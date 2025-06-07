@@ -1,5 +1,34 @@
-<x-layouts.app.sidebar :title="$title ?? null">
-    <flux:main>
-        {{ $slot }}
-    </flux:main>
-</x-layouts.app.sidebar>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $title ?? 'Page Title' }}</title>
+
+    {{-- ✅ Always include styles first --}}
+    @livewireStyles
+
+    {{-- ✅ Then Vite CSS and JS --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- ❌ Do NOT load @livewireScripts in <head> --}}
+</head>
+
+<body class="font-sans antialiased">
+    <div class="min-h-screen bg-gray-100">
+        <main>
+            {{ $slot }}
+        </main>
+    </div>
+
+    {{-- ✅ Load Livewire scripts at the end of <body> --}}
+    @livewireScriptConfig
+
+    {{-- ✅ AlpineJS must be loaded after Livewire --}}
+    {{-- <script src="https://unpkg.com/alpinejs" defer></script> --}}
+
+</body>
+
+</html>
