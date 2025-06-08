@@ -1,3 +1,4 @@
+
 export default function designReviewApp() {
     function uuidv4() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -6,12 +7,25 @@ export default function designReviewApp() {
             return v.toString(16);
         });
     }
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func.apply(this, args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
     return {
         isOpen: false,
         currentImage: '',
+        designId: null,
         comments: [],
-        activeComment: null,
+        showingComment: false,
+        activeCommentId: null,
         showCommentPopup: false,
         showConfirmDialog: false,
         hasUnsavedChanges: false,
@@ -78,7 +92,10 @@ export default function designReviewApp() {
             return this.hasValidComment && !this.isSaving;
         },
 
-        init() {
+        init(callbacks = {}) {
+            if (callbacks && Object.keys(callbacks).length > 0) {
+                this.setCallbacks(callbacks);
+            }
             this.$watch('selectedCommentIds', () => {
                 if (this.filterMode) {
                     this.updateVisibleComments();
@@ -125,22 +142,40 @@ export default function designReviewApp() {
                 });
             });
 
-            window.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') {
-                    event.preventDefault();
-                    this.handleEscape();
-                }
-            });
+
+
+
+        },
+        destroy() {
+            window.removeEventListener('open-design-review', this.handleOpenEvent);
+            if (this.longPressTimer) {
+                clearTimeout(this.longPressTimer);
+            }
         },
 
         handleEscape() {
-            this.handleClose();
+            if (this.showingComment) {
+                this.closeComment();
+                return;
+            }
+            if (!this.showConfirmDialog) {
+                this.handleClose();
+                return;
+
+            }
+            if (this.showConfirmDialog) {
+                this.handleCancelConfirmationDialog();
+
+                return;
+            }
+
         },
 
         updateVisibleComments() {
             this.visibleComments = this.filterMode ?
                 this.comments.filter(c => this.selectedCommentIds.includes(c.id)) :
                 this.comments.filter(c => c.text?.trim());
+
         },
 
         toggleCommentFilter() {
@@ -149,6 +184,7 @@ export default function designReviewApp() {
         },
 
         toggleAllComments() {
+            if (this.showCommentPopup) return;
             this.allCommentsHidden ? this.showAllComments() : this.hideAllComments();
         },
 
@@ -164,7 +200,7 @@ export default function designReviewApp() {
             this.allCommentsHidden = false;
         },
 
-        openModal(imageUrl, existingComments = [], callbacks = {}) {
+        openModal(imageUrl, existingComments = [], designId) {
             if (this._openedViaEvent) {
                 console.warn(
                     'Design Review: Modal opened via both direct method and event. Using direct method parameters.'
@@ -173,14 +209,15 @@ export default function designReviewApp() {
             }
 
             this.currentImage = imageUrl;
+            this.designId = designId;
 
             this.comments = existingComments;
             this.selectedCommentIds = this.comments.map(c => c.id);
 
             // Update callbacks if provided
-            if (callbacks && Object.keys(callbacks).length > 0) {
-                this.setCallbacks(callbacks);
-            }
+            // if (callbacks && Object.keys(callbacks).length > 0) {
+            //     this.setCallbacks(callbacks);
+            // }
 
             this.isOpen = true;
             this.hasUnsavedChanges = false;
@@ -208,7 +245,7 @@ export default function designReviewApp() {
         reset() {
             this.comments = [];
             this.selectedCommentIds = [];
-            this.activeComment = null;
+            this.activeCommentId = null;
             this.showCommentPopup = false;
             this.hasUnsavedChanges = false;
             this.isSelecting = false;
@@ -224,26 +261,33 @@ export default function designReviewApp() {
                 this.longPressTimer = null;
             }
         },
-
         handleClose() {
             if (this.isSaving) {
-                return; // Prevent closing while saving
+                return;
             }
 
-            if (this.hasUnsavedChanges && this.newComment?.text !== '') {
-                this.showConfirmDialog = true;
-                return;
+            // Simplified empty comment check
+            if (this.showCommentPopup) {
+                const hasText = this.newComment?.text && this.newComment.text.trim().length > 0;
+
+                if (!hasText) {
+                    this.showCommentPopup = false;
+                    this.newComment = null;
+                    return;
+                }
+
+                if (this.hasUnsavedChanges) {
+                    this.showConfirmDialog = true;
+                    return;
+                }
             }
-            if (this.showCommentPopup && this.newComment?.text === '') {
-                this.showCommentPopup = false;
-                this.newComment = null;
-                return;
-            }
+
             if (this.showCommentFilter) {
                 this.showCommentFilter = false;
                 this.filterMode = false;
                 return;
             }
+
             this.closeModal();
         },
 
@@ -254,7 +298,7 @@ export default function designReviewApp() {
                 this.newComment = null;
                 return;
             }
-            this.closeModal();
+
         },
 
         handleBackdropClick(event) {
@@ -277,7 +321,7 @@ export default function designReviewApp() {
             this.isSelecting = false;
         },
 
-        updateSelection(event) {
+        updateSelection: debounce(function (event) {
             if (!this.isDragging || !this.selectionStart.xPx) return;
             const rect = this.$refs.imageContainer.getBoundingClientRect();
             const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
@@ -295,7 +339,7 @@ export default function designReviewApp() {
                 width: Math.abs(xPercent - this.selectionStart.x),
                 height: Math.abs(yPercent - this.selectionStart.y)
             };
-        },
+        }, 16),
 
         endSelection(event) {
             if (!this.isDragging) return;
@@ -406,7 +450,10 @@ export default function designReviewApp() {
 
             if (this.isClickInsideNewComment(xPercent, yPercent)) return;
 
-            const clickedComment = this.findCommentAtPoint(xPercent, yPercent);
+            const isMobile = 'ontouchstart' in window;
+
+            const searchRadius = isMobile ? 2.2 : 1.5; // 2% padding on mobile
+            const clickedComment = this.findCommentAtPoint(xPercent, yPercent, searchRadius);
             if (clickedComment) {
                 return this.selectComment(clickedComment);
             }
@@ -481,18 +528,31 @@ export default function designReviewApp() {
             return xPercent >= c.x && xPercent <= c.x + c.width && yPercent >= c.y && yPercent <= c.y + c.height;
         },
 
-        findCommentAtPoint(x, y) {
-            return this.visibleComments.find(c => x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c
-                .height);
+        findCommentAtPoint(x, y, searchRadius = 0) {
+            return this.visibleComments.find(c => {
+                const expandedLeft = c.x - searchRadius;
+                const expandedRight = c.x + c.width + searchRadius;
+                const expandedTop = c.y - searchRadius;
+                const expandedBottom = c.y + c.height + searchRadius;
+
+                return x >= expandedLeft && x <= expandedRight &&
+                    y >= expandedTop && y <= expandedBottom;
+            });
         },
 
         selectComment(comment) {
-            this.activeComment = comment.id;
-            if (this.callbacks.onCommentClick) {
-                this.callbacks.onCommentClick(comment);
-            }
+
+            this.showingComment = true;
+            this.activeCommentId = comment.id;
+            this.$wire.set('activeCommentId', comment.id);
+
         },
 
+        closeComment() {
+            this.showingComment = false;
+            this.activeCommentId = null;
+            this.$wire.set('activeCommentId', null);
+        },
         async saveComment() {
             if (!this.newComment?.text?.trim() || this.isSaving) return;
 
@@ -513,21 +573,15 @@ export default function designReviewApp() {
 
                 // Call the async callback if it exists
                 if (this.callbacks.onSaveComment) {
-                    const response = await this.callbacks.onSaveComment(comment, this.currentImage);
-                    if (response.success) {
-                        console.log('Comment saved:', response);
-                        this.comments.push(response.comment);
-                        this.selectedCommentIds.push(response.comment.id);
-                        this.showCommentPopup = false;
-                        this.hasUnsavedChanges = false;
-                        this.newComment = null;
-                        this.updateVisibleComments();
-
-                    }
+                    await this.callbacks.onSaveComment(comment, this.designId, this.currentImage);
                 }
 
 
                 // Close popup after successful save
+                this.showCommentPopup = false;
+                this.hasUnsavedChanges = false;
+                this.newComment = null;
+                this.updateVisibleComments();
 
 
             } catch (error) {
@@ -554,8 +608,10 @@ export default function designReviewApp() {
 
         // Public API methods
         setCallbacks(callbacks = {}) {
+            const validCallbacks = ['onSaveComment', 'onDeleteComment', 'onEditComment', 'onCommentClick', 'onModalOpen', 'onModalClose'];
+
             Object.keys(callbacks).forEach(key => {
-                if (callbacks[key] !== undefined) {
+                if (validCallbacks.includes(key) && typeof callbacks[key] === 'function') {
                     this.callbacks[key] = callbacks[key];
                 }
             });
