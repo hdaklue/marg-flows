@@ -41,7 +41,8 @@ class Previewtest extends Component
     public $images = [
         [
             'id' => '1',
-            'url' => 'https://picsum.photos/600/900?random=1',
+            // 'url' => 'https://picsum.photos/600/900?random=1',
+            'url' => 'img/1.jpeg',
             'comments' => [
                 [
                     'id' => 'c91c1dbe-3ef1-4208-a8e9-9d3f010f0c21',
@@ -71,7 +72,7 @@ class Previewtest extends Component
         ],
         [
             'id' => '2',
-            'url' => 'https://picsum.photos/600/900?random=2',
+            'url' => 'img/2.png',
             'comments' => [
                 [
                     'id' => 'c91c1dbe-3ef1-4208-a8e9-9d3f010f0c32',

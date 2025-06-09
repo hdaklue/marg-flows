@@ -3,7 +3,8 @@
         await $wire.saveComment(comment, designId);
     }
 })" @keydown.escape.window="handleEscape()">
-    <div class="fixed z-50 min-h-screen w-full items-center justify-center bg-gray-50/90" x-show="showingComment" x-cloak>
+    <div class="fixed z-50 min-h-screen w-full items-center justify-center bg-gray-800/90" x-show="showingComment"
+        x-cloak>
 
         <!-- Comment container -->
         <div x-show="showingComment" x-transition:enter="transition ease-out duration-300" @click.outside="closeComment()"
@@ -11,7 +12,7 @@
             x-transition:enter-end="transform translate-y-0 opacity-100" x-transition:leave="transition ease-in"
             x-transition:leave-start="transform translate-y-0 opacity-100"
             x-transition:leave-end="transform translate-y-full opacity-0"
-            class="md:w-3xl fixed bottom-0 left-1/2 z-50 h-4/5 w-full -translate-x-1/2 transform rounded-lg bg-white p-4 shadow-2xl md:h-1/2"
+            class="md:w-2xl fixed bottom-0 left-1/2 z-50 h-4/5 w-full -translate-x-1/2 transform rounded-lg bg-white p-4 shadow-2xl md:h-1/2"
             x-cloak>
             <div class="mb-4 flex h-full flex-col text-gray-600">
                 <!-- Fixed top section -->
@@ -48,8 +49,9 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
             @foreach ($images as $image)
                 <div class="cursor-pointer overflow-hidden rounded transition-transform hover:scale-105"
-                    @click="openModal('{{ $image['url'] }}', @js($image['comments'] ?? []), '{{ $image['id'] }}')">
-                    <img src="{{ $image['url'] }}" alt="Design" class="h-40 w-full object-cover" loading="lazy">
+                    @click="openModal('{{ asset($image['url']) }}', @js($image['comments'] ?? []), '{{ $image['id'] }}')">
+                    <img src="{{ asset($image['url']) }}" alt="Design" class="h-40 w-full object-cover"
+                        loading="lazy">
                 </div>
             @endforeach
             {{-- <div class="cursor-pointer overflow-hidden rounded transition-transform hover:scale-105"
@@ -66,9 +68,10 @@
     <!-- Modal -->
     <div x-show="isOpen" x-transition class="fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-4"
         @click="handleBackdropClick($event)" style="display: none;">
-        <div class="relative flex max-h-[95vh] max-w-[95vw] flex-wrap rounded-lg bg-white shadow-2xl" @click.stop>
+        <div class="relative flex max-h-[95vh] max-w-[95vw] flex-wrap rounded-lg bg-white shadow-2xl transition-all duration-200"
+            @click.stop :class="showingComment ? 'scale-95' : ''">
             <button @click="handleClose()" @touchend.prevent="handleClose()"
-                class="absolute right-0 top-5 z-10 flex h-8 w-8 -translate-y-full items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 active:bg-black/90">
+                class="absolute -top-1 right-0 z-10 flex h-8 w-8 -translate-y-full items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 active:bg-black/90">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                     </path>
@@ -183,12 +186,12 @@
 
                 <!-- Comment Popup -->
                 <template x-if="newComment">
-                    <div x-show="showCommentPopup" x-transition
+                    <div x-show="showCommentPopup" x-transition x-trap="showCommentPopup"
                         class="absolute z-50 min-w-[300px] rounded-lg bg-white p-2 shadow-lg transition-all duration-500"
                         :style="commentPopupStyle" @click.stop>
 
-                        <textarea x-ref="commentTextarea" x-model="newComment.text" :disabled="isSaving"
-                            class="min-h-[80px] w-full resize-y rounded border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
+                        <textarea x-autosize x-ref="commentTextarea" x-model="newComment.text" :disabled="isSaving"
+                            class="w-full rounded border border-gray-300 p-1 text-sm font-semibold focus:border-blue-500 focus:outline-none lg:font-normal"
                             placeholder="Add your comment..." @keydown.ctrl.enter="saveComment()" @keydown.meta.enter="saveComment()"></textarea>
                         <div class="mt-2 flex justify-end gap-2">
                             <button @click.stop="cancelComment()" @touchend.prevent="cancelComment()"
@@ -209,7 +212,7 @@
     </div>
 
     <!-- Confirmation Dialog -->
-    <div x-show="showConfirmDialog" x-transition
+    <div x-show="showConfirmDialog" x-transition x-trap="showConfirmDialog"
         class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80" style="display: none;">
         <div class="max-w-md rounded-lg bg-white p-6" @click.stop>
             <h3 class="mb-2 text-lg font-semibold text-red-500">Unsaved Changes</h3>

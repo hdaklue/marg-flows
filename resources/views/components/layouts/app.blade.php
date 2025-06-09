@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Page Title' }}</title>
 
+    </script>
     {{-- ✅ Always include styles first --}}
     @livewireStyles
 

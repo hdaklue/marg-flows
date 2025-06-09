@@ -601,6 +601,10 @@ export default function designReviewApp() {
         },
 
         cancelComment() {
+            if (this.canSave) {
+                this.showConfirmDialog = true;
+                return;
+            }
             this.showCommentPopup = false;
             this.hasUnsavedChanges = false;
             this.newComment = null;
