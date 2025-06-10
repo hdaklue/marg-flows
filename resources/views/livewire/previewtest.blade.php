@@ -12,17 +12,18 @@
             x-transition:enter-end="transform translate-y-0 opacity-100" x-transition:leave="transition ease-in"
             x-transition:leave-start="transform translate-y-0 opacity-100"
             x-transition:leave-end="transform translate-y-full opacity-0"
-            class="md:w-2xl fixed bottom-0 left-1/2 z-50 h-4/5 w-full -translate-x-1/2 transform rounded-lg bg-white p-4 shadow-2xl md:h-1/2"
+            class="md:w-2xl fixed bottom-0 left-1/2 z-50 h-4/5 w-full -translate-x-1/2 transform rounded-lg bg-gray-50 p-4 shadow-2xl md:h-1/2 dark:bg-zinc-900"
             x-cloak>
-            <div class="mb-4 flex h-full flex-col text-gray-600">
+            <div class="mb-4 flex h-full flex-col text-gray-600 dark:text-gray-400">
                 <!-- Fixed top section -->
-                <div class="h-12 flex-shrink-0 justify-start border-b border-gray-200 text-left">
+                <div class="h-12 flex-shrink-0 justify-start text-left">
+                    <h3>Comment</h3>
                     {{-- <h3>Comment ID: <span x-text="activeComment?.id"></span></h3>
                     <p x-text="activeComment?.text"></p> --}}
                 </div>
 
                 <!-- Flexible center section that takes remaining space -->
-                <div class="flex-1 overflow-auto bg-gray-50 p-4">
+                <div class="dakr:text-gray-50 flex-1 overflow-auto bg-gray-50 p-4 dark:bg-zinc-800">
                     @if ($activeCommentId)
                         {{ $activeCommentId }}
                     @endif
@@ -39,19 +40,28 @@
         </div>
     </div>
     <!-- Demo Container -->
-    <div class="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow-sm">
+    <div class="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
 
-        <h1 class="mb-2 text-2xl font-bold">Design Review Component Demo</h1>
-        <p class="mb-4 text-gray-600">Click on any image to open the review modal. Click or drag on the image to add
+        <h1 class="mb-2 text-2xl font-bold text-gray-800 dark:text-white">Design Review Component Demo</h1>
+        <p class="mb-4 text-gray-600 dark:text-gray-400">Click on any image to open the review modal. Click or drag on
+            the image to add
             comments.</p>
 
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
             @foreach ($images as $image)
-                <div class="cursor-pointer overflow-hidden rounded transition-transform hover:scale-105"
+                <div class="cursor-pointer overflow-hidden rounded bg-gray-100 p-2 transition-transform hover:scale-105 dark:bg-gray-800"
                     @click="openModal('{{ asset($image['url']) }}', @js($image['comments'] ?? []), '{{ $image['id'] }}')">
                     <img src="{{ asset($image['url']) }}" alt="Design" class="h-40 w-full object-cover"
                         loading="lazy">
+                    <div class="flex flex-col justify-between space-y-1.5 pt-2">
+                        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Snapchat Story</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400"><span
+                                class="text-xs font-semibold text-gray-500 dark:text-gray-400">Size:</span> 100</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400"><span
+                                class="text-xs font-semibold text-gray-500 dark:text-gray-400">Dimension:</span> 1200 x
+                            1080</p>
+                    </div>
                 </div>
             @endforeach
             {{-- <div class="cursor-pointer overflow-hidden rounded transition-transform hover:scale-105"
@@ -71,7 +81,7 @@
         <div class="relative flex max-h-[95vh] max-w-[95vw] flex-wrap rounded-lg bg-white shadow-2xl transition-all duration-200"
             @click.stop :class="showingComment ? 'scale-95' : ''">
             <button @click="handleClose()" @touchend.prevent="handleClose()"
-                class="absolute -top-1 right-0 z-10 flex h-8 w-8 -translate-y-full items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 active:bg-black/90">
+                class="dakr:text-gray-50 absolute -top-1 right-0 z-10 flex h-8 w-8 -translate-y-full items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 active:bg-black/90 dark:bg-zinc-700/90 dark:hover:bg-zinc-700">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                     </path>
@@ -82,22 +92,22 @@
                 <div class="relative z-[60]" @click.outside="showCommentFilter = false">
                     <button @click="toggleCommentFilter" @touchend.prevent="toggleCommentFilter"
                         :class="showCommentFilter || hasActiveFilter ?
-                            'bg-blue-500 text-white hover:bg-blue-400 border-blue-800' :
+                            'bg-blue-500  hover:bg-blue-400 border-blue-800 text-gray-300' :
                             'bg-white/70 text-gray-700 hover:bg-white border-gray-900'"
-                        class="flex h-8 w-8 items-center justify-center rounded-full border shadow hover:bg-white active:bg-gray-200">
+                        class="hover:text-gray-800' flex h-8 w-8 items-center justify-center rounded-full border shadow">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
 
                     <div x-show="showCommentFilter" x-transition
-                        class="absolute mt-2 w-48 space-y-1 rounded-md border border-gray-300 bg-white/70 p-2 shadow-lg hover:bg-white">
+                        class="absolute mt-2 w-48 space-y-1 rounded-md border border-gray-300 bg-white/70 p-2 shadow-lg hover:bg-white dark:border-zinc-900 dark:bg-zinc-800/90 dark:hover:bg-zinc-900">
                         <template x-for="(comment, index) in comments">
                             <label class="flex cursor-pointer items-center gap-2 text-sm">
                                 <input type="checkbox" :value="comment.id" x-model="selectedCommentIds"
                                     class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                                <span
-                                    x-text="comment.text.slice(0, 20) + (comment.text.length > 20 ? '...' : '')"></span>
+                                <span x-text="comment.text.slice(0, 20) + (comment.text.length > 20 ? '...' : '')"
+                                    class="dark:text-gray-50"></span>
                             </label>
                         </template>
                         {{-- <div class="border-t pt-2 text-right">
@@ -187,11 +197,11 @@
                 <!-- Comment Popup -->
                 <template x-if="newComment">
                     <div x-show="showCommentPopup" x-transition x-trap="showCommentPopup"
-                        class="absolute z-50 min-w-[300px] rounded-lg bg-white p-2 shadow-lg transition-all duration-500"
+                        class="absolute z-50 min-w-[300px] rounded-lg bg-white p-2 shadow-lg transition-all duration-500 dark:bg-zinc-900"
                         :style="commentPopupStyle" @click.stop>
 
                         <textarea x-autosize x-ref="commentTextarea" x-model="newComment.text" :disabled="isSaving"
-                            class="w-full rounded border border-gray-300 p-1 text-sm font-semibold focus:border-blue-500 focus:outline-none lg:font-normal"
+                            class="w-full rounded border border-gray-300 p-1 text-sm font-semibold focus:border-blue-500 focus:outline-none lg:font-normal dark:text-gray-50"
                             placeholder="Add your comment..." @keydown.ctrl.enter="saveComment()" @keydown.meta.enter="saveComment()"></textarea>
                         <div class="mt-2 flex justify-end gap-2">
                             <button @click.stop="cancelComment()" @touchend.prevent="cancelComment()"
@@ -214,15 +224,16 @@
     <!-- Confirmation Dialog -->
     <div x-show="showConfirmDialog" x-transition x-trap="showConfirmDialog"
         class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80" style="display: none;">
-        <div class="max-w-md rounded-lg bg-white p-6" @click.stop>
+        <div class="max-w-md rounded-lg bg-white p-6 dark:bg-zinc-900" @click.stop>
             <h3 class="mb-2 text-lg font-semibold text-red-500">Unsaved Changes</h3>
-            <p class="mb-5 text-gray-600">You have unsaved comments. Are you sure you want to close?</p>
+            <p class="mb-5 text-gray-600 dark:text-gray-50">You have unsaved comments. Are you sure you want to close?
+            </p>
             <div class="flex justify-end gap-2">
                 <button @click="handleCancelConfirmationDialog" @touchend.prevent="handleCancelConfirmationDialog"
-                    class="rounded bg-gray-200 px-2 py-1 text-gray-700 transition-colors hover:bg-gray-300 active:bg-gray-400">Cancel</button>
+                    class="rounded bg-gray-200 px-2 py-1 text-sm text-gray-700 outline-offset-1 outline-gray-300 transition-colors hover:bg-gray-300 active:bg-gray-400">Cancel</button>
                 <button @click="handleConfirmCloseConfirmationDialog"
                     @touchend.prevent="handleConfirmCloseConfirmationDialog"
-                    class="rounded bg-red-500 px-2 py-1 text-sm text-white transition-colors hover:bg-red-600 active:bg-red-700">Close
+                    class="rounded bg-red-500 px-2 py-1 text-sm text-white outline-offset-1 outline-red-800 ring-1 ring-red-500 transition-colors hover:bg-red-600 active:bg-red-700 dark:text-red-950">Close
                     Anyway</button>
             </div>
         </div>
