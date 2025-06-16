@@ -16,14 +16,14 @@
             x-cloak>
             <div class="mb-4 flex h-full flex-col text-gray-600 dark:text-gray-400">
                 <!-- Fixed top section -->
-                <div class="h-12 flex-shrink-0 justify-start text-left">
-                    <h3>Comment</h3>
+                <div class="h-12 flex-shrink-0 justify-start self-start text-left">
+                    <h3 class="text-xl font-semibold">This button could be larger for better accessibility.</h3>
                     {{-- <h3>Comment ID: <span x-text="activeComment?.id"></span></h3>
                     <p x-text="activeComment?.text"></p> --}}
                 </div>
 
                 <!-- Flexible center section that takes remaining space -->
-                <div class="dakr:text-gray-50 flex-1 overflow-auto bg-gray-50 p-4 dark:bg-zinc-800">
+                <div class="dakr:text-gray-50 flex-1 overflow-auto bg-gray-50 p-4 dark:bg-zinc-900/90">
                     @if ($activeCommentId)
                         {{ $activeCommentId }}
                     @endif
@@ -50,16 +50,21 @@
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
             @foreach ($images as $image)
-                <div class="cursor-pointer overflow-hidden rounded bg-gray-100 p-2 transition-transform hover:scale-105 dark:bg-gray-800"
+                <div class="flex cursor-pointer space-x-3 overflow-hidden rounded bg-gray-100 p-2 transition-all hover:scale-105 dark:bg-zinc-800 dark:hover:bg-zinc-700"
                     @click="openModal('{{ asset($image['url']) }}', @js($image['comments'] ?? []), '{{ $image['id'] }}')">
-                    <img src="{{ asset($image['url']) }}" alt="Design" class="h-40 w-full object-cover"
-                        loading="lazy">
-                    <div class="flex flex-col justify-between space-y-1.5 pt-2">
-                        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Snapchat Story</h2>
+                    <div class="h-20 w-20 overflow-hidden">
+                        <img src="{{ asset($image['url']) }}" alt="Design" class="h-auto w-full object-cover"
+                            loading="lazy">
+                    </div>
+                    <div class="flex flex-col items-start justify-start space-y-1">
+                        <h2 class="pb-1.5 text-xs font-semibold leading-5 text-gray-900 dark:text-gray-50">Snapchat
+                            option 3 story size</h2>
                         <p class="text-xs text-gray-500 dark:text-gray-400"><span
-                                class="text-xs font-semibold text-gray-500 dark:text-gray-400">Size:</span> 100</p>
+                                class="text-xs font-semibold text-gray-500 dark:text-gray-400">Size:</span> 100 MB
+                        </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400"><span
-                                class="text-xs font-semibold text-gray-500 dark:text-gray-400">Dimension:</span> 1200 x
+                                class="text-xs font-semibold text-gray-500 dark:text-gray-400">Dimension:</span>
+                            1200 x
                             1080</p>
                     </div>
                 </div>
@@ -100,8 +105,8 @@
                         </svg>
                     </button>
 
-                    <div x-show="showCommentFilter" x-transition
-                        class="absolute mt-2 w-48 space-y-1 rounded-md border border-gray-300 bg-white/70 p-2 shadow-lg hover:bg-white dark:border-zinc-900 dark:bg-zinc-800/90 dark:hover:bg-zinc-900">
+                    <div x-show="showCommentFilter" x-transition x-trap="showCommentFilter"
+                        class="absolute mt-2 w-48 space-y-1 rounded-md border border-gray-300 bg-white/70 p-2 shadow-lg hover:bg-white dark:border-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-900">
                         <template x-for="(comment, index) in comments">
                             <label class="flex cursor-pointer items-center gap-2 text-sm">
                                 <input type="checkbox" :value="comment.id" x-model="selectedCommentIds"
@@ -201,7 +206,7 @@
                         :style="commentPopupStyle" @click.stop>
 
                         <textarea x-autosize x-ref="commentTextarea" x-model="newComment.text" :disabled="isSaving"
-                            class="w-full rounded border border-gray-300 p-1 text-sm font-semibold focus:border-blue-500 focus:outline-none lg:font-normal dark:text-gray-50"
+                            class="w-full rounded border border-gray-300 p-1.5 text-sm font-semibold focus:border-blue-500 focus:outline-none lg:font-normal dark:text-gray-50"
                             placeholder="Add your comment..." @keydown.ctrl.enter="saveComment()" @keydown.meta.enter="saveComment()"></textarea>
                         <div class="mt-2 flex justify-end gap-2">
                             <button @click.stop="cancelComment()" @touchend.prevent="cancelComment()"
@@ -233,7 +238,7 @@
                     class="rounded bg-gray-200 px-2 py-1 text-sm text-gray-700 outline-offset-1 outline-gray-300 transition-colors hover:bg-gray-300 active:bg-gray-400">Cancel</button>
                 <button @click="handleConfirmCloseConfirmationDialog"
                     @touchend.prevent="handleConfirmCloseConfirmationDialog"
-                    class="rounded bg-red-500 px-2 py-1 text-sm text-white outline-offset-1 outline-red-800 ring-1 ring-red-500 transition-colors hover:bg-red-600 active:bg-red-700 dark:text-red-950">Close
+                    class="rounded bg-red-500 px-2 py-1 text-sm text-white outline-offset-1 outline-red-800 ring-1 ring-red-500 transition-colors hover:bg-red-600 active:bg-red-700 dark:text-gray-50">Close
                     Anyway</button>
             </div>
         </div>

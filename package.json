@@ -7,6 +7,7 @@
     },
     "dependencies": {
         "@marcreichel/alpine-autosize": "^1.3.3",
+        "@ryangjchandler/alpine-tooltip": "^2.0.1",
         "@tailwindcss/vite": "^4.0.7",
         "alpinejs": "^3.14.9",
         "autoprefixer": "^10.4.20",

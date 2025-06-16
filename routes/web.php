@@ -6,7 +6,8 @@ use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', Previewtest::class)->name('home');
+Route::get('/', action: Previewtest::class)->name('home');
+Route::get('/annotation', fn () => view('annotation'));
 
 // Route::view('dashboard', 'dashboard')
 //     ->middleware(['auth', 'verified'])

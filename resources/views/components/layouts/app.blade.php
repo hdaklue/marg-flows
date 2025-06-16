@@ -13,7 +13,8 @@
 
     {{-- ✅ Then Vite CSS and JS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+    <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-auto-animate@latest/dist/alpine-auto-animate.min.js"
+        defer></script>
     {{-- ❌ Do NOT load @livewireScripts in <head> --}}
 </head>
 

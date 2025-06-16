@@ -11,7 +11,10 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.1.1",
-        "livewire/volt": "^1.7.0"
+        "livewire/volt": "^1.7.0",
+        "lorisleiva/laravel-actions": "^2.9",
+        "spatie/laravel-permission": "^6.20",
+        "wendelladriel/laravel-validated-dto": "^4.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
