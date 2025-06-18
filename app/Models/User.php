@@ -5,16 +5,20 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Concerns\Roles\HasEntityAwareRoles;
+use App\Enums\Account\AccountType;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -34,6 +38,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
         'email',
         'password',
         'active_tenant_id',
+        'account_type',
     ];
 
     /**
@@ -46,9 +51,23 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
         'remember_token',
     ];
 
-    public function canAccessPanel(\Filament\Panel $panel): bool
+    public function canAccessPanel(Panel $panel): bool
     {
         return true;
+    }
+
+    /**
+     * Get all flows where this user has any role
+     */
+    public function flows(): MorphToMany
+    {
+        return $this->morphedByMany(
+            Flow::class,
+            'roleable',
+            config('permission.table_names.model_has_roles'),
+            'model_id',
+            'roleable_id'
+        )->withPivot(['role_id', 'tenant_id']);
     }
 
     /**
@@ -77,6 +96,28 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
         $this->update([
             'active_tenant_id' => $tenant->id,
         ]);
+    }
+
+    public function isAppAdmin(): bool
+    {
+        return $this->account_type === AccountType::ADMIN->value;
+    }
+
+    public function isAppUser(): bool
+    {
+        return $this->account_type === AccountType::USER->value;
+    }
+
+    #[Scope]
+    public function appAdmin(Builder $builder): Builder
+    {
+        return $builder->where('account_type', AccountType::ADMIN->value);
+    }
+
+    #[Scope]
+    public function appUser(Builder $builder): Builder
+    {
+        return $builder->where('account_type', AccountType::USER->value);
     }
 
     public function getTenants(Panel $panel): Collection

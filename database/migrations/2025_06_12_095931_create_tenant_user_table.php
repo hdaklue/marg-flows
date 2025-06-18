@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignUlid('user_id')->index();
             $table->foreignUlid('tenant_id')->index();
 
-            $table->timestamps();
+            $table->index(['user_id', 'tenant_id']);
         });
     }
 

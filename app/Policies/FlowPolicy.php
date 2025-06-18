@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Role\RoleEnum;
 use App\Models\Flow;
 use App\Models\User;
 
@@ -12,7 +13,13 @@ class FlowPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+
+        if (filament()->getTenant()) {
+
+            return filament()->getTenant()->isParticipant($user);
+        }
+
+        return false;
     }
 
     /**
@@ -20,7 +27,9 @@ class FlowPolicy
      */
     public function view(User $user, Flow $flow): bool
     {
-        return true;
+
+        return $user->hasAnyRoleOn($flow)
+        || $flow->isSuperAdmin($user);
     }
 
     /**
@@ -28,7 +37,12 @@ class FlowPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        if (filament()->getTenant()) {
+
+            return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::TENANT_ADMIN, RoleEnum::SUPER_ADMIN], filament()->getTenant());
+        }
+
+        return false;
     }
 
     /**
@@ -36,7 +50,7 @@ class FlowPolicy
      */
     public function update(User $user, Flow $flow): bool
     {
-        return $user->hasRoleOn('writer', $flow);
+        return $user->hasRoleOn('writer', $flow) || $user->hasRoleOn(RoleEnum::SUPER_ADMIN, filament()->getTenant());
     }
 
     /**

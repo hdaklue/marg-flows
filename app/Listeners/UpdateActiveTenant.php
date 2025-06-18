@@ -4,6 +4,8 @@ namespace App\Listeners;
 
 use Filament\Events\TenantSet;
 
+use function Illuminate\Log\log;
+
 class UpdateActiveTenant
 {
     /**
@@ -20,6 +22,13 @@ class UpdateActiveTenant
             abort(404);
         }
 
-        $event->getUser()->switchActiveTenant($event->getTenant());
+        try {
+            $event->getUser()->switchActiveTenant($event->getTenant());
+            setPermissionsTeamId($event->getTenant()->id);
+        } catch (\Exception $e) {
+            log()->error($e->getMessage());
+            throw $e;
+        }
+
     }
 }

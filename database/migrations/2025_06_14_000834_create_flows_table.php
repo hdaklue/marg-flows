@@ -18,6 +18,8 @@ return new class extends Migration
             $table->tinyInteger('status')
                 ->default(FlowStatus::ACTIVE->value);
 
+            $table->boolean('is_default')->default(false);
+
             $table->date('start_date')->nullable();
             $table->date('due_date')->nullable();
             $table->date('completed_at')->nullable();

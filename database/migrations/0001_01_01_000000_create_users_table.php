@@ -16,10 +16,16 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('account_type')->default('user');
             $table->string('password');
             $table->string('active_tenant_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
+
+            $table->index('active_tenant_id');
+            $table->index('email');
+            $table->index('account_type');
+
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

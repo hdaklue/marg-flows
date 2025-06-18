@@ -40,7 +40,7 @@ class FlowResource extends Resource
         $flowProgressService = app(FlowProgressService::class);
 
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with('creator')->orderBy('status')->orderBy('due_date'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->forParticipant(filament()->auth()->user())->running()->with(['creator', 'participants'])->orderBy('status')->orderBy('due_date'))
             ->columns([
                 TextColumn::make('status')
                     ->getStateUsing(fn ($record) => FlowStatus::from($record->status)->getLabel())
@@ -62,9 +62,9 @@ class FlowResource extends Resource
                     ->getStateUsing(fn ($record) => $flowProgressService->getTotalDays($record)),
                 ImageColumn::make('creator')
                     ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))
-
                     ->size(30)
                     ->circular(),
+                TextColumn::make('participants.name'),
 
             ])
 
@@ -77,7 +77,7 @@ class FlowResource extends Resource
                     ]),
             ], FiltersLayout::AboveContentCollapsible)
             ->actions([
-                // Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

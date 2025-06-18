@@ -23,8 +23,8 @@
                 "method_static",
                 "method_public",
                 "method_protected",
-                "magic",
                 "method_scope",
+                "magic",
                 "phpunit",
                 "method_is",
                 "method_private"

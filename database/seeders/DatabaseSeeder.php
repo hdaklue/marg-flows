@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Account\AccountType;
+use App\Enums\Role\RoleEnum;
 use App\Models\Flow;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -16,29 +18,48 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        $user = User::factory()->create([
+        $user1 = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => bcrypt('password'),
+            'account_type' => AccountType::ADMIN->value,
         ]);
 
-        $user->tenants()->create([
-            'name' => 'Test Tenant(2)',
+        $tenant1 = $user1->tenants()->create([
+            'name' => 'Test Tenant',
         ]);
 
-        $team = $user->tenants()->create([
-            'name' => 'Test Team',
+        $tenant2 = $user1->tenants()->create([
+            'name' => 'Test Tenant 2',
         ]);
 
-        $user->update([
-            'active_tenant_id' => $team->id,
+        $user1->update([
+            'active_tenant_id' => $tenant1->id,
         ]);
+        $systemRoles = collect(RoleEnum::cases())->map(function ($case) {
+            return [
+                'name' => $case->value,
+                'guard_name' => 'web',
+            ];
+        })->toArray();
+        $tenant1->systemRoles()->createMany($systemRoles);
+        $tenant2->systemRoles()->createMany($systemRoles);
 
-        $team->members()->attach(User::factory()->create([
+        setPermissionsTeamId($tenant1->id);
+
+        $user1->assignRole(RoleEnum::SUPER_ADMIN, $tenant1);
+        $user2 = User::factory()->create([
             'name' => 'Test Member',
             'email' => 'member@example.com',
             'password' => bcrypt('password'),
-        ]));
+        ]);
+
+        $tenant1->members()->attach($user2);
+
+        $tenant1->assignUserRole($user2, RoleEnum::VIEWER);
+
+        setPermissionsTeamId($tenant2->id);
+        $user1->assignRole(RoleEnum::VIEWER, $tenant2);
 
         Flow::factory(20)->create(); // Random realistic distribution
 
