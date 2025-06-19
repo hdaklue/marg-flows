@@ -54,6 +54,7 @@ use Illuminate\Support\Facades\Log;
  */
 class RoleEventListener
 {
+    // TODO: Notify Prticipants
     /**
      * Role caching service instance
      */
@@ -74,6 +75,7 @@ class RoleEventListener
      */
     protected bool $cacheWarming;
 
+    // TODO: revise config values
     public function __construct(RoleCacheService $RoleCacheService)
     {
         $this->RoleCacheService = $RoleCacheService;

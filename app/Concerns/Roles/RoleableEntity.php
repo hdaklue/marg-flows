@@ -203,11 +203,11 @@ trait RoleableEntity
     /**
      * Add a participant with specific role(s)
      */
-    public function addParticipant(Model $user, string|array $roles): self
+    public function addParticipant(Model $user, string|array $roles, bool $silently = false): self
     {
         $roles = is_array($roles) ? $roles : [$roles];
 
-        return $this->assignUserRoles($user, $roles);
+        return $this->assignUserRole($user, $roles, $silently);
     }
 
     /**
@@ -239,7 +239,7 @@ trait RoleableEntity
     }
 
     /**
-     * Get reviewers query builder for additional filtering
+     * Roles asigned to this entity
      */
     public function roles(): MorphToMany
     {
@@ -342,7 +342,6 @@ trait RoleableEntity
                 'roles.name as role_name',
                 'roles.id as role_id',
                 'roles.guard_name as role_guard',
-
             ]);
     }
 
@@ -432,7 +431,7 @@ trait RoleableEntity
     /**
      * Assign a role to a user on this entity (Performance Optimized with Events)
      */
-    public function assignUserRole(Model $user, $role): self
+    public function assignUserRole(Model $user, $role, bool $silently = false): self
     {
         if (method_exists($user, 'assignRole')) {
             $user->assignRole($role, $this);
@@ -440,7 +439,7 @@ trait RoleableEntity
             // Invalidate cache and fire event
             $this->getRoleCacheService()->invalidateUserRoleCache($user, $this);
 
-            if (config('permission.events_enabled', true)) {
+            if (! $silently) {
                 EntityRoleAssigned::dispatch($user, $this, $role);
             }
         } else {
@@ -455,15 +454,15 @@ trait RoleableEntity
     /**
      * Assign multiple roles to a user on this entity (Performance Optimized with Events)
      */
-    public function assignUserRoles(Model $user, array $roles): self
+    public function assignUserRoles(Model $user, array $roles, bool $silently = false): self
     {
         if (empty($roles)) {
             return $this;
         }
 
-        DB::transaction(function () use ($user, $roles) {
+        DB::transaction(function () use ($user, $roles, $silently) {
             foreach ($roles as $role) {
-                $this->assignUserRole($user, $role);
+                $this->assignUserRole($user, $role, $silently);
             }
         });
 

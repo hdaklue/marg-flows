@@ -6,12 +6,14 @@ namespace App\Models;
 
 use App\Concerns\Roles\HasEntityAwareRoles;
 use App\Enums\Account\AccountType;
+use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -53,6 +55,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
 
     public function canAccessPanel(Panel $panel): bool
     {
+
+        // if ($panel->getId() === 'admin') {
+
+        //     return $this->canAccessAdmin() ?: abort('404');
+        // }
+
         return true;
     }
 
@@ -98,9 +106,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
         ]);
     }
 
+    #[Scope]
+    public function scopeNotMemberOf(Builder $builder, Tenant $tenant): Builder
+    {
+        return $builder->whereDoesntHave('tenants', function ($query) use ($tenant) {
+            $query->where('tenants.id', '=', $tenant->id);
+        });
+    }
+
     public function isAppAdmin(): bool
     {
         return $this->account_type === AccountType::ADMIN->value;
+    }
+
+    public function isAppManager(): bool
+    {
+        return $this->account_type === AccountType::MANAGER->value;
     }
 
     public function isAppUser(): bool
@@ -127,12 +148,26 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
 
     public function getFilamentAvatarUrl(): ?string
     {
+
         return null;
+    }
+
+    public function canAccessAdmin(): bool
+    {
+        return $this->isAppAdmin() || $this->isAppManager();
     }
 
     public function canAccessTenant(Model $tenant): bool
     {
+
         return $this->tenants()->whereKey($tenant)->exists();
+    }
+
+    protected function avatar(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Filament::getUserAvatarUrl($this),
+        );
     }
 
     /**

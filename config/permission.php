@@ -121,7 +121,7 @@ return [
      *
      * To enable, set to true, and then create listeners to watch these events.
      */
-    'events_enabled' => true,
+    'events_enabled' => false,
 
     /*
      * Teams Feature.

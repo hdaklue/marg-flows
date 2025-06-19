@@ -98,18 +98,6 @@ trait HasEntityAwareRoles
     protected ?RoleCacheService $roleCacheService = null;
 
     /**
-     * Get the role caching service instance
-     */
-    protected function getRoleCacheService(): RoleCacheService
-    {
-        if (! $this->roleCacheService) {
-            $this->roleCacheService = app(RoleCacheService::class);
-        }
-
-        return $this->roleCacheService;
-    }
-
-    /**
      * Override the roles relationship to include roleable columns in pivot
      */
     public function roles(): MorphToMany
@@ -132,6 +120,7 @@ trait HasEntityAwareRoles
 
         // Only apply team filtering if getPermissionsTeamId() returns a valid value
         $teamId = getPermissionsTeamId();
+
         if ($teamId) {
             $teamField = config('permission.table_names.roles') . '.' . $teamsKey;
 
@@ -197,7 +186,7 @@ trait HasEntityAwareRoles
             $saved = false;
 
             $class::saved(
-                function ($object) use ($roleId, $model, $pivotData, $entity, $role, &$saved) {
+                function ($object) use ($roleId, $model, $pivotData, $entity, &$saved) {
                     if ($saved || $model->getKey() != $object->getKey()) {
                         return;
                     }
@@ -208,9 +197,9 @@ trait HasEntityAwareRoles
                     $this->getRoleCacheService()->invalidateUserRoleCache($model, $entity);
 
                     // Fire events
-                    if (config('permission.events_enabled')) {
-                        EntityRoleAssigned::dispatch($model, $entity, $role);
-                    }
+                    // if (config('permission.events_enabled')) {
+                    //     EntityRoleAssigned::dispatch($model, $entity, $role);
+                    // }
 
                     $saved = true;
                 }
@@ -642,5 +631,17 @@ trait HasEntityAwareRoles
                 'user_collection' => 'Generated on demand',
             ],
         ];
+    }
+
+    /**
+     * Get the role caching service instance
+     */
+    protected function getRoleCacheService(): RoleCacheService
+    {
+        if (! $this->roleCacheService) {
+            $this->roleCacheService = app(RoleCacheService::class);
+        }
+
+        return $this->roleCacheService;
     }
 }

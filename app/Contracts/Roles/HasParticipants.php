@@ -33,7 +33,7 @@ interface HasParticipants
     /**
      * Add a participant with specific role(s)
      */
-    public function addParticipant(Model $user, string|array $roles);
+    public function addParticipant(Model $user, string|array $roles, bool $silently = false);
 
     /**
      * Remove a participant's specific role(s)

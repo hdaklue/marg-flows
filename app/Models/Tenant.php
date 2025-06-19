@@ -16,6 +16,8 @@ class Tenant extends Model implements HasParticipants
     /** @use HasUlids */
     use HasFactory, HasUlids, RoleableEntity;
 
+    protected $fillable = ['name'];
+
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class);

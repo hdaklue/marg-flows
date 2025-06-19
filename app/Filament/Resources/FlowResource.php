@@ -42,6 +42,7 @@ class FlowResource extends Resource
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->forParticipant(filament()->auth()->user())->running()->with(['creator', 'participants'])->orderBy('status')->orderBy('due_date'))
             ->columns([
+
                 TextColumn::make('status')
                     ->getStateUsing(fn ($record) => FlowStatus::from($record->status)->getLabel())
                     ->color(fn ($record) => FlowStatus::from($record->status)->getColor())

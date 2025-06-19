@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TenantPolicy
 {
@@ -13,7 +12,7 @@ class TenantPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->canAccessAdmin();
     }
 
     /**
@@ -29,7 +28,7 @@ class TenantPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAppAdmin();
     }
 
     /**
@@ -37,7 +36,7 @@ class TenantPolicy
      */
     public function update(User $user, Tenant $tenant): bool
     {
-        return false;
+        return $user->canAccessAdmin();
     }
 
     /**
