@@ -25,13 +25,16 @@ class DatabaseSeeder extends Seeder
             'account_type' => AccountType::ADMIN->value,
         ]);
 
-        $tenant1 = $user1->tenants()->create([
+        $tenant1 = $user1->createdTenants()->create([
             'name' => 'Test Tenant',
         ]);
 
-        $tenant2 = $user1->tenants()->create([
+        $tenant2 = $user1->createdTenants()->create([
             'name' => 'Test Tenant 2',
         ]);
+
+        $tenant1->members()->attach($user1);
+        $tenant2->members()->attach($user1);
 
         $user1->update([
             'active_tenant_id' => $tenant1->id,
@@ -48,10 +51,12 @@ class DatabaseSeeder extends Seeder
         setPermissionsTeamId($tenant1->id);
 
         $user1->assignRole(RoleEnum::SUPER_ADMIN, $tenant1);
+
         $user2 = User::factory()->create([
             'name' => 'Test Member',
             'email' => 'member@example.com',
             'password' => bcrypt('password'),
+            'account_type' => AccountType::ADMIN->value,
         ]);
 
         $tenant1->members()->attach($user2);

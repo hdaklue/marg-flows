@@ -1,9 +1,24 @@
 {
     "preset": "laravel",
     "rules": {
+        "trailing_comma_in_multiline": {
+            "elements": [
+                "arguments",
+                "arrays",
+                "match",
+                "parameters"
+            ]
+        },
+        "combine_consecutive_unsets": true,
+        "combine_consecutive_issets": true,
         "method_chaining_indentation": true,
+        "declare_strict_types": true,
         "concat_space": {
             "spacing": "one"
+        },
+        "no_unused_imports": true,
+        "ordered_imports": {
+            "sort_algorithm": "alpha"
         },
         "explicit_string_variable": true,
         "no_useless_else": true,
@@ -15,28 +30,24 @@
                 "constant_public",
                 "constant_protected",
                 "constant_private",
+                "property_public_static",
+                "property_protected_static",
+                "property_private_static",
                 "property_public",
                 "property_protected",
                 "property_private",
                 "construct",
                 "destruct",
-                "method_static",
+                "method_public_static",
+                "method_protected_static",
+                "method_private_static",
                 "method_public",
                 "method_protected",
-                "method_scope",
+                "method_private",
                 "magic",
-                "phpunit",
-                "method_is",
-                "method_private"
+                "phpunit"
             ],
             "sort_algorithm": "none"
         }
-    },
-    "finder": {
-        "exclude": [],
-        "in": [
-            "app",
-            "app/Models"
-        ]
     }
 }

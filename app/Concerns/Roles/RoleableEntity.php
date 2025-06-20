@@ -162,6 +162,7 @@ trait RoleableEntity
      */
     public function participants(): MorphToMany
     {
+
         return $this->usersWithAnyRole();
     }
 
@@ -269,7 +270,7 @@ trait RoleableEntity
             'roleable',
             config('permission.table_names.model_has_roles'),
             'roleable_id',
-            config('permission.column_names.model_morph_key')
+            config('permission.column_names.model_morph_key'),
         )
             ->withPivot(['role_id'])
             ->select([
@@ -293,7 +294,7 @@ trait RoleableEntity
         if (! empty($roles)) {
             $roleIds = $this->getRoleCacheService()->getCachedRoleIds(
                 is_array($roles) ? $roles : [$roles],
-                $guard
+                $guard,
             );
 
             if (! empty($roleIds)) {
@@ -336,13 +337,28 @@ trait RoleableEntity
     public function usersWithAnyRole(?string $guard = null)
     {
         return $this->usersWithRole([], $guard)
-            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
-            ->select([
-                'users.*',
-                'roles.name as role_name',
-                'roles.id as role_id',
-                'roles.guard_name as role_guard',
-            ]);
+            ->with(['roles' => function ($query) use ($guard) {
+                $query->select(['id', 'name'])
+                    ->wherePivot('roleable_type', $this->getMorphClass())
+                    ->wherePivot('roleable_id', $this->getKey())
+                    ->when($guard, function ($query, $guard) {
+                        $query->where('guard_name', $guard);
+                    })
+                    ->when(app(PermissionRegistrar::class)->teams, function ($query) {
+                        $teamId = getPermissionsTeamId();
+                        if ($teamId) {
+                            $query->wherePivot('tenant_id', $teamId);
+                        }
+                    });
+            }]);
+        // ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+        // ->select([
+        //     'users.*',
+        //     'roles.name as role_name',
+        //     'roles.id as role_id',
+        //     'roles.guard_name as role_guard',
+        // ]);
+
     }
 
     /**
@@ -444,7 +460,7 @@ trait RoleableEntity
             }
         } else {
             throw new \BadMethodCallException(
-                'User model must use HasEntityAwareRoles trait to support entity-scoped roles.'
+                'User model must use HasEntityAwareRoles trait to support entity-scoped roles.',
             );
         }
 
@@ -485,7 +501,7 @@ trait RoleableEntity
             }
         } else {
             throw new \BadMethodCallException(
-                'User model must use HasEntityAwareRoles trait to support entity-scoped roles.'
+                'User model must use HasEntityAwareRoles trait to support entity-scoped roles.',
             );
         }
 
@@ -581,7 +597,7 @@ trait RoleableEntity
         $guard = $guard ?: config('auth.defaults.guard');
         $roleIds = $this->getRoleCacheService()->getCachedRoleIds(
             is_array($roles) ? $roles : [$roles],
-            $guard
+            $guard,
         );
 
         if (empty($roleIds)) {

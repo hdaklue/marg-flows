@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Actions\Tenant\AddParticipant;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\TenantResource\Pages;
+use App\Filament\Admin\Resources\TenantResource\RelationManagers\ParticipantRelationManager;
 use App\Models\Tenant;
 use App\Models\User;
 use Filament\Forms\Components\Select;
@@ -91,7 +92,7 @@ class TenantResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ParticipantRelationManager::class,
         ];
     }
 
@@ -100,6 +101,7 @@ class TenantResource extends Resource
         return [
             'index' => Pages\ListTenants::route('/'),
             // 'create' => Pages\CreateTenant::route('/create'),
+
             'edit' => Pages\EditTenant::route('/{record}/edit'),
         ];
     }

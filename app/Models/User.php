@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -56,10 +57,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
     public function canAccessPanel(Panel $panel): bool
     {
 
-        // if ($panel->getId() === 'admin') {
+        if ($panel->getId() === 'admin') {
 
-        //     return $this->canAccessAdmin() ?: abort('404');
-        // }
+            return $this->canAccessAdmin() ?: abort('404');
+        }
 
         return true;
     }
@@ -74,7 +75,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
             'roleable',
             config('permission.table_names.model_has_roles'),
             'model_id',
-            'roleable_id'
+            'roleable_id',
         )->withPivot(['role_id', 'tenant_id']);
     }
 
@@ -129,8 +130,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
         return $this->account_type === AccountType::USER->value;
     }
 
+    public function createdTenants(): HasMany
+    {
+        return $this->hasMany(Tenant::class, 'creator_id');
+    }
+
     #[Scope]
-    public function appAdmin(Builder $builder): Builder
+    public function scopeAppAdmin(Builder $builder): Builder
     {
         return $builder->where('account_type', AccountType::ADMIN->value);
     }

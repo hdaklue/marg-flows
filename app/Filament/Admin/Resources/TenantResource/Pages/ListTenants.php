@@ -42,12 +42,7 @@ class ListTenants extends ListRecords
                 ])->action(function (array $data): void {
 
                     try {
-
-                        CreateTenant::run($data);
-                        Notification::make()
-                            ->body('Tenant created')
-                            ->success()
-                            ->send();
+                        CreateTenant::run($data, filament()->auth()->user());
                     } catch (\Exception $e) {
                         if (! app()->isProduction()) {
                             throw $e;
@@ -57,6 +52,11 @@ class ListTenants extends ListRecords
                             ->danger()
                             ->send();
                     }
+                })->after(function () {
+                    Notification::make()
+                        ->body('Tenant created')
+                        ->success()
+                        ->send();
                 }),
         ];
     }
