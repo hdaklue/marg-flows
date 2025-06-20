@@ -9,6 +9,9 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Flow>
+ */
 class FlowFactory extends Factory
 {
     protected $model = Flow::class;
@@ -40,8 +43,8 @@ class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $startDate = $now->copy()->addDays($this->faker->numberBetween(1, 60))->startOfDay();
-            $dueDate = $startDate->copy()->addDays($this->faker->numberBetween(7, 45))->endOfDay();
+            $startDate = $now->copy()->addDays(fake()->numberBetween(1, 60))->startOfDay();
+            $dueDate = $startDate->copy()->addDays(fake()->numberBetween(7, 45))->endOfDay();
 
             return [
                 'status' => FlowStatus::SCHEDULED->value,
@@ -59,8 +62,8 @@ class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $startDate = $now->copy()->subDays($this->faker->numberBetween(1, 60))->startOfDay();
-            $dueDate = $now->copy()->addDays($this->faker->numberBetween(7, 60))->endOfDay();
+            $startDate = $now->copy()->subDays(fake()->numberBetween(1, 60))->startOfDay();
+            $dueDate = $now->copy()->addDays(fake()->numberBetween(7, 60))->endOfDay();
 
             return [
                 'status' => FlowStatus::ACTIVE->value,
@@ -78,8 +81,8 @@ class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $dueDate = $now->copy()->subDays($this->faker->numberBetween(1, 30))->endOfDay();
-            $startDate = $dueDate->copy()->subDays($this->faker->numberBetween(14, 60))->startOfDay();
+            $dueDate = $now->copy()->subDays(fake()->numberBetween(1, 30))->endOfDay();
+            $startDate = $dueDate->copy()->subDays(fake()->numberBetween(14, 60))->startOfDay();
 
             return [
                 'status' => FlowStatus::ACTIVE->value, // Active but overdue
@@ -97,8 +100,8 @@ class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $startDate = $now->copy()->subDays($this->faker->numberBetween(7, 90))->startOfDay();
-            $dueDate = $now->copy()->addDays($this->faker->numberBetween(7, 45))->endOfDay();
+            $startDate = $now->copy()->subDays(fake()->numberBetween(7, 90))->startOfDay();
+            $dueDate = $now->copy()->addDays(fake()->numberBetween(7, 45))->endOfDay();
 
             return [
                 'status' => FlowStatus::PAUSED->value,
@@ -116,19 +119,19 @@ class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $completedAt = $now->copy()->subDays($this->faker->numberBetween(1, 90))->setTime(
-                $this->faker->numberBetween(9, 17),
-                $this->faker->numberBetween(0, 59),
+            $completedAt = $now->copy()->subDays(fake()->numberBetween(1, 90))->setTime(
+                fake()->numberBetween(9, 17),
+                fake()->numberBetween(0, 59),
                 0
             );
 
-            $duration = $this->faker->numberBetween(7, 60);
+            $duration = fake()->numberBetween(7, 60);
             $startDate = $completedAt->copy()->subDays($duration)->startOfDay();
 
             // 80% completed on time, 20% late
-            $dueOffset = $this->faker->boolean(80) ?
-                $this->faker->numberBetween(0, 7) : // On time or early
-                $this->faker->numberBetween(-14, -1); // Late
+            $dueOffset = fake()->boolean(80) ?
+                fake()->numberBetween(0, 7) : // On time or early
+                fake()->numberBetween(-14, -1); // Late
 
             $dueDate = $completedAt->copy()->addDays($dueOffset)->endOfDay();
 
@@ -176,7 +179,7 @@ class FlowFactory extends Factory
                 ],
             ];
 
-            $caseType = $this->faker->randomElement(array_keys($cases));
+            $caseType = fake()->randomElement(array_keys($cases));
 
             return $cases[$caseType];
         });
@@ -194,7 +197,7 @@ class FlowFactory extends Factory
             FlowStatus::PAUSED->value => 10,     // 10%
         ];
 
-        $rand = $this->faker->numberBetween(1, 100);
+        $rand = fake()->numberBetween(1, 100);
         $cumulative = 0;
 
         foreach ($weights as $status => $weight) {
@@ -229,11 +232,11 @@ class FlowFactory extends Factory
     private function scheduledDates(Carbon $now): array
     {
         // Start 1-90 days in the future
-        $daysFromNow = $this->faker->numberBetween(1, 90);
+        $daysFromNow = fake()->numberBetween(1, 90);
         $startDate = $now->copy()->addDays($daysFromNow)->startOfDay();
 
         // Duration 7-60 days
-        $duration = $this->faker->numberBetween(7, 60);
+        $duration = fake()->numberBetween(7, 60);
         $dueDate = $startDate->copy()->addDays($duration)->endOfDay();
 
         return [$startDate, $dueDate, null];
@@ -245,17 +248,17 @@ class FlowFactory extends Factory
     private function activeDates(Carbon $now): array
     {
         // Started 1-120 days ago
-        $daysAgo = $this->faker->numberBetween(1, 120);
+        $daysAgo = fake()->numberBetween(1, 120);
         $startDate = $now->copy()->subDays($daysAgo)->startOfDay();
 
         // Due in 7-90 days from start (ensuring it's reasonable)
-        $duration = $this->faker->numberBetween(14, 90);
+        $duration = fake()->numberBetween(14, 90);
         $dueDate = $startDate->copy()->addDays($duration)->endOfDay();
 
         // Ensure due date is in the future for most active flows
-        if ($dueDate->lt($now) && $this->faker->boolean(70)) {
+        if ($dueDate->lt($now) && fake()->boolean(70)) {
             // 70% chance to push due date to future if it's in the past
-            $dueDate = $now->copy()->addDays($this->faker->numberBetween(7, 30))->endOfDay();
+            $dueDate = $now->copy()->addDays(fake()->numberBetween(7, 30))->endOfDay();
         }
 
         return [$startDate, $dueDate, null];
@@ -267,11 +270,11 @@ class FlowFactory extends Factory
     private function pausedDates(Carbon $now): array
     {
         // Started 7-180 days ago
-        $daysAgo = $this->faker->numberBetween(7, 180);
+        $daysAgo = fake()->numberBetween(7, 180);
         $startDate = $now->copy()->subDays($daysAgo)->startOfDay();
 
         // Due date is usually in the future (paused projects often get extended)
-        $futureDays = $this->faker->numberBetween(7, 60);
+        $futureDays = fake()->numberBetween(7, 60);
         $dueDate = $now->copy()->addDays($futureDays)->endOfDay();
 
         return [$startDate, $dueDate, null];
@@ -283,25 +286,25 @@ class FlowFactory extends Factory
     private function completedDates(Carbon $now): array
     {
         // Completed 1-180 days ago
-        $completedDaysAgo = $this->faker->numberBetween(1, 180);
+        $completedDaysAgo = fake()->numberBetween(1, 180);
         $completedAt = $now->copy()->subDays($completedDaysAgo)->setTime(
-            $this->faker->numberBetween(9, 17), // Business hours
-            $this->faker->numberBetween(0, 59),
+            fake()->numberBetween(9, 17), // Business hours
+            fake()->numberBetween(0, 59),
             0
         );
 
         // Started before completion
-        $projectDuration = $this->faker->numberBetween(7, 90);
+        $projectDuration = fake()->numberBetween(7, 90);
         $startDate = $completedAt->copy()->subDays($projectDuration)->startOfDay();
 
         // Due date - 80% completed on time, 20% completed late
-        if ($this->faker->boolean(80)) {
+        if (fake()->boolean(80)) {
             // Completed on time or early
-            $dueDays = $this->faker->numberBetween($projectDuration, $projectDuration + 7);
+            $dueDays = fake()->numberBetween($projectDuration, $projectDuration + 7);
             $dueDate = $startDate->copy()->addDays($dueDays)->endOfDay();
         } else {
             // Completed late
-            $dueDays = $this->faker->numberBetween($projectDuration - 7, $projectDuration - 1);
+            $dueDays = fake()->numberBetween($projectDuration - 7, $projectDuration - 1);
             $dueDate = $startDate->copy()->addDays(max(7, $dueDays))->endOfDay();
         }
 
@@ -336,7 +339,7 @@ class FlowFactory extends Factory
             'Email Campaign',
         ];
 
-        return $this->faker->randomElement($titles);
+        return fake()->randomElement($titles);
     }
 
     /**
@@ -344,16 +347,16 @@ class FlowFactory extends Factory
      */
     private function getProjectSettings(): ?array
     {
-        if ($this->faker->boolean(30)) {
+        if (fake()->boolean(30)) {
             return null; // 30% chance of no settings
         }
 
         return [
-            'auto_assign' => $this->faker->boolean(60), // 60% chance true
-            'client_access' => $this->faker->boolean(40), // 40% chance true
-            'notifications' => $this->faker->randomElement(['all', 'mentions', 'none']),
-            'budget' => $this->faker->boolean(70) ? $this->faker->numberBetween(5000, 50000) : null,
-            'priority' => $this->faker->randomElement(['low', 'medium', 'high']),
+            'auto_assign' => fake()->boolean(60), // 60% chance true
+            'client_access' => fake()->boolean(40), // 40% chance true
+            'notifications' => fake()->randomElement(['all', 'mentions', 'none']),
+            'budget' => fake()->boolean(70) ? fake()->numberBetween(5000, 50000) : null,
+            'priority' => fake()->randomElement(['low', 'medium', 'high']),
         ];
     }
 }

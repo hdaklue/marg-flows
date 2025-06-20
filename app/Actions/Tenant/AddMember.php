@@ -1,25 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Tenant;
 
+use App\Enums\Role\RoleEnum;
+use App\Events\Tenant\MemberAdded;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddParticipant
+class AddMember
 {
     use AsAction;
 
-    public function handle(Tenant $tenant, User $user, string $role)
+    public function handle(Tenant $tenant, User $user, RoleEnum $role)
     {
         try {
             DB::transaction(function () use ($tenant, $user, $role) {
-                $tenant->members()->attach($user);
+                $tenant->addMember($user);
                 setPermissionsTeamId($tenant->id);
-                $tenant->addParticipant($user, roles: $role);
+                $tenant->addParticipant($user, $role->value);
             });
+
         } catch (\Exception $e) {
             Log::error('Tenant creation failed', [
                 'error' => $e->getMessage(),
@@ -31,5 +36,7 @@ class AddParticipant
             ]);
             throw $e; // Re-throw to let caller handle
         }
+
+        MemberAdded::dispatch($tenant, $user, $role);
     }
 }

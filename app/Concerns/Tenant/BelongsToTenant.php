@@ -18,13 +18,9 @@ trait BelongsToTenant
             if ($model->tenant_id) {
                 return;
             }
-            if (! auth()->user() && ! $model->tenant_id) {
-                throw (new Exception('Cannot resolve team id for creating model'));
-            }
+            throw_if(! auth()->user() && ! $model->tenant_id, new Exception('Cannot resolve team id for creating model'));
 
-            if (! auth()->user()->active_tenant_id) {
-                throw (new Exception('Cannot resolve team id for creating model'));
-            }
+            throw_unless(auth()->user()->active_tenant_id, new Exception('Cannot resolve team id for creating model'));
 
             $model->tenant_id = Filament::getTenant()->id();
         });

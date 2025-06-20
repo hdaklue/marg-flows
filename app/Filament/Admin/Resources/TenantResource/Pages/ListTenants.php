@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\TenantResource\Pages;
 
 use App\Actions\Tenant\CreateTenant;
@@ -38,15 +40,14 @@ class ListTenants extends ListRecords
                                 ->required()
                                 ->native(false),
                         ])
+                        ->reorderable(false)
                         ->columns(2),
                 ])->action(function (array $data): void {
 
                     try {
                         CreateTenant::run($data, filament()->auth()->user());
                     } catch (\Exception $e) {
-                        if (! app()->isProduction()) {
-                            throw $e;
-                        }
+                        throw_unless(app()->isProduction(), $e);
                         Notification::make()
                             ->body('Something went wrong')
                             ->danger()

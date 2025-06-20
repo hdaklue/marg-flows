@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Events\Tenant\MemberAdded;
+use App\Events\Tenant\MemberRemoved;
 use App\Events\Tenant\TenantCreated;
 use App\Models\User;
+use App\Notifications\Participant\AsignedToTenant;
+use App\Notifications\Participant\RemovedFromTenant;
 use App\Notifications\TenantCreatedNotification;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Support\Facades\Log;
 
 class TenantEventSubscriber
 {
@@ -17,16 +20,26 @@ class TenantEventSubscriber
      */
     public function handleTenantCreated(TenantCreated $event): void
     {
-        Log::info('Ran On' . now());
+
         $users = User::appAdmin()
             ->where('id', '!=', $event->user->id)
             ->get();
 
         foreach ($users as $user) {
-
             $user->notify(new TenantCreatedNotification($event->tenant));
         }
 
+    }
+
+    public function handleMemberRemoved(MemberRemoved $event): void
+    {
+        $event->memberRemoved->notify(new RemovedFromTenant($event->tenant->name));
+    }
+
+    public function handleMemberAdded(MemberAdded $event): void
+    {
+
+        $event->user->notify(new AsignedToTenant($event->tenant->name, $event->role->getLabel()));
     }
 
     /**
@@ -38,6 +51,9 @@ class TenantEventSubscriber
     {
         return [
             TenantCreated::class => 'handleTenantCreated',
+            MemberRemoved::class => 'handleMemberRemoved',
+            MemberAdded::class => 'handleMemberAdded',
+
         ];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners\Role;
 
 use App\Events\Role\EntityAllRolesRemoved;
@@ -91,27 +93,27 @@ class RoleEventListener
     {
         $events->listen(
             EntityRoleAssigned::class,
-            [static::class, 'handleRoleAssigned']
+            [static::class, 'handleRoleAssigned'],
         );
 
         $events->listen(
             EntityRoleRemoved::class,
-            [static::class, 'handleRoleRemoved']
+            [static::class, 'handleRoleRemoved'],
         );
 
         $events->listen(
             EntityAllRolesRemoved::class,
-            [static::class, 'handleAllRolesRemoved']
+            [static::class, 'handleAllRolesRemoved'],
         );
 
         $events->listen(
             EntityRolesSynced::class,
-            [static::class, 'handleRolesSynced']
+            [static::class, 'handleRolesSynced'],
         );
 
         $events->listen(
             EntityBulkRolesUpdated::class,
-            [static::class, 'handleBulkRolesUpdated']
+            [static::class, 'handleBulkRolesUpdated'],
         );
     }
 
@@ -155,6 +157,7 @@ class RoleEventListener
         $startTime = $this->startPerformanceMonitoring();
 
         try {
+
             // Audit logging
             $this->logRoleChange('removed', $event->user, $event->entity, $event->role, $event->guard);
 
@@ -187,6 +190,7 @@ class RoleEventListener
         $startTime = $this->startPerformanceMonitoring();
 
         try {
+
             // Audit logging
             $this->logRoleChange('all_removed', $event->user, $event->entity, 'ALL', $event->guard);
 

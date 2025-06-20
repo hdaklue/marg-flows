@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources;
 
-use App\Actions\Tenant\AddParticipant;
+use App\Actions\Tenant\AddMember;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\TenantResource\Pages;
 use App\Filament\Admin\Resources\TenantResource\RelationManagers\ParticipantRelationManager;
@@ -52,22 +54,15 @@ class TenantResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Action::make('add')
-                    ->form([
-                        Select::make('members')
-                            ->required()
-                            ->searchable(true)
-                            ->native(false)
-                            ->options(fn ($record) => User::query()->notMemberOf($record)->pluck('name', 'id')),
-                        Select::make('system_roles')
-                            ->options(RoleEnum::class)
-                            ->searchable(true)
-                            ->required()
-                            ->native(false),
-
-                    ])->action(function (array $data, Tenant $record): void {
+                    ->label('Add Member')
+                    ->icon('heroicon-s-user-plus')
+                    ->form(
+                        fn ($record) => TenantResource::getAddMemberSchema($record),
+                    )->action(function (array $data, Tenant $record): void {
                         try {
+
                             $user = User::where('id', $data['members'])->first();
-                            AddParticipant::run($record, $user, $data['system_roles']);
+                            AddMember::run($record, $user, $data['system_roles']);
                             Notification::make()
                                 ->body('Participant added')
                                 ->success()
@@ -93,6 +88,23 @@ class TenantResource extends Resource
     {
         return [
             ParticipantRelationManager::class,
+        ];
+    }
+
+    public static function getAddMemberSchema(Tenant $record): array
+    {
+        return [
+            Select::make('members')
+                ->required()
+                ->searchable(true)
+                ->native(false)
+                ->options(User::query()->notMemberOf($record)->pluck('name', 'id')),
+            Select::make('system_roles')
+                ->options(RoleEnum::class)
+                ->searchable(true)
+                ->required()
+                ->native(false),
+
         ];
     }
 

@@ -18,9 +18,7 @@ class UpdateActiveTenant
      */
     public function handle(TenantSet $event): void
     {
-        if (! $event->getUser()->canAccessTenant($event->getTenant())) {
-            abort(404);
-        }
+        abort_unless($event->getUser()->canAccessTenant($event->getTenant()), 404);
 
         try {
             $event->getUser()->switchActiveTenant($event->getTenant());

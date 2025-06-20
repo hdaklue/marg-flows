@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Concerns\Roles;
 
 use App\Enums\Role\RoleEnum;
@@ -214,13 +216,13 @@ trait RoleableEntity
     /**
      * Remove a participant's specific role(s)
      */
-    public function removeParticipant(Model $user, ?string $role = null): self
+    public function removeParticipant(Model $user, ?bool $silently = false, ?string $role = null): self
     {
         if ($role) {
             return $this->removeUserRole($user, $role);
         }
 
-        return $this->removeAllUserRoles($user);
+        return $this->removeAllUserRoles($user, $silently);
     }
 
     /**
@@ -496,9 +498,8 @@ trait RoleableEntity
             // Invalidate cache and fire event
             $this->getRoleCacheService()->invalidateUserRoleCache($user, $this);
 
-            if (config('permission.events_enabled', true)) {
-                EntityRoleRemoved::dispatch($user, $this, $role);
-            }
+            EntityRoleRemoved::dispatch($user, $this, $role);
+
         } else {
             throw new \BadMethodCallException(
                 'User model must use HasEntityAwareRoles trait to support entity-scoped roles.',
@@ -511,7 +512,7 @@ trait RoleableEntity
     /**
      * Remove all roles from a user on this entity (Performance Optimized with Events)
      */
-    public function removeAllUserRoles(Model $user): self
+    public function removeAllUserRoles(Model $user, bool $silently = false): self
     {
         // Get current roles before removal for event
         $currentRoles = $this->rolesForUser($user);
@@ -533,7 +534,7 @@ trait RoleableEntity
         // Invalidate cache and fire event
         $this->getRoleCacheService()->invalidateUserRoleCache($user, $this);
 
-        if (config('permission.events_enabled', true) && $currentRoles->isNotEmpty()) {
+        if (! $silently && $currentRoles->isNotEmpty()) {
             EntityAllRolesRemoved::dispatch($user, $this);
         }
 

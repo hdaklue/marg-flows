@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Contracts\Roles;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -38,7 +40,7 @@ interface HasParticipants
     /**
      * Remove a participant's specific role(s)
      */
-    public function removeParticipant(Model $user, ?string $role = null);
+    public function removeParticipant(Model $user, ?bool $silently = false, ?string $role = null);
 
     /**
      * Change a participant's role(s)

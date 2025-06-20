@@ -225,11 +225,9 @@ trait HasEntityAwareRoles
     public function syncRoles(...$args)
     {
         // Entity is REQUIRED - check if last argument is a Model
-        if (empty($args) || ! end($args) instanceof Model) {
-            throw new \InvalidArgumentException(
-                'Entity parameter is required. Use: syncRoles($role1, $role2, $entity)'
-            );
-        }
+        throw_if(empty($args) || ! end($args) instanceof Model, new \InvalidArgumentException(
+            'Entity parameter is required. Use: syncRoles($role1, $role2, $entity)'
+        ));
 
         $entity = array_pop($args);
         $roles = $args;
@@ -298,11 +296,9 @@ trait HasEntityAwareRoles
      */
     public function removeRole($role, ?Model $entity = null)
     {
-        if (! $entity) {
-            throw new \InvalidArgumentException(
-                'Entity parameter is required. Use: removeRole($role, $entity)'
-            );
-        }
+        throw_unless($entity, new \InvalidArgumentException(
+            'Entity parameter is required. Use: removeRole($role, $entity)'
+        ));
 
         $storedRole = $this->getStoredRole($role);
 

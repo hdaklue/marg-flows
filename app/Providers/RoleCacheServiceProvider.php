@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Events\Role\EntityAllRolesRemoved;
@@ -67,7 +69,7 @@ class RoleCacheServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register RoleCacheService as singleton
-        $this->app->singleton(RoleCacheService::class, function ($app) {
+        $this->app->singleton(function ($app): RoleCacheService {
             $service = new RoleCacheService;
 
             // Configure TTL from config
@@ -80,7 +82,7 @@ class RoleCacheServiceProvider extends ServiceProvider
         // Merge default configuration
         $this->mergeConfigFrom(
             $this->getConfigPath(),
-            'permission'
+            'permission',
         );
     }
 
@@ -137,12 +139,10 @@ class RoleCacheServiceProvider extends ServiceProvider
     protected function validateConfiguration(): void
     {
         // Check if Spatie Permission is configured
-        if (! config('permission.table_names')) {
-            throw new \RuntimeException(
-                'Spatie Permission package is not properly configured. ' .
-                'Please run: php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"'
-            );
-        }
+        throw_unless(config('permission.table_names'), new \RuntimeException(
+            'Spatie Permission package is not properly configured. ' .
+            'Please run: php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"',
+        ));
 
         // Validate role caching configuration
         $roleCachingConfig = config('permission.role_caching', []);
@@ -152,21 +152,17 @@ class RoleCacheServiceProvider extends ServiceProvider
             $cacheDriver = $roleCachingConfig['cache_driver'] ?? config('cache.default');
             $cacheConfig = config("cache.stores.{$cacheDriver}");
 
-            if (! $cacheConfig) {
-                throw new \RuntimeException(
-                    "Cache driver '{$cacheDriver}' is not configured. " .
-                    'Please configure a cache driver for role caching.'
-                );
-            }
+            throw_unless($cacheConfig, new \RuntimeException(
+                "Cache driver '{$cacheDriver}' is not configured. " .
+                'Please configure a cache driver for role caching.',
+            ));
         }
 
         // Validate TTL
         $ttl = config('permission.role_caching.default_ttl', 300);
-        if (! is_int($ttl) || $ttl < 0) {
-            throw new \InvalidArgumentException(
-                'role_caching.default_ttl must be a positive integer representing seconds.'
-            );
-        }
+        throw_if(! is_int($ttl) || $ttl < 0, new \InvalidArgumentException(
+            'role_caching.default_ttl must be a positive integer representing seconds.',
+        ));
     }
 
     /**

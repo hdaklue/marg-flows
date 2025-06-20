@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Concerns\Roles\RoleableEntity;
@@ -22,6 +24,16 @@ class Tenant extends Model implements HasParticipants
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public function removeMember(User|array $user)
+    {
+        $this->members()->detach($user);
+    }
+
+    public function addMember(User|array $user)
+    {
+        $this->members()->attach($user);
     }
 
     public function systemRoles(): HasMany
