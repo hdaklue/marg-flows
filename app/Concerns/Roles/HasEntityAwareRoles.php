@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Concerns\Roles;
 
 use App\Events\Role\EntityRoleAssigned;
@@ -76,6 +78,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 trait HasEntityAwareRoles
 {
+    // TODO: implement silently option
     use HasRoles {
         assignRole as parentAssignRole;
         removeRole as parentRemoveRole;
@@ -107,7 +110,7 @@ trait HasEntityAwareRoles
             'model',
             config('permission.table_names.model_has_roles'),
             config('permission.column_names.model_morph_key'),
-            app(PermissionRegistrar::class)->pivotRole
+            app(PermissionRegistrar::class)->pivotRole,
         );
 
         if (! app(PermissionRegistrar::class)->teams) {
@@ -202,7 +205,7 @@ trait HasEntityAwareRoles
                     // }
 
                     $saved = true;
-                }
+                },
             );
         }
 
@@ -226,7 +229,7 @@ trait HasEntityAwareRoles
     {
         // Entity is REQUIRED - check if last argument is a Model
         throw_if(empty($args) || ! end($args) instanceof Model, new \InvalidArgumentException(
-            'Entity parameter is required. Use: syncRoles($role1, $role2, $entity)'
+            'Entity parameter is required. Use: syncRoles($role1, $role2, $entity)',
         ));
 
         $entity = array_pop($args);
@@ -281,7 +284,7 @@ trait HasEntityAwareRoles
     {
         throw new \BadMethodCallException(
             'hasRole() is disabled in entity-aware context. ' .
-            'Use hasRoleOn($role, $entity) for entity-specific checks. '
+            'Use hasRoleOn($role, $entity) for entity-specific checks. ',
         );
     }
 
@@ -297,7 +300,7 @@ trait HasEntityAwareRoles
     public function removeRole($role, ?Model $entity = null)
     {
         throw_unless($entity, new \InvalidArgumentException(
-            'Entity parameter is required. Use: removeRole($role, $entity)'
+            'Entity parameter is required. Use: removeRole($role, $entity)',
         ));
 
         $storedRole = $this->getStoredRole($role);
@@ -372,7 +375,7 @@ trait HasEntityAwareRoles
         // Get cached role IDs for comparison
         $targetRoleIds = $this->getRoleCacheService()->getCachedRoleIds(
             is_array($roles) ? $roles : [$roles],
-            $guard
+            $guard,
         );
 
         return ! empty(array_intersect($userRoleIds, $targetRoleIds));
@@ -398,7 +401,7 @@ trait HasEntityAwareRoles
     public function givePermissionTo(...$permissions)
     {
         throw new \BadMethodCallException(
-            'Direct permissions are disabled. Assign roles to entities instead: assignRole($role, $entity)'
+            'Direct permissions are disabled. Assign roles to entities instead: assignRole($role, $entity)',
         );
     }
 
@@ -410,7 +413,7 @@ trait HasEntityAwareRoles
     public function revokePermissionTo($permission)
     {
         throw new \BadMethodCallException(
-            'Direct permissions are disabled. Remove roles from entities instead: removeRole($role, $entity)'
+            'Direct permissions are disabled. Remove roles from entities instead: removeRole($role, $entity)',
         );
     }
 
@@ -420,7 +423,7 @@ trait HasEntityAwareRoles
     public function getDirectPermissions(): never
     {
         throw new \BadMethodCallException(
-            'Direct permissions are disabled. Use role-based permissions: assignRole($role, $entity)'
+            'Direct permissions are disabled. Use role-based permissions: assignRole($role, $entity)',
         );
     }
 
@@ -432,7 +435,7 @@ trait HasEntityAwareRoles
     public function syncPermissions(...$permissions)
     {
         throw new \BadMethodCallException(
-            'Direct permissions are disabled. Use role-based permissions: assignRole($role, $entity)'
+            'Direct permissions are disabled. Use role-based permissions: assignRole($role, $entity)',
         );
     }
 
@@ -444,7 +447,7 @@ trait HasEntityAwareRoles
     public function hasPermissionTo($permission, $guardName = null): bool
     {
         throw new \BadMethodCallException(
-            'Direct permission checks are disabled. Use hasRoleOn($role, $entity) instead.'
+            'Direct permission checks are disabled. Use hasRoleOn($role, $entity) instead.',
         );
     }
 
@@ -456,7 +459,7 @@ trait HasEntityAwareRoles
     public function hasDirectPermission($permission): bool
     {
         throw new \BadMethodCallException(
-            'Direct permission checks are disabled. Use hasRoleOn($role, $entity) instead.'
+            'Direct permission checks are disabled. Use hasRoleOn($role, $entity) instead.',
         );
     }
 
@@ -468,7 +471,7 @@ trait HasEntityAwareRoles
     public function hasAnyPermission(...$permissions): bool
     {
         throw new \BadMethodCallException(
-            'Direct permission checks are disabled. Use hasRoleOn($role, $entity) instead.'
+            'Direct permission checks are disabled. Use hasRoleOn($role, $entity) instead.',
         );
     }
 
@@ -480,7 +483,7 @@ trait HasEntityAwareRoles
     public function hasAllPermissions(...$permissions): bool
     {
         throw new \BadMethodCallException(
-            'Direct permission checks are disabled. Use hasRoleOn($role, $entity) instead.'
+            'Direct permission checks are disabled. Use hasRoleOn($role, $entity) instead.',
         );
     }
 
@@ -492,7 +495,7 @@ trait HasEntityAwareRoles
     public function permissions(): BelongsToMany
     {
         throw new \BadMethodCallException(
-            'Direct permissions are disabled. Permissions are managed through roles only.'
+            'Direct permissions are disabled. Permissions are managed through roles only.',
         );
     }
 
@@ -508,7 +511,7 @@ trait HasEntityAwareRoles
     public function hasAnyRole(...$roles): bool
     {
         throw new \BadMethodCallException(
-            'Global role checks are disabled. Use hasRoleOn($role, $entity) instead.'
+            'Global role checks are disabled. Use hasRoleOn($role, $entity) instead.',
         );
     }
 
@@ -520,7 +523,7 @@ trait HasEntityAwareRoles
     public function hasAllRoles($roles, ?string $guard = null): bool
     {
         throw new \BadMethodCallException(
-            'Global role checks are disabled. Use hasRoleOn($role, $entity) instead.'
+            'Global role checks are disabled. Use hasRoleOn($role, $entity) instead.',
         );
     }
 
@@ -532,7 +535,7 @@ trait HasEntityAwareRoles
     public function hasExactRoles($roles, ?string $guard = null): bool
     {
         throw new \BadMethodCallException(
-            'Global role checks are disabled. Use hasRoleOn($role, $entity) instead.'
+            'Global role checks are disabled. Use hasRoleOn($role, $entity) instead.',
         );
     }
 
@@ -544,7 +547,7 @@ trait HasEntityAwareRoles
     public function getRoleNames(): Collection
     {
         throw new \BadMethodCallException(
-            'Global role names are disabled. Use rolesOn($entity)->pluck(\'name\') instead.'
+            'Global role names are disabled. Use rolesOn($entity)->pluck(\'name\') instead.',
         );
     }
 
@@ -556,7 +559,7 @@ trait HasEntityAwareRoles
     public function scopeRole(Builder $query, $roles, $guard = null, $without = false): never
     {
         throw new \BadMethodCallException(
-            'Global role scopes are disabled. Create custom entity-aware scopes instead.'
+            'Global role scopes are disabled. Create custom entity-aware scopes instead.',
         );
     }
 
@@ -568,7 +571,7 @@ trait HasEntityAwareRoles
     public function scopeWithoutRole(Builder $query, $roles, $guard = null): never
     {
         throw new \BadMethodCallException(
-            'Global role scopes are disabled. Create custom entity-aware scopes instead.'
+            'Global role scopes are disabled. Create custom entity-aware scopes instead.',
         );
     }
 

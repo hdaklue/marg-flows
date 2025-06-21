@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Concerns\Roles\RoleableEntity;
@@ -30,17 +32,6 @@ class Flow extends Model implements HasParticipants
         'completed_at',
     ];
 
-    public function casts(): array
-    {
-        return [
-            'settings' => 'array',
-            // 'status' => FlowStatus::class,
-            'due_date' => 'date',
-            'start_date' => 'date',
-            'completed_at' => 'date',
-        ];
-    }
-
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -50,5 +41,16 @@ class Flow extends Model implements HasParticipants
     public function running(Builder $query): Builder
     {
         return $query->where('status', '!=', FlowStatus::COMPLETED->value);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'array',
+            // 'status' => FlowStatus::class,
+            'due_date' => 'date',
+            'start_date' => 'date',
+            'completed_at' => 'date',
+        ];
     }
 }

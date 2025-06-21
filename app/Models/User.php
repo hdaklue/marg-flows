@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -115,6 +117,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
         });
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(MemberInvitation::class, 'sender_id');
+    }
+
     public function isAppAdmin(): bool
     {
         return $this->account_type === AccountType::ADMIN->value;
@@ -186,6 +193,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'accout_type' => AccountType::class,
         ];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers\Filament;
 
 use App\Http\Middleware\Filament\CanAccessAdmin;
@@ -27,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Sky,
             ])
             ->login()
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
@@ -41,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
                 // Widgets\FilamentInfoWidget::class,
             ])
             ->databaseNotifications()
-            ->databaseNotificationsPolling(interval: 60)
+            ->databaseNotificationsPolling(interval: '60s')
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

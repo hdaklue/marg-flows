@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Listeners\TenantEventSubscriber;
@@ -22,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(FlowProgressService::class);
-        Model::shouldBeStrict();
+
         Gate::defaultDenialResponse(
             Response::denyAsNotFound(),
         );
@@ -41,5 +43,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Event::subscribe(TenantEventSubscriber::class);
+        Model::shouldBeStrict();
     }
 }

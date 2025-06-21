@@ -1,14 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Http\Controllers\AcceptInvitation;
 use App\Livewire\Previewtest;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', action: Previewtest::class)->name('home');
 Route::get('/annotation', fn () => view('annotation'));
-
+Route::get('invitation/accept/{token}', AcceptInvitation::class)
+    ->middleware([Authenticate::class])
+    ->name('invitation.accept');
 // Route::view('dashboard', 'dashboard')
 //     ->middleware(['auth', 'verified'])
 //     ->name('dashboard');

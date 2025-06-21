@@ -16,13 +16,13 @@ class AddMember
 {
     use AsAction;
 
-    public function handle(Tenant $tenant, User $user, RoleEnum $role)
+    public function handle(Tenant $tenant, User $user, RoleEnum $role, bool $silently = false)
     {
         try {
-            DB::transaction(function () use ($tenant, $user, $role) {
+            DB::transaction(function () use ($tenant, $user, $role, $silently) {
                 $tenant->addMember($user);
                 setPermissionsTeamId($tenant->id);
-                $tenant->addParticipant($user, $role->value);
+                $tenant->addParticipant($user, $role->value, $silently);
             });
 
         } catch (\Exception $e) {

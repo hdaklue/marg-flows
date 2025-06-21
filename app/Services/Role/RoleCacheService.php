@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Role;
 
 use Illuminate\Database\Eloquent\Model;
@@ -53,6 +55,7 @@ class RoleCacheService
         'role_summary' => 'summary',
         'user_exists' => 'exists',
         'role_count' => 'count',
+
     ];
 
     /**
@@ -407,7 +410,7 @@ class RoleCacheService
             $entity->getKey(),
             $user->getKey(),
             $guard,
-            $teamSuffix
+            $teamSuffix,
         );
     }
 
@@ -431,8 +434,7 @@ class RoleCacheService
             $this->prefixes['entity_data'],
             $entity->getMorphClass(),
             $entity->getKey(),
-            $teamSuffix
-        );
+            $teamSuffix, );
     }
 
     // =================================================================

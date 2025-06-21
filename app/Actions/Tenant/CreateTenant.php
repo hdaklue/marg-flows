@@ -26,6 +26,7 @@ class CreateTenant
 
         try {
             DB::transaction(function () use ($data, &$tenant, &$participants, $user) {
+
                 $tenant = Tenant::make(['name' => $data['name']]);
 
                 $tenant->creator()->associate($user);
