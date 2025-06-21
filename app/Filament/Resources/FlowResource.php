@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources;
 
 use App\Enums\FlowStatus;
@@ -15,8 +17,6 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\QueryBuilder;
-use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,17 +40,28 @@ class FlowResource extends Resource
         $flowProgressService = app(FlowProgressService::class);
 
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->forParticipant(filament()->auth()->user())->running()->with(['creator', 'participants'])->orderBy('status')->orderBy('due_date'))
+            ->modifyQueryUsing(function (Builder $query) {
+                $isAdmin = filament()->getTenant()->isAdmin(\filament()->auth()->user());
+                $query->when(! $isAdmin, function ($query) {
+                    $query->forParticipant(\filament()->auth()->user());
+                })->running()->with(['creator', 'participants'])->orderBy('status')->orderBy('due_date');
+            })
             ->columns([
-
+                TextColumn::make('title'),
                 TextColumn::make('status')
                     ->getStateUsing(fn ($record) => FlowStatus::from($record->status)->getLabel())
                     ->color(fn ($record) => FlowStatus::from($record->status)->getColor())
                     ->badge(),
+                ImageColumn::make('creator')
+                    ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))
+                    ->size(30)
+                    ->circular(),
+
                 // SelectColumn::make('status')
                 //     ->options(FlowStatus::class),
-                TextColumn::make('title'),
+
                 Progress::make('time_progress')
+
                     ->getStateUsing(fn ($record) => $flowProgressService->getProgressDetails($record)),
                 TextColumn::make('start_date')
                     ->since(),
@@ -61,21 +72,17 @@ class FlowResource extends Resource
                     ->getStateUsing(fn ($record) => $flowProgressService->getDaysRemainingPositive($record)),
                 TextColumn::make('duration')
                     ->getStateUsing(fn ($record) => $flowProgressService->getTotalDays($record)),
-                ImageColumn::make('creator')
-                    ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))
-                    ->size(30)
-                    ->circular(),
-                TextColumn::make('participants.name'),
+
+                ImageColumn::make('members')
+                    ->getStateUsing(fn ($record) => $record->participants->pluck('avatar'))
+                    ->circular()
+                    ->stacked(),
 
             ])
 
             ->filters([
                 SelectFilter::make('status')
                     ->options(FlowStatus::class),
-                QueryBuilder::make()
-                    ->constraints([
-                        DateConstraint::make('due_date'),
-                    ]),
             ], FiltersLayout::AboveContentCollapsible)
             ->actions([
                 Tables\Actions\EditAction::make(),

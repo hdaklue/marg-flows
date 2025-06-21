@@ -30,7 +30,7 @@ use Spatie\Permission\PermissionRegistrar;
  * @method \Illuminate\Database\Eloquent\Relations\Relation contributors()
  * @method \Illuminate\Database\Eloquent\Relations\Relation managers()
  * @method \Illuminate\Database\Eloquent\Relations\Relation reviewers()
- * @method mixed addParticipant(\Illuminate\Database\Eloquent\Model $user, string|array $roles)
+ * @method mixed addParticipant(\Illuminate\Database\Eloquent\Model $user, string|array $roles, bool $siliently)
  * @method mixed removeParticipant(\Illuminate\Database\Eloquent\Model $user, ?string $role = null)
  * @method mixed changeParticipantRole(\Illuminate\Database\Eloquent\Model $user, string|\BackedEnum $role)
  * @method bool isParticipant(\Illuminate\Database\Eloquent\Model $user)

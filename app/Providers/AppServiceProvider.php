@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
             'tenant' => Tenant::class,
             'flow' => Flow::class,
         ]);
-
+        Model::shouldBeStrict();
     }
 
     /**
@@ -43,6 +43,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Event::subscribe(TenantEventSubscriber::class);
-        Model::shouldBeStrict();
+
     }
 }

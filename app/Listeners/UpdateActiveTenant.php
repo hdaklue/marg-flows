@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
 use Filament\Events\TenantSet;
@@ -16,6 +18,7 @@ class UpdateActiveTenant
     /**
      * Handle the event.
      */
+    // As it's type Hinted TenantSet it's auto-discovered
     public function handle(TenantSet $event): void
     {
         abort_unless($event->getUser()->canAccessTenant($event->getTenant()), 404);

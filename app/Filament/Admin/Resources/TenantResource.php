@@ -8,8 +8,10 @@ use App\Actions\Tenant\AddMember;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\TenantResource\Pages;
 use App\Filament\Admin\Resources\TenantResource\RelationManagers\ParticipantRelationManager;
+use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -62,7 +64,7 @@ class TenantResource extends Resource
                         try {
 
                             $user = User::where('id', $data['members'])->first();
-                            AddMember::run($record, $user, $data['system_roles']);
+                            AddMember::run($record, $user, RoleEnum::from($data['system_roles']), $data['flows']);
                             Notification::make()
                                 ->body('Participant added')
                                 ->success()
@@ -98,12 +100,17 @@ class TenantResource extends Resource
                 ->required()
                 ->searchable(true)
                 ->native(false)
-                ->options(User::query()->notMemberOf($record)->pluck('name', 'id')),
+                ->options(User::query()->notMemberOf($record)->get()->mapWithKeys(fn ($record) => [$record->id => "{$record->name} ( {$record->email} )"])->toArray()),
             Select::make('system_roles')
                 ->options(RoleEnum::class)
                 ->searchable(true)
                 ->required()
                 ->native(false),
+            CheckboxList::make('flows')
+                ->searchable()
+                ->bulkToggleable()
+                ->columns(3)
+                ->options(Flow::activeOrScheduledByTenant($record)->pluck('title', 'id')),
 
         ];
     }

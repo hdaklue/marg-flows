@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'models' => [
@@ -26,11 +28,16 @@ return [
 
         'role' => Spatie\Permission\Models\Role::class,
 
+        'user' => App\Models\User::class,
+
+        'tenant' => App\Models\Tenant::class,
     ],
 
     'table_names' => [
 
         'users' => 'users',
+
+        'tenants' => 'tenants',
 
         /*
          * When using the "HasRoles" trait from this package, we need to know which
@@ -74,6 +81,9 @@ return [
     ],
 
     'column_names' => [
+        'roleable_morhp_key' => 'roleable_id',
+        'roleable_morph_type' => 'roleable_type',
+
         /*
          * Change this if you want to name the related pivots other than defaults
          */

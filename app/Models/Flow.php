@@ -37,8 +37,14 @@ class Flow extends Model implements HasParticipants
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    public function scopeActiveOrScheduledByTenant(Builder $query, Tenant $tenant): Builder
+    {
+        return $query->whereBelongsTo($tenant, 'tenant')
+            ->whereIn('status', [FlowStatus::ACTIVE->value, FlowStatus::SCHEDULED->value]);
+    }
+
     #[Scope]
-    public function running(Builder $query): Builder
+    public function scopeRunning(Builder $query): Builder
     {
         return $query->where('status', '!=', FlowStatus::COMPLETED->value);
     }

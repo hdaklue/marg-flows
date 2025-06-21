@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -94,12 +95,34 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class);
+        return $this->belongsToMany(Tenant::class)->using(TenantUser::class);
     }
 
     public function activeTenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class, 'active_tenant_id');
+    }
+
+    public function logins(): HasMany
+    {
+        return $this->hasMany(LoginLog::class);
+    }
+
+    public function latestLogin(): HasOne
+    {
+        return $this->hasOne(LoginLog::class)->latestOfMany();
+    }
+
+    public function receivedInvitation(): HasOne
+    {
+        return $this->hasOne(MemberInvitation::class, 'receiver_id');
+    }
+
+    public function updateLastLogin(string $userAgent, string $ip): void
+    {
+        $this->logins()->create([
+            'user_agent' => $userAgent,
+            'ip_address' => $ip,        ]);
     }
 
     public function switchActiveTenant(Tenant $tenant): void
@@ -176,8 +199,25 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
         return $this->tenants()->whereKey($tenant)->exists();
     }
 
+    protected function inviterName(): Attribute
+    {
+
+        return Attribute::make(
+            get: fn () => $this->load('receivedInvitation')->receivedInvitation->sender->name ?? null,
+        );
+
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => \ucwords($value),
+        );
+    }
+
     protected function avatar(): Attribute
     {
+
         return Attribute::make(
             get: fn () => Filament::getUserAvatarUrl($this),
         );

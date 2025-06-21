@@ -8,6 +8,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class InvitationRecieved extends Notification implements ShouldQueue
 {
@@ -16,7 +18,7 @@ class InvitationRecieved extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(public string $url) {}
+    public function __construct(public string $password) {}
 
     /**
      * Get the notification's delivery channels.
@@ -34,9 +36,10 @@ class InvitationRecieved extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->greeting('Hello,')
+            ->greeting('Hello ' . Str::before($notifiable->name, ' ') . ',')
             ->line('You have been invited to join our succees management platform.')
-            ->action('Accept Invitation', $this->url)
+            ->line(new HtmlString("Password: <b>{$this->password}</b>"))
+            ->action('Login Here', \route('filament.portal.auth.login'))
             ->line('Thank you for being a part of our success!');
     }
 

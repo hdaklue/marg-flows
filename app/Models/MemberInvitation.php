@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,10 +15,7 @@ class MemberInvitation extends Model
     use HasFactory, HasUlids;
 
     protected $fillable = [
-        'email',
-        'accepted_at',
         'role_data',
-        'expires_at',
     ];
 
     public function sender(): BelongsTo
@@ -25,21 +23,20 @@ class MemberInvitation extends Model
         return $this->belongsTo(User::class, 'sender_id');
     }
 
-    public function expired(): bool
+    public function receiver(): BelongsTo
     {
-        return now()->gt($this->expires_at);
+        return $this->belongsTo(User::class, 'receiver_id');
     }
 
-    public function accepted(): bool
+    public function scopeSentBy(Builder $query, User $user): Builder
     {
-        return $this->accepted_at !== null;
+        return $query->where('sender_id', '=', $user->id);
     }
 
     protected function casts(): array
     {
         return [
-            'expires_at' => 'datetime',
-            'accepted_at' => 'datetime',
+
             'role_data' => 'array',
         ];
     }

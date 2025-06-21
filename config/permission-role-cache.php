@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -303,7 +305,7 @@ return [
          * Enable integration with Spatie Laravel Permission events.
          * Fires original Spatie events alongside custom events.
          */
-        'spatie_events' => env('ROLE_SPATIE_EVENTS', true),
+        'spatie_events' => env('ROLE_SPATIE_EVENTS', false),
 
         /*
          * Enable metrics collection for external monitoring systems.

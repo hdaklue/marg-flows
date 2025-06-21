@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Enums\Role\RoleEnum;
@@ -37,12 +39,9 @@ class FlowPolicy
      */
     public function create(User $user): bool
     {
-        if (filament()->getTenant()) {
 
-            return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::TENANT_ADMIN, RoleEnum::SUPER_ADMIN], filament()->getTenant());
-        }
+        return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::TENANT_ADMIN, RoleEnum::SUPER_ADMIN], filament()->getTenant());
 
-        return false;
     }
 
     /**

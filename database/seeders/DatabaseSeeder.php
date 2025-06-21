@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Enums\Account\AccountType;
@@ -71,6 +73,10 @@ class DatabaseSeeder extends Seeder
         // Create specific scenarios
         // Predictable mixed data
         Flow::factory(50)->create();
+
+        Flow::inRandomOrder(10)->get()->each(function (Flow $flow) use ($user1) {
+            $flow->addParticipant($user1, RoleEnum::ADMIN->value, true);
+        });
 
         // Specific test scenarios
         Flow::factory(5)->overdue()->create();     // Guaranteed overdue

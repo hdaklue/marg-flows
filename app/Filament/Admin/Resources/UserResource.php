@@ -32,6 +32,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['latestLogin', 'receivedInvitation']))
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('email'),
@@ -40,6 +41,11 @@ class UserResource extends Resource
                     ->label('Account Type')
                     ->formatStateUsing(fn ($state) => \ucwords($state))
                     ->badge(),
+                TextColumn::make('latestLogin.created_at')
+                    ->label('Last Login')
+                    ->default('Never'),
+                TextColumn::make('receivedInvitation.sender.name')
+                    ->label('Invited By'),
             ])
             ->filters([
                 //

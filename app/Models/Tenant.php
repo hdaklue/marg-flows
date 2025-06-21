@@ -23,7 +23,7 @@ class Tenant extends Model implements HasParticipants
 
     public function members(): BelongsToMany
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)->using(TenantUser::class);
     }
 
     public function removeMember(User|array $user)

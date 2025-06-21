@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers\Filament;
 
 use App\Models\Tenant;
@@ -28,11 +30,12 @@ class PortalPanelProvider extends PanelProvider
             ->id('portal')
             ->path('/portal')
             ->login()
+            ->passwordReset()
             ->tenant(Tenant::class, ownershipRelationship: 'tenant')
             ->colors([
                 'primary' => Color::Sky,
             ])
-
+            ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

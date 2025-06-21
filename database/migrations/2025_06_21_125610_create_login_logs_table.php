@@ -13,18 +13,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('member_invitations', function (Blueprint $table) {
+        Schema::create('login_logs', function (Blueprint $table) {
             $table->ulid('id')->primary();
-
-            $table->foreignUlid('sender_id')->references('id')->on('users');
-            $table->foreignUlid('receiver_id')->references('id')->on('users');
-
-            $table->json('role_data');
-
+            $table->foreignUlid('user_id')->references('id')->on('users');
+            $table->string('ip_address');
+            $table->string('user_agent');
             $table->timestamps();
 
-            $table->index(['sender_id', 'receiver_id']);
-
+            $table->index('user_id');
+            $table->index('ip_address');
+            $table->index('user_agent');
         });
     }
 
@@ -33,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('member_invitations');
+        Schema::dropIfExists('login_logs');
     }
 };

@@ -31,12 +31,13 @@ class ParticipantRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with('roles'))
+
             ->recordTitleAttribute('roleable_type')
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
+                TextColumn::make('email'),
                 TextColumn::make('role')
-                    ->getStateUsing(fn ($record) => $record->roles->first()->name),
+                    ->getStateUsing(fn (RelationManager $livewire, $record) => RoleEnum::from($livewire->getOwnerRecord()->rolesForUser($record)->first()->name)->getLabel()),
 
             ])
             ->filters([
@@ -50,9 +51,8 @@ class ParticipantRelationManager extends RelationManager
                     ->form(fn (RelationManager $livewire) => TenantResource::getAddMemberSchema($livewire->getOwnerRecord()))
                     ->action(function (RelationManager $livewire, $data) {
                         try {
-
                             $user = User::where('id', $data['members'])->first();
-                            AddMember::run($livewire->getOwnerRecord(), $user, RoleEnum::from($data['system_roles']));
+                            AddMember::run($livewire->getOwnerRecord(), $user, RoleEnum::from($data['system_roles']), $data['flows']);
                             Notification::make()
                                 ->body('Participant added')
                                 ->success()
