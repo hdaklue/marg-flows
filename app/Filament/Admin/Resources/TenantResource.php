@@ -12,6 +12,7 @@ use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -96,22 +97,25 @@ class TenantResource extends Resource
     public static function getAddMemberSchema(Tenant $record): array
     {
         return [
-            Select::make('members')
-                ->required()
-                ->searchable(true)
-                ->native(false)
-                ->options(User::query()->notMemberOf($record)->get()->mapWithKeys(fn ($record) => [$record->id => "{$record->name} ( {$record->email} )"])->toArray()),
-            Select::make('system_roles')
-                ->options(RoleEnum::class)
-                ->searchable(true)
-                ->required()
-                ->native(false),
-            CheckboxList::make('flows')
-                ->searchable()
-                ->bulkToggleable()
-                ->columns(3)
-                ->options(Flow::activeOrScheduledByTenant($record)->pluck('title', 'id')),
-
+            Grid::make()
+                ->schema([
+                    Select::make('members')
+                        ->required()
+                        ->searchable(true)
+                        ->native(false)
+                        ->options(User::query()->notMemberOf($record)->get()->mapWithKeys(fn ($record) => [$record->id => "{$record->name} - {$record->email}"])),
+                    Select::make('system_roles')
+                        ->options(RoleEnum::class)
+                        ->searchable(true)
+                        ->required()
+                        ->native(false),
+                    CheckboxList::make('flows')
+                        ->columnSpanFull()
+                        ->searchable()
+                        ->bulkToggleable()
+                        ->columns(3)
+                        ->options(Flow::byTenant($record)->assignable()->pluck('title', 'id')),
+                ])->columns(2),
         ];
     }
 

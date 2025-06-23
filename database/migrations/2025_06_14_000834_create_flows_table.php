@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\FlowStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -20,6 +22,8 @@ return new class extends Migration
 
             $table->boolean('is_default')->default(false);
 
+            $table->smallInteger('order_column');
+
             $table->date('start_date')->nullable();
             $table->date('due_date')->nullable();
             $table->date('completed_at')->nullable();
@@ -33,6 +37,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
+            $table->index(['tenant_id', 'order_column']);
             $table->index(['tenant_id', 'status']);
             $table->index(['status', 'due_date']);
             $table->index('creator_id');

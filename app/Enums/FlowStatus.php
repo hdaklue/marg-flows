@@ -1,14 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
+use Mokhosh\FilamentKanban\Concerns\IsKanbanStatus;
 
 enum FlowStatus: int implements HasColor, HasLabel
 {
-    case ACTIVE = 1;
-    case SCHEDULED = 2;
+    use IsKanbanStatus;
+
+    case SCHEDULED = 1;
+    case ACTIVE = 2;
     case PAUSED = 3;
     case BLOCKED = 4;
     case COMPLETED = 5;
@@ -22,7 +27,7 @@ enum FlowStatus: int implements HasColor, HasLabel
             self::BLOCKED => 'blocked',
             self::COMPLETED => 'completed',
             self::CANCELED => 'canceled',
-            self::SCHEDULED => 'scheduled'
+            self::SCHEDULED => 'scheduled',
 
         };
     }
@@ -30,12 +35,18 @@ enum FlowStatus: int implements HasColor, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::ACTIVE => 'primary',
-            self::PAUSED => 'warning',
-            self::BLOCKED => 'warning',
-            self::COMPLETED => 'success',
+            self::ACTIVE => 'sky',
+            self::PAUSED => 'amber',
+            self::BLOCKED => 'red',
+            self::COMPLETED => 'green',
+            self::SCHEDULED => 'stone',
             default => 'gray',
 
         };
+    }
+
+    public function getTitle(): string
+    {
+        return $this->getLabel();
     }
 }

@@ -22,16 +22,18 @@ class ListTenants extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('create')
+            Actions\CreateAction::make('create')
+                ->createAnother(false)
                 ->form([
                     TextInput::make('name')
                         ->required(),
                     Repeater::make('members')
                         ->schema([
                             Select::make('name')
-                                ->options(fn () => User::get()->pluck('name', 'id'))
+                                ->options(fn () => User::get()->mapWithKeys(fn ($user) => [$user->id => "{$user->name} - {$user->email}"]))
                                 ->required()
                                 ->searchable(true)
+                                ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->name} - {$record->email}")
                                 ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                                 ->native(false),
                             Select::make('role')

@@ -12,6 +12,7 @@ use App\Models\User;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -46,9 +47,12 @@ class ParticipantRelationManager extends RelationManager
             ->headerActions([
                 // Tables\Actions\CreateAction::make(),
                 Tables\Actions\AttachAction::make()
+                    ->modalWidth(MaxWidth::SixExtraLarge)
+                    ->attachAnother(false)
                     ->label('Add Member')
                     ->icon('heroicon-s-user-plus')
                     ->form(fn (RelationManager $livewire) => TenantResource::getAddMemberSchema($livewire->getOwnerRecord()))
+
                     ->action(function (RelationManager $livewire, $data) {
                         try {
                             $user = User::where('id', $data['members'])->first();

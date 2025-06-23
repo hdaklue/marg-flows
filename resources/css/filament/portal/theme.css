@@ -1,0 +1,12 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+
+.kl-red-flow {
+    @apply bg-red-200;
+}
+
+.dark .kl-red-flow {
+    @apply bg-red-400;
+}

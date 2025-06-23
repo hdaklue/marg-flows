@@ -72,7 +72,7 @@ class DatabaseSeeder extends Seeder
 
         // Create specific scenarios
         // Predictable mixed data
-        Flow::factory(50)->create();
+        Flow::factory(10)->create();
 
         Flow::inRandomOrder(10)->get()->each(function (Flow $flow) use ($user1) {
             $flow->addParticipant($user1, RoleEnum::ADMIN->value, true);

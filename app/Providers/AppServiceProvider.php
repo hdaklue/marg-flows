@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,16 +26,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(FlowProgressService::class);
 
-        Gate::defaultDenialResponse(
-            Response::denyAsNotFound(),
-        );
-
-        Relation::enforceMorphMap([
-            'user' => User::class,
-            'tenant' => Tenant::class,
-            'flow' => Flow::class,
-        ]);
-        Model::shouldBeStrict();
+        $this->configureGate();
+        $this->configureModel();
+        // $this->configureVite();
     }
 
     /**
@@ -44,5 +38,27 @@ class AppServiceProvider extends ServiceProvider
     {
         // Event::subscribe(TenantEventSubscriber::class);
 
+    }
+
+    protected function configureVite()
+    {
+        Vite::useAggressivePrefetching();
+    }
+
+    protected function configureModel()
+    {
+        Relation::enforceMorphMap([
+            'user' => User::class,
+            'tenant' => Tenant::class,
+            'flow' => Flow::class,
+        ]);
+        Model::shouldBeStrict();
+    }
+
+    protected function configureGate()
+    {
+        Gate::defaultDenialResponse(
+            Response::denyAsNotFound(),
+        );
     }
 }

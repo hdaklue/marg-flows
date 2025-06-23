@@ -40,7 +40,7 @@
         </div>
     </div>
     <!-- Demo Container -->
-    <div class="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-900">
+    <div class="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-800">
 
         <h1 class="mb-2 text-2xl font-bold text-gray-800 dark:text-white">Design Review Component Demo</h1>
         <p class="mb-4 text-gray-600 dark:text-gray-400">Click on any image to open the review modal. Click or drag on

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Concerns\Tenant;
 
 use App\Models\Tenant;
 use Exception;
 use Filament\Facades\Filament;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait BelongsToTenant
@@ -33,8 +35,8 @@ trait BelongsToTenant
     }
 
     #[Scope]
-    protected function byTenant(Builder $builder, string $tenant_id)
+    protected function scopeByTenant(Builder $builder, Tenant $tenant)
     {
-        return $builder->where('tenant_id', $tenant_id);
+        return $builder->where('tenant_id', $tenant->id);
     }
 }

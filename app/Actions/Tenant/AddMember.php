@@ -66,7 +66,11 @@ class AddMember
                     'role_id',
                     'model_id',
                     'model_type',
-                ], [],
+                ], [
+                    'roleable_type',
+                    'roleable_id',
+                    'role_id',
+                ],
             );
 
     }
