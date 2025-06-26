@@ -5,6 +5,8 @@
 
     function onEnd() {
         document.body.classList.remove("grabbing")
+        setTimeout(() => window.dispatchEvent(new CustomEvent('item-stopped-moving')),
+            1000) //await for livewire request
     }
 
     function setData(dataTransfer, el) {
@@ -47,13 +49,16 @@
 
         statuses.forEach(status => Sortable.create(document.querySelector(`[data-status-id='${status}']`), {
             group: `filament-kanban`,
-            ghostClass: 'shadow-md',
+            ghostClass: 'draggable-item',
             animation: 150,
             onStart,
             onEnd,
             onUpdate,
             setData,
             onAdd,
+            onStart: function( /**Event*/ evt) {
+                window.dispatchEvent(new CustomEvent('item-is-moving'))
+            },
 
         }))
 

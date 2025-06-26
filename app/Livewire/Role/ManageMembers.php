@@ -41,15 +41,17 @@ class ManageMembers extends Component implements HasActions, HasForms
     {
         return $form
             ->schema([
-                Select::make('members')
+                Select::make('member')
                     ->options(function () {
 
                         return User::memberOf(\filament()->getTenant())
                             ->whereNotIn('id', $this->roleable->participants->pluck('id')->toArray())
                             ->get()->pluck('name', 'id');
 
-                    }),
+                    })
+                    ->required(),
                 Select::make('role')
+                    ->required()
                     ->options(RoleEnum::class),
                 // ...
             ])
@@ -57,10 +59,21 @@ class ManageMembers extends Component implements HasActions, HasForms
             ->statePath('data');
     }
 
-    #[On('members-updated')]
     public function loadManagableMembers()
     {
         $this->managableMembers = $this->roleable->participants->filter(fn ($item) => $item->id != filament()->auth()->user()->id);
+    }
+
+    public function addMember()
+    {
+        $state = $this->form->getState();
+
+        $this->roleable->addParticipant(User::where('id', '=', $state['member'])->first(), RoleEnum::from($state['role'])->value);
+
+        $this->loadManagableMembers();
+        $this->form->fill();
+        $this->dispatch('members-updated');
+
     }
 
     public function removeMemberAction(): Action
@@ -69,6 +82,7 @@ class ManageMembers extends Component implements HasActions, HasForms
             ->action(function (array $arguments) {
                 $user = User::where('id', '=', $arguments['memberId'])->first();
                 $this->roleable->removeParticipant($user);
+                $this->loadManagableMembers();
                 $this->dispatch('members-updated');
             })->requiresConfirmation()
             ->color('danger');

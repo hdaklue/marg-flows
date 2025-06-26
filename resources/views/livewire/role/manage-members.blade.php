@@ -1,11 +1,17 @@
 <div class="flex flex-col space-y-2">
-    <div>
-        <form wire:submit="create">
+
+    <div class="flex flex-col gap-2">
+        <form wire:submit.prevent>
             {{ $this->form }}
         </form>
+        <div class="justify-self-end">
+            <x-filament::button size="xs" color="primary" wire:click="addMember">
+                Add Member
+            </x-filament::button>
+        </div>
     </div>
     <h3>Existing Members:</h3>
-    <div class="flex flex-col space-y-2 divide-y">
+    <div class="flex flex-col space-y-2">
 
         @if (count($managableMembers))
             @foreach ($managableMembers as $member)

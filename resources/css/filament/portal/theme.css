@@ -3,10 +3,10 @@
 @config 'tailwind.config.js';
 
 
-.kl-red-flow {
-    @apply bg-red-200;
+.draggable-item {
+    @apply border border-gray-500 shadow-md;
 }
 
-.dark .kl-red-flow {
-    @apply bg-red-400;
+.dark .draggable-item {
+    @apply border border-gray-400 shadow-md shadow-gray-700/70;
 }
