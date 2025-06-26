@@ -146,6 +146,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
         });
     }
 
+    #[Scope]
+    public function scopeMemberOf(Builder $builder, Tenant $tenant): Builder
+    {
+        return $builder->whereHas('tenants', function ($query) use ($tenant) {
+            $query->where('tenants.id', '=', $tenant->id);
+        });
+    }
+
     public function invitations(): HasMany
     {
         return $this->hasMany(MemberInvitation::class, 'sender_id');

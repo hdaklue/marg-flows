@@ -56,18 +56,18 @@ class Flow extends Model implements HasParticipants, HasStages, Roleable, Sortab
 
     public function scopeAssignable(Builder $builder)
     {
-        return $builder->whereIn('status', [FlowStatus::ACTIVE->value, FlowStatus::SCHEDULED->value]);
+        return $builder->where('status', '!=', FlowStatus::COMPLETED->value);
 
     }
 
-    // public function scopeByStatus(Builder $builder, string|FlowStatus $status)
-    // {
-    //     if ($status instanceof BackedEnum) {
-    //         $status = $status->value;
-    //     }
+    public function scopeByStatus(Builder $builder, string|FlowStatus $status)
+    {
+        if ($status instanceof BackedEnum) {
+            $status = $status->value;
+        }
 
-    //     return $builder->where('status', '=', $status);
-    // }
+        return $builder->where('status', '=', $status);
+    }
 
     #[Scope]
     public function scopeRunning(Builder $query): Builder

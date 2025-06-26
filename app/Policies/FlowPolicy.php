@@ -49,7 +49,8 @@ class FlowPolicy
      */
     public function update(User $user, Flow $flow): bool
     {
-        return $user->hasRoleOn('writer', $flow) || $user->hasRoleOn(RoleEnum::SUPER_ADMIN, filament()->getTenant());
+        return $user->hasRoleOn(RoleEnum::ADMIN, $flow);
+        // return $user->hasRoleOn('writer', $flow) || $user->hasRoleOn(RoleEnum::SUPER_ADMIN, filament()->getTenant());
     }
 
     /**
@@ -74,5 +75,11 @@ class FlowPolicy
     public function forceDelete(User $user, Flow $flow): bool
     {
         return true;
+    }
+
+    public function manageMembers(User $user, Flow $flow): bool
+    {
+
+        return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::MANAGER], $flow);
     }
 }

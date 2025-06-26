@@ -24,8 +24,11 @@ class FlowsKanabanBoard extends KanbanBoard
 
     protected ?string $maxContentWidth = 'full';
 
+    protected $listeners = ['members-updated' => '$refresh'];
+
     // public function onSortChanged(int|string $recordId, string $status, array $orderedIds): void
     // {
+
     //     $newOrder = collect($orderedIds)->sort()->toArray();
     //     if (method_exists(static::$model, 'setNewOrder')) {
     //         static::$model::setNewOrder($newOrder);
@@ -34,6 +37,7 @@ class FlowsKanabanBoard extends KanbanBoard
 
     protected function records(): Collection
     {
+
         $isAdmin = filament()->getTenant()->isAdmin(\filament()->auth()->user());
 
         return Flow::when(! $isAdmin, function ($query) {

@@ -114,7 +114,7 @@ class TenantResource extends Resource
                         ->searchable()
                         ->bulkToggleable()
                         ->columns(3)
-                        ->options(Flow::byTenant($record)->assignable()->pluck('title', 'id')),
+                        ->options(Flow::byTenant($record)->pluck('title', 'id')),
                 ])->columns(2),
         ];
     }

@@ -23,19 +23,23 @@
             fromOrderedIds,
             toOrderedIds
         })
+
+
     }
+
 
     function onUpdate(e) {
 
         const recordId = e.item.id
         const status = e.from.dataset.statusId
         const orderedIds = [].slice.call(e.from.children).map(child => child.id)
-        console.log(recordId, status);
+
         Livewire.dispatch('sort-changed', {
             recordId,
             status,
             orderedIds
         })
+
     }
 
     document.addEventListener('livewire:navigated', () => {
@@ -45,12 +49,12 @@
             group: `filament-kanban`,
             ghostClass: 'shadow-md',
             animation: 150,
-
             onStart,
             onEnd,
             onUpdate,
             setData,
             onAdd,
+
         }))
 
     })

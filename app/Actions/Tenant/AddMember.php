@@ -29,8 +29,10 @@ class AddMember
                 $tenant->addParticipant($user, $role->value, $silently);
 
                 if (! empty($flows)) {
+
                     $roleId = $tenant->roles()->where('name', $role->value)->first()->id;
                     $this->assignFlowsRole($tenant, $user, $flows, $roleId);
+                    Flow::whereIn('id', $flows)->each(fn ($flow) => app(RoleCacheService::class)->invalidateEntityCache($flow));
                 }
 
             });

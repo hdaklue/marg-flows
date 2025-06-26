@@ -1,6 +1,7 @@
-@props(['color'])
 <div id="{{ $record->getKey() }}"
-    class="record dark:bg-{{ $color }}-900/5 bg-{{ $color }}-50 relative overflow-hidden rounded-lg px-2 py-4 text-base font-medium text-gray-800 hover:cursor-move dark:text-gray-200"
+    class="record dark:bg-{{ $color }}-900/5 bg-{{ $color }}-50 @can('manageFlows', filament()->getTenant())
+     cursor-move
+     @endcan relative overflow-hidden rounded-lg px-2 py-4 text-base font-medium text-gray-800 dark:text-gray-200"
     @if ($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3) x-data
         x-init="
             $el.classList.add('animate-pulse-twice', 'bg-gray-100', 'dark:bg-gray-800')
@@ -13,8 +14,8 @@
 
 
     <div class="flex flex-row justify-between gap-2">
-        <div class="text-{{ $color }}-800 flex text-base font-semibold leading-snug hover:cursor-pointer dark:text-gray-300"
-            wire:click="recordClicked('{{ $record->getKey() }}', {{ @json_encode($record) }})">
+        <div
+            class="text-{{ $color }}-800 flex text-base font-semibold leading-snug hover:cursor-pointer dark:text-gray-300">
             <a>{{ $record->{static::$recordTitleAttribute} }}</a>
         </div>
         <div class="flex flex-row -space-x-2">
@@ -37,6 +38,12 @@
     <div class="prose py-2 ps-2 text-sm font-light dark:text-gray-400">
         Lorem ipsum, dolor sit amet consectetur adipisicing elit.
     </div>
+
+    @can('manageMembers', $record)
+        <div x-data class="b flex justify-end px-2 pt-2 text-sm">
+            @include('role.manage-action')
+        </div>
+    @endcan
 
     {{-- <div class="absolute bottom-0 w-full h-1 start-0">
         <div class="relative h-0.5">

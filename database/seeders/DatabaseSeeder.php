@@ -75,7 +75,7 @@ class DatabaseSeeder extends Seeder
         Flow::factory(10)->create();
 
         Flow::inRandomOrder(10)->get()->each(function (Flow $flow) use ($user1) {
-            $flow->addParticipant($user1, RoleEnum::ADMIN->value, true);
+            $flow->addParticipant($user1, RoleEnum::VIEWER->value, true);
         });
 
         // Specific test scenarios

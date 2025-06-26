@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Tenant;
@@ -61,5 +63,10 @@ class TenantPolicy
     public function forceDelete(User $user, Tenant $tenant): bool
     {
         return false;
+    }
+
+    public function manageFlows(User $user, Tenant $tenant): bool
+    {
+        return $tenant->isAdmin($user) || $tenant->isManager($user);
     }
 }
