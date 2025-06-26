@@ -31,7 +31,6 @@ class InviteMember
         $this->generatePassword();
         try {
             DB::transaction(function () use ($dto) {
-
                 $this->persistMember($dto);
                 $this->attachMemberToTenant($dto);
                 $this->assingMemberRoles($dto);

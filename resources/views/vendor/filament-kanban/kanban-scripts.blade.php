@@ -17,23 +17,33 @@
         const fromOrderedIds = [].slice.call(e.from.children).map(child => child.id)
         const toOrderedIds = [].slice.call(e.to.children).map(child => child.id)
 
-        Livewire.dispatch('status-changed', {recordId, status, fromOrderedIds, toOrderedIds})
+        Livewire.dispatch('status-changed', {
+            recordId,
+            status,
+            fromOrderedIds,
+            toOrderedIds
+        })
     }
 
     function onUpdate(e) {
+
         const recordId = e.item.id
         const status = e.from.dataset.statusId
         const orderedIds = [].slice.call(e.from.children).map(child => child.id)
-
-        Livewire.dispatch('sort-changed', {recordId, status, orderedIds})
+        console.log(recordId, status);
+        Livewire.dispatch('sort-changed', {
+            recordId,
+            status,
+            orderedIds
+        })
     }
 
     document.addEventListener('livewire:navigated', () => {
-        const statuses = @js($statuses->map(fn ($status) => $status['id']))
+        const statuses = @js($statuses->map(fn($status) => $status['id']))
 
         statuses.forEach(status => Sortable.create(document.querySelector(`[data-status-id='${status}']`), {
-            group: 'filament-kanban',
-            ghostClass: 'opacity-50',
+            group: `filament-kanban`,
+            ghostClass: 'shadow-md',
             animation: 150,
 
             onStart,
@@ -42,5 +52,6 @@
             setData,
             onAdd,
         }))
+
     })
 </script>

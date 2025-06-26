@@ -11,6 +11,7 @@ use App\Enums\Account\AccountType;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -29,7 +30,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenants
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaultTenant, HasTenants
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasEntityAwareRoles, HasFactory, HasUlids, Notifiable;
@@ -62,10 +63,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenant
 
         if ($panel->getId() === 'admin') {
 
-            return $this->canAccessAdmin() ?: abort('404');
+            return $this->canAccessAdmin() ?: abort(404);
         }
 
         return true;
+    }
+
+    public function getDefaultTenant(Panel $panel): ?Model
+    {
+        return $this->activeTenant()->first() ?? $this->tenant()->first();
     }
 
     /**

@@ -1,0 +1,16 @@
+{
+    "preset": "laravel",
+    "ignore": {
+        "words": [
+            "php",
+            "roleable",
+            "filesystems",
+            "kanban",
+            "sortable",
+            "stageable"
+        ],
+        "paths": [
+            "app"
+        ]
+    }
+}

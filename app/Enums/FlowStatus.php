@@ -36,10 +36,10 @@ enum FlowStatus: int implements HasColor, HasLabel
     {
         return match ($this) {
             self::ACTIVE => 'sky',
-            self::PAUSED => 'amber',
+            self::PAUSED => 'yellow',
             self::BLOCKED => 'red',
             self::COMPLETED => 'green',
-            self::SCHEDULED => 'stone',
+            self::SCHEDULED => 'indigo',
             default => 'gray',
 
         };

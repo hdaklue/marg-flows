@@ -7,10 +7,15 @@ use App\Livewire\Previewtest;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Models\Flow;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', action: Previewtest::class)->name('home');
+
+// Route::get('/', function () {
+//     return Flow::byStatus('pause')->get();
+// });
 Route::get('/annotation', fn () => view('annotation'));
 Route::get('invitation/accept/{token}', AcceptInvitation::class)
     ->middleware([Authenticate::class])

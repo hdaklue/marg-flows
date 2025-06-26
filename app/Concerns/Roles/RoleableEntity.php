@@ -336,7 +336,7 @@ trait RoleableEntity
     /**
      * Get all users with any role on this entity (Performance Optimized)
      */
-    public function usersWithAnyRole(?string $guard = null)
+    public function usersWithAnyRole(?string $guard = null): MorphToMany
     {
         return $this->usersWithRole([], $guard)
             ->with(['roles' => function ($query) use ($guard) {

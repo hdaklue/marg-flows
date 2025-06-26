@@ -16,6 +16,7 @@ use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class ParticipantRelationManager extends RelationManager
 {
@@ -74,6 +75,7 @@ class ParticipantRelationManager extends RelationManager
             ->actions([
                 // Tables\Actions\EditAction::make(),
                 Tables\Actions\DetachAction::make()
+                    ->modalContent(new HtmlString('<span class="text-sm text-gray-300 dark:text-gray-500">CAUTION: this will remove user from all flows and tasks related to this Team</span>'))
                     ->label('Remove')
                     ->action(fn (RelationManager $livewire, $record) => RemoveMember::run($livewire->getOwnerRecord(), $record, filament()->auth()->user())),
 

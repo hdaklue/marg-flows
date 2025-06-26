@@ -24,8 +24,10 @@ class UpdateActiveTenant
         abort_unless($event->getUser()->canAccessTenant($event->getTenant()), 404);
 
         try {
+
             $event->getUser()->switchActiveTenant($event->getTenant());
             setPermissionsTeamId($event->getTenant()->id);
+
         } catch (\Exception $e) {
             log()->error($e->getMessage());
             throw $e;

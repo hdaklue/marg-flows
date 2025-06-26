@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Tenant;
 
 use App\Enums\Role\RoleEnum;
-use App\Events\Tenant\MemberAdded;
+use App\Events\Tenant\TanantMemberAdded;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
@@ -25,6 +25,7 @@ class AddMember
             DB::transaction(function () use ($tenant, $user, $role, $silently, $flows) {
                 $tenant->addMember($user);
                 setPermissionsTeamId($tenant->id);
+                // RoleService::addParticipant()
                 $tenant->addParticipant($user, $role->value, $silently);
 
                 if (! empty($flows)) {
@@ -48,7 +49,7 @@ class AddMember
             throw $e; // Re-throw to let caller handle
         }
 
-        MemberAdded::dispatch($tenant, $user, $role);
+        TanantMemberAdded::dispatch($tenant, $user, $role);
     }
 
     private function assignFlowsRole(Tenant $tenant, User $user, $flows, $roleId)

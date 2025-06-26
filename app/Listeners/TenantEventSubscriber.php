@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Events\Tenant\MemberAdded;
 use App\Events\Tenant\MemberRemoved;
+use App\Events\Tenant\TanantMemberAdded;
 use App\Events\Tenant\TenantCreated;
 use App\Models\User;
 use App\Notifications\Participant\AsignedToTenant;
@@ -36,7 +36,7 @@ class TenantEventSubscriber
         $event->memberRemoved->notify(new RemovedFromTenant($event->tenant->name));
     }
 
-    public function handleMemberAdded(MemberAdded $event): void
+    public function handleMemberAdded(TanantMemberAdded $event): void
     {
 
         $event->user->notify(new AsignedToTenant($event->tenant->name, $event->role->getLabel()));
@@ -52,7 +52,7 @@ class TenantEventSubscriber
         return [
             TenantCreated::class => 'handleTenantCreated',
             MemberRemoved::class => 'handleMemberRemoved',
-            MemberAdded::class => 'handleMemberAdded',
+            TanantMemberAdded::class => 'handleMemberAdded',
 
         ];
     }

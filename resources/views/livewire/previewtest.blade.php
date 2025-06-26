@@ -69,13 +69,13 @@
                     </div>
                 </div>
             @endforeach
-            {{-- <div class="cursor-pointer overflow-hidden rounded transition-transform hover:scale-105"
+            {{-- <div class="overflow-hidden transition-transform rounded cursor-pointer hover:scale-105"
                 @click="openModal($wire.image, $wire.comments)">
-                <img :src="$wire.image" alt="Design 3" class="h-40 w-full object-cover">
+                <img :src="$wire.image" alt="Design 3" class="object-cover w-full h-40">
             </div>
-            <div class="cursor-pointer overflow-hidden rounded transition-transform hover:scale-105"
+            <div class="overflow-hidden transition-transform rounded cursor-pointer hover:scale-105"
                 @click="openModal($wire.image, $wire.comments)">
-                <img :src="$wire.image" alt="Design 3" class="h-40 w-full object-cover">
+                <img :src="$wire.image" alt="Design 3" class="object-cover w-full h-40">
             </div> --}}
         </div>
     </div>
@@ -115,7 +115,7 @@
                                     class="dark:text-gray-50"></span>
                             </label>
                         </template>
-                        {{-- <div class="border-t pt-2 text-right">
+                        {{-- <div class="pt-2 text-right border-t">
                                 <button @click="selectedCommentIds = []" @touchend.prevent="selectedCommentIds = []"
                                     class="text-xs text-blue-600 hover:underline active:text-blue-800">Clear
                                     Filter</button>
@@ -151,8 +151,8 @@
                 </div>
                 {{-- <div>
                         <button @click="showAllComments" @touchend.prevent="showAllComments()"
-                            class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-700 shadow hover:bg-white active:bg-gray-200">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
+                            class="flex items-center justify-center w-8 h-8 text-gray-700 border border-gray-300 rounded-full shadow bg-white/70 hover:bg-white active:bg-gray-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -206,7 +206,7 @@
                         :style="commentPopupStyle" @click.stop>
 
                         <textarea x-autosize x-ref="commentTextarea" x-model="newComment.text" :disabled="isSaving"
-                            class="w-full rounded border border-gray-300 p-1.5 text-sm font-semibold focus:border-blue-500 focus:outline-none lg:font-normal dark:text-gray-50"
+                            class="w-full rounded border border-gray-300 p-1.5 text-sm font-semibold focus:border-blue-500 focus:outline-none lg:font-normal dark:bg-gray-800 dark:text-gray-50"
                             placeholder="Add your comment..." @keydown.ctrl.enter="saveComment()" @keydown.meta.enter="saveComment()"></textarea>
                         <div class="mt-2 flex justify-end gap-2">
                             <button @click.stop="cancelComment()" @touchend.prevent="cancelComment()"

@@ -16,7 +16,6 @@ class CreateInvitation
     {
 
         $invitation = MemberInvitation::make([
-
             'role_data' => $role_data,
         ]);
 

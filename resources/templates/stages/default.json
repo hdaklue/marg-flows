@@ -1,0 +1,32 @@
+{
+    "name": "Default Template",
+    "description": "Standard project workflow with review process",
+    "version": "1.0.0",
+    "stages": [
+        {
+            "name": "scheduled",
+            "order": 1,
+            "color": "indigo"
+        },
+        {
+            "name": "active",
+            "order": 2,
+            "color": "sky"
+        },
+        {
+            "name": "approval",
+            "order": 3,
+            "color": "amber"
+        },
+        {
+            "name": "completed",
+            "order": 4,
+            "color": "teal"
+        },
+        {
+            "name": "canceled",
+            "order": 5,
+            "color": "gray"
+        }
+    ]
+}

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Concerns\Roles\RoleableEntity;
 use App\Contracts\Roles\HasParticipants;
+use App\Contracts\Roles\Roleable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Tenant extends Model implements HasParticipants
+class Tenant extends Model implements HasParticipants, Roleable
 {
     /** @use HasFactory<\Database\Factories\TenantFactory> */
     /** @use HasUlids */

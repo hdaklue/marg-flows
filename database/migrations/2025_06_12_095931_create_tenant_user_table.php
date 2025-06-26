@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignUlid('tenant_id')->index();
 
             $table->index(['user_id', 'tenant_id']);
+            $table->unique(['tenant_id', 'user_id']);
         });
     }
 

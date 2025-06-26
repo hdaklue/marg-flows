@@ -6,9 +6,9 @@
         @endforeach
 
 
-        {{-- <div wire:ignore>
+        <div wire:ignore>
             @include(static::$scriptsView)
-        </div> --}}
+        </div>
     </div>
 
     @unless ($disableEditModal)

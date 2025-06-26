@@ -44,8 +44,9 @@ class FlowResource extends Resource
                 $isAdmin = filament()->getTenant()->isAdmin(\filament()->auth()->user());
                 $query->when(! $isAdmin, function ($query) {
                     $query->forParticipant(\filament()->auth()->user());
-                })->running()->with(['creator', 'participants'])->orderBy('status')->orderBy('due_date')->ordered();
+                })->running()->with(['creator', 'participants'])->ordered();
             })
+            ->deferLoading()
             ->reorderable('order_column')
             ->columns([
                 TextColumn::make('title'),
@@ -53,6 +54,7 @@ class FlowResource extends Resource
                 TextColumn::make('status')
                     ->getStateUsing(fn ($record) => FlowStatus::from($record->status)->getLabel())
                     ->color(fn ($record) => FlowStatus::from($record->status)->getColor())
+
                     ->badge(),
                 ImageColumn::make('creator')
                     ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))

@@ -16,17 +16,40 @@ trait BelongsToTenant
     public static function bootBelongsToTenant(): void
     {
         static::creating(static function ($model) {
-
+            // Skip if tenant_id already set
             if ($model->tenant_id) {
                 return;
             }
-            throw_if(! auth()->user() && ! $model->tenant_id, new Exception('Cannot resolve team id for creating model'));
 
-            throw_unless(auth()->user()->active_tenant_id, new Exception('Cannot resolve team id for creating model'));
+            $tenantId = static::resolveTenantId();
 
-            $model->tenant_id = Filament::getTenant()->id();
+            throw_unless($tenantId, new Exception('Cannot resolve tenant for creating model'));
+
+            $model->tenant_id = $tenantId;
         });
+    }
 
+    protected static function resolveTenantId(): ?int
+    {
+        // Try Filament first (if available)
+        if (class_exists(Filament::class)) {
+            $tenant = Filament::getTenant();
+            if ($tenant) {
+                return $tenant->id;
+            }
+        }
+
+        // Fall back to authenticated user's active tenant
+        if (auth()->check()) {
+            return auth()->user()->active_tenant_id;
+        }
+
+        // Fall back to session or other methods
+        if (session()->has('tenant_id')) {
+            return session('tenant_id');
+        }
+
+        return null;
     }
 
     public function tenant(): BelongsTo

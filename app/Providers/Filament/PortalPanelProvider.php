@@ -35,6 +35,7 @@ class PortalPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Sky,
             ])
+            ->topNavigation(true)
             ->viteTheme('resources/css/filament/portal/theme.css')
             ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
@@ -57,6 +58,7 @@ class PortalPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+
             ])
             ->authMiddleware([
                 Authenticate::class,
