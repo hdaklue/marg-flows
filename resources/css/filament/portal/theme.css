@@ -8,5 +8,5 @@
 }
 
 .dark .draggable-item {
-    @apply border border-gray-400 shadow-md shadow-gray-700/70;
+    @apply border border-gray-900 shadow-md shadow-gray-800/60;
 }

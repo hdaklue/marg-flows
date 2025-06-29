@@ -1,7 +1,7 @@
 <div id="{{ $record->getKey() }}"
-    class="record dark:bg-{{ $color }}-900/5 bg-{{ $color }}-50 @can('manageFlows', filament()->getTenant())
+    class="record dark:bg-{{ $color }}-900/10 dark:hover:bg-{{ $color }}-900/20 bg-{{ $color }}-50 hover:bg-{{ $color }}-200 @can('manageFlows', filament()->getTenant())
      cursor-move
-     @endcan relative overflow-hidden rounded-lg px-2 py-4 text-base font-medium text-gray-800 dark:text-gray-200"
+     @endcan relative overflow-hidden rounded-lg px-2 py-4 text-base font-medium text-gray-800 transition-all dark:text-gray-200"
     @if ($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3) x-data @endif>
 
 
@@ -15,7 +15,7 @@
                 <div class="h-6 w-6 cursor-default rounded-full" x-tooltip="name" x-data="{
                     name: '{{ $participant->name }}'
                 }">
-                    <img class="w-full rounded-full border border-gray-700"
+                    <img class="w-full rounded-full border border-gray-50 dark:border-gray-600"
                         src="{{ filament()->getUserAvatarUrl($participant) }}">
                 </div>
             @endforeach
@@ -34,14 +34,14 @@
         <div x-data>
             @can('manageMembers', $record)
                 <button title="Manage members"
-                    class="cursor-pointer text-gray-700/70 hover:text-gray-700 dark:text-gray-700/70 dark:hover:text-gray-700"
+                    class="cursor-pointer text-gray-700/70 hover:text-gray-700 dark:text-gray-700 dark:hover:text-gray-500"
                     {{-- wire:click="recordClicked('{{ $record->getKey() }}', {{ @json_encode($record) }})" --}}
                     @click.prevent="$dispatch('open-modal',{id: 'edit-members-modal-{{ $record->getKey() }}'})">
                     <x-heroicon-o-users class="h-5 w-5" />
                 </button>
                 <x-filament::modal id="edit-members-modal-{{ $record->getKey() }}" width="xl">
                     <x-slot name="heading">
-                        Manage Member
+                        {{ $record->title }} Members
                     </x-slot>
                     <livewire:role.manage-members :roleable="$record" wire:key="manage-members-{{ $record->getKey() }}" />
                     {{-- Modal content --}}

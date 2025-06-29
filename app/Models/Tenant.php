@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\HasStaticTypeTrait;
 use App\Concerns\Roles\RoleableEntity;
+use App\Contracts\HasStaticType;
 use App\Contracts\Roles\HasParticipants;
 use App\Contracts\Roles\Roleable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -14,11 +16,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Tenant extends Model implements HasParticipants, Roleable
+class Tenant extends Model implements HasParticipants, HasStaticType, Roleable
 {
     /** @use HasFactory<\Database\Factories\TenantFactory> */
     /** @use HasUlids */
-    use HasFactory, HasUlids, RoleableEntity;
+    use HasFactory, HasStaticTypeTrait, HasUlids, RoleableEntity;
 
     protected $fillable = ['name'];
 
@@ -45,6 +47,11 @@ class Tenant extends Model implements HasParticipants, Roleable
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function getTypeName(): string
+    {
+        return 'Team';
     }
 
     public function flows(): HasMany

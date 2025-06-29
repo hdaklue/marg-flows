@@ -40,7 +40,7 @@ enum FlowStatus: int implements HasColor, HasLabel
             self::BLOCKED => 'red',
             self::COMPLETED => 'green',
             self::SCHEDULED => 'indigo',
-            default => 'gray',
+            default => 'slate',
 
         };
     }

@@ -8,8 +8,8 @@ use App\Events\Tenant\MemberRemoved;
 use App\Events\Tenant\TanantMemberAdded;
 use App\Events\Tenant\TenantCreated;
 use App\Models\User;
-use App\Notifications\Participant\AsignedToTenant;
-use App\Notifications\Participant\RemovedFromTenant;
+use App\Notifications\Participant\AssignedToEntity;
+use App\Notifications\Participant\RemovedFromEntity;
 use App\Notifications\TenantCreatedNotification;
 use Illuminate\Events\Dispatcher;
 
@@ -33,13 +33,13 @@ class TenantEventSubscriber
 
     public function handleMemberRemoved(MemberRemoved $event): void
     {
-        $event->memberRemoved->notify(new RemovedFromTenant($event->tenant->name));
+        $event->memberRemoved->notify(new RemovedFromEntity($event->tenant->name));
     }
 
     public function handleMemberAdded(TanantMemberAdded $event): void
     {
 
-        $event->user->notify(new AsignedToTenant($event->tenant->name, $event->role->getLabel()));
+        $event->user->notify(new AssignedToEntity($event->tenant, $event->role->getLabel()));
     }
 
     /**

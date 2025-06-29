@@ -39,8 +39,8 @@ class FlowPolicy
      */
     public function create(User $user): bool
     {
-
-        return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::TENANT_ADMIN, RoleEnum::SUPER_ADMIN], filament()->getTenant());
+        return true;
+        // return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::TENANT_ADMIN, RoleEnum::SUPER_ADMIN], filament()->getTenant());
 
     }
 

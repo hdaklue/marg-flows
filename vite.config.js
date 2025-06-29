@@ -7,7 +7,10 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/css/filament/portal/theme.css'],
+                'resources/css/filament/portal/theme.css',
+                'resources/js/components/editorjs/index.js',
+                'resources/css/components/editorjs/index.css',
+            ],
             refresh: [
                 ...refreshPaths,
                 'app/Livewire/**',

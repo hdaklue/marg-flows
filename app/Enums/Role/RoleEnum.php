@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums\Role;
 
 use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
+use Illuminate\Support\Collection;
 
 enum RoleEnum: string implements HasDescription, HasLabel
 {
@@ -54,6 +57,14 @@ enum RoleEnum: string implements HasDescription, HasLabel
      * Limited read access to public content
      */
     case GUEST = 'guest';
+
+    public static function whereLowerThanOrEqual(RoleEnum $other): Collection
+    {
+        return \collect(self::cases())
+            ->filter(fn ($role) => $role->isLowerThanOrEqual($other))
+            ->mapWithKeys(fn ($item) => [$item->value => $item->getLabel()]);
+
+    }
 
     /**
      * Get the hierarchical level of this role
@@ -121,6 +132,11 @@ enum RoleEnum: string implements HasDescription, HasLabel
     public function isLowerThan(RoleEnum $other): bool
     {
         return $this->getLevel() < $other->getLevel();
+    }
+
+    public function isLowerThanOrEqual(RoleEnum $other): bool
+    {
+        return $this->getLevel() <= $other->getLevel();
     }
 
     /**

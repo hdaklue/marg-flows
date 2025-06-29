@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace App\Notifications\Participant;
 
+use App\Contracts\HasStaticType;
+use App\Contracts\Roles\Roleable;
+use Exception;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class RemovedFromTenant extends Notification implements ShouldQueue
+class RemovedFromEntity extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public string $entityName) {}
+    public function __construct(public Model|Roleable $entity) {}
 
     /**
      * Get the notification's delivery channels.
@@ -42,8 +46,14 @@ class RemovedFromTenant extends Notification implements ShouldQueue
 
     public function toDatabase(object $notifiable): array
     {
+        if (! $this->entity instanceof HasStaticType) {
+            throw new Exception('Entity must implement HasStaticType');
+        }
+        $message = "You've been removed from ({$this->entity->getTypeTitle()}) {$this->entity->getTypeName()}";
+
         return FilamentNotification::make()
-            ->body("You have been removed from {$this->entityName}")
+            ->body($message)
+            ->danger()
             ->getDatabaseMessage();
     }
 

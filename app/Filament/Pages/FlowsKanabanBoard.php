@@ -7,6 +7,7 @@ namespace App\Filament\Pages;
 use App\Enums\FlowStatus;
 use App\Models\Flow;
 use App\Services\Flow\FlowProgressService;
+use Filament\Actions\Action;
 use Illuminate\Support\Collection;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
@@ -16,7 +17,7 @@ class FlowsKanabanBoard extends KanbanBoard
 
     protected static string $statusEnum = FlowStatus::class;
 
-    protected static ?string $navigationLabel = 'Projects';
+    protected static ?string $navigationLabel = 'Overview';
 
     protected static ?string $title = 'Flows';
 
@@ -25,6 +26,14 @@ class FlowsKanabanBoard extends KanbanBoard
     protected ?string $maxContentWidth = 'full';
 
     protected $listeners = ['members-updated' => '$refresh'];
+
+    public function getHeaderActions(): array
+    {
+        return [
+            //         Action::make('Create')
+            //   ,
+        ];
+    }
 
     // public function onSortChanged(int|string $recordId, string $status, array $orderedIds): void
     // {

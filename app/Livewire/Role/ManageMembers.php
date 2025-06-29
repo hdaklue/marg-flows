@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Role;
 
+use App\Actions\Roleable\AddParticipant;
+use App\Actions\Roleable\RemoveParticipant;
 use App\Contracts\Roles\HasParticipants;
 use App\Enums\Role\RoleEnum;
 use App\Models\User;
@@ -15,6 +17,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -43,16 +46,18 @@ class ManageMembers extends Component implements HasActions, HasForms
             ->schema([
                 Select::make('member')
                     ->options(function () {
-
                         return User::memberOf(\filament()->getTenant())
                             ->whereNotIn('id', $this->roleable->participants->pluck('id')->toArray())
                             ->get()->pluck('name', 'id');
-
                     })
                     ->required(),
                 Select::make('role')
                     ->required()
-                    ->options(RoleEnum::class),
+                    ->options(function () {
+                        $userRole = Auth::user()->rolesOn($this->roleable)->first();
+
+                        return RoleEnum::whereLowerThanOrEqual(RoleEnum::from($userRole->name))->toArray();
+                    }),
                 // ...
             ])
             ->columns(2)
@@ -66,9 +71,12 @@ class ManageMembers extends Component implements HasActions, HasForms
 
     public function addMember()
     {
+        $this->authorize('manageMembers', $this->roleable);
         $state = $this->form->getState();
 
-        $this->roleable->addParticipant(User::where('id', '=', $state['member'])->first(), RoleEnum::from($state['role'])->value);
+        $user = User::where('id', '=', $state['member'])->first();
+        $role = RoleEnum::from($state['role']);
+        AddParticipant::run($this->roleable, $user, $role);
 
         $this->loadManagableMembers();
         $this->form->fill();
@@ -81,7 +89,7 @@ class ManageMembers extends Component implements HasActions, HasForms
         return Action::make('Remove Member')
             ->action(function (array $arguments) {
                 $user = User::where('id', '=', $arguments['memberId'])->first();
-                $this->roleable->removeParticipant($user);
+                RemoveParticipant::run($this->roleable, $user);
                 $this->loadManagableMembers();
                 $this->dispatch('members-updated');
             })->requiresConfirmation()

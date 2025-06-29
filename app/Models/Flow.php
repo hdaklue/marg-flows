@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\HasStaticTypeTrait;
 use App\Concerns\Roles\RoleableEntity;
 use App\Concerns\Status\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
+use App\Contracts\HasStaticType;
 use App\Contracts\Roles\HasParticipants;
 use App\Contracts\Roles\Roleable;
 use App\Contracts\Status\HasStages;
@@ -22,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
-class Flow extends Model implements HasParticipants, HasStages, Roleable, Sortable
+class Flow extends Model implements HasParticipants, HasStages, HasStaticType, Roleable, Sortable
 {
     /**
      * @use HasFactory<\Database\Factories\FlowFactory>
@@ -33,7 +35,13 @@ class Flow extends Model implements HasParticipants, HasStages, Roleable, Sortab
      * @use SoftDeletes
      * @use SortableTrait<\Spatie\EloquentSortable\SortableTrait>
      */
-    use BelongsToTenant,HasFactory, HasStagesTrait, HasUlids, RoleableEntity , SoftDeletes, SortableTrait;
+    use BelongsToTenant,HasFactory,
+        HasStagesTrait,
+        HasStaticTypeTrait,
+        HasUlids ,
+        RoleableEntity,
+        SoftDeletes,
+        SortableTrait;
 
     public $sortable = [
         'order_column_name' => 'order_column',
@@ -47,6 +55,14 @@ class Flow extends Model implements HasParticipants, HasStages, Roleable, Sortab
         'start_date',
         'due_date',
         'completed_at',
+    ];
+
+    /* The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'status' => FlowStatus::ACTIVE->value,
     ];
 
     public function creator(): BelongsTo

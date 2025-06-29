@@ -1,0 +1,232 @@
+@tailwind components;
+
+
+.ce-block {
+    @apply px-16;
+}
+
+.ce-block__content *::selection {
+    background-color: theme('colors.blue.500');
+    /* light mode */
+    color: theme('colors.gray.100');
+}
+
+.image-tool__image-picture {
+    @apply mx-auto max-w-prose;
+}
+
+.dark .ce-block__content *::selection {
+    background-color: theme('colors.blue.100');
+    /* dark mode */
+    color: theme('colors.gray.900');
+}
+
+.ce-popover .ce-popover__container {
+    @apply text-gray-700 bg-white border-gray-200 shadow-md;
+
+}
+
+.dark .ce-popover .ce-popover__container {
+    @apply shadow-md border-zinc-800 bg-zinc-900;
+
+}
+
+.dark .ce-block--selected {
+    @apply bg-zinc-800;
+}
+
+.tc-wrap .tc-popover {
+    @apply z-50 bg-white border-gray-200 shadow-md;
+}
+
+.tc-wrap .tc-popover .tc-popover__item .tc-popover__item-icon {
+    @apply text-gray-700 bg-gray-200;
+}
+
+.ce-popover__items .ce-popover-item-html .ce-inline-tool {
+    @apply text-gray-700;
+}
+
+.dark .ce-popover__items .ce-popover-item-html .ce-inline-tool {
+    @apply text-gray-50;
+}
+
+.dark .tc-wrap .tc-popover {
+    @apply z-50 border-gray-200 shadow-md bg-zinc-900;
+}
+
+
+
+.dark .tc-wrap .tc-popover .tc-popover__item .tc-popover__item-icon {
+    @apply bg-zinc-700;
+}
+
+
+.dark .tc-wrap .tc-cell--selected {
+    @apply bg-zinc-800;
+
+}
+
+
+
+
+.tc-wrap .tc-add-row {
+    @apply bg-gray-100;
+}
+
+.dark .tc-table--heading .tc-row .tc-cell[heading] {
+    @apply bg-zinc-800;
+}
+
+
+.dark .tc-wrap .tc-add-row {
+    @apply bg-zinc-800;
+}
+
+.dark .tc-wrap .tc-add-row::before {
+    @apply text-white bg-zinc-700;
+}
+
+.dark .tc-wrap .tc-add-column {
+    @apply bg-zinc-800;
+}
+
+.dark .ce-popover .ce-popover-item {
+    @apply text-gray-50 hover:bg-zinc-700;
+}
+
+
+.ce-popover .ce-popover-item {
+    @apply text-gray-700;
+}
+
+
+.codex-editor__redactor {
+    @apply px-3 py-4 !important;
+}
+
+.cdx-search-field {
+    @apply bg-transparent;
+}
+
+.ce-block__content,
+.ce-toolbar__content {
+    max-width: 100%;
+    /* example value, adjust for your own use case */
+}
+
+.ce-toolbar__plus,
+.ce-toolbar__settings-btn {
+    @apply dark:text-gray-300 dark:hover:bg-gray-500;
+}
+
+.ce-popover {
+    @apply dark:bg-gray-800 dark:border-gray-600;
+}
+
+.ce-popover-item__icon {
+    @apply dark:bg-transparent;
+}
+
+.ce-popover-item {
+    @apply dark:hover:bg-gray-700 dark:text-white;
+}
+
+.ce-code__textarea {
+    @apply dark:bg-gray-800 dark:text-white;
+}
+
+.ce-settings {
+    @apply dark:bg-gray-800 dark:text-white dark:border-gray-500;
+}
+
+.ce-settings__button,
+.cdx-settings-button {
+    @apply dark:text-white dark:hover:bg-gray-500;
+}
+
+.cdx-search-field__icon .icon {
+    @apply dark:text-white;
+}
+
+.cdx-search-field__input {
+    @apply dark:text-white dark:placeholder:text-gray-400;
+}
+
+.ce-popover__no-found {
+    @apply dark:text-gray-400;
+}
+
+.ce-inline-toolbar {
+    @apply dark:bg-gray-800 dark:border-gray-600;
+}
+
+.ce-inline-tool {
+    @apply dark:text-white dark:hover:bg-gray-500;
+}
+
+.ce-inline-tool-input {
+    @apply block w-full transition duration-75 border-gray-300 focus:ring-1 focus:ring-inset disabled:opacity-70 dark:bg-gray-700 dark:text-white dark:border-gray-600;
+}
+
+.ce-popover__container {
+    @apply dark:bg-gray-800 dark:border-gray-600;
+}
+
+.ce-block--stretched {
+    @apply px-0;
+}
+
+/*
+List Item style
+*/
+.cdx-list {
+    @apply pl-[1rem] !important;
+}
+
+/*
+Header style
+*/
+h1.ce-header {
+    @apply mb-4 text-4xl font-bold;
+}
+
+h2.ce-header {
+    @apply mb-3 text-3xl font-semibold;
+}
+
+h3.ce-header {
+    @apply mb-2 text-2xl font-medium;
+}
+
+h4.ce-header {
+    @apply mb-2 text-xl font-medium;
+}
+
+h5.ce-header {
+    @apply mb-1 text-lg font-medium;
+}
+
+h6.ce-header {
+    @apply mb-1 text-base font-medium;
+}
+
+/*
+Actions alignment
+*/
+.ce-toolbar__actions {
+    right: inherit;
+    @apply pr-0 pl-[6px] pt-[1px] !important;
+}
+
+.tc-popover {
+    @apply dark:bg-gray-800;
+}
+
+.tc-popover__item-icon {
+    @apply dark:bg-sky-700;
+}
+
+.tc-add-row {
+    @apply dark:bg-gray-700
+}

@@ -22,11 +22,11 @@ class RemoveMember
     {
         try {
             DB::transaction(function () use ($tenant, $user) {
-                setPermissionsTeamId($tenant->id);
+                setPermissionsTeamId($tenant->getKey());
                 $tenant->removeParticipant($user, silently: true);
                 $tenant->removeMember($user);
                 DB::table(\config('permission.table_names.model_has_roles'))
-                    ->where('tenant_id', $tenant->id)
+                    ->where('tenant_id', $tenant->getKey())
                     ->where('roleable_type', Relation::getMorphAlias(Flow::class))
                     ->where('model_id', $user->id)
                     ->delete();

@@ -1,7 +1,9 @@
 import Autosize from '@marcreichel/alpine-autosize';
 import Tooltip from '@ryangjchandler/alpine-tooltip';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
+
 import designReviewApp from "./components/image-review";
+
 
 
 Alpine.data('designReviewApp', designReviewApp)

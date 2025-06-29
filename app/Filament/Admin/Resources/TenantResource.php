@@ -23,6 +23,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class TenantResource extends Resource
 {
@@ -105,7 +106,11 @@ class TenantResource extends Resource
                         ->native(false)
                         ->options(User::query()->notMemberOf($record)->get()->mapWithKeys(fn ($record) => [$record->id => "{$record->name} - {$record->email}"])),
                     Select::make('system_roles')
-                        ->options(RoleEnum::class)
+                        ->options(function ($record) {
+                            $userRole = $record->rolesForUser(Auth::user())->first()->name;
+
+                            return RoleEnum::whereLowerThanOrEqual(RoleEnum::from($userRole))->toArray();
+                        })
                         ->searchable(true)
                         ->required()
                         ->native(false),

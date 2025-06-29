@@ -9,8 +9,6 @@ use App\Filament\Resources\FlowResource\Pages;
 use App\Models\Flow;
 use App\Services\Flow\FlowProgressService;
 use App\Tables\Columns\Progress;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
@@ -26,14 +24,6 @@ class FlowResource extends Resource
     protected static ?string $model = Flow::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('title'),
-            ]);
-    }
 
     public static function table(Table $table): Table
     {
@@ -54,7 +44,6 @@ class FlowResource extends Resource
                 TextColumn::make('status')
                     ->getStateUsing(fn ($record) => FlowStatus::from($record->status)->getLabel())
                     ->color(fn ($record) => FlowStatus::from($record->status)->getColor())
-
                     ->badge(),
                 ImageColumn::make('creator')
                     ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))
@@ -109,7 +98,7 @@ class FlowResource extends Resource
     {
         return [
             'index' => Pages\ListFlows::route('/'),
-            // 'create' => Pages\CreateFlow::route('/create'),
+            'create' => Pages\CreateFlow::route('/create'),
             // 'edit' => Pages\EditFlow::route('/{record}/edit'),
         ];
     }

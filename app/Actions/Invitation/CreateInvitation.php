@@ -22,6 +22,5 @@ class CreateInvitation
         $invitation->sender()->associate($sender);
         $invitation->receiver()->associate($receiver);
         $invitation->save();
-
     }
 }

@@ -74,6 +74,8 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @version 1.1.0 - Service Integration & Events
  *
+ * @method BelongsToMany rolesOn()
+ *
  * @since 2025-06-16
  */
 trait HasEntityAwareRoles

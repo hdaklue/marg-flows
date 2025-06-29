@@ -29,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureGate();
         $this->configureModel();
         // $this->configureVite();
+
+        if ($this->app->environment('local') && class_exists(TelescopeServiceProvider::class)) {
+            $this->app->register(TelescopeServiceProvider::class);
+
+        }
     }
 
     /**

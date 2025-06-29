@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\FlowResource\Pages;
 
 use App\Filament\Resources\FlowResource;
@@ -14,6 +16,7 @@ class ListFlows extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+
         ];
     }
 }

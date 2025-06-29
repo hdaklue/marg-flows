@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace App\Notifications\Participant;
 
+use App\Contracts\HasStaticType;
+use App\Contracts\Roles\Roleable;
+use Exception;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AsignedToTenant extends Notification implements ShouldQueue
+class AssignedToEntity extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public string $entityName, public string $role) {}
+    public function __construct(public Model|Roleable $entity, public string $role) {}
 
     /**
      * Get the notification's delivery channels.
@@ -42,8 +46,15 @@ class AsignedToTenant extends Notification implements ShouldQueue
 
     public function toDatabase(object $notifiable): array
     {
+
+        if (! $this->entity instanceof HasStaticType) {
+            throw new Exception('Entity must implement HasStaticType');
+        }
+        $message = "You've been added to ({$this->entity->getTypeTitle()}) {$this->entity->getTypeName()} as {$this->role} ";
+
         return FilamentNotification::make()
-            ->body("You have been aded to {$this->entityName} as {$this->role}")
+            ->body($message)
+            ->success()
             ->getDatabaseMessage();
     }
 

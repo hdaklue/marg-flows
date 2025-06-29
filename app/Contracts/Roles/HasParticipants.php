@@ -5,19 +5,24 @@ declare(strict_types=1);
 namespace App\Contracts\Roles;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
-/* Has Participants Interface
-*
-* Defines the contract for entities that can have participants (users with roles).
-* This interface provides semantic methods for accessing users based on their roles
-* on the entity, making role-based queries more readable and consistent.
-*
-* @author Hassan Ibrahim
-* @version 1.0.0
-* @since 2025-06-18
-*/
+/**
+ * Has Participants Interface
+ *Defines the contract for entities that can have participants (users with roles).
+ * This interface provides semantic methods for accessing users based on their roles
+ * on the entity, making role-based queries more readable and consistent.
+ *
+ * @property Collection $participants
+ *
+ * @author Hassan Ibrahim
+ *
+ * @version 1.0.0
+ *
+ * @since 2025-06-18
+ */
 interface HasParticipants
 {
     public function participants(): Relation;
