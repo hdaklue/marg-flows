@@ -20,11 +20,15 @@
     <div class="md:scrollbar-hide mb-5 flex flex-shrink-0 flex-col overflow-y-auto overscroll-y-contain rounded-xl p-2 md:h-auto md:max-h-screen md:w-[22rem]"
         x-bind:style="isMobile ? '' : 'height:' + height + 'px'">
         @unless ($status['records'])
-            <div class="flex h-24 items-center justify-center rounded-xl border border-gray-100 dark:border-gray-800"
+            <div class="flex items-center justify-center rounded-xl border border-gray-100 py-4 dark:border-gray-800"
                 x-data="{ show: true }" x-show="show" @item-is-moving.window="show = false"
                 @item-stopped-moving.window="show = true">
                 <p class="w-2/3 text-center text-sm text-gray-400 dark:text-gray-500">
-                    No items assinged, you can drag and drop here!
+                    @can('manageFlows', filament()->getTenant())
+                        No items assinged, you can drag and drop here!
+                    @else
+                        No items assinged!
+                    @endcan
                 </p>
             </div>
         @endunless

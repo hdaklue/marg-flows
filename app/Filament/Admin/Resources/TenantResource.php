@@ -23,7 +23,6 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 
 class TenantResource extends Resource
 {
@@ -97,6 +96,7 @@ class TenantResource extends Resource
 
     public static function getAddMemberSchema(Tenant $record): array
     {
+
         return [
             Grid::make()
                 ->schema([
@@ -106,8 +106,9 @@ class TenantResource extends Resource
                         ->native(false)
                         ->options(User::query()->notMemberOf($record)->get()->mapWithKeys(fn ($record) => [$record->id => "{$record->name} - {$record->email}"])),
                     Select::make('system_roles')
-                        ->options(function ($record) {
-                            $userRole = $record->rolesForUser(Auth::user())->first()->name;
+                        ->options(function () use ($record) {
+
+                            $userRole = $record->rolesForUser(\auth()->user())->first()->name;
 
                             return RoleEnum::whereLowerThanOrEqual(RoleEnum::from($userRole))->toArray();
                         })

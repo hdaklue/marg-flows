@@ -32,7 +32,7 @@ class FlowResource extends Resource
         return $table
             ->modifyQueryUsing(function (Builder $query) {
                 $isAdmin = filament()->getTenant()->isAdmin(\filament()->auth()->user());
-                $query->when(! $isAdmin, function ($query) {
+                $query->unless($isAdmin, function ($query) {
                     $query->forParticipant(\filament()->auth()->user());
                 })->running()->with(['creator', 'participants'])->ordered();
             })
@@ -40,7 +40,7 @@ class FlowResource extends Resource
             ->reorderable('order_column')
             ->columns([
                 TextColumn::make('title'),
-                TextColumn::make('order_column'),
+
                 TextColumn::make('status')
                     ->getStateUsing(fn ($record) => FlowStatus::from($record->status)->getLabel())
                     ->color(fn ($record) => FlowStatus::from($record->status)->getColor())

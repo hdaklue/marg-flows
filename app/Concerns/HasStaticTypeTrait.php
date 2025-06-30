@@ -18,7 +18,10 @@ trait HasStaticTypeTrait
             $this->hasAttribute('title') || $this->hasAttribute('name'),
             new \LogicException('Model must have either title or name attribute'),
         );
+        if ($this->hasAttribute('title')) {
+            return $this->title;
+        }
 
-        return $this->title ?: $this->name;
+        return $this->name;
     }
 }

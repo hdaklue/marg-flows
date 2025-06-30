@@ -1,13 +1,13 @@
 <div id="{{ $record->getKey() }}"
     class="record dark:bg-{{ $color }}-900/10 dark:hover:bg-{{ $color }}-900/20 bg-{{ $color }}-50 hover:bg-{{ $color }}-200 @can('manageFlows', filament()->getTenant())
      cursor-move
-     @endcan relative overflow-hidden rounded-lg px-2 py-4 text-base font-medium text-gray-800 transition-all dark:text-gray-200"
+     @endcan relative overflow-hidden rounded-lg p-4 text-base font-medium text-gray-800 transition-all dark:text-gray-200"
     @if ($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3) x-data @endif>
 
 
     <div class="flex flex-row justify-between gap-2">
         <div
-            class="text-{{ $color }}-800 flex cursor-pointer text-base font-semibold leading-snug dark:text-gray-300">
+            class="text-{{ $color }}-800 flex cursor-pointer text-base font-semibold leading-snug lg:text-lg dark:text-gray-300">
             <a>{{ $record->title }}</a>
         </div>
         <div class="flex flex-row -space-x-2">
@@ -21,16 +21,22 @@
             @endforeach
         </div>
     </div>
-    <div class="mt-1 flex flex-row gap-x-1">
-        <div class="flex gap-x-1 text-xs font-medium">
-            <span class="font-medium">Due:</span>
-            <span>{{ $record->due_date->toDateString() }}</span>
+    <div class="mt-2 flex flex-row gap-x-2 dark:text-gray-400">
+        {{-- <div class="flex items-center text-xs gap-x-1">
+            <span class="font-semibold">Start</span>
+            <span
+                class="rounded border px-1 py-0.5 text-xs dark:border-gray-700">{{ $record->start_date->toDateString() }}</span>
+        </div> --}}
+        <div class="flex items-center gap-x-1 text-xs">
+            <span class="font-semibold">Due :</span>
+            <span
+                class="rounded border px-1 py-0.5 text-xs dark:border-gray-800/60">{{ $record->due_date->toDateString() }}</span>
         </div>
     </div>
-    <div class="prose py-2 ps-2 text-sm font-light dark:text-gray-400">
+    {{-- <div class="py-2 text-sm font-light prose ps-2 dark:text-gray-400">
         Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-    </div>
-    <div x-data class="b flex justify-end px-2 pt-2 text-sm">
+    </div> --}}
+    <div x-data class="flex justify-end pt-2 text-sm">
         <div x-data>
             @can('manageMembers', $record)
                 <button title="Manage members"

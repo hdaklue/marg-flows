@@ -18,6 +18,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Log;
 
 class CreateFlow extends CreateRecord
@@ -27,6 +28,8 @@ class CreateFlow extends CreateRecord
     protected static string $view = 'filament.resources.flow-resource.pages.create-flow';
 
     protected static bool $canCreateAnother = false;
+
+    protected static ?string $title = '';
 
     public string $from;
 
@@ -99,5 +102,10 @@ class CreateFlow extends CreateRecord
             Log::error($e->getMessage());
         }
 
+    }
+
+    public function getHeading(): string|Htmlable
+    {
+        return '';
     }
 }

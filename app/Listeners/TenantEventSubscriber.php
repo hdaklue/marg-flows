@@ -33,7 +33,7 @@ class TenantEventSubscriber
 
     public function handleMemberRemoved(MemberRemoved $event): void
     {
-        $event->memberRemoved->notify(new RemovedFromEntity($event->tenant->name));
+        $event->memberRemoved->notify(new RemovedFromEntity($event->tenant));
     }
 
     public function handleMemberAdded(TanantMemberAdded $event): void

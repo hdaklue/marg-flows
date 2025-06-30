@@ -35,21 +35,25 @@ class FlowsKanabanBoard extends KanbanBoard
         ];
     }
 
-    // public function onSortChanged(int|string $recordId, string $status, array $orderedIds): void
-    // {
+    public function onStatusChanged(int|string $recordId, string $status, array $fromOrderedIds, array $toOrderedIds): void
+    {
 
-    //     $newOrder = collect($orderedIds)->sort()->toArray();
-    //     if (method_exists(static::$model, 'setNewOrder')) {
-    //         static::$model::setNewOrder($newOrder);
-    //     }
-    // }
+        $this->getEloquentQuery()->find($recordId)->update([
+            static::$recordStatusAttribute => $status,
+            'completed_at' => FlowStatus::from((int) $status)->value === FlowStatus::COMPLETED->value ? now() : null,
+        ]);
+
+        if (method_exists(static::$model, 'setNewOrder')) {
+            static::$model::setNewOrder($toOrderedIds);
+        }
+    }
 
     protected function records(): Collection
     {
 
         $isAdmin = filament()->getTenant()->isAdmin(\filament()->auth()->user());
 
-        return Flow::when(! $isAdmin, function ($query) {
+        return Flow::unless($isAdmin, function ($query) {
             $query->forParticipant(\filament()->auth()->user());
         })->byTenant(filament()->getTenant())->with(['creator', 'participants'])->ordered()->get();
     }

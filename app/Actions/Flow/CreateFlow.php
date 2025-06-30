@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
+// TODO:Move to top order after create
 class CreateFlow
 {
     use AsAction;
@@ -23,7 +24,7 @@ class CreateFlow
             'title' => $data['title'],
             'start_date' => $data['start_date'],
             'due_date' => $data['due_date'],
-            'status' => $data['status'] ?? $this->getStatus(Carbon::parse($data['due_date'])),
+            'status' => $data['status'] ?? $this->getStatus(Carbon::parse($data['start_date'])),
         ]);
         $flow->tenant()->associate($tenant);
         $flow->creator()->associate($creator);

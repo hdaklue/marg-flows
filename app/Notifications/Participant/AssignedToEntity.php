@@ -6,7 +6,12 @@ namespace App\Notifications\Participant;
 
 use App\Contracts\HasStaticType;
 use App\Contracts\Roles\Roleable;
+use App\Filament\Pages\FlowsKanabanBoard;
+use App\Filament\Resources\FlowResource;
+use App\Models\Flow;
+use App\Models\Tenant;
 use Exception;
+use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -54,6 +59,11 @@ class AssignedToEntity extends Notification implements ShouldQueue
 
         return FilamentNotification::make()
             ->body($message)
+            ->actions([
+                Action::make('visit')
+                    ->button()
+                    ->url(fn () => $this->generateVisitUrl()),
+            ])
             ->success()
             ->getDatabaseMessage();
     }
@@ -66,5 +76,16 @@ class AssignedToEntity extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [];
+    }
+
+    protected function generateVisitUrl()
+    {
+        $class = \get_class($this->entity);
+
+        return match ($class) {
+            Flow::class => FlowResource::getUrl('index', ['tenant' => $this->entity->tenant]),
+            Tenant::class => FlowsKanabanBoard::getUrl(['tenant' => $this->entity]),
+            default => null,
+        };
     }
 }

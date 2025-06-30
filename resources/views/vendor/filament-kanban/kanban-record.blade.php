@@ -14,9 +14,9 @@
 
 
     <div class="flex flex-row justify-between gap-2">
-        <div
-            class="text-{{ $color }}-800 flex text-base font-semibold leading-snug hover:cursor-pointer dark:text-gray-300">
-            <a>{{ $record->{static::$recordTitleAttribute} }}</a>
+        <div class="">
+            <a
+                class="text-{{ $color }}-800 flex font-semibold leading-snug hover:cursor-pointer lg:text-3xl dark:text-gray-300">{{ $record->{static::$recordTitleAttribute} }}</a>
         </div>
         <div class="flex flex-row -space-x-2">
             @foreach ($record->participants as $participant)
@@ -35,9 +35,9 @@
             <span>{{ $record->due_date->toDateString() }}</span>
         </div>
     </div>
-    <div class="prose py-2 ps-2 text-sm font-light dark:text-gray-400">
+    {{-- <div class="py-2 text-sm font-light prose ps-2 dark:text-gray-400">
         Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-    </div>
+    </div> --}}
 
     @can('manageMembers', $record)
         <div x-data class="b flex justify-end px-2 pt-2 text-sm">

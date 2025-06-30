@@ -10,11 +10,11 @@
 
         <x-slot name="footer">
             <x-filament::button type="submit">
-                {{$this->getEditModalSaveButtonLabel()}}
+                {{ $this->getEditModalSaveButtonLabel() }}
             </x-filament::button>
 
             <x-filament::button color="gray" x-on:click="isOpen = false">
-                {{$this->getEditModalCancelButtonLabel()}}
+                {{ $this->getEditModalCancelButtonLabel() }}
             </x-filament::button>
         </x-slot>
     </x-filament::modal>

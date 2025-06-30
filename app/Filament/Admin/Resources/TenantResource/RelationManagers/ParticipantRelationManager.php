@@ -53,7 +53,6 @@ class ParticipantRelationManager extends RelationManager
                     ->label('Add Member')
                     ->icon('heroicon-s-user-plus')
                     ->form(fn (RelationManager $livewire) => TenantResource::getAddMemberSchema($livewire->getOwnerRecord()))
-
                     ->action(function (RelationManager $livewire, $data) {
                         try {
                             $user = User::where('id', $data['members'])->first();

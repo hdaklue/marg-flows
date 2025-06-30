@@ -128,7 +128,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
     {
         $this->logins()->create([
             'user_agent' => $userAgent,
-            'ip_address' => $ip,        ]);
+            'ip_address' => $ip,
+        ]);
     }
 
     public function switchActiveTenant(Tenant $tenant): void
