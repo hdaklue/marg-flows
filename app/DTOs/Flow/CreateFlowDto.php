@@ -54,7 +54,7 @@ class CreateFlowDto extends ValidatedDTO
             'title' => ['required', 'string', 'min:3', 'max:255'],
             'status' => ['sometimes', Rule::enum(FlowStatus::class)],
             'order_column' => ['interger'],
-            'start_date' => ['date', Rule::date()->todayOrAfter()],
+            'start_date' => ['date'],
             'due_date' => ['date', Rule::date()->afterOrEqual('start_date')],
             'completed_at' => ['date', Rule::date()->afterOrEqual('start_date')],
             'is_default' => 'boolean',
@@ -86,9 +86,9 @@ class CreateFlowDto extends ValidatedDTO
     {
         return [
             'status' => new EnumCast(FlowStatus::class),
-            'start_date' => new CarbonCast(\config('app.timezone')),
-            'due_date' => new CarbonCast(\config('app.timezone')),
-            'completed_at' => new CarbonCast(\config('app.timezone')),
+            'start_date' => new CarbonCast(config('app.timezone')),
+            'due_date' => new CarbonCast,
+            'completed_at' => new CarbonCast,
         ];
     }
 }

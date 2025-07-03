@@ -136,8 +136,8 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
         return [
             'settings' => 'array',
             // 'status' => FlowStatus::class,
-            'due_date' => 'date',
-            'start_date' => 'date',
+            'due_date' => 'datetime',
+            'start_date' => 'datetime',
             'completed_at' => 'date',
             'canceled_at' => 'date',
         ];

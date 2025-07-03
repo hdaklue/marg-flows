@@ -12,18 +12,15 @@ use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
 use App\Models\User;
 use App\Services\Flow\TemplateService;
-use Carbon\CarbonTimeZone;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -65,20 +62,17 @@ class CreateFlow extends CreateRecord
                         Select::make('template')
                             ->options(TemplateService::toArray())
                             ->selectablePlaceholder(false),
-                        DateTimePicker::make('start_date')
-                            ->minDate(today(\auth()->user()->timezone))
-                            ->default(now(\auth()->user()->timezone))
+                        DatePicker::make('start_date')
+                            ->timezone(auth()->user()->timezone)
+                            ->minDate(today())
                             ->required()
                             ->live(onBlur: true)
                             ->native(false),
-                        DateTimePicker::make('due_date')
+
+                        DatePicker::make('due_date')
                             ->required()
-                            ->minDate(function (Get $get) {
-                                if ($get('start_date')) {
-                                    return Carbon::parse($get('start_date'), CarbonTimeZone::create(\auth()->user()->timezone))->addHour();
-                                }
-                            })
-                            ->afterOrEqual('start_date')
+                            ->timezone(auth()->user()->timezone)
+                            ->afterOrEqual(fn($get)=>$get('start_date'))
                             ->native(false),
                         Select::make('participants')
                             ->options(User::memberOf(filament()->getTenant())
@@ -100,6 +94,8 @@ class CreateFlow extends CreateRecord
 
         $this->authorizeAccess();
         $data = $this->form->getState();
+        // $data['start_date'] = fromUserDateTime($data['start_date'],auth()->user());
+        // $data['due_date'] = fromUserDateTime($data['due_date'],auth()->user());
 
         try {
             $flowDto = CreateFlowDto::fromArray($data);

@@ -40,7 +40,6 @@ class FlowResource extends Resource
             ->reorderable('order_column')
             ->columns([
                 TextColumn::make('title'),
-
                 TextColumn::make('status')
                     ->getStateUsing(fn ($record) => FlowStatus::from($record->status)->getLabel())
                     ->color(fn ($record) => FlowStatus::from($record->status)->getColor())

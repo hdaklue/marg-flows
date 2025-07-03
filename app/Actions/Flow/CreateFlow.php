@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\Flow;
 
-use App\Actions\Roleable\AddParticipant;
-use App\DTOs\Flow\CreateFlowDto;
-use App\Enums\Role\RoleEnum;
-use App\Exceptions\Flow\FlowCreationException;
+use Throwable;
 use App\Models\Flow;
+use App\Models\User;
 use App\Models\Stage;
 use App\Models\Tenant;
-use App\Models\User;
 use Illuminate\Bus\Batch;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Bus;
+use App\Enums\Role\RoleEnum;
+use Illuminate\Support\Carbon;
+use App\DTOs\Flow\CreateFlowDto;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException;
+use App\Actions\Roleable\AddParticipant;
 use Lorisleiva\Actions\Concerns\AsAction;
-use Throwable;
+use App\Exceptions\Flow\FlowCreationException;
 
 // TODO:Move to top order after create
 class CreateFlow
@@ -33,6 +34,7 @@ class CreateFlow
                 $flow = $this->makeFlow($data);
                 $flow->tenant()->associate($tenant);
                 $flow->creator()->associate($creator);
+       
                 $flow->save();
                 $this->attachFlowStages($flow, $data, $tenant);
                 $flow->addParticipant($creator, RoleEnum::ADMIN->value, true);
@@ -81,6 +83,8 @@ class CreateFlow
 
     protected function makeFlow(CreateFlowDto $data): Flow
     {
+        
+
         return Flow::make([
             'title' => $data->title,
             'start_date' => $data->start_date,
