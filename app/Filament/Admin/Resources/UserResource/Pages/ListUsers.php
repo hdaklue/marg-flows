@@ -9,6 +9,7 @@ use App\DTOs\Invitation\InvitationDTO;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\UserResource;
 use App\Models\Tenant;
+use App\Services\Timezone;
 use Exception;
 use Filament\Actions;
 use Filament\Forms\Components\Repeater;
@@ -17,6 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class ListUsers extends ListRecords
@@ -43,6 +45,12 @@ class ListUsers extends ListRecords
                         ])
                         ->email()
                         ->unique('users'),
+                    Select::make('timezone')
+                        ->options(Timezone::getTimezonesAsSelectList())
+                        ->searchable()
+                        ->required()
+                        ->preload()
+                        ->native(false),
 
                     Repeater::make('tenents')
                         ->reorderable(false)
@@ -60,15 +68,18 @@ class ListUsers extends ListRecords
                                 ->required()
                                 ->label('Role')
                                 ->options(fn (Get $get) => Role::where('tenant_id', $get('tenant_id'))->whereNotIn('name', [RoleEnum::SUPER_ADMIN->value, RoleEnum::TENANT_ADMIN->value])->get()->mapWithKeys(fn ($role) => [$role->id => RoleEnum::from($role->name)->getLabel()])),
+
                         ]),
                 ])->action(function ($data) {
                     try {
+
                         $user = filament()->auth()->user()->toArray();
                         $dto = new InvitationDTO([
                             'email' => $data['email'],
                             'role_data' => $data['tenents'],
                             'name' => $data['name'],
                             'sender' => $user,
+                            'timezone' => $data['timezone'],
                         ]);
 
                         InviteMember::run($dto);
@@ -78,6 +89,7 @@ class ListUsers extends ListRecords
                             ->color('success')
                             ->send();
                     } catch (Exception $e) {
+                        Log::error($e->getMessage());
                         Notification::make()
                             ->body('Something went wrong!')
                             ->color('danger')

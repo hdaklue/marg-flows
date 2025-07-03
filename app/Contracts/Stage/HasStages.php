@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts\Status;
+namespace App\Contracts\Stage;
 
 use App\Enums\FlowStatus;
 use Illuminate\Database\Eloquent\Builder;

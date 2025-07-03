@@ -7,7 +7,7 @@ namespace App\Filament\Resources;
 use App\Enums\FlowStatus;
 use App\Filament\Resources\FlowResource\Pages;
 use App\Models\Flow;
-use App\Services\Flow\FlowProgressService;
+use App\Services\Flow\TimeProgressService;
 use App\Tables\Columns\Progress;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,7 +27,7 @@ class FlowResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $flowProgressService = app(FlowProgressService::class);
+        $flowProgressService = app(TimeProgressService::class);
 
         return $table
             ->modifyQueryUsing(function (Builder $query) {
@@ -54,15 +54,13 @@ class FlowResource extends Resource
                 //     ->options(FlowStatus::class),
 
                 Progress::make('time_progress')
-
                     ->getStateUsing(fn ($record) => $flowProgressService->getProgressDetails($record)),
                 TextColumn::make('start_date')
                     ->since(),
                 TextColumn::make('due_date')
                     ->since(),
                 TextColumn::make('days_left')
-
-                    ->getStateUsing(fn ($record) => $flowProgressService->getDaysRemainingPositive($record)),
+                    ->getStateUsing(fn ($record) => $flowProgressService->getDaysRemaining($record)),
                 TextColumn::make('duration')
                     ->getStateUsing(fn ($record) => $flowProgressService->getTotalDays($record)),
 

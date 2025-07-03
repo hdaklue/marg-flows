@@ -8,7 +8,10 @@ use App\Listeners\TenantEventSubscriber;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Services\Flow\FlowProgressService;
+use App\Services\Flow\TimeProgressService;
+use Filament\Support\Assets\AlpineComponent;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -24,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(FlowProgressService::class);
+        $this->app->singleton(TimeProgressService::class);
 
         $this->configureGate();
         $this->configureModel();
@@ -41,7 +44,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
         // Event::subscribe(TenantEventSubscriber::class);
+        // FilamentAsset::register([
+        //     AlpineComponent::make('test-component', __DIR__ . '/../../resources/js/test.js'),
+        //     // Js::make('editorJs', __DIR__ . '/../../resources/js/components/editorjs/index.js'),
+        // ]);
 
     }
 

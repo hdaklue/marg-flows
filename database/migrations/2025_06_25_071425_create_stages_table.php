@@ -20,12 +20,15 @@ return new class extends Migration
             $table->ulidMorphs('stageable');
             $table->string('color');
             $table->json('meta')->nullable();
+            $table->integer('order');
             $table->timestamps();
 
             $table->index(['name']);
-            $table->unique(['name', 'stageable_type', 'stageable_id']);
-
             $table->index(['stageable_type', 'stageable_id', 'name']);
+            $table->index(['stageable_type', 'stageable_id', 'order']);
+            $table->unique(['name', 'stageable_type', 'stageable_id']);
+            $table->unique(['order', 'stageable_type', 'stageable_id']);
+
         });
     }
 
@@ -34,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('statuses');
+        Schema::dropIfExists('stages');
     }
 };

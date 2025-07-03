@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
             'password' => bcrypt('password'),
             'account_type' => AccountType::ADMIN->value,
+            'timezone' => 'Africa/Cairo',
         ]);
 
         $tenant1 = $user1->createdTenants()->create([
@@ -38,9 +39,8 @@ class DatabaseSeeder extends Seeder
         $tenant1->members()->attach($user1);
         $tenant2->members()->attach($user1);
 
-        $user1->update([
-            'active_tenant_id' => $tenant1->id,
-        ]);
+        $user1->switchActiveTenant($tenant1);
+        $user1->save();
         $systemRoles = collect(RoleEnum::cases())->map(function ($case) {
             return [
                 'name' => $case->value,
@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
 
         setPermissionsTeamId($tenant1->id);
 
-        $user1->assignRole(RoleEnum::SUPER_ADMIN, $tenant1);
+        $user1->assignRole(RoleEnum::ADMIN, $tenant1);
 
         $user2 = User::factory()->create([
             'name' => 'Test Member',

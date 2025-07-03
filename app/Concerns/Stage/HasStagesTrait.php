@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Concerns\Status;
+namespace App\Concerns\Stage;
 
 use App\Enums\FlowStatus;
 use App\Models\Stage;
@@ -13,7 +13,7 @@ trait HasStagesTrait
 {
     public function stages(): MorphMany
     {
-        return $this->morphMany(Stage::class, 'statuable');
+        return $this->morphMany(Stage::class, 'stageable');
     }
 
     public function scopeByStage(Builder $builder, string|FlowStatus $status): Builder

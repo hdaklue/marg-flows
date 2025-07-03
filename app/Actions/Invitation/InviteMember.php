@@ -57,6 +57,7 @@ class InviteMember
             'name' => $dto->name,
             'email' => $dto->email,
             'password' => $this->password,
+            'timezone' => $dto->timezone,
         ]);
     }
 

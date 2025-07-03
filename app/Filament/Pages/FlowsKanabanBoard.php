@@ -6,7 +6,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\FlowStatus;
 use App\Models\Flow;
-use App\Services\Flow\FlowProgressService;
+use App\Services\Flow\TimeProgressService;
 use Filament\Actions\Action;
 use Illuminate\Support\Collection;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
@@ -21,7 +21,7 @@ class FlowsKanabanBoard extends KanbanBoard
 
     protected static ?string $title = 'Flows';
 
-    public string $progressService = FlowProgressService::class;
+    public string $progressService = TimeProgressService::class;
 
     protected ?string $maxContentWidth = 'full';
 
@@ -38,10 +38,14 @@ class FlowsKanabanBoard extends KanbanBoard
     public function onStatusChanged(int|string $recordId, string $status, array $fromOrderedIds, array $toOrderedIds): void
     {
 
-        $this->getEloquentQuery()->find($recordId)->update([
-            static::$recordStatusAttribute => $status,
-            'completed_at' => FlowStatus::from((int) $status)->value === FlowStatus::COMPLETED->value ? now() : null,
-        ]);
+        $record = $this->getEloquentQuery()->find($recordId);
+
+        match ((int) $status) {
+            FlowStatus::COMPLETED->value => $record->setAsCompleted(),
+            FlowStatus::CANCELED->value => $record->setAsCanceled(),
+            default => $record->setStatus(FlowStatus::from((int) $status)),
+
+        };
 
         if (method_exists(static::$model, 'setNewOrder')) {
             static::$model::setNewOrder($toOrderedIds);

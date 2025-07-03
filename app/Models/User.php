@@ -44,8 +44,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
         'name',
         'email',
         'password',
-        'active_tenant_id',
         'account_type',
+        'timezone',
     ];
 
     /**
@@ -124,19 +124,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
         return $this->hasOne(MemberInvitation::class, 'receiver_id');
     }
 
-    public function updateLastLogin(string $userAgent, string $ip): void
+    public function updateLastLogin(string $userAgent, string $ip): self
     {
         $this->logins()->create([
             'user_agent' => $userAgent,
             'ip_address' => $ip,
         ]);
+
+        return $this;
     }
 
-    public function switchActiveTenant(Tenant $tenant): void
+    public function switchActiveTenant(Tenant $tenant): self
     {
-        $this->update([
-            'active_tenant_id' => $tenant->id,
-        ]);
+        $this->activeTenant()->associate($tenant);
+        $this->save();
+
+        return $this;
     }
 
     #[Scope]

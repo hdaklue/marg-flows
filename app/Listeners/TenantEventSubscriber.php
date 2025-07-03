@@ -40,6 +40,7 @@ class TenantEventSubscriber
     {
 
         $event->user->notify(new AssignedToEntity($event->tenant, $event->role->getLabel()));
+
     }
 
     /**

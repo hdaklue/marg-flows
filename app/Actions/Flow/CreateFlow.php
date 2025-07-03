@@ -5,50 +5,109 @@ declare(strict_types=1);
 namespace App\Actions\Flow;
 
 use App\Actions\Roleable\AddParticipant;
-use App\Enums\FlowStatus;
+use App\DTOs\Flow\CreateFlowDto;
 use App\Enums\Role\RoleEnum;
+use App\Exceptions\Flow\FlowCreationException;
 use App\Models\Flow;
+use App\Models\Stage;
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Support\Carbon;
+use Illuminate\Bus\Batch;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Throwable;
 
 // TODO:Move to top order after create
 class CreateFlow
 {
     use AsAction;
 
-    public function handle(array $data, Tenant $tenant, User $creator)
+    public function handle(CreateFlowDto $data, Tenant $tenant, User $creator)
     {
-        $flow = Flow::make([
-            'title' => $data['title'],
-            'start_date' => $data['start_date'],
-            'due_date' => $data['due_date'],
-            'status' => $data['status'] ?? $this->getStatus(Carbon::parse($data['start_date'])),
-        ]);
-        $flow->tenant()->associate($tenant);
-        $flow->creator()->associate($creator);
-        $flow->save();
-        $flow->addParticipant($creator, RoleEnum::ADMIN->value, true);
 
-        if ($data['participants']) {
-            User::whereIn('id', $data['participants'])
-                ->get()->each(function ($user) use ($flow, $tenant) {
-                    $role = RoleEnum::from($user->rolesOn($tenant)->first()->name);
-                    $this->addParticipants($flow, $user, $role);
+        try {
+            return DB::transaction(function () use ($creator, $tenant, $data) {
+                $flow = $this->makeFlow($data);
+                $flow->tenant()->associate($tenant);
+                $flow->creator()->associate($creator);
+                $flow->save();
+                $this->attachFlowStages($flow, $data, $tenant);
+                $flow->addParticipant($creator, RoleEnum::ADMIN->value, true);
+
+                DB::afterCommit(function () use ($flow, $data, $tenant) {
+                    if ($data->hasParticipants()) {
+                        $this->dispatchAddParticipantBatchJobs($flow, $data->participants, $tenant);
+                    }
                 });
 
+                return $flow;
+            });
+
+        } catch (QueryException $e) {
+            Log::error('Database error creating flow', [
+                'tenant_id' => $tenant->id,
+                'creator_id' => $creator->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new FlowCreationException('Failed to create flow due to database constraints');
+        } catch (\Exception $e) {
+            Log::error('Unexpected error creating flow', [
+                'tenant_id' => $tenant->id,
+                'creator_id' => $creator->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new FlowCreationException('An unexpected error occurred while creating the flow');
         }
-
     }
 
-    protected function getStatus(Carbon $date)
+    protected function attachFlowStages(Flow $flow, CreateFlowDto $data, Tenant $tenant)
     {
-        return $date->isAfter(today()) ? FlowStatus::SCHEDULED->value : FlowStatus::ACTIVE->value;
+        $stages = $data->template->stages->map(function ($stage, $tenant) {
+            $stage = Stage::make([
+                'name' => $stage->name,
+                'color' => $stage->color,
+                'order' => $stage->order,
+                'meta' => $stage->meta,
+            ]);
+
+            return $stage;
+        });
+
+        $flow->stages()->createMany($stages->toArray());
     }
 
-    protected function addParticipants(Flow $flow, User $participant, RoleEnum $role)
+    protected function makeFlow(CreateFlowDto $data): Flow
     {
-        AddParticipant::dispatch($flow, $participant, $role, $flow->tenant);
+        return Flow::make([
+            'title' => $data->title,
+            'start_date' => $data->start_date,
+            'due_date' => $data->due_date,
+            'status' => $data->status,
+        ]);
+    }
+
+    protected function dispatchAddParticipantBatchJobs(Flow $flow, array $participants, Tenant $tenant)
+    {
+        $jobs = User::whereIn('id', $participants)
+            ->get()->map(function ($user) use ($flow, $tenant) {
+                $role = RoleEnum::from($user->rolesOn($tenant)->first()->name);
+
+                return AddParticipant::makeJob($flow, $user, $role, $tenant);
+            })->toArray();
+
+        Bus::batch($jobs)
+            ->name("Add participants to flow {$flow->id}")
+            ->allowFailures()
+            ->catch(function (Batch $batch, Throwable $e) use ($flow) {
+                Log::error('Some participants failed to be added', [
+                    'flow_id' => $flow->id,
+                    'batch_id' => $batch->id,
+                    'error' => $e->getMessage(),
+                ]);
+            })
+            ->dispatch();
     }
 }

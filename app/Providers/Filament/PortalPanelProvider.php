@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\Filament\ConfigureDateTimePickers;
 use App\Models\Tenant;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -31,6 +32,7 @@ class PortalPanelProvider extends PanelProvider
             ->path('/portal')
             ->login()
             ->passwordReset()
+            ->databaseNotificationsPolling(fn () => app()->isProduction() ? '60s' : '90s')
             ->tenant(Tenant::class, ownershipRelationship: 'tenant')
             ->colors([
                 'primary' => Color::Sky,
@@ -62,6 +64,7 @@ class PortalPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                ConfigureDateTimePickers::class,
             ]);
     }
 }

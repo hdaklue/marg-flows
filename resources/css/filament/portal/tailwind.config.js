@@ -1,10 +1,18 @@
 import preset from '../../../../vendor/filament/filament/tailwind.config.preset'
 const colors = import('tailwindcss/colors')
 export default {
+    theme: {
+        extend: {
+            fontSize: {
+                '2xs': ['0.625rem', '0.75rem'],  // 10px font, 12px line-height (1.2x)
+                '3xs': ['0.5rem', '0.625rem'],   // 8px font, 10px line-height (1.25x)
+            }
+        }
+    },
     presets: [preset],
-
     content: [
         './resources/views/forms/**/*.blade.php',
+        './resources/views/**/*.blade.php',
         './app/Filament/**/*.php',
         './resources/views/livewire/**/*.blade.php',
         './resources/views/filament/**/*.blade.php',

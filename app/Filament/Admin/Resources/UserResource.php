@@ -42,8 +42,8 @@ class UserResource extends Resource
                     ->formatStateUsing(fn ($state) => \ucwords($state))
                     ->badge(),
                 TextColumn::make('latestLogin.created_at')
-                    ->label('Last Login')
-                    ->default('Never'),
+                    ->dateTime()
+                    ->label('Last Login'),
                 TextColumn::make('receivedInvitation.sender.name')
                     ->label('Invited By'),
             ])

@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\HasStaticTypeTrait;
+use App\Concerns\Progress\HasTimeProgress;
 use App\Concerns\Roles\RoleableEntity;
-use App\Concerns\Status\HasStagesTrait;
+use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\HasStaticType;
+use App\Contracts\Progress\TimeProgressable;
 use App\Contracts\Roles\HasParticipants;
 use App\Contracts\Roles\Roleable;
-use App\Contracts\Status\HasStages;
+use App\Contracts\Stage\HasStages;
 use App\Enums\FlowStatus;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -24,7 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
-class Flow extends Model implements HasParticipants, HasStages, HasStaticType, Roleable, Sortable
+class Flow extends Model implements HasParticipants, HasStages, HasStaticType, Roleable, Sortable, TimeProgressable
 {
     /**
      * @use HasFactory<\Database\Factories\FlowFactory>
@@ -35,10 +37,12 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
      * @use SoftDeletes
      * @use SortableTrait<\Spatie\EloquentSortable\SortableTrait>
      */
-    use BelongsToTenant,HasFactory,
+    use BelongsToTenant,
+        HasFactory,
         HasStagesTrait,
         HasStaticTypeTrait,
-        HasUlids ,
+        HasTimeProgress ,
+        HasUlids,
         RoleableEntity,
         SoftDeletes,
         SortableTrait;
@@ -55,6 +59,7 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
         'start_date',
         'due_date',
         'completed_at',
+        'canceled_at',
     ];
 
     /* The model's default values for attributes.
@@ -85,6 +90,34 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
         return $builder->where('status', '=', $status);
     }
 
+    public function setAsCompleted()
+    {
+        $this->update([
+            'status' => FlowStatus::COMPLETED->value,
+            'completed_at' => now(),
+            'canceled_at' => null,
+        ]);
+    }
+
+    public function setAsCanceled()
+    {
+        $this->update([
+            'status' => FlowStatus::CANCELED->value,
+            'completed_at' => null,
+            'canceled_at' => now(),
+        ]);
+    }
+
+    public function setStatus(FlowStatus $status)
+    {
+
+        $this->update([
+            'status' => $status->value,
+            'completed_at' => null,
+            'canceled_at' => null,
+        ]);
+    }
+
     #[Scope]
     public function scopeRunning(Builder $query): Builder
     {
@@ -106,6 +139,7 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
             'due_date' => 'date',
             'start_date' => 'date',
             'completed_at' => 'date',
+            'canceled_at' => 'date',
         ];
     }
 }

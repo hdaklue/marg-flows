@@ -16,6 +16,7 @@ trait BelongsToTenant
     public static function bootBelongsToTenant(): void
     {
         static::creating(static function ($model) {
+
             // Skip if tenant_id already set
             if ($model->tenant_id) {
                 return;
@@ -29,7 +30,7 @@ trait BelongsToTenant
         });
     }
 
-    protected static function resolveTenantId(): ?int
+    protected static function resolveTenantId(): int|string|null
     {
         // Try Filament first (if available)
         if (class_exists(Filament::class)) {

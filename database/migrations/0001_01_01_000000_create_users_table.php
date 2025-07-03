@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,11 +20,15 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('account_type')->default('user');
             $table->string('password');
-            $table->string('active_tenant_id')->nullable();
+
+            $table->foreignUlid('active_tenant_id')
+                ->nullable()
+                ->references('id')->on('tenants');
+            $table->string('timezone')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
 
-            $table->index('active_tenant_id');
             $table->index('email');
             $table->index('account_type');
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\AcceptInvitation;
 use App\Http\Controllers\EditorJsUpload;
 use App\Livewire\Previewtest;
+use App\Livewire\Reusable\Kanban;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -13,7 +14,7 @@ use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', action: Previewtest::class)->name('home');
-
+Route::get('/sort', Kanban::class);
 // Route::get('/', function () {
 //     return Flow::byStatus('pause')->get();
 // });

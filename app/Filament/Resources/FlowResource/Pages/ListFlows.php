@@ -16,7 +16,6 @@ class ListFlows extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
-
         ];
     }
 }

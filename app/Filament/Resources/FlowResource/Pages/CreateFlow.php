@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Filament\Resources\FlowResource\Pages;
 
 use App\Actions\Flow\CreateFlow as CreateFlowAction;
+use App\DTOs\Flow\CreateFlowDto;
+use App\Exceptions\Flow\FlowCreationException;
 use App\Filament\Resources\FlowResource;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
 use App\Models\User;
-use Filament\Forms\Components\DatePicker;
+use App\Services\Flow\TemplateService;
+use Carbon\CarbonTimeZone;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -19,7 +23,9 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class CreateFlow extends CreateRecord
 {
@@ -51,20 +57,27 @@ class CreateFlow extends CreateRecord
                         ->placeholder('Title')
                         ->required(),
                     Section::make([
-
                         EditorJs::make('wiki')
                             ->required()
                             ->columnSpanFull(),
                     ])->columnSpan(3),
-
                     Section::make([
-                        DatePicker::make('start_date')
-                            ->default(today())
+                        Select::make('template')
+                            ->options(TemplateService::toArray())
+                            ->selectablePlaceholder(false),
+                        DateTimePicker::make('start_date')
+                            ->minDate(today(\auth()->user()->timezone))
+                            ->default(now(\auth()->user()->timezone))
+                            ->required()
                             ->live(onBlur: true)
                             ->native(false),
-                        DatePicker::make('due_date')
+                        DateTimePicker::make('due_date')
                             ->required()
-                            ->minDate(fn (Get $get) => $get('start_date'))
+                            ->minDate(function (Get $get) {
+                                if ($get('start_date')) {
+                                    return Carbon::parse($get('start_date'), CarbonTimeZone::create(\auth()->user()->timezone))->addHour();
+                                }
+                            })
                             ->afterOrEqual('start_date')
                             ->native(false),
                         Select::make('participants')
@@ -84,16 +97,29 @@ class CreateFlow extends CreateRecord
 
     public function create(bool $another = false): void
     {
+
         $this->authorizeAccess();
         $data = $this->form->getState();
+
         try {
-            CreateFlowAction::run($data, filament()->getTenant(), filament()->auth()->user());
+            $flowDto = CreateFlowDto::fromArray($data);
+        } catch (ValidationException $e) {
+            Log::error($e->getMessage());
+        }
+
+        try {
+            CreateFlowAction::run($flowDto, filament()->getTenant(), filament()->auth()->user());
             $this->form->fill();
             Notification::make()
                 ->body('Created Successfully')
                 ->success()
                 ->send();
 
+        } catch (FlowCreationException $e) {
+            Notification::make()
+                ->body('We could not create the flow')
+                ->danger()
+                ->send();
         } catch (\Exception $e) {
             Notification::make()
                 ->body('Something went wrong')

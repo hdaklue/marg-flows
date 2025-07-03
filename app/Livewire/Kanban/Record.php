@@ -6,6 +6,7 @@ namespace App\Livewire\Kanban;
 
 use App\Enums\FlowStatus;
 use App\Models\Flow;
+use App\Services\Flow\TimeProgressService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -15,22 +16,54 @@ class Record extends Component
 
     public string $color;
 
+    public array $progressDetails;
+
+    public bool $shouldShowProgressDetails;
+
     protected $listeners = ['members-updated' => '$refresh'];
 
     public function mount()
     {
-        $this->color = $this->getColor();
+        $this->setColor();
+        $this->setProgressDetails();
+        $this->setShouldShowProgressDetails();
     }
 
-    public function getColor()
+    public function setColor()
     {
-        return FlowStatus::from($this->record->status)->getColor();
+        $this->color = FlowStatus::from($this->record->status)->getColor();
+    }
+
+    public function shouldShowProgressDetails()
+    {
+
+        return $this->record->status == FlowStatus::ACTIVE->value || $this->record->status == FlowStatus::SCHEDULED->value;
+    }
+
+    public function setShouldShowProgressDetails()
+    {
+
+        $this->shouldShowProgressDetails = $this->shouldShowProgressDetails();
+    }
+
+    public function setProgressDetails()
+    {
+        $this->progressDetails = app(TimeProgressService::class)->getProgressDetails($this->record);
+    }
+
+    public function setColors()
+    {
+        $this->color = $this->getColor();
     }
 
     #[On('status-changed')]
-    public function reloadColors()
+    public function handleStatusChange()
     {
-        $this->color = $this->getColor();
+
+        $this->setColor();
+        $this->setShouldShowProgressDetails();
+        $this->setProgressDetails();
+
     }
 
     public function render()

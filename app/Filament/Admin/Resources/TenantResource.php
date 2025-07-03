@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources;
 
 use App\Actions\Tenant\AddMember;
+use App\Enums\Account\AccountType;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\TenantResource\Pages;
 use App\Filament\Admin\Resources\TenantResource\RelationManagers\ParticipantRelationManager;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
+use Exception;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -106,9 +108,13 @@ class TenantResource extends Resource
                         ->native(false)
                         ->options(User::query()->notMemberOf($record)->get()->mapWithKeys(fn ($record) => [$record->id => "{$record->name} - {$record->email}"])),
                     Select::make('system_roles')
-                        ->options(function () use ($record) {
+                        ->options(function () {
 
-                            $userRole = $record->rolesForUser(\auth()->user())->first()->name;
+                            $userRole = match (auth()->user()->account_type) {
+                                AccountType::ADMIN->value => RoleEnum::ADMIN->value,
+                                AccountType::MANAGER->value => RoleEnum::MANAGER->value,
+                                default => throw new Exception('Invalid account type'),
+                            };
 
                             return RoleEnum::whereLowerThanOrEqual(RoleEnum::from($userRole))->toArray();
                         })

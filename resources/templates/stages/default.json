@@ -6,27 +6,57 @@
         {
             "name": "scheduled",
             "order": 1,
-            "color": "indigo"
+            "color": "indigo",
+            "settings": {
+                "show_progress": true,
+                "show_days": true,
+                "show_overdue": true,
+                "lock_edits": false
+            }
         },
         {
             "name": "active",
             "order": 2,
-            "color": "sky"
+            "color": "sky",
+            "settings": {
+                "show_progress": true,
+                "show_days": true,
+                "show_overdue": true,
+                "lock_edits": false
+            }
         },
         {
             "name": "approval",
             "order": 3,
-            "color": "amber"
+            "color": "amber",
+            "settings": {
+                "show_progress": true,
+                "show_days": true,
+                "show_overdue": true,
+                "lock_edits": true
+            }
         },
         {
             "name": "completed",
             "order": 4,
-            "color": "teal"
+            "color": "teal",
+            "settings": {
+                "show_progress": true,
+                "show_days": true,
+                "show_overdue": false,
+                "lock_edits": true
+            }
         },
         {
             "name": "canceled",
             "order": 5,
-            "color": "gray"
+            "color": "gray",
+            "settings": {
+                "show_progress": true,
+                "show_days": true,
+                "show_overdue": false,
+                "lock_edits": false
+            }
         }
     ]
 }
