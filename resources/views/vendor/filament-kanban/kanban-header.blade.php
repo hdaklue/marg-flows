@@ -12,11 +12,11 @@
         </h3>
     </div>
     <div class="flex items-center justify-center">
-        @can('manageFlows', filament()->getTenant())
+        @if($this->canManageFlow)
             <a href="{{ App\Filament\Resources\FlowResource::getUrl('create') }}"
                 class="border-{{ $color }}-400 dark:border-{{ $color }}-800/30 dark:hover:bg-{{ $color }}-600/40 text-{{ $color }}-400 dark:text-{{ $color }}-600/50 dark:bg-{{ $color }}-800/10 hover:text-{{ $color }}-700 hover:bg-{{ $color }}-200 dark:hover:text-{{ $color }}-400 bg-{{ $color }}-50 rounded-md border p-1 transition-all active:scale-95">
                 <x-heroicon-c-plus class="w-3 h-3" />
             </a>
-        @endcan
+        @endif
     </div>
 </div>

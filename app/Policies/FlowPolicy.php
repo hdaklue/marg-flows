@@ -30,8 +30,7 @@ class FlowPolicy
     public function view(User $user, Flow $flow): bool
     {
 
-        return $user->hasAnyRoleOn($flow)
-        || $flow->isSuperAdmin($user);
+        return $flow->isParticipant($user) || $flow->tenant->isAdmin($user);
     }
 
     /**

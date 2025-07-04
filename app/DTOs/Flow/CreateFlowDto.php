@@ -54,7 +54,7 @@ class CreateFlowDto extends ValidatedDTO
             'title' => ['required', 'string', 'min:3', 'max:255'],
             'status' => ['sometimes', Rule::enum(FlowStatus::class)],
             'order_column' => ['interger'],
-            'start_date' => ['date'],
+            'start_date' => ['date', 'required'],
             'due_date' => ['date', Rule::date()->afterOrEqual('start_date')],
             'completed_at' => ['date', Rule::date()->afterOrEqual('start_date')],
             'is_default' => 'boolean',

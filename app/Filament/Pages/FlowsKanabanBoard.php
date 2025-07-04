@@ -6,9 +6,10 @@ namespace App\Filament\Pages;
 
 use App\Enums\FlowStatus;
 use App\Models\Flow;
+use App\Models\User;
 use App\Services\Flow\TimeProgressService;
-use Filament\Actions\Action;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
 class FlowsKanabanBoard extends KanbanBoard
@@ -25,13 +26,11 @@ class FlowsKanabanBoard extends KanbanBoard
 
     protected ?string $maxContentWidth = 'full';
 
-    protected $listeners = ['members-updated' => '$refresh'];
+    // protected $listeners = ['members-updated' => '$refresh'];
 
     public function getHeaderActions(): array
     {
         return [
-            //         Action::make('Create')
-            //   ,
         ];
     }
 
@@ -50,16 +49,28 @@ class FlowsKanabanBoard extends KanbanBoard
         if (method_exists(static::$model, 'setNewOrder')) {
             static::$model::setNewOrder($toOrderedIds);
         }
+        $this->dispatch("board-item-updated.{$recordId}");
+    }
+
+    /**
+     * @var User;
+     */
+    #[Computed]
+    public function canManageFlow()
+    {
+
+        return filamentUser()->can('manageFlows', filamentTenant()) ?? false;
+
     }
 
     protected function records(): Collection
     {
 
-        $isAdmin = filament()->getTenant()->isAdmin(\filament()->auth()->user());
+        $isAdmin = filamentTenant()->isAdmin(filamentUser());
 
         return Flow::unless($isAdmin, function ($query) {
-            $query->forParticipant(\filament()->auth()->user());
-        })->byTenant(filament()->getTenant())->with(['creator', 'participants'])->ordered()->get();
+            $query->forParticipant(filamentUser());
+        })->byTenant(filamentTenant())->with(['creator', 'participants'])->ordered()->get();
     }
 
     protected function getProgressPercentage(Flow $record)

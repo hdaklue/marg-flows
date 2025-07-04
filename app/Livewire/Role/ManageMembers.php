@@ -80,7 +80,7 @@ class ManageMembers extends Component implements HasActions, HasForms
 
         $this->loadManagableMembers();
         $this->form->fill();
-        $this->dispatch('members-updated');
+        $this->dispatch("board-item-updated.{$this->roleable->id}");
 
     }
 
@@ -91,7 +91,8 @@ class ManageMembers extends Component implements HasActions, HasForms
                 $user = User::where('id', '=', $arguments['memberId'])->first();
                 RemoveParticipant::run($this->roleable, $user);
                 $this->loadManagableMembers();
-                $this->dispatch('members-updated');
+
+                $this->dispatch("board-item-updated.{$this->roleable->id}");
             })->requiresConfirmation()
             ->color('danger');
 

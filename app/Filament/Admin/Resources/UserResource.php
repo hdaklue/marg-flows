@@ -32,7 +32,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with(['latestLogin', 'receivedInvitation']))
+            ->modifyQueryUsing(fn ($query) => $query->with(['latestLogin', 'receivedInvitation.sender']))
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('email'),

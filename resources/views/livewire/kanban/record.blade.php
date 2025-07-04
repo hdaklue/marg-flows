@@ -1,16 +1,16 @@
 <div x-data="{
     color: $wire.entangle('color'),
     progressDetails: $wire.entangle('progressDetails'),
-
 }" id="{{ $record->getKey() }}"
-    class="record dark:bg-{{ $color }}-900/10 dark:hover:bg-{{ $color }}-900/20 bg-{{ $color }}-50 hover:bg-{{ $color }}-200 @can('manageFlows', filament()->getTenant())
+
+    class="record dark:bg-{{ $this->color }}-900/10 dark:hover:bg-{{ $this->color }}-900/20 bg-{{ $this->color }}-50 hover:bg-{{ $this->color }}-200 @if($this->userPermissions['canManageFlows'])
      cursor-move
-     @endcan relative overflow-hidden rounded-lg p-2 text-base font-medium text-gray-800 transition-all dark:text-gray-200"
+     @endif relative overflow-hidden rounded-lg p-2 text-base font-medium text-gray-800 transition-all dark:text-gray-200"
     @if ($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3) x-data @endif>
 
     <div class="flex flex-row justify-between gap-2">
         <div
-            class="text-{{ $color }}-800 flex cursor-pointer text-sm font-semibold leading-snug dark:text-gray-300">
+            class="text-{{ $this->color }}-800 flex cursor-pointer text-sm font-semibold leading-snug dark:text-gray-300">
             <a href="{{ App\Filament\Pages\ViewFlow::getUrl(['record' => $record->getKey()]) }}">{{ $record->title }}</a>
         </div>
         <div class="flex flex-row -space-x-2">
@@ -55,7 +55,7 @@
     </div> --}}
     <div x-data class="flex justify-end pt-2 text-sm">
         <div x-data>
-            @can('manageMembers', $record)
+            @if($this->userPermissions['canManageMembers'])
                 <button title="Manage members"
                     class="cursor-pointer text-gray-700/70 hover:text-gray-700 dark:text-gray-700 dark:hover:text-gray-500"
                     {{-- wire:click="recordClicked('{{ $record->getKey() }}', {{ @json_encode($record) }})" --}}
@@ -69,7 +69,7 @@
                     <livewire:role.manage-members :roleable="$record" wire:key="manage-members-{{ $record->getKey() }}" />
                     {{-- Modal content --}}
                 </x-filament::modal>
-            @endcan
+            @endif
         </div>
     </div>
 
@@ -81,7 +81,7 @@
 
     {{-- <div class="absolute bottom-0 w-full h-1 start-0">
         <div class="relative h-0.5">
-            <div class="dark:bg-{{ $color }}-800 bg-{{ $color }}-400 absolute start-0 top-0 h-full"
+            <div class="dark:bg-{{ $this->color }}-800 bg-{{ $this->color }}-400 absolute start-0 top-0 h-full"
                 style="width: {{ $this->getProgressPercentage($record) }}%">
             </div>
         </div>

@@ -7,6 +7,7 @@ namespace App\Livewire\Kanban;
 use App\Enums\FlowStatus;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -14,56 +15,37 @@ class Record extends Component
 {
     public Flow $record;
 
-    public string $color;
+    public string $color = '';
 
-    public array $progressDetails;
+    public array $progressDetails = [];
 
-    public bool $shouldShowProgressDetails;
+    public bool $shouldShowProgressDetails = false;
 
-    protected $listeners = ['members-updated' => '$refresh'];
+    protected $listeners = ['board-item-updated.{record.id}' => '$refresh'];
 
     public function mount()
     {
-        $this->setColor();
-        $this->setProgressDetails();
-        $this->setShouldShowProgressDetails();
+        $this->refreshComputedData();
     }
 
-    public function setColor()
+    #[On('board-item-updated.{record.id}')]
+    public function refreshComputedData()
     {
         $this->color = FlowStatus::from($this->record->status)->getColor();
+        $this->shouldShowProgressDetails = in_array($this->record->status, [FlowStatus::ACTIVE->value, FlowStatus::SCHEDULED->value]);
+
+        if ($this->shouldShowProgressDetails) {
+            $this->progressDetails = app(TimeProgressService::class)->getProgressDetails($this->record);
+        }
     }
 
-    public function shouldShowProgressDetails()
+    #[Computed]
+    public function userPermissions(): array
     {
-
-        return $this->record->status == FlowStatus::ACTIVE->value || $this->record->status == FlowStatus::SCHEDULED->value;
-    }
-
-    public function setShouldShowProgressDetails()
-    {
-
-        $this->shouldShowProgressDetails = $this->shouldShowProgressDetails();
-    }
-
-    public function setProgressDetails()
-    {
-        $this->progressDetails = app(TimeProgressService::class)->getProgressDetails($this->record);
-    }
-
-    public function setColors()
-    {
-        $this->color = $this->getColor();
-    }
-
-    #[On('status-changed')]
-    public function handleStatusChange()
-    {
-
-        $this->setColor();
-        $this->setShouldShowProgressDetails();
-        $this->setProgressDetails();
-
+        return [
+            'canManageFlows' => auth()->user()->can('manageFlows', filament()->getTenant()),
+            'canManageMembers' => auth()->user()->can('manageMembers', $this->record),
+        ];
     }
 
     public function render()

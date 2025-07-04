@@ -24,11 +24,11 @@
                 x-data="{ show: true }" x-show="show" @item-is-moving.window="show = false"
                 @item-stopped-moving.window="show = true">
                 <p class="w-2/3 text-center text-gray-400 text-2xs dark:text-gray-500">
-                    @can('manageFlows', filament()->getTenant())
+                    @if($this->canManageFlow)
                         No items assinged, you can drag and drop here!
                     @else
                         No items assinged!
-                    @endcan
+                    @endif
                 </p>
             </div>
         @endunless

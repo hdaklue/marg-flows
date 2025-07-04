@@ -18,7 +18,6 @@ document.addEventListener('alpine:init', () => {
         editorLocale: null,
 
         init() {
-
             this.setupLocaleWatcher();
             this.initializeEditor();
             this.watchStateChanges();
