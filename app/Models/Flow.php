@@ -60,6 +60,7 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
         'due_date',
         'completed_at',
         'canceled_at',
+        'blocks',
     ];
 
     /* The model's default values for attributes.
@@ -135,7 +136,7 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
     {
         return [
             'settings' => 'array',
-            // 'status' => FlowStatus::class,
+            'blocks' => 'json:unicode',
             'due_date' => 'datetime',
             'start_date' => 'datetime',
             'completed_at' => 'date',

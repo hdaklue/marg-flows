@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\FlowStatus;
@@ -26,6 +28,7 @@ class FlowFactory extends Factory
 
         return [
             'title' => $this->getProjectTitle(),
+            'blocks' => '{}',
             'status' => $statusType,
             'start_date' => $startDate,
             'due_date' => $dueDate,
@@ -122,7 +125,7 @@ class FlowFactory extends Factory
             $completedAt = $now->copy()->subDays(fake()->numberBetween(1, 90))->setTime(
                 fake()->numberBetween(9, 17),
                 fake()->numberBetween(0, 59),
-                0
+                0,
             );
 
             $duration = fake()->numberBetween(7, 60);
@@ -188,7 +191,7 @@ class FlowFactory extends Factory
     /**
      * Get weighted status selection (more predictable than random)
      */
-    private function getWeightedStatus(): string
+    private function getWeightedStatus(): int|string
     {
         $weights = [
             FlowStatus::SCHEDULED->value => 25,  // 25%
@@ -213,7 +216,7 @@ class FlowFactory extends Factory
     /**
      * Generate predictable dates based on status
      */
-    private function generateDatesForStatus(string $status): array
+    private function generateDatesForStatus(string|int $status): array
     {
         $now = now();
 
@@ -290,7 +293,7 @@ class FlowFactory extends Factory
         $completedAt = $now->copy()->subDays($completedDaysAgo)->setTime(
             fake()->numberBetween(9, 17), // Business hours
             fake()->numberBetween(0, 59),
-            0
+            0,
         );
 
         // Started before completion

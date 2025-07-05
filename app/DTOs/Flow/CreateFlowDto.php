@@ -24,6 +24,8 @@ class CreateFlowDto extends ValidatedDTO
 
     public bool $is_default;
 
+    public $blocks;
+
     public ?int $order_column;
 
     public ?array $participants;
@@ -54,7 +56,8 @@ class CreateFlowDto extends ValidatedDTO
             'title' => ['required', 'string', 'min:3', 'max:255'],
             'status' => ['sometimes', Rule::enum(FlowStatus::class)],
             'order_column' => ['interger'],
-            'start_date' => ['date', 'required'],
+            'blocks' => ['required'],
+            'start_date' => ['date', 'required', Rule::date()->afterOrEqual(today()->startOfDay())],
             'due_date' => ['date', Rule::date()->afterOrEqual('start_date')],
             'completed_at' => ['date', Rule::date()->afterOrEqual('start_date')],
             'is_default' => 'boolean',
@@ -79,6 +82,7 @@ class CreateFlowDto extends ValidatedDTO
 
     protected function evaluateDefaultStatus(): FlowStatus
     {
+
         return $this->start_date->isAfter(today()) ? FlowStatus::SCHEDULED : FlowStatus::ACTIVE;
     }
 
@@ -86,7 +90,7 @@ class CreateFlowDto extends ValidatedDTO
     {
         return [
             'status' => new EnumCast(FlowStatus::class),
-            'start_date' => new CarbonCast(config('app.timezone')),
+            'start_date' => new CarbonCast,
             'due_date' => new CarbonCast,
             'completed_at' => new CarbonCast,
         ];

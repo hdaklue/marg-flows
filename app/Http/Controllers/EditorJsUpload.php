@@ -30,7 +30,7 @@ class EditorJsUpload extends Controller
         return response()->json([
             'success' => 1,
             'file' => [
-                'url' => Storage::temporaryUrl($path, now()->addHour()),
+                'url' => Storage::url($path, now()->addHour()),
             ],
         ]);
     }

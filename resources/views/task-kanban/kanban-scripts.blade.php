@@ -1,6 +1,7 @@
 <script>
     function onStart() {
-        setTimeout(() => document.body.classList.add("grabbing"))
+        window.dispatchEvent(new CustomEvent('item-is-moving'));
+        setTimeout(() => document.body.classList.add("grabbing"));
     }
 
     function onEnd() {
@@ -16,8 +17,10 @@
     function onAdd(e) {
         const recordId = e.item.id
         const status = e.to.dataset.statusId
-        const fromOrderedIds = [].slice.call(e.from.children).map(child => child.id)
-        const toOrderedIds = [].slice.call(e.to.children).map(child => child.id)
+        const fromOrderedIds = [...e.from.children].map(child => child.id)
+        // const fromOrderedIds = [].slice.call(e.from.children).map(child => child.id)
+        // const toOrderedIds = [].slice.call(e.to.children).map(child => child.id)
+        const toOrderedIds = [...e.to.children].map(child => child.id)
 
         Livewire.dispatch('status-changed', {
             recordId,
@@ -56,9 +59,7 @@
             onUpdate,
             setData,
             onAdd,
-            onStart: function( /**Event*/ evt) {
-                window.dispatchEvent(new CustomEvent('item-is-moving'))
-            },
+
 
         }))
 

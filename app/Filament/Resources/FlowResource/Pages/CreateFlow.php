@@ -7,6 +7,7 @@ namespace App\Filament\Resources\FlowResource\Pages;
 use App\Actions\Flow\CreateFlow as CreateFlowAction;
 use App\DTOs\Flow\CreateFlowDto;
 use App\Exceptions\Flow\FlowCreationException;
+use App\Filament\Pages\FlowsKanabanBoard;
 use App\Filament\Resources\FlowResource;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
@@ -42,6 +43,7 @@ class CreateFlow extends CreateRecord
 
     public function form(Form $form): Form
     {
+
         return $form
             ->schema([
                 Grid::make([
@@ -54,7 +56,7 @@ class CreateFlow extends CreateRecord
                         ->placeholder('Title')
                         ->required(),
                     Section::make([
-                        EditorJs::make('wiki')
+                        EditorJs::make('blocks')
                             ->required()
                             ->columnSpanFull(),
                     ])->columnSpan(3),
@@ -63,20 +65,20 @@ class CreateFlow extends CreateRecord
                             ->options(TemplateService::toArray())
                             ->selectablePlaceholder(false),
                         DatePicker::make('start_date')
-                            ->timezone(auth()->user()->timezone)
-                            ->minDate(today())
+                            ->minDate(today(filamentUser()->timezone))
                             ->required()
                             ->live(onBlur: true)
                             ->native(false),
 
                         DatePicker::make('due_date')
                             ->required()
-                            ->timezone(auth()->user()->timezone)
-                            ->afterOrEqual(fn($get)=>$get('start_date'))
+                            ->minDate(fn ($get) => $get('start_date'))
+
+                            ->afterOrEqual(fn ($get) => $get('start_date'))
                             ->native(false),
                         Select::make('participants')
-                            ->options(User::memberOf(filament()->getTenant())
-                                ->where('id', '!=', filament()->auth()->user()->id)
+                            ->options(User::memberOf(filamentTenant())
+                                ->where('id', '!=', filamentUser()->id)
                                 ->pluck('name', 'id'))
                             ->multiple(true)
                             ->native(false),
@@ -94,22 +96,24 @@ class CreateFlow extends CreateRecord
 
         $this->authorizeAccess();
         $data = $this->form->getState();
-        // $data['start_date'] = fromUserDateTime($data['start_date'],auth()->user());
-        // $data['due_date'] = fromUserDateTime($data['due_date'],auth()->user());
 
         try {
+
             $flowDto = CreateFlowDto::fromArray($data);
         } catch (ValidationException $e) {
             Log::error($e->getMessage());
         }
 
         try {
-            CreateFlowAction::run($flowDto, filament()->getTenant(), filament()->auth()->user());
+            CreateFlowAction::run($flowDto, filamentTenant(), filamentUser());
+
             $this->form->fill();
+
             Notification::make()
                 ->body('Created Successfully')
                 ->success()
                 ->send();
+            $this->redirect(FlowsKanabanBoard::getUrl(['tenant' => filamentTenant()]));
 
         } catch (FlowCreationException $e) {
             Notification::make()
@@ -129,5 +133,10 @@ class CreateFlow extends CreateRecord
     public function getHeading(): string|Htmlable
     {
         return '';
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return null; // Disables automatic notification
     }
 }

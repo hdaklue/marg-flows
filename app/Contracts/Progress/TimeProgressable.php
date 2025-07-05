@@ -8,6 +8,8 @@ use Illuminate\Support\Carbon;
 
 interface TimeProgressable
 {
+    public function getKey();
+
     /**
      * Get the start date for progress calculation
      */

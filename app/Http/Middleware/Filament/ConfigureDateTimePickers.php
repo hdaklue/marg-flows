@@ -20,11 +20,12 @@ class ConfigureDateTimePickers
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $timezone = auth()->user()?->timezone ?: \config('app.timezone');
+        $timezone = filamentUser()->timezone ?: \config('app.timezone');
 
         DateTimePicker::configureUsing(function (DateTimePicker $component) use ($timezone) {
             $component->timezone($timezone);
             $component->format('m/d/Y g:i A');
+
             return $component;
         });
         DatePicker::configureUsing(fn (DatePicker $component) => $component->timezone($timezone),

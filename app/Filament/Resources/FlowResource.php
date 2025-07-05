@@ -6,9 +6,11 @@ namespace App\Filament\Resources;
 
 use App\Enums\FlowStatus;
 use App\Filament\Resources\FlowResource\Pages;
+use App\Filament\Resources\FlowResource\Pages\FlowPages;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
 use App\Tables\Columns\Progress;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
@@ -31,11 +33,12 @@ class FlowResource extends Resource
 
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                $isAdmin = filament()->getTenant()->isAdmin(\filament()->auth()->user());
+                $isAdmin = filamentTenant()->isAdmin(filamentUser());
                 $query->unless($isAdmin, function ($query) {
-                    $query->forParticipant(\filament()->auth()->user());
+                    $query->forParticipant(filamentUser());
                 })->running()->with(['creator', 'participants'])->ordered();
             })
+            ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
             ->reorderable('order_column')
             ->columns([
@@ -67,7 +70,6 @@ class FlowResource extends Resource
                     ->getStateUsing(fn ($record) => $record->participants->pluck('avatar'))
                     ->circular()
                     ->stacked(),
-
             ])
 
             ->filters([
@@ -91,11 +93,19 @@ class FlowResource extends Resource
         ];
     }
 
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            FlowPages::class,
+        ]);
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListFlows::route('/'),
             'create' => Pages\CreateFlow::route('/create'),
+            'pages' => FlowPages::route('/d/{record}'),
             // 'edit' => Pages\EditFlow::route('/{record}/edit'),
         ];
     }

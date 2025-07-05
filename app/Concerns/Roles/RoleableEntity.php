@@ -338,21 +338,22 @@ trait RoleableEntity
      */
     public function usersWithAnyRole(?string $guard = null): MorphToMany
     {
-        return $this->usersWithRole([], $guard)
-            ->with(['roles' => function ($query) use ($guard) {
-                $query->select(['id', 'name'])
-                    ->wherePivot('roleable_type', $this->getMorphClass())
-                    ->wherePivot('roleable_id', $this->getKey())
-                    ->when($guard, function ($query, $guard) {
-                        $query->where('guard_name', $guard);
-                    })
-                    ->when(app(PermissionRegistrar::class)->teams, function ($query) {
-                        $teamId = getPermissionsTeamId();
-                        if ($teamId) {
-                            $query->wherePivot('tenant_id', $teamId);
-                        }
-                    });
-            }]);
+
+        return $this->usersWithRole([], $guard);
+        // ->with(['roles' => function ($query) use ($guard) {
+        //     $query->select(['id', 'name'])
+        //         ->wherePivot('roleable_type', $this->getMorphClass())
+        //         ->wherePivot('roleable_id', $this->getKey())
+        //         ->when($guard, function ($query, $guard) {
+        //             $query->where('guard_name', $guard);
+        //         })
+        //         ->when(app(PermissionRegistrar::class)->teams, function ($query) {
+        //             $teamId = getPermissionsTeamId();
+        //             if ($teamId) {
+        //                 $query->wherePivot('tenant_id', $teamId);
+        //             }
+        //         });
+        // }]);
         // ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
         // ->select([
         //     'users.*',

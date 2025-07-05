@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Flow;
 
-use Throwable;
+use App\Actions\Roleable\AddParticipant;
+use App\DTOs\Flow\CreateFlowDto;
+use App\Enums\Role\RoleEnum;
+use App\Exceptions\Flow\FlowCreationException;
 use App\Models\Flow;
-use App\Models\User;
 use App\Models\Stage;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Bus\Batch;
-use App\Enums\Role\RoleEnum;
-use Illuminate\Support\Carbon;
-use App\DTOs\Flow\CreateFlowDto;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
-use App\Actions\Roleable\AddParticipant;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
-use App\Exceptions\Flow\FlowCreationException;
+use Throwable;
 
 // TODO:Move to top order after create
 class CreateFlow
@@ -34,7 +33,7 @@ class CreateFlow
                 $flow = $this->makeFlow($data);
                 $flow->tenant()->associate($tenant);
                 $flow->creator()->associate($creator);
-       
+
                 $flow->save();
                 $this->attachFlowStages($flow, $data, $tenant);
                 $flow->addParticipant($creator, RoleEnum::ADMIN->value, true);
@@ -50,14 +49,15 @@ class CreateFlow
 
         } catch (QueryException $e) {
             Log::error('Database error creating flow', [
-                'tenant_id' => $tenant->id,
+                'tenant_id' => $tenant->getKey(),
                 'creator_id' => $creator->id,
                 'error' => $e->getMessage(),
             ]);
+
             throw new FlowCreationException('Failed to create flow due to database constraints');
         } catch (\Exception $e) {
             Log::error('Unexpected error creating flow', [
-                'tenant_id' => $tenant->id,
+                'tenant_id' => $tenant->getKey(),
                 'creator_id' => $creator->id,
                 'error' => $e->getMessage(),
             ]);
@@ -67,6 +67,7 @@ class CreateFlow
 
     protected function attachFlowStages(Flow $flow, CreateFlowDto $data, Tenant $tenant)
     {
+
         $stages = $data->template->stages->map(function ($stage, $tenant) {
             $stage = Stage::make([
                 'name' => $stage->name,
@@ -83,13 +84,13 @@ class CreateFlow
 
     protected function makeFlow(CreateFlowDto $data): Flow
     {
-        
 
         return Flow::make([
             'title' => $data->title,
             'start_date' => $data->start_date,
             'due_date' => $data->due_date,
             'status' => $data->status,
+            'blocks' => $data->blocks,
         ]);
     }
 

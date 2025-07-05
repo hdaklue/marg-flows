@@ -1,5 +1,4 @@
 <div class="flex flex-col space-y-2">
-
     <div class="rounded-lg bg-gray-100 px-4 py-3 dark:bg-gray-800/30">
         <header class="border-b border-gray-200 pb-2 font-semibold dark:border-gray-800/60">
             Assign new members
@@ -21,8 +20,8 @@
             Manage Members
         </header>
         <div class="mt-2 flex flex-col space-y-2">
-            @if (count($managableMembers))
-                @foreach ($managableMembers as $member)
+            @if (count($manageableMembers))
+                @foreach ($manageableMembers as $member)
                     <div class="flex flex-col">
                         <div class="flex justify-between border-gray-200 py-1 dark:border-gray-800">
                             <div class="flex items-center gap-2">

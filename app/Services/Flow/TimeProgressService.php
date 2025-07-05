@@ -7,6 +7,7 @@ namespace App\Services\Flow;
 use App\Contracts\Progress\TimeProgressable;
 use App\ValueObjects\Percentage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class TimeProgressService
 {
@@ -87,19 +88,24 @@ class TimeProgressService
         $percentage = $this->isCompleted($item) ? Percentage::complete() : $this->calculateProgressPercentage($item);
         $color = $this->mapStatusToColor($status, $percentage);
 
-        return [
-            'percentage' => $percentage->toArray(),
-            'status' => $status,
-            'color' => $color,
-            'days_remaining' => $this->getDaysRemaining($item),
-            'days_elapsed' => $this->getDaysElapsed($item),
-            'total_days' => $this->getTotalDays($item),
-            'is_overdue' => $this->isPastDue($item),
-            'is_completed' => $this->isCompleted($item),
-            'is_scheduled' => $this->isScheduled($item),
-            'start_date' => $item->getProgressStartDate()->format('Y-m-d'),
-            'due_date' => $item->getProgressDueDate()->format('Y-m-d'),
-        ];
+        return Cache::remember(
+            $this->getCacheKey($item),
+            now()->endOfDay()->diffInSeconds(now()),
+            function () use ($item, $percentage, $status, $color) {
+                return [
+                    'percentage' => $percentage->toArray(),
+                    'color' => $color,
+                    'status' => $status,
+                    'days_remaining' => $this->getDaysRemaining($item),
+                    'days_elapsed' => $this->getDaysElapsed($item),
+                    'total_days' => $this->getTotalDays($item),
+                    'is_overdue' => $this->isPastDue($item),
+                    'is_completed' => $this->isCompleted($item),
+                    'is_scheduled' => $this->isScheduled($item),
+                    'start_date' => $item->getProgressStartDate()->format('Y-m-d'),
+                    'due_date' => $item->getProgressDueDate()->format('Y-m-d'),
+                ];
+            });
     }
 
     /**
@@ -225,6 +231,20 @@ class TimeProgressService
             self::STATUS_OVERDUE => 'heroicon-o-exclamation-triangle',
             default => 'heroicon-o-question-mark-circle',
         };
+    }
+
+    private function getCacheKey(TimeProgressable $item): string
+    {
+        $itemId = get_class($item) . '_' . $item->getKey();
+
+        return sprintf(
+            'progress_%s_%s_%s_%s_%s',
+            $itemId,
+            $item->getProgressStartDate()->format('Ymd'),
+            $item->getProgressDueDate()->format('Ymd'),
+            $item->getProgressCompletedDate()?->format('Ymd') ?? 'pending',
+            now()->endOfDay()->timestamp,
+        );
     }
 
     /**

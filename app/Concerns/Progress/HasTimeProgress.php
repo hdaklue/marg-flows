@@ -27,7 +27,6 @@ trait HasTimeProgress
                 throw new InvalidArgumentException('Model must have valid progress dates');
             }
         });
-
     }
 
     /**

@@ -31,6 +31,8 @@ return new class extends Migration
 
             $table->json('settings')->nullable();
 
+            $table->json('blocks');
+
             // foreign keys
             $table->foreignUlid('tenant_id')->references('id')->on('tenants');
             $table->foreignUlid('creator_id')

@@ -8,14 +8,16 @@ use App\Enums\FlowStatus;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Record extends Component
 {
+    #[Locked]
     public Flow $record;
 
-    public string $color = '';
+    public string $color;
 
     public array $progressDetails = [];
 
@@ -25,13 +27,19 @@ class Record extends Component
 
     public function mount()
     {
+        $this->record;
+
         $this->refreshComputedData();
     }
 
     #[On('board-item-updated.{record.id}')]
     public function refreshComputedData()
     {
-        $this->color = FlowStatus::from($this->record->status)->getColor();
+        $this->color = cache()->remember(
+            "flow_color_{$this->record->status}",
+            3600,
+            fn () => FlowStatus::from($this->record->status)->getColor(),
+        );
         $this->shouldShowProgressDetails = in_array($this->record->status, [FlowStatus::ACTIVE->value, FlowStatus::SCHEDULED->value]);
 
         if ($this->shouldShowProgressDetails) {
@@ -39,12 +47,12 @@ class Record extends Component
         }
     }
 
-    #[Computed]
+    #[Computed(true)]
     public function userPermissions(): array
     {
         return [
-            'canManageFlows' => auth()->user()->can('manageFlows', filament()->getTenant()),
-            'canManageMembers' => auth()->user()->can('manageMembers', $this->record),
+            'canManageFlows' => filamentUser()->can('manageFlows', filamentTenant()),
+            'canManageMembers' => filamentUser()->can('manageMembers', $this->record),
         ];
     }
 

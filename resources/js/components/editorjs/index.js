@@ -4,45 +4,32 @@ import ImageTool from '@editorjs/image';
 import EditorJsList from "@editorjs/list";
 import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
-import ChangeCase from 'editorjs-change-case';
+import Alert from 'editorjs-alert';
 import DragDrop from 'editorjs-drag-drop';
-
 import HyperLink from 'editorjs-hyperlink';
 import Undo from 'editorjs-undo';
 
-document.addEventListener('alpine:init', () => {
-    Alpine.data('editorJs', (livewireState, uploadUrl) => ({
+
+export default function editorjs(livewireState, uploadUrl) {
+    return {
         editor: null,
         state: livewireState,
         currentLocale: null,
         editorLocale: null,
 
         init() {
-            this.setupLocaleWatcher();
             this.initializeEditor();
             this.watchStateChanges();
         },
 
-        setupLocaleWatcher() {
-            window.addEventListener('locale-changed', (e) => {
-                if (e.detail?.locale && e.detail.locale !== this.currentLocale) {
-                    this.currentLocale = e.detail.locale;
-                }
-            });
-        },
-
         watchStateChanges() {
             this.$watch('state', (newState) => {
-                if (newState === null && this.editor) {
 
+                if (newState === null && this.editor) {
                     this.editor.blocks.clear();
                     return;
                 }
-                if (this.editor && this.editorLocale !== this.currentLocale) {
-                    const renderedState = (newState === "" || newState === null) ? '{}' : newState;
-                    this.editor.render(this.normalizeState(renderedState));
-                    this.editorLocale = this.currentLocale;
-                }
+
             });
         },
 
@@ -55,10 +42,8 @@ document.addEventListener('alpine:init', () => {
                 data: initialData,
                 placeholder: 'Let`s write an awesome story!',
                 defaultBlock: 'paragraph',
-                inlineToolbar: ['bold', 'link', 'changeCase', 'convertTo'],
+                inlineToolbar: ['bold', 'link', 'convertTo'],
                 tools: this.getEditorTools(csrf, uploadUrl),
-                i18n: this.getI18nConfig(this.currentLocale),
-
                 onChange: () => {
                     this.editor.save().then((outputData) => {
                         this.state = JSON.stringify(outputData);
@@ -88,11 +73,11 @@ document.addEventListener('alpine:init', () => {
                     class: Header,
                     config: {
                         placeholder: 'Enter a heading',
-                        levels: [2, 3, 4, 5],
-                        defaultLevel: 2,
+                        // levels: [2, 3, 4, 5],
+                        // defaultLevel: 2,
                     },
-                    inlineToolbar: ['changeCase'],
                 },
+
                 image: {
                     class: ImageTool,
                     config: {
@@ -123,6 +108,16 @@ document.addEventListener('alpine:init', () => {
                         maxLevel: 2,
                     }
                 },
+                alert: {
+                    class: Alert,
+                    inlineToolbar: true,
+                    shortcut: 'CMD+SHIFT+A',
+                    config: {
+                        alertTypes: ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'light', 'dark'],
+                        defaultType: 'primary',
+                        messagePlaceholder: 'Enter something',
+                    },
+                },
                 hyperlink: {
                     class: HyperLink,
                     config: {
@@ -134,24 +129,10 @@ document.addEventListener('alpine:init', () => {
                         validate: false,
                     }
                 },
-                changeCase: {
-                    class: ChangeCase,
-                    config: {
-                        showLocaleOption: true,
-                        locale: ['ar-AR', 'en-EN'],
-                    }
-                },
             };
         },
 
-        getI18nConfig(locale) {
-            return locale === 'ar'
-                ? {
-                    inlineToolbar: { converter: { 'Convert to': 'تحويل إلى' } },
-                    tools: { header: 'عناوين' },
-                }
-                : {};
-        },
+
 
         normalizeState(state) {
 
@@ -173,5 +154,8 @@ document.addEventListener('alpine:init', () => {
                 version: '2.31.0-rc.7',
             };
         }
-    }));
-});
+    }
+}
+
+
+

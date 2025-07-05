@@ -58,9 +58,7 @@ class FlowsKanabanBoard extends KanbanBoard
     #[Computed]
     public function canManageFlow()
     {
-
         return filamentUser()->can('manageFlows', filamentTenant()) ?? false;
-
     }
 
     protected function records(): Collection
@@ -70,7 +68,7 @@ class FlowsKanabanBoard extends KanbanBoard
 
         return Flow::unless($isAdmin, function ($query) {
             $query->forParticipant(filamentUser());
-        })->byTenant(filamentTenant())->with(['creator', 'participants'])->ordered()->get();
+        })->byTenant(filamentTenant())->with(['participants'])->ordered()->get();
     }
 
     protected function getProgressPercentage(Flow $record)

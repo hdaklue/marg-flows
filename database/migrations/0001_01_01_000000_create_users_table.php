@@ -21,9 +21,6 @@ return new class extends Migration
             $table->string('account_type')->default('user');
             $table->string('password');
 
-            $table->foreignUlid('active_tenant_id')
-                ->nullable()
-                ->references('id')->on('tenants');
             $table->string('timezone')->nullable();
 
             $table->rememberToken();

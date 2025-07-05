@@ -45,11 +45,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
-        // Event::subscribe(TenantEventSubscriber::class);
-        // FilamentAsset::register([
-        //     AlpineComponent::make('test-component', __DIR__ . '/../../resources/js/test.js'),
-        //     // Js::make('editorJs', __DIR__ . '/../../resources/js/components/editorjs/index.js'),
-        // ]);
+        Event::subscribe(TenantEventSubscriber::class);
+        FilamentAsset::register([
+            AlpineComponent::make('editorJs', __DIR__ . '/../../resources/js/dist/components/editorjs.js'),
+            // Js::make('editorJs', __DIR__ . '/../../public/build/assets/index-C9DEfZiz.js')->loadedOnRequest(),
+            // Js::make('editorJs', __DIR__ . '/../../resources/js/components/editorjs/index.js'),
+        ]);
 
     }
 
