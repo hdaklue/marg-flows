@@ -45,6 +45,19 @@ enum FlowStatus: int implements HasColor, HasLabel
         };
     }
 
+    public function getFilamentColor(): string
+    {
+        return match ($this) {
+            self::ACTIVE => 'primary',
+            self::PAUSED => 'warning',
+            self::BLOCKED => 'danger',
+            self::COMPLETED => 'success',
+            self::SCHEDULED => 'info',
+            default => 'gray',
+
+        };
+    }
+
     public function getTitle(): string
     {
         return $this->getLabel();

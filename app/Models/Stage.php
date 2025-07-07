@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Contracts\Status\HasStages;
+use App\Contracts\Stage\HasStages;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -31,8 +31,8 @@ class Stage extends Model
     public function scopeBy(Builder $builder, HasStages $entity)
     {
         return $builder->whereHas('stageable', function ($query) use ($entity) {
-            $query->where('stageable_id', $entity->id)
-                ->where('stageable_type', Relation::getMorphAlias(\get_class($entity)));
+            $query->where('stageable_id', $entity->getKey())
+                ->where('stageable_type', $entity->getMorphClass());
         });
     }
 

@@ -7,6 +7,7 @@ namespace App\Filament\Pages;
 use App\Filament\Resources\FlowResource;
 use App\Models\Flow;
 use Filament\Actions\Action;
+use Filament\Support\Enums\ActionSize;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -14,6 +15,9 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
+/**
+ * ViewFlow
+ */
 class ViewFlow extends KanbanBoard
 {
     protected static string $model = Flow::class;
@@ -31,6 +35,8 @@ class ViewFlow extends KanbanBoard
     #[Url('record')]
     #[Locked]
     public string $recordId;
+
+    protected ?string $maxContentWidth = 'full';
 
     #[Computed]
     public function flow(): Flow
@@ -52,9 +58,18 @@ class ViewFlow extends KanbanBoard
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('add')
+                ->label('Task')
+                ->color('primary')
+                ->size(ActionSize::ExtraSmall)
+                ->icon('heroicon-o-plus-circle')
+                ->outlined()
+                ->url(FlowResource::getUrl('pages', ['record' => $this->recordId])),
             Action::make('view')
                 ->label('Knowledge')
                 ->color('gray')
+                ->size(ActionSize::ExtraSmall)
+                ->icon('heroicon-o-document-text')
                 ->outlined()
                 ->url(FlowResource::getUrl('pages', ['record' => $this->recordId])),
         ];

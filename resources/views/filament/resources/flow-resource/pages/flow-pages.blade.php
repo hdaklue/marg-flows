@@ -1,23 +1,18 @@
-<x-filament-panels::page @class([
-    'fi-resource-create-record-page',
-    'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
-])>
-
-
-
-    <div class="flex w-full flex-row gap-4">
-
-        <div class="w-2/3">
+<x-filament-panels::page>
+    <div class="flex flex-row w-full gap-x-4">
+        <div class="w-3/4">
             <x-filament-panels::form id="form" :wire:key="$this->getId() . '.forms.' . $this->getFormStatePath()">
                 {{ $this->form }}
 
                 {{-- <x-filament-panels::form.actions :actions="$this->getCachedFormActions()" :full-width="$this->hasFullWidthFormActions()" /> --}}
             </x-filament-panels::form>
         </div>
-        <div class="w-1/3">
-            pages here
+        <div class="w-1/4">
+            <div @click.prevent="">Item</div>
         </div>
     </div>
+
+    <livewire:reusable.side-note-list />
 
     {{-- <x-filament-panels::page.unsaved-data-changes-alert /> --}}
 </x-filament-panels::page>

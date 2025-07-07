@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 interface HasStages
 {
     public function stages(): MorphMany;
-
     public function scopeByStage(Builder $builder, string|FlowStatus $status);
+    public function getKey();
+    public function getMorphClass();
 }

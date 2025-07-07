@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
 use App\Concerns\Progress\HasTimeProgress;
 use App\Concerns\Roles\RoleableEntity;
@@ -13,6 +14,7 @@ use App\Contracts\HasStaticType;
 use App\Contracts\Progress\TimeProgressable;
 use App\Contracts\Roles\HasParticipants;
 use App\Contracts\Roles\Roleable;
+use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
 use App\Enums\FlowStatus;
 use BackedEnum;
@@ -26,7 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
-class Flow extends Model implements HasParticipants, HasStages, HasStaticType, Roleable, Sortable, TimeProgressable
+class Flow extends Model implements HasParticipants, HasStages, HasStaticType, Roleable, Sidenoteable, Sortable, TimeProgressable
 {
     /**
      * @use HasFactory<\Database\Factories\FlowFactory>
@@ -39,9 +41,10 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
      */
     use BelongsToTenant,
         HasFactory,
+        HasSideNotes,
         HasStagesTrait,
-        HasStaticTypeTrait,
-        HasTimeProgress ,
+        HasStaticTypeTrait ,
+        HasTimeProgress,
         HasUlids,
         RoleableEntity,
         SoftDeletes,
@@ -122,7 +125,7 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
     #[Scope]
     public function scopeRunning(Builder $query): Builder
     {
-        return $query->where('status', '!=', FlowStatus::COMPLETED->value);
+        return $query->whereNotIn('status', [FlowStatus::COMPLETED->value, FlowStatus::CANCELED->value, FlowStatus::PAUSED->value]);
     }
 
     public function buildSortQuery()

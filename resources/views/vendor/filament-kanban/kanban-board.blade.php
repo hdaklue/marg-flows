@@ -1,6 +1,6 @@
 <x-filament-panels::page>
-
-    <div wire:ignore.self x-data class="scrollbar-hide gap-2 pb-2 md:flex md:overflow-x-auto" class="flex flex-col">
+    <div wire:ignore.self x-data
+        class="flex flex-col pb-2 overflow-y-hidden scrollbar-hide gap-x-2 md:flex-row md:overflow-x-auto">
 
         @foreach ($statuses as $status)
             @include(static::$statusView)
@@ -19,5 +19,5 @@
     @endunless
 
     <livewire:role.manage-members-modal />
-
+    <livewire:reusable.side-note-list />
 </x-filament-panels::page>

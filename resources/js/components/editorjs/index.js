@@ -10,14 +10,16 @@ import HyperLink from 'editorjs-hyperlink';
 import Undo from 'editorjs-undo';
 
 
-export default function editorjs(livewireState, uploadUrl) {
+export default function editorjs(livewireState, uploadUrl, canEdit) {
     return {
         editor: null,
         state: livewireState,
         currentLocale: null,
         editorLocale: null,
+        canEdit: canEdit,
 
         init() {
+
             this.initializeEditor();
             this.watchStateChanges();
         },
@@ -40,13 +42,18 @@ export default function editorjs(livewireState, uploadUrl) {
             this.editor = new EditorJS({
                 holder: 'editor-wrap',
                 data: initialData,
+                readOnly: !this.canEdit,
                 placeholder: 'Let`s write an awesome story!',
                 defaultBlock: 'paragraph',
                 inlineToolbar: ['bold', 'link', 'convertTo'],
                 tools: this.getEditorTools(csrf, uploadUrl),
                 onChange: () => {
                     this.editor.save().then((outputData) => {
-                        this.state = JSON.stringify(outputData);
+                        clearTimeout(this.debounceTimer);
+
+                        this.debounceTimer = setTimeout(() => {
+                            this.state = JSON.stringify(outputData);
+                        }, 500);
                     });
                 },
 

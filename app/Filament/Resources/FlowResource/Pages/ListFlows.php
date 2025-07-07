@@ -12,10 +12,13 @@ class ListFlows extends ListRecords
 {
     protected static string $resource = FlowResource::class;
 
+    protected ?string $maxContentWidth = 'full';
+
     protected function getHeaderActions(): array
     {
         return [
             Actions\CreateAction::make(),
+
         ];
     }
 }

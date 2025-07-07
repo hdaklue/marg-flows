@@ -11,7 +11,7 @@ use JsonSerializable;
 use Livewire\Wireable;
 use Stringable;
 
-class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringable, Wireable
+final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringable, Wireable
 {
     private readonly float $value;
 
@@ -186,7 +186,7 @@ class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringable, W
     /**
      * Check if percentage is greater than given percentage
      */
-    public function isGreaterThan(Percentage $other): bool
+    public function gt(Percentage $other): bool
     {
         return $this->value > $other->value;
     }
@@ -194,7 +194,7 @@ class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringable, W
     /**
      * Check if percentage is less than given percentage
      */
-    public function isLessThan(Percentage $other): bool
+    public function ls(Percentage $other): bool
     {
         return $this->value < $other->value;
     }
@@ -202,7 +202,7 @@ class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringable, W
     /**
      * Check if percentage equals given percentage
      */
-    public function equals(Percentage $other): bool
+    public function eq(Percentage $other): bool
     {
         return abs($this->value - $other->value) < PHP_FLOAT_EPSILON;
     }

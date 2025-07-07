@@ -117,6 +117,10 @@ class TimeProgressService
      */
     public function getTotalDays(TimeProgressable $item): int|float
     {
+        if ($item->getProgressStartDate()->startOfDay()->equalTo($item->getProgressDueDate()->startOfDay())) {
+            return 1;
+        }
+
         return $item->getProgressStartDate()->startOfDay()->diffInDays($item->getProgressDueDate()->startOfDay());
     }
 
@@ -141,7 +145,14 @@ class TimeProgressService
      */
     public function getDaysRemaining(TimeProgressable $item): int|float
     {
-        return today()->diffInDays($item->getProgressDueDate()->startOfDay());
+        $cacheKey = $this->getCacheKey($item) . 'days_remaining';
+
+        return Cache::remember(
+            $cacheKey,
+            now()->endOfDay()->diffInSeconds(now()),
+            function () use ($item) {
+                return today()->diffInDays($item->getProgressDueDate()->startOfDay());
+            });
     }
 
     /**

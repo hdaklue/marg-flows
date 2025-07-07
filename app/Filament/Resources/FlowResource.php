@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\FlowStatus;
+use App\Filament\Pages\ViewFlow;
 use App\Filament\Resources\FlowResource\Pages;
 use App\Filament\Resources\FlowResource\Pages\FlowPages;
 use App\Models\Flow;
@@ -12,7 +13,9 @@ use App\Services\Flow\TimeProgressService;
 use App\Tables\Columns\Progress;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -20,6 +23,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class FlowResource extends Resource
 {
@@ -41,11 +45,13 @@ class FlowResource extends Resource
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
             ->reorderable('order_column')
+            ->recordUrl(fn (Model $record) => ViewFlow::getUrl(['record' => $record->id]))
             ->columns([
-                TextColumn::make('title'),
+                TextColumn::make('title')
+                    ->weight(FontWeight::Bold),
                 TextColumn::make('status')
-                    ->getStateUsing(fn ($record) => FlowStatus::from($record->status)->getLabel())
-                    ->color(fn ($record) => FlowStatus::from($record->status)->getColor())
+                    ->getStateUsing(fn ($record) => ucfirst(FlowStatus::from($record->status)->getLabel()))
+                    ->color(fn ($record) => FlowStatus::from($record->status)->getFilamentColor())
                     ->badge(),
                 ImageColumn::make('creator')
                     ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))
@@ -58,9 +64,9 @@ class FlowResource extends Resource
                 Progress::make('time_progress')
                     ->getStateUsing(fn ($record) => $flowProgressService->getProgressDetails($record)),
                 TextColumn::make('start_date')
-                    ->since(),
+                    ->date(),
                 TextColumn::make('due_date')
-                    ->since(),
+                    ->date(),
                 TextColumn::make('days_left')
                     ->getStateUsing(fn ($record) => $flowProgressService->getDaysRemaining($record)),
                 TextColumn::make('duration')
@@ -78,6 +84,11 @@ class FlowResource extends Resource
             ], FiltersLayout::AboveContentCollapsible)
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('view')
+                    ->label('Knowledge')
+                    ->color('gray')
+                    ->outlined()
+                    ->url(fn ($record) => FlowResource::getUrl('pages', ['record' => $record])),
             ])
             ->bulkActions([
                 // Tables\Actions\BulkActionGroup::make([
