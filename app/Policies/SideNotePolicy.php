@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\SideNote;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class SideNotePolicy
 {
@@ -45,6 +46,7 @@ class SideNotePolicy
      */
     public function delete(User $user, SideNote $sideNote): bool
     {
+
         return $sideNote->owner_id === $user->id;
     }
 
