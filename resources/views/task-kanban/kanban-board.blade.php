@@ -42,5 +42,5 @@
         <x-filament-kanban::edit-record-modal />
     @endunless
 
-    <livewire:reusable.side-note-list />
+    <livewire:reusable.side-note-list :sidenoteable="$this->flow" />
 </x-filament-panels::page>

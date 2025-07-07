@@ -19,5 +19,5 @@
     @endunless
 
     <livewire:role.manage-members-modal />
-    <livewire:reusable.side-note-list />
+
 </x-filament-panels::page>

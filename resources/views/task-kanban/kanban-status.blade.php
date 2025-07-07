@@ -42,5 +42,4 @@
         </div>
 
     </div>
-    <livewire:reusable.side-note-list />
 </div>

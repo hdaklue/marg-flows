@@ -21,7 +21,7 @@ class SideNotePolicy
      */
     public function view(User $user, SideNote $sideNote): bool
     {
-        return false;
+        return $sideNote->owner_id === $user->id;
     }
 
     /**
@@ -29,7 +29,7 @@ class SideNotePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -45,7 +45,7 @@ class SideNotePolicy
      */
     public function delete(User $user, SideNote $sideNote): bool
     {
-        return false;
+        return $sideNote->owner_id === $user->id;
     }
 
     /**

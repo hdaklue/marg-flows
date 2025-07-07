@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="flex flex-row w-full gap-x-4">
+    <div class="flex w-full flex-row gap-x-4">
         <div class="w-3/4">
             <x-filament-panels::form id="form" :wire:key="$this->getId() . '.forms.' . $this->getFormStatePath()">
                 {{ $this->form }}
@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <livewire:reusable.side-note-list />
+    <livewire:reusable.side-note-list :sidenoteable="$this->flow" />
 
     {{-- <x-filament-panels::page.unsaved-data-changes-alert /> --}}
 </x-filament-panels::page>
