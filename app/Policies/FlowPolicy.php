@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Contracts\Role\AssignableEntity;
-use App\Contracts\Role\RoleableEntity;
 use App\Enums\Role\RoleEnum;
 use App\Models\Flow;
 use App\Models\User;
@@ -17,19 +16,11 @@ final class FlowPolicy
      */
     public function viewAny(User $user): bool
     {
-
-        if (filament()->getTenant()) {
-
-            return filament()->getTenant()->isParticipant($user);
-        }
-
-        return false;
+        return filamentTenant()->isParticipant($user);
     }
 
     /**
      * Determine whether the user can view the model.
-     *
-     * @param  RoleableEntity  $flow;
      */
     public function view(AssignableEntity $user, Flow $flow): bool
     {

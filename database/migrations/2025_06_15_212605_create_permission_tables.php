@@ -36,11 +36,12 @@ return new class extends Migration
             $table->ulid('id')->primary(); // role id
 
             $table->foreignUlid('tenant_id')->references('id')->on('tenants');
-            $table->index('tenant_id', 'roles_team_foreign_key_index');
 
             $table->string('name');
 
             $table->timestamps();
+            $table->index('tenant_id', 'roles_team_foreign_key_index');
+            $table->index(['tenant_id', 'name', 'id']);
             $table->unique(['tenant_id', 'name']);
         });
 

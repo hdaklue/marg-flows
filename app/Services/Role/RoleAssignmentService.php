@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\Tenant;
 use DomainException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 final class RoleAssignmentService implements RoleAssignmentManagerInterface
 {
@@ -26,6 +27,8 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
             'roleable_id' => $target->getKey(),
             'role_id' => $roleToAssign->getKey(),
         ]);
+
+        $this->clearCache($target);
     }
 
     public function remove(AssignableEntity $user, RoleableEntity $target): void
@@ -36,11 +39,19 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
             'roleable_id' => $target->getKey(),
             'roleable_type' => $target->getMorphClass(),
         ])->delete();
+
+        $this->clearCache($target);
     }
 
     public function getParticipantsHasRole(RoleableEntity $target, string|RoleEnum $role): Collection
     {
         $roleToCheck = $this->ensureRoleBelongsToTenant($target, $role);
+
+        if (config('role.should_cache')) {
+            return $this->getParticipants($target)->filter(function (ModelHasRole $participant) use ($roleToCheck) {
+                return $participant->role->getKey() === $roleToCheck->getKey();
+            })->pluck('model');
+        }
 
         return ModelHasRole::where([
             'roleable_type' => $target->getMorphClass(),
@@ -49,8 +60,26 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
         ])->with('model')->get()->pluck('model');
     }
 
+    /**
+     * Summary of getParticipantsWithRoles.
+     *
+     * @return Collection<ModelHasRole>
+     */
     public function getParticipantsWithRoles(RoleableEntity $target): Collection
     {
+        if (config('role.should_cache')) {
+            return Cache::remember($this->generateParticipantsCacheKey($target), now()->addHour(), function () use ($target) {
+                logger()->info('hitting cache');
+
+                return ModelHasRole::where([
+                    'roleable_id' => $target->getKey(),
+                    'roleable_type' => $target->getMorphClass(),
+                ])
+                    ->with(['model', 'role'])
+                    ->get();
+            });
+        }
+
         return ModelHasRole::where([
             'roleable_id' => $target->getKey(),
             'roleable_type' => $target->getMorphClass(),
@@ -59,26 +88,49 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
             ->get();
     }
 
+    /**
+     * Summary of getParticipantsHasRole.
+     *
+     * @return Collection<ModelHasRole>
+     */
     public function getParticipants(RoleableEntity $target): Collection
     {
-        return $this->getParticipantsWithRoles($target)->pluck('model');
+        return $this->getParticipantsWithRoles($target);
     }
 
     public function hasRoleOn(AssignableEntity $user, RoleableEntity $target, string|RoleEnum $role): bool
     {
-        $roleToCheck = $this->ensureRoleBelongsToTenant($target, $role);
+        // $roleToCheck = $this->ensureRoleBelongsToTenant($target, $role);
+        $roleName = $this->resolveRoleName($role);
+
+        if (config('role.should_cache')) {
+
+            return $this->getParticipants($target)->filter(function (ModelHasRole $participant) use ($user, $roleName) {
+                return $participant->role->name === $roleName &&
+                $participant->model->getKey() === $user->getKey() &&
+                $participant->model->getMorphClass() === $user->getMorphClass();
+            })->isNotEmpty();
+        }
 
         return ModelHasRole::where([
             'model_id' => $user->getKey(),
             'model_type' => $user->getMorphClass(),
             'roleable_id' => $target->getKey(),
             'roleable_type' => $target->getMorphClass(),
-            'role_id' => $roleToCheck->getKey(),
-        ])->exists();
+        ])->whereHas('role', function ($auery) use ($roleName) {
+            $auery->where('name', $roleName);
+        })->exists();
     }
 
     public function hasAnyRoleOn(AssignableEntity $user, RoleableEntity $target): bool
     {
+        if (config('role.should_cache')) {
+            return $this->getParticipants($target)->filter(function (ModelHasRole $participant) use ($user) {
+                return $participant->model->getKey() === $user->getKey() &&
+                $participant->model->getMorphClass() === $user->getMorphClass();
+            })->isNotEmpty();
+        }
+
         return ModelHasRole::where([
             'model_id' => $user->getKey(),
             'model_type' => $user->getMorphClass(),
@@ -120,12 +172,34 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function clearCache(AssignableEntity $user, RoleableEntity $target): void {}
+    public function clearCache(RoleableEntity $target)
+    {
+        logger()->info('clearing cache');
+        $key = $this->generateParticipantsCacheKey($target);
+        Cache::forget($key);
+    }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function generateCacheKey(AssignableEntity $user, RoleableEntity $target, Role $role): string {}
+    // /**
+    //  * {@inheritDoc}
+    //  */
+    // public function generateCacheKey(AssignableEntity $user, RoleableEntity $target, Role $role): string
+    // {
+    //     return 'shold be implemented';
+    // }
+
+    public function generateParticipantsCacheKey(RoleableEntity $target): string
+    {
+        return "parcipitans:{$target->getMorphClass()}:{$target->getKey()}";
+    }
+
+    /** @param Collection<RoleableEntity> $targets */
+    public function bulkClearCache(Collection $targets)
+    {
+        $targets->each(function (RoleableEntity $target) {
+            return $this->clearCache($target);
+        });
+
+    }
 
     private function resolveTargetTenant(RoleableEntity $target)
     {
@@ -138,10 +212,9 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
         return $target;
     }
 
-    private function resolveRoleName($roleName)
+    private function resolveRoleName(string|RoleEnum $roleName): string
     {
-        $roleName = $roleName instanceof RoleEnum ? $roleName->value : $roleName;
+        return $roleName instanceof RoleEnum ? $roleName->value : $roleName;
 
-        return $roleName;
     }
 }

@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class EditorJsUpload extends Controller
+final class EditorJsUpload extends Controller
 {
     /**
      * Handle the imcoming image upload requests from Editor.js.
@@ -30,7 +30,7 @@ class EditorJsUpload extends Controller
         return response()->json([
             'success' => 1,
             'file' => [
-                'url' => Storage::url($path, now()->addHour()),
+                'url' => Storage::url($path),
             ],
         ]);
     }

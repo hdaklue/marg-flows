@@ -36,6 +36,9 @@ final class FlowsKanabanBoard extends KanbanBoard
     public function onStatusChanged(int|string $recordId, string $status, array $fromOrderedIds, array $toOrderedIds): void
     {
 
+        /**
+         * @var Flow $record
+         */
         $record = $this->getEloquentQuery()->find($recordId);
 
         match ((int) $status) {
@@ -64,7 +67,7 @@ final class FlowsKanabanBoard extends KanbanBoard
 
         return Flow::unless($isAdmin, function ($query) {
             $query->forParticipant(filamentUser());
-        })->byTenant(filamentTenant())->with(['participants'])->ordered()->get();
+        })->byTenant(filamentTenant())->ordered()->get();
     }
 
     protected function getProgressPercentage(Flow $record)

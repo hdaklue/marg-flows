@@ -1,13 +1,13 @@
 <div class="flex flex-col space-y-2">
-    <div class="rounded-lg bg-gray-100 px-4 py-3 dark:bg-gray-800/30">
-        <header class="border-b border-gray-200 pb-2 font-semibold dark:border-gray-800/60">
+    <div class="px-4 py-3 bg-gray-100 rounded-lg dark:bg-gray-800/30">
+        <header class="pb-2 font-semibold border-b border-gray-200 dark:border-gray-800/60">
             Assign new members
         </header>
-        <div class="mt-2 flex flex-col gap-2">
+        <div class="flex flex-col gap-2 mt-2">
             <form wire:submit.prevent>
                 {{ $this->form }}
             </form>
-            <div class="mt-1 flex justify-end">
+            <div class="flex justify-end mt-1">
                 <x-filament::button size="sm" color="primary" outlined wire:click="addMember">
                     Add Member
                 </x-filament::button>
@@ -16,23 +16,30 @@
     </div>
 
     <div>
-        <header class="mt-2 border-b border-gray-200 pb-2 font-semibold dark:border-gray-800/60">
+        <header class="pb-2 mt-2 font-semibold border-b border-gray-200 dark:border-gray-800/60">
             Manage Members
         </header>
-        <div class="mt-2 flex flex-col space-y-2">
-            @if (count($manageableMembers))
-                @foreach ($manageableMembers as $member)
-                    <div class="flex flex-col">
-                        <div class="flex justify-between border-gray-200 py-1 dark:border-gray-800">
-                            <div class="flex items-center gap-2">
-                                <x-filament::avatar size="w-6 h-6" src="{{ $member->avatar }}"
-                                    alt="{{ $member->name }}" />
-                                <div>{{ $member->name }}</div>
+        <div class="flex flex-col mt-2 space-y-2">
+            @if (count($this->manageableMembers))
+                @foreach ($this->manageableMembers as $member)
+                    <div class="flex flex-col px-2 py-1 rounded-lg dark:bg-gray-800/40">
+                        <div class="flex items-center justify-between py-1 border-gray-200 dark:border-gray-800">
+                            <div class="flex flex-col items-center justify-start gap-y-2">
+                                <div class="flex w-full gap-x-1">
+                                    <x-filament::avatar size="w-6 h-6" src="{{ $member->model->avatar }}"
+                                        alt="{{ $member->model->name }}" />
+                                    <p class="text-sm">
+                                        {{ $member->model->name }}
+                                    </p>
+                                </div>
+                                <div class="text-xs capitalize text-start">
+                                    {{ $member->role->name }}
+                                </div>
                             </div>
                             <div>
                                 <x-filament::button size="xs" color="danger" icon="heroicon-o-trash" outlined
                                     tooltip="remove member"
-                                    wire:click="mountAction('removeMemberAction', { memberId: '{{ $member->id }}'})">
+                                    wire:click="mountAction('removeMemberAction', { memberId: '{{ $member->model->getKey() }}'})">
                                     remove
                                 </x-filament::button>
                                 {{-- {{ ($this->removeMemberAction)(['memberId' => $member->id]) }} --}}
@@ -42,7 +49,7 @@
                 @endforeach
             @else
                 <div
-                    class="flex flex-col justify-center pt-3 text-center text-sm font-normal text-gray-400 dark:text-gray-600">
+                    class="flex flex-col justify-center pt-3 text-sm font-normal text-center text-gray-400 dark:text-gray-600">
                     <p class="font-medium">Projects are not lonely planets 😵‍💫</p>
                     <p class="mt-1 text-sm">Add some fellows to get this mission started!</p>
                 </div>

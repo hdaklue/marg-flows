@@ -27,12 +27,68 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Str;
 
 use function ucwords;
 
+/**
+ * 
+ *
+ * @property string $id
+ * @property string $name
+ * @property string $email
+ * @property Carbon|null $email_verified_at
+ * @property string $account_type
+ * @property string $password
+ * @property string|null $timezone
+ * @property string|null $remember_token
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property string|null $active_tenant_id
+ * @property AccountType $accout_type
+ * @property-read mixed $avatar
+ * @property-read Collection<int, \App\Models\Tenant> $createdTenants
+ * @property-read int|null $created_tenants_count
+ * @property-read Collection<int, \App\Models\Flow> $flows
+ * @property-read int|null $flows_count
+ * @property-read Collection<int, \App\Models\MemberInvitation> $invitations
+ * @property-read int|null $invitations_count
+ * @property-read mixed $inviter_name
+ * @property-read \App\Models\LoginLog|null $latestLogin
+ * @property-read Collection<int, \App\Models\LoginLog> $logins
+ * @property-read int|null $logins_count
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \App\Models\MemberInvitation|null $receivedInvitation
+ * @property-read Collection<int, \App\Models\ModelHasRole> $roleAssignments
+ * @property-read int|null $role_assignments_count
+ * @method static Builder<static>|User appAdmin()
+ * @method static Builder<static>|User assignedTo(\App\Contracts\Role\RoleableEntity $entity)
+ * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static Builder<static>|User memberOf(\App\Models\Tenant $tenant)
+ * @method static Builder<static>|User newModelQuery()
+ * @method static Builder<static>|User newQuery()
+ * @method static Builder<static>|User notAssignedTo(\App\Contracts\Role\RoleableEntity $entity)
+ * @method static Builder<static>|User notMemberOf(\App\Models\Tenant $tenant)
+ * @method static Builder<static>|User query()
+ * @method static Builder<static>|User whereAccountType($value)
+ * @method static Builder<static>|User whereActiveTenantId($value)
+ * @method static Builder<static>|User whereCreatedAt($value)
+ * @method static Builder<static>|User whereEmail($value)
+ * @method static Builder<static>|User whereEmailVerifiedAt($value)
+ * @method static Builder<static>|User whereId($value)
+ * @method static Builder<static>|User whereName($value)
+ * @method static Builder<static>|User wherePassword($value)
+ * @method static Builder<static>|User whereRememberToken($value)
+ * @method static Builder<static>|User whereTimezone($value)
+ * @method static Builder<static>|User whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 final class User extends Authenticatable implements AssignableEntity, FilamentUser, HasAvatar, HasDefaultTenant, HasTenants
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -222,7 +278,12 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $this->isAppAdmin() || $this->isAppManager();
     }
 
-    public function canAccessTenant(Model $tenant): bool
+    /**
+     * Summary of canAccessTenant.
+     *
+     * @param  mixed  $tenant
+     */
+    public function canAccessTenant($tenant): bool
     {
 
         return $this->isAssignedTo($tenant);

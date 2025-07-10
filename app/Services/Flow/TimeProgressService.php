@@ -9,7 +9,7 @@ use App\ValueObjects\Percentage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
-class TimeProgressService
+final class TimeProgressService
 {
     // Status constants
     private const STATUS_COMPLETED = 'completed';
@@ -38,7 +38,7 @@ class TimeProgressService
     private const COLOR_CYAN_300 = '#67e8f9';     // In-progress < 20%
 
     /**
-     * Calculate time-based progress percentage for a progressable item
+     * Calculate time-based progress percentage for a progressable item.
      */
     public function calculateTimeProgress(TimeProgressable $item): Percentage
     {
@@ -57,7 +57,7 @@ class TimeProgressService
     }
 
     /**
-     * Get progress status based on item state and dates
+     * Get progress status based on item state and dates.
      */
     public function getProgressStatus(TimeProgressable $item): string
     {
@@ -65,7 +65,7 @@ class TimeProgressService
     }
 
     /**
-     * Get progress color based on status and percentage
+     * Get progress color based on status and percentage.
      */
     public function getProgressColor(TimeProgressable $item): string
     {
@@ -80,7 +80,7 @@ class TimeProgressService
     }
 
     /**
-     * Get comprehensive progress information
+     * Get comprehensive progress information.
      */
     public function getProgressDetails(TimeProgressable $item): array
     {
@@ -90,7 +90,7 @@ class TimeProgressService
 
         return Cache::remember(
             $this->getCacheKey($item),
-            now()->endOfDay()->diffInSeconds(now()),
+            (int) now()->endOfDay()->diffInSeconds(now()),
             function () use ($item, $percentage, $status, $color) {
                 return [
                     'percentage' => $percentage->toArray(),
@@ -109,11 +109,11 @@ class TimeProgressService
     }
 
     /**
-     * Public Date Calculation Methods
+     * Public Date Calculation Methods.
      */
 
     /**
-     * Get total project duration in days
+     * Get total project duration in days.
      */
     public function getTotalDays(TimeProgressable $item): int|float
     {
@@ -125,15 +125,15 @@ class TimeProgressService
     }
 
     /**
-     * Get days elapsed since project start
+     * Get days elapsed since project start.
      */
-    public function getDaysElapsed(TimeProgressable $item): int|float
+    public function getDaysElapsed(TimeProgressable $item): float
     {
         return $item->getProgressStartDate()->startOfDay()->diffInDays(today());
     }
 
     /**
-     * Check if item is due today
+     * Check if item is due today.
      */
     public function isDueToday(TimeProgressable $item): bool
     {
@@ -141,7 +141,7 @@ class TimeProgressService
     }
 
     /**
-     * Get days remaining until due date (can be negative for overdue)
+     * Get days remaining until due date (can be negative for overdue).
      */
     public function getDaysRemaining(TimeProgressable $item): int|float
     {
@@ -149,14 +149,14 @@ class TimeProgressService
 
         return Cache::remember(
             $cacheKey,
-            now()->endOfDay()->diffInSeconds(now()),
+            (int) now()->endOfDay()->diffInSeconds(now()),
             function () use ($item) {
                 return today()->diffInDays($item->getProgressDueDate()->startOfDay());
             });
     }
 
     /**
-     * Get days remaining until due date (always positive, 0 if overdue)
+     * Get days remaining until due date (always positive, 0 if overdue).
      */
     public function getDaysRemainingPositive(TimeProgressable $item): int
     {
@@ -164,7 +164,7 @@ class TimeProgressService
     }
 
     /**
-     * Get normalized start date
+     * Get normalized start date.
      */
     public function getStartDate(TimeProgressable $item): Carbon
     {
@@ -172,7 +172,7 @@ class TimeProgressService
     }
 
     /**
-     * Get normalized due date
+     * Get normalized due date.
      */
     public function getDueDate(TimeProgressable $item): Carbon
     {
@@ -180,7 +180,7 @@ class TimeProgressService
     }
 
     /**
-     * Check if project has started
+     * Check if project has started.
      */
     public function hasStarted(TimeProgressable $item): bool
     {
@@ -188,7 +188,7 @@ class TimeProgressService
     }
 
     /**
-     * Check if item is scheduled (not started yet)
+     * Check if item is scheduled (not started yet).
      */
     public function isScheduled(TimeProgressable $item): bool
     {
@@ -196,7 +196,7 @@ class TimeProgressService
     }
 
     /**
-     * Check if project is past due date
+     * Check if project is past due date.
      */
     public function isPastDue(TimeProgressable $item): bool
     {
@@ -204,7 +204,7 @@ class TimeProgressService
     }
 
     /**
-     * Check if item is completed
+     * Check if item is completed.
      */
     public function isCompleted(TimeProgressable $item): bool
     {
@@ -216,7 +216,7 @@ class TimeProgressService
     }
 
     /**
-     * UI helper methods
+     * UI helper methods.
      */
     public function getStatusDisplayName(TimeProgressable $item): string
     {
@@ -259,7 +259,7 @@ class TimeProgressService
     }
 
     /**
-     * Private helper methods
+     * Private helper methods.
      */
     private function calculateStatusFromDates(TimeProgressable $item): string
     {

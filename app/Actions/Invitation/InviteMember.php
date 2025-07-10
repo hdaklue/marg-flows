@@ -5,16 +5,25 @@ declare(strict_types=1);
 namespace App\Actions\Invitation;
 
 use App\DTOs\Invitation\InvitationDTO;
+use App\Facades\RoleManager;
 use App\Models\Tenant;
 use App\Models\TenantUser;
 use App\Models\User;
 use App\Notifications\Invitation\InvitationRecieved;
+
+use function bcrypt;
+use function config;
+
+use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class InviteMember
+use function request;
+
+final class InviteMember
 {
     use AsAction;
 
@@ -28,6 +37,7 @@ class InviteMember
 
     public function handle(InvitationDTO $dto)
     {
+
         $this->generatePassword();
         try {
             DB::transaction(function () use ($dto) {
@@ -36,13 +46,13 @@ class InviteMember
                 $this->assingMemberRoles($dto);
             });
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
 
         $this->notifyMember();
 
-        CreateInvitation::run(\request()->user(), $this->member, $dto->role_data);
+        CreateInvitation::run(request()->user(), $this->member, $dto->role_data->toArray());
     }
 
     private function notifyMember()
@@ -65,14 +75,17 @@ class InviteMember
     {
         $this->password = Str::password(8);
 
-        return $this->encryptedPassword = \bcrypt($this->password);
+        return $this->encryptedPassword = bcrypt($this->password);
     }
 
     private function assingMemberRoles(InvitationDTO $dto)
     {
+        $tanentIds = $dto->role_data->pluck('id')->toArray();
+        $tenants = Tenant::whereIn('id', $tanentIds)->get();
 
-        DB::table(\config('permission.table_names.model_has_roles'))
+        DB::table(config('permission.table_names.model_has_roles'))
             ->insert($this->prepareInsertAttr($dto->role_data, $this->member));
+        RoleManager::bulkClearCache($tenants);
     }
 
     // private function attachMemberToTenant(InvitationDTO $dto)
@@ -87,10 +100,10 @@ class InviteMember
     //     TenantUser::insert($data);
     // }
 
-    private function prepareInsertAttr(array $roles, User $invitedMember): array
+    private function prepareInsertAttr(Collection $roles, User $invitedMember): array
     {
 
-        return collect($roles)->map(function ($role) use ($invitedMember) {
+        return $roles->map(function ($role) use ($invitedMember) {
             return [
                 'roleable_id' => $role['tenant_id'],
                 'roleable_type' => Relation::getMorphAlias(Tenant::class),

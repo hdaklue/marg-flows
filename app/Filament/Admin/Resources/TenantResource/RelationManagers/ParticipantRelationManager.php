@@ -48,13 +48,18 @@ final class ParticipantRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
+                // @php-stan-ignore-next
                 // Tables\Actions\CreateAction::make(),
                 Tables\Actions\AttachAction::make()
                     ->modalWidth(MaxWidth::SixExtraLarge)
                     ->attachAnother(false)
                     ->label('Add Member')
                     ->icon('heroicon-s-user-plus')
-                    ->form(fn (RelationManager $livewire) => TenantResource::getAddMemberSchema(/** @var Tenant */ $livewire->getOwnerRecord()))
+                    ->form(function (RelationManager $livewire) {
+                        /** @var Tenant */
+                        $record = $livewire->getOwnerRecord();
+                        TenantResource::getAddMemberSchema($record);
+                    })
                     ->action(function (RelationManager $livewire, $data) {
                         try {
                             $user = User::where('id', $data['members'])->first();

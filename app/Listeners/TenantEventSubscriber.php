@@ -7,13 +7,14 @@ namespace App\Listeners;
 use App\Events\Tenant\MemberRemoved;
 use App\Events\Tenant\TanantMemberAdded;
 use App\Events\Tenant\TenantCreated;
+use App\Facades\RoleManager;
 use App\Models\User;
 use App\Notifications\Participant\AssignedToEntity;
 use App\Notifications\Participant\RemovedFromEntity;
 use App\Notifications\TenantCreatedNotification;
 use Illuminate\Events\Dispatcher;
 
-class TenantEventSubscriber
+final class TenantEventSubscriber
 {
     /**
      * Handle the Created event.
@@ -33,12 +34,15 @@ class TenantEventSubscriber
 
     public function handleMemberRemoved(MemberRemoved $event): void
     {
+        RoleManager::clearCache($event->tenant);
+        logger("cache should be cleared for {$event->tenant->id}");
         $event->memberRemoved->notify(new RemovedFromEntity($event->tenant));
     }
 
     public function handleMemberAdded(TanantMemberAdded $event): void
     {
 
+        RoleManager::clearCache($event->tenant);
         $event->user->notify(new AssignedToEntity($event->tenant, $event->role->getLabel()));
 
     }
@@ -54,7 +58,6 @@ class TenantEventSubscriber
             TenantCreated::class => 'handleTenantCreated',
             MemberRemoved::class => 'handleMemberRemoved',
             TanantMemberAdded::class => 'handleMemberAdded',
-
         ];
     }
 }

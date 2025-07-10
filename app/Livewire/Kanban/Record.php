@@ -7,12 +7,18 @@ namespace App\Livewire\Kanban;
 use App\Enums\FlowStatus;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class Record extends Component
+/**
+ * Summary of Record.
+ *
+ * @property-read Collection $participants
+ */
+final class Record extends Component
 {
     #[Locked]
     public Flow $record;
@@ -27,8 +33,6 @@ class Record extends Component
 
     public function mount()
     {
-        $this->record;
-
         $this->refreshComputedData();
     }
 
@@ -40,11 +44,18 @@ class Record extends Component
             3600,
             fn () => FlowStatus::from($this->record->status)->getColor(),
         );
+        unset($this->participants);
         $this->shouldShowProgressDetails = in_array($this->record->status, [FlowStatus::ACTIVE->value, FlowStatus::SCHEDULED->value]);
 
         if ($this->shouldShowProgressDetails) {
             $this->progressDetails = app(TimeProgressService::class)->getProgressDetails($this->record);
         }
+    }
+
+    #[Computed]
+    public function participants(): Collection
+    {
+        return $this->record->getParticipants();
     }
 
     #[Computed(true)]

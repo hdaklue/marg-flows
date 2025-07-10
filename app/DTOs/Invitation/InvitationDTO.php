@@ -6,11 +6,13 @@ namespace App\DTOs\Invitation;
 
 use App\Models\User;
 use App\Services\Timezone;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use WendellAdriel\ValidatedDTO\Casting\CollectionCast;
 use WendellAdriel\ValidatedDTO\Casting\ObjectCast;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-class InvitationDTO extends ValidatedDTO
+final class InvitationDTO extends ValidatedDTO
 {
     public object $sender;
 
@@ -18,7 +20,7 @@ class InvitationDTO extends ValidatedDTO
 
     public string $name;
 
-    public array $role_data;
+    public array|Collection $role_data;
 
     public string $timezone;
 
@@ -46,6 +48,7 @@ class InvitationDTO extends ValidatedDTO
     {
         return [
             'sender' => new ObjectCast,
+            'role_data' => new CollectionCast,
         ];
     }
 }

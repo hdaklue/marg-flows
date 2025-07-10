@@ -22,7 +22,6 @@
         "rinvex/countries": "^9.0",
         "spatie/eloquent-sortable": "^4.5",
         "spatie/laravel-image-optimizer": "^1.8",
-        "spatie/laravel-permission": "^6.20",
         "wendelladriel/laravel-validated-dto": "^4.1"
     },
     "require-dev": {
@@ -58,6 +57,13 @@
         }
     },
     "scripts": {
+        "phpstan:analyze": [
+            "@php artisan cache:clear",
+            "clear && php -d memory_limit=2G ./vendor/bin/phpstan analyse"
+        ],
+        "lint": [
+            "@phpstan:analyze"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",

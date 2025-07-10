@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications\Participant;
 
 use App\Contracts\HasStaticType;
-use App\Contracts\Role\HasParticipants;
+use App\Contracts\Role\RoleableEntity;
 use App\Filament\Pages\FlowsKanabanBoard;
 use App\Filament\Resources\FlowResource;
 use App\Models\Flow;
@@ -29,7 +29,7 @@ final class AssignedToEntity extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Model|HasParticipants $entity, public string $role) {}
+    public function __construct(public Model|RoleableEntity $entity, public string $role) {}
 
     /**
      * Get the notification's delivery channels.

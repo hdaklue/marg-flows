@@ -12,7 +12,6 @@ use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\HasStaticType;
 use App\Contracts\Progress\TimeProgressable;
-use App\Contracts\Role\HasParticipants;
 use App\Contracts\Role\RoleableEntity;
 use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
@@ -26,24 +25,79 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
 /**
- * @property string $name
+ * @property string $id
+ * @property string $title
+ * @property int $status
+ * @property int $is_default
+ * @property int $order_column
+ * @property Carbon|null $start_date
+ * @property Carbon|null $due_date
+ * @property Carbon|null $completed_at
+ * @property Carbon|null $canceled_at
+ * @property array<array-key, mixed>|null $settings
+ * @property mixed $blocks
+ * @property string $tenant_id
+ * @property string $creator_id
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $assignedRoles
+ * @property-read int|null $assigned_roles_count
+ * @property-read User $creator
+ * @property-read string $progress_completed_date
+ * @property-read string $progress_due_date
+ * @property-read string $progress_start_date
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $participants
+ * @property-read int|null $participants_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $roleAssignments
+ * @property-read int|null $role_assignments_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, SideNote> $sideNotes
+ * @property-read int|null $side_notes_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Stage> $stages
+ * @property-read int|null $stages_count
+ * @property-read Tenant $tenant
+ *
+ * @method static Builder<static>|Flow assignable()
+ * @method static Builder<static>|Flow byStage(\App\Enums\FlowStatus|string $status)
+ * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStatus|string $status)
+ * @method static Builder<static>|Flow byTenant(\App\Models\Tenant $tenant)
+ * @method static \Database\Factories\FlowFactory factory($count = null, $state = [])
+ * @method static Builder<static>|Flow forParticipant(\App\Contracts\Role\AssignableEntity $member)
+ * @method static Builder<static>|Flow newModelQuery()
+ * @method static Builder<static>|Flow newQuery()
+ * @method static Builder<static>|Flow onlyTrashed()
+ * @method static Builder<static>|Flow ordered(string $direction = 'asc')
+ * @method static Builder<static>|Flow query()
+ * @method static Builder<static>|Flow running()
+ * @method static Builder<static>|Flow whereBlocks($value)
+ * @method static Builder<static>|Flow whereCanceledAt($value)
+ * @method static Builder<static>|Flow whereCompletedAt($value)
+ * @method static Builder<static>|Flow whereCreatedAt($value)
+ * @method static Builder<static>|Flow whereCreatorId($value)
+ * @method static Builder<static>|Flow whereDeletedAt($value)
+ * @method static Builder<static>|Flow whereDueDate($value)
+ * @method static Builder<static>|Flow whereId($value)
+ * @method static Builder<static>|Flow whereIsDefault($value)
+ * @method static Builder<static>|Flow whereOrderColumn($value)
+ * @method static Builder<static>|Flow whereSettings($value)
+ * @method static Builder<static>|Flow whereStartDate($value)
+ * @method static Builder<static>|Flow whereStatus($value)
+ * @method static Builder<static>|Flow whereTenantId($value)
+ * @method static Builder<static>|Flow whereTitle($value)
+ * @method static Builder<static>|Flow whereUpdatedAt($value)
+ * @method static Builder<static>|Flow withTrashed()
+ * @method static Builder<static>|Flow withoutTrashed()
+ *
+ * @mixin \Eloquent
  */
-final class Flow extends Model implements HasParticipants, HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
+final class Flow extends Model implements HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
 {
-    /**
-     * @use HasFactory<\Database\Factories\FlowFactory>
-     * @use BelongsToTenant<\App\Concerns\Tenant\BelongsToTenant>
-     * @use HasStagesTrait<\App\Concerns\Status\HasStagesTrait>
-     * @use HasUlids
-     * @use RoleableEntity<\App\Concerns\Roles\RoleableEntity>
-     * @use SoftDeletes
-     * @use SortableTrait<\Spatie\EloquentSortable\SortableTrait>
-     */
     use BelongsToTenant,
         HasFactory,
         HasSideNotes,
@@ -79,7 +133,7 @@ final class Flow extends Model implements HasParticipants, HasStages, HasStaticT
         'status' => FlowStatus::ACTIVE->value,
     ];
 
-    public function systemRoleByName(string $name): ?Role
+    public function systemRoleByName(string $name): Role
     {
         return $this->getTenant()->systemRoleByName($name);
     }
@@ -146,7 +200,7 @@ final class Flow extends Model implements HasParticipants, HasStages, HasStaticT
     public function buildSortQuery()
     {
         return self::query()
-            ->byStatus($this->status)
+            ->byStatus(FlowStatus::from($this->status))
             ->byTenant($this->tenant);
     }
 

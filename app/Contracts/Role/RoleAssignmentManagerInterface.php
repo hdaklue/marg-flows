@@ -52,21 +52,28 @@ interface RoleAssignmentManagerInterface
      * Get all users/entities assigned to the target.
      *
      *
-     * @return Collection<AssignableEntity>
+     * @return Collection<ModelHasRole>
      */
     public function getParticipants(RoleableEntity $target): Collection;
 
     /**
      * Clear the role assignment cache for a specific user and target.
      */
-    public function clearCache(AssignableEntity $user, RoleableEntity $target): void;
+    public function clearCache(RoleableEntity $target);
+
+    /**
+     * Summary of bulkClearCache.
+     *
+     * @param  Collection<RoleableEntity>  $targets
+     */
+    public function bulkClearCache(Collection $targets);
 
     public function getRoleOn(AssignableEntity $user, RoleableEntity $target): ?Role;
 
     /**
      * Generate a cache key for a role assignment.
      */
-    public function generateCacheKey(AssignableEntity $user, RoleableEntity $target, Role $role): string;
+    public function generateParticipantsCacheKey(RoleableEntity $target): string;
 
     /**
      * Ensure that a role belongs to the tenant associated with the target.

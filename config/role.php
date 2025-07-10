@@ -1,17 +1,23 @@
 <?php
 
 declare(strict_types=1);
+use App\Models\Role;
+use App\Models\Tenant;
+use App\Models\User;
+use Spatie\Permission\DefaultTeamResolver;
 
 return [
 
     'models' => [
 
-        'role' => App\Models\Role::class,
+        'role' => Role::class,
 
-        'user' => App\Models\User::class,
+        'user' => User::class,
 
-        'tenant' => App\Models\Tenant::class,
+        'tenant' => Tenant::class,
     ],
+
+    'should_cache' => true,
 
     'table_names' => [
 
@@ -61,7 +67,7 @@ return [
     ],
 
     'column_names' => [
-        'roleable_morhp_key' => 'roleable_id',
+        'roleable_morph_key' => 'roleable_id',
         'roleable_morph_type' => 'roleable_type',
 
         /*
@@ -128,7 +134,7 @@ return [
     /*
      * The class to use to resolve the permissions team id
      */
-    'team_resolver' => \Spatie\Permission\DefaultTeamResolver::class,
+    'team_resolver' => DefaultTeamResolver::class,
 
     /*
      * Passport Client Credentials Grant

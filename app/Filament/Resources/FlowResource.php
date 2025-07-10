@@ -25,7 +25,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class FlowResource extends Resource
+final class FlowResource extends Resource
 {
     protected static ?string $model = Flow::class;
 
@@ -45,7 +45,7 @@ class FlowResource extends Resource
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
             ->reorderable('order_column')
-            ->recordUrl(fn (Model $record) => ViewFlow::getUrl(['record' => $record->id]))
+            ->recordUrl(fn (Model $record) => ViewFlow::getUrl(['record' => $record->getKey()]))
             ->columns([
                 TextColumn::make('title')
                     ->weight(FontWeight::Bold),

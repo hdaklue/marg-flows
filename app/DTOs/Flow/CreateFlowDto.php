@@ -14,7 +14,7 @@ use WendellAdriel\ValidatedDTO\Casting\CarbonCast;
 use WendellAdriel\ValidatedDTO\Casting\EnumCast;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-class CreateFlowDto extends ValidatedDTO
+final class CreateFlowDto extends ValidatedDTO
 {
     public string $title;
 

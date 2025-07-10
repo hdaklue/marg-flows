@@ -38,7 +38,7 @@ final class CreateFlow
                 $flow->save();
                 $this->attachFlowStages($flow, $data, $tenant);
                 $role = $tenant->systemRoleByName(RoleEnum::ADMIN);
-                $flow->addParticipant($creator, $role, true);
+                $flow->addParticipant($creator, $role->name, true);
 
                 DB::afterCommit(function () use ($flow, $data, $tenant) {
                     if ($data->hasParticipants()) {
@@ -91,7 +91,7 @@ final class CreateFlow
             'title' => $data->title,
             'start_date' => $data->start_date,
             'due_date' => $data->due_date,
-            'status' => $data->status,
+            'status' => $data->status->value,
             'blocks' => $data->blocks,
         ]);
     }

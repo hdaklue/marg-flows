@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Contracts\Role;
 
 use App\Contracts\Tenant\BelongsToTenantContract;
+use App\Enums\Role\RoleEnum;
 use App\Models\Role;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
@@ -20,6 +23,8 @@ interface RoleableEntity extends Arrayable, BelongsToTenantContract
     public function systemRoleByName(string $name): ?Role;
 
     public function getSystemRoles(): Collection;
+
+    public function addParticipant(AssignableEntity $target, string|RoleEnum $role): void;
 
     /**
      * All role assignments attached to this entity.
@@ -36,6 +41,18 @@ interface RoleableEntity extends Arrayable, BelongsToTenantContract
      * Just to enhance IDE support.
      */
     public function loadMissing($relations);
+
+    public function participants(): MorphMany;
+
+    /**
+     * Remove a participant's specific role(s).
+     */
+    public function removeParticipant(AssignableEntity $user, ?bool $silently = false);
+
+    /**
+     * Get scoped participants query builder for additional filtering.
+     */
+    public function scopeForParticipant(Builder $query, AssignableEntity $member): Builder;
 
     /**
      * Get the morph class (used in roleable_type).

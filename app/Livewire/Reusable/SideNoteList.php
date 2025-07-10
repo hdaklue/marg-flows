@@ -6,10 +6,14 @@ namespace App\Livewire\Reusable;
 
 use App\Contracts\Sidenoteable;
 use App\Models\SideNote;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
+/**
+ * @property-read Collection $notes
+ */
 final class SideNoteList extends Component
 {
     #[Locked]

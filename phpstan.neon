@@ -1,0 +1,20 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+
+parameters:
+    reportUnmatchedIgnoredErrors: false
+    paths:
+        - app/
+
+    # Level 10 is the highest level
+    level: 5
+
+    ignoreErrors:
+#        - '#PHPDoc tag @var#'
+         - '#Call to an undefined method.*Builder::.*#'
+         - '#Call to an undefined method.*Query.*Builder::.*#'
+         - '#Call to an undefined method.*Illuminate\\Database\\Eloquent\\Builder::.*#'
+         - '#Call to an undefined method.*Illuminate\\Database\\Query\\Builder::.*#'
+#    excludePaths:
+#        - ./*/*/FileToBeExcluded.php

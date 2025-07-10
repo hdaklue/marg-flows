@@ -17,18 +17,23 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 use const true;
 
+/**
+ * @property-read Form $form
+ * @property-read Collection $manageableMembers
+ */
 #[Lazy(true)]
 final class ManageMembers extends Component implements HasActions, HasForms
 {
     use InteractsWithActions, InteractsWithForms;
 
-    public ?Collection $manageableMembers;
+    // public ?Collection $manageableMembers;
 
     public ?RoleableEntity $roleable = null;
 
@@ -41,7 +46,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
             $this->form->fill();
             $this->roleable = $roleable;
         }
-        $this->manageableMembers = $this->loadManageableMembers();
+        // $this->manageableMembers = $this->loadManageableMembers();
 
     }
 
@@ -75,13 +80,15 @@ final class ManageMembers extends Component implements HasActions, HasForms
             ->statePath('data');
     }
 
-    public function loadManageableMembers(): Collection
+    #[Computed]
+    public function manageableMembers(): Collection
     {
+
         if (! $this->roleable) {
             return collect();
         }
 
-        return $this->roleable->getParticipants()->filter(fn ($item) => $item->id !== filament()->auth()->user()->id);
+        return $this->roleable->getParticipants()->filter(fn ($item) => $item->model->getKey() !== filamentUser()->getKey());
     }
 
     public function addMember()
@@ -93,21 +100,22 @@ final class ManageMembers extends Component implements HasActions, HasForms
         $role = RoleEnum::from($state['role']);
         AddParticipant::run($this->roleable, $user, $role);
 
-        $this->manageableMembers = $this->loadmanageableMembers();
+        unset($this->manageableMembers);
         $this->form->fill();
-        $this->dispatch("board-item-updated.{$this->roleable->id}");
+        $this->dispatch("board-item-updated.{$this->roleable->getKey()}");
 
     }
 
     public function removeMemberAction(): Action
     {
+
         return Action::make('Remove Member')
             ->action(function (array $arguments) {
                 $user = User::where('id', '=', $arguments['memberId'])->firstOrFail();
                 RemoveParticipant::run($this->roleable, $user);
-                $this->manageableMembers = $this->loadmanageableMembers();
+                unset($this->manageableMembers);
 
-                $this->dispatch("board-item-updated.{$this->roleable->id}");
+                $this->dispatch("board-item-updated.{$this->roleable->getKey()}");
             })->requiresConfirmation()
             ->color('danger');
 

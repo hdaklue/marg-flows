@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Livewire\Role;
 
-use App\Contracts\Role\HasParticipants;
+use App\Contracts\Role\RoleableEntity;
 use App\Models\Flow;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 final class ManageMembersModal extends Component
 {
-    public ?HasParticipants $record = null;
+    public ?RoleableEntity $record = null;
 
     public $shouldShowModal = false;
 

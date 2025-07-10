@@ -46,8 +46,9 @@ trait ManagesParticipants
         return RoleManager::getParticipants($this);
     }
 
-    public function addParticipant(AssignableEntity $user, Role|RoleEnum|string $role, bool $silently = false): void
+    public function addParticipant(AssignableEntity $user, RoleEnum|string $role, bool $silently = false): void
     {
+
         RoleManager::assign($user, $this, $role);
     }
 
@@ -65,11 +66,11 @@ trait ManagesParticipants
         return RoleManager::hasAnyRoleOn($entity, $this);
     }
 
-    public function changeParticipantRole(AssignableEntity $user, Role $newRole): void
-    {
-        $this->removeParticipant($user, true);
-        $this->addParticipant($user, $newRole, true);
-    }
+    // public function changeParticipantRole(AssignableEntity $user, Role $newRole): void
+    // {
+    //     $this->removeParticipant($user, true);
+    //     $this->addParticipant($user, $newRole, true);
+    // }
 
     public function getParticipantRole(AssignableEntity $entity): ?Role
     {

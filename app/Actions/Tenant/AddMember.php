@@ -6,16 +6,21 @@ namespace App\Actions\Tenant;
 
 use App\Enums\Role\RoleEnum;
 use App\Events\Tenant\TanantMemberAdded;
+use App\Facades\RoleManager;
 use App\Models\Flow;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+
+use function config;
+
+use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddMember
+final class AddMember
 {
     use AsAction;
 
@@ -23,9 +28,10 @@ class AddMember
     {
         try {
             $assignedRole = $tenant->systemRoleByName($role);
+
             DB::transaction(function () use ($tenant, $user, $assignedRole, $silently, $flows) {
 
-                $tenant->addParticipant($user, $assignedRole, $silently);
+                $tenant->addParticipant($user, $assignedRole->name, $silently);
 
                 if (! empty($flows)) {
 
@@ -34,7 +40,7 @@ class AddMember
 
             });
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Adding Member to Tenant Failed', [
                 'error' => $e->getMessage(),
                 'data' => [
@@ -51,9 +57,14 @@ class AddMember
 
     private function assignFlowsRole(Tenant $tenant, User $user, $flows, Role $role)
     {
-        $data = $this->buildInsertAttr($tenant, $user, $flows, $role);
+        $flows = $tenant->flows()->whereIn('id', $flows)->get();
+        if ($flows->isEmpty()) {
+            return;
+        }
 
-        DB::table(\config('role.table_names.model_has_roles'))
+        $data = $this->buildInsertAttr($tenant, $user, $flows->pluck('id')->toArray(), $role);
+
+        DB::table(config('role.table_names.model_has_roles'))
             ->upsert(
                 $data,
                 [
@@ -68,13 +79,13 @@ class AddMember
                     'role_id',
                 ],
             );
-
+        RoleManager::bulkClearCache($flows);
     }
 
     private function buildInsertAttr(Tenant $tenant, User $user, array $flows, Role $assignedRole)
     {
-        $rolableKey = \config('role.column_names.roleable_morhp_key');
-        $roleableTypeKey = \config('role.column_names.roleable_morph_type');
+        $rolableKey = config('role.column_names.roleable_morph_key');
+        $roleableTypeKey = config('role.column_names.roleable_morph_type');
 
         return collect($flows)->map(function ($flow) use ($rolableKey, $roleableTypeKey, $user, $assignedRole) {
             return [
