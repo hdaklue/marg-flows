@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Stage extends Model
 {
@@ -19,7 +18,7 @@ class Stage extends Model
         'name',
         'color',
         'order',
-        'meta',
+        'settings',
         'tenant_id',
     ];
 
@@ -39,7 +38,7 @@ class Stage extends Model
     protected function casts(): array
     {
         return [
-            'meta' => 'array',
+            'settings' => 'array',
         ];
     }
 }

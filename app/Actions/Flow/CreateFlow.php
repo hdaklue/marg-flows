@@ -12,6 +12,7 @@ use App\Models\Flow;
 use App\Models\Stage;
 use App\Models\Tenant;
 use App\Models\User;
+use Exception;
 use Illuminate\Bus\Batch;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Bus;
@@ -21,7 +22,7 @@ use Lorisleiva\Actions\Concerns\AsAction;
 use Throwable;
 
 // TODO:Move to top order after create
-class CreateFlow
+final class CreateFlow
 {
     use AsAction;
 
@@ -36,7 +37,8 @@ class CreateFlow
 
                 $flow->save();
                 $this->attachFlowStages($flow, $data, $tenant);
-                $flow->addParticipant($creator, RoleEnum::ADMIN->value, true);
+                $role = $tenant->systemRoleByName(RoleEnum::ADMIN);
+                $flow->addParticipant($creator, $role, true);
 
                 DB::afterCommit(function () use ($flow, $data, $tenant) {
                     if ($data->hasParticipants()) {
@@ -55,7 +57,7 @@ class CreateFlow
             ]);
 
             throw new FlowCreationException('Failed to create flow due to database constraints');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Unexpected error creating flow', [
                 'tenant_id' => $tenant->getKey(),
                 'creator_id' => $creator->id,
@@ -69,11 +71,11 @@ class CreateFlow
     {
 
         $stages = $data->template->stages->map(function ($stage, $tenant) {
-            $stage = Stage::make([
+            $stage = new Stage([
                 'name' => $stage->name,
                 'color' => $stage->color,
                 'order' => $stage->order,
-                'meta' => $stage->meta,
+                'settings' => $stage->settings,
             ]);
 
             return $stage;
@@ -85,7 +87,7 @@ class CreateFlow
     protected function makeFlow(CreateFlowDto $data): Flow
     {
 
-        return Flow::make([
+        return new Flow([
             'title' => $data->title,
             'start_date' => $data->start_date,
             'due_date' => $data->due_date,
@@ -98,7 +100,7 @@ class CreateFlow
     {
         $jobs = User::whereIn('id', $participants)
             ->get()->map(function ($user) use ($flow, $tenant) {
-                $role = RoleEnum::from($user->rolesOn($tenant)->first()->name);
+                $role = RoleEnum::from($user->getAssignmentOn($tenant)->name);
 
                 return AddParticipant::makeJob($flow, $user, $role, $tenant);
             })->toArray();

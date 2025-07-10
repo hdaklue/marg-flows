@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->ulidMorphs('stageable');
             $table->string('color');
-            $table->json('meta')->nullable();
+            $table->json('settings')->nullable();
             $table->integer('order');
             $table->timestamps();
 

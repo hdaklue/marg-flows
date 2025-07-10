@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Tenant;
 
+use App\Contracts\Role\AssignableEntity;
 use App\Enums\Role\RoleEnum;
 use App\Events\Tenant\TenantCreated;
 use App\Models\Tenant;
 use App\Models\User;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateTenant
+final class CreateTenant
 {
     use AsAction;
 
@@ -27,7 +29,7 @@ class CreateTenant
         try {
             DB::transaction(function () use ($data, &$tenant, &$participants, $user) {
 
-                $tenant = Tenant::make(['name' => $data['name']]);
+                $tenant = new Tenant(['name' => $data['name']]);
 
                 $tenant->creator()->associate($user);
 
@@ -37,19 +39,17 @@ class CreateTenant
 
                 $participants = $this->getParticipants(array_column($data['members'], 'name'));
 
-                setPermissionsTeamId($tenant->id);
-
                 $systemRoles = $this->getSysyemRoles();
 
                 $tenant->systemRoles()->createMany($systemRoles);
 
                 $roles = collect($data['members'])->pluck('role', 'name')->toArray();
 
-                $participants->each(fn ($participant): Tenant => $tenant->addParticipant($participant, roles: $roles[$participant->id], silently: true),
+                $participants->each(fn (AssignableEntity $participant) => $tenant->addParticipant($participant, $roles[$participant->getKey()], silently: true),
                 );
             });
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tenant creation failed', [
                 'error' => $e->getMessage(),
                 'data' => $data,

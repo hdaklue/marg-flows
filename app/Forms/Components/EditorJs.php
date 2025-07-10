@@ -7,7 +7,7 @@ namespace App\Forms\Components;
 use Closure;
 use Filament\Forms\Components\Field;
 
-class EditorJs extends Field
+final class EditorJs extends Field
 {
     public $uploadUrl = null;
 
@@ -21,7 +21,8 @@ class EditorJs extends Field
 
         return $this;
     }
-     public function getEditable(): bool|Closure
+
+    public function getEditable(): bool|Closure
     {
         return $this->evaluate($this->editable);
     }

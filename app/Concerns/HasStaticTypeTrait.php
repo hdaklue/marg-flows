@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace App\Concerns;
 
+use Illuminate\Support\Str;
+use LogicException;
+
 trait HasStaticTypeTrait
 {
     public function getTypeName(): string
     {
-        return str(static::class)->afterLast('\\')->title()->toString();
+        return Str::of(static::class)
+            ->afterLast('\\')
+            ->title()
+            ->toString();
     }
 
-    public function getTypeTitle(): string
+    public function getTypeTitle(): ?string
     {
-        // Throw if model has NEITHER title NOR name
-        throw_unless(
-            $this->hasAttribute('title') || $this->hasAttribute('name'),
-            new \LogicException('Model must have either title or name attribute'),
-        );
         if ($this->hasAttribute('title')) {
-            return $this->title;
+            return $this->getAttribute('title');
         }
 
-        return $this->name;
+        if ($this->hasAttribute('name')) {
+            return $this->getAttribute('name');
+        }
+        throw new LogicException("Model [{get_class({$this})] must have either 'title' or 'name' attribute.");
     }
 }

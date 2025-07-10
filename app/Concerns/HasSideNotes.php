@@ -16,13 +16,42 @@ trait HasSideNotes
         return $this->morphMany(SideNote::class, 'sidenoteable');
     }
 
-    public function sideNotesFor(User $user): Collection
+    public function getSideNotesBy(User $user): Collection
     {
-        return $this->sideNotes()->whereBelongsTo($user,'creator')->get();
+        return $this->sideNotes()->whereBelongsTo($user, 'creator')->latest()->get();
     }
 
-    public function hasSideNotesFor(User $user): bool
+    public function hasSideNotesBy(User $user): bool
     {
-        return $this->sideNotes()->whereBelongsTo($user,'creator')->exists();
+        return $this->sideNotes()->whereBelongsTo($user, 'creator')->exists();
+    }
+
+    public function getSideNotes(): Collection
+    {
+        return $this->sideNotes()->latest()->get();
+    }
+
+    public function addSideNote(SideNote $sidenote): SideNote
+    {
+
+        $this->sideNotes()->save($sidenote);
+
+        /** @var SideNote */
+        return $sidenote;
+    }
+
+    /**
+     * @return SideNote|null
+     */
+    public function getSideNote(int|string $id): ?SideNote
+    {
+        /** @var SideNote|null */
+        return $this->sideNotes()->whereKey($id)->first();
+    }
+
+    public function deleteSideNote(string|int|SideNote $entity)
+    {
+        $id = $entity instanceof SideNote ? $entity->getKey() : $entity;
+        $this->sideNotes()->whereKey($id)->delete();
     }
 }

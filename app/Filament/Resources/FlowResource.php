@@ -72,8 +72,8 @@ class FlowResource extends Resource
                 TextColumn::make('duration')
                     ->getStateUsing(fn ($record) => $flowProgressService->getTotalDays($record)),
 
-                ImageColumn::make('members')
-                    ->getStateUsing(fn ($record) => $record->participants->pluck('avatar'))
+                ImageColumn::make('prticipants')
+                    ->getStateUsing(fn ($record) => $record->participants->pluck('model')->pluck('avatar'))
                     ->circular()
                     ->stacked(),
             ])

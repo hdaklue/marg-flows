@@ -9,6 +9,7 @@ use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Flow\TimeProgressService;
+use App\Services\Role\RoleAssignmentService;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(TimeProgressService::class);
+        $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
 
         $this->configureGate();
         $this->configureModel();

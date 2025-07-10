@@ -17,6 +17,7 @@ use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
 /**
  * ViewFlow
+ * @property-read Flow $flow; 
  */
 class ViewFlow extends KanbanBoard
 {

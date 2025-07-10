@@ -17,6 +17,9 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\Locked;
 
+/**
+ * @property-read \Filament\Forms\Form $form
+ */
 class FlowPages extends Page implements HasForms
 {
     use InteractsWithForms;
@@ -34,6 +37,7 @@ class FlowPages extends Page implements HasForms
     {
 
         $this->flow = Flow::where('id', $record)->first();
+        $this->authorize('view', $this->flow);
         $this->form->fill($this->flow->toArray());
     }
 

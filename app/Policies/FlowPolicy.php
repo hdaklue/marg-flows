@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Contracts\Role\AssignableEntity;
+use App\Contracts\Role\RoleableEntity;
 use App\Enums\Role\RoleEnum;
 use App\Models\Flow;
 use App\Models\User;
 
-class FlowPolicy
+final class FlowPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -26,11 +28,13 @@ class FlowPolicy
 
     /**
      * Determine whether the user can view the model.
+     *
+     * @param  RoleableEntity  $flow;
      */
-    public function view(User $user, Flow $flow): bool
+    public function view(AssignableEntity $user, Flow $flow): bool
     {
 
-        return $flow->isParticipant($user) || $flow->tenant->isAdmin($user);
+        return $flow->isParticipant($user) || $flow->getTenant()->isAdmin($user);
     }
 
     /**
@@ -38,7 +42,8 @@ class FlowPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::MANAGER], filament()->getTenant());
+        return $user->hasAssignmentOn(filamentTenant(), RoleEnum::ADMIN)
+        || $user->hasAssignmentOn(filamentTenant(), RoleEnum::MANAGER);
 
     }
 
@@ -47,9 +52,10 @@ class FlowPolicy
      */
     public function update(User $user, Flow $flow): bool
     {
-        return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::MANAGER], $flow);
 
-        // return $user->hasRoleOn('writer', $flow) || $user->hasRoleOn(RoleEnum::SUPER_ADMIN, filament()->getTenant());
+        return $user->hasAssignmentOn($flow, RoleEnum::ADMIN) || $user->hasAssignmentOn($flow, RoleEnum::MANAGER);
+
+        // return $user->hasAssignmentOn('writer', $flow) || $user->hasAssignmentOn(RoleEnum::SUPER_ADMIN, filament()->getTenant());
     }
 
     /**
@@ -57,7 +63,7 @@ class FlowPolicy
      */
     public function delete(User $user, Flow $flow): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -79,6 +85,6 @@ class FlowPolicy
     public function manageMembers(User $user, Flow $flow): bool
     {
 
-        return $user->hasRoleOn([RoleEnum::ADMIN, RoleEnum::MANAGER], $flow);
+        return $user->hasAssignmentOn($flow, RoleEnum::ADMIN) || $user->hasAssignmentOn($flow, RoleEnum::MANAGER);
     }
 }

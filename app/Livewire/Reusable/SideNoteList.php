@@ -10,22 +10,20 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
-class SideNoteList extends Component
+final class SideNoteList extends Component
 {
     #[Locked]
     public Sidenoteable $sidenoteable;
 
-    public function mount($sidenoteable)
+    public function mount(Sidenoteable $sidenoteable)
     {
         $this->sidenoteable = $sidenoteable;
     }
 
-    public function loadNotes() {}
-
     #[Computed]
     public function notes()
     {
-        return SideNote::for($this->sidenoteable, filamentUser())->latest()->get();
+        return $this->sidenoteable->getSideNotesBy(filamentUser());
     }
 
     public function addNote(string $content)
@@ -33,21 +31,19 @@ class SideNoteList extends Component
         if (blank($content)) {
             return;
         }
-        $sideNote = SideNote::make([
+        $sideNote = new SideNote([
             'content' => $content,
         ]);
         $sideNote->creator()->associate(filamentUser());
-        $this->sidenoteable->sideNotes()->save($sideNote);
+        $this->sidenoteable->addSideNote($sideNote);
         unset($this->notes);
     }
 
     public function deleteNote(string|int $noteId)
     {
-        $note = SideNote::where('id', $noteId)->firstOrFail();
-
-        $this->authorize('delete', $note);
-
-        $note->delete();
+        $sideNote = $this->sidenoteable->getSideNote($noteId);
+        $this->authorize('delete', $sideNote);
+        $this->sidenoteable->deleteSideNote($sideNote);
         unset($this->notes);
     }
 

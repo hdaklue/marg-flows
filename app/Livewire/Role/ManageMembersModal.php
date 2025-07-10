@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Role;
 
-use App\Contracts\Roles\HasParticipants;
+use App\Contracts\Role\HasParticipants;
 use App\Models\Flow;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class ManageMembersModal extends Component
+final class ManageMembersModal extends Component
 {
     public ?HasParticipants $record = null;
 

@@ -7,7 +7,14 @@
             "filesystems",
             "kanban",
             "sortable",
-            "stageable"
+            "stageable",
+            "editorjs",
+            "textarea",
+            "config",
+            "namespace",
+            "js",
+            "img",
+            "favico"
         ],
         "paths": [
             "app"

@@ -7,13 +7,14 @@ namespace App\Models;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
 use App\Concerns\Progress\HasTimeProgress;
-use App\Concerns\Roles\RoleableEntity;
+use App\Concerns\Role\ManagesParticipants;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\HasStaticType;
 use App\Contracts\Progress\TimeProgressable;
-use App\Contracts\Roles\HasParticipants;
-use App\Contracts\Roles\Roleable;
+use App\Contracts\Role\HasParticipants;
+use App\Contracts\Role\RoleableEntity;
+use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
 use App\Enums\FlowStatus;
@@ -25,10 +26,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
-class Flow extends Model implements HasParticipants, HasStages, HasStaticType, Roleable, Sidenoteable, Sortable, TimeProgressable
+/**
+ * @property string $name
+ */
+final class Flow extends Model implements HasParticipants, HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
 {
     /**
      * @use HasFactory<\Database\Factories\FlowFactory>
@@ -46,7 +51,7 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
         HasStaticTypeTrait ,
         HasTimeProgress,
         HasUlids,
-        RoleableEntity,
+        ManagesParticipants,
         SoftDeletes,
         SortableTrait;
 
@@ -73,6 +78,16 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
     protected $attributes = [
         'status' => FlowStatus::ACTIVE->value,
     ];
+
+    public function systemRoleByName(string $name): ?Role
+    {
+        return $this->getTenant()->systemRoleByName($name);
+    }
+
+    public function getSystemRoles(): Collection
+    {
+        return $this->getTenant()->getSystemRoles();
+    }
 
     public function creator(): BelongsTo
     {
@@ -130,7 +145,7 @@ class Flow extends Model implements HasParticipants, HasStages, HasStaticType, R
 
     public function buildSortQuery()
     {
-        return static::query()
+        return self::query()
             ->byStatus($this->status)
             ->byTenant($this->tenant);
     }

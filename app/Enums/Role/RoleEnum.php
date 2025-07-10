@@ -14,13 +14,13 @@ enum RoleEnum: string implements HasDescription, HasLabel
      * Super Admin - System-wide administrative access
      * Can manage tenants, system settings, and all entities
      */
-    case SUPER_ADMIN = 'super_admin';
+    // case SUPER_ADMIN = 'super_admin';
 
     /**
      * Tenant Admin - Tenant-wide administrative access
      * Can manage all entities within their tenant
      */
-    case TENANT_ADMIN = 'tenant_admin';
+    // case TENANT_ADMIN = 'tenant_admin';
 
     /**
      * Admin - Entity administrative access
@@ -73,8 +73,8 @@ enum RoleEnum: string implements HasDescription, HasLabel
     public function getLevel(): int
     {
         return match ($this) {
-            self::SUPER_ADMIN => 10,
-            self::TENANT_ADMIN => 8,
+            // self::SUPER_ADMIN => 10,
+            // self::TENANT_ADMIN => 8,
             self::ADMIN => 6,
             self::MANAGER => 5,
             self::EDITOR => 4,
@@ -90,8 +90,8 @@ enum RoleEnum: string implements HasDescription, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::SUPER_ADMIN => 'Super Administrator',
-            self::TENANT_ADMIN => 'Tenant Administrator',
+            // self::SUPER_ADMIN => 'Super Administrator',
+            // self::TENANT_ADMIN => 'Tenant Administrator',
             self::ADMIN => 'Administrator',
             self::MANAGER => 'Manager',
             self::EDITOR => 'Editor',
@@ -107,8 +107,8 @@ enum RoleEnum: string implements HasDescription, HasLabel
     public function getDescription(): string
     {
         return match ($this) {
-            self::SUPER_ADMIN => 'Full system access including tenant management',
-            self::TENANT_ADMIN => 'Complete control within tenant boundaries',
+            // self::SUPER_ADMIN => 'Full system access including tenant management',
+            // self::TENANT_ADMIN => 'Complete control within tenant boundaries',
             self::ADMIN => 'Full administrative access to assigned entities',
             self::MANAGER => 'Manage content and assign roles within entities',
             self::EDITOR => 'Create, edit, and delete content',

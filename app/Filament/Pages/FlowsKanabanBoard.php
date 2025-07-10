@@ -6,13 +6,12 @@ namespace App\Filament\Pages;
 
 use App\Enums\FlowStatus;
 use App\Models\Flow;
-use App\Models\User;
 use App\Services\Flow\TimeProgressService;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
-class FlowsKanabanBoard extends KanbanBoard
+final class FlowsKanabanBoard extends KanbanBoard
 {
     protected static string $model = Flow::class;
 
@@ -46,19 +45,16 @@ class FlowsKanabanBoard extends KanbanBoard
 
         };
 
-        if (method_exists(static::$model, 'setNewOrder')) {
-            static::$model::setNewOrder($toOrderedIds);
+        if (method_exists(self::$model, 'setNewOrder')) {
+            self::$model::setNewOrder($toOrderedIds);
         }
         $this->dispatch("board-item-updated.{$recordId}");
     }
 
-    /**
-     * @var User;
-     */
     #[Computed]
-    public function canManageFlow()
+    public function canManageFlow(): bool
     {
-        return filamentUser()->can('manageFlows', filamentTenant()) ?? false;
+        return filamentUser()->can('manageFlows', filamentTenant());
     }
 
     protected function records(): Collection

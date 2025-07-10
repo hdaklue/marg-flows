@@ -36,7 +36,7 @@ trait BelongsToTenant
         if (class_exists(Filament::class)) {
             $tenant = Filament::getTenant();
             if ($tenant) {
-                return $tenant->id;
+                return $tenant->getKey();
             }
         }
 
@@ -58,9 +58,25 @@ trait BelongsToTenant
         return $this->belongsto(Tenant::class);
     }
 
+
+
+    /**
+     * @return Tenant
+     */
+    public function getTenant(): Tenant
+    {
+        /** @var Tenant */
+        return $this->tenant()->firstOrFail();
+    }
+
+    public function getTenantId(): string|int
+    {
+        return $this->getTenant()->getKey();
+    }
+
     #[Scope]
     protected function scopeByTenant(Builder $builder, Tenant $tenant)
     {
-        return $builder->where('tenant_id', $tenant->id);
+        return $builder->where('tenant_id', $tenant->getKey());
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Contracts\Sidenoteable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -29,7 +30,8 @@ class SideNote extends Model
         return $this->morphTo();
     }
 
-    public function scopeFor(Builder $builder, Sidenoteable $entity, User $owner): Builder
+    #[Scope]
+    protected function for(Builder $builder, Sidenoteable $entity, User $owner): Builder
     {
         return $builder->where('owner_id', $owner->getKey())
             ->whereHas('sidenoteable', function ($query) use ($entity) {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications\Participant;
 
 use App\Contracts\HasStaticType;
-use App\Contracts\Roles\Roleable;
+use App\Contracts\Role\HasParticipants;
 use Exception;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -14,14 +14,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class RemovedFromEntity extends Notification implements ShouldQueue
+final class RemovedFromEntity extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Model|Roleable $entity) {}
+    public function __construct(public Model|HasParticipants $entity) {}
 
     /**
      * Get the notification's delivery channels.

@@ -26,7 +26,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
-class TenantResource extends Resource
+final class TenantResource extends Resource
 {
     protected static ?string $model = Tenant::class;
 
@@ -43,13 +43,13 @@ class TenantResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with('members'))
+            ->modifyQueryUsing(fn ($query) => $query->with('participants'))
             ->columns([
                 ToggleColumn::make('active')
                     ->label('Status'),
                 TextColumn::make('name'),
-                ImageColumn::make('members')
-                    ->getStateUsing(fn ($record) => $record->members->pluck('avatar'))
+                ImageColumn::make('model.avatar')
+                    ->getStateUsing(fn ($record) => $record->participants->pluck('model.avatar'))
                     ->circular()
                     ->stacked(),
             ])
@@ -73,7 +73,7 @@ class TenantResource extends Resource
                                 ->success()
                                 ->color('success')
                                 ->send();
-                        } catch (\Exception $exception) {
+                        } catch (Exception $exception) {
                             Notification::make()
                                 ->body('Something went wrong')
                                 ->danger()
@@ -106,11 +106,11 @@ class TenantResource extends Resource
                         ->required()
                         ->searchable(true)
                         ->native(false)
-                        ->options(User::query()->notMemberOf($record)->get()->mapWithKeys(fn ($record) => [$record->id => "{$record->name} - {$record->email}"])),
+                        ->options(User::query()->notAssignedTo($record)->get()->mapWithKeys(fn ($record) => [$record->id => "{$record->name} - {$record->email}"])),
                     Select::make('system_roles')
                         ->options(function () {
 
-                            $userRole = match (auth()->user()->account_type) {
+                            $userRole = match (filamentUser()->account_type) {
                                 AccountType::ADMIN->value => RoleEnum::ADMIN->value,
                                 AccountType::MANAGER->value => RoleEnum::MANAGER->value,
                                 default => throw new Exception('Invalid account type'),

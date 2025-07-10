@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             'account_type' => AccountType::ADMIN->value,
             'timezone' => 'Africa/Cairo',
         ]);
-
+             $user1->save();
         $tenant1 = $user1->createdTenants()->create([
             'name' => 'Test Tenant',
         ]);
@@ -36,24 +36,23 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test Tenant 2',
         ]);
 
-        $tenant1->members()->attach($user1);
-        $tenant2->members()->attach($user1);
+        // $tenant1->members()->attach($user1);
+        // $tenant2->members()->attach($user1);
 
-        $user1->switchActiveTenant($tenant1);
-        $user1->save();
+   
         $systemRoles = collect(RoleEnum::cases())->map(function ($case) {
             return [
                 'name' => $case->value,
-                'guard_name' => 'web',
             ];
         })->toArray();
         $tenant1->systemRoles()->createMany($systemRoles);
         $tenant2->systemRoles()->createMany($systemRoles);
 
-        setPermissionsTeamId($tenant1->id);
+        // $user1->assignRole(RoleEnum::ADMIN, $tenant1);
 
-        $user1->assignRole(RoleEnum::ADMIN, $tenant1);
+        $roleadmin = $tenant1->systemRoles()->where('name', RoleEnum::ADMIN->value)->firstOrFail();
 
+        $tenant1->addParticipant($user1, $roleadmin);
         $user2 = User::factory()->create([
             'name' => 'Test Member',
             'email' => 'member@example.com',
@@ -61,12 +60,12 @@ class DatabaseSeeder extends Seeder
             'account_type' => AccountType::ADMIN->value,
         ]);
 
-        $tenant1->members()->attach($user2);
+        // $tenant1->members()->attach($user2);
 
-        $tenant1->assignUserRole($user2, RoleEnum::VIEWER);
-
-        setPermissionsTeamId($tenant2->id);
-        $user1->assignRole(RoleEnum::VIEWER, $tenant2);
+        $roleviewer = $tenant2->systemRoles()->where('name', RoleEnum::VIEWER->value)->firstOrFail();
+        // $tenant1->addParticipant($user1, $roleadmin);
+        $tenant2->addParticipant($user1, $roleviewer);
+        // $user1->assignRole(RoleEnum::VIEWER, $tenant2);
 
         Flow::factory(20)->create(); // Random realistic distribution
 
@@ -74,8 +73,10 @@ class DatabaseSeeder extends Seeder
         // Predictable mixed data
         Flow::factory(10)->create();
 
-        Flow::inRandomOrder(10)->get()->each(function (Flow $flow) use ($user1) {
-            $flow->addParticipant($user1, RoleEnum::VIEWER->value, true);
+        Flow::inRandomOrder(10)->with('tenant')->get()->each(function (Flow $flow) use ($user1) {
+
+            $role = $flow->tenant->systemRoles()->where('name', RoleEnum::VIEWER->value)->firstOrFail();
+            $flow->addParticipant($user1, $role, true);
         });
 
         // Specific test scenarios

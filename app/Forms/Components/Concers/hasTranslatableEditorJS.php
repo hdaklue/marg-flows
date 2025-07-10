@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Forms\Components\Concers;
 
 use Filament\Resources\Pages\EditRecord\Concerns\Translatable;
@@ -7,7 +9,7 @@ use Illuminate\Support\Arr;
 
 trait hasTranslatableEditorJS
 {
-    use Translatable;
+    // use Translatable;
 
     public function updatedActiveLocale(): void
     {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
-use App\Concerns\Roles\HasEntityAwareRoles;
+use App\Concerns\Role\CanBeAssignedToEntity;
+use App\Concerns\Tenant\HasActiveTenant;
+use App\Contracts\Role\AssignableEntity;
 use App\Enums\Account\AccountType;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
@@ -21,19 +21,26 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaultTenant, HasTenants
+use function ucwords;
+
+final class User extends Authenticatable implements AssignableEntity, FilamentUser, HasAvatar, HasDefaultTenant, HasTenants
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasEntityAwareRoles, HasFactory, HasUlids, Notifiable;
+    use CanBeAssignedToEntity,
+        HasActiveTenant,
+        HasFactory,
+        HasUlids,
+        Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -46,6 +53,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
         'password',
         'account_type',
         'timezone',
+        'active_tenant_id',
     ];
 
     /**
@@ -71,11 +79,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
 
     public function getDefaultTenant(Panel $panel): ?Model
     {
-        return $this->activeTenant()->first() ?? $this->tenants()->first();
+        return $this->activeTenant() ?? $this->getAssignedTenants()->first();
     }
 
     /**
-     * Get all flows where this user has any role
+     * Get all flows where this user has any role.
      */
     public function flows(): MorphToMany
     {
@@ -89,7 +97,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
     }
 
     /**
-     * Get the user's initials
+     * Get the user's initials.
      */
     public function initials(): string
     {
@@ -99,14 +107,25 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
             ->implode('');
     }
 
-    public function tenants(): BelongsToMany
+    // public function tenants(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Tenant::class)->using(TenantUser::class);
+    // }
+
+    public function getTenants(Panel $panel): SupportCollection
     {
-        return $this->belongsToMany(Tenant::class)->using(TenantUser::class);
+
+        return $this->getAssignedTenants();
     }
 
-    public function activeTenant(): BelongsTo
+    public function getAssignedTenants()
     {
-        return $this->belongsTo(Tenant::class, 'active_tenant_id');
+        return $this->roleAssignments()
+            ->where('roleable_type', Relation::getMorphAlias(Tenant::class))
+            ->where('model_type', $this->getMorphClass())
+            ->where('model_id', $this->getKey())
+            ->with('roleable')
+            ->get()->pluck('roleable');
     }
 
     public function logins(): HasMany
@@ -130,14 +149,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
             'user_agent' => $userAgent,
             'ip_address' => $ip,
         ]);
-
-        return $this;
-    }
-
-    public function switchActiveTenant(Tenant $tenant): self
-    {
-        $this->activeTenant()->associate($tenant);
-        $this->save();
 
         return $this;
     }
@@ -195,10 +206,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
         return $builder->where('account_type', AccountType::USER->value);
     }
 
-    public function getTenants(Panel $panel): Collection
-    {
-        return $this->tenants;
-    }
+    // public function getTenants(Panel $panel): Collection
+    // {
+    //     return $this->tenants;
+    // }
 
     public function getFilamentAvatarUrl(): ?string
     {
@@ -214,7 +225,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
     public function canAccessTenant(Model $tenant): bool
     {
 
-        return $this->tenants()->whereKey($tenant)->exists();
+        return $this->isAssignedTo($tenant);
     }
 
     protected function inviterName(): Attribute
@@ -229,7 +240,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
     protected function name(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => \ucwords($value),
+            get: fn ($value) => ucwords($value),
         );
     }
 

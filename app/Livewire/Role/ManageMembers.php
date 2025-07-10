@@ -6,7 +6,7 @@ namespace App\Livewire\Role;
 
 use App\Actions\Roleable\AddParticipant;
 use App\Actions\Roleable\RemoveParticipant;
-use App\Contracts\Roles\HasParticipants;
+use App\Contracts\Role\RoleableEntity;
 use App\Enums\Role\RoleEnum;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -17,23 +17,24 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-#[Lazy(\true)]
-class ManageMembers extends Component implements HasActions, HasForms
+use const true;
+
+#[Lazy(true)]
+final class ManageMembers extends Component implements HasActions, HasForms
 {
     use InteractsWithActions, InteractsWithForms;
 
     public ?Collection $manageableMembers;
 
-    public ?HasParticipants $roleable = null;
+    public ?RoleableEntity $roleable = null;
 
     public ?array $data = [];
 
-    public function mount(?HasParticipants $roleable)
+    public function mount(?RoleableEntity $roleable)
     {
         if ($roleable) {
             $this->authorize('manageMembers', $roleable);
@@ -54,8 +55,7 @@ class ManageMembers extends Component implements HasActions, HasForms
                             return [];
                         }
 
-                        return User::memberOf(\filament()->getTenant())
-                            ->whereNotIn('id', $this->roleable->participants->pluck('id')->toArray())
+                        return User::assignedTo(filamentTenant())->notAssignedTo($this->roleable)
                             ->get()->pluck('name', 'id');
                     })
                     ->required(),
@@ -65,7 +65,7 @@ class ManageMembers extends Component implements HasActions, HasForms
                         if (! $this->roleable) {
                             return [];
                         }
-                        $userRole = Auth::user()->rolesOn($this->roleable)->firstOrFail();
+                        $userRole = filamentUser()->getAssignmentOn($this->roleable);
 
                         return RoleEnum::whereLowerThanOrEqual(RoleEnum::from($userRole->name))->toArray();
                     }),
@@ -81,7 +81,7 @@ class ManageMembers extends Component implements HasActions, HasForms
             return collect();
         }
 
-        return $this->roleable->participants->filter(fn ($item) => $item->id != filament()->auth()->user()->id);
+        return $this->roleable->getParticipants()->filter(fn ($item) => $item->id !== filament()->auth()->user()->id);
     }
 
     public function addMember()

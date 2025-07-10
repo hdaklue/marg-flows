@@ -6,8 +6,8 @@ namespace App\Filament\Admin\Resources\UserResource\Pages;
 
 use App\Actions\Invitation\InviteMember;
 use App\DTOs\Invitation\InvitationDTO;
-use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\UserResource;
+use App\Models\Role;
 use App\Models\Tenant;
 use App\Services\Timezone;
 use Exception;
@@ -19,7 +19,6 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Log;
-use Spatie\Permission\Models\Role;
 
 class ListUsers extends ListRecords
 {
@@ -62,13 +61,13 @@ class ListUsers extends ListRecords
                                 ->required()
                                 ->label('Assign to')
                                 ->disableOptionsWhenSelectedInSiblingRepeaterItems()
-                                ->live(onBlur: true)
-                                ->searchable(),
+                                ->live(onBlur: true),
                             Select::make('role_id')
-                                ->required()
                                 ->label('Role')
-                                ->options(fn (Get $get) => Role::where('tenant_id', $get('tenant_id'))->whereNotIn('name', [RoleEnum::SUPER_ADMIN->value, RoleEnum::TENANT_ADMIN->value])->get()->mapWithKeys(fn ($role) => [$role->id => RoleEnum::from($role->name)->getLabel()])),
-
+                                ->required()
+                                ->options(fn (Get $get) => Role::where('tenant_id', $get('tenant_id'))->pluck('name', 'id'),
+                                )
+                                ->live(),
                         ]),
                 ])->action(function ($data) {
                     try {

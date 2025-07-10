@@ -12,7 +12,7 @@ use InvalidArgumentException;
 trait HasTimeProgress
 {
     /**
-     * Boot the HasTimeProgress trait
+     * Boot the HasTimeProgress trait.
      */
     public static function bootHasTimeProgress()
     {
@@ -31,7 +31,7 @@ trait HasTimeProgress
 
     /**
      * Get the start date for progress calculation
-     * Override this method if your start date attribute has a different name
+     * Override this method if your start date attribute has a different name.
      */
     public function getProgressStartDate(): Carbon
     {
@@ -49,7 +49,7 @@ trait HasTimeProgress
 
     /**
      * Get the due date for progress calculation
-     * Override this method if your due date attribute has a different name
+     * Override this method if your due date attribute has a different name.
      */
     public function getProgressDueDate(): Carbon
     {
@@ -67,7 +67,7 @@ trait HasTimeProgress
 
     /**
      * Get the due date for progress calculation
-     * Override this method if your due date attribute has a different name
+     * Override this method if your due date attribute has a different name.
      */
     public function getProgressCompletedDate(): ?Carbon
     {
@@ -84,7 +84,7 @@ trait HasTimeProgress
     }
 
     /**
-     * Check if the progressable item has valid progress dates
+     * Check if the progressable item has valid progress dates.
      */
     public function hasValidProgressDates(): bool
     {
@@ -94,10 +94,7 @@ trait HasTimeProgress
             $completedDate = $this->getProgressCompletedDate();
 
             // Basic validation: start and due dates must exist and be valid
-            $hasValidBasicDates = isset($startDate, $dueDate) &&
-                                 $startDate instanceof Carbon &&
-                                 $dueDate instanceof Carbon &&
-                                 $dueDate->gte($startDate);
+            $hasValidBasicDates = $dueDate->gte($startDate);
 
             if (! $hasValidBasicDates) {
                 return false;
@@ -105,8 +102,7 @@ trait HasTimeProgress
 
             // Optional validation: if completed date exists, it should be valid
             if ($completedDate !== null) {
-                return $completedDate instanceof Carbon &&
-                       $completedDate->gte($startDate); // Completed date should be after start
+                return $completedDate->gte($startDate); // Completed date should be after start
             }
 
             return true;
@@ -118,7 +114,7 @@ trait HasTimeProgress
 
     /**
      * Get a unique identifier for the progressable item
-     * Override this method if your primary key has a different name
+     * Override this method if your primary key has a different name.
      */
     public function getProgressableId(): mixed
     {
@@ -130,7 +126,7 @@ trait HasTimeProgress
     // =======================
 
     /**
-     * Get time-based progress percentage
+     * Get time-based progress percentage.
      */
     public function getTimeProgressPercentage(): Percentage
     {
@@ -138,7 +134,7 @@ trait HasTimeProgress
     }
 
     /**
-     * Get current progress status
+     * Get current progress status.
      */
     public function getCurrentProgressStatus(): string
     {
@@ -146,7 +142,7 @@ trait HasTimeProgress
     }
 
     /**
-     * Get progress color for UI
+     * Get progress color for UI.
      */
     public function getProgressColor(): string
     {
@@ -154,7 +150,7 @@ trait HasTimeProgress
     }
 
     /**
-     * Get comprehensive progress details
+     * Get comprehensive progress details.
      */
     public function getProgressDetails(): array
     {
@@ -162,7 +158,7 @@ trait HasTimeProgress
     }
 
     /**
-     * Check if the item is overdue
+     * Check if the item is overdue.
      */
     public function isOverdue(): bool
     {
@@ -170,7 +166,7 @@ trait HasTimeProgress
     }
 
     /**
-     * Get days remaining (positive only)
+     * Get days remaining (positive only).
      */
     public function getDaysRemainingPositive(): int
     {
@@ -178,7 +174,7 @@ trait HasTimeProgress
     }
 
     /**
-     * Get total project duration in days
+     * Get total project duration in days.
      */
     public function getTotalDays(): int
     {
@@ -187,7 +183,7 @@ trait HasTimeProgress
 
     /**
      * Get the attribute name for the start date
-     * Override this method to customize the start date attribute
+     * Override this method to customize the start date attribute.
      */
     public function getProgressStartDateAttribute(): string
     {
@@ -196,7 +192,7 @@ trait HasTimeProgress
 
     /**
      * Get the attribute name for the due date
-     * Override this method to customize the due date attribute
+     * Override this method to customize the due date attribute.
      */
     public function getProgressDueDateAttribute(): string
     {
@@ -205,7 +201,7 @@ trait HasTimeProgress
 
     /**
      * Get the attribute name for the status
-     * Override this method to customize the status attribute
+     * Override this method to customize the status attribute.
      */
     public function getProgressCompletedDateAttribute(): string
     {

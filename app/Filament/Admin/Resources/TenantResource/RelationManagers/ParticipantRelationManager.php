@@ -8,7 +8,9 @@ use App\Actions\Tenant\AddMember;
 use App\Actions\Tenant\RemoveMember;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\TenantResource;
+use App\Models\Tenant;
 use App\Models\User;
+use Exception;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -18,9 +20,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 
-class ParticipantRelationManager extends RelationManager
+final class ParticipantRelationManager extends RelationManager
 {
-    protected static string $relationship = 'members';
+    protected static string $relationship = 'participants';
 
     public function form(Form $form): Form
     {
@@ -33,14 +35,14 @@ class ParticipantRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-
             ->recordTitleAttribute('roleable_type')
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                TextColumn::make('email'),
-                TextColumn::make('role')
-                    ->getStateUsing(fn (RelationManager $livewire, $record) => RoleEnum::from($livewire->getOwnerRecord()->rolesForUser($record)->first()->name)->getLabel()),
-
+                TextColumn::make('model.name')
+                    ->label('Name'),
+                TextColumn::make('model.email')
+                    ->label('Email'),
+                TextColumn::make('role.name'),
+                // ->getStateUsing(fn (RelationManager $livewire, $record) => RoleEnum::from($livewire->getOwnerRecord()->getParticipantRole($record->model)->name)->getLabel()),
             ])
             ->filters([
                 //
@@ -52,7 +54,7 @@ class ParticipantRelationManager extends RelationManager
                     ->attachAnother(false)
                     ->label('Add Member')
                     ->icon('heroicon-s-user-plus')
-                    ->form(fn (RelationManager $livewire) => TenantResource::getAddMemberSchema($livewire->getOwnerRecord()))
+                    ->form(fn (RelationManager $livewire) => TenantResource::getAddMemberSchema(/** @var Tenant */ $livewire->getOwnerRecord()))
                     ->action(function (RelationManager $livewire, $data) {
                         try {
                             $user = User::where('id', $data['members'])->first();
@@ -62,7 +64,7 @@ class ParticipantRelationManager extends RelationManager
                                 ->success()
                                 ->color('success')
                                 ->send();
-                        } catch (\Exception $exception) {
+                        } catch (Exception $exception) {
                             Notification::make()
                                 ->body('Something went wrong')
                                 ->danger()
@@ -76,7 +78,9 @@ class ParticipantRelationManager extends RelationManager
                 Tables\Actions\DetachAction::make()
                     ->modalContent(new HtmlString('<span class="text-sm text-gray-300 dark:text-gray-500">CAUTION: this will remove user from all flows and tasks related to this Team</span>'))
                     ->label('Remove')
-                    ->action(fn (RelationManager $livewire, $record) => RemoveMember::run($livewire->getOwnerRecord(), $record, filament()->auth()->user())),
+                    ->action(fn (RelationManager $livewire, $record) => RemoveMember::run($livewire->getOwnerRecord(),
+                        $record->model,
+                        filament()->auth()->user())),
 
                 // ->after(fn (RelationManager $livewire, $record) => $livewire->getOwnerRecord()->removeParticipant($record)),
                 // Tables\Actions\DeleteAction::make(),

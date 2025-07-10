@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Enums\Role\RoleEnum;
 use App\Models\Tenant;
 use App\Models\User;
 
@@ -22,7 +23,7 @@ class TenantPolicy
      */
     public function view(User $user, Tenant $tenant): bool
     {
-        return false;
+        return $user->isAssignedTo($tenant);
     }
 
     /**
@@ -67,6 +68,6 @@ class TenantPolicy
 
     public function manageFlows(User $user, Tenant $tenant): bool
     {
-        return $tenant->isAdmin($user) || $tenant->isManager($user);
+        return $user->hasAssignmentOn($tenant, RoleEnum::MANAGER) || $user->hasAssignmentOn($tenant, RoleEnum::ADMIN);
     }
 }

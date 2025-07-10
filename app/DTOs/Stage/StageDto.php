@@ -12,7 +12,7 @@ class StageDto extends ValidatedDTO
 
     public string $color;
 
-    public array $meta = [];
+    public array $settings;
 
     public int $order;
 
@@ -26,6 +26,7 @@ class StageDto extends ValidatedDTO
             'name' => 'required',
             'color' => 'required',
             'order' => 'required',
+            'settings' => 'array',
         ];
     }
 

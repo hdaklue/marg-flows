@@ -8,14 +8,14 @@ use App\Models\MemberInvitation;
 use App\Models\User;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateInvitation
+final class CreateInvitation
 {
     use AsAction;
 
     public function handle(User $sender, User $receiver, array $role_data)
     {
 
-        $invitation = MemberInvitation::make([
+        $invitation = new MemberInvitation([
             'role_data' => $role_data,
         ]);
 

@@ -32,7 +32,7 @@ class InviteMember
         try {
             DB::transaction(function () use ($dto) {
                 $this->persistMember($dto);
-                $this->attachMemberToTenant($dto);
+                // $this->attachMemberToTenant($dto);
                 $this->assingMemberRoles($dto);
             });
 
@@ -70,35 +70,33 @@ class InviteMember
 
     private function assingMemberRoles(InvitationDTO $dto)
     {
+
         DB::table(\config('permission.table_names.model_has_roles'))
-            ->insert($this->prepareInsertAttr($dto->role_data, $this->member->id));
+            ->insert($this->prepareInsertAttr($dto->role_data, $this->member));
     }
 
-    private function attachMemberToTenant(InvitationDTO $dto)
+    // private function attachMemberToTenant(InvitationDTO $dto)
+    // {
+    //     $data = collect($dto->role_data)->map(function ($role) {
+    //         return [
+    //             'tenant_id' => $role['tenant_id'],
+    //             'user_id' => $this->member->id,
+    //         ];
+    //     })->toArray();
+
+    //     TenantUser::insert($data);
+    // }
+
+    private function prepareInsertAttr(array $roles, User $invitedMember): array
     {
-        $data = collect($dto->role_data)->map(function ($role) {
+
+        return collect($roles)->map(function ($role) use ($invitedMember) {
             return [
-                'tenant_id' => $role['tenant_id'],
-                'user_id' => $this->member->id,
-            ];
-        })->toArray();
-
-        TenantUser::insert($data);
-    }
-
-    private function prepareInsertAttr(array $roles, string $invitedMemberId): array
-    {
-        $rolableKey = \config('permission.column_names.roleable_morhp_key');
-        $roleableTypeKey = \config('permission.column_names.roleable_morph_type');
-
-        return collect($roles)->map(function ($role) use ($rolableKey, $roleableTypeKey, $invitedMemberId) {
-            return [
-                'tenant_id' => $role['tenant_id'],
-                $rolableKey => $role['tenant_id'],
-                $roleableTypeKey => Relation::getMorphAlias(Tenant::class),
+                'roleable_id' => $role['tenant_id'],
+                'roleable_type' => Relation::getMorphAlias(Tenant::class),
                 'role_id' => $role['role_id'],
-                'model_id' => $invitedMemberId,
-                'model_type' => Relation::getMorphAlias(User::class),
+                'model_id' => $invitedMember->getKey(),
+                'model_type' => $invitedMember->getMorphClass(),
             ];
         })->toArray();
     }

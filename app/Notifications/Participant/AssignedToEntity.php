@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications\Participant;
 
 use App\Contracts\HasStaticType;
-use App\Contracts\Roles\Roleable;
+use App\Contracts\Role\HasParticipants;
 use App\Filament\Pages\FlowsKanabanBoard;
 use App\Filament\Resources\FlowResource;
 use App\Models\Flow;
@@ -13,20 +13,23 @@ use App\Models\Tenant;
 use Exception;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
+
+use function get_class;
+
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AssignedToEntity extends Notification implements ShouldQueue
+final class AssignedToEntity extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Model|Roleable $entity, public string $role) {}
+    public function __construct(public Model|HasParticipants $entity, public string $role) {}
 
     /**
      * Get the notification's delivery channels.
@@ -80,10 +83,10 @@ class AssignedToEntity extends Notification implements ShouldQueue
 
     protected function generateVisitUrl()
     {
-        $class = \get_class($this->entity);
+        $class = get_class($this->entity);
 
         return match ($class) {
-            Flow::class => FlowResource::getUrl('index', ['tenant' => $this->entity->tenant]),
+            Flow::class => FlowResource::getUrl('index', ['tenant' => $this->entity->getTenant()]),
             Tenant::class => FlowsKanabanBoard::getUrl(['tenant' => $this->entity]),
             default => null,
         };

@@ -1,30 +1,32 @@
 <x-filament-panels::page>
     <div class="flex gap-x-2">
-        <x-filament::badge size="xs" color="gray" icon="heroicon-o-calendar-days" class="px-1">
-            <div class="flex items-center gap-x-1">
-                <span clas="font-bold"> Due:</span>
-                <span class="">{{ toUserDate($this->flow->due_date, filamentUser()) }}</span>
-            </div>
-        </x-filament::badge>
-        <x-filament::badge size="xs" color="gray" icon="heroicon-o-calendar" class="px-1">
-            <div class="flex items-center gap-x-1">
-                <span clas="font-bold"> Start:</span>
-                <span class="">{{ toUserDate($this->flow->start_date, filamentUser()) }}</span>
-            </div>
-        </x-filament::badge>
+        <div class="flex items-center gap-x-1">
+            <x-filament::badge size="sm" color="gray" icon="heroicon-o-calendar-days">
+                <div class="flex h-full items-center gap-x-1">
+                    <div clas="font-bold"> Due:</div>
+                    <div class="text-xs">{{ toUserDate($this->flow->due_date, filamentUser()) }}</div>
+                </div>
+            </x-filament::badge>
+            <x-filament::badge size="sm" color="gray" icon="heroicon-o-calendar">
+                <div class="flex items-center gap-x-1">
+                    <div clas="font-bold text-xs"> Start:</div>
+                    <div class="text-xs">{{ toUserDate($this->flow->start_date, filamentUser()) }}</div>
+                </div>
+            </x-filament::badge>
+        </div>
         <div class="flex flex-row -space-x-2">
             @foreach ($this->flow->participants as $participant)
-                <div class="w-6 h-6 rounded-full cursor-default" x-tooltip="name" x-data="{
-                    name: '{{ $participant->name }}'
+                <div class="h-6 w-6 cursor-default rounded-full" x-tooltip="name" x-data="{
+                    name: '{{ $participant->model->name }}'
                 }">
-                    <img class="w-full border rounded-full border-gray-50 dark:border-gray-800"
-                        src="{{ filament()->getUserAvatarUrl($participant) }}">
+                    <img class="w-full rounded-full border border-gray-50 dark:border-gray-800"
+                        src="{{ filament()->getUserAvatarUrl($participant->model) }}">
                 </div>
             @endforeach
         </div>
     </div>
 
-    <div wire:ignore.self x-data class="gap-2 pb-2 scrollbar-hide md:flex md:overflow-x-auto" class="flex flex-col">
+    <div wire:ignore.self x-data class="scrollbar-hide gap-2 pb-2 md:flex md:overflow-x-auto" class="flex flex-col">
 
         @foreach ($statuses as $status)
             @include(static::$statusView)

@@ -77,9 +77,7 @@ class CreateFlow extends CreateRecord
                             ->afterOrEqual(fn ($get) => $get('start_date'))
                             ->native(false),
                         Select::make('participants')
-                            ->options(User::memberOf(filamentTenant())
-                                ->where('id', '!=', filamentUser()->id)
-                                ->pluck('name', 'id'))
+                            ->options(User::assignedTo(filamentTenant())->where('id', '!=', filamentUser()->getKey())->pluck('name','id'))
                             ->multiple(true)
                             ->native(false),
                         // FileUpload::make('assets')

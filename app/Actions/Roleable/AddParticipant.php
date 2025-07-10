@@ -4,26 +4,30 @@ declare(strict_types=1);
 
 namespace App\Actions\Roleable;
 
-use App\Contracts\Roles\Roleable;
+use App\Contracts\Role\AssignableEntity;
+use App\Contracts\Role\HasParticipants;
 use App\Enums\Role\RoleEnum;
-use App\Models\Tenant;
-use App\Models\User;
 use App\Notifications\Participant\AssignedToEntity;
+use BackedEnum;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddParticipant
+final class AddParticipant
 {
     use AsAction;
 
-    public function handle(Roleable $roleable, User $user, RoleEnum $role)
+    public function handle(HasParticipants $roleable, AssignableEntity $user, RoleEnum|string $role)
     {
-        $roleable->assignUserRole($user, $role->value);
-        $user->notify(new AssignedToEntity($roleable, $role->getLabel()));
+
+        if ($role instanceof BackedEnum) {
+            $role = $role->value;
+        }
+        $roleable->addParticipant($user, $role);
+
+        $user->notify(new AssignedToEntity($roleable, RoleEnum::from($role)->getLabel()));
     }
 
-    public function asJob(Roleable $roleable, User $user, RoleEnum $role, Tenant $tenant)
+    public function asJob(HasParticipants $roleable, AssignableEntity $user, RoleEnum|string $role)
     {
-        \setPermissionsTeamId($tenant->id);
         $this->handle($roleable, $user, $role);
     }
 }
