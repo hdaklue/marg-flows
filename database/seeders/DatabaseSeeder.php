@@ -11,7 +11,7 @@ use App\Models\Flow;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder
+final class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             'account_type' => AccountType::ADMIN->value,
             'timezone' => 'Africa/Cairo',
         ]);
-             $user1->save();
+        $user1->save();
         $tenant1 = $user1->createdTenants()->create([
             'name' => 'Test Tenant',
         ]);
@@ -39,7 +39,6 @@ class DatabaseSeeder extends Seeder
         // $tenant1->members()->attach($user1);
         // $tenant2->members()->attach($user1);
 
-   
         $systemRoles = collect(RoleEnum::cases())->map(function ($case) {
             return [
                 'name' => $case->value,
@@ -52,7 +51,7 @@ class DatabaseSeeder extends Seeder
 
         $roleadmin = $tenant1->systemRoles()->where('name', RoleEnum::ADMIN->value)->firstOrFail();
 
-        $tenant1->addParticipant($user1, $roleadmin);
+        $tenant1->addParticipant($user1, $roleadmin->name);
         $user2 = User::factory()->create([
             'name' => 'Test Member',
             'email' => 'member@example.com',
@@ -64,7 +63,7 @@ class DatabaseSeeder extends Seeder
 
         $roleviewer = $tenant2->systemRoles()->where('name', RoleEnum::VIEWER->value)->firstOrFail();
         // $tenant1->addParticipant($user1, $roleadmin);
-        $tenant2->addParticipant($user1, $roleviewer);
+        $tenant2->addParticipant($user1, $roleviewer->name);
         // $user1->assignRole(RoleEnum::VIEWER, $tenant2);
 
         Flow::factory(20)->create(); // Random realistic distribution
@@ -76,7 +75,7 @@ class DatabaseSeeder extends Seeder
         Flow::inRandomOrder(10)->with('tenant')->get()->each(function (Flow $flow) use ($user1) {
 
             $role = $flow->tenant->systemRoles()->where('name', RoleEnum::VIEWER->value)->firstOrFail();
-            $flow->addParticipant($user1, $role, true);
+            $flow->addParticipant($user1, $role->name, true);
         });
 
         // Specific test scenarios

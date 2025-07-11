@@ -13,6 +13,7 @@ use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Collection;
 
 trait CanBeAssignedToEntity
 {
@@ -22,6 +23,11 @@ trait CanBeAssignedToEntity
     public function roleAssignments(): MorphMany
     {
         return $this->morphMany(ModelHasRole::class, 'model');
+    }
+
+    public function getAssignedEntitiesByType(string $type): Collection
+    {
+        return RoleManager::getAssignedEntitiesByType($this, $type);
     }
 
     /**

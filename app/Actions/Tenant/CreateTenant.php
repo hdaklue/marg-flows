@@ -35,8 +35,6 @@ final class CreateTenant
 
                 $tenant->save();
 
-                $tenant->members()->attach(array_column($data['members'], 'name'));
-
                 $participants = $this->getParticipants(array_column($data['members'], 'name'));
 
                 $systemRoles = $this->getSysyemRoles();
@@ -73,7 +71,6 @@ final class CreateTenant
     {
         return collect(RoleEnum::cases())->map(fn ($case) => [
             'name' => $case->value,
-            'guard_name' => 'web',
         ])->toArray();
     }
 }

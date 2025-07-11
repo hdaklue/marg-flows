@@ -32,9 +32,6 @@ use Illuminate\Support\Collection;
  * @property-read \App\Models\User $creator
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Flow> $flows
  * @property-read int|null $flows_count
- * @property-read \App\Models\TenantUser|null $pivot
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $members
- * @property-read int|null $members_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $participants
  * @property-read int|null $participants_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $roleAssignments
@@ -60,10 +57,10 @@ final class Tenant extends Model implements HasStaticType, RoleableEntity
 
     protected $fillable = ['name'];
 
-    public function members(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class)->using(TenantUser::class);
-    }
+    // public function members(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(User::class)->using(TenantUser::class);
+    // }
 
     /**
      * Enforces the RoleableEntity.
@@ -83,16 +80,6 @@ final class Tenant extends Model implements HasStaticType, RoleableEntity
     public function getTenantId(): string
     {
         return $this->getKey();
-    }
-
-    public function removeMember(User|array $user)
-    {
-        $this->members()->detach($user);
-    }
-
-    public function addMember(User|array $user)
-    {
-        $this->members()->attach($user);
     }
 
     public function systemRoles(): HasMany

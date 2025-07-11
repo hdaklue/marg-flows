@@ -8,6 +8,7 @@ use App\Actions\Roleable\AddParticipant;
 use App\Actions\Roleable\RemoveParticipant;
 use App\Contracts\Role\RoleableEntity;
 use App\Enums\Role\RoleEnum;
+use App\Facades\RoleManager;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -16,6 +17,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
@@ -27,6 +29,7 @@ use const true;
 /**
  * @property-read Form $form
  * @property-read Collection $manageableMembers
+ * @property-read Collection $authedUserAssignableRoles
  */
 #[Lazy(true)]
 final class ManageMembers extends Component implements HasActions, HasForms
@@ -99,11 +102,35 @@ final class ManageMembers extends Component implements HasActions, HasForms
         $user = User::where('id', '=', $state['member'])->firstOrFail();
         $role = RoleEnum::from($state['role']);
         AddParticipant::run($this->roleable, $user, $role);
+        $this->reloadData();
 
-        unset($this->manageableMembers);
-        $this->form->fill();
-        $this->dispatch("board-item-updated.{$this->roleable->getKey()}");
+    }
 
+    #[Computed]
+    public function authedUserAssignableRoles(): Collection
+    {
+        if (! $this->roleable) {
+            return collect();
+        }
+        $role = filamentUser()->getAssignmentOn($this->roleable);
+
+        return RoleEnum::getRolesLowerThanOrEqual(RoleEnum::from($role->name));
+    }
+
+    public function changeRole(string $role, string|int $target_id)
+    {
+        $this->authorize('manageMembers', $this->roleable);
+        $targetModel = $this->roleable->getPaticipant($target_id);
+        if (! $targetModel) {
+            return;
+        }
+
+        RoleManager::changeRoleOn($targetModel, $this->roleable, $role);
+        $this->reloadData();
+        Notification::make()
+            ->body('Role updated successfully')
+            ->success()
+            ->send();
     }
 
     public function removeMemberAction(): Action
@@ -113,10 +140,9 @@ final class ManageMembers extends Component implements HasActions, HasForms
             ->action(function (array $arguments) {
                 $user = User::where('id', '=', $arguments['memberId'])->firstOrFail();
                 RemoveParticipant::run($this->roleable, $user);
-                unset($this->manageableMembers);
-
-                $this->dispatch("board-item-updated.{$this->roleable->getKey()}");
+                $this->reloadData();
             })->requiresConfirmation()
+            ->iconButton()
             ->color('danger');
 
     }
@@ -125,5 +151,12 @@ final class ManageMembers extends Component implements HasActions, HasForms
     public function render()
     {
         return view('livewire.role.manage-members');
+    }
+
+    private function reloadData()
+    {
+        unset($this->manageableMembers);
+        $this->form->fill();
+        $this->dispatch("board-item-updated.{$this->roleable->getKey()}");
     }
 }

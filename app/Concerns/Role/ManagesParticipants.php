@@ -41,6 +41,18 @@ trait ManagesParticipants
             ->with(['model', 'role']);
     }
 
+    public function getPaticipant(AssignableEntity|string|int $entity): ?AssignableEntity
+    {
+        if ($entity instanceof AssignableEntity) {
+            $entity = $entity->getKey();
+        }
+        $modelHasRole = $this->getParticipants()->filter(fn (ModelHasRole $participant) => $participant->getModel()->getKey() === $entity)->first();
+
+        if ($modelHasRole) {
+            return $modelHasRole->getModel();
+        }
+    }
+
     public function getParticipants(): Collection
     {
         return RoleManager::getParticipants($this);

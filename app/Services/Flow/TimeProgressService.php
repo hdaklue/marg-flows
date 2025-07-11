@@ -7,6 +7,7 @@ namespace App\Services\Flow;
 use App\Contracts\Progress\TimeProgressable;
 use App\ValueObjects\Percentage;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
 
 final class TimeProgressService
@@ -87,25 +88,30 @@ final class TimeProgressService
         $status = $this->getProgressStatus($item);
         $percentage = $this->isCompleted($item) ? Percentage::complete() : $this->calculateProgressPercentage($item);
         $color = $this->mapStatusToColor($status, $percentage);
+        $cacheKey = $this->getCacheKey($item);
+        $ttl = (int) now()->diffInSeconds(now()->endOfDay());
 
         return Cache::remember(
-            $this->getCacheKey($item),
-            (int) now()->endOfDay()->diffInSeconds(now()),
-            function () use ($item, $percentage, $status, $color) {
-                return [
-                    'percentage' => $percentage->toArray(),
-                    'color' => $color,
-                    'status' => $status,
-                    'days_remaining' => $this->getDaysRemaining($item),
-                    'days_elapsed' => $this->getDaysElapsed($item),
-                    'total_days' => $this->getTotalDays($item),
-                    'is_overdue' => $this->isPastDue($item),
-                    'is_completed' => $this->isCompleted($item),
-                    'is_scheduled' => $this->isScheduled($item),
-                    'start_date' => $item->getProgressStartDate()->format('Y-m-d'),
-                    'due_date' => $item->getProgressDueDate()->format('Y-m-d'),
-                ];
-            });
+            $cacheKey,
+            $ttl,
+            fn () => [
+                'percentage' => $percentage->toArray(),
+                'color' => $color,
+                'status' => $status,
+                'days_remaining' => $this->getDaysRemaining($item),
+                'days_remaining_display' => now()->diffForHumans($this->getDueDate($item), [
+                    'syntax' => CarbonInterface::DIFF_ABSOLUTE,
+                    'short' => false,
+                    'parts' => 1,
+                ]),
+                'days_elapsed' => $this->getDaysElapsed($item),
+                'total_days' => $this->getTotalDays($item),
+                'is_overdue' => $this->isPastDue($item),
+                'is_completed' => $this->isCompleted($item),
+                'is_scheduled' => $this->isScheduled($item),
+                'start_date' => $item->getProgressStartDate()->format('Y-m-d'),
+                'due_date' => $item->getProgressDueDate()->format('Y-m-d'),
+            ]);
     }
 
     /**
@@ -254,7 +260,7 @@ final class TimeProgressService
             $item->getProgressStartDate()->format('Ymd'),
             $item->getProgressDueDate()->format('Ymd'),
             $item->getProgressCompletedDate()?->format('Ymd') ?? 'pending',
-            now()->endOfDay()->timestamp,
+            now()->endOfDay()->toDateTimeString(),
         );
     }
 

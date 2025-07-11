@@ -83,7 +83,7 @@ final class InviteMember
         $tanentIds = $dto->role_data->pluck('id')->toArray();
         $tenants = Tenant::whereIn('id', $tanentIds)->get();
 
-        DB::table(config('permission.table_names.model_has_roles'))
+        DB::table(config('role.table_names.model_has_roles'))
             ->insert($this->prepareInsertAttr($dto->role_data, $this->member));
         RoleManager::bulkClearCache($tenants);
     }

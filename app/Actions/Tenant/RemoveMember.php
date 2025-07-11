@@ -58,7 +58,7 @@ final class RemoveMember
             return; // Nothing to revoke
         }
 
-        DB::table(config('permission.table_names.model_has_roles'))
+        DB::table(config('role.table_names.model_has_roles'))
             ->where('roleable_type', Relation::getMorphAlias(Flow::class))
             ->where('model_type', $entity->getMorphClass())
             ->where('model_id', $entity->getKey())

@@ -29,6 +29,7 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
         ]);
 
         $this->clearCache($target);
+        $this->clearAssignableEntityCache($user, $target->getMorphClass());
     }
 
     public function remove(AssignableEntity $user, RoleableEntity $target): void
@@ -41,6 +42,26 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
         ])->delete();
 
         $this->clearCache($target);
+        $this->clearAssignableEntityCache($user, $target->getMorphClass());
+    }
+
+    public function changeRoleOn(AssignableEntity $user, RoleableEntity $target, RoleEnum|string $role)
+    {
+
+        $roleToAssign = $this->ensureRoleBelongsToTenant($target, $role);
+
+        $model = ModelHasRole::where([
+            'model_type' => $user->getMorphClass(),
+            'model_id' => $user->getKey(),
+            'roleable_id' => $target->getKey(),
+            'roleable_type' => $target->getMorphClass(),
+        ])->first();
+
+        $model->role()->associate($roleToAssign);
+        $model->save();
+
+        $this->clearCache($target);
+        $this->clearAssignableEntityCache($user, $target->getMorphClass());
     }
 
     public function getParticipantsHasRole(RoleableEntity $target, string|RoleEnum $role): Collection
@@ -61,6 +82,33 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
     }
 
     /**
+     * Summary of getAssignedEntitiesByType
+     * $type has To be A valid morphMapResult.
+     */
+    public function getAssignedEntitiesByType(AssignableEntity $entity, string $type): Collection
+    {
+        $cacheKey = $this->generateAssignedEntitiesCacheKey($entity, $type);
+        if (config('role.should_cache')) {
+            return Cache::remember($cacheKey, now()->addHour(), fn () => ModelHasRole::where([
+                'roleable_type' => $type,
+                'model_type' => $entity->getMorphClass(),
+                'model_id' => $entity->getKey(),
+            ])
+                ->with('roleable')
+                ->get()
+                ->pluck('roleable'));
+        }
+
+        return ModelHasRole::where([
+            'roleable_type' => $type,
+            'model_type' => $entity->getMorphClass(),
+            'model_id' => $entity->getKey(),
+        ])
+            ->with('roleable')
+            ->get()->pluck('roleable');
+    }
+
+    /**
      * Summary of getParticipantsWithRoles.
      *
      * @return Collection<ModelHasRole>
@@ -69,8 +117,6 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
     {
         if (config('role.should_cache')) {
             return Cache::remember($this->generateParticipantsCacheKey($target), now()->addHour(), function () use ($target) {
-                logger()->info('hitting cache');
-
                 return ModelHasRole::where([
                     'roleable_id' => $target->getKey(),
                     'roleable_type' => $target->getMorphClass(),
@@ -174,7 +220,7 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
      */
     public function clearCache(RoleableEntity $target)
     {
-        logger()->info('clearing cache');
+
         $key = $this->generateParticipantsCacheKey($target);
         Cache::forget($key);
     }
@@ -189,7 +235,8 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
 
     public function generateParticipantsCacheKey(RoleableEntity $target): string
     {
-        return "parcipitans:{$target->getMorphClass()}:{$target->getKey()}";
+        return "participants:{$target->getMorphClass()}:{$target->getKey()}";
+
     }
 
     /** @param Collection<RoleableEntity> $targets */
@@ -201,6 +248,11 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
 
     }
 
+    private function clearAssignableEntityCache(AssignableEntity $user, string $type): void
+    {
+        Cache::forget(($this->generateAssignedEntitiesCacheKey($user, $type)));
+    }
+
     private function resolveTargetTenant(RoleableEntity $target)
     {
         if (! $target instanceof Tenant) {
@@ -210,6 +262,11 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
         }
 
         return $target;
+    }
+
+    private function generateAssignedEntitiesCacheKey(AssignableEntity $target, string $type): string
+    {
+        return "{$target->getMorphClass()}:{$target->getKey()}_{$type}_entities";
     }
 
     private function resolveRoleName(string|RoleEnum $roleName): string

@@ -44,6 +44,8 @@ interface RoleableEntity extends Arrayable, BelongsToTenantContract
 
     public function participants(): MorphMany;
 
+    public function getPaticipant(AssignableEntity|string|int $entity): ?AssignableEntity;
+
     /**
      * Remove a participant's specific role(s).
      */

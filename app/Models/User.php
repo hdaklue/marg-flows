@@ -8,6 +8,7 @@ use App\Concerns\Role\CanBeAssignedToEntity;
 use App\Concerns\Tenant\HasActiveTenant;
 use App\Contracts\Role\AssignableEntity;
 use App\Enums\Account\AccountType;
+use App\Facades\RoleManager;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -146,7 +147,7 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $this->morphedByMany(
             Flow::class,
             'roleable',
-            config('permission.table_names.model_has_roles'),
+            config('role.table_names.model_has_roles'),
             'model_id',
             'roleable_id',
         )->withPivot(['role_id', 'tenant_id']);
@@ -176,12 +177,13 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
 
     public function getAssignedTenants()
     {
-        return $this->roleAssignments()
-            ->where('roleable_type', Relation::getMorphAlias(Tenant::class))
-            ->where('model_type', $this->getMorphClass())
-            ->where('model_id', $this->getKey())
-            ->with('roleable')
-            ->get()->pluck('roleable');
+        return RoleManager::getAssignedEntitiesByType($this, Relation::getMorphAlias(Tenant::class));
+        // return $this->roleAssignments()
+        //     ->where('roleable_type', Relation::getMorphAlias(Tenant::class))
+        //     ->where('model_type', $this->getMorphClass())
+        //     ->where('model_id', $this->getKey())
+        //     ->with('roleable')
+        //     ->get()->pluck('roleable');
     }
 
     public function logins(): HasMany

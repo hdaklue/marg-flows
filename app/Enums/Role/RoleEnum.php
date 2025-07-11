@@ -12,49 +12,49 @@ enum RoleEnum: string implements HasDescription, HasLabel
 {
     /**
      * Super Admin - System-wide administrative access
-     * Can manage tenants, system settings, and all entities
+     * Can manage tenants, system settings, and all entities.
      */
     // case SUPER_ADMIN = 'super_admin';
 
     /**
      * Tenant Admin - Tenant-wide administrative access
-     * Can manage all entities within their tenant
+     * Can manage all entities within their tenant.
      */
     // case TENANT_ADMIN = 'tenant_admin';
 
     /**
      * Admin - Entity administrative access
-     * Can manage specific entities (projects, organizations, etc.)
+     * Can manage specific entities (projects, organizations, etc.).
      */
     case ADMIN = 'admin';
 
     /**
      * Manager - Entity management access
-     * Can manage entity content and assign viewer/editor roles
+     * Can manage entity content and assign viewer/editor roles.
      */
     case MANAGER = 'manager';
 
     /**
      * Editor - Content modification access
-     * Can create, edit, and delete content within entities
+     * Can create, edit, and delete content within entities.
      */
     case EDITOR = 'editor';
 
     /**
      * Contributor - Limited content access
-     * Can create and edit their own content
+     * Can create and edit their own content.
      */
     case CONTRIBUTOR = 'contributor';
 
     /**
      * Viewer - Read-only access
-     * Can view content within entities
+     * Can view content within entities.
      */
     case VIEWER = 'viewer';
 
     /**
      * Guest - Minimal access
-     * Limited read access to public content
+     * Limited read access to public content.
      */
     case GUEST = 'guest';
 
@@ -66,9 +66,16 @@ enum RoleEnum: string implements HasDescription, HasLabel
 
     }
 
+    public static function getRolesLowerThanOrEqual(RoleEnum $role)
+    {
+        return collect(self::cases())->reject(function ($case) use ($role) {
+            return $case->getLevel() > $role->getLevel();
+        })->map(fn ($item) => ['value' => $item->value, 'label' => $item->getLabel()]);
+    }
+
     /**
      * Get the hierarchical level of this role
-     * Higher numbers = more privileges
+     * Higher numbers = more privileges.
      */
     public function getLevel(): int
     {
@@ -85,7 +92,7 @@ enum RoleEnum: string implements HasDescription, HasLabel
     }
 
     /**
-     * Get human-readable label for this role
+     * Get human-readable label for this role.
      */
     public function getLabel(): string
     {
@@ -102,7 +109,7 @@ enum RoleEnum: string implements HasDescription, HasLabel
     }
 
     /**
-     * Get description of role capabilities
+     * Get description of role capabilities.
      */
     public function getDescription(): string
     {
@@ -119,7 +126,7 @@ enum RoleEnum: string implements HasDescription, HasLabel
     }
 
     /**
-     * Check if this role is higher than another role
+     * Check if this role is higher than another role.
      */
     public function isHigherThan(RoleEnum $other): bool
     {
@@ -127,7 +134,7 @@ enum RoleEnum: string implements HasDescription, HasLabel
     }
 
     /**
-     * Check if this role is lower than another role
+     * Check if this role is lower than another role.
      */
     public function isLowerThan(RoleEnum $other): bool
     {
@@ -140,7 +147,7 @@ enum RoleEnum: string implements HasDescription, HasLabel
     }
 
     /**
-     * Check if this role is at least the same level as another
+     * Check if this role is at least the same level as another.
      */
     public function isAtLeast(RoleEnum $other): bool
     {

@@ -70,6 +70,10 @@ interface RoleAssignmentManagerInterface
 
     public function getRoleOn(AssignableEntity $user, RoleableEntity $target): ?Role;
 
+    public function getAssignedEntitiesByType(AssignableEntity $entity, string $type): Collection;
+
+    public function changeRoleOn(AssignableEntity $user, RoleableEntity $target, string|RoleEnum $role);
+
     /**
      * Generate a cache key for a role assignment.
      */
