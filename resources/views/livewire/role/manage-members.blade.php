@@ -1,24 +1,26 @@
 <div class="flex flex-col space-y-2">
-    <div class="rounded-lg bg-gray-100 px-4 py-3 dark:bg-gray-800/30">
-        <header class="border-b border-gray-200 pb-2 font-semibold dark:border-gray-800/60">
-            Assign new members
-        </header>
-        <div class="mt-2 flex flex-col gap-2">
-            <form wire:submit.prevent>
-                {{ $this->form }}
-            </form>
-            <div class="mt-1 flex justify-end">
-                <x-filament::button size="sm" color="primary" outlined wire:click="addMember">
-                    Add Member
-                </x-filament::button>
+    @if ($canEdit)
+        <div class="rounded-lg bg-gray-100 px-4 py-3 dark:bg-gray-800/30">
+            <header class="border-b border-gray-200 pb-2 font-semibold dark:border-gray-800/60">
+                Assign new members
+            </header>
+            <div class="mt-2 flex flex-col gap-2">
+                <form wire:submit.prevent>
+                    {{ $this->form }}
+                </form>
+                <div class="mt-1 flex justify-end">
+                    <x-filament::button size="sm" color="primary" outlined wire:click="addMember">
+                        Add Member
+                    </x-filament::button>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <div>
-        <header class="mt-2 border-b border-gray-200 pb-2 font-semibold dark:border-gray-800/60">
+        {{-- <header class="pb-2 mt-2 font-semibold border-b border-gray-200 dark:border-gray-800/60">
             Manage Members
-        </header>
+        </header> --}}
         <div class="mt-2 flex flex-col space-y-2">
             @if (count($this->manageableMembers))
                 @foreach ($this->manageableMembers as $member)
@@ -37,40 +39,42 @@
                                 </p>
                             </div>
                         </div>
-                        <div x-data="{
-                            role: '',
-                            id: '{{ $member->model->getKey() }}',
-                            {{-- init() {
+                        @if ($canEdit)
+                            <div x-data="{
+                                role: '',
+                                id: '{{ $member->model->getKey() }}',
+                                {{-- init() {
                                 $watch('role', () => this.updateRole())
                             } --}}
-                            updateRole() {
-                                $wire.changeRole(this.role, this.id);
-                                {{-- $nextTick(() => this.role = '') --}}
-                            },
-                        }">
-                            <x-filament::input.wrapper class="!rounded-md">
-                                <x-filament::input.select x-model="role" class="!py-1.5 !pe-6 !ps-2 !text-sm"
-                                    @change="role = $event.target.value; $nextTick(()=>updateRole())">
-                                    <option value="" disabled>Update role</option>
-                                    @foreach ($this->authedUserAssignableRoles as $role)
-                                        <option value="{{ $role['value'] }}">
-                                            {{ $role['label'] }}
-                                        </option>
-                                    @endforeach
-                                    {{-- <option value="draft">Draft</option>
+                                updateRole() {
+                                    $wire.changeRole(this.role, this.id);
+                                    {{-- $nextTick(() => this.role = '') --}}
+                                },
+                            }">
+                                <x-filament::input.wrapper class="!rounded-md">
+                                    <x-filament::input.select x-model="role" class="!py-1.5 !pe-6 !ps-2 !text-sm"
+                                        @change="role = $event.target.value; $nextTick(()=>updateRole())">
+                                        <option value="" disabled>Update role</option>
+                                        @foreach ($this->authedUserAssignableRoles as $role)
+                                            <option value="{{ $role['value'] }}">
+                                                {{ $role['label'] }}
+                                            </option>
+                                        @endforeach
+                                        {{-- <option value="draft">Draft</option>
                                         <option value="reviewing" selected>Reviewing</option>
                                         <option value="published">Published</option> --}}
-                                </x-filament::input.select>
-                            </x-filament::input.wrapper>
-                        </div>
-                        <div>
-                            <x-filament::icon-button size="xs" color="danger" icon="heroicon-o-trash" outlined
-                                tooltip="remove member"
-                                wire:click="mountAction('removeMemberAction', { memberId: '{{ $member->model->getKey() }}'})">
-                                remove
-                            </x-filament::icon-button>
-                            {{-- {{ ($this->removeMemberAction)(['memberId' => $member->id]) }} --}}
-                        </div>
+                                    </x-filament::input.select>
+                                </x-filament::input.wrapper>
+                            </div>
+                            <div>
+                                <x-filament::icon-button size="xs" color="danger" icon="heroicon-o-trash" outlined
+                                    tooltip="remove member"
+                                    wire:click="mountAction('removeMemberAction', { memberId: '{{ $member->model->getKey() }}'})">
+                                    remove
+                                </x-filament::icon-button>
+                                {{-- {{ ($this->removeMemberAction)(['memberId' => $member->id]) }} --}}
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             @else

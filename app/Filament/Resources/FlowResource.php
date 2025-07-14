@@ -53,10 +53,12 @@ final class FlowResource extends Resource
                     ->getStateUsing(fn ($record) => ucfirst(FlowStatus::from($record->status)->getLabel()))
                     ->color(fn ($record) => FlowStatus::from($record->status)->getFilamentColor())
                     ->badge(),
-                ImageColumn::make('creator')
-                    ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))
-                    ->size(30)
-                    ->circular(),
+                ImageColumn::make('creator.avatar')
+                    // ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))
+                    ->circular()
+                    ->stacked()
+                    ->limit(3)
+                    ->limitedRemainingText(),
 
                 // SelectColumn::make('status')
                 //     ->options(FlowStatus::class),
@@ -75,7 +77,9 @@ final class FlowResource extends Resource
                 ImageColumn::make('prticipants')
                     ->getStateUsing(fn ($record) => $record->participants->pluck('model')->pluck('avatar'))
                     ->circular()
-                    ->stacked(),
+                    ->stacked()
+                    ->limit(3)
+                    ->limitedRemainingText(),
             ])
 
             ->filters([

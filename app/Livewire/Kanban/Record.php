@@ -58,6 +58,13 @@ final class Record extends Component
         return $this->record->getParticipants();
     }
 
+    #[Computed]
+    public function participantsArray(): array
+    {
+
+        return $this->participants->pluck('model')->map(fn ($item) => ['name' => $item->name, 'avatar' => $item->avatar])->toArray();
+    }
+
     #[Computed(true)]
     public function userPermissions(): array
     {

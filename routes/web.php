@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AcceptInvitation;
+use App\Http\Controllers\ChunkedUploadController;
 use App\Http\Controllers\EditorJsUpload;
 use App\Livewire\Previewtest;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\TestChunkedUpload;
 use App\Models\Flow;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +26,26 @@ Route::get('invitation/accept/{token}', AcceptInvitation::class)
     ->name('invitation.accept');
 
 Route::post('uploader/editorjs', EditorJsUpload::class)->name('uploader');
+
+// Chunked upload routes
+Route::post('chunked-upload', [ChunkedUploadController::class, 'store'])
+    ->middleware(['auth'])
+    ->name('chunked-upload.store');
+
+Route::post('chunked-upload/cleanup', [ChunkedUploadController::class, 'cleanup'])
+    ->middleware(['auth'])
+    ->name('chunked-upload.cleanup');
+Route::delete('chunked-upload', [ChunkedUploadController::class, 'delete'])
+    ->middleware(['auth'])
+    ->name('chunked-upload.delete');
+Route::post('chunked-upload/cancel', [ChunkedUploadController::class, 'cancel'])
+    ->middleware(['auth'])
+    ->name('chunked-upload.cancel');
+
+// Test route for chunked upload
+Route::get('test-chunked-upload', TestChunkedUpload::class)
+    // ->middleware(['auth'])
+    ->name('test-chunked-upload');
 
 // Route::view('dashboard', 'dashboard')
 //     ->middleware(['auth', 'verified'])

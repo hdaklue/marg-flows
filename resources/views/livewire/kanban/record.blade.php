@@ -2,7 +2,7 @@
     color: $wire.entangle('color'),
     progressDetails: $wire.entangle('progressDetails'),
 }" id="{{ $record->getKey() }}"
-    class="record dark:bg-{{ $this->color }}-900/10 dark:hover:bg-{{ $this->color }}-900/20 bg-{{ $this->color }}-50 hover:bg-{{ $this->color }}-200 @if ($this->userPermissions['canManageFlows']) cursor-move @endif relative overflow-hidden rounded-lg p-2 text-base font-medium text-gray-800 transition-all dark:text-gray-200"
+    class="record dark:bg-{{ $this->color }}-900/10 dark:hover:bg-{{ $this->color }}-900/20 bg-{{ $this->color }}-50 hover:bg-{{ $this->color }}-200 @if ($this->userPermissions['canManageFlows']) cursor-move @endif relative rounded-lg p-2 text-base font-medium text-gray-800 transition-all dark:text-gray-200"
     @if ($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3) x-data @endif>
 
     <div class="flex flex-row justify-between gap-2">
@@ -11,14 +11,15 @@
             <a href="{{ App\Filament\Pages\ViewFlow::getUrl(['record' => $record->getKey()]) }}">{{ $record->title }}</a>
         </div>
         <div class="flex flex-row -space-x-2">
-            @foreach ($this->participants as $participant)
-                <div class="h-5 w-5 cursor-default rounded-full" x-tooltip="name" x-data="{
+            <x-user-avatar-stack :users="$this->participantsArray" size="2xs" :editable-key="$this->record->getKey()" :showTooltip="false" />
+            {{-- @foreach ($this->participants as $participant)
+                <div class="w-5 h-5 rounded-full cursor-default" x-tooltip="name" x-data="{
                     name: '{{ $participant->model->name }} - ({{ $participant->role->name }})'
                 }">
-                    <img class="w-full rounded-full border border-gray-50 dark:border-gray-800"
+                    <img class="w-full border rounded-full border-gray-50 dark:border-gray-800"
                         src="{{ filament()->getUserAvatarUrl($participant->model) }}">
                 </div>
-            @endforeach
+            @endforeach --}}
         </div>
     </div>
 

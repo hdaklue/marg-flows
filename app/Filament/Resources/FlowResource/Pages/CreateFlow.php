@@ -9,10 +9,12 @@ use App\DTOs\Flow\CreateFlowDto;
 use App\Exceptions\Flow\FlowCreationException;
 use App\Filament\Pages\FlowsKanabanBoard;
 use App\Filament\Resources\FlowResource;
+use App\Forms\Components\ChunkedFileUpload;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
 use App\Models\User;
 use App\Services\Flow\TemplateService;
+use Exception;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
@@ -25,7 +27,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
-class CreateFlow extends CreateRecord
+final class CreateFlow extends CreateRecord
 {
     protected static string $resource = FlowResource::class;
 
@@ -55,10 +57,14 @@ class CreateFlow extends CreateRecord
                         ->columnSpanFull()
                         ->placeholder('Title')
                         ->required(),
+
                     Section::make([
                         EditorJs::make('blocks')
                             ->required()
                             ->columnSpanFull(),
+                        ChunkedFileUpload::make('as')
+                            ->video()
+                            ->maxFiles(5),
                     ])->columnSpan(3),
                     Section::make([
                         Select::make('template')
@@ -77,7 +83,7 @@ class CreateFlow extends CreateRecord
                             ->afterOrEqual(fn ($get) => $get('start_date'))
                             ->native(false),
                         Select::make('participants')
-                            ->options(User::assignedTo(filamentTenant())->where('id', '!=', filamentUser()->getKey())->pluck('name','id'))
+                            ->options(User::assignedTo(filamentTenant())->where('id', '!=', filamentUser()->getKey())->pluck('name', 'id'))
                             ->multiple(true)
                             ->native(false),
                         // FileUpload::make('assets')
@@ -94,6 +100,7 @@ class CreateFlow extends CreateRecord
 
         $this->authorizeAccess();
         $data = $this->form->getState();
+        dd($data);
 
         try {
 
@@ -118,7 +125,7 @@ class CreateFlow extends CreateRecord
                 ->body('We could not create the flow')
                 ->danger()
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->body('Something went wrong')
                 ->danger()

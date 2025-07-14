@@ -21,6 +21,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -42,10 +43,13 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
     public ?array $data = [];
 
+    #[Locked]
+    public bool $canEdit = false;
+
     public function mount(?RoleableEntity $roleable)
     {
         if ($roleable) {
-            $this->authorize('manageMembers', $roleable);
+            $this->canEdit = $this->authorize('manageMembers', $roleable)->allowed();
             $this->form->fill();
             $this->roleable = $roleable;
         }

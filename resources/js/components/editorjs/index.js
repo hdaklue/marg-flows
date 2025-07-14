@@ -8,6 +8,7 @@ import Alert from 'editorjs-alert';
 import DragDrop from 'editorjs-drag-drop';
 import HyperLink from 'editorjs-hyperlink';
 import Undo from 'editorjs-undo';
+import ResizableImage from './plugins/resizable-image';
 
 
 export default function editorjs(livewireState, uploadUrl, canEdit) {
@@ -96,6 +97,23 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                             'X-CSRF-TOKEN': csrf,
                         },
                         types: 'image/png, image/jpeg, image/jpg',
+                    }
+                },
+                resizableImage: {
+                    class: ResizableImage,
+                    config: {
+                        endpoints: {
+                            byFile: uploadUrl,
+                            byUrl: uploadUrl,
+                            delete: '/delete-image',
+                        },
+                        additionalRequestHeaders: {
+                            'X-CSRF-TOKEN': csrf,
+                        },
+                        types: 'image/*',
+                        field: 'image',
+                        captionPlaceholder: 'Enter image caption...',
+                        buttonContent: 'Select an image',
                     }
                 },
                 table: {

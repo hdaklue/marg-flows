@@ -16,10 +16,11 @@ use Livewire\Attributes\Url;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
 /**
- * ViewFlow
- * @property-read Flow $flow; 
+ * ViewFlow.
+ *
+ * @property-read Flow $flow;
  */
-class ViewFlow extends KanbanBoard
+final class ViewFlow extends KanbanBoard
 {
     protected static string $model = Flow::class;
 
@@ -54,6 +55,11 @@ class ViewFlow extends KanbanBoard
     public function getHeading(): string|Htmlable
     {
         return $this->flow->title;
+    }
+
+    public function getParticipantsArray(): array
+    {
+        return $this->flow->getParticipants()->pluck('model')->map(fn ($item) => ['name' => $item->name, 'avatar' => $item->avatar])->toArray();
     }
 
     protected function getHeaderActions(): array

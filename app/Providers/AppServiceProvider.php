@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Flow\TimeProgressService;
 use App\Services\Role\RoleAssignmentService;
 use Filament\Support\Assets\AlpineComponent;
+use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Auth\Access\Response;
@@ -50,6 +51,10 @@ final class AppServiceProvider extends ServiceProvider
         Event::subscribe(TenantEventSubscriber::class);
         FilamentAsset::register([
             AlpineComponent::make('editorJs', __DIR__ . '/../../resources/js/dist/components/editorjs.js'),
+            AlpineComponent::make('chunkedFileUploadComponent', __DIR__ . '/../../resources/js/dist/components/chunked-file-upload.js'),
+            Css::make('chunkedFileUploadCss', __DIR__ . '/../../resources/css/components/chunked-file-upload.css')
+                ->loadedOnRequest(),
+
             // Js::make('editorJs', __DIR__ . '/../../public/build/assets/index-C9DEfZiz.js')->loadedOnRequest(),
             // Js::make('editorJs', __DIR__ . '/../../resources/js/components/editorjs/index.js'),
         ]);

@@ -1,0 +1,113 @@
+@props([
+    'users' => [],
+    'maxVisible' => 4,
+    'size' => 'md', // 2xs, xs, sm, md, lg, xl
+    'showCount' => true,
+    'showTooltip' => true,
+    'editableKey',
+])
+
+@php
+    $sizeClasses = [
+        '2xs' => 'w-4 h-4 text-2xs',
+        'xs' => 'w-6 h-6 text-xs',
+        'sm' => 'w-8 h-8 text-xs',
+        'md' => 'w-10 h-10 text-sm',
+        'lg' => 'w-12 h-12 text-sm',
+        'xl' => 'w-16 h-16 text-base',
+    ];
+
+    $offsetClasses = [
+        '2xs' => '-ms-1',
+        'xs' => '-ms-1.5',
+        'sm' => '-ms-2',
+        'md' => '-ms-2.5',
+        'lg' => '-ms-3',
+        'xl' => '-ms-4',
+    ];
+
+    $borderClasses = [
+        '2xs' => 'border-1',
+        'xs' => 'border-1',
+        'sm' => 'border-2',
+        'md' => 'border-2',
+        'lg' => 'border-2',
+        'xl' => 'border-4',
+    ];
+
+    $visibleUsers = collect($users)->take($maxVisible - ($showCount && count($users) > $maxVisible ? 1 : 0));
+    $remainingCount = count($users) - $visibleUsers->count();
+@endphp
+
+<div class="flex items-center" x-data="{
+    tooltip: '',
+    showTooltip: false,
+    showUserTooltip(event, name) {
+        this.tooltip = name;
+        this.showTooltip = true;
+    },
+    hideUserTooltip() {
+        this.showTooltip = false;
+    }
+}">
+    @foreach ($visibleUsers as $index => $user)
+        @php
+            $userName =
+                is_array($user) && isset($user['name'])
+                    ? $user['name']
+                    : (is_object($user) && isset($user->name)
+                        ? $user->name
+                        : 'User');
+            $userAvatar =
+                is_array($user) && isset($user['avatar'])
+                    ? $user['avatar']
+                    : (is_object($user) && isset($user->avatar)
+                        ? $user->avatar
+                        : null);
+        @endphp
+        <div class="{{ $index > 0 ? $offsetClasses[$size] ?? '' : '' }} group relative">
+            @if ($userAvatar)
+                <img src="{{ $userAvatar }}" alt="{{ $userName }}"
+                    class="{{ $sizeClasses[$size] ?? '' }} {{ $borderClasses[$size] ?? '' }} cursor-pointer rounded-full border-white object-cover shadow-sm ring-2 ring-white transition-all duration-200 hover:z-10 hover:scale-110 dark:border-gray-700 dark:ring-gray-800">
+            @else
+                <div
+                    class="{{ $sizeClasses[$size] ?? '' }} {{ $borderClasses[$size] ?? '' }} flex cursor-pointer items-center justify-center rounded-full border-white bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white shadow-sm ring-2 ring-white transition-all duration-200 hover:z-10 hover:scale-110 dark:border-gray-700 dark:ring-gray-800">
+                    {{ strtoupper(substr($userName, 0, 1)) }}
+                </div>
+            @endif
+            @if($showTooltip)
+                <!-- CSS-only tooltip -->
+                <div
+                    class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:bg-gray-700">
+                    {{ $userName }}
+                </div>
+            @endif
+        </div>
+    @endforeach
+
+    @if ($showCount)
+        <div class="{{ $offsetClasses[$size] ?? '' }} group relative"
+            wire:click="$dispatch('open-members-modal',{roleable: '{{ $editableKey }}' })">
+            <div
+                class="{{ $sizeClasses[$size] ?? '' }} {{ $borderClasses[$size] ?? '' }} flex cursor-pointer items-center justify-center rounded-full border-white bg-gray-100 font-semibold text-gray-600 shadow-sm ring-2 ring-white transition-all duration-200 hover:z-10 hover:scale-110 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-gray-600">
+                @if ($remainingCount > 0)
+                    +{{ $remainingCount }}
+                @else
+                    <x-heroicon-o-users class="h-3 w-3" />
+                @endif
+            </div>
+            @if($showTooltip)
+                <!-- CSS-only tooltip -->
+                <div
+                    class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:bg-gray-700">
+                    @if ($remainingCount > 0)
+                        {{ $remainingCount }} more user{{ $remainingCount > 1 ? 's' : '' }}
+                    @else
+                        Manage members
+                    @endif
+                </div>
+            @endif
+        </div>
+    @endif
+
+</div>

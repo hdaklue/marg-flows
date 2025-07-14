@@ -1,5 +1,5 @@
 <div>
-    <x-filament::modal id="edit-members-modal" width="xl">
+    <x-filament::modal id="edit-members-modal" width="xl" slide-over>
         <x-slot name="heading">
             {{ $record?->title }} Members
         </x-slot>

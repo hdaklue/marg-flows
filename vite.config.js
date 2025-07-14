@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/css/filament/portal/theme.css',
                 'resources/js/components/editorjs/index.js',
                 'resources/css/components/editorjs/index.css',
+                'resources/css/components/editorjs/resizable-image.css',
             ],
             refresh: [
                 ...refreshPaths,
