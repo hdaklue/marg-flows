@@ -152,25 +152,31 @@ final class DatabaseSeeder extends Seeder
         $this->command->info('Assigning participants to flows...');
         
         // Assign participants to flows with 10 max limit and test user as admin
-        Flow::with('tenant')->chunk(25, function ($flows) use ($allUsers, $testUser) {
+        Flow::with('tenant')->chunk(25, function ($flows) use ($testUser) {
             foreach ($flows as $flow) {
-                // First, assign test user as ADMIN on every flow
-                $adminRole = $flow->tenant->systemRoles()->where('name', RoleEnum::ADMIN->value)->first();
-                if ($adminRole) {
-                    try {
-                        $flow->addParticipant($testUser, $adminRole->name, true);
-                    } catch (\Exception $e) {
-                        // Skip if already assigned
+                // First, assign test user as ADMIN on every flow (only if test user is a participant of this tenant)
+                $testUserIsParticipant = $flow->tenant->isParticipant($testUser);
+                if ($testUserIsParticipant) {
+                    $adminRole = $flow->tenant->systemRoles()->where('name', RoleEnum::ADMIN->value)->first();
+                    if ($adminRole) {
+                        try {
+                            $flow->addParticipant($testUser, $adminRole->name, true);
+                        } catch (\Exception $e) {
+                            // Skip if already assigned
+                        }
                     }
                 }
                 
-                // Then assign 9 more random users (total 10 including test user)
-                $remainingParticipants = 9;
-                $availableUsers = $allUsers->filter(fn($user) => $user->id !== $testUser->id);
-                $participants = $availableUsers->random(min($remainingParticipants, $availableUsers->count()));
+                // Get all participants of this tenant (excluding test user if already assigned)
+                $tenantParticipants = $flow->tenant->getParticipants();
+                $availableUsers = $tenantParticipants->pluck('model')->filter(fn($user) => $user->id !== $testUser->id);
+                
+                // Assign up to 9 more participants (or fewer if tenant has fewer participants)
+                $maxParticipants = $testUserIsParticipant ? 9 : 10;
+                $participantsToAssign = $availableUsers->random(min($maxParticipants, $availableUsers->count()));
                 $roles = collect(RoleEnum::cases())->reject(fn($role) => $role === RoleEnum::ADMIN); // Exclude ADMIN since test user has it
                 
-                foreach ($participants as $participant) {
+                foreach ($participantsToAssign as $participant) {
                     $randomRole = $roles->random();
                     $role = $flow->tenant->systemRoles()->where('name', $randomRole->value)->first();
                     

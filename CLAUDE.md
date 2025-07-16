@@ -145,6 +145,7 @@ php artisan db:seed --class=DatabaseSeeder
 ## Development Guidelines
 
 - **When using svg icons always use hero icons**
+- **Always apply dark and light mode for css, dark mode using .dark**
 
 ---
 

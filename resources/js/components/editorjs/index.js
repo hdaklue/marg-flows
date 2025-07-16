@@ -1,6 +1,5 @@
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
-import ImageTool from '@editorjs/image';
 import EditorJsList from "@editorjs/list";
 import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
@@ -86,19 +85,19 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                     },
                 },
 
-                image: {
-                    class: ImageTool,
-                    config: {
-                        endpoints: {
-                            byFile: uploadUrl,
-                            byUrl: uploadUrl,
-                        },
-                        additionalRequestHeaders: {
-                            'X-CSRF-TOKEN': csrf,
-                        },
-                        types: 'image/png, image/jpeg, image/jpg',
-                    }
-                },
+                // image: {
+                //     class: ImageTool,
+                //     config: {
+                //         endpoints: {
+                //             byFile: uploadUrl,
+                //             byUrl: uploadUrl,
+                //         },
+                //         additionalRequestHeaders: {
+                //             'X-CSRF-TOKEN': csrf,
+                //         },
+                //         types: 'image/png, image/jpeg, image/jpg',
+                //     }
+                // },
                 resizableImage: {
                     class: ResizableImage,
                     config: {

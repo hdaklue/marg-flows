@@ -2,11 +2,11 @@
     progressDetails: @js($getState()),
 }" class="w-full mx-3">
     <!-- Fixed height container -->
-    <p class="text-3xs w-full rounded border border-red-700 bg-red-500/20 p-0.5 text-center font-semibold uppercase tracking-wider text-red-700 dark:bg-red-500/10 dark:text-red-800"
+    <p class="text-3xs w-full rounded border border-red-700 bg-red-500/20 p-0.5 text-center font-semibold uppercase tracking-wider text-red-700 dark:bg-red-500/30 dark:text-red-400"
         x-show="progressDetails.days_remaining < 0" x-cloak>
         Overdue
     </p>
-    <p class="text-3xs w-full rounded border border-sky-700 bg-sky-500/20 p-0.5 text-center font-semibold uppercase tracking-wider text-sky-700 dark:bg-sky-500/10 dark:text-sky-600"
+    <p class="text-3xs w-full rounded border border-sky-700 bg-sky-500/20 p-0.5 text-center font-semibold uppercase tracking-wider text-sky-700 dark:bg-sky-500/30 dark:text-sky-400"
         x-show="progressDetails.days_remaining === 0" x-cloak>
         Due Today
     </p>

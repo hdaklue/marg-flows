@@ -30,6 +30,7 @@ export default function chunkedFileUploadComponent(config) {
             placeholder: config.placeholder,
             statePath: config.statePath,
             uploadingMessage: config.uploadingMessage || 'Uploading...',
+            storage: config.storage || { disk: 'public', finalDir: 'uploads' },
         },
 
         // Initialization
@@ -58,7 +59,7 @@ export default function chunkedFileUploadComponent(config) {
                     key: this.generateFileKey(),
                     name: fileName,
                     size: 0, // Size not available from filename
-                    url: `/storage/uploads/${fileName}`, // Reconstruct URL from filename
+                    url: this.buildFileUrl(fileName),
                     type: null
                 }));
             }
@@ -590,7 +591,6 @@ export default function chunkedFileUploadComponent(config) {
                     filePath = filePath.substring(storageIndex + '/storage/'.length);
                 }
                 
-                console.log('Deleting file:', { fileKey, filePath, originalUrl: file.url, file }); // Debug log
 
                 // Delete from server
                 const response = await fetch(this.config.chunkDeleteUrl, {
@@ -697,6 +697,20 @@ export default function chunkedFileUploadComponent(config) {
 
         getCsrfToken() {
             return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        },
+
+        // Build file URL based on storage configuration
+        buildFileUrl(fileName) {
+            const storage = this.config.storage;
+            
+            // For public disk, use standard Laravel storage URL structure
+            if (storage.disk === 'public') {
+                return `/storage/${storage.finalDir}/${fileName}`;
+            }
+            
+            // For cloud storage (S3, DO Spaces, etc.), assume full URLs are provided by server
+            // This would typically be handled server-side and passed via the component
+            return `/storage/${storage.finalDir}/${fileName}`; // Fallback to standard structure
         }
     };
 }

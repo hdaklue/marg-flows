@@ -34,6 +34,7 @@
             state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$statePath}')") }},
             statePath: @js($statePath),
             uploadingMessage: @js($getUploadingMessage()),
+            storage: @js($getStorageConfig()),
         })" wire:ignore
         {{ $attributes->merge(
                 [

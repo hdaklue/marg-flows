@@ -28,7 +28,8 @@
             x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-90" @click.outside="show = false"
-            @keyup.escape.window="show = false">
+            @keyup.escape.window="show = false"
+            x-init="$watch('show', value => value && $nextTick(() => $refs.noteInput.focus()))">
 
             <div class="cursor-normal flex h-full w-full flex-col justify-between gap-y-1">
                 <header
@@ -68,8 +69,8 @@
                 <div class="flex h-8 w-full grow-0 justify-self-end">
                     {{-- <input type="text" x-model="cotent" placeholder="enter note"
                         class="w-full text-xs bg-transperant dark:text-gray-300"> --}}
-                    <x-filament::input.wrapper class="w-full !text-sm" autofocus>
-                        <x-filament::input autofocus type="text" @keydown.enter="addNote() " x-model="content"
+                    <x-filament::input.wrapper class="w-full !text-sm">
+                        <x-filament::input x-ref="noteInput" type="text" @keydown.enter="addNote() " x-model="content"
                             class="!py-1.5 !pe-6 !ps-2 !text-sm" placeholder="write your note .. and hit Enter" />
                     </x-filament::input.wrapper>
                 </div>

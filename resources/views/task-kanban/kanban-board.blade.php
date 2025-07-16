@@ -1,12 +1,12 @@
 @use(App\Enums\Role\RoleEnum)
 @php
-    $users = $this->getParticipantsArray();
+    $users = $this->getParticipantsArray;
 @endphp
 <x-filament-panels::page>
     <div class="flex gap-x-2">
         <div class="flex items-center gap-x-1">
             <x-filament::badge size="sm" color="gray" icon="heroicon-o-calendar-days">
-                <div class="flex h-full items-center gap-x-1">
+                <div class="flex items-center h-full gap-x-1">
                     <div clas="font-bold"> Due:</div>
                     <div class="text-xs">{{ toUserDate($this->flow->due_date, filamentUser()) }}</div>
                 </div>
@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div wire:ignore.self x-data class="scrollbar-hide gap-2 pb-2 md:flex md:overflow-x-auto" class="flex flex-col">
+    <div wire:ignore.self x-data class="gap-2 pb-2 scrollbar-hide md:flex md:overflow-x-auto" class="flex flex-col">
 
         @foreach ($statuses as $status)
             @include(static::$statusView)

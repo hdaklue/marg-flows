@@ -18,9 +18,9 @@ use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\Locked;
 
 /**
- * @property-read \Filament\Forms\Form $form
+ * @property-read Form $form
  */
-class FlowPages extends Page implements HasForms
+final class FlowPages extends Page implements HasForms
 {
     use InteractsWithForms;
 

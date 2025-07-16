@@ -12,6 +12,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
@@ -57,6 +58,13 @@ final class ViewFlow extends KanbanBoard
         return $this->flow->title;
     }
 
+    #[On('board-item-updated.{recordId}')]
+    public function reloadMembers()
+    {
+        unset($this->getParticipantsArray);
+    }
+
+    #[Computed]
     public function getParticipantsArray(): array
     {
         return $this->flow->getParticipants()->pluck('model')->map(fn ($item) => ['name' => $item->name, 'avatar' => $item->avatar])->toArray();

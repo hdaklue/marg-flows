@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\AcceptInvitation;
 use App\Http\Controllers\ChunkedUploadController;
 use App\Http\Controllers\EditorJsUpload;
+use App\Http\Controllers\EditorJsImageDelete;
 use App\Livewire\Previewtest;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
@@ -25,7 +26,12 @@ Route::get('invitation/accept/{token}', AcceptInvitation::class)
     ->middleware([Authenticate::class])
     ->name('invitation.accept');
 
-Route::post('uploader/editorjs', EditorJsUpload::class)->name('uploader');
+Route::post('uploader/editorjs', EditorJsUpload::class)
+    ->middleware(['auth'])
+    ->name('uploader');
+Route::delete('delete-image', EditorJsImageDelete::class)
+    ->middleware(['auth'])
+    ->name('editorjs.delete-image');
 
 // Chunked upload routes
 Route::post('chunked-upload', [ChunkedUploadController::class, 'store'])
