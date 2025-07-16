@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Tenant;
 
+use App\Contracts\Role\RoleableEntity;
 use App\Enums\Role\RoleEnum;
 use App\Events\Tenant\TanantMemberAdded;
 use App\Facades\RoleManager;
@@ -11,6 +12,7 @@ use App\Models\Flow;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 use function config;
 
@@ -79,7 +81,8 @@ final class AddMember
                     'role_id',
                 ],
             );
-        RoleManager::bulkClearCache($flows);
+        /** @var Collection<int, RoleableEntity> $flows */
+        RoleManager::bulkClearCache($flows->collect());
     }
 
     private function buildInsertAttr(Tenant $tenant, User $user, array $flows, Role $assignedRole)

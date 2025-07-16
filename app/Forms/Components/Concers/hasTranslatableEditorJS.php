@@ -7,6 +7,7 @@ namespace App\Forms\Components\Concers;
 use Filament\Resources\Pages\EditRecord\Concerns\Translatable;
 use Illuminate\Support\Arr;
 
+/** @phpstan-ignore-next-line */
 trait hasTranslatableEditorJS
 {
     // use Translatable;

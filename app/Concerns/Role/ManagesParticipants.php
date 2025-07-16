@@ -51,6 +51,8 @@ trait ManagesParticipants
         if ($modelHasRole) {
             return $modelHasRole->getModel();
         }
+        
+        return null;
     }
 
     public function getParticipants(): Collection

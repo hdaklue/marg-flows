@@ -25,9 +25,7 @@ final class TaskAssigneeDto extends ValidatedDTO
         $role = null;
 
         if ($taskEntity) {
-            $userRole = RoleManager::getRolesForEntity($user, $taskEntity)
-                ->sortByDesc('level')
-                ->first();
+            $userRole = RoleManager::getRoleOn($user, $taskEntity);
             $role = $userRole?->name;
         }
 

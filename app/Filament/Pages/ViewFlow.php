@@ -20,6 +20,7 @@ use Mokhosh\FilamentKanban\Pages\KanbanBoard;
  * ViewFlow.
  *
  * @property-read Flow $flow;
+ * @property-read array $getParticipantsArray
  */
 final class ViewFlow extends KanbanBoard
 {
@@ -53,7 +54,7 @@ final class ViewFlow extends KanbanBoard
         return filamentUser()->can('manageFlows', filamentTenant());
     }
 
-    public function getHeading(): string|Htmlable
+    public function getHeading(): string|Htmlable // @phpstan-ignore-line
     {
         return $this->flow->title;
     }

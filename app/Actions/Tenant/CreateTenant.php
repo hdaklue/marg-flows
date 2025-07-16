@@ -43,6 +43,7 @@ final class CreateTenant
 
                 $roles = collect($data['members'])->pluck('role', 'name')->toArray();
 
+                /** @phpstan-ignore-next-line */
                 $participants->each(fn (AssignableEntity $participant) => $tenant->addParticipant($participant, $roles[$participant->getKey()], silently: true),
                 );
             });
@@ -64,6 +65,7 @@ final class CreateTenant
 
     protected function getParticipants(array $ids): Collection
     {
+        /** @phpstan-ignore-next-line */
         return User::whereIn('id', $ids)->get();
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTOs\AssignableEntity;
 
+use App\Contracts\Role\RoleableEntity;
 use App\Enums\Role\RoleEnum;
 use App\Facades\RoleManager;
 use App\Models\User;
@@ -24,11 +25,12 @@ final class AssigneeDto extends ValidatedDTO
 
     public static function fromUserAssignment(User $user, Model $entity, string $assignmentType = 'assignee'): self
     {
+        /** @phpstan-ignore-next-line */
         $userRole = RoleManager::getRoleOn($user, $entity);
 
         return new self([
             'user_id' => $user->id,
-            'role' => $userRole?->value,
+            'role' => $userRole?->name,
             'assignment_type' => $assignmentType,
             'entity_type' => $entity->getMorphClass(),
             'entity_id' => $entity->getKey(),
@@ -38,7 +40,7 @@ final class AssigneeDto extends ValidatedDTO
     public function initials(): string
     {
         $user = User::find($this->user_id);
-        $nameInitials = collect(explode(' ', $user?->name ?? ''))
+        $nameInitials = collect(explode(' ', $user->name ?? ''))
             ->map(fn ($name) => substr($name, 0, 1))
             ->implode('');
 

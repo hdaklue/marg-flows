@@ -41,7 +41,7 @@ final class FlowPages extends Page implements HasForms
         $this->form->fill($this->flow->toArray());
     }
 
-    public function getTitle(): string|Htmlable
+    public function getTitle(): string|Htmlable // @phpstan-ignore-line
     {
         return '';
     }

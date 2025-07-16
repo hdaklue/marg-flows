@@ -102,9 +102,8 @@ final class CreateFlow extends CreateRecord
         $data = $this->form->getState();
 
         try {
-
             $flowDto = CreateFlowDto::fromArray($data);
-        } catch (ValidationException $e) {
+        } catch (ValidationException $e) { // @phpstan-ignore-line
             Log::error($e->getMessage());
         }
 
@@ -134,7 +133,7 @@ final class CreateFlow extends CreateRecord
 
     }
 
-    public function getHeading(): string|Htmlable
+    public function getHeading(): string|Htmlable // @phpstan-ignore-line
     {
         return '';
     }

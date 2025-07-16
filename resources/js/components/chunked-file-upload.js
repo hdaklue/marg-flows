@@ -480,6 +480,16 @@ export default function chunkedFileUploadComponent(config) {
 
         // Cancel all uploads
         async cancelAllUploads() {
+            // Show confirmation dialog
+            const uploadingCount = this.uploadingFiles.filter(file => 
+                file.status === 'uploading' || file.status === 'pending'
+            ).length;
+            
+            if (uploadingCount === 0) return;
+            
+            const confirmed = confirm(`Are you sure you want to cancel all ${uploadingCount} upload${uploadingCount > 1 ? 's' : ''}?`);
+            if (!confirmed) return;
+
             this.abortControllers.forEach(controller => {
                 try {
                     controller.abort();
@@ -580,6 +590,10 @@ export default function chunkedFileUploadComponent(config) {
         async removeFile(fileKey) {
             const file = this.uploadedFiles.find(f => f.key === fileKey);
             if (!file) return;
+
+            // Show confirmation dialog
+            const confirmed = confirm(`Are you sure you want to delete "${file.name}"?`);
+            if (!confirmed) return;
 
             try {
                 // Construct the file path - extract relative path from URL

@@ -10,6 +10,9 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Livewire\Component;
 
+/**
+ * @property-read Form $form
+ */
 class TestChunkedUpload extends Component implements HasForms
 {
     use InteractsWithForms;
