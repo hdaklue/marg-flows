@@ -164,6 +164,7 @@ return [
         'disk' => env('CHUNKED_UPLOAD_DISK', 'public'),
         'temp_directory' => env('CHUNKED_UPLOAD_TEMP_DIR', 'uploads/temp'),
         'final_directory' => env('CHUNKED_UPLOAD_FINAL_DIR', 'uploads'),
+        'chunk_directory' => env('CHUNKED_UPLOAD_CHUNK_DIR', 'chunk-uploads'),
         'auto_cleanup' => env('CHUNKED_UPLOAD_AUTO_CLEANUP', true),
     ],
 

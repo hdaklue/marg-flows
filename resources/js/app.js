@@ -4,10 +4,13 @@ import Tooltip from '@ryangjchandler/alpine-tooltip';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
 import designReviewApp from "./components/image-review";
+import videoAnnotationComponent from "./components/video-annotation";
 
-
+// Make video annotation available globally for Blade component
+window.videoAnnotationComponent = videoAnnotationComponent;
 
 Alpine.data('designReviewApp', designReviewApp)
+Alpine.data('videoAnnotation', videoAnnotationComponent)
 Alpine.plugin(Autosize);
 Alpine.plugin(Tooltip);
 Alpine.plugin(sort);
