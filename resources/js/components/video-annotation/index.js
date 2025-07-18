@@ -12,11 +12,12 @@ export default function videoAnnotation() {
         videoElement: null,
         comments: [], // Array of comment objects: {commentId, avatar, name, body, timestamp}
         onComment: null, // Callback function (like $wire)
-        showAddCommentButton: false,
         currentTime: 0,
         duration: 0,
         progressBarWidth: 0,
         initRetryCount: 0, // Track retry attempts
+        hoverX: 0, // Mouse hover position for add button
+        showHoverAdd: false, // Show hover add button
         
         init() {
             // Prevent multiple initializations
@@ -160,25 +161,6 @@ export default function videoAnnotation() {
             });
         },
 
-        addComment() {
-            const currentTimeMs = Math.floor(this.currentTime * 1000);
-            
-            // Fire event with current timeline position
-            this.$dispatch('addComment', {
-                timestamp: currentTimeMs,
-                currentTime: this.currentTime
-            });
-
-            // Call the onComment callback if provided
-            if (this.onComment && typeof this.onComment === 'function') {
-                this.onComment('addComment', {
-                    timestamp: currentTimeMs,
-                    currentTime: this.currentTime
-                });
-            }
-
-            this.showAddCommentButton = false;
-        },
 
         loadComment(commentId) {
             // Fire event with comment ID
@@ -202,9 +184,17 @@ export default function videoAnnotation() {
         },
 
         getCommentPosition(timestamp) {
-            if (this.duration <= 0 || this.progressBarWidth <= 0) return 0;
+            if (this.duration <= 0) return 0;
+            
+            // Get current progress bar width dynamically
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) return 0;
+            
+            const currentWidth = progressBar.offsetWidth;
             const seconds = timestamp / 1000;
-            return (seconds / this.duration) * this.progressBarWidth;
+            const position = (seconds / this.duration) * currentWidth;
+            
+            return position;
         },
 
         renderCommentMarkers() {
@@ -228,6 +218,34 @@ export default function videoAnnotation() {
             
             if (this.player) {
                 this.player.currentTime(newTime);
+            }
+        },
+
+        updateHoverPosition(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            this.hoverX = event.clientX - rect.left;
+        },
+
+        addCommentAtPosition() {
+            // Use the stored hover position instead of trying to parse styles
+            const progressBar = this.$refs.progressBar;
+            const rect = progressBar.getBoundingClientRect();
+            const percentage = this.hoverX / rect.width;
+            const targetTime = percentage * this.duration;
+            const currentTimeMs = Math.floor(targetTime * 1000);
+            
+            // Fire event with calculated timeline position
+            this.$dispatch('addComment', {
+                timestamp: currentTimeMs,
+                currentTime: targetTime
+            });
+
+            // Call the onComment callback if provided
+            if (this.onComment && typeof this.onComment === 'function') {
+                this.onComment('addComment', {
+                    timestamp: currentTimeMs,
+                    currentTime: targetTime
+                });
             }
         },
 
