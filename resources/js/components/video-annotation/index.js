@@ -79,9 +79,11 @@ export default function videoAnnotation() {
 
             // Initialize Video.js with ID instead of element reference
             this.player = videojs(this.videoElement.id, {
+                playbackRates: [0.5, 1, 1.25, 1.5, 2],
+                // Use fluid mode to maintain aspect ratio
                 fluid: true,
                 responsive: true,
-                playbackRates: [0.5, 1, 1.25, 1.5, 2]
+                fill: false
             });
 
             this.setupPlayerEventListeners();
