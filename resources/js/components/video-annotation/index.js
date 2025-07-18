@@ -199,6 +199,54 @@ export default function videoAnnotation() {
             return position;
         },
 
+        getTooltipPosition(timestamp) {
+            const position = this.getCommentPosition(timestamp);
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) return 'left-1/2 -translate-x-1/2';
+            
+            const containerWidth = progressBar.offsetWidth;
+            const tooltipWidth = 200; // approximate tooltip width
+            
+            // If tooltip would go off the left edge
+            if (position < tooltipWidth / 2) {
+                return 'left-0 translate-x-0';
+            }
+            // If tooltip would go off the right edge
+            else if (position > containerWidth - tooltipWidth / 2) {
+                return 'right-0 translate-x-0';
+            }
+            // Default centered position
+            else {
+                return 'left-1/2 -translate-x-1/2';
+            }
+        },
+
+        getArrowPosition(timestamp) {
+            const position = this.getCommentPosition(timestamp);
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) return 'left-1/2 -translate-x-1/2';
+            
+            const containerWidth = progressBar.offsetWidth;
+            const tooltipWidth = 200; // approximate tooltip width
+            
+            // If tooltip is aligned to the left edge
+            if (position < tooltipWidth / 2) {
+                // Arrow should be positioned where the comment actually is
+                const arrowLeft = Math.max(8, position); // 8px minimum from edge
+                return `left-[${arrowLeft}px] -translate-x-1/2`;
+            }
+            // If tooltip is aligned to the right edge
+            else if (position > containerWidth - tooltipWidth / 2) {
+                // Arrow should be positioned where the comment actually is
+                const arrowRight = Math.max(8, containerWidth - position); // 8px minimum from edge
+                return `right-[${arrowRight}px] translate-x-1/2`;
+            }
+            // Default centered position
+            else {
+                return 'left-1/2 -translate-x-1/2';
+            }
+        },
+
         renderCommentMarkers() {
             // This will be called after comments are loaded
             this.$nextTick(() => {

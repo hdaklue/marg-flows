@@ -6,7 +6,7 @@ init();
 
 // Watch for changes that affect comment positioning
 $watch('duration', () => updateProgressBarWidth());
-$watch('progressBarWidth', () => $nextTick(() => {}));" class="relative w-full overflow-hidden rounded-lg bg-black"
+$watch('progressBarWidth', () => $nextTick(() => {}));" class="relative w-full overflow-visible rounded-lg bg-black"
     @destroy.window="destroy()">
     <!-- Video Player -->
     <div class="relative flex justify-center">
@@ -44,7 +44,7 @@ $watch('progressBarWidth', () => $nextTick(() => {}));" class="relative w-full o
         <!-- Progress Bar with Comment Markers -->
         <div class="relative">
             <!-- Comment Bubbles Above Progress Bar -->
-            <div class="relative mb-2 h-12">
+            <div class="relative mb-2 h-20">
                 <template x-for="comment in comments" :key="comment.commentId">
                     <div class="absolute bottom-0 -translate-x-1/2 transform cursor-pointer"
                         :style="`left: ${getCommentPosition(comment.timestamp)}px`"
@@ -64,7 +64,8 @@ $watch('progressBarWidth', () => $nextTick(() => {}));" class="relative w-full o
 
                             <!-- Hover Tooltip -->
                             <div
-                                class="pointer-events-none absolute bottom-10 left-1/2 z-20 -translate-x-1/2 transform opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                class="pointer-events-none absolute bottom-10 z-50 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                                :class="getTooltipPosition(comment.timestamp)">
                                 <div
                                     class="max-w-xs whitespace-nowrap rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-white shadow-xl dark:bg-gray-800">
                                     <div class="font-medium" x-text="'@' + comment.name"></div>
@@ -75,7 +76,8 @@ $watch('progressBarWidth', () => $nextTick(() => {}));" class="relative w-full o
                                         x-text="formatTime(comment.timestamp / 1000)"></div>
                                     <!-- Tooltip Arrow -->
                                     <div
-                                        class="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 transform border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-800">
+                                        class="absolute top-full h-0 w-0 transform border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-800"
+                                        :class="getArrowPosition(comment.timestamp)">
                                     </div>
                                 </div>
                             </div>
