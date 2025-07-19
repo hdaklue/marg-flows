@@ -7,30 +7,40 @@ use Livewire\Component;
 class PreviewVideo extends Component
 {
     public $comments = [];
-    public $videoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    public $videoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4';
     public $qualitySources = [];
     
     public function mount()
     {
-        // Sample quality sources for the video
+        // Reliable test video sources with different URLs (simulating different resolutions)
         $this->qualitySources = [
             [
                 'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
                 'type' => 'video/mp4',
-                'label' => '720p',
-                'quality' => '720'
+                'label' => '1080p',
+                'quality' => '1080',
+                'selected' => false
             ],
             [
-                'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+                'type' => 'video/mp4',
+                'label' => '720p',
+                'quality' => '720',
+                'selected' => true  // Default selection
+            ],
+            [
+                'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
                 'type' => 'video/mp4',
                 'label' => '480p',
-                'quality' => '480'
+                'quality' => '480',
+                'selected' => false
             ],
             [
-                'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
                 'type' => 'video/mp4',
                 'label' => '360p',
-                'quality' => '360'
+                'quality' => '360',
+                'selected' => false
             ]
         ];
 

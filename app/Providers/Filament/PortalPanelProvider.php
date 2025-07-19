@@ -22,7 +22,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class PortalPanelProvider extends PanelProvider
+final class PortalPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
@@ -36,7 +36,7 @@ class PortalPanelProvider extends PanelProvider
             ->tenant(Tenant::class, ownershipRelationship: 'tenant')
             ->colors([
                 'primary' => Color::Sky,
-                'gray' => Color::Zinc,
+
             ])
             ->topNavigation(true)
             ->viteTheme('resources/css/filament/portal/theme.css')
