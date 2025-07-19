@@ -22,6 +22,34 @@
         }
     }" @comments-updated.window="comments = $event.detail.comments"
         @comment-loaded.window="console.log('Comment loaded:', $event.detail.comment)">
+        <!-- Configuration Controls -->
+        <div class="p-4 mb-6 rounded-lg bg-gray-50 dark:bg-gray-800">
+            <h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-white">Player Configuration</h3>
+            <div class="flex flex-wrap gap-3">
+                <button wire:click="setAdvancedAnnotationMode"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    Advanced Annotation Mode
+                </button>
+                <button wire:click="setSimplePlayerMode"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 dark:focus:ring-offset-gray-800">
+                    Simple Player Mode
+                </button>
+                <button wire:click="toggleAnnotations"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800">
+                    Toggle Annotations
+                </button>
+            </div>
+            <div class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                <p><strong>Current mode:</strong> 
+                    @if($config['features']['enableAnnotations'])
+                        Annotation Mode (annotations enabled)
+                    @else
+                        Simple Player Mode (annotations disabled)
+                    @endif
+                </p>
+            </div>
+        </div>
+
         <!-- Video Annotation Component -->
         <x-video-annotation :video-src="$videoUrl" :quality-sources="$qualitySources" :comments="$comments"
             x-on:add-comment="handleComment('addComment', $event.detail)"

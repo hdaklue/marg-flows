@@ -9,6 +9,7 @@ class PreviewVideo extends Component
     public $comments = [];
     public $videoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4';
     public $qualitySources = [];
+    public $config = [];
     
     public function mount()
     {
@@ -68,6 +69,40 @@ class PreviewVideo extends Component
                 'timestamp' => 82000 // 1:22
             ]
         ];
+
+        // Example configuration - can be customized based on use case
+        $this->config = [
+            'features' => [
+                'enableAnnotations' => true,
+                'enableComments' => true,
+                'enableProgressBarAnnotations' => true,
+                'enableVideoAnnotations' => true,
+                'enableResolutionSelector' => true,
+                'enableVolumeControls' => true,
+                'enableFullscreenButton' => true,
+                'enableSettingsMenu' => true
+            ],
+            'ui' => [
+                'progressBarMode' => 'auto-hide',
+                'showControls' => true,
+                'helpTooltipLimit' => 3,
+                'theme' => 'auto'
+            ],
+            'annotations' => [
+                'showCommentsOnProgressBar' => true,
+                'enableProgressBarComments' => true,
+                'enableVideoComments' => true,
+                'enableContextMenu' => true,
+                'enableHapticFeedback' => true
+            ],
+            'timing' => [
+                'progressBarAutoHideDelay' => 2000,
+                'progressBarHoverHideDelay' => 1000,
+                'longPressDuration' => 500,
+                'playPauseOverlayDuration' => 800,
+                'helpTooltipDuration' => 3000
+            ]
+        ];
     }
 
     public function addComment($timestamp)
@@ -101,8 +136,153 @@ class PreviewVideo extends Component
         }
     }
 
+    public function toggleAnnotations()
+    {
+        // Example method to toggle annotations on/off
+        $this->config['features']['enableAnnotations'] = !$this->config['features']['enableAnnotations'];
+        
+        // Update related annotation features
+        if (!$this->config['features']['enableAnnotations']) {
+            $this->config['features']['enableComments'] = false;
+            $this->config['features']['enableProgressBarAnnotations'] = false;
+            $this->config['features']['enableVideoAnnotations'] = false;
+            $this->config['annotations']['showCommentsOnProgressBar'] = false;
+            $this->config['annotations']['enableProgressBarComments'] = false;
+            $this->config['annotations']['enableVideoComments'] = false;
+        } else {
+            $this->config['features']['enableComments'] = true;
+            $this->config['features']['enableProgressBarAnnotations'] = true;
+            $this->config['features']['enableVideoAnnotations'] = true;
+            $this->config['annotations']['showCommentsOnProgressBar'] = true;
+            $this->config['annotations']['enableProgressBarComments'] = true;
+            $this->config['annotations']['enableVideoComments'] = true;
+        }
+        
+        $this->ensureCompleteConfig();
+    }
+
+    public function setSimplePlayerMode()
+    {
+        // Configuration for simple video player without annotations
+        $this->config = [
+            'features' => [
+                'enableAnnotations' => false,
+                'enableComments' => false,
+                'enableProgressBarAnnotations' => false,
+                'enableVideoAnnotations' => false,
+                'enableResolutionSelector' => true,
+                'enableVolumeControls' => true,
+                'enableFullscreenButton' => true,
+                'enableSettingsMenu' => false
+            ],
+            'ui' => [
+                'progressBarMode' => 'always-visible',
+                'showControls' => true,
+                'helpTooltipLimit' => 0,
+                'theme' => 'auto'
+            ],
+            'annotations' => [
+                'showCommentsOnProgressBar' => false,
+                'enableProgressBarComments' => false,
+                'enableVideoComments' => false,
+                'enableContextMenu' => false,
+                'enableHapticFeedback' => false
+            ],
+            'timing' => [
+                'progressBarAutoHideDelay' => 2000,
+                'progressBarHoverHideDelay' => 1000,
+                'longPressDuration' => 500,
+                'playPauseOverlayDuration' => 800,
+                'helpTooltipDuration' => 3000
+            ]
+        ];
+        
+        $this->ensureCompleteConfig();
+    }
+
+    public function setAdvancedAnnotationMode()
+    {
+        // Configuration for full annotation capabilities
+        $this->config = [
+            'features' => [
+                'enableAnnotations' => true,
+                'enableComments' => true,
+                'enableProgressBarAnnotations' => true,
+                'enableVideoAnnotations' => true,
+                'enableResolutionSelector' => true,
+                'enableVolumeControls' => true,
+                'enableFullscreenButton' => true,
+                'enableSettingsMenu' => true
+            ],
+            'ui' => [
+                'progressBarMode' => 'auto-hide',
+                'showControls' => true,
+                'helpTooltipLimit' => 5,
+                'theme' => 'auto'
+            ],
+            'annotations' => [
+                'showCommentsOnProgressBar' => true,
+                'enableProgressBarComments' => true,
+                'enableVideoComments' => true,
+                'enableContextMenu' => true,
+                'enableHapticFeedback' => true
+            ],
+            'timing' => [
+                'progressBarAutoHideDelay' => 1500,
+                'progressBarHoverHideDelay' => 800,
+                'longPressDuration' => 400,
+                'playPauseOverlayDuration' => 600,
+                'helpTooltipDuration' => 2000
+            ]
+        ];
+        
+        $this->ensureCompleteConfig();
+    }
+
+    private function ensureCompleteConfig()
+    {
+        // Ensure all required config sections exist with defaults
+        $defaults = [
+            'features' => [
+                'enableAnnotations' => true,
+                'enableComments' => true,
+                'enableProgressBarAnnotations' => true,
+                'enableVideoAnnotations' => true,
+                'enableResolutionSelector' => true,
+                'enableVolumeControls' => true,
+                'enableFullscreenButton' => true,
+                'enableSettingsMenu' => true
+            ],
+            'ui' => [
+                'progressBarMode' => 'auto-hide',
+                'showControls' => true,
+                'helpTooltipLimit' => 3,
+                'theme' => 'auto'
+            ],
+            'annotations' => [
+                'showCommentsOnProgressBar' => true,
+                'enableProgressBarComments' => true,
+                'enableVideoComments' => true,
+                'enableContextMenu' => true,
+                'enableHapticFeedback' => true
+            ],
+            'timing' => [
+                'progressBarAutoHideDelay' => 2000,
+                'progressBarHoverHideDelay' => 1000,
+                'longPressDuration' => 500,
+                'playPauseOverlayDuration' => 800,
+                'helpTooltipDuration' => 3000
+            ]
+        ];
+
+        // Merge with existing config to fill any missing keys
+        $this->config = array_merge_recursive($defaults, $this->config);
+    }
+
     public function render()
     {
+        // Ensure config is complete before rendering
+        $this->ensureCompleteConfig();
         return view('livewire.preview-video');
     }
 }

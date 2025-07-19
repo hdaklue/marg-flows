@@ -1,15 +1,52 @@
-@props(['videoSrc' => '', 'comments' => '[]', 'onComment' => null, 'qualitySources' => null])
+@props(['videoSrc' => '', 'comments' => '[]', 'onComment' => null, 'qualitySources' => null, 'config' => null])
 
 <!-- Load quality selector CSS and JS -->
 {{-- <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
 <script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script> --}}
 
-<div x-data="videoAnnotation()" class="relative w-full overflow-visible bg-black rounded-lg" @destroy.window="destroy()">
+<div x-data="videoAnnotation(@if($config) @js($config) @else null @endif)" class="relative w-full overflow-visible bg-black rounded-lg" @destroy.window="destroy()"
+    @contextmenu="handleVideoRightClick($event)">
+    
+    <!-- Internal Configuration Controls (when no external config provided) -->
+    @if(!$config)
+    <div class="p-3 mb-4 rounded-lg bg-gray-100 dark:bg-gray-800">
+        <h4 class="mb-2 text-sm font-medium text-gray-900 dark:text-white">Player Mode</h4>
+        <div class="flex flex-wrap gap-2">
+            <button @click="setAdvancedAnnotationMode()"
+                class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
+                Advanced Mode
+            </button>
+            <button @click="setSimplePlayerMode()"
+                class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">
+                Simple Mode
+            </button>
+            <button @click="toggleAnnotationsMode()"
+                class="px-3 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
+                Toggle Annotations
+            </button>
+        </div>
+        <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+            <span x-text="config.features.enableAnnotations ? 'Annotations: ON' : 'Annotations: OFF'"></span>
+        </div>
+    </div>
+    @endif
+    <!-- Context menu (only if annotations enabled) -->
+    <div x-cloak x-show="showContextMenu && config.annotations.enableContextMenu" @click.away.window="showContextMenu = false"
+        class="fixed z-50 flex flex-col bg-gray-100 rounded-lg w-36 dark:bg-gray-800 dark:text-gray-200"
+        :style="`left: ${contextMenuX}px; top: ${contextMenuY}px`">
+        <div @click="addCommentFromContextMenu()" class="p-2 text-xs rounded-lg cursor-pointer dark:hover:bg-gray-700">Add
+            comment</div>
+    </div>
+
     <!-- Video Player -->
-    <div class="relative flex justify-center cursor-pointer" @click="handleVideoClick(); hideCommentTooltip(); showHoverAdd = false"
-        @touchstart="handleTouchStart($event)" @touchend="handleTouchEnd($event); hideCommentTooltip(); showHoverAdd = false">
+    <div class="relative flex justify-center cursor-pointer"
+        @click.prevent="handleVideoClick(); hideCommentTooltip(); showHoverAdd = false"
+        @touchstart="handleTouchStart($event)"
+        @touchend="handleTouchEnd($event); hideCommentTooltip(); showHoverAdd = false" @mouseenter="handleVideoHover()"
+        @mouseleave="handleVideoLeave()">
         <video x-ref="videoPlayer" :id="'video-player-' + Math.random().toString(36).substr(2, 9)"
-            class="w-full h-auto video-js vjs-fluid vjs-default-skin" preload="auto" data-setup='{}'
+            class="w-full h-auto video-js vjs-fluid vjs-default-skin" preload="auto" data-setup='{}' playsinline
+            webkit-playsinline
             @if ($qualitySources) data-quality-sources='@json($qualitySources)' @endif>
             @if ($qualitySources)
                 @foreach ($qualitySources as $index => $source)
@@ -47,10 +84,14 @@
         </div>
 
         <!-- Progress Bar Overlay with Comment Markers -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 z-10" @click.away="showHoverAdd = false">
-            <!-- Comment Bubbles Above Progress Bar -->
-            <div class="relative mb-2" :class="showCommentsOnProgressBar ? 'h-16' : 'h-0'">
-                <div x-show="showCommentsOnProgressBar" x-cloak>
+        <div x-show="showProgressBar" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-2" class="absolute bottom-0 left-0 right-0 z-10 p-4"
+            @click.away="showHoverAdd = false">
+            <!-- Comment Bubbles Above Progress Bar (only if annotations enabled) -->
+            <div class="relative mb-2" :class="showCommentsOnProgressBar && config.features.enableAnnotations ? 'h-16' : 'h-0'">
+                <div x-show="showCommentsOnProgressBar && config.features.enableAnnotations" x-cloak>
                     <template x-for="(comment, index) in comments" :key="`comment-${index}-${comment.commentId}`">
                         <div class="absolute bottom-0 transform -translate-x-1/2 cursor-pointer"
                             :style="`left: ${getCommentPosition(comment.timestamp)}px`"
@@ -98,38 +139,49 @@
                 </div>
             </div>
 
-            <!-- Progress Bar Hover Tooltip -->
-            <div x-show="showHoverAdd" class="absolute z-[9999] transform -translate-x-1/2 pointer-events-none"
-                :style="`left: calc(1rem + ${hoverX}px); bottom: 32px;`" 
-                x-transition:enter="transition ease-out duration-150"
+            <!-- Progress Bar Hover Tooltip (Desktop Only, always available) -->
+            <div x-show="showHoverAdd && helpTooltipCount < config.ui.helpTooltipLimit && !isTouchDevice()" x-init="if (helpTooltipCount < config.ui.helpTooltipLimit && !isTouchDevice()) {
+                helpTooltipCount++;
+                setTimeout(() => showHoverAdd = false, config.timing.helpTooltipDuration);
+            }"
+                @click.away="showHoverAdd = false"
+                class="pointer-events-none absolute bottom-12 z-[9999] hidden -translate-x-1/2 transform sm:block"
+                :style="`left: calc(1rem + ${hoverX}px);`" x-transition:enter="transition ease-out duration-150"
                 x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition ease-in duration-100"
-                x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
-                <div class="px-3 py-2 text-xs text-white bg-gray-900 rounded-lg shadow-lg whitespace-nowrap dark:bg-gray-800">
-                    <span class="hidden sm:inline">Click to seek • Double-click to add comment</span>
-                    <span class="sm:hidden">Tap to seek • Hold to add comment</span>
+                x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-90">
+                <div
+                    class="px-3 py-2 text-xs text-white bg-gray-900 rounded-lg shadow-lg whitespace-nowrap dark:bg-gray-800">
+                    <!-- Dynamic tooltip text based on mode -->
+                    <span x-show="config.features.enableAnnotations">Click to seek • Double-click to add comment</span>
+                    <span x-show="!config.features.enableAnnotations">Click to seek video</span>
                     <!-- Tooltip Arrow -->
-                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                    <div
+                        class="absolute w-0 h-0 transform -translate-x-1/2 border-t-4 border-l-4 border-r-4 left-1/2 top-full border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-800">
+                    </div>
                 </div>
             </div>
 
             <!-- Progress Bar with Click/Double-Click -->
-            <div x-ref="progressBar" 
-                @click="handleProgressBarClick($event)" 
-                @dblclick="handleProgressBarDoubleClick($event)"
-                @touchstart="onProgressBarTouchStart($event)"
-                @touchmove="onProgressBarTouchMove($event)" 
-                @touchend="onProgressBarTouchEnd($event)"
-                @mousemove="updateHoverPosition($event)"
-                @mouseenter="showHoverAdd = true"
+            <div x-ref="progressBar" @click="handleProgressBarClick($event)"
+                @dblclick="handleProgressBarDoubleClick($event)" @touchstart="onProgressBarTouchStart($event)"
+                @touchmove="onProgressBarTouchMove($event)" @touchend="onProgressBarTouchEnd($event)"
+                @mousemove="updateHoverPosition($event)" @mouseenter="showHoverAdd = true"
                 @mouseleave="showHoverAdd = false"
-                class="relative w-full h-2 overflow-hidden rounded-full cursor-pointer bg-white/30 backdrop-blur-sm">
+                class="relative w-full h-2 overflow-hidden rounded-full cursor-pointer bg-gray-500/50 backdrop-blur-sm border border-blue-400/30">
                 <!-- Current Progress -->
-                <div class="h-full transition-all duration-100 bg-white rounded-l-full"
+                <div class="h-full transition-all duration-100 bg-gradient-to-r from-blue-300 to-blue-600 rounded-l-full"
                     :style="`width: ${duration > 0 ? (currentTime / duration) * 100 : 0}%`"
                     :class="{ 'rounded-r-full': duration > 0 && (currentTime / duration) * 100 >= 100 }"></div>
             </div>
+
+            <!-- Time Display Under Progress Bar -->
+            <div class="flex items-center justify-between mt-1 text-xs font-mono text-white drop-shadow-lg">
+                <span x-text="formatTime(currentTime)" class="px-1 bg-black/50 rounded backdrop-blur-sm">0:00</span>
+                <span x-text="formatTime(duration)" class="px-1 bg-black/50 rounded backdrop-blur-sm">0:00</span>
+            </div>
         </div>
+
 
     </div>
 
@@ -155,9 +207,9 @@
 
                 <!-- Volume Controls -->
                 <div class="flex items-center gap-1 sm:gap-2">
-                    <!-- Mute/Unmute Button -->
-                    <button @click="toggleMute()"
-                        class="flex items-center justify-center w-8 h-8 text-gray-600 transition-colors duration-200 rounded-lg video-control-btn hover:bg-gray-200 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <!-- Mobile Volume Button -->
+                    <button @click="showVolumeModal = !showVolumeModal"
+                        class="flex items-center justify-center w-8 h-8 text-gray-600 transition-colors duration-200 rounded-lg video-control-btn hover:bg-gray-200 hover:text-gray-800 sm:hidden dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
                         <!-- Volume Up Icon -->
                         <svg x-show="!isMuted && volume > 0.5" x-cloak class="w-5 h-5" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -180,33 +232,61 @@
                         </svg>
                     </button>
 
-                    <!-- Volume Slider (hidden on mobile) -->
-                    <div class="hidden sm:block">
-                        <input type="range" min="0" max="1" step="0.1" :value="volume"
-                            @input="setVolume($event.target.value)"
-                            class="w-20 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider dark:bg-gray-600">
+                    <!-- Desktop Volume Controls -->
+                    <div class="items-center hidden gap-2 sm:flex" @mouseenter="showVolumeSlider = true"
+                        @mouseleave="showVolumeSlider = false">
+                        <!-- Mute/Unmute Button -->
+                        <button @click="toggleMute()"
+                            class="flex items-center justify-center w-8 h-8 text-gray-600 transition-colors duration-200 rounded-lg video-control-btn hover:bg-gray-200 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
+                            <!-- Volume Up Icon -->
+                            <svg x-show="!isMuted && volume > 0.5" x-cloak class="w-5 h-5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 15v-2a2 2 0 012-2h1l4-4v12l-4-4H7a2 2 0 01-2-2z" />
+                            </svg>
+                            <!-- Volume Down Icon -->
+                            <svg x-show="!isMuted && volume <= 0.5 && volume > 0" x-cloak class="w-5 h-5"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.536 8.464a5 5 0 010 7.072M5 15v-2a2 2 0 012-2h1l4-4v12l-4-4H7a2 2 0 01-2-2z" />
+                            </svg>
+                            <!-- Volume Muted Icon -->
+                            <svg x-show="isMuted || volume === 0" x-cloak class="w-5 h-5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                            </svg>
+                        </button>
+
+                        <!-- Volume Percentage Display -->
+                        <div x-show="!showVolumeSlider"
+                            class="text-xs text-center text-gray-600 min-w-8 dark:text-gray-300">
+                            <span x-text="Math.round(volume * 100) + '%'"></span>
+                        </div>
+
+                        <!-- Volume Slider (appears on hover) -->
+                        <div x-show="showVolumeSlider" x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95">
+                            <input type="range" min="0" max="1" step="0.1"
+                                :value="volume" @input="setVolume($event.target.value)"
+                                class="w-20 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider dark:bg-gray-600">
+                        </div>
                     </div>
                 </div>
 
-                <!-- Time Display -->
-                <div class="items-center hidden gap-1 font-mono text-sm text-gray-600 sm:flex dark:text-gray-300">
-                    <span x-text="formatTime(currentTime)">0:00</span>
-                    <span class="text-gray-400">/</span>
-                    <span x-text="formatTime(duration)">0:00</span>
-                </div>
             </div>
 
             <!-- Right Controls Group -->
             <div class="flex items-center gap-1 sm:gap-2">
-                <!-- Mobile Time Display -->
-                <div class="flex items-center gap-1 font-mono text-xs text-gray-600 sm:hidden dark:text-gray-300">
-                    <span x-text="formatTime(currentTime)">0:00</span>
-                    <span class="text-gray-400">/</span>
-                    <span x-text="formatTime(duration)">0:00</span>
-                </div>
 
                 <!-- Resolution Selector -->
-                <div class="relative" x-show="qualitySources.length > 1" x-cloak>
+                <div class="relative" x-show="qualitySources.length > 1 && config.features.enableResolutionSelector" x-cloak>
                     <button @click="showResolutionMenu = !showResolutionMenu"
                         class="flex items-center justify-center h-8 gap-1 text-gray-600 transition-colors duration-200 rounded-lg video-control-btn hover:bg-gray-200 hover:text-gray-800 sm:px-2 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
                         :class="{ 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white': showResolutionMenu }">
@@ -229,7 +309,7 @@
 
                     <!-- Resolution Dropdown (Desktop) -->
                     <div x-show="showResolutionMenu" x-cloak @click.away="showResolutionMenu = false"
-                        class="absolute right-0 hidden mb-2 bg-white rounded-lg shadow-lg bottom-full min-w-32 ring-1 ring-black/5 sm:block dark:bg-gray-800 dark:ring-white/10 z-50"
+                        class="absolute right-0 z-50 hidden mb-2 bg-white rounded-lg shadow-lg bottom-full min-w-32 ring-1 ring-black/5 sm:block dark:bg-gray-800 dark:ring-white/10"
                         x-transition:enter="transition ease-out duration-100"
                         x-transition:enter-start="transform opacity-0 scale-95"
                         x-transition:enter-end="transform opacity-100 scale-100"
@@ -263,7 +343,7 @@
                 </div>
 
                 <!-- Settings Menu -->
-                <div class="relative">
+                <div class="relative" x-show="config.features.enableSettingsMenu">
                     <button @click="showSettingsMenu = !showSettingsMenu"
                         class="flex items-center justify-center w-8 h-8 text-gray-600 transition-colors duration-200 rounded-lg video-control-btn hover:bg-gray-200 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
                         :class="{ 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white': showSettingsMenu }">
@@ -278,7 +358,7 @@
 
                     <!-- Settings Dropdown (Desktop) -->
                     <div x-show="showSettingsMenu" x-cloak @click.away="showSettingsMenu = false"
-                        class="absolute right-0 hidden w-56 mb-2 bg-white rounded-lg shadow-lg bottom-full ring-1 ring-black/5 sm:block dark:bg-gray-800 dark:ring-white/10 z-50"
+                        class="absolute right-0 z-50 hidden w-56 mb-2 bg-white rounded-lg shadow-lg bottom-full ring-1 ring-black/5 sm:block dark:bg-gray-800 dark:ring-white/10"
                         x-transition:enter="transition ease-out duration-100"
                         x-transition:enter-start="transform opacity-0 scale-95"
                         x-transition:enter-end="transform opacity-100 scale-100"
@@ -291,24 +371,42 @@
                                 Video Settings
                             </div>
 
-                            <!-- Show Comments Toggle -->
-                            <button @click="toggleCommentsOnProgressBar()"
+                            <!-- Show Comments Toggle (only if annotations enabled) -->
+                            <button x-show="config.features.enableAnnotations" @click="toggleCommentsOnProgressBar()"
                                 class="flex items-center justify-between w-full px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
                                 <div class="flex items-center gap-3">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
-                                    <span>Show Comments on Progress Bar</span>
+                                    <span>Show Comments</span>
                                 </div>
                                 <!-- Toggle Switch -->
                                 <div class="relative">
-                                    <div class="w-10 h-5 transition-colors duration-200 bg-gray-300 rounded-full dark:bg-gray-600"
-                                        :class="{ 'bg-blue-600 dark:bg-blue-500': showCommentsOnProgressBar }">
+                                    <div class="w-10 h-5 transition-colors duration-200 rounded-full"
+                                        :class="showCommentsOnProgressBar ? 'bg-blue-600 dark:bg-blue-500' :
+                                            'bg-gray-300 dark:bg-gray-600'">
                                         <div class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200"
-                                            :class="{ 'translate-x-5': showCommentsOnProgressBar }">
+                                            :class="showCommentsOnProgressBar ? 'translate-x-5' : ''">
                                         </div>
                                     </div>
+                                </div>
+                            </button>
+
+                            <!-- Progress Bar Visibility Toggle -->
+                            <button @click="toggleProgressBarMode()"
+                                class="flex items-center justify-between w-full px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Progress Bar</span>
+                                </div>
+                                <!-- Mode Display -->
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <span x-show="progressBarMode === 'always-visible'">Always</span>
+                                    <span x-show="progressBarMode === 'auto-hide'">Auto-hide</span>
                                 </div>
                             </button>
                         </div>
@@ -316,7 +414,7 @@
                 </div>
 
                 <!-- Fullscreen Button -->
-                <button @click="toggleFullscreen()"
+                <button x-show="config.features.enableFullscreenButton" @click="toggleFullscreen()"
                     class="flex items-center justify-center w-8 h-8 text-gray-600 transition-colors duration-200 rounded-lg video-control-btn hover:bg-gray-200 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
                     <!-- Enter Fullscreen Icon -->
                     <svg x-show="!isFullscreen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor"
@@ -409,8 +507,8 @@
 
             <!-- Settings Options -->
             <div class="space-y-4">
-                <!-- Show Comments Toggle -->
-                <button @click="toggleCommentsOnProgressBar()"
+                <!-- Show Comments Toggle (only if annotations enabled) -->
+                <button x-show="config.features.enableAnnotations" @click="toggleCommentsOnProgressBar()"
                     class="flex items-center justify-between w-full p-4 text-left transition-colors duration-200 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
                     <div class="flex items-center gap-4">
                         <div class="p-2 bg-blue-100 rounded-lg dark:bg-blue-900">
@@ -437,6 +535,127 @@
                         </div>
                     </div>
                 </button>
+
+                <!-- Progress Bar Visibility Toggle -->
+                <button @click="toggleProgressBarMode()"
+                    class="flex items-center justify-between w-full p-4 text-left transition-colors duration-200 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2 bg-green-100 rounded-lg dark:bg-green-900">
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-base font-medium text-gray-900 dark:text-white">Progress Bar Visibility
+                            </div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                <span x-show="progressBarMode === 'always-visible'">Always visible on video</span>
+                                <span x-show="progressBarMode === 'auto-hide'">Auto-hide after 2 seconds</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Mode Display -->
+                    <div class="px-3 py-1 text-xs font-medium rounded-full"
+                        :class="progressBarMode === 'always-visible' ?
+                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                            'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'">
+                        <span x-show="progressBarMode === 'always-visible'">Always</span>
+                        <span x-show="progressBarMode === 'auto-hide'">Auto-hide</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Volume Modal -->
+    <div x-show="showVolumeModal" x-cloak @click="showVolumeModal = false"
+        class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:hidden"
+        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div @click.stop class="w-full max-w-md p-6 bg-white rounded-t-2xl dark:bg-gray-800"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="transform translate-y-full" x-transition:enter-end="transform translate-y-0"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="transform translate-y-0"
+            x-transition:leave-end="transform translate-y-full">
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Volume Control</h3>
+                <button @click="showVolumeModal = false"
+                    class="p-1 text-gray-400 rounded-lg hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Volume Controls -->
+            <div class="space-y-6">
+                <!-- Volume Level Display -->
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white">
+                        <span x-text="Math.round(volume * 100) + '%'"></span>
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Volume Level</div>
+                </div>
+
+                <!-- Mute Toggle -->
+                <button @click="toggleMute()"
+                    class="flex items-center justify-between w-full p-4 text-left transition-colors duration-200 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-blue-100 rounded-lg dark:bg-blue-900">
+                            <!-- Volume Up Icon -->
+                            <svg x-show="!isMuted && volume > 0.5" x-cloak
+                                class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 15v-2a2 2 0 012-2h1l4-4v12l-4-4H7a2 2 0 01-2-2z" />
+                            </svg>
+                            <!-- Volume Down Icon -->
+                            <svg x-show="!isMuted && volume <= 0.5 && volume > 0" x-cloak
+                                class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.536 8.464a5 5 0 010 7.072M5 15v-2a2 2 0 012-2h1l4-4v12l-4-4H7a2 2 0 01-2-2z" />
+                            </svg>
+                            <!-- Volume Muted Icon -->
+                            <svg x-show="isMuted || volume === 0" x-cloak
+                                class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-base font-medium text-gray-900 dark:text-white">
+                                <span x-show="!isMuted">Mute Audio</span>
+                                <span x-show="isMuted">Unmute Audio</span>
+                            </div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Toggle sound on/off</div>
+                        </div>
+                    </div>
+                </button>
+
+                <!-- Volume Slider -->
+                <div class="space-y-3">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Adjust Volume</label>
+                    <div class="relative">
+                        <input type="range" min="0" max="1" step="0.01" :value="volume"
+                            @input="setVolume($event.target.value)"
+                            class="w-full h-3 bg-gray-300 rounded-lg appearance-none cursor-pointer slider dark:bg-gray-600">
+                        <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -540,7 +759,34 @@
         }
     }
 
-    /* Prevent text selection on touch */
+    /* Safari and WebKit specific fixes */
+    @supports (-webkit-touch-callout: none) {
+
+        /* iOS Safari specific styles */
+        video {
+            -webkit-playsinline: true;
+        }
+
+        /* Fix for iOS Safari video player quirks */
+        video {
+            -webkit-playsinline: true;
+            playsinline: true;
+        }
+
+        /* Safari slider improvements */
+        .slider::-webkit-slider-track {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        /* Better touch targets for Safari */
+        .video-control-btn {
+            min-height: 48px;
+            min-width: 48px;
+        }
+    }
+
+    /* Prevent text selection and improve touch behavior */
     .video-control-btn,
     div[x-ref="progressBar"],
     .cursor-pointer {
@@ -549,6 +795,35 @@
         -ms-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    /* Cross-browser button active states */
+    .video-control-btn:active,
+    button:active {
+        transition: transform 0.1s ease;
+    }
+
+    /* Fix for Chrome Android address bar height changes */
+    @supports (height: 100dvh) {
+        .fixed.inset-0 {
+            height: 100dvh;
+        }
+    }
+
+    /* Firefox specific fixes */
+    @-moz-document url-prefix() {
+        .slider {
+            background: transparent;
+        }
+
+        .slider::-moz-range-track {
+            background: #d1d5db;
+            border: none;
+            height: 8px;
+            border-radius: 4px;
+        }
     }
 </style>
 
