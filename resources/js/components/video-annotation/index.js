@@ -82,7 +82,6 @@ export default function videoAnnotation(userConfig = null) {
         progressBarWidth: 0,
         hoverX: 0, // Mouse hover position for add button
         showHoverAdd: false, // Show hover add button
-        helpTooltipCount: 0, // Track tooltip show count
         config: config, // Store config for component use
         isPlaying: false,
         volume: 1.0,
@@ -289,9 +288,13 @@ export default function videoAnnotation(userConfig = null) {
                 });
             });
 
-            // Listen for window resize to update progress bar width
+            // Throttled resize handler for better performance
+            let resizeTimeout;
             window.addEventListener('resize', () => {
-                this.updateProgressBarWidth();
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    this.updateProgressBarWidth();
+                }, 100);
             });
         },
 
@@ -327,25 +330,19 @@ export default function videoAnnotation(userConfig = null) {
         },
 
         getCommentPosition(timestamp) {
-            if (this.duration <= 0) return 0;
+            if (this.duration <= 0 || !this.progressBarWidth) return 0;
 
-            // Get current progress bar width dynamically
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) return 0;
-
-            const currentWidth = progressBar.offsetWidth;
+            // Use cached width for better performance
             const seconds = timestamp / 1000;
-            const position = (seconds / this.duration) * currentWidth;
+            const position = (seconds / this.duration) * this.progressBarWidth;
 
             return position;
         },
 
         getTooltipPosition(timestamp) {
             const position = this.getCommentPosition(timestamp);
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) return 'left-1/2 -translate-x-1/2';
+            if (!this.progressBarWidth) return 'left-1/2 -translate-x-1/2';
 
-            const containerWidth = progressBar.offsetWidth;
             const tooltipWidth = 200; // approximate tooltip width
 
             // If tooltip would go off the left edge
@@ -353,7 +350,7 @@ export default function videoAnnotation(userConfig = null) {
                 return 'left-0 translate-x-0';
             }
             // If tooltip would go off the right edge
-            else if (position > containerWidth - tooltipWidth / 2) {
+            else if (position > this.progressBarWidth - tooltipWidth / 2) {
                 return 'right-0 translate-x-0';
             }
             // Default centered position
@@ -417,6 +414,9 @@ export default function videoAnnotation(userConfig = null) {
             event.preventDefault();
             event.stopPropagation();
 
+            // Hide context menu if open
+            this.hideContextMenu();
+
             // Clear initial hide timeout on interaction
             if (this.progressBarTimeout) {
                 clearTimeout(this.progressBarTimeout);
@@ -461,6 +461,11 @@ export default function videoAnnotation(userConfig = null) {
                 this.clickTimeout = null;
             }
             this.clickCount = 0;
+
+            // Only handle double-click for comments if annotations are enabled
+            if (!this.config.annotations.enableProgressBarComments) {
+                return;
+            }
 
             // Double click - add comment at position
             event.preventDefault();
@@ -765,37 +770,38 @@ export default function videoAnnotation(userConfig = null) {
             const rect = event.currentTarget.getBoundingClientRect();
             this.hoverX = touch.clientX - rect.left;
 
-            // Start long press timer for mobile add comment
-            this.longPressTimeout = setTimeout(() => {
-                if (!this.isTouchMove) {
-                    // Long press detected - add comment
-                    const percentage = this.hoverX / rect.width;
-                    const targetTime = percentage * this.duration;
-                    const currentTimeMs = Math.floor(targetTime * 1000);
+            // Start long press timer for mobile add comment (only if annotations enabled)
+            if (this.config.annotations.enableProgressBarComments) {
+                this.longPressTimeout = setTimeout(() => {
+                    if (!this.isTouchMove) {
+                        // Long press detected - add comment
+                        const percentage = this.hoverX / rect.width;
+                        const targetTime = percentage * this.duration;
+                        const currentTimeMs = Math.floor(targetTime * 1000);
 
-                    console.log('Mobile long press: Adding comment at', this.formatTime(targetTime), 'at', Math.round(percentage * 100) + '%', '(' + currentTimeMs + 'ms)');
+                        console.log('Mobile long press: Adding comment at', this.formatTime(targetTime), 'at', Math.round(percentage * 100) + '%', '(' + currentTimeMs + 'ms)');
 
-                    // Don't show help tooltip on mobile long press
-                    // this.showHoverAdd = true;
+                        // Add haptic feedback if available (cross-browser)
+                        if (this.config.annotations.enableHapticFeedback) {
+                            this.triggerHapticFeedback(100);
+                        }
 
-                    // Add haptic feedback if available (cross-browser)
-                    this.triggerHapticFeedback(100);
-
-                    // Fire event with calculated timeline position
-                    this.$dispatch('addComment', {
-                        timestamp: currentTimeMs,
-                        currentTime: targetTime
-                    });
-
-                    // Call the onComment callback if provided
-                    if (this.onComment && typeof this.onComment === 'function') {
-                        this.onComment('addComment', {
+                        // Fire event with calculated timeline position
+                        this.$dispatch('addComment', {
                             timestamp: currentTimeMs,
                             currentTime: targetTime
                         });
+
+                        // Call the onComment callback if provided
+                        if (this.onComment && typeof this.onComment === 'function') {
+                            this.onComment('addComment', {
+                                timestamp: currentTimeMs,
+                                currentTime: targetTime
+                            });
+                        }
                     }
-                }
-            }, 500); // 500ms long press
+                }, 500); // 500ms long press
+            }
 
             event.preventDefault(); // Prevent scrolling
             event.stopPropagation(); // Prevent video click handler
@@ -1005,19 +1011,23 @@ export default function videoAnnotation(userConfig = null) {
 
         // Right-click context menu handlers
         handleVideoRightClick(event) {
-            if (!this.isTouchDevice() && this.player && this.config.annotations.enableContextMenu) {
+            if (!this.isTouchDevice() && this.player) {
+                // Always prevent default browser context menu
                 event.preventDefault();
 
-                // Pause video and capture time
-                this.player.pause();
-                this.contextMenuTime = this.player.currentTime();
+                // Only show custom context menu if annotations are enabled
+                if (this.config.annotations.enableContextMenu) {
+                    // Pause video and capture time
+                    this.player.pause();
+                    this.contextMenuTime = this.player.currentTime();
 
-                // Position context menu
-                this.contextMenuX = event.clientX;
-                this.contextMenuY = event.clientY;
-                this.showContextMenu = true;
+                    // Position context menu
+                    this.contextMenuX = event.clientX;
+                    this.contextMenuY = event.clientY;
+                    this.showContextMenu = true;
 
-                console.log('Right-click: Context menu at', this.formatTime(this.contextMenuTime), this.contextMenuX, this.contextMenuY);
+                    console.log('Right-click: Context menu at', this.formatTime(this.contextMenuTime), this.contextMenuX, this.contextMenuY);
+                }
             }
         },
 
@@ -1048,70 +1058,5 @@ export default function videoAnnotation(userConfig = null) {
             this.showContextMenu = false;
         },
 
-        // Internal configuration toggle methods
-        toggleAnnotationsMode() {
-            this.config.features.enableAnnotations = !this.config.features.enableAnnotations;
-            
-            // Update related features
-            if (!this.config.features.enableAnnotations) {
-                this.config.features.enableComments = false;
-                this.config.features.enableProgressBarAnnotations = false;
-                this.config.features.enableVideoAnnotations = false;
-                // Keep settings menu available for progress bar control
-                this.config.annotations.showCommentsOnProgressBar = false;
-                this.config.annotations.enableProgressBarComments = false;
-                this.config.annotations.enableVideoComments = false;
-                this.config.annotations.enableContextMenu = false;
-                this.showCommentsOnProgressBar = false;
-            } else {
-                this.config.features.enableComments = true;
-                this.config.features.enableProgressBarAnnotations = true;
-                this.config.features.enableVideoAnnotations = true;
-                this.config.features.enableSettingsMenu = true;
-                this.config.annotations.showCommentsOnProgressBar = true;
-                this.config.annotations.enableProgressBarComments = true;
-                this.config.annotations.enableVideoComments = true;
-                this.config.annotations.enableContextMenu = true;
-                this.showCommentsOnProgressBar = true;
-            }
-            // Always ensure progress bar is visible for seeking
-            this.showProgressBar = true;
-        },
-
-        setSimplePlayerMode() {
-            this.config.features.enableAnnotations = false;
-            this.config.features.enableComments = false;
-            this.config.features.enableProgressBarAnnotations = false;
-            this.config.features.enableVideoAnnotations = false;
-            this.config.features.enableSettingsMenu = true; // Keep settings available for progress bar control
-            this.config.annotations.showCommentsOnProgressBar = false;
-            this.config.annotations.enableProgressBarComments = false;
-            this.config.annotations.enableVideoComments = false;
-            this.config.annotations.enableContextMenu = false;
-            this.config.ui.progressBarMode = 'auto-hide';
-            this.config.ui.helpTooltipLimit = 1;
-            this.showCommentsOnProgressBar = false;
-            this.progressBarMode = 'auto-hide';
-            // Initialize progress bar visibility with auto-hide behavior
-            this.initializeProgressBarVisibility();
-        },
-
-        setAdvancedAnnotationMode() {
-            this.config.features.enableAnnotations = true;
-            this.config.features.enableComments = true;
-            this.config.features.enableProgressBarAnnotations = true;
-            this.config.features.enableVideoAnnotations = true;
-            this.config.features.enableSettingsMenu = true;
-            this.config.annotations.showCommentsOnProgressBar = true;
-            this.config.annotations.enableProgressBarComments = true;
-            this.config.annotations.enableVideoComments = true;
-            this.config.annotations.enableContextMenu = true;
-            this.config.ui.progressBarMode = 'auto-hide';
-            this.config.ui.helpTooltipLimit = 5;
-            this.showCommentsOnProgressBar = true;
-            this.progressBarMode = 'auto-hide';
-            // Always ensure progress bar is visible for seeking
-            this.showProgressBar = true;
-        }
     }
 }

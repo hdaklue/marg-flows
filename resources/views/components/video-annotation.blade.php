@@ -7,29 +7,6 @@
 <div x-data="videoAnnotation(@if($config) @js($config) @else null @endif)" class="relative w-full overflow-visible bg-black rounded-lg" @destroy.window="destroy()"
     @contextmenu="handleVideoRightClick($event)">
     
-    <!-- Internal Configuration Controls (when no external config provided) -->
-    @if(!$config)
-    <div class="p-3 mb-4 rounded-lg bg-gray-100 dark:bg-gray-800">
-        <h4 class="mb-2 text-sm font-medium text-gray-900 dark:text-white">Player Mode</h4>
-        <div class="flex flex-wrap gap-2">
-            <button @click="setAdvancedAnnotationMode()"
-                class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
-                Advanced Mode
-            </button>
-            <button @click="setSimplePlayerMode()"
-                class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">
-                Simple Mode
-            </button>
-            <button @click="toggleAnnotationsMode()"
-                class="px-3 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
-                Toggle Annotations
-            </button>
-        </div>
-        <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
-            <span x-text="config.features.enableAnnotations ? 'Annotations: ON' : 'Annotations: OFF'"></span>
-        </div>
-    </div>
-    @endif
     <!-- Context menu (only if annotations enabled) -->
     <div x-cloak x-show="showContextMenu && config.annotations.enableContextMenu" @click.away.window="showContextMenu = false"
         class="fixed z-50 flex flex-col bg-gray-100 rounded-lg w-36 dark:bg-gray-800 dark:text-gray-200"
@@ -93,7 +70,7 @@
             <div class="relative mb-2" :class="showCommentsOnProgressBar && config.features.enableAnnotations ? 'h-16' : 'h-0'">
                 <div x-show="showCommentsOnProgressBar && config.features.enableAnnotations" x-cloak>
                     <template x-for="(comment, index) in comments" :key="`comment-${index}-${comment.commentId}`">
-                        <div class="absolute bottom-0 transform -translate-x-1/2 cursor-pointer"
+                        <div class="absolute bottom-0 transform -translate-x-1/2 cursor-pointer comment-bubble"
                             :style="`left: ${getCommentPosition(comment.timestamp)}px`"
                             @click.stop="seekToComment(comment.timestamp)"
                             @touchstart.stop="handleCommentTouchStart($event, comment)"
@@ -139,22 +116,16 @@
                 </div>
             </div>
 
-            <!-- Progress Bar Hover Tooltip (Desktop Only, always available) -->
-            <div x-show="showHoverAdd && helpTooltipCount < config.ui.helpTooltipLimit && !isTouchDevice()" x-init="if (helpTooltipCount < config.ui.helpTooltipLimit && !isTouchDevice()) {
-                helpTooltipCount++;
-                setTimeout(() => showHoverAdd = false, config.timing.helpTooltipDuration);
-            }"
-                @click.away="showHoverAdd = false"
+            <!-- Progress Bar Time Preview (Desktop hover) -->
+            <div x-show="showHoverAdd && !isTouchDevice()"
                 class="pointer-events-none absolute bottom-12 z-[9999] hidden -translate-x-1/2 transform sm:block"
                 :style="`left: calc(1rem + ${hoverX}px);`" x-transition:enter="transition ease-out duration-150"
                 x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
                 x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-90">
                 <div
-                    class="px-3 py-2 text-xs text-white bg-gray-900 rounded-lg shadow-lg whitespace-nowrap dark:bg-gray-800">
-                    <!-- Dynamic tooltip text based on mode -->
-                    <span x-show="config.features.enableAnnotations">Click to seek • Double-click to add comment</span>
-                    <span x-show="!config.features.enableAnnotations">Click to seek video</span>
+                    class="px-2 py-1 text-xs font-mono text-white bg-gray-900 rounded shadow-lg dark:bg-gray-800">
+                    <span x-text="formatTime((hoverX / progressBarWidth) * duration)">0:00</span>
                     <!-- Tooltip Arrow -->
                     <div
                         class="absolute w-0 h-0 transform -translate-x-1/2 border-t-4 border-l-4 border-r-4 left-1/2 top-full border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-800">
@@ -166,11 +137,12 @@
             <div x-ref="progressBar" @click="handleProgressBarClick($event)"
                 @dblclick="handleProgressBarDoubleClick($event)" @touchstart="onProgressBarTouchStart($event)"
                 @touchmove="onProgressBarTouchMove($event)" @touchend="onProgressBarTouchEnd($event)"
-                @mousemove="updateHoverPosition($event)" @mouseenter="showHoverAdd = true"
+                @mousemove="updateHoverPosition($event)" 
+                @mouseenter="showHoverAdd = true"
                 @mouseleave="showHoverAdd = false"
                 class="relative w-full h-2 overflow-hidden rounded-full cursor-pointer bg-gray-500/50 backdrop-blur-sm border border-blue-400/30">
                 <!-- Current Progress -->
-                <div class="h-full transition-all duration-100 bg-gradient-to-r from-blue-300 to-blue-600 rounded-l-full"
+                <div class="h-full transition-all duration-100 bg-gradient-to-r from-blue-300 to-blue-600 rounded-l-full progress-fill"
                     :style="`width: ${duration > 0 ? (currentTime / duration) * 100 : 0}%`"
                     :class="{ 'rounded-r-full': duration > 0 && (currentTime / duration) * 100 >= 100 }"></div>
             </div>
@@ -803,6 +775,23 @@
     .video-control-btn:active,
     button:active {
         transition: transform 0.1s ease;
+    }
+
+    /* Performance optimizations */
+    .video-control-btn,
+    div[x-ref="progressBar"],
+    .cursor-pointer {
+        will-change: transform;
+    }
+
+    /* Smooth progress bar updates */
+    .progress-fill {
+        will-change: width;
+    }
+
+    /* Optimize comment bubble positioning */
+    .comment-bubble {
+        will-change: transform, opacity;
     }
 
     /* Fix for Chrome Android address bar height changes */
