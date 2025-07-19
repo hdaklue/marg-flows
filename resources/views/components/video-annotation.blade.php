@@ -4,11 +4,12 @@
 {{-- <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
 <script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script> --}}
 
-<div x-data="videoAnnotation(@if($config) @js($config) @else null @endif)" class="relative w-full overflow-visible bg-black rounded-lg" @destroy.window="destroy()"
+<div x-data="videoAnnotation(@if ($config) @js($config) @else null @endif)" class="relative w-full overflow-visible bg-black rounded-lg" @destroy.window="destroy()"
     @contextmenu="handleVideoRightClick($event)">
-    
+
     <!-- Context menu (only if annotations enabled) -->
-    <div x-cloak x-show="showContextMenu && config.annotations.enableContextMenu" @click.away.window="showContextMenu = false"
+    <div x-cloak x-show="showContextMenu && config.annotations.enableContextMenu"
+        @click.away.window="showContextMenu = false"
         class="fixed z-50 flex flex-col bg-gray-100 rounded-lg w-36 dark:bg-gray-800 dark:text-gray-200"
         :style="`left: ${contextMenuX}px; top: ${contextMenuY}px`">
         <div @click="addCommentFromContextMenu()" class="p-2 text-xs rounded-lg cursor-pointer dark:hover:bg-gray-700">Add
@@ -67,7 +68,8 @@
             x-transition:leave-end="opacity-0 translate-y-2" class="absolute bottom-0 left-0 right-0 z-10 p-4"
             @click.away="showHoverAdd = false">
             <!-- Comment Bubbles Above Progress Bar (only if annotations enabled) -->
-            <div class="relative mb-2" :class="showCommentsOnProgressBar && config.features.enableAnnotations ? 'h-16' : 'h-0'">
+            <div class="relative mb-2"
+                :class="showCommentsOnProgressBar && config.features.enableAnnotations ? 'h-16' : 'h-0'">
                 <div x-show="showCommentsOnProgressBar && config.features.enableAnnotations" x-cloak>
                     <template x-for="(comment, index) in comments" :key="`comment-${index}-${comment.commentId}`">
                         <div class="absolute bottom-0 transform -translate-x-1/2 cursor-pointer comment-bubble"
@@ -116,41 +118,59 @@
                 </div>
             </div>
 
-            <!-- Progress Bar Time Preview (Desktop hover) -->
-            <div x-show="showHoverAdd && !isTouchDevice()"
-                class="pointer-events-none absolute bottom-12 z-[9999] hidden -translate-x-1/2 transform sm:block"
-                :style="`left: calc(1rem + ${hoverX}px);`" x-transition:enter="transition ease-out duration-150"
-                x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-90">
-                <div
-                    class="px-2 py-1 text-xs font-mono text-white bg-gray-900 rounded shadow-lg dark:bg-gray-800">
-                    <span x-text="formatTime((hoverX / progressBarWidth) * duration)">0:00</span>
-                    <!-- Tooltip Arrow -->
-                    <div
-                        class="absolute w-0 h-0 transform -translate-x-1/2 border-t-4 border-l-4 border-r-4 left-1/2 top-full border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-800">
+
+            <!-- Progress Bar with Click/Double-Click and Draggable Seek Circle -->
+            <!-- Progress Bar Container with Larger Hover Area -->
+            <div @mouseenter="onProgressBarMouseEnter($event)" @mouseleave="onProgressBarMouseLeave()"
+                @mousemove="updateHoverPosition($event)" class="relative w-full py-2 -my-2">
+                <!-- Actual Progress Bar -->
+                <div x-ref="progressBar" @click="handleProgressBarClick($event)"
+                    @dblclick="handleProgressBarDoubleClick($event)" @touchstart="onProgressBarTouchStart($event)"
+                    @touchmove="onProgressBarTouchMove($event)" @touchend="onProgressBarTouchEnd($event)"
+                    class="relative w-full h-2 overflow-visible border rounded-full cursor-pointer border-blue-400/30 bg-gray-500/50 backdrop-blur-sm">
+                    <!-- Current Progress -->
+                    <div class="h-full transition-all duration-100 rounded-l-full progress-fill bg-gradient-to-r from-blue-300 to-blue-600"
+                        :style="`width: ${duration > 0 ? (currentTime / duration) * 100 : 0}%`"
+                        :class="{ 'rounded-r-full': duration > 0 && (currentTime / duration) * 100 >= 100 }"></div>
+
+                    <!-- Draggable Seek Circle -->
+                    <div x-show="showSeekCircle" x-cloak
+                        class="absolute transition-all duration-200 transform -translate-x-1/2 -translate-y-1/2 top-1/2"
+                        :style="`left: ${seekCircleX}px`" :class="{ 'scale-125': isDragging }"
+                        @mousedown.stop="startDrag($event)" @touchstart.stop="startCircleDrag($event)" @touchmove.stop
+                        @touchend.stop @click.stop @dblclick.stop>
+                        <!-- Outer circle with glow -->
+                        <div class="w-4 h-4 bg-white rounded-full shadow-lg ring-2 ring-blue-500/50"
+                            :class="{ 'ring-4 ring-blue-500/70 shadow-blue-500/30': isDragging }">
+                            <!-- Inner circle -->
+                            <div class="w-2 h-2 transform translate-x-1 translate-y-1 bg-blue-500 rounded-full"
+                                :class="{ 'bg-blue-600': isDragging }"></div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar Time Preview (follows pointer) - Below progress bar -->
+                    <div x-show="showTooltip"
+                        class="pointer-events-none absolute top-6 z-[9999] hidden -translate-x-1/2 transform sm:block"
+                        :style="`left: ${hoverX}px;`" x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
+                        <div
+                            class="px-2 py-1 font-mono text-xs text-white bg-gray-900 rounded shadow-lg dark:bg-gray-800">
+                            <span x-text="formatTime(dragCurrentTime)">0:00</span>
+                            <!-- Tooltip Arrow pointing up to progress bar -->
+                            <div
+                                class="absolute w-0 h-0 transform -translate-x-1/2 border-b-4 border-l-4 border-r-4 bottom-full left-1/2 border-b-gray-900 border-l-transparent border-r-transparent dark:border-b-gray-800">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Progress Bar with Click/Double-Click -->
-            <div x-ref="progressBar" @click="handleProgressBarClick($event)"
-                @dblclick="handleProgressBarDoubleClick($event)" @touchstart="onProgressBarTouchStart($event)"
-                @touchmove="onProgressBarTouchMove($event)" @touchend="onProgressBarTouchEnd($event)"
-                @mousemove="updateHoverPosition($event)" 
-                @mouseenter="showHoverAdd = true"
-                @mouseleave="showHoverAdd = false"
-                class="relative w-full h-2 overflow-hidden rounded-full cursor-pointer bg-gray-500/50 backdrop-blur-sm border border-blue-400/30">
-                <!-- Current Progress -->
-                <div class="h-full transition-all duration-100 bg-gradient-to-r from-blue-300 to-blue-600 rounded-l-full progress-fill"
-                    :style="`width: ${duration > 0 ? (currentTime / duration) * 100 : 0}%`"
-                    :class="{ 'rounded-r-full': duration > 0 && (currentTime / duration) * 100 >= 100 }"></div>
-            </div>
-
             <!-- Time Display Under Progress Bar -->
-            <div class="flex items-center justify-between mt-1 text-xs font-mono text-white drop-shadow-lg">
-                <span x-text="formatTime(currentTime)" class="px-1 bg-black/50 rounded backdrop-blur-sm">0:00</span>
-                <span x-text="formatTime(duration)" class="px-1 bg-black/50 rounded backdrop-blur-sm">0:00</span>
+            <div class="flex items-center justify-between mt-1 font-mono text-xs text-white drop-shadow-lg">
+                <span x-text="formatTime(currentTime)" class="px-1 rounded bg-black/50 backdrop-blur-sm">0:00</span>
+                <span x-text="formatTime(duration)" class="px-1 rounded bg-black/50 backdrop-blur-sm">0:00</span>
             </div>
         </div>
 
@@ -258,7 +278,8 @@
             <div class="flex items-center gap-1 sm:gap-2">
 
                 <!-- Resolution Selector -->
-                <div class="relative" x-show="qualitySources.length > 1 && config.features.enableResolutionSelector" x-cloak>
+                <div class="relative" x-show="qualitySources.length > 1 && config.features.enableResolutionSelector"
+                    x-cloak>
                     <button @click="showResolutionMenu = !showResolutionMenu"
                         class="flex items-center justify-center h-8 gap-1 text-gray-600 transition-colors duration-200 rounded-lg video-control-btn hover:bg-gray-200 hover:text-gray-800 sm:px-2 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
                         :class="{ 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white': showResolutionMenu }">

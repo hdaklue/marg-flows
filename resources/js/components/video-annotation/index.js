@@ -120,6 +120,17 @@ export default function videoAnnotation(userConfig = null) {
         contextMenuX: 0,
         contextMenuY: 0,
         contextMenuTime: 0,
+        // Draggable seek circle
+        isDragging: false,
+        showSeekCircle: false,
+        showTooltip: false,
+        seekCircleX: 0,
+        dragStartX: 0,
+        dragCurrentTime: 0,
+        boundHandleDragMove: null,
+        boundEndDrag: null,
+        boundTouchDragMove: null,
+        boundTouchEndDrag: null,
 
 
         init() {
@@ -236,6 +247,12 @@ export default function videoAnnotation(userConfig = null) {
 
             this.player.on('timeupdate', () => {
                 this.currentTime = this.player.currentTime();
+                // Always update circle position when time changes (unless actively dragging)
+                if (!this.isDragging) {
+                    this.forceUpdateSeekCirclePosition();
+                } else {
+                    console.log('Timeupdate skipped - isDragging:', this.isDragging);
+                }
             });
 
             this.player.on('play', () => {
@@ -303,6 +320,7 @@ export default function videoAnnotation(userConfig = null) {
                 const progressBar = this.$refs.progressBar;
                 if (progressBar) {
                     this.progressBarWidth = progressBar.offsetWidth;
+                    this.updateSeekCirclePosition();
                 }
             });
         },
@@ -441,10 +459,7 @@ export default function videoAnnotation(userConfig = null) {
 
                 // First click - wait to see if there's a second click
                 this.clickTimeout = setTimeout(() => {
-                    // Single click confirmed
-                    console.log('Single click: Seeking to', this.formatTime(storedEventData.targetTime), 'at', Math.round(storedEventData.percentage * 100) + '%');
-
-                    // Perform seek operation directly
+                    // Single click confirmed - perform seek operation
                     if (this.player) {
                         this.player.currentTime(storedEventData.targetTime);
                     }
@@ -497,6 +512,213 @@ export default function videoAnnotation(userConfig = null) {
         updateHoverPosition(event) {
             const rect = event.currentTarget.getBoundingClientRect();
             this.hoverX = event.clientX - rect.left;
+
+            // Only update drag time for tooltip, don't move circle unless dragging
+            if (!this.isDragging) {
+                const percentage = this.hoverX / rect.width;
+                this.dragCurrentTime = percentage * this.duration;
+            }
+        },
+
+        onProgressBarMouseEnter(event) {
+            if (!this.isTouchDevice()) {
+                this.showSeekCircle = true;
+                this.showTooltip = true;
+                // Show circle at current progress position (aligned with progress fill)
+                this.forceUpdateSeekCirclePosition();
+                // Update hover position for tooltip only
+                this.updateHoverPosition(event);
+            }
+        },
+
+        onProgressBarMouseLeave() {
+            // Always hide tooltip when leaving, regardless of mode
+            this.showTooltip = false;
+
+            // Only hide circle if not dragging and not in always-visible mode
+            if (!this.isDragging) {
+                this.showSeekCircle = false;
+            }
+        },
+
+
+        updateSeekCirclePosition() {
+            // Update seek circle position to align with current progress fill
+            // Only update if not actively dragging and we have valid dimensions
+            if (!this.isDragging && this.duration > 0 && this.progressBarWidth > 0) {
+                const progressPercentage = this.currentTime / this.duration;
+                // Position circle at the end of the progress fill
+                this.seekCircleX = progressPercentage * this.progressBarWidth;
+            }
+        },
+
+        forceUpdateSeekCirclePosition() {
+            // Force update circle position regardless of drag state
+            // Always position circle at the end of the progress fill (current playback position)
+            if (this.duration > 0 && this.progressBarWidth > 0) {
+                const progressPercentage = this.currentTime / this.duration;
+                // Align circle with the end of the blue progress fill
+                this.seekCircleX = progressPercentage * this.progressBarWidth;
+            }
+        },
+
+        startDrag(event) {
+            // Only handle mousedown events for dragging, let touch events use separate handler
+            if (event.type === 'touchstart') {
+                return;
+            }
+
+            this.isDragging = true;
+            this.showSeekCircle = true;
+            this.showTooltip = true;
+
+            // Get the progress bar rect, not the circle rect
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) {
+                return;
+            }
+
+            const rect = progressBar.getBoundingClientRect();
+            this.dragStartX = event.clientX - rect.left;
+            this.seekCircleX = this.dragStartX;
+
+            // Calculate initial time
+            const percentage = this.dragStartX / rect.width;
+            this.dragCurrentTime = percentage * this.duration;
+
+            // Bind methods to this context for proper removal
+            this.boundHandleDragMove = this.handleDragMove.bind(this);
+            this.boundEndDrag = this.endDrag.bind(this);
+
+            // Add global mouse move and up listeners
+            document.addEventListener('mousemove', this.boundHandleDragMove);
+            document.addEventListener('mouseup', this.boundEndDrag);
+
+            event.preventDefault();
+        },
+
+        startCircleDrag(event) {
+            this.isDragging = true;
+            this.showSeekCircle = true;
+            this.showTooltip = true;
+
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) return;
+
+            const rect = progressBar.getBoundingClientRect();
+            const touch = event.touches[0];
+            this.dragStartX = touch.clientX - rect.left;
+            this.seekCircleX = this.dragStartX;
+
+            const percentage = this.dragStartX / rect.width;
+            this.dragCurrentTime = percentage * this.duration;
+
+            this.boundTouchDragMove = this.handleTouchDragMove.bind(this);
+            this.boundTouchEndDrag = this.endTouchDrag.bind(this);
+
+            document.addEventListener('touchmove', this.boundTouchDragMove);
+            document.addEventListener('touchend', this.boundTouchEndDrag);
+            event.preventDefault();
+        },
+
+        handleTouchDragMove(event) {
+            if (!this.isDragging) return;
+
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) return;
+
+            const rect = progressBar.getBoundingClientRect();
+            const touch = event.touches[0];
+            let newX = touch.clientX - rect.left;
+
+            newX = Math.max(0, Math.min(newX, rect.width));
+
+            console.log('Touch move - setting seekCircleX to:', newX, 'isDragging:', this.isDragging);
+
+            this.seekCircleX = newX;
+            this.hoverX = newX;
+            const percentage = newX / rect.width;
+            this.dragCurrentTime = percentage * this.duration;
+
+            event.preventDefault();
+        },
+
+        endTouchDrag(event) {
+            if (!this.isDragging) return;
+
+            this.isDragging = false;
+
+            if (this.player) {
+                this.player.currentTime(this.dragCurrentTime);
+            }
+
+            if (this.boundTouchDragMove) {
+                document.removeEventListener('touchmove', this.boundTouchDragMove);
+                this.boundTouchDragMove = null;
+            }
+            if (this.boundTouchEndDrag) {
+                document.removeEventListener('touchend', this.boundTouchEndDrag);
+                this.boundTouchEndDrag = null;
+            }
+
+            setTimeout(() => {
+                this.showTooltip = false;
+                this.showSeekCircle = false;
+            }, 100);
+
+            event.preventDefault();
+        },
+
+        handleDragMove(event) {
+            if (!this.isDragging) return;
+
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) return;
+
+            const rect = progressBar.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            let newX = clientX - rect.left;
+
+            // Constrain to progress bar bounds
+            newX = Math.max(0, Math.min(newX, rect.width));
+
+            // Update both circle position and drag time during drag
+            this.seekCircleX = newX;
+            this.hoverX = newX; // Also update hover position for tooltip
+            const percentage = newX / rect.width;
+            this.dragCurrentTime = percentage * this.duration;
+
+            event.preventDefault();
+        },
+
+        endDrag(event) {
+            if (!this.isDragging) return;
+
+            this.isDragging = false;
+
+            // Seek to the dragged position
+            if (this.player) {
+                this.player.currentTime(this.dragCurrentTime);
+            }
+
+            // Remove global listeners using bound references
+            if (this.boundHandleDragMove) {
+                document.removeEventListener('mousemove', this.boundHandleDragMove);
+                this.boundHandleDragMove = null;
+            }
+            if (this.boundEndDrag) {
+                document.removeEventListener('mouseup', this.boundEndDrag);
+                this.boundEndDrag = null;
+            }
+
+            // Hide tooltip and circle after drag unless mouse is still hovering
+            setTimeout(() => {
+                // Force hide tooltip and circle - let mouse enter trigger them again if still hovering
+                this.showTooltip = false;
+                this.showSeekCircle = false;
+            }, 100);
+
+            event.preventDefault();
         },
 
         addCommentAtPosition() {
@@ -595,8 +817,13 @@ export default function videoAnnotation(userConfig = null) {
                 return;
             }
 
-            // Toggle play/pause for loaded video
+            // Always toggle play/pause
             this.togglePlay();
+
+            // On touch devices, also toggle progress bar visibility (better UX)
+            if (this.isTouchDevice() && this.progressBarMode === 'auto-hide') {
+                this.toggleProgressBarVisibility();
+            }
         },
 
         toggleCommentsOnProgressBar() {
@@ -757,6 +984,24 @@ export default function videoAnnotation(userConfig = null) {
 
         // Progress bar touch handlers
         onProgressBarTouchStart(event) {
+            // Check if touching the circle - if so, don't handle here
+            const target = event.target;
+            if (target.closest('[x-show="showSeekCircle"]')) {
+                return; // Let circle handle its own touch
+            }
+
+            // Show circle on touch for mobile progress bar area
+            this.showSeekCircle = true;
+            this.showTooltip = true;
+            this.forceUpdateSeekCirclePosition();
+
+            // Update touch position for tooltip and store for progress bar
+            const touch = event.touches[0];
+            const rect = event.currentTarget.getBoundingClientRect();
+            this.hoverX = touch.clientX - rect.left;
+            const percentage = this.hoverX / rect.width;
+            this.dragCurrentTime = percentage * this.duration;
+
             this.touchStartTime = Date.now();
             this.isTouchMove = false;
 
@@ -764,11 +1009,6 @@ export default function videoAnnotation(userConfig = null) {
             if (this.progressBarTimeout) {
                 clearTimeout(this.progressBarTimeout);
             }
-
-            // Store touch position for progress bar
-            const touch = event.touches[0];
-            const rect = event.currentTarget.getBoundingClientRect();
-            this.hoverX = touch.clientX - rect.left;
 
             // Start long press timer for mobile add comment (only if annotations enabled)
             if (this.config.annotations.enableProgressBarComments) {
@@ -847,11 +1087,17 @@ export default function videoAnnotation(userConfig = null) {
                 const percentage = clickX / rect.width;
                 const newTime = percentage * this.duration;
 
-                console.log('Mobile tap: Seeking to', this.formatTime(newTime), 'at', Math.round(percentage * 100) + '%');
-
                 if (this.player) {
                     this.player.currentTime(newTime);
                 }
+            }
+
+            // Hide circle and tooltip after touch interaction (unless dragging)
+            if (!this.isDragging) {
+                setTimeout(() => {
+                    this.showSeekCircle = false;
+                    this.showTooltip = false;
+                }, 100);
             }
         },
 
@@ -1006,6 +1252,25 @@ export default function videoAnnotation(userConfig = null) {
             } else {
                 // Start auto-hide behavior
                 this.initializeProgressBarVisibility();
+            }
+        },
+
+        toggleProgressBarVisibility() {
+            if (this.progressBarMode === 'auto-hide') {
+                // Clear any existing timeout
+                if (this.progressBarTimeout) {
+                    clearTimeout(this.progressBarTimeout);
+                }
+
+                // Toggle visibility
+                this.showProgressBar = !this.showProgressBar;
+
+                // If we just showed it, start auto-hide timer
+                if (this.showProgressBar) {
+                    this.progressBarTimeout = setTimeout(() => {
+                        this.showProgressBar = false;
+                    }, this.config.timing.progressBarAutoHideDelay);
+                }
             }
         },
 
