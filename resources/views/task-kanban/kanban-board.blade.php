@@ -20,7 +20,7 @@
         </div>
         <div class="flex flex-row -space-x-2">
 
-            <x-user-avatar-stack :users="$users" size="xs" :editableKey="$this->flow->getKey()" />
+            <x-user-avatar-stack :users="$users" size="xs" :canEdit="$this->canManageFlow" :editableKey="$this->flow->getKey()" />
             {{-- @foreach ($this->flow->getParticipants() as $participant)
                 <div class="w-6 h-6 rounded-full cursor-default" x-tooltip="name" x-data="{
                     name: '{{ $participant->model->name }} ({{ RoleEnum::from($participant->role->name)->getLabel() }})'

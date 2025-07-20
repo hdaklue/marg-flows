@@ -129,8 +129,7 @@ export default function videoAnnotation(userConfig = null) {
         dragCurrentTime: 0,
         boundHandleDragMove: null,
         boundEndDrag: null,
-        boundTouchDragMove: null,
-        boundTouchEndDrag: null,
+        wasPlayingBeforeDrag: false,
 
 
         init() {
@@ -250,8 +249,6 @@ export default function videoAnnotation(userConfig = null) {
                 // Always update circle position when time changes (unless actively dragging)
                 if (!this.isDragging) {
                     this.forceUpdateSeekCirclePosition();
-                } else {
-                    console.log('Timeupdate skipped - isDragging:', this.isDragging);
                 }
             });
 
@@ -261,6 +258,13 @@ export default function videoAnnotation(userConfig = null) {
                 setTimeout(() => {
                     this.showPlayPauseOverlay = false;
                 }, 800);
+
+                // Resume auto-hide behavior when playing (if in auto-hide mode)
+                if (this.progressBarMode === 'auto-hide') {
+                    this.progressBarTimeout = setTimeout(() => {
+                        this.showProgressBar = false;
+                    }, this.config.timing.progressBarAutoHideDelay);
+                }
             });
 
             this.player.on('pause', () => {
@@ -269,6 +273,14 @@ export default function videoAnnotation(userConfig = null) {
                 setTimeout(() => {
                     this.showPlayPauseOverlay = false;
                 }, 800);
+
+                // Show progress bar when paused
+                this.showProgressBar = true;
+                // Clear any auto-hide timeout when paused
+                if (this.progressBarTimeout) {
+                    clearTimeout(this.progressBarTimeout);
+                    this.progressBarTimeout = null;
+                }
             });
 
             this.player.on('volumechange', () => {
@@ -568,9 +580,19 @@ export default function videoAnnotation(userConfig = null) {
                 return;
             }
 
+            // Remember if video was playing before drag
+            this.wasPlayingBeforeDrag = this.isPlaying;
+            
             this.isDragging = true;
             this.showSeekCircle = true;
             this.showTooltip = true;
+            this.showProgressBar = true; // Force show progress bar while dragging
+
+            // Clear any auto-hide timeout while dragging
+            if (this.progressBarTimeout) {
+                clearTimeout(this.progressBarTimeout);
+                this.progressBarTimeout = null;
+            }
 
             // Get the progress bar rect, not the circle rect
             const progressBar = this.$refs.progressBar;
@@ -597,11 +619,26 @@ export default function videoAnnotation(userConfig = null) {
             event.preventDefault();
         },
 
+        // Simple touch start for circle
         startCircleDrag(event) {
+            console.log('Circle touch start');
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Remember if video was playing before drag
+            this.wasPlayingBeforeDrag = this.isPlaying;
+            
             this.isDragging = true;
             this.showSeekCircle = true;
             this.showTooltip = true;
-
+            this.showProgressBar = true; // Force show progress bar while dragging
+            
+            // Clear any auto-hide timeout while dragging
+            if (this.progressBarTimeout) {
+                clearTimeout(this.progressBarTimeout);
+                this.progressBarTimeout = null;
+            }
+            
             const progressBar = this.$refs.progressBar;
             if (!progressBar) return;
 
@@ -612,17 +649,14 @@ export default function videoAnnotation(userConfig = null) {
 
             const percentage = this.dragStartX / rect.width;
             this.dragCurrentTime = percentage * this.duration;
-
-            this.boundTouchDragMove = this.handleTouchDragMove.bind(this);
-            this.boundTouchEndDrag = this.endTouchDrag.bind(this);
-
-            document.addEventListener('touchmove', this.boundTouchDragMove);
-            document.addEventListener('touchend', this.boundTouchEndDrag);
-            event.preventDefault();
         },
 
+        // Simple touch move for circle
         handleTouchDragMove(event) {
             if (!this.isDragging) return;
+
+            event.preventDefault();
+            event.stopPropagation();
 
             const progressBar = this.$refs.progressBar;
             if (!progressBar) return;
@@ -633,40 +667,53 @@ export default function videoAnnotation(userConfig = null) {
 
             newX = Math.max(0, Math.min(newX, rect.width));
 
-            console.log('Touch move - setting seekCircleX to:', newX, 'isDragging:', this.isDragging);
+            console.log('Circle touch move - X:', newX);
 
             this.seekCircleX = newX;
             this.hoverX = newX;
             const percentage = newX / rect.width;
             this.dragCurrentTime = percentage * this.duration;
-
-            event.preventDefault();
         },
 
+        // Simple touch end for circle
         endTouchDrag(event) {
             if (!this.isDragging) return;
 
-            this.isDragging = false;
+            event.preventDefault();
+            event.stopPropagation();
 
+            console.log('Circle touch end, seeking to:', this.dragCurrentTime);
+            
+            // Seek to the dragged position
             if (this.player) {
                 this.player.currentTime(this.dragCurrentTime);
+                this.currentTime = this.dragCurrentTime;
+                this.forceUpdateSeekCirclePosition();
+                
+                // Resume playing if video was playing before drag
+                if (this.wasPlayingBeforeDrag) {
+                    this.player.play().catch(e => {
+                        console.log('Resume play failed:', e);
+                    });
+                }
             }
 
-            if (this.boundTouchDragMove) {
-                document.removeEventListener('touchmove', this.boundTouchDragMove);
-                this.boundTouchDragMove = null;
-            }
-            if (this.boundTouchEndDrag) {
-                document.removeEventListener('touchend', this.boundTouchEndDrag);
-                this.boundTouchEndDrag = null;
-            }
+            // Reset state
+            this.isDragging = false;
+            this.wasPlayingBeforeDrag = false;
 
+            // Hide UI elements
             setTimeout(() => {
                 this.showTooltip = false;
                 this.showSeekCircle = false;
             }, 100);
 
-            event.preventDefault();
+            // Resume auto-hide behavior if in auto-hide mode and video is playing
+            if (this.progressBarMode === 'auto-hide' && this.isPlaying) {
+                this.progressBarTimeout = setTimeout(() => {
+                    this.showProgressBar = false;
+                }, this.config.timing.progressBarAutoHideDelay);
+            }
         },
 
         handleDragMove(event) {
@@ -694,11 +741,38 @@ export default function videoAnnotation(userConfig = null) {
         endDrag(event) {
             if (!this.isDragging) return;
 
-            this.isDragging = false;
+            console.log('Mouse drag ended, seeking to:', this.dragCurrentTime);
 
             // Seek to the dragged position
-            if (this.player) {
+            if (this.player && this.player.readyState() >= 1) {
                 this.player.currentTime(this.dragCurrentTime);
+                // Force update the current time immediately for UI consistency
+                this.currentTime = this.dragCurrentTime;
+                // Update circle position to match the seek
+                this.forceUpdateSeekCirclePosition();
+                
+                // Resume playing if video was playing before drag
+                if (this.wasPlayingBeforeDrag) {
+                    this.player.play().catch(e => {
+                        console.log('Resume play failed:', e);
+                    });
+                }
+            } else {
+                // If player isn't ready, wait a bit and try again
+                setTimeout(() => {
+                    if (this.player) {
+                        this.player.currentTime(this.dragCurrentTime);
+                        this.currentTime = this.dragCurrentTime;
+                        this.forceUpdateSeekCirclePosition();
+                        
+                        // Resume playing if video was playing before drag
+                        if (this.wasPlayingBeforeDrag) {
+                            this.player.play().catch(e => {
+                                console.log('Resume play failed:', e);
+                            });
+                        }
+                    }
+                }, 50);
             }
 
             // Remove global listeners using bound references
@@ -711,12 +785,23 @@ export default function videoAnnotation(userConfig = null) {
                 this.boundEndDrag = null;
             }
 
+            // Set dragging to false after seek attempt
+            this.isDragging = false;
+            this.wasPlayingBeforeDrag = false;
+
             // Hide tooltip and circle after drag unless mouse is still hovering
             setTimeout(() => {
                 // Force hide tooltip and circle - let mouse enter trigger them again if still hovering
                 this.showTooltip = false;
                 this.showSeekCircle = false;
             }, 100);
+
+            // Resume auto-hide behavior if in auto-hide mode and video is playing
+            if (this.progressBarMode === 'auto-hide' && this.isPlaying) {
+                this.progressBarTimeout = setTimeout(() => {
+                    this.showProgressBar = false;
+                }, this.config.timing.progressBarAutoHideDelay);
+            }
 
             event.preventDefault();
         },
@@ -986,10 +1071,14 @@ export default function videoAnnotation(userConfig = null) {
         onProgressBarTouchStart(event) {
             // Check if touching the circle - if so, don't handle here
             const target = event.target;
-            if (target.closest('[x-show="showSeekCircle"]')) {
+            const circleElement = target.closest('.seek-circle, [data-seek-circle]');
+            if (circleElement || this.isDragging) {
+                console.log('Progress bar touch ignored - circle being touched');
                 return; // Let circle handle its own touch
             }
 
+            console.log('Progress bar touch start');
+            
             // Show circle on touch for mobile progress bar area
             this.showSeekCircle = true;
             this.showTooltip = true;
@@ -1013,7 +1102,7 @@ export default function videoAnnotation(userConfig = null) {
             // Start long press timer for mobile add comment (only if annotations enabled)
             if (this.config.annotations.enableProgressBarComments) {
                 this.longPressTimeout = setTimeout(() => {
-                    if (!this.isTouchMove) {
+                    if (!this.isTouchMove && !this.isDragging) {
                         // Long press detected - add comment
                         const percentage = this.hoverX / rect.width;
                         const targetTime = percentage * this.duration;
@@ -1048,6 +1137,11 @@ export default function videoAnnotation(userConfig = null) {
         },
 
         onProgressBarTouchMove(event) {
+            // Don't handle if circle is being dragged
+            if (this.isDragging) {
+                return;
+            }
+
             this.isTouchMove = true;
             event.preventDefault(); // Prevent scrolling
             event.stopPropagation(); // Prevent video click handler
@@ -1065,6 +1159,11 @@ export default function videoAnnotation(userConfig = null) {
         },
 
         onProgressBarTouchEnd(event) {
+            // Don't handle if circle dragging just ended
+            if (this.isDragging) {
+                return;
+            }
+
             const touchEndTime = Date.now();
             const touchDuration = touchEndTime - this.touchStartTime;
 
@@ -1077,8 +1176,6 @@ export default function videoAnnotation(userConfig = null) {
                 this.longPressTimeout = null;
             }
 
-            // Remove old tooltip logic since we disabled it above
-
             // Handle tap to seek (short touch without movement)
             if (touchDuration < 500 && !this.isTouchMove) {
                 const touch = event.changedTouches[0];
@@ -1087,6 +1184,7 @@ export default function videoAnnotation(userConfig = null) {
                 const percentage = clickX / rect.width;
                 const newTime = percentage * this.duration;
 
+                console.log('Progress bar tap seek to:', newTime);
                 if (this.player) {
                     this.player.currentTime(newTime);
                 }
@@ -1206,18 +1304,20 @@ export default function videoAnnotation(userConfig = null) {
 
         // Progress bar visibility management
         initializeProgressBarVisibility() {
-            if (this.progressBarMode === 'auto-hide') {
-                // Show progress bar initially
-                this.showProgressBar = true;
+            // Always show progress bar initially
+            this.showProgressBar = true;
 
-                // Hide after configured delay
-                this.progressBarTimeout = setTimeout(() => {
-                    this.showProgressBar = false;
-                }, this.config.timing.progressBarAutoHideDelay);
-            } else {
-                // Always visible mode
-                this.showProgressBar = true;
+            // Check actual player state to determine visibility behavior
+            if (this.progressBarMode === 'auto-hide') {
+                // Only start auto-hide timer if video is actually playing
+                if (this.player && this.isPlaying) {
+                    this.progressBarTimeout = setTimeout(() => {
+                        this.showProgressBar = false;
+                    }, this.config.timing.progressBarAutoHideDelay);
+                }
+                // If paused (default state), keep progress bar visible
             }
+            // If always-visible mode, keep progress bar visible
         },
 
         handleVideoHover() {
@@ -1321,6 +1421,14 @@ export default function videoAnnotation(userConfig = null) {
 
         hideContextMenu() {
             this.showContextMenu = false;
+        },
+
+        // Helper method for dev tools testing - force end any stuck drag
+        forceEndDrag() {
+            if (this.isDragging) {
+                console.log('Manually forcing drag end');
+                this.endTouchDrag({ preventDefault: () => {}, stopPropagation: () => {} });
+            }
         },
 
     }

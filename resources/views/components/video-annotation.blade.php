@@ -122,12 +122,13 @@
             <!-- Progress Bar with Click/Double-Click and Draggable Seek Circle -->
             <!-- Progress Bar Container with Larger Hover Area -->
             <div @mouseenter="onProgressBarMouseEnter($event)" @mouseleave="onProgressBarMouseLeave()"
-                @mousemove="updateHoverPosition($event)" class="relative w-full py-2 -my-2">
+                @mousemove="updateHoverPosition($event)" class="relative w-full py-3 -my-3">
                 <!-- Actual Progress Bar -->
                 <div x-ref="progressBar" @click="handleProgressBarClick($event)"
-                    @dblclick="handleProgressBarDoubleClick($event)" @touchstart="onProgressBarTouchStart($event)"
-                    @touchmove="onProgressBarTouchMove($event)" @touchend="onProgressBarTouchEnd($event)"
-                    class="relative w-full h-2 overflow-visible border rounded-full cursor-pointer border-blue-400/30 bg-gray-500/50 backdrop-blur-sm">
+                    @dblclick="handleProgressBarDoubleClick($event)"
+                    @touchstart.prevent="onProgressBarTouchStart($event)" {{-- @touchmove="onProgressBarTouchMove($event)"  --}}
+                    @touchend.prevent="onProgressBarTouchEnd($event)"
+                    class="relative w-full overflow-visible border rounded-full cursor-pointer border-blue-400/30 bg-gray-500/50 backdrop-blur-sm sm:h-3 h-2">
                     <!-- Current Progress -->
                     <div class="h-full transition-all duration-100 rounded-l-full progress-fill bg-gradient-to-r from-blue-300 to-blue-600"
                         :style="`width: ${duration > 0 ? (currentTime / duration) * 100 : 0}%`"
@@ -137,13 +138,13 @@
                     <div x-show="showSeekCircle" x-cloak
                         class="absolute transition-all duration-200 transform -translate-x-1/2 -translate-y-1/2 top-1/2"
                         :style="`left: ${seekCircleX}px`" :class="{ 'scale-125': isDragging }"
-                        @mousedown.stop="startDrag($event)" @touchstart.stop="startCircleDrag($event)" @touchmove.stop
-                        @touchend.stop @click.stop @dblclick.stop>
+                        @mousedown.stop="startDrag($event)" @touchstart.stop="startCircleDrag($event)"
+                        @touchmove.stop="handleTouchDragMove($event)" @touchend.stop="endTouchDrag($event)" @click.stop @dblclick.stop>
                         <!-- Outer circle with glow -->
-                        <div class="w-4 h-4 bg-white rounded-full shadow-lg ring-2 ring-blue-500/50"
+                        <div class="bg-white rounded-full shadow-lg ring-2 ring-blue-500/50 sm:w-5 sm:h-5 w-4 h-4"
                             :class="{ 'ring-4 ring-blue-500/70 shadow-blue-500/30': isDragging }">
                             <!-- Inner circle -->
-                            <div class="w-2 h-2 transform translate-x-1 translate-y-1 bg-blue-500 rounded-full"
+                            <div class="bg-blue-500 rounded-full sm:w-3 sm:h-3 w-2 h-2 sm:translate-x-1 sm:translate-y-1 translate-x-1 translate-y-1"
                                 :class="{ 'bg-blue-600': isDragging }"></div>
                         </div>
                     </div>

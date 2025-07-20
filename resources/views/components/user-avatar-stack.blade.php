@@ -5,6 +5,7 @@
     'showCount' => true,
     'showTooltip' => true,
     'editableKey',
+    'canEdit' => false,
 ])
 
 @php
@@ -75,10 +76,10 @@
                     {{ strtoupper(substr($userName, 0, 1)) }}
                 </div>
             @endif
-            @if($showTooltip)
+            @if ($showTooltip)
                 <!-- CSS-only tooltip -->
                 <div
-                    class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:bg-gray-700">
+                    class="absolute z-50 px-2 py-1 mb-2 text-xs text-white transition-opacity duration-200 transform -translate-x-1/2 bg-gray-900 rounded shadow-lg opacity-0 pointer-events-none bottom-full left-1/2 whitespace-nowrap group-hover:opacity-100 dark:bg-gray-700">
                     {{ $userName }}
                 </div>
             @endif
@@ -87,19 +88,19 @@
 
     @if ($showCount)
         <div class="{{ $offsetClasses[$size] ?? '' }} group relative"
-            wire:click="$dispatch('open-members-modal',{roleable: '{{ $editableKey }}' })">
+            @if ($canEdit) wire:click="$dispatch('open-members-modal',{roleable: '{{ $editableKey }}' })" @endif>
             <div
                 class="{{ $sizeClasses[$size] ?? '' }} {{ $borderClasses[$size] ?? '' }} flex cursor-pointer items-center justify-center rounded-full border-white bg-gray-100 font-semibold text-gray-600 shadow-sm ring-2 ring-white transition-all duration-200 hover:z-10 hover:scale-110 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-gray-600">
                 @if ($remainingCount > 0)
                     +{{ $remainingCount }}
                 @else
-                    <x-heroicon-o-users class="h-3 w-3" />
+                    <x-heroicon-o-users class="w-3 h-3" />
                 @endif
             </div>
-            @if($showTooltip)
+            @if ($showTooltip)
                 <!-- CSS-only tooltip -->
                 <div
-                    class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:bg-gray-700">
+                    class="absolute z-50 px-2 py-1 mb-2 text-xs text-white transition-opacity duration-200 transform -translate-x-1/2 bg-gray-900 rounded shadow-lg opacity-0 pointer-events-none bottom-full left-1/2 whitespace-nowrap group-hover:opacity-100 dark:bg-gray-700">
                     @if ($remainingCount > 0)
                         {{ $remainingCount }} more user{{ $remainingCount > 1 ? 's' : '' }}
                     @else
