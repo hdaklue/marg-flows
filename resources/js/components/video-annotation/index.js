@@ -59,7 +59,6 @@ export default function videoAnnotation(userConfig = null) {
             helpTooltipDuration: 3000
         },
         callbacks: {
-            onComment: null,
             onPlay: null,
             onPause: null,
             onSeek: null,
@@ -76,7 +75,6 @@ export default function videoAnnotation(userConfig = null) {
         player: null,
         videoElement: null,
         comments: [], // Array of comment objects: {commentId, avatar, name, body, timestamp}
-        onComment: null, // Callback function (like $wire)
         currentTime: 0,
         duration: 0,
         progressBarWidth: 0,
@@ -106,7 +104,9 @@ export default function videoAnnotation(userConfig = null) {
         isTouchMove: false,
         touchTimeout: null,
         longPressTimeout: null,
+        longPressActive: false,
         hasUserInteracted: false,
+        progressBarLongPressTriggered: false,
         // Click handling
         clickTimeout: null,
         clickCount: 0,
@@ -132,6 +132,11 @@ export default function videoAnnotation(userConfig = null) {
         boundEndDrag: null,
         wasPlayingBeforeDrag: false,
 
+        // Getter for current video time - always references actual player time
+        get getCurrentTime() {
+            const currentTime = this.player ? this.player.currentTime() : 0;
+            return currentTime;
+        },
 
         init() {
             // Initialize comments from window global
@@ -318,6 +323,15 @@ export default function videoAnnotation(userConfig = null) {
                 });
             });
 
+            // Listen for external seek commands
+            this.$el.addEventListener('video-annotation:seek-comment', (event) => {
+                if (this.player && event.detail.timestamp) {
+                    this.hasUserInteracted = true;
+                    const seconds = event.detail.timestamp / 1000; // Convert from ms to seconds
+                    this.player.currentTime(seconds);
+                }
+            });
+
             // Throttled resize handler for better performance
             let resizeTimeout;
             window.addEventListener('resize', () => {
@@ -340,26 +354,10 @@ export default function videoAnnotation(userConfig = null) {
 
 
         loadComment(commentId) {
-            // Fire event with comment ID
-            this.$dispatch('loadComment', {
+            // Emit event for external handling (e.g., show comment details)
+            this.$dispatch('video-annotation:view-comment', {
                 commentId: commentId
             });
-
-            // Call the onComment callback if provided
-            if (this.onComment && typeof this.onComment === 'function') {
-                this.onComment('loadComment', {
-                    commentId: commentId
-                });
-            }
-        },
-
-        seekToComment(timestamp) {
-            if (this.player && timestamp >= 0) {
-                // Mark that user has interacted with the page
-                this.hasUserInteracted = true;
-                const seconds = timestamp / 1000;
-                this.player.currentTime(seconds);
-            }
         },
 
         getCommentPosition(timestamp) {
@@ -445,7 +443,7 @@ export default function videoAnnotation(userConfig = null) {
         handleProgressBarClick(event) {
             // Mark that user has interacted with the page
             this.hasUserInteracted = true;
-            
+
             // Hide context menu if open
             this.hideContextMenu();
 
@@ -497,28 +495,18 @@ export default function videoAnnotation(userConfig = null) {
             }
 
             // Double click - add comment at position
-
             const rect = event.currentTarget.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
             const percentage = clickX / rect.width;
             const targetTime = percentage * this.duration;
-            const currentTimeMs = Math.floor(targetTime * 1000);
 
-            console.log('Double click: Adding comment at', this.formatTime(targetTime), 'at', Math.round(percentage * 100) + '%', '(' + currentTimeMs + 'ms)');
 
-            // Fire event with calculated timeline position
-            this.$dispatch('addComment', {
-                timestamp: currentTimeMs,
-                currentTime: targetTime
+            // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+            this.$dispatch('video-annotation:add-comment', {
+                timestamp: targetTime,  // Where to add comment
+                currentTime: targetTime  // Same as timestamp for progress bar actions
             });
 
-            // Call the onComment callback if provided
-            if (this.onComment && typeof this.onComment === 'function') {
-                this.onComment('addComment', {
-                    timestamp: currentTimeMs,
-                    currentTime: targetTime
-                });
-            }
         },
 
         updateHoverPosition(event) {
@@ -582,7 +570,7 @@ export default function videoAnnotation(userConfig = null) {
 
             // Remember if video was playing before drag
             this.wasPlayingBeforeDrag = this.isPlaying;
-            
+
             this.isDragging = true;
             this.showSeekCircle = true;
             this.showTooltip = true;
@@ -619,22 +607,21 @@ export default function videoAnnotation(userConfig = null) {
 
         // Simple touch start for circle
         startCircleDrag(event) {
-            console.log('Circle touch start');
-            
+
             // Remember if video was playing before drag
             this.wasPlayingBeforeDrag = this.isPlaying;
-            
+
             this.isDragging = true;
             this.showSeekCircle = true;
             this.showTooltip = true;
             this.showProgressBar = true; // Force show progress bar while dragging
-            
+
             // Clear any auto-hide timeout while dragging
             if (this.progressBarTimeout) {
                 clearTimeout(this.progressBarTimeout);
                 this.progressBarTimeout = null;
             }
-            
+
             const progressBar = this.$refs.progressBar;
             if (!progressBar) return;
 
@@ -660,7 +647,6 @@ export default function videoAnnotation(userConfig = null) {
 
             newX = Math.max(0, Math.min(newX, rect.width));
 
-            console.log('Circle touch move - X:', newX);
 
             this.seekCircleX = newX;
             this.hoverX = newX;
@@ -672,22 +658,21 @@ export default function videoAnnotation(userConfig = null) {
         endTouchDrag(event) {
             if (!this.isDragging) return;
 
-            console.log('Circle touch end, seeking to:', this.dragCurrentTime);
-            
+
             // Seek to the dragged position
             if (this.player && this.player.readyState() >= 1) {
                 // Validate that dragCurrentTime is finite and within bounds
                 const targetTime = Math.max(0, Math.min(this.dragCurrentTime || 0, this.duration || 0));
-                
+
                 if (isFinite(targetTime)) {
                     this.player.currentTime(targetTime);
                     this.currentTime = targetTime;
                     this.forceUpdateSeekCirclePosition();
-                    
+
                     // Resume playing if video was playing before drag
                     if (this.wasPlayingBeforeDrag) {
                         this.player.play().catch(e => {
-                            console.log('Resume play failed:', e);
+                            // Silently handle play failure
                         });
                     }
                 } else {
@@ -736,7 +721,6 @@ export default function videoAnnotation(userConfig = null) {
         endDrag(event) {
             if (!this.isDragging) return;
 
-            console.log('Mouse drag ended, seeking to:', this.dragCurrentTime);
 
             // Seek to the dragged position
             if (this.player && this.player.readyState() >= 1) {
@@ -745,11 +729,11 @@ export default function videoAnnotation(userConfig = null) {
                 this.currentTime = this.dragCurrentTime;
                 // Update circle position to match the seek
                 this.forceUpdateSeekCirclePosition();
-                
+
                 // Resume playing if video was playing before drag
                 if (this.wasPlayingBeforeDrag) {
                     this.player.play().catch(e => {
-                        console.log('Resume play failed:', e);
+                        // Silently handle play failure
                     });
                 }
             } else {
@@ -759,11 +743,11 @@ export default function videoAnnotation(userConfig = null) {
                         this.player.currentTime(this.dragCurrentTime);
                         this.currentTime = this.dragCurrentTime;
                         this.forceUpdateSeekCirclePosition();
-                        
+
                         // Resume playing if video was playing before drag
                         if (this.wasPlayingBeforeDrag) {
                             this.player.play().catch(e => {
-                                console.log('Resume play failed:', e);
+                                // Silently handle play failure
                             });
                         }
                     }
@@ -805,21 +789,13 @@ export default function videoAnnotation(userConfig = null) {
             const rect = progressBar.getBoundingClientRect();
             const percentage = this.hoverX / rect.width;
             const targetTime = percentage * this.duration;
-            const currentTimeMs = Math.floor(targetTime * 1000);
 
-            // Fire event with calculated timeline position
-            this.$dispatch('addComment', {
-                timestamp: currentTimeMs,
-                currentTime: targetTime
+            // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+            this.$dispatch('video-annotation:add-comment', {
+                timestamp: targetTime,  // Where to add comment
+                currentTime: targetTime  // Same as timestamp for progress bar actions
             });
 
-            // Call the onComment callback if provided
-            if (this.onComment && typeof this.onComment === 'function') {
-                this.onComment('addComment', {
-                    timestamp: currentTimeMs,
-                    currentTime: targetTime
-                });
-            }
         },
 
         destroy() {
@@ -841,7 +817,7 @@ export default function videoAnnotation(userConfig = null) {
         // Custom control methods
         togglePlay() {
             if (!this.player) return;
-            
+
             // Mark that user has interacted with the page
             this.hasUserInteracted = true;
 
@@ -892,7 +868,7 @@ export default function videoAnnotation(userConfig = null) {
                 this.player.ready(() => {
                     this.player.play().catch(e => {
                         // Handle autoplay restrictions silently
-                        console.log('Autoplay prevented:', e);
+                        // Silently handle autoplay prevention
                     });
                 });
                 return;
@@ -934,7 +910,7 @@ export default function videoAnnotation(userConfig = null) {
                 this.player.currentTime(currentTime);
                 if (wasPlaying) {
                     this.player.play().catch(e => {
-                        console.log('Resume play failed:', e);
+                        // Silently handle play failure
                     });
                 }
 
@@ -968,31 +944,22 @@ export default function videoAnnotation(userConfig = null) {
             // Start long press timer for mobile video comment
             if (this.isTouchDevice() && this.config.annotations.enableVideoComments) {
                 this.longPressTimeout = setTimeout(() => {
-                    if (!this.isTouchMove && this.player) {
+                    if (!this.isTouchMove && this.player && !this.progressBarLongPressTriggered) {
                         // Pause video and add comment at current time
                         this.player.pause();
-                        const currentTimeMs = Math.floor(this.player.currentTime() * 1000);
 
-                        console.log('Video long press: Adding comment at', this.formatTime(this.player.currentTime()));
 
                         // Add haptic feedback if enabled
                         if (this.config.annotations.enableHapticFeedback) {
                             this.triggerHapticFeedback(100);
                         }
 
-                        // Fire event with current timeline position
-                        this.$dispatch('addComment', {
-                            timestamp: currentTimeMs,
+                        // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+                        this.$dispatch('video-annotation:add-comment', {
+                            timestamp: this.player.currentTime(),
                             currentTime: this.player.currentTime()
                         });
 
-                        // Call the onComment callback if provided
-                        if (this.onComment && typeof this.onComment === 'function') {
-                            this.onComment('addComment', {
-                                timestamp: currentTimeMs,
-                                currentTime: this.player.currentTime()
-                            });
-                        }
                     }
                 }, this.config.timing.longPressDuration);
             }
@@ -1021,7 +988,7 @@ export default function videoAnnotation(userConfig = null) {
         },
 
         handleTouchMoveDetection(event) {
-            if (this.touchStartPos.x && this.touchStartPos.y) {
+            if (this.touchStartPos && event.touches && event.touches[0]) {
                 const currentTouch = event.touches[0];
                 const deltaX = Math.abs(currentTouch.clientX - this.touchStartPos.x);
                 const deltaY = Math.abs(currentTouch.clientY - this.touchStartPos.y);
@@ -1049,6 +1016,9 @@ export default function videoAnnotation(userConfig = null) {
                 this.longPressTimeout = null;
             }
 
+            // Reset progress bar long press flag
+            this.progressBarLongPressTriggered = false;
+
             // Remove touch move listener
             document.removeEventListener('touchmove', this.handleTouchMoveDetection);
 
@@ -1067,12 +1037,10 @@ export default function videoAnnotation(userConfig = null) {
             const target = event.target;
             const circleElement = target.closest('.seek-circle, [data-seek-circle]');
             if (circleElement || this.isDragging) {
-                console.log('Progress bar touch ignored - circle being touched');
                 return; // Let circle handle its own touch
             }
 
-            console.log('Progress bar touch start');
-            
+
             // Show circle on touch for mobile progress bar area
             this.showSeekCircle = true;
             this.showTooltip = true;
@@ -1095,33 +1063,26 @@ export default function videoAnnotation(userConfig = null) {
 
             // Start long press timer for mobile add comment (only if annotations enabled)
             if (this.config.annotations.enableProgressBarComments) {
+                this.longPressActive = true;
                 this.longPressTimeout = setTimeout(() => {
-                    if (!this.isTouchMove && !this.isDragging) {
+                    if (!this.isTouchMove && !this.isDragging && this.longPressActive) {
                         // Long press detected - add comment
                         const percentage = this.hoverX / rect.width;
                         const targetTime = percentage * this.duration;
-                        const currentTimeMs = Math.floor(targetTime * 1000);
-
-                        console.log('Mobile long press: Adding comment at', this.formatTime(targetTime), 'at', Math.round(percentage * 100) + '%', '(' + currentTimeMs + 'ms)');
 
                         // Add haptic feedback if available (cross-browser)
                         if (this.config.annotations.enableHapticFeedback) {
                             this.triggerHapticFeedback(100);
                         }
 
-                        // Fire event with calculated timeline position
-                        this.$dispatch('addComment', {
-                            timestamp: currentTimeMs,
-                            currentTime: targetTime
+                        // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+                        this.$dispatch('video-annotation:add-comment', {
+                            timestamp: targetTime,  // Where to add comment
+                            currentTime: targetTime  // Same as timestamp for progress bar actions
                         });
 
-                        // Call the onComment callback if provided
-                        if (this.onComment && typeof this.onComment === 'function') {
-                            this.onComment('addComment', {
-                                timestamp: currentTimeMs,
-                                currentTime: targetTime
-                            });
-                        }
+                        // Prevent video long press from also firing
+                        this.progressBarLongPressTriggered = true;
                     }
                 }, 500); // 500ms long press
             }
@@ -1155,8 +1116,8 @@ export default function videoAnnotation(userConfig = null) {
 
             const touchEndTime = Date.now();
             const touchDuration = touchEndTime - this.touchStartTime;
-
             // Cancel long press timeout if still active
+            this.longPressActive = false;
             if (this.longPressTimeout) {
                 clearTimeout(this.longPressTimeout);
                 this.longPressTimeout = null;
@@ -1170,7 +1131,6 @@ export default function videoAnnotation(userConfig = null) {
                 const percentage = clickX / rect.width;
                 const newTime = percentage * this.duration;
 
-                console.log('Progress bar tap seek to:', newTime);
                 if (this.player) {
                     this.player.currentTime(newTime);
                 }
@@ -1203,7 +1163,7 @@ export default function videoAnnotation(userConfig = null) {
 
             // Only handle tap if it was a short touch
             if (touchDuration < 300 && !this.isTouchMove) {
-                this.seekToComment(comment.timestamp);
+                this.$dispatch('video-annotation:seek-comment', { commentId: comment.commentId, timestamp: comment.timestamp });
             }
         },
 
@@ -1219,14 +1179,14 @@ export default function videoAnnotation(userConfig = null) {
                 if (this.activeCommentId === comment.commentId) {
                     // If already active, hide it and seek to comment
                     this.activeCommentId = null;
-                    this.seekToComment(comment.timestamp);
+                    this.$dispatch('video-annotation:seek-comment', { commentId: comment.commentId, timestamp: comment.timestamp });
                 } else {
                     // Show this comment's tooltip
                     this.activeCommentId = comment.commentId;
                 }
             } else {
                 // On desktop, just seek to comment
-                this.seekToComment(comment.timestamp);
+                this.$dispatch('video-annotation:seek-comment', { commentId: comment.commentId, timestamp: comment.timestamp });
             }
         },
 
@@ -1251,7 +1211,7 @@ export default function videoAnnotation(userConfig = null) {
                 if (!this.hasUserInteracted) {
                     return;
                 }
-                
+
                 // Standard vibration API
                 if (navigator.vibrate) {
                     navigator.vibrate(duration);
@@ -1365,7 +1325,6 @@ export default function videoAnnotation(userConfig = null) {
         // Right-click context menu handlers
         handleVideoRightClick(event) {
             if (!this.isTouchDevice() && this.player) {
-
                 // Only show custom context menu if annotations are enabled
                 if (this.config.annotations.enableContextMenu) {
                     // Pause video and capture time
@@ -1377,30 +1336,18 @@ export default function videoAnnotation(userConfig = null) {
                     this.contextMenuY = event.clientY;
                     this.showContextMenu = true;
 
-                    console.log('Right-click: Context menu at', this.formatTime(this.contextMenuTime), this.contextMenuX, this.contextMenuY);
                 }
             }
         },
 
 
         addCommentFromContextMenu() {
-            const currentTimeMs = Math.floor(this.contextMenuTime * 1000);
-
-            console.log('Context menu: Adding comment at', this.formatTime(this.contextMenuTime));
-
-            // Fire event with calculated timeline position
-            this.$dispatch('addComment', {
-                timestamp: currentTimeMs,
+            // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+            this.$dispatch('video-annotation:add-comment', {
+                timestamp: this.contextMenuTime,
                 currentTime: this.contextMenuTime
             });
 
-            // Call the onComment callback if provided
-            if (this.onComment && typeof this.onComment === 'function') {
-                this.onComment('addComment', {
-                    timestamp: currentTimeMs,
-                    currentTime: this.contextMenuTime
-                });
-            }
 
             this.hideContextMenu();
         },
@@ -1412,10 +1359,9 @@ export default function videoAnnotation(userConfig = null) {
         // Helper method for dev tools testing - force end any stuck drag
         forceEndDrag() {
             if (this.isDragging) {
-                console.log('Manually forcing drag end');
-                this.endTouchDrag({ preventDefault: () => {}, stopPropagation: () => {} });
+                this.endTouchDrag({ preventDefault: () => { }, stopPropagation: () => { } });
             }
-        },
+        }
 
-    }
+    };
 }

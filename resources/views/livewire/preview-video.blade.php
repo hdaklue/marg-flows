@@ -12,25 +12,22 @@
     @endif
 
     <div class="" x-data="{
-        comments: @js($comments),
-        handleComment(action, data) {
-            if (action === 'addComment') {
-                @this.call('addComment', data.timestamp);
-            } else if (action === 'loadComment') {
-                @this.call('loadComment', data.commentId);
-            }
-        }
-    }" @comments-updated.window="comments = $event.detail.comments"
+        comments: @js($comments)
+    }"
+        @video-annotation:add-comment.window="console.log('Add comment:', $event.detail); @this.call('addComment', $event.detail.timestamp)"
+        @video-annotation:view-comment="console.log('View comment:', $event.detail); @this.call('viewComment', $event.detail.commentId)"
+        @video-annotation:seek-comment="console.log('Seek comment:', $event.detail)"
+        @comments-updated.window="comments = $event.detail.comments"
         @comment-loaded.window="console.log('Comment loaded:', $event.detail.comment)">
 
 
         <!-- Video Annotation Component -->
-        <x-video-annotation :video-src="$videoUrl" :quality-sources="$qualitySources" :comments="$comments" :config="$config"
-            x-on:add-comment="handleComment('addComment', $event.detail)"
-            x-on:load-comment="handleComment('loadComment', $event.detail)" />
+        <div wire:ignore>
+            <x-video-annotation :video-src="$videoUrl" :quality-sources="$qualitySources" :comments="$comments" :config="$config" />
+        </div>
 
         <!-- Comments Summary -->
-        <div class="p-6 mt-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+        {{-- <div class="p-6 mt-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
             <h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Comments Summary (<span x-text="comments.length"></span>)
             </h2>
@@ -51,10 +48,10 @@
                     </div>
                 </template>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Instructions -->
-        <div class="p-6 mt-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+        {{-- <div class="p-6 mt-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
             <h3 class="mb-3 text-lg font-medium text-blue-900 dark:text-blue-100">How to use:</h3>
             <ul class="space-y-2 text-blue-800 dark:text-blue-200">
                 <li class="flex items-start space-x-2">
@@ -74,7 +71,7 @@
                     <span>Use the video quality selector in the bottom-right of the video player</span>
                 </li>
             </ul>
-        </div>
+        </div> --}}
     </div>
 
     <script>

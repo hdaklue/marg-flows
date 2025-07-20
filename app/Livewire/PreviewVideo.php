@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\ValueObjects\CommentTime;
 use Livewire\Component;
 
 final class PreviewVideo extends Component
@@ -112,6 +113,8 @@ final class PreviewVideo extends Component
 
     public function addComment($timestamp)
     {
+
+        $time = CommentTime::fromSeconds($timestamp);
         // Validate timestamp
         if (! is_numeric($timestamp) || $timestamp < 0) {
             session()->flash('error', 'Invalid timestamp provided');
@@ -132,7 +135,7 @@ final class PreviewVideo extends Component
         $this->dispatch('commentsUpdated', comments: $this->comments);
 
         // You can also make API calls here
-        session()->flash('message', 'Comment added successfully!');
+        session()->flash('message', 'Comment added successfully!' . $time->display());
     }
 
     public function loadComment($commentId)

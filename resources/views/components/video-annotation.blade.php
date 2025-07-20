@@ -1,11 +1,11 @@
-@props(['videoSrc' => '', 'comments' => '[]', 'onComment' => null, 'qualitySources' => null, 'config' => null])
+@props(['videoSrc' => '', 'comments' => '[]', 'qualitySources' => null, 'config' => null])
 
 <!-- Load quality selector CSS and JS -->
 {{-- <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
 <script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script> --}}
 
 <div x-data="videoAnnotation(@if ($config) @js($config) @else null @endif)" class="relative w-full overflow-visible bg-black rounded-lg" @destroy.window="destroy()"
-    @contextmenu="handleVideoRightClick($event)">
+    @contextmenu.prevent="handleVideoRightClick($event)">
 
     <!-- Context menu (only if annotations enabled) -->
     <div x-cloak x-show="showContextMenu && config.annotations.enableContextMenu"
@@ -74,7 +74,7 @@
                     <template x-for="(comment, index) in comments" :key="`comment-${index}-${comment.commentId}`">
                         <div class="absolute bottom-0 transform -translate-x-1/2 cursor-pointer comment-bubble"
                             :style="`left: ${getCommentPosition(comment.timestamp)}px`"
-                            @click.stop="seekToComment(comment.timestamp)"
+                            @click.stop="$dispatch('video-annotation:seek-comment', { commentId: comment.commentId, timestamp: comment.timestamp })"
                             @touchstart.stop="handleCommentTouchStart($event, comment)"
                             @touchend.stop="handleCommentTouchEnd($event, comment)">
                             <!-- Comment Bubble -->
@@ -124,13 +124,13 @@
             <div @mouseenter="onProgressBarMouseEnter($event)" @mouseleave="onProgressBarMouseLeave()"
                 @mousemove="updateHoverPosition($event)" class="relative w-full py-3 -my-3">
                 <!-- Actual Progress Bar -->
-                <div x-ref="progressBar" @click="handleProgressBarClick($event)"
-                    @dblclick="handleProgressBarDoubleClick($event)"
+                <div x-ref="progressBar" @click.stop="handleProgressBarClick($event)"
+                    @dblclick.stop="handleProgressBarDoubleClick($event)"
                     @touchstart.prevent="onProgressBarTouchStart($event)" {{-- @touchmove="onProgressBarTouchMove($event)"  --}}
                     @touchend.prevent="onProgressBarTouchEnd($event)"
-                    class="relative w-full overflow-visible border rounded-full cursor-pointer border-blue-400/30 bg-gray-500/50 backdrop-blur-sm sm:h-3 h-2">
+                    class="relative w-full h-2 overflow-visible border rounded-full cursor-pointer border-sky-400/30 bg-gray-500/50 backdrop-blur-sm sm:h-3">
                     <!-- Current Progress -->
-                    <div class="h-full transition-all duration-100 rounded-l-full progress-fill bg-gradient-to-r from-blue-300 to-blue-600"
+                    <div class="h-full transition-all duration-100 rounded-l-full progress-fill bg-gradient-to-r from-sky-300 to-sky-600"
                         :style="`width: ${duration > 0 ? (currentTime / duration) * 100 : 0}%`"
                         :class="{ 'rounded-r-full': duration > 0 && (currentTime / duration) * 100 >= 100 }"></div>
 
@@ -139,13 +139,14 @@
                         class="absolute transition-all duration-200 transform -translate-x-1/2 -translate-y-1/2 top-1/2"
                         :style="`left: ${seekCircleX}px`" :class="{ 'scale-125': isDragging }"
                         @mousedown.stop="startDrag($event)" @touchstart.stop="startCircleDrag($event)"
-                        @touchmove.stop="handleTouchDragMove($event)" @touchend.stop="endTouchDrag($event)" @click.stop @dblclick.stop>
+                        @touchmove.stop="handleTouchDragMove($event)" @touchend.stop="endTouchDrag($event)" @click.stop
+                        @dblclick.stop>
                         <!-- Outer circle with glow -->
-                        <div class="bg-white rounded-full shadow-lg ring-2 ring-blue-500/50 sm:w-5 sm:h-5 w-4 h-4"
-                            :class="{ 'ring-4 ring-blue-500/70 shadow-blue-500/30': isDragging }">
+                        <div class="w-4 h-4 bg-white rounded-full shadow-lg ring-2 ring-sky-500/50 sm:h-5 sm:w-5"
+                            :class="{ 'ring-4 ring-sky-500/70 shadow-sky-500/30': isDragging }">
                             <!-- Inner circle -->
-                            <div class="bg-blue-500 rounded-full sm:w-3 sm:h-3 w-2 h-2 sm:translate-x-1 sm:translate-y-1 translate-x-1 translate-y-1"
-                                :class="{ 'bg-blue-600': isDragging }"></div>
+                            <div class="w-2 h-2 translate-x-1 translate-y-1 rounded-full bg-sky-500 sm:h-3 sm:w-3 sm:translate-x-1 sm:translate-y-1"
+                                :class="{ 'bg-sky-600': isDragging }"></div>
                         </div>
                     </div>
 
@@ -187,7 +188,7 @@
                 <button @click="togglePlay()" @touchstart="$event.currentTarget.style.transform = 'scale(0.95)'"
                     @touchend="$event.currentTarget.style.transform = 'scale(1)'"
                     @touchcancel="$event.currentTarget.style.transform = 'scale(1)'"
-                    class="flex items-center justify-center w-10 h-10 text-white transition-all duration-200 bg-blue-600 rounded-full shadow-md video-control-btn hover:scale-105 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95 dark:focus:ring-offset-gray-800">
+                    class="flex items-center justify-center w-10 h-10 text-white transition-all duration-200 rounded-full shadow-md video-control-btn bg-sky-600 hover:scale-105 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 active:scale-95 dark:focus:ring-offset-gray-800">
                     <!-- Play Icon -->
                     <svg x-show="!isPlaying" x-cloak class="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z" />
@@ -253,9 +254,8 @@
                             </svg>
                         </button>
 
-                        <!-- Volume Percentage Display -->
-                        <div x-show="!showVolumeSlider"
-                            class="text-xs text-center text-gray-600 min-w-8 dark:text-gray-300">
+                        <!-- Volume Percentage Display (always visible) -->
+                        <div class="text-xs text-center text-gray-600 min-w-8 dark:text-gray-300">
                             <span x-text="Math.round(volume * 100) + '%'"></span>
                         </div>
 
@@ -321,12 +321,12 @@
                                 <button @click="changeResolution(source)"
                                     class="flex items-center justify-between w-full px-3 py-2 text-sm transition-colors duration-200 rounded-md"
                                     :class="currentResolutionSrc === source.src ?
-                                        'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' :
+                                        'bg-sky-50 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300' :
                                         'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'">
                                     <span x-text="source.label || source.quality || 'Auto'"></span>
                                     <!-- Check Icon for Selected -->
                                     <svg x-show="currentResolutionSrc === source.src" x-cloak
-                                        class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor"
+                                        class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="currentColor"
                                         viewBox="0 0 24 24">
                                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
@@ -378,7 +378,7 @@
                                 <!-- Toggle Switch -->
                                 <div class="relative">
                                     <div class="w-10 h-5 transition-colors duration-200 rounded-full"
-                                        :class="showCommentsOnProgressBar ? 'bg-blue-600 dark:bg-blue-500' :
+                                        :class="showCommentsOnProgressBar ? 'bg-sky-600 dark:bg-sky-500' :
                                             'bg-gray-300 dark:bg-gray-600'">
                                         <div class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200"
                                             :class="showCommentsOnProgressBar ? 'translate-x-5' : ''">
@@ -457,7 +457,7 @@
                     <button @click="changeResolution(source)"
                         class="flex items-center justify-between w-full p-4 text-left transition-colors duration-200 rounded-xl"
                         :class="currentResolutionSrc === source.src ?
-                            'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/30 dark:ring-blue-400' :
+                            'bg-sky-50 ring-2 ring-sky-500 dark:bg-sky-900/30 dark:ring-sky-400' :
                             'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600'">
                         <div>
                             <div class="text-base font-medium text-gray-900 dark:text-white"
@@ -466,7 +466,7 @@
                         </div>
                         <!-- Check Icon for Selected -->
                         <svg x-show="currentResolutionSrc === source.src" x-cloak
-                            class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                            class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </button>
@@ -505,9 +505,9 @@
                 <button x-show="config.features.enableAnnotations" @click="toggleCommentsOnProgressBar()"
                     class="flex items-center justify-between w-full p-4 text-left transition-colors duration-200 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
                     <div class="flex items-center gap-4">
-                        <div class="p-2 bg-blue-100 rounded-lg dark:bg-blue-900">
-                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-2 rounded-lg bg-sky-100 dark:bg-sky-900">
+                            <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
@@ -522,7 +522,7 @@
                     <!-- Toggle Switch -->
                     <div class="relative">
                         <div class="h-6 transition-colors duration-200 bg-gray-300 rounded-full w-11 dark:bg-gray-600"
-                            :class="{ 'bg-blue-600 dark:bg-blue-500': showCommentsOnProgressBar }">
+                            :class="{ 'bg-sky-600 dark:bg-sky-500': showCommentsOnProgressBar }">
                             <div class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200"
                                 :class="{ 'translate-x-5': showCommentsOnProgressBar }">
                             </div>
@@ -601,24 +601,24 @@
                 <button @click="toggleMute()"
                     class="flex items-center justify-between w-full p-4 text-left transition-colors duration-200 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
                     <div class="flex items-center gap-4">
-                        <div class="p-3 bg-blue-100 rounded-lg dark:bg-blue-900">
+                        <div class="p-3 rounded-lg bg-sky-100 dark:bg-sky-900">
                             <!-- Volume Up Icon -->
                             <svg x-show="!isMuted && volume > 0.5" x-cloak
-                                class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                                class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 15v-2a2 2 0 012-2h1l4-4v12l-4-4H7a2 2 0 01-2-2z" />
                             </svg>
                             <!-- Volume Down Icon -->
                             <svg x-show="!isMuted && volume <= 0.5 && volume > 0" x-cloak
-                                class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                                class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15.536 8.464a5 5 0 010 7.072M5 15v-2a2 2 0 012-2h1l4-4v12l-4-4H7a2 2 0 01-2-2z" />
                             </svg>
                             <!-- Volume Muted Icon -->
                             <svg x-show="isMuted || volume === 0" x-cloak
-                                class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                                class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
@@ -654,30 +654,6 @@
         </div>
     </div>
 
-    <!-- Comments List (Optional - shows when comments exist) -->
-    <div x-show="comments.length > 0" x-cloak class="p-4 mt-4 rounded-lg bg-gray-50 dark:bg-gray-900">
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Comments</h3>
-        </div>
-        <div class="space-y-2 overflow-y-auto max-h-32">
-            <template x-for="(comment, index) in comments" :key="`list-comment-${index}-${comment.commentId}`">
-                <div class="flex items-start p-2 space-x-3 transition-colors duration-200 bg-white rounded-lg cursor-pointer hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700"
-                    @click="seekToComment(comment.timestamp); loadComment(comment.commentId)">
-                    <img :src="comment.avatar" :alt="comment.name"
-                        class="flex-shrink-0 object-cover w-8 h-8 rounded-full">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-sm font-medium text-gray-900 dark:text-white"
-                                x-text="comment.name"></span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400"
-                                x-text="formatTime(comment.timestamp / 1000)"></span>
-                        </div>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300" x-text="comment.body"></p>
-                    </div>
-                </div>
-            </template>
-        </div>
-    </div>
 </div>
 
 <style>
