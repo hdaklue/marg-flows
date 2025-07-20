@@ -106,6 +106,7 @@ export default function videoAnnotation(userConfig = null) {
         isTouchMove: false,
         touchTimeout: null,
         longPressTimeout: null,
+        hasUserInteracted: false,
         // Click handling
         clickTimeout: null,
         clickCount: 0,
@@ -354,6 +355,8 @@ export default function videoAnnotation(userConfig = null) {
 
         seekToComment(timestamp) {
             if (this.player && timestamp >= 0) {
+                // Mark that user has interacted with the page
+                this.hasUserInteracted = true;
                 const seconds = timestamp / 1000;
                 this.player.currentTime(seconds);
             }
@@ -440,10 +443,9 @@ export default function videoAnnotation(userConfig = null) {
         },
 
         handleProgressBarClick(event) {
-            // Prevent video click handler from firing
-            event.preventDefault();
-            event.stopPropagation();
-
+            // Mark that user has interacted with the page
+            this.hasUserInteracted = true;
+            
             // Hide context menu if open
             this.hideContextMenu();
 
@@ -495,8 +497,6 @@ export default function videoAnnotation(userConfig = null) {
             }
 
             // Double click - add comment at position
-            event.preventDefault();
-            event.stopPropagation(); // Prevent video click handler from firing
 
             const rect = event.currentTarget.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
@@ -615,15 +615,11 @@ export default function videoAnnotation(userConfig = null) {
             // Add global mouse move and up listeners
             document.addEventListener('mousemove', this.boundHandleDragMove);
             document.addEventListener('mouseup', this.boundEndDrag);
-
-            event.preventDefault();
         },
 
         // Simple touch start for circle
         startCircleDrag(event) {
             console.log('Circle touch start');
-            event.preventDefault();
-            event.stopPropagation();
             
             // Remember if video was playing before drag
             this.wasPlayingBeforeDrag = this.isPlaying;
@@ -655,9 +651,6 @@ export default function videoAnnotation(userConfig = null) {
         handleTouchDragMove(event) {
             if (!this.isDragging) return;
 
-            event.preventDefault();
-            event.stopPropagation();
-
             const progressBar = this.$refs.progressBar;
             if (!progressBar) return;
 
@@ -672,29 +665,33 @@ export default function videoAnnotation(userConfig = null) {
             this.seekCircleX = newX;
             this.hoverX = newX;
             const percentage = newX / rect.width;
-            this.dragCurrentTime = percentage * this.duration;
+            this.dragCurrentTime = percentage * (this.duration || 0);
         },
 
         // Simple touch end for circle
         endTouchDrag(event) {
             if (!this.isDragging) return;
 
-            event.preventDefault();
-            event.stopPropagation();
-
             console.log('Circle touch end, seeking to:', this.dragCurrentTime);
             
             // Seek to the dragged position
-            if (this.player) {
-                this.player.currentTime(this.dragCurrentTime);
-                this.currentTime = this.dragCurrentTime;
-                this.forceUpdateSeekCirclePosition();
+            if (this.player && this.player.readyState() >= 1) {
+                // Validate that dragCurrentTime is finite and within bounds
+                const targetTime = Math.max(0, Math.min(this.dragCurrentTime || 0, this.duration || 0));
                 
-                // Resume playing if video was playing before drag
-                if (this.wasPlayingBeforeDrag) {
-                    this.player.play().catch(e => {
-                        console.log('Resume play failed:', e);
-                    });
+                if (isFinite(targetTime)) {
+                    this.player.currentTime(targetTime);
+                    this.currentTime = targetTime;
+                    this.forceUpdateSeekCirclePosition();
+                    
+                    // Resume playing if video was playing before drag
+                    if (this.wasPlayingBeforeDrag) {
+                        this.player.play().catch(e => {
+                            console.log('Resume play failed:', e);
+                        });
+                    }
+                } else {
+                    console.warn('Invalid time value:', this.dragCurrentTime);
                 }
             }
 
@@ -734,8 +731,6 @@ export default function videoAnnotation(userConfig = null) {
             this.hoverX = newX; // Also update hover position for tooltip
             const percentage = newX / rect.width;
             this.dragCurrentTime = percentage * this.duration;
-
-            event.preventDefault();
         },
 
         endDrag(event) {
@@ -802,8 +797,6 @@ export default function videoAnnotation(userConfig = null) {
                     this.showProgressBar = false;
                 }, this.config.timing.progressBarAutoHideDelay);
             }
-
-            event.preventDefault();
         },
 
         addCommentAtPosition() {
@@ -848,6 +841,9 @@ export default function videoAnnotation(userConfig = null) {
         // Custom control methods
         togglePlay() {
             if (!this.player) return;
+            
+            // Mark that user has interacted with the page
+            this.hasUserInteracted = true;
 
             if (this.isPlaying) {
                 this.player.pause();
@@ -1058,8 +1054,6 @@ export default function videoAnnotation(userConfig = null) {
 
             // Only handle tap if it was a short touch and minimal movement
             if (touchDuration < 300 && !this.isTouchMove) {
-                // Prevent default click event from also firing
-                event.preventDefault();
                 this.handleVideoClick();
             }
 
@@ -1131,9 +1125,6 @@ export default function videoAnnotation(userConfig = null) {
                     }
                 }, 500); // 500ms long press
             }
-
-            event.preventDefault(); // Prevent scrolling
-            event.stopPropagation(); // Prevent video click handler
         },
 
         onProgressBarTouchMove(event) {
@@ -1143,8 +1134,6 @@ export default function videoAnnotation(userConfig = null) {
             }
 
             this.isTouchMove = true;
-            event.preventDefault(); // Prevent scrolling
-            event.stopPropagation(); // Prevent video click handler
 
             // Cancel long press since user is moving
             if (this.longPressTimeout) {
@@ -1166,9 +1155,6 @@ export default function videoAnnotation(userConfig = null) {
 
             const touchEndTime = Date.now();
             const touchDuration = touchEndTime - this.touchStartTime;
-
-            event.preventDefault();
-            event.stopPropagation(); // Prevent video click handler
 
             // Cancel long press timeout if still active
             if (this.longPressTimeout) {
@@ -1217,15 +1203,12 @@ export default function videoAnnotation(userConfig = null) {
 
             // Only handle tap if it was a short touch
             if (touchDuration < 300 && !this.isTouchMove) {
-                event.preventDefault();
                 this.seekToComment(comment.timestamp);
             }
         },
 
         // Mobile comment interaction handlers
         handleCommentClick(event, comment) {
-            event.preventDefault();
-            event.stopPropagation();
 
             // Always load the comment
             this.loadComment(comment.commentId);
@@ -1264,6 +1247,11 @@ export default function videoAnnotation(userConfig = null) {
         // Cross-browser haptic feedback
         triggerHapticFeedback(duration = 50) {
             try {
+                // Check if user has interacted with the page first
+                if (!this.hasUserInteracted) {
+                    return;
+                }
+                
                 // Standard vibration API
                 if (navigator.vibrate) {
                     navigator.vibrate(duration);
@@ -1377,8 +1365,6 @@ export default function videoAnnotation(userConfig = null) {
         // Right-click context menu handlers
         handleVideoRightClick(event) {
             if (!this.isTouchDevice() && this.player) {
-                // Always prevent default browser context menu
-                event.preventDefault();
 
                 // Only show custom context menu if annotations are enabled
                 if (this.config.annotations.enableContextMenu) {
