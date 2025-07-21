@@ -57,7 +57,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
         isSelectingRegion: false,
         selectedRegion: null,
         activeRegion: null,
-        regionLoop: true, // Enable region looping by default
+        regionLoop: false, // Enable region looping by default
         hiddenRegions: new Set(), // Track individually hidden regions
 
         // Comments and annotations
@@ -169,7 +169,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 this.isLoaded = true;
                 this.duration = this.wavesurfer.getDuration();
                 this.renderCommentRegions();
-                
+
                 // Ensure all existing regions have handlers after a short delay
                 setTimeout(() => {
                     this.ensureAllRegionsHaveHandlers();
@@ -226,12 +226,12 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             // Region playback and viewport events with proper scoping
             {
                 let activeRegions = new Set();
-                
+
                 this.regionsPlugin.on('region-in', (region) => {
                     if (activeRegions.has(region.id)) return; // Prevent duplicate handling
                     activeRegions.add(region.id);
                     this.handleRegionEnterViewport(region);
-                    
+
                     // Set as active region for potential looping
                     if (region.id && region.id.startsWith('comment-')) {
                         this.activeRegion = region;
@@ -242,7 +242,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     if (!activeRegions.has(region.id)) return; // Prevent duplicate handling
                     activeRegions.delete(region.id);
                     this.handleRegionLeaveViewport(region);
-                    
+
                     // Handle region looping
                     if (this.activeRegion === region && this.regionLoop && region.id && region.id.startsWith('comment-')) {
                         // Loop the region
@@ -256,7 +256,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     }
                 });
             }
-            
+
             // Reset active region when user clicks on waveform
             this.wavesurfer.on('interaction', () => {
                 this.activeRegion = null;
@@ -297,7 +297,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                         waveformWrapper.addEventListener('scroll', () => {
                             this.updateBubblePositions();
                         });
-                        
+
                         // Also listen for any DOM changes that might affect positions
                         const resizeObserver = new ResizeObserver(() => {
                             this.updateBubblePositions();
@@ -411,42 +411,42 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
 
         toggleRegionVisibility(commentId) {
             const commentIdStr = commentId.toString();
-            
+
             // Find the region
             const region = this.regionsPlugin.getRegions().find(r => r.id === `comment-${commentId}`);
             if (!region) return;
-            
+
             if (this.hiddenRegions.has(commentIdStr)) {
                 // Show the region
                 this.hiddenRegions.delete(commentIdStr);
-                
+
                 // Show the region element
                 if (region.element) {
                     region.element.style.display = 'block';
                 }
-                
+
                 // Show the bubble container
                 const bubbleContainer = this.$refs.bubbleOverlay?.querySelector(`.comment-bubble-container[data-comment-id="${commentId}"]`);
                 if (bubbleContainer) {
                     bubbleContainer.style.display = 'flex';
                 }
-                
+
                 console.log(`Showing region for comment: ${commentId}`);
             } else {
                 // Hide the region
                 this.hiddenRegions.add(commentIdStr);
-                
+
                 // Hide the region element (don't remove it)
                 if (region.element) {
                     region.element.style.display = 'none';
                 }
-                
+
                 // Hide the bubble container (don't remove it)
                 const bubbleContainer = this.$refs.bubbleOverlay?.querySelector(`.comment-bubble-container[data-comment-id="${commentId}"]`);
                 if (bubbleContainer) {
                     bubbleContainer.style.display = 'none';
                 }
-                
+
                 console.log(`Hidden region for comment: ${commentId}`);
             }
         },
@@ -461,10 +461,10 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 // Use the proper remove method
                 region.remove();
                 console.log(`Region removed for comment: ${commentId}`);
-                
+
                 // Remove the bubble container
                 this.removeBubbleFromOverlay(commentId);
-                
+
                 // Remove from comments array if it exists
                 this.comments = this.comments.filter(c => c.commentId.toString() !== commentId.toString());
             }
@@ -480,7 +480,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             //   name: string (author name),
             //   avatar: string (optional, author avatar URL)
             // }
-            
+
             if (!this.regionsPlugin || !this.isLoaded) {
                 console.warn('Audio not loaded yet, cannot add region');
                 return;
@@ -511,7 +511,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 name,
                 avatar
             };
-            
+
             // Check if comment already exists in array
             const existingCommentIndex = this.comments.findIndex(c => c.commentId.toString() === commentId.toString());
             if (existingCommentIndex >= 0) {
@@ -536,10 +536,10 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             // Store comment data for interactions
             region.commentData = comment;
             region.commentIndex = this.comments.length - 1;
-            
+
             // Set up handlers for the new region
             this.scheduleRegionSetup(region, comment);
-            
+
             console.log(`External region added for comment: ${commentId}`);
         },
 
@@ -597,7 +597,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
         startRegionSelection() {
             // Hide all existing regions
             this.hideCommentRegions();
-            
+
             // Set selection mode
             this.isSelectingRegion = true;
             this.showRegions = false; // Keep regions hidden during selection
@@ -605,7 +605,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             // Create a new resizable region at current time
             const startTime = this.currentTime;
             const defaultDuration = 2.0;
-            
+
             this.selectedRegion = this.regionsPlugin.addRegion({
                 start: startTime,
                 end: startTime + defaultDuration,
@@ -673,7 +673,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 this.regionsPlugin.getRegions().forEach(region => {
                     if (region.element) region.element.style.display = 'none';
                 });
-                
+
                 const bubbleOverlay = this.$refs.bubbleOverlay;
                 if (bubbleOverlay) {
                     const containers = bubbleOverlay.querySelectorAll('.comment-bubble-container');
@@ -689,7 +689,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             // Add only new comment regions that don't exist yet
             this.comments.forEach((comment, index) => {
                 const regionId = `comment-${comment.commentId}`;
-                
+
                 // Skip if region already exists
                 if (existingRegionIds.has(regionId)) {
                     // Just make sure existing region is visible (unless hidden by user)
@@ -699,7 +699,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                             existingRegion.element.style.display = 'block';
                         }
                     }
-                    
+
                     // Make sure existing bubble is visible (unless hidden by user)
                     const bubbleContainer = this.$refs.bubbleOverlay?.querySelector(`.comment-bubble-container[data-comment-id="${comment.commentId}"]`);
                     if (bubbleContainer) {
@@ -709,7 +709,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     }
                     return;
                 }
-                
+
                 const duration = comment.duration || 2.0;
                 const region = this.regionsPlugin.addRegion({
                     start: comment.timestamp,
@@ -724,7 +724,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 // Store comment data for interactions
                 region.commentData = comment;
                 region.commentIndex = index;
-                
+
                 // Manually set up handlers for initial regions with proper timing
                 this.scheduleRegionSetup(region, comment);
             });
@@ -733,12 +733,12 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
         scheduleRegionSetup(region, comment, attempt = 0) {
             const maxAttempts = 10;
             const delay = 100; // 100ms between attempts
-            
+
             if (attempt >= maxAttempts) {
                 console.warn(`Failed to setup handlers for region ${region.id} after ${maxAttempts} attempts`);
                 return;
             }
-            
+
             if (region.element) {
                 // Element is ready, set up handlers
                 this.setupRegionHandlers(region, comment);
@@ -757,19 +757,19 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 return;
             }
             region._handlersSetup = true;
-            
+
             if (!region.element) {
                 console.warn('Region element still not ready for:', region.id);
                 return;
             }
-            
+
             console.log('Setting up handlers for region:', comment.commentId, 'Element:', region.element);
-            
+
             // Add tooltip with comment preview
             const tooltip = `${comment.name}: ${comment.body.substring(0, 50)}${comment.body.length > 50 ? '...' : ''}`;
             region.element.setAttribute('data-tooltip', tooltip);
             region.element.setAttribute('title', tooltip);
-            
+
             // Check if this region should be initially hidden
             if (this.isRegionHidden(comment.commentId)) {
                 // Hide the region element
@@ -777,15 +777,15 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     region.element.style.display = 'none';
                 }
             }
-            
+
             // Note: Bubbles are created via viewport events (region-in) for better performance
-            
+
             // Add region click handler for playback
             region.element.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent triggering waveform click
                 this.handleRegionClicked(region);
             });
-            
+
             // Store reference for easy access
             region.element.setAttribute('data-comment-id', comment.commentId);
         },
@@ -822,7 +822,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             bubble.className = 'comment-bubble-overlay';
             bubble.textContent = '💬';
             bubble.setAttribute('data-comment-id', comment.commentId);
-            
+
             // Position bubble in overlay
             bubble.style.cssText = `
                 position: absolute;
@@ -844,31 +844,31 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 cursor: pointer;
                 pointer-events: all;
             `;
-            
+
             // Add bubble click handler
             bubble.addEventListener('click', (e) => {
                 e.stopPropagation();
                 console.log('Bubble clicked for comment:', comment.commentId);
-                
+
                 // Pause playback when clicking on bubble
                 if (this.isPlaying) {
                     this.wavesurfer.pause();
                 }
-                
+
                 this.$dispatch('audio-annotation:view-comment', { commentId: comment.commentId });
             });
-            
+
             // Add hover effects for bubble
             bubble.addEventListener('mouseenter', () => {
                 bubble.style.transform = 'scale(1.1)';
                 bubble.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.5)';
             });
-            
+
             bubble.addEventListener('mouseleave', () => {
                 bubble.style.transform = 'scale(1)';
                 bubble.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
             });
-            
+
             // Add to overlay
             bubbleOverlay.appendChild(bubble);
         },
@@ -920,13 +920,13 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 // Extract comment ID from part attribute (e.g., "region comment-123" -> "123")
                 const partAttr = regionElement.getAttribute('part');
                 const commentId = partAttr.match(/comment-(.+)/)?.[1];
-                
+
                 if (commentId) {
                     // Find corresponding bubble
                     const bubble = bubbleOverlay.querySelector(`[data-comment-id="${commentId}"]`);
                     const regionRect = regionElement.getBoundingClientRect();
                     const leftPosition = regionRect.left - waveformRect.left;
-                    
+
                     if (bubble) {
                         // Update existing bubble position
                         bubble.style.left = `${leftPosition}px`;
@@ -960,7 +960,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             bubble.className = 'comment-bubble-overlay';
             bubble.textContent = '💬';
             bubble.setAttribute('data-comment-id', comment.commentId);
-            
+
             // Position bubble in overlay
             bubble.style.cssText = `
                 position: absolute;
@@ -982,31 +982,31 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 cursor: pointer;
                 pointer-events: all;
             `;
-            
+
             // Add bubble click handler
             bubble.addEventListener('click', (e) => {
                 e.stopPropagation();
                 console.log('Bubble clicked for comment:', comment.commentId);
-                
+
                 // Pause playback when clicking on bubble
                 if (this.isPlaying) {
                     this.wavesurfer.pause();
                 }
-                
+
                 this.$dispatch('audio-annotation:view-comment', { commentId: comment.commentId });
             });
-            
+
             // Add hover effects
             bubble.addEventListener('mouseenter', () => {
                 bubble.style.transform = 'scale(1.1)';
                 bubble.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.5)';
             });
-            
+
             bubble.addEventListener('mouseleave', () => {
                 bubble.style.transform = 'scale(1)';
                 bubble.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
             });
-            
+
             // Add to overlay
             bubbleOverlay.appendChild(bubble);
             console.log('Bubble created for comment during scroll:', comment.commentId, 'at position:', leftPosition);
@@ -1017,16 +1017,16 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             document.querySelectorAll('[part*="region comment-"]').forEach(el => {
                 el.classList.remove('region-active');
             });
-            
+
             // Add active class to selected region
             const activeRegionElement = document.querySelector(`[part*="comment-${commentId}"]`);
             if (activeRegionElement) {
                 activeRegionElement.classList.add('region-active');
             }
-            
+
             // Set active comment
             this.activeCommentId = commentId;
-            
+
             // Dispatch event for external handling
             const comment = this.comments.find(c => c.commentId === commentId);
             if (comment) {
@@ -1038,16 +1038,16 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             if (region.commentData) {
                 // Set as active region and play
                 this.activeRegion = region;
-                
+
                 // Play the region with looping enabled
                 region.play();
-                
+
                 // Activate the comment region visually
                 this.activateCommentRegion(region.commentData.commentId);
-                
+
                 // Dispatch event for external handling
                 this.$dispatch('audio-annotation:comment-clicked', { comment: region.commentData });
-                
+
                 console.log(`Playing region ${region.id} with loop: ${this.regionLoop}`);
             }
         },
@@ -1101,7 +1101,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             // Get all regions from the plugin
             const allRegions = this.regionsPlugin.getRegions();
             console.log(`Checking handlers for ${allRegions.length} regions`);
-            
+
             allRegions.forEach(region => {
                 if (region.id && region.id.startsWith('comment-') && region.commentData && !region._handlersSetup) {
                     console.log('Setting up missing handlers for region:', region.id);
