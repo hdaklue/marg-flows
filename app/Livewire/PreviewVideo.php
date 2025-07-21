@@ -11,7 +11,7 @@ final class PreviewVideo extends Component
 {
     public $comments = [];
 
-    public $videoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4';
+    public $videoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4';
 
     public $qualitySources = [];
 
@@ -19,7 +19,7 @@ final class PreviewVideo extends Component
 
     public function mount()
     {
-        // Reliable test video sources with different URLs (simulating different resolutions)
+        // Google Cloud Storage videos with proper CORS headers
         $this->qualitySources = [
             [
                 'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
@@ -33,7 +33,7 @@ final class PreviewVideo extends Component
                 'type' => 'video/mp4',
                 'label' => '720p',
                 'quality' => '720',
-                'selected' => true,  // Default selection
+                'selected' => false,
             ],
             [
                 'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
@@ -47,32 +47,44 @@ final class PreviewVideo extends Component
                 'type' => 'video/mp4',
                 'label' => '360p',
                 'quality' => '360',
-                'selected' => false,
+                'selected' => true,  // Default - smallest file size for Safari
             ],
         ];
 
-        // Sample comments data
+        // Sample comments data - created using frame-precise timing
+        $frameRate = 30.0;
+
+        $comment1Time = CommentTime::fromFrame(450, $frameRate); // Frame 450
+        $comment2Time = CommentTime::fromFrame(1350, $frameRate); // Frame 1350
+        $comment3Time = CommentTime::fromFrame(2460, $frameRate); // Frame 2460
+
         $this->comments = [
             [
                 'commentId' => 1,
                 'avatar' => 'https://ui-avatars.com/api/?name=John+Doe&background=3b82f6&color=fff',
                 'name' => 'John Doe',
                 'body' => 'Great scene! The animation quality is impressive here.',
-                'timestamp' => 15000, // 15 seconds
+                'timestamp' => $comment1Time->asSeconds(),
+                'frameNumber' => $comment1Time->getFrame($frameRate),
+                'frameRate' => $frameRate,
             ],
             [
                 'commentId' => 2,
                 'avatar' => 'https://ui-avatars.com/api/?name=Jane+Smith&background=ef4444&color=fff',
                 'name' => 'Jane Smith',
                 'body' => 'Love the character design. The attention to detail is amazing.',
-                'timestamp' => 45000, // 45 seconds
+                'timestamp' => $comment2Time->asSeconds(),
+                'frameNumber' => $comment2Time->getFrame($frameRate),
+                'frameRate' => $frameRate,
             ],
             [
                 'commentId' => 3,
                 'avatar' => 'https://ui-avatars.com/api/?name=Mike+Wilson&background=10b981&color=fff',
                 'name' => 'Mike Wilson',
                 'body' => 'This part needs some work on the lighting.',
-                'timestamp' => 82000, // 1:22
+                'timestamp' => $comment3Time->asSeconds(),
+                'frameNumber' => $comment3Time->getFrame($frameRate),
+                'frameRate' => $frameRate,
             ],
         ];
 
@@ -111,10 +123,10 @@ final class PreviewVideo extends Component
         ];
     }
 
-    public function addComment($timestamp)
+    public function addComment($timestamp, $frameNumber = null, $frameRate = null)
     {
-
         $time = CommentTime::fromSeconds($timestamp);
+
         // Validate timestamp
         if (! is_numeric($timestamp) || $timestamp < 0) {
             session()->flash('error', 'Invalid timestamp provided');
@@ -122,20 +134,40 @@ final class PreviewVideo extends Component
             return;
         }
 
+        // If frame rate is provided, ensure frame alignment
+        if ($frameRate > 0) {
+            $time = $time->getFrameAlignedTime($frameRate);
+            $frameNumber = $time->getFrame($frameRate);
+            $timestamp = $time->asSeconds(); // Use frame-aligned timestamp
+        }
+
+        // Calculate frame number if not provided but frame rate is available
+        if ($frameNumber === null && $frameRate > 0) {
+            $frameNumber = $time->getFrame($frameRate);
+        }
+
         // Simulate adding a new comment
         $this->comments[] = [
             'commentId' => count($this->comments) + 1,
             'avatar' => 'https://ui-avatars.com/api/?name=New+User&background=8b5cf6&color=fff',
             'name' => 'New User',
-            'body' => 'New comment added at ' . round($timestamp / 1000, 1) . ' seconds',
+            'body' => $frameRate > 0
+                ? "New comment added at {$time->displayWithFrame($frameRate)}"
+                : "New comment added at {$time->display()}",
             'timestamp' => $timestamp,
+            'frameNumber' => $frameNumber,
+            'frameRate' => $frameRate,
         ];
 
         // Dispatch event to update the frontend
         $this->dispatch('commentsUpdated', comments: $this->comments);
 
-        // You can also make API calls here
-        session()->flash('message', 'Comment added successfully!' . $time->display());
+        // Success message with frame info
+        $successMessage = $frameRate > 0
+            ? "Comment added at {$time->displayWithFrame($frameRate)}"
+            : "Comment added at {$time->display()}";
+
+        session()->flash('message', $successMessage);
     }
 
     public function loadComment($commentId)

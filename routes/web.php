@@ -8,6 +8,7 @@ use App\Http\Controllers\EditorJsUpload;
 use App\Http\Controllers\EditorJsImageDelete;
 use App\Livewire\Previewtest;
 use App\Livewire\PreviewVideo;
+use App\Livewire\PreviewAudio;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -23,6 +24,7 @@ Route::get('/', action: Previewtest::class)->name('home');
 // });
 Route::get('/annotation', fn () => view('annotation'));
 Route::get('/videoPreview', PreviewVideo::class)->name('video.preview');
+Route::get('/audioPreview', PreviewAudio::class)->name('audio.preview');
 
 Route::get('invitation/accept/{token}', AcceptInvitation::class)
     ->middleware([Authenticate::class])

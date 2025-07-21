@@ -1,0 +1,315 @@
+/* Audio Annotation Component Styles */
+
+.audio-annotation-container {
+    @apply w-full max-w-4xl mx-auto;
+}
+
+/* Audio Player Wrapper */
+.audio-player-wrapper {
+    @apply overflow-hidden bg-white rounded-lg shadow-lg dark:bg-zinc-800;
+}
+
+/* Audio Controls Header */
+.audio-controls-header {
+    @apply p-4 border-b border-zinc-200 bg-zinc-50 dark:bg-zinc-700 dark:border-zinc-600;
+}
+
+/* Play/Pause Button */
+.audio-play-button {
+    @apply flex items-center justify-center w-12 h-12 text-white transition-colors duration-200 rounded-full bg-sky-600 hover:bg-sky-700 disabled:bg-zinc-400 disabled:cursor-not-allowed;
+}
+
+.audio-play-button.playing {
+    @apply bg-red-600 hover:bg-red-700;
+}
+
+.play-icon,
+.pause-icon {
+    @apply w-5 h-5;
+}
+
+/* Time Display */
+.time-display {
+    @apply flex items-center space-x-1 font-mono text-sm text-zinc-700 dark:text-zinc-300;
+}
+
+.time-separator {
+    @apply text-zinc-500 dark:text-zinc-400;
+}
+
+/* Frame Navigation Buttons */
+.frame-nav-button {
+    @apply flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded text-zinc-700 bg-zinc-200 dark:bg-zinc-600 hover:bg-zinc-300 dark:hover:bg-zinc-500 disabled:bg-zinc-100 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed dark:text-zinc-300;
+}
+
+/* Volume Controls */
+.volume-button {
+    @apply flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded text-zinc-700 bg-zinc-200 dark:bg-zinc-600 hover:bg-zinc-300 dark:hover:bg-zinc-500 dark:text-zinc-300;
+}
+
+.volume-slider {
+    @apply w-20 h-2 rounded-lg appearance-none cursor-pointer bg-zinc-200 dark:bg-zinc-600;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    @apply w-4 h-4 rounded-full appearance-none cursor-pointer bg-sky-600;
+}
+
+.volume-slider::-moz-range-thumb {
+    @apply w-4 h-4 border-0 rounded-full cursor-pointer bg-sky-600;
+}
+
+/* Add Comment Button */
+.add-comment-button {
+    @apply flex items-center px-3 py-2 space-x-2 text-sm font-medium text-white transition-colors duration-200 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-400 disabled:cursor-not-allowed;
+}
+
+/* Waveform Container */
+.waveform-container {
+    @apply relative p-6 bg-white dark:bg-zinc-800;
+}
+
+.waveform {
+    @apply w-full h-20 rounded;
+}
+
+/* Ensure all child elements within waveform container hide scrollbars */
+.waveform,
+.waveform * {
+    @apply scrollbar-hide;
+}
+
+/* WaveSurfer Region Bubbles - Target specific comment regions */
+div[part*="region comment-"]::after {
+    content: '💬';
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    background: rgba(168, 85, 247, 0.9);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+    z-index: 15;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+div[part*="region comment-"]:hover::after {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.5);
+}
+
+.dark div[part*="region comment-"]::after {
+    border-color: rgba(39, 39, 42, 1);
+}
+
+/* Loading State */
+.waveform-loading {
+    @apply absolute inset-0 flex items-center justify-center space-x-3 bg-white text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400;
+}
+
+.loading-spinner {
+    @apply w-6 h-6 border-2 rounded-full border-sky-600 border-t-transparent animate-spin;
+}
+
+/* Mobile Frame Navigation */
+.mobile-frame-nav {
+    @apply fixed z-50 flex items-center px-4 py-2 space-x-4 transform -translate-x-1/2 rounded-full bottom-6 left-1/2 bg-black/80 backdrop-blur-sm;
+}
+
+.mobile-nav-button {
+    @apply flex items-center justify-center w-12 h-12 text-white transition-colors duration-200 rounded-full bg-white/20 hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed;
+}
+
+/* Keyboard Shortcuts Info */
+.keyboard-shortcuts-info {
+    @apply p-3 border-t border-zinc-200 bg-zinc-50 dark:bg-zinc-700 dark:border-zinc-600;
+}
+
+.shortcuts-grid {
+    @apply flex flex-wrap items-center justify-center gap-4 text-xs text-zinc-600 dark:text-zinc-400;
+}
+
+.shortcut-item {
+    @apply flex items-center space-x-1;
+}
+
+.shortcut-item kbd {
+    @apply px-2 py-1 font-mono text-xs rounded text-zinc-800 bg-zinc-200 dark:bg-zinc-600 dark:text-zinc-200;
+}
+
+/* Safari Warning Styles */
+.audio-annotation-container [x-show="isSafari"] {
+    @apply bg-white border rounded-lg shadow-lg dark:bg-zinc-800 border-amber-200 dark:border-amber-800;
+}
+
+/* WaveSurfer Custom Styles */
+.waveform wave {
+    @apply transition-all duration-200;
+}
+
+/* Hide scrollbar on WaveSurfer scroll container using Shadow DOM part selector */
+.waveform::part(scroll),
+.waveform-container ::part(scroll) {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE and Edge */
+}
+
+.waveform::part(scroll)::-webkit-scrollbar,
+.waveform-container ::part(scroll)::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari, Opera */
+    width: 0 !important;
+    height: 0 !important;
+}
+
+
+/* Region Selection State */
+.waveform [data-region-id="region-selection"] {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.2) 100%) !important;
+    border-left: 4px solid #22c55e !important;
+    border-right: 2px solid rgba(34, 197, 94, 0.5) !important;
+    animation: selection-pulse 2s ease-in-out infinite;
+}
+
+
+/* Selection region icon bubble */
+.waveform [data-region-id="region-selection"]::after {
+    content: '🎯';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    transform: translateY(2px);
+    background: rgba(34, 197, 94, 0.9) !important;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.5);
+    z-index: 15;
+    animation: selection-icon-pulse 2s ease-in-out infinite;
+}
+
+.dark .waveform [data-region-id="region-selection"]::after {
+    border-color: rgba(39, 39, 42, 1) !important;
+}
+
+/* Selection pulse animation */
+@keyframes selection-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+}
+
+/* Selection icon pulse animation */
+@keyframes selection-icon-pulse {
+    0%, 100% {
+        transform: translateY(2px) scale(1);
+    }
+    50% {
+        transform: translateY(2px) scale(1.1);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .audio-controls-header {
+        @apply p-3;
+    }
+
+    .audio-controls-header > div {
+        @apply flex-col space-y-3;
+    }
+
+    .audio-controls-header > div > div {
+        @apply justify-between;
+    }
+
+    .volume-slider {
+        @apply w-16;
+    }
+
+    .waveform-container {
+        @apply p-4;
+    }
+
+    .waveform {
+        @apply h-16;
+    }
+
+    .shortcuts-grid {
+        @apply grid grid-cols-1 gap-2 text-center;
+    }
+}
+
+/* Active Region Styling */
+div[part*="region comment-"].region-active {
+    background: rgba(168, 85, 247, 0.35) !important;
+    border-left: 3px solid #a855f7 !important;
+    border-right: 3px solid #a855f7 !important;
+    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3) !important;
+    animation: region-active-pulse 2s ease-in-out infinite;
+}
+
+/* Active region pulse animation */
+@keyframes region-active-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.2);
+    }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+    .loading-spinner {
+        border-color: rgb(59, 130, 246);
+        border-top-color: transparent;
+    }
+}
+
+/* Animation for smooth transitions */
+.audio-annotation-container * {
+    @apply transition-colors duration-200;
+}
+
+/* Focus states for accessibility */
+.audio-play-button:focus,
+.frame-nav-button:focus,
+.volume-button:focus,
+.add-comment-button:focus,
+.mobile-nav-button:focus {
+    @apply outline-none ring-2 ring-sky-500 ring-offset-2 ring-offset-white dark:ring-offset-zinc-800;
+}
+
+/* Custom scrollbar for potential overflow */
+.audio-annotation-container::-webkit-scrollbar {
+    @apply w-2;
+}
+
+.audio-annotation-container::-webkit-scrollbar-track {
+    @apply bg-zinc-100 dark:bg-zinc-700;
+}
+
+.audio-annotation-container::-webkit-scrollbar-thumb {
+    @apply rounded bg-zinc-400 dark:bg-zinc-500;
+}
+
+.audio-annotation-container::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-500 dark:bg-zinc-400;
+}

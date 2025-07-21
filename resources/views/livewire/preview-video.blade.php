@@ -14,7 +14,7 @@
     <div class="" x-data="{
         comments: @js($comments)
     }"
-        @video-annotation:add-comment.window="console.log('Add comment:', $event.detail); @this.call('addComment', $event.detail.timestamp)"
+        @video-annotation:add-comment.window="console.log('Add comment:', $event.detail); @this.call('addComment', $event.detail.timestamp, $event.detail.frameNumber, $event.detail.frameRate)"
         @video-annotation:view-comment="console.log('View comment:', $event.detail); @this.call('viewComment', $event.detail.commentId)"
         @video-annotation:seek-comment="console.log('Seek comment:', $event.detail)"
         @comments-updated.window="comments = $event.detail.comments"

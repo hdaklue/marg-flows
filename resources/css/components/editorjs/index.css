@@ -2,7 +2,7 @@
 
 
 .ce-block {
-    @apply px-16;
+    @apply px-4;
 }
 
 .ce-block__content *::selection {
@@ -107,6 +107,13 @@
 
 .cdx-search-field {
     @apply bg-transparent;
+}
+.dark .ce-toolbar__plus {
+    @apply bg-zinc-700;
+}
+
+.dark .ce-toolbar__settings-btn {
+    @apply bg-zinc-700;
 }
 
 .ce-block__content,

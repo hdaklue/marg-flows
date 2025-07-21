@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark" data-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 
 <head>
     <meta charset="utf-8">
@@ -10,7 +10,7 @@
     </script>
     {{-- ✅ Always include styles first --}}
     @livewireStyles
-
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
     {{-- ✅ Then Vite CSS and JS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-auto-animate@latest/dist/alpine-auto-animate.min.js"
@@ -18,8 +18,8 @@
     {{-- ❌ Do NOT load @livewireScripts in <head> --}}
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-zinc-950">
+<body class="font-sans antialiased dark:bg-zinc-950">
+    <div class="min-h-screen">
         <main>
             {{ $slot }}
         </main>

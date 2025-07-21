@@ -33,6 +33,23 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     }
 
     /**
+     * Create from frame number and frame rate
+     */
+    public static function fromFrame(int $frameNumber, float $frameRate): self
+    {
+        if ($frameNumber < 0) {
+            throw new InvalidArgumentException('Frame number cannot be negative, got: ' . $frameNumber);
+        }
+
+        if ($frameRate <= 0) {
+            throw new InvalidArgumentException('Frame rate must be positive, got: ' . $frameRate);
+        }
+
+        $seconds = $frameNumber / $frameRate;
+        return new self($seconds);
+    }
+
+    /**
      * Create from formatted time string (auto-detects MM:SS or HH:MM:SS)
      */
     public static function fromFormatted(string $time): self
@@ -137,6 +154,27 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     }
 
     /**
+     * Get as frame number for given frame rate
+     */
+    public function getFrame(float $frameRate): int
+    {
+        if ($frameRate <= 0) {
+            throw new InvalidArgumentException('Frame rate must be positive, got: ' . $frameRate);
+        }
+
+        return (int) round($this->seconds * $frameRate);
+    }
+
+    /**
+     * Get frame-aligned timestamp for given frame rate
+     */
+    public function getFrameAlignedTime(float $frameRate): self
+    {
+        $frameNumber = $this->getFrame($frameRate);
+        return self::fromFrame($frameNumber, $frameRate);
+    }
+
+    /**
      * Get formatted time string (auto-detects if hours needed)
      */
     public function asFormatted(bool $forceHours = false): string
@@ -184,6 +222,15 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     public function displayPrecise(int $decimals = 1): string
     {
         return $this->asFormattedPrecise($decimals);
+    }
+
+    /**
+     * Get display string with frame information
+     */
+    public function displayWithFrame(float $frameRate): string
+    {
+        $frameNumber = $this->getFrame($frameRate);
+        return "Frame {$frameNumber} ({$this->display()})";
     }
 
     /**
@@ -271,6 +318,18 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
             'display' => $this->display(),
             'has_hours' => $this->hasHours(),
         ];
+    }
+
+    /**
+     * Array representation with frame data
+     */
+    public function toArrayWithFrames(float $frameRate): array
+    {
+        return array_merge($this->toArray(), [
+            'frame_number' => $this->getFrame($frameRate),
+            'frame_rate' => $frameRate,
+            'frame_aligned' => $this->getFrameAlignedTime($frameRate)->asSeconds(),
+        ]);
     }
 
     /**

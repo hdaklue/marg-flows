@@ -25,7 +25,8 @@ function isObject(item) {
     return item && typeof item === 'object' && !Array.isArray(item);
 }
 
-export default function videoAnnotation(userConfig = null) {
+// accept comments as a param before config.
+export default function videoAnnotation(userConfig = null, initialComments = []) {
     // Default configuration
     const defaultConfig = {
         features: {
@@ -74,7 +75,7 @@ export default function videoAnnotation(userConfig = null) {
     return {
         player: null,
         videoElement: null,
-        comments: [], // Array of comment objects: {commentId, avatar, name, body, timestamp}
+        comments: initialComments || [], // Array of comment objects: {commentId, avatar, name, body, timestamp}
         currentTime: 0,
         duration: 0,
         progressBarWidth: 0,
@@ -98,6 +99,14 @@ export default function videoAnnotation(userConfig = null) {
         qualitySources: [],
         currentResolution: null,
         currentResolutionSrc: null,
+        // Frame navigation
+        frameRate: 30, // Default, will be auto-detected
+        frameDuration: 1 / 30, // Calculated from frameRate
+        wasPlayingBeforeFrame: false, // Track if video was playing before frame nav
+        frameNavigationDirection: null, // 'forward', 'backward', or null
+        frameNavigationTimeout: null, // Timeout for hiding feedback
+        showFrameHelpers: true, // Show frame navigation helper arrows
+        currentFrameNumber: 0, // Real-time frame number for display
         // Touch handling
         touchStartTime: 0,
         touchStartPos: { x: 0, y: 0 },
@@ -139,12 +148,19 @@ export default function videoAnnotation(userConfig = null) {
         },
 
         init() {
-            // Initialize comments from window global
-            this.comments = window.videoComments || [];
+            // Comments are already initialized from initialComments parameter
+            // Keep window.videoComments as fallback for backward compatibility
+            if (!this.comments || this.comments.length === 0) {
+                this.comments = window.videoComments || [];
+            }
 
             // Cross-browser compatibility checks
             this.detectBrowser();
 
+            // Safari check - don't load player for Safari
+            if (this.isSafari) {
+                return; // Exit early, don't initialize anything for Safari
+            }
 
             // Initialize quality sources from data attribute
             this.initializeQualitySources();
@@ -153,7 +169,6 @@ export default function videoAnnotation(userConfig = null) {
             this.$nextTick(() => {
                 this.videoElement = this.$refs.videoPlayer;
                 if (this.videoElement) {
-                    this.setupCrossBrowserCompatibility();
                     this.setupVideoJS();
                     this.setupEventListeners();
                 }
@@ -169,30 +184,6 @@ export default function videoAnnotation(userConfig = null) {
             this.isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
         },
 
-        setupCrossBrowserCompatibility() {
-            if (this.videoElement) {
-                // iOS Safari specific fixes
-                if (this.isIOS) {
-                    this.videoElement.setAttribute('playsinline', 'true');
-                    this.videoElement.setAttribute('webkit-playsinline', 'true');
-
-                    // Prevent iOS from showing native controls
-                    this.videoElement.controls = false;
-                }
-
-                // Android specific fixes
-                if (this.isAndroid) {
-                    // Ensure touch events work properly
-                    this.videoElement.style.touchAction = 'manipulation';
-                }
-
-                // Safari specific fixes
-                if (this.isSafari) {
-                    // Fix Safari double-tap zoom
-                    this.videoElement.style.touchAction = 'manipulation';
-                }
-            }
-        },
 
         initializeQualitySources() {
             // Wait for next tick to ensure DOM is ready
@@ -227,19 +218,24 @@ export default function videoAnnotation(userConfig = null) {
                 return;
             }
 
-            // Initialize Video.js with ID instead of element reference - no controls
+            // Initialize Video.js player
             this.player = videojs(this.videoElement.id, {
-                // Use fluid mode to maintain aspect ratio
-                fluid: true,
+                autoplay: false,
+                controls: false,
+                muted: true,
+                preload: 'auto',
+                playsinline: true,
                 responsive: true,
-                fill: false,
-                // Disable all controls - we'll create our own
-                controls: false
+                fluid: true
+            });
+
+            this.player.ready(() => {
+                this.player.play().catch(e => console.warn("Playback blocked", e));
             });
 
             this.setupPlayerEventListeners();
-
         },
+
 
         setupPlayerEventListeners() {
             if (!this.player) return;
@@ -252,6 +248,10 @@ export default function videoAnnotation(userConfig = null) {
 
             this.player.on('timeupdate', () => {
                 this.currentTime = this.player.currentTime();
+
+                // Update frame number in real-time
+                this.currentFrameNumber = this.getFrameNumber(this.currentTime);
+
                 // Always update circle position when time changes (unless actively dragging)
                 if (!this.isDragging) {
                     this.forceUpdateSeekCirclePosition();
@@ -301,6 +301,7 @@ export default function videoAnnotation(userConfig = null) {
             this.player.on('loadedmetadata', () => {
                 this.duration = this.player.duration();
                 this.updateProgressBarWidth();
+                this.detectFrameRate();
             });
 
             this.player.on('loadeddata', () => {
@@ -340,6 +341,8 @@ export default function videoAnnotation(userConfig = null) {
                     this.updateProgressBarWidth();
                 }, 100);
             });
+
+            // Note: Keyboard events are handled via @keydown.window in the template
         },
 
         updateProgressBarWidth() {
@@ -361,13 +364,17 @@ export default function videoAnnotation(userConfig = null) {
         },
 
         getCommentPosition(timestamp) {
+            // Safety checks for invalid inputs
+            if (!timestamp || typeof timestamp !== 'number') return 0;
             if (this.duration <= 0 || !this.progressBarWidth) return 0;
 
-            // Use cached width for better performance
-            const seconds = timestamp / 1000;
+            // Timestamp is already in seconds from Laravel CommentTime->asSeconds()
+            // No need to divide by 1000 like we do for milliseconds
+            const seconds = timestamp;
             const position = (seconds / this.duration) * this.progressBarWidth;
-
-            return position;
+            
+            // Ensure position is within bounds
+            return Math.max(0, Math.min(position, this.progressBarWidth));
         },
 
         getTooltipPosition(timestamp) {
@@ -427,6 +434,149 @@ export default function videoAnnotation(userConfig = null) {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
             return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        },
+
+        // Frame navigation methods
+        detectFrameRate() {
+            if (!this.player) {
+                return;
+            }
+
+            try {
+                // Use VideoJS API instead of direct tech access
+                let detectedRate = null;
+
+                // Try to get from video element metadata if available
+                if (this.videoElement && this.videoElement.videoTracks && this.videoElement.videoTracks.length > 0) {
+                    const track = this.videoElement.videoTracks[0];
+                    if (track.getSettings && track.getSettings().frameRate) {
+                        detectedRate = track.getSettings().frameRate;
+                    }
+                }
+
+                // Fallback to common frame rates based on duration patterns
+                if (!detectedRate && this.duration > 0) {
+                    // Use 30fps as safe default for web video
+                    detectedRate = 30;
+                }
+
+                this.frameRate = detectedRate || 30;
+                this.frameDuration = 1 / this.frameRate;
+
+            } catch (e) {
+                // Fallback to 30fps on any error
+                this.frameRate = 30;
+                this.frameDuration = 1 / this.frameRate;
+            }
+        },
+
+        stepForward() {
+            if (!this.player) return;
+
+            // Store playing state and pause if needed
+            this.wasPlayingBeforeFrame = !this.player.paused();
+            if (this.wasPlayingBeforeFrame) {
+                this.player.pause();
+            }
+
+            const currentTime = this.player.currentTime();
+            const newTime = Math.min(currentTime + this.frameDuration, this.duration);
+            this.player.currentTime(newTime);
+
+            // Show visual feedback
+            this.showFrameNavigationFeedback('forward');
+        },
+
+        stepBackward() {
+            if (!this.player) return;
+
+            // Store playing state and pause if needed
+            this.wasPlayingBeforeFrame = !this.player.paused();
+            if (this.wasPlayingBeforeFrame) {
+                this.player.pause();
+            }
+
+            const currentTime = this.player.currentTime();
+            const newTime = Math.max(currentTime - this.frameDuration, 0);
+            this.player.currentTime(newTime);
+
+            // Show visual feedback
+            this.showFrameNavigationFeedback('backward');
+        },
+
+        showFrameNavigationFeedback(direction) {
+            // Clear any existing timeout
+            if (this.frameNavigationTimeout) {
+                clearTimeout(this.frameNavigationTimeout);
+            }
+
+            // Set direction for visual feedback
+            this.frameNavigationDirection = direction;
+
+            // Hide feedback after 800ms
+            this.frameNavigationTimeout = setTimeout(() => {
+                this.frameNavigationDirection = null;
+            }, 800);
+        },
+
+        toggleFrameHelpers() {
+            this.showFrameHelpers = !this.showFrameHelpers;
+        },
+
+        // Round timestamp to nearest frame boundary
+        roundToNearestFrame(timestamp) {
+            if (this.frameDuration <= 0) {
+                return timestamp; // Fallback if frame rate not detected
+            }
+
+            const frameNumber = Math.round(timestamp / this.frameDuration);
+            return frameNumber * this.frameDuration;
+        },
+
+        // Get current timestamp aligned to frame boundary
+        getCurrentFrameTime() {
+            if (!this.player) {
+                return 0;
+            }
+
+            const currentTime = this.player.currentTime();
+            return this.roundToNearestFrame(currentTime);
+        },
+
+        // Calculate frame number from timestamp
+        getFrameNumber(timestamp) {
+            if (this.frameDuration <= 0) {
+                return Math.round(timestamp * 30); // Fallback assuming 30fps
+            }
+
+            return Math.round(timestamp / this.frameDuration);
+        },
+
+        // Get current frame number
+        getCurrentFrameNumber() {
+            const frameTime = this.getCurrentFrameTime();
+            return this.getFrameNumber(frameTime);
+        },
+
+        // Note: Keyboard shortcuts are now handled directly in the template with Alpine.js @keydown directives
+
+        addCommentAtCurrentFrame() {
+            if (!this.player || !this.config.annotations?.enableVideoComments) {
+                return;
+            }
+
+            this.player.pause();
+            // Get frame-aligned current time
+            const frameAlignedTime = this.getCurrentFrameTime();
+            const frameNumber = this.getCurrentFrameNumber();
+
+            // Emit event with frame-aligned timestamp
+            this.$dispatch('video-annotation:add-comment', {
+                timestamp: frameAlignedTime,
+                currentTime: frameAlignedTime,
+                frameNumber: frameNumber,
+                frameRate: this.frameRate
+            });
         },
 
         onProgressBarClick(event) {
@@ -500,11 +650,14 @@ export default function videoAnnotation(userConfig = null) {
             const percentage = clickX / rect.width;
             const targetTime = percentage * this.duration;
 
-
-            // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+            // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
+            const frameAlignedTime = this.roundToNearestFrame(targetTime);
+            const frameNumber = this.getFrameNumber(frameAlignedTime);
             this.$dispatch('video-annotation:add-comment', {
-                timestamp: targetTime,  // Where to add comment
-                currentTime: targetTime  // Same as timestamp for progress bar actions
+                timestamp: frameAlignedTime,  // Where to add comment (frame-aligned)
+                currentTime: frameAlignedTime,  // Same as timestamp for progress bar actions
+                frameNumber: frameNumber,  // Frame number for reference
+                frameRate: this.frameRate  // Include frame rate for context
             });
 
         },
@@ -790,10 +943,14 @@ export default function videoAnnotation(userConfig = null) {
             const percentage = this.hoverX / rect.width;
             const targetTime = percentage * this.duration;
 
-            // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+            // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
+            const frameAlignedTime = this.roundToNearestFrame(targetTime);
+            const frameNumber = this.getFrameNumber(frameAlignedTime);
             this.$dispatch('video-annotation:add-comment', {
-                timestamp: targetTime,  // Where to add comment
-                currentTime: targetTime  // Same as timestamp for progress bar actions
+                timestamp: frameAlignedTime,  // Where to add comment (frame-aligned)
+                currentTime: frameAlignedTime,  // Same as timestamp for progress bar actions
+                frameNumber: frameNumber,  // Frame number for reference
+                frameRate: this.frameRate  // Include frame rate for context
             });
 
         },
@@ -812,6 +969,8 @@ export default function videoAnnotation(userConfig = null) {
             if (window.removeEventListener) {
                 window.removeEventListener('resize', this.updateProgressBarWidth);
             }
+
+            // Note: Window keyboard events are automatically cleaned up by Alpine.js
         },
 
         // Custom control methods
@@ -825,6 +984,16 @@ export default function videoAnnotation(userConfig = null) {
                 this.player.pause();
             } else {
                 this.player.play();
+            }
+
+            // Ensure keyboard shortcuts work after interaction
+            this.ensureFocus();
+        },
+
+        ensureFocus() {
+            // Ensure the component container has focus for keyboard shortcuts
+            if (this.$el && !this.$el.contains(document.activeElement)) {
+                this.$el.focus();
             }
         },
 
@@ -881,6 +1050,9 @@ export default function videoAnnotation(userConfig = null) {
             if (this.isTouchDevice() && this.progressBarMode === 'auto-hide') {
                 this.toggleProgressBarVisibility();
             }
+
+            // Ensure focus for keyboard shortcuts
+            this.ensureFocus();
         },
 
         toggleCommentsOnProgressBar() {
@@ -954,10 +1126,14 @@ export default function videoAnnotation(userConfig = null) {
                             this.triggerHapticFeedback(100);
                         }
 
-                        // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+                        // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
+                        const frameAlignedTime = this.getCurrentFrameTime();
+                        const frameNumber = this.getCurrentFrameNumber();
                         this.$dispatch('video-annotation:add-comment', {
-                            timestamp: this.player.currentTime(),
-                            currentTime: this.player.currentTime()
+                            timestamp: frameAlignedTime,
+                            currentTime: frameAlignedTime,
+                            frameNumber: frameNumber,
+                            frameRate: this.frameRate
                         });
 
                     }
@@ -1075,10 +1251,11 @@ export default function videoAnnotation(userConfig = null) {
                             this.triggerHapticFeedback(100);
                         }
 
-                        // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+                        // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
+                        const frameAlignedTime = this.roundToNearestFrame(targetTime);
                         this.$dispatch('video-annotation:add-comment', {
-                            timestamp: targetTime,  // Where to add comment
-                            currentTime: targetTime  // Same as timestamp for progress bar actions
+                            timestamp: frameAlignedTime,  // Where to add comment (frame-aligned)
+                            currentTime: frameAlignedTime  // Same as timestamp for progress bar actions
                         });
 
                         // Prevent video long press from also firing
@@ -1342,10 +1519,14 @@ export default function videoAnnotation(userConfig = null) {
 
 
         addCommentFromContextMenu() {
-            // Emit event with timestamp in seconds (Laravel/VideoJS standard)
+            // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
+            const frameAlignedTime = this.roundToNearestFrame(this.contextMenuTime);
+            const frameNumber = this.getFrameNumber(frameAlignedTime);
             this.$dispatch('video-annotation:add-comment', {
-                timestamp: this.contextMenuTime,
-                currentTime: this.contextMenuTime
+                timestamp: frameAlignedTime,
+                currentTime: frameAlignedTime,
+                frameNumber: frameNumber,
+                frameRate: this.frameRate
             });
 
 

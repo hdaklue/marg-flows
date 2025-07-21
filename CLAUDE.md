@@ -147,6 +147,8 @@ php artisan db:seed --class=DatabaseSeeder
 - **When using svg icons always use hero icons**
 - **Always apply dark and light mode for css, dark mode using .dark**
 - **Always use alpine's event syntax @ and .stop or .prevent instead of native js registering events, also .window for global events**
+- **Use zinc instead of gray and sky instead of blue**
+- **Always use alpines x-tooltip plugin for tooltips**
 
 ---
 

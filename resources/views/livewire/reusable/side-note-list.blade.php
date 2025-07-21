@@ -49,8 +49,8 @@
                     @foreach ($this->notes as $note)
                         <div
                             class="relative flex flex-col w-full px-2 py-1 border border-gray-100 rounded-lg gap-y-1 dark:border-gray-800 dark:bg-gray-900/50">
-                            <p class="text-xs text-gray-800 dark:text-gray-200">
-                                {{ $note->content }}
+                            <p class="text-xs prose text-gray-800 dark:prose-invert dark:text-gray-200">
+                                {!! $note->content !!}
                             </p>
                             <div class="flex items-center justify-between">
                                 <p class="text-gray-800 text-2xs justify-self-end text-end dark:text-gray-400">

@@ -7,6 +7,7 @@ namespace App\Livewire\Reusable;
 use App\Contracts\Sidenoteable;
 use App\Models\SideNote;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -36,7 +37,7 @@ final class SideNoteList extends Component
             return;
         }
         $sideNote = new SideNote([
-            'content' => $content,
+            'content' => $this->linkifyText($content),
         ]);
         $sideNote->creator()->associate(filamentUser());
         $this->sidenoteable->addSideNote($sideNote);
@@ -54,5 +55,22 @@ final class SideNoteList extends Component
     public function render()
     {
         return view('livewire.reusable.side-note-list');
+    }
+
+    private function linkifyText($text)
+    {
+        // Match URLs with or without protocol
+        $regex = '/\b((https?:\/\/)?(www\.)?[a-z0-9\-]+(\.[a-z]{2,})(\/\S*)?)/i';
+
+        return preg_replace_callback($regex, function ($matches) {
+            $url = $matches[0];
+            $hasProtocol = Str::startsWith($url, ['http://', 'https://']);
+            $href = $hasProtocol ? $url : 'https://' . $url;
+
+            $escapedHref = e($href);
+            $escapedText = e($url);
+
+            return "<a href=\"{$escapedHref}\" target=\"_blank\" rel=\"noopener noreferrer\">{$escapedText}</a>";
+        }, e($text));
     }
 }

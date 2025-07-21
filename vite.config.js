@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/components/editorjs/index.js',
                 'resources/css/components/editorjs/index.css',
                 'resources/css/components/editorjs/resizable-image.css',
+                'resources/css/audio-annotation.css',
             ],
             refresh: [
                 ...refreshPaths,
