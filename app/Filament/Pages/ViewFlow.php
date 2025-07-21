@@ -7,7 +7,11 @@ namespace App\Filament\Pages;
 use App\Filament\Resources\FlowResource;
 use App\Models\Flow;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\TextInput;
 use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -74,15 +78,43 @@ final class ViewFlow extends KanbanBoard
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('edit')
+                ->authorize('update', $this->flow)
+                ->outlined()
+                ->color('gray')
+                ->icon('heroicon-o-pencil-square')
+                ->size(ActionSize::ExtraSmall)
+                ->fillForm(fn () => [
+                    'title' => $this->flow->title,
+                    'start_date' => $this->flow->getProgressStartDate(),
+                    'due_date' => $this->flow->getProgressDueDate(),
+                ])
+                ->form([
+                    Grid::make([
+                        'sm' => 1,
+                        'lg' => 2,
+                    ])->schema([
+                        TextInput::make('title')
+                            ->required()
+                            ->minLength(5)
+                            ->columnSpanFull(),
+                        // DatePicker::make('start_date')
+                        //     ->native(false),
+                        DatePicker::make('due_date')
+                            ->minDate($this->flow->getProgressStartDate())
+                            ->required()
+                            ->native(false),
+                    ]),
+                ])->modalWidth(MaxWidth::Large),
             Action::make('add')
                 ->label('Task')
-                ->color('primary')
+                ->color('gray')
                 ->size(ActionSize::ExtraSmall)
                 ->icon('heroicon-o-plus-circle')
                 ->outlined()
                 ->url(FlowResource::getUrl('pages', ['record' => $this->recordId])),
             Action::make('view')
-                ->label('Knowledge')
+                ->label('Pages')
                 ->color('gray')
                 ->size(ActionSize::ExtraSmall)
                 ->icon('heroicon-o-document-text')

@@ -222,7 +222,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             this.player = videojs(this.videoElement.id, {
                 autoplay: false,
                 controls: false,
-                muted: true,
+                muted: false,
                 preload: 'auto',
                 playsinline: true,
                 responsive: true,
@@ -372,7 +372,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             // No need to divide by 1000 like we do for milliseconds
             const seconds = timestamp;
             const position = (seconds / this.duration) * this.progressBarWidth;
-            
+
             // Ensure position is within bounds
             return Math.max(0, Math.min(position, this.progressBarWidth));
         },

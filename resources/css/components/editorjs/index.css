@@ -116,9 +116,13 @@
     @apply bg-zinc-700;
 }
 
+.ce-toolbar__content{
+    @apply -translate-x-10;
+}
 .ce-block__content,
 .ce-toolbar__content {
     max-width: 100%;
+
     /* example value, adjust for your own use case */
 }
 

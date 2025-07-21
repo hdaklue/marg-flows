@@ -146,6 +146,11 @@ enum RoleEnum: string implements HasDescription, HasLabel
         return $this->getLevel() <= $other->getLevel();
     }
 
+    public function isEqualTo(RoleEnum $other): bool
+    {
+        return $this->getLevel() === $other->getLevel();
+    }
+
     /**
      * Check if this role is at least the same level as another.
      */

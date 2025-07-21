@@ -1,5 +1,6 @@
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
+import ZoomPlugin from 'wavesurfer.js/dist/plugins/zoom.esm.js';
 
 // Alpine.js Audio Annotation Component
 export default function audioAnnotation(userConfig = null, initialComments = []) {
@@ -26,6 +27,13 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             regionColor: 'rgba(168, 85, 247, 0.2)',
             regionBorderColor: '#a855f7'
         },
+        zoom: {
+            scale: 0.3, // Amount of zoom per wheel step (30% magnification per scroll)
+            maxZoom: 500, // Maximum pixels-per-second while zooming
+            minZoom: 50, // Minimum pixels-per-second while zooming
+            wheelZoom: true, // Enable mouse wheel zoom
+            touchZoom: true // Enable pinch-to-zoom on mobile
+        },
         timing: {
             commentPrecision: 0.01, // 10ms precision
             seekPrecision: 0.1 // 100ms for keyboard seeking
@@ -39,6 +47,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
         // Core WaveSurfer instance
         wavesurfer: null,
         regionsPlugin: null,
+        zoomPlugin: null,
 
         // Audio state
         isLoaded: false,
@@ -60,6 +69,9 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
         regionLoop: false, // Enable region looping by default
         hiddenRegions: new Set(), // Track individually hidden regions
 
+        // Zoom state
+        currentZoom: 150, // Current pixels per second (matches initial minPxPerSec)
+
         // Comments and annotations
         comments: initialComments || [],
         activeCommentId: null,
@@ -69,6 +81,9 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
 
         // Window size tracking
         windowWidth: window.innerWidth,
+
+        // Mobile controls state
+        mobileControlsExpanded: false,
 
         // Configuration
         config: config,
@@ -129,8 +144,11 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                 // Create regions plugin
                 this.regionsPlugin = RegionsPlugin.create();
 
-
-
+                // Create zoom plugin
+                this.zoomPlugin = ZoomPlugin.create({
+                    scale: this.config.zoom.scale,
+                    maxZoom: this.config.zoom.maxZoom,
+                });
 
                 // Initialize WaveSurfer
                 this.wavesurfer = WaveSurfer.create({
@@ -145,7 +163,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     height: 100,
                     normalize: true,
                     dragToSeek: false,
-                    plugins: [this.regionsPlugin]
+                    plugins: [this.regionsPlugin, this.zoomPlugin]
                 });
 
                 const random = (min, max) => Math.random() * (max - min) + min
@@ -261,6 +279,13 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             this.wavesurfer.on('interaction', () => {
                 this.activeRegion = null;
             });
+
+            // Zoom events
+            this.wavesurfer.on('zoom', (minPxPerSec) => {
+                this.currentZoom = Math.round(minPxPerSec);
+                // Dispatch event for external listeners
+                this.$dispatch('audio-annotation:zoom-changed', { zoom: this.currentZoom });
+            });
         },
 
         setupEventListeners() {
@@ -306,6 +331,25 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     }
                 }
             }, 1000); // Give WaveSurfer time to initialize
+
+            // Add global wheel event listener for Shift+scroll volume control
+            document.addEventListener('wheel', (event) => {
+                if (event.shiftKey && this.wavesurfer && this.isLoaded) {
+                    event.preventDefault();
+                    const delta = event.deltaY;
+                    const volumeStep = 0.05; // 5% volume steps
+                    
+                    if (delta < 0) {
+                        // Scroll up = volume up
+                        const newVolume = Math.min(this.volume + volumeStep, 1.0);
+                        this.setVolume(newVolume);
+                    } else {
+                        // Scroll down = volume down  
+                        const newVolume = Math.max(this.volume - volumeStep, 0.0);
+                        this.setVolume(newVolume);
+                    }
+                }
+            }, { passive: false });
         },
 
         // Audio control methods
@@ -1070,9 +1114,29 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     this.seekForward();
                     break;
                 case 'c':
-                    if (event.altKey || event.ctrlKey) {
+                case 'C':
+                    if (event.shiftKey) {
                         event.preventDefault();
                         this.addComment({ timestamp: this.currentTime });
+                    }
+                    break;
+                case '=':
+                case '+':
+                    if (event.ctrlKey || event.metaKey) {
+                        event.preventDefault();
+                        this.zoomIn();
+                    }
+                    break;
+                case '-':
+                    if (event.ctrlKey || event.metaKey) {
+                        event.preventDefault();
+                        this.zoomOut();
+                    }
+                    break;
+                case '0':
+                    if (event.ctrlKey || event.metaKey) {
+                        event.preventDefault();
+                        this.zoomReset();
                     }
                     break;
             }
@@ -1121,12 +1185,55 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
             }
         },
 
+        // Zoom control methods
+        zoomIn() {
+            if (!this.wavesurfer || !this.isLoaded) return;
+            
+            const newZoom = Math.min(this.currentZoom + 50, this.config.zoom.maxZoom);
+            this.wavesurfer.zoom(newZoom);
+        },
+
+        zoomOut() {
+            if (!this.wavesurfer || !this.isLoaded) return;
+            
+            const newZoom = Math.max(this.currentZoom - 50, this.config.zoom.minZoom);
+            this.wavesurfer.zoom(newZoom);
+        },
+
+        zoomToLevel(level) {
+            if (!this.wavesurfer || !this.isLoaded) return;
+            
+            const clampedLevel = Math.max(this.config.zoom.minZoom, Math.min(level, this.config.zoom.maxZoom));
+            this.wavesurfer.zoom(clampedLevel);
+        },
+
+        zoomReset() {
+            if (!this.wavesurfer || !this.isLoaded) return;
+            
+            this.wavesurfer.zoom(150); // Reset to initial zoom level
+        },
+
+        getZoomPercentage() {
+            const range = this.config.zoom.maxZoom - this.config.zoom.minZoom;
+            const current = this.currentZoom - this.config.zoom.minZoom;
+            return Math.round((current / range) * 100);
+        },
+
+        // Mobile controls methods
+        toggleMobileControls() {
+            this.mobileControlsExpanded = !this.mobileControlsExpanded;
+        },
+
         // Cleanup
         destroy() {
             if (this.wavesurfer) {
                 this.wavesurfer.destroy();
                 this.wavesurfer = null;
             }
+            
+            // Remove global event listeners to prevent memory leaks
+            // Note: We can't easily remove the exact listener without storing a reference
+            // This is acceptable since Alpine.js components are typically long-lived
         }
     };
 }

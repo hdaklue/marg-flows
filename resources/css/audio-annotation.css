@@ -119,13 +119,68 @@ div[part*="region comment-"]:hover::after {
     @apply w-6 h-6 border-2 rounded-full border-sky-600 border-t-transparent animate-spin;
 }
 
-/* Mobile Frame Navigation */
+/* Mobile Controls - Sliding Design */
+
+/* Base Container */
+.mobile-controls-container {
+    @apply flex items-center justify-center rounded-2xl bg-black/75 backdrop-blur-md shadow-xl border border-white/10 transition-all duration-300 ease-out overflow-hidden;
+}
+
+/* Collapsed State */
+.mobile-controls-collapsed {
+    @apply w-12 h-12 px-0 py-0;
+}
+
+/* Expanded State */
+.mobile-controls-expanded {
+    @apply w-full max-w-sm px-4 py-2;
+}
+
+/* Gear Button */
+.mobile-gear-button {
+    @apply flex items-center justify-center w-full h-full text-white transition-all duration-200 hover:text-white/80;
+}
+
+/* Individual Control Buttons */
+.mobile-control-btn {
+    @apply flex items-center justify-center w-8 h-8 text-white/90 transition-all duration-200 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 disabled:bg-white/5 disabled:text-white/30 disabled:cursor-not-allowed;
+}
+
+/* Play Button (Center, Larger) */
+.mobile-play-btn {
+    @apply flex items-center justify-center w-10 h-10 text-white transition-all duration-200 rounded-full bg-sky-600/90 hover:bg-sky-600 active:scale-95 disabled:bg-white/10 disabled:cursor-not-allowed shadow-lg;
+}
+
+/* Close Button */
+.mobile-close-btn {
+    @apply flex items-center justify-center w-6 h-6 text-white/70 transition-all duration-200 rounded-full hover:text-white hover:bg-white/10 active:scale-95;
+}
+
+/* Legacy Mobile Navigation (Fallback) */
 .mobile-frame-nav {
-    @apply fixed z-50 flex items-center px-4 py-2 space-x-4 transform -translate-x-1/2 rounded-full bottom-6 left-1/2 bg-black/80 backdrop-blur-sm;
+    @apply fixed z-50 flex items-center px-4 py-2 space-x-3 transform -translate-x-1/2 rounded-full bottom-6 left-1/2 bg-black/80 backdrop-blur-sm;
 }
 
 .mobile-nav-button {
-    @apply flex items-center justify-center w-12 h-12 text-white transition-colors duration-200 rounded-full bg-white/20 hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed;
+    @apply flex items-center justify-center w-10 h-10 text-white transition-colors duration-200 rounded-full bg-white/20 hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+    @apply flex items-center gap-1;
+}
+
+.zoom-button {
+    @apply flex items-center justify-center px-2 py-1 transition-all duration-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600 dark:focus:ring-offset-zinc-800;
+}
+
+.zoom-level-display {
+    @apply px-2 py-1 text-xs font-mono transition-all duration-200 rounded-md bg-zinc-100 text-zinc-600 dark:bg-zinc-600 dark:text-zinc-300;
+}
+
+/* Mobile Zoom Level Display */
+.mobile-zoom-display {
+    @apply px-2 py-1 text-xs font-mono text-white bg-white/20 rounded-md;
 }
 
 /* Keyboard Shortcuts Info */
@@ -253,6 +308,24 @@ div[part*="region comment-"]:hover::after {
 
     .shortcuts-grid {
         @apply grid grid-cols-1 gap-2 text-center;
+    }
+
+    /* Mobile controls responsive adjustments */
+    .mobile-controls-expanded {
+        @apply max-w-xs px-3 py-1.5;
+    }
+
+    .mobile-controls-collapsed {
+        @apply w-10 h-10;
+    }
+
+    .mobile-control-btn {
+        @apply w-7 h-7;
+    }
+
+    /* Adjust spacing on very small screens */
+    .mobile-controls-expanded .justify-between {
+        @apply gap-1;
     }
 }
 

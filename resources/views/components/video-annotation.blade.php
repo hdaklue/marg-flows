@@ -167,7 +167,7 @@
             <video crossorigin="anonymous" x-ref="videoPlayer"
                 :id="'video-player-' + Math.random().toString(36).substr(2, 9)"
                 class="w-full h-auto video-js vjs-fluid vjs-default-skin" preload="auto" data-setup='{}' playsinline
-                webkit-playsinline muted
+                webkit-playsinline
                 @if ($qualitySources) data-quality-sources='@json($qualitySources)' @endif>
                 @if ($qualitySources)
                     @foreach ($qualitySources as $index => $source)
@@ -350,7 +350,7 @@
         </div>
 
         <!-- Custom Video Controls -->
-        <div class="relative p-2 mt-3 rounded-lg bg-zinc-100 sm:p-3 dark:bg-zinc-800">
+        <div class="relative p-2 mt-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 sm:p-3">
             <div class="flex items-center justify-between gap-2 sm:gap-4">
                 <!-- Left Controls Group -->
                 <div class="flex items-center gap-1 sm:gap-3">
@@ -394,7 +394,7 @@
                         </button>
 
                         <!-- Frame Info Display -->
-                        <div class="hidden px-2 py-1 text-xs rounded-md bg-zinc-100 text-zinc-500 lg:block dark:bg-zinc-700 dark:text-zinc-400"
+                        <div class="hidden px-2 py-1 text-xs rounded-md bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400 lg:block"
                             :title="'Frame ' + currentFrameNumber + ' at ' + frameRate + 'fps'">
                             F<span x-text="currentFrameNumber"></span>
                         </div>
@@ -404,7 +404,7 @@
                     <div class="flex items-center gap-1 sm:gap-2">
                         <!-- Mobile Volume Button -->
                         <button @click="showVolumeModal = !showVolumeModal"
-                            class="flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 sm:hidden dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white">
+                            class="flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white sm:hidden">
                             <!-- Volume Up Icon -->
                             <svg x-show="!isMuted && volume > 0.5" x-cloak class="w-5 h-5" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -483,7 +483,7 @@
                     <div class="relative"
                         x-show="qualitySources.length > 1 && config.features.enableResolutionSelector" x-cloak>
                         <button @click="showResolutionMenu = !showResolutionMenu"
-                            class="flex items-center justify-center h-8 gap-1 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 sm:px-2 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
+                            class="flex items-center justify-center h-8 gap-1 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white sm:px-2"
                             :class="{ 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-white': showResolutionMenu }">
                             <!-- HD Icon -->
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -504,7 +504,7 @@
 
                         <!-- Resolution Dropdown (Desktop) -->
                         <div x-show="showResolutionMenu" x-cloak @click.away="showResolutionMenu = false"
-                            class="absolute right-0 z-50 hidden mb-2 bg-white rounded-lg shadow-lg bottom-full min-w-32 ring-1 ring-black/5 sm:block dark:bg-zinc-800 dark:ring-white/10"
+                            class="absolute right-0 z-50 hidden mb-2 bg-white rounded-lg shadow-lg bottom-full min-w-32 ring-1 ring-black/5 dark:bg-zinc-800 dark:ring-white/10 sm:block"
                             x-transition:enter="transition ease-out duration-100"
                             x-transition:enter-start="transform opacity-0 scale-95"
                             x-transition:enter-end="transform opacity-100 scale-100"
@@ -553,7 +553,7 @@
 
                         <!-- Settings Dropdown (Desktop) -->
                         <div x-show="showSettingsMenu" x-cloak @click.away="showSettingsMenu = false"
-                            class="absolute right-0 z-50 hidden w-56 mb-2 bg-white rounded-lg shadow-lg bottom-full ring-1 ring-black/5 sm:block dark:bg-zinc-800 dark:ring-white/10"
+                            class="absolute right-0 z-50 hidden w-56 mb-2 bg-white rounded-lg shadow-lg bottom-full ring-1 ring-black/5 dark:bg-zinc-800 dark:ring-white/10 sm:block"
                             x-transition:enter="transition ease-out duration-100"
                             x-transition:enter-start="transform opacity-0 scale-95"
                             x-transition:enter-end="transform opacity-100 scale-100"

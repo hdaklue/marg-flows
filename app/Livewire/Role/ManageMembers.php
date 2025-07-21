@@ -59,6 +59,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
     public function form(Form $form): Form
     {
+
         return $form
             ->schema([
                 Select::make('member')
@@ -73,6 +74,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
                     ->required(),
                 Select::make('role')
                     ->required()
+
                     ->options(function () {
                         if (! $this->roleable) {
                             return [];

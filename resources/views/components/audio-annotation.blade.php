@@ -109,23 +109,78 @@
 
         </div>
 
-        <!-- Mobile Frame Navigation (Floating) -->
-        <div x-show="windowWidth < 768" class="mobile-frame-nav">
-            <button @click="seekBackward()" :disabled="!isLoaded" class="mobile-nav-button">
-                <svg fill="currentColor" viewBox="0 0 20 20" class="w-6 h-6">
-                    <path fill-rule="evenodd"
-                        d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
-                        clip-rule="evenodd" />
-                </svg>
-            </button>
+        <!-- Mobile Frame Navigation (Sliding) -->
+        <div x-show="windowWidth < 768" class="fixed bottom-4 inset-x-0 z-50 flex justify-end pe-4">
+            <!-- Single Sliding Container -->
+            <div class="mobile-controls-container"
+                :class="mobileControlsExpanded ? 'mobile-controls-expanded' : 'mobile-controls-collapsed'">
+                
+                <!-- Gear Button (Collapsed State) -->
+                <button x-show="!mobileControlsExpanded" @click="toggleMobileControls()" 
+                    class="mobile-gear-button">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
 
-            <button @click="seekForward()" :disabled="!isLoaded" class="mobile-nav-button">
-                <svg fill="currentColor" viewBox="0 0 20 20" class="w-6 h-6">
-                    <path fill-rule="evenodd"
-                        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                        clip-rule="evenodd" />
-                </svg>
-            </button>
+                <!-- Controls Bar (Expanded State) -->
+                <div x-show="mobileControlsExpanded" x-cloak class="flex items-center justify-between w-full">
+                    
+                    <!-- Frame & Zoom Controls -->
+                    <div class="flex items-center justify-between flex-1">
+                        <!-- Zoom Out -->
+                        <button @click="zoomOut()" :disabled="!isLoaded || currentZoom <= config.zoom.minZoom" class="mobile-control-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                            </svg>
+                        </button>
+
+                        <!-- Seek Backward -->
+                        <button @click="seekBackward()" :disabled="!isLoaded" class="mobile-control-btn">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <!-- Zoom Reset -->
+                        <button @click="zoomReset()" :disabled="!isLoaded" class="mobile-control-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" 
+                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                            </svg>
+                        </button>
+
+                        <!-- Seek Forward -->
+                        <button @click="seekForward()" :disabled="!isLoaded" class="mobile-control-btn">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <!-- Zoom In -->
+                        <button @click="zoomIn()" :disabled="!isLoaded || currentZoom >= config.zoom.maxZoom" class="mobile-control-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zm-7-4v8m4-4H7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Close Button -->
+                    <button @click="toggleMobileControls()" class="mobile-close-btn">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Custom Audio Controls -->
@@ -142,11 +197,11 @@
                         title="Play/Pause (Space Bar)">
                         <!-- Play Icon -->
                         <svg x-show="!isPlaying" x-cloak class="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z" />
+                            <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
                         </svg>
                         <!-- Pause Icon -->
                         <svg x-show="isPlaying" x-cloak class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                            <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
                         </svg>
                     </button>
 
@@ -196,7 +251,7 @@
                         <!-- Volume Percentage (Desktop) -->
                         <span
                             class="hidden w-8 font-mono text-xs text-center transition-colors duration-200 text-zinc-500 dark:text-zinc-400 sm:inline-block"
-                            x-text="getVolumePercentage() + '%'">100%</span>
+                            x-text="(isMuted ? '0' : getVolumePercentage()) + '%'">100%</span>
                     </div>
                 </div>
 
@@ -229,7 +284,7 @@
                     </button>
                 </div>
 
-                <!-- END: Playback Speed + Add Comment + Toggle Regions -->
+                <!-- END: Playback Speed + Add Comment + Toggle Regions + Zoom Controls -->
                 <div class="flex items-center justify-end gap-1 overflow-visible sm:gap-2">
                     <!-- Playback Speed Control -->
                     <div class="relative">
@@ -318,14 +373,13 @@
 
                     <!-- Add Comment / Region Selection Buttons -->
                     <div x-show="!isSelectingRegion">
-                        <button x-tooltip.raw="Add Comment (Alt+C)" @click="addComment()"
+                        <button x-tooltip.raw="Add Comment (Shift+C)" @click="addComment()"
                             :disabled="!isLoaded || !config.features?.enableComments"
                             class="flex items-center justify-center px-2 py-1 text-white transition-all duration-200 rounded-md shadow-sm bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:bg-zinc-400 dark:focus:ring-offset-zinc-800"
-                            title="Add Comment (Alt+C)">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M10 2a6 6 0 00-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 00.515 1.076 32.91 32.91 0 003.256.508 3.5 3.5 0 006.972 0 32.903 32.903 0 003.256-.508.75.75 0 00.515-1.076A11.448 11.448 0 0116 8a6 6 0 00-6-6zM8.05 14.943a33.54 33.54 0 003.9 0 2 2 0 01-3.9 0z"
-                                    clip-rule="evenodd" />
+                            title="Add Comment (Shift+C)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" 
+                                    d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
                             </svg>
                         </button>
                     </div>
@@ -365,21 +419,46 @@
                             'bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600'"
                         :title="showRegions ? 'Hide Regions' : 'Show Regions'">
                         <!-- Eye Icon (Show) -->
-                        <svg x-show="showRegions" x-cloak class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path fill-rule="evenodd"
-                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                clip-rule="evenodd" />
+                        <svg x-show="showRegions" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         </svg>
                         <!-- Eye Slash Icon (Hide) -->
-                        <svg x-show="!showRegions" x-cloak class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
-                                clip-rule="evenodd" />
-                            <path
-                                d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                        <svg x-show="!showRegions" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
                         </svg>
                     </button>
+
+                    <!-- Zoom Controls (Desktop Only) -->
+                    <div x-show="windowWidth >= 768" class="flex items-center gap-1">
+                        <!-- Zoom Out Button -->
+                        <button x-tooltip.raw="Zoom Out Waveform" @click="zoomOut()" :disabled="!isLoaded || currentZoom <= config.zoom.minZoom"
+                            class="flex items-center justify-center px-2 py-1 transition-all duration-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600 dark:focus:ring-offset-zinc-800">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                            </svg>
+                        </button>
+
+
+                        <!-- Zoom In Button -->
+                        <button x-tooltip.raw="Zoom In Waveform" @click="zoomIn()" :disabled="!isLoaded || currentZoom >= config.zoom.maxZoom"
+                            class="flex items-center justify-center px-2 py-1 transition-all duration-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600 dark:focus:ring-offset-zinc-800">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zm-7-4v8m4-4H7" />
+                            </svg>
+                        </button>
+
+                        <!-- Zoom Reset Button -->
+                        <button x-tooltip.raw="Reset Zoom to 1:1" @click="zoomReset()" :disabled="!isLoaded"
+                            class="flex items-center justify-center px-2 py-1 transition-all duration-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600 dark:focus:ring-offset-zinc-800">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" 
+                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                            </svg>
+                        </button>
+                    </div>
 
                     <!-- Region Loop Toggle Button -->
                     <button x-tooltip.raw="Toggle Region Loop" @click="toggleRegionLoop()" :disabled="!isLoaded"
@@ -389,10 +468,9 @@
                             'bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600'"
                         :title="regionLoop ? 'Disable Loop' : 'Enable Loop'">
                         <!-- Loop Icon -->
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                                clip-rule="evenodd" />
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" 
+                                d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
                         </svg>
                     </button>
                 </div>
@@ -415,11 +493,20 @@
                 </span>
                 <span class="flex items-center gap-1">
                     <kbd
-                        class="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">Alt+C</kbd>
-                    /
-                    <kbd
-                        class="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">⌃+C</kbd>
+                        class="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">⇧+C</kbd>
                     Comment
+                </span>
+                <span class="flex items-center gap-1">
+                    <kbd
+                        class="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">Wheel</kbd>
+                    <kbd
+                        class="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">Cmd±</kbd>
+                    Zoom
+                </span>
+                <span class="flex items-center gap-1">
+                    <kbd
+                        class="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">⇧+Wheel</kbd>
+                    Volume
                 </span>
             </div>
         </div>
@@ -455,7 +542,7 @@
                     <!-- Volume Level Display -->
                     <div class="text-center">
                         <div class="text-3xl font-bold text-zinc-900 dark:text-white"
-                            x-text="getVolumePercentage() + '%'">100%</div>
+                            x-text="(isMuted ? '0' : getVolumePercentage()) + '%'">100%</div>
                         <div class="text-sm text-zinc-500 dark:text-zinc-400">Volume Level</div>
                     </div>
 

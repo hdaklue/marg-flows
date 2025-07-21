@@ -6,34 +6,34 @@
  */
 
 .resizable-image {
-  @apply relative mt-5 outline-none;
+  @apply relative py-3 mt-5 outline-none;
 }
 
 /* Upload Interface Styles */
 .resizable-image__upload-container {
-  @apply border-2 border-dashed border-gray-300 rounded-xl py-10 px-5 text-center bg-gray-50
+  @apply border-2 border-dashed border-zinc-300 rounded-xl py-10 px-5 text-center bg-zinc-50
          transition-all duration-300 cursor-pointer relative min-h-[140px] flex items-center
          justify-center shadow-sm;
 }
 
 .resizable-image__upload-container:hover {
-  @apply border-gray-400 bg-gray-100 -translate-y-0.5 shadow-lg;
+  @apply border-zinc-400 bg-zinc-100 -translate-y-0.5 shadow-lg;
 }
 
 .resizable-image__upload-container--dragover {
-  @apply border-blue-500 bg-blue-50 border-solid scale-[1.02] shadow-xl shadow-blue-500/15;
+  @apply border-sky-500 bg-sky-50 border-solid scale-[1.02] shadow-xl shadow-sky-500/15;
 }
 
 .dark .resizable-image__upload-container {
-  @apply bg-gray-800 border-gray-600 shadow-black/30;
+  @apply bg-zinc-800 border-zinc-600 shadow-black/30;
 }
 
 .dark .resizable-image__upload-container:hover {
-  @apply bg-gray-900 border-gray-500 shadow-black/40;
+  @apply bg-zinc-900 border-zinc-500 shadow-black/40;
 }
 
 .dark .resizable-image__upload-container--dragover {
-  @apply border-blue-400 bg-blue-900/50 shadow-blue-400/25;
+  @apply border-sky-400 bg-sky-900/50 shadow-sky-400/25;
 }
 
 .resizable-image__upload-button {
@@ -41,44 +41,44 @@
 }
 
 .resizable-image__upload-icon {
-  @apply flex items-center justify-center w-12 h-12 transition-all duration-300 border border-gray-200 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl;
+  @apply flex items-center justify-center w-12 h-12 transition-all duration-300 border border-zinc-200 bg-gradient-to-br from-zinc-100 to-zinc-200 rounded-2xl;
 }
 
 .resizable-image__upload-container:hover .resizable-image__upload-icon {
-  @apply bg-gradient-to-br from-gray-200 to-gray-300 scale-110 -translate-y-0.5 border-gray-400
+  @apply bg-gradient-to-br from-zinc-200 to-zinc-300 scale-110 -translate-y-0.5 border-zinc-400
          shadow-xl shadow-black/10;
 }
 
 .resizable-image__upload-icon svg {
-  @apply text-gray-500 transition-all duration-300 w-9 h-9;
+  @apply transition-all duration-300 text-zinc-500 w-9 h-9;
 }
 
 .resizable-image__upload-container:hover .resizable-image__upload-icon svg {
-  @apply text-gray-700 scale-110;
+  @apply scale-110 text-zinc-700;
 }
 
 .resizable-image__upload-text {
-  @apply m-0 text-base font-semibold tracking-tight text-gray-700;
+  @apply m-0 text-base font-semibold tracking-tight text-zinc-700;
 }
 
 .dark .resizable-image__upload-icon {
-  @apply border-gray-600 bg-gradient-to-br from-gray-700 to-gray-800;
+  @apply border-zinc-600 bg-gradient-to-br from-zinc-700 to-zinc-800;
 }
 
 .dark .resizable-image__upload-container:hover .resizable-image__upload-icon {
-  @apply border-gray-500 bg-gradient-to-br from-gray-600 to-gray-700 shadow-black/30;
+  @apply border-zinc-500 bg-gradient-to-br from-zinc-600 to-zinc-700 shadow-black/30;
 }
 
 .dark .resizable-image__upload-icon svg {
-  @apply text-gray-400;
+  @apply text-zinc-400;
 }
 
 .dark .resizable-image__upload-container:hover .resizable-image__upload-icon svg {
-  @apply text-gray-200;
+  @apply text-zinc-200;
 }
 
 .dark .resizable-image__upload-text {
-  @apply text-gray-200;
+  @apply text-zinc-200;
 }
 
 .resizable-image__file-input {
@@ -91,20 +91,20 @@
 }
 
 .resizable-image__progress-bar {
-  @apply w-full h-1 mb-3 overflow-hidden bg-gray-200 rounded-sm;
+  @apply w-full h-1 mb-3 overflow-hidden rounded-sm bg-zinc-200;
 }
 
 .resizable-image__progress-fill {
-  @apply h-full bg-blue-600 rounded-sm w-[30%];
+  @apply h-full bg-sky-600 rounded-sm w-[30%];
   animation: progress-indeterminate 2s infinite ease-in-out;
 }
 
 .dark .resizable-image__progress-bar {
-  @apply bg-gray-700;
+  @apply bg-zinc-700;
 }
 
 .dark .resizable-image__progress-fill {
-  @apply bg-blue-400;
+  @apply bg-sky-400;
 }
 
 @keyframes progress-indeterminate {
@@ -117,11 +117,11 @@
 }
 
 .resizable-image__progress-text {
-  @apply text-sm font-medium text-gray-500;
+  @apply text-sm font-medium text-zinc-500;
 }
 
 .dark .resizable-image__progress-text {
-  @apply text-gray-300;
+  @apply text-zinc-300;
 }
 
 /* Image Container Styles */
@@ -134,11 +134,11 @@
 }
 
 .resizable-image__container--resizable:hover {
-  @apply border-blue-600;
+  @apply border-sky-600;
 }
 
 .dark .resizable-image__container--resizable:hover {
-  @apply border-blue-400;
+  @apply border-sky-400;
 }
 
 .resizable-image__img {
@@ -147,7 +147,7 @@
 
 /* Resize Handles */
 .resizable-image__handle {
-  @apply absolute z-10 w-3 h-3 transition-opacity duration-200 bg-blue-600 border-2 border-white rounded-full opacity-0;
+  @apply absolute z-10 w-3 h-3 transition-opacity duration-200 border-2 border-white rounded-full opacity-0 bg-sky-600;
 }
 
 .resizable-image__container--resizable:hover .resizable-image__handle {
@@ -155,7 +155,7 @@
 }
 
 .dark .resizable-image__handle {
-  @apply bg-blue-400 border-gray-800;
+  @apply bg-sky-400 border-zinc-800;
 }
 
 /* Corner handles */
@@ -194,44 +194,44 @@
 
 /* Caption Input */
 .resizable-image__caption {
-  @apply w-full px-3 py-2 mt-3 text-sm text-gray-600 transition-colors duration-200 bg-white border border-gray-300 rounded-md outline-none;
+  @apply w-full px-3 py-2 mt-3 text-sm transition-colors duration-200 bg-white border rounded-md outline-none text-zinc-600 border-zinc-300;
 }
 
 .resizable-image__caption:focus {
-  @apply border-gray-500 ring-2 ring-gray-500/20;
+  @apply border-zinc-500 ring-2 ring-zinc-500/20;
 }
 
 .resizable-image__caption:read-only {
-  @apply text-gray-500 cursor-default bg-gray-50;
+  @apply cursor-default text-zinc-500 bg-zinc-50;
 }
 
 .resizable-image__caption::placeholder {
-  @apply text-gray-400;
+  @apply text-zinc-400;
 }
 
 .dark .resizable-image__caption {
-  @apply text-gray-200 bg-gray-800 border-gray-600;
+  @apply text-zinc-200 bg-zinc-800 border-zinc-600;
 }
 
 .dark .resizable-image__caption:focus {
-  @apply border-gray-400 ring-2 ring-gray-400/20;
+  @apply border-zinc-400 ring-2 ring-zinc-400/20;
 }
 
 .dark .resizable-image__caption:read-only {
-  @apply text-gray-400 bg-gray-900;
+  @apply text-zinc-400 bg-zinc-900;
 }
 
 .dark .resizable-image__caption::placeholder {
-  @apply text-gray-500;
+  @apply text-zinc-500;
 }
 
 /* Read-only caption display */
 .resizable-image__caption--readonly {
-  @apply w-full px-3 py-2 mt-3 text-sm text-gray-700 bg-gray-50 border border-gray-300 rounded-md;
+  @apply w-full px-3 py-2 mt-3 text-sm border rounded-md text-zinc-700 border-zinc-300 bg-zinc-50;
 }
 
 .dark .resizable-image__caption--readonly {
-  @apply text-gray-300 bg-gray-800 border-gray-600;
+  @apply text-zinc-300 bg-zinc-800 border-zinc-600;
 }
 
 /* Mobile Responsive */
@@ -276,11 +276,11 @@
 
 /* Accessibility */
 .resizable-image__upload-container:focus-within {
-  @apply outline outline-2 outline-blue-600 outline-offset-2;
+  @apply outline outline-2 outline-sky-600 outline-offset-2;
 }
 
 .resizable-image__handle:focus {
-  @apply opacity-100 outline outline-2 outline-blue-600 outline-offset-2;
+  @apply opacity-100 outline outline-2 outline-sky-600 outline-offset-2;
 }
 
 /* Animation for smooth interactions */
@@ -298,32 +298,32 @@
 }
 
 .resizable-image__setting-button {
-  @apply flex items-center gap-2 px-3 py-2 transition-colors duration-200 bg-transparent rounded-md cursor-pointer hover:bg-gray-100;
+  @apply flex items-center gap-2 px-3 py-2 transition-colors duration-200 bg-transparent rounded-md cursor-pointer hover:bg-zinc-100;
 }
 
 .resizable-image__setting-icon {
-  @apply flex items-center justify-center w-5 h-5 text-gray-500;
+  @apply flex items-center justify-center w-5 h-5 text-zinc-500;
 }
 
 .resizable-image__setting-label {
-  @apply text-sm font-medium text-gray-600;
+  @apply text-sm font-medium text-zinc-600;
 }
 
 .dark .resizable-image__setting-button:hover {
-  @apply bg-gray-700;
+  @apply bg-zinc-700;
 }
 
 .dark .resizable-image__setting-icon {
-  @apply text-gray-300;
+  @apply text-zinc-300;
 }
 
 .dark .resizable-image__setting-label {
-  @apply text-gray-200;
+  @apply text-zinc-200;
 }
 
 /* Dark Mode Styles for Images */
 .resizable-image__container--dark {
-  @apply p-3 border border-gray-600 shadow-xl bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-black/30;
+  @apply p-3 border shadow-xl border-zinc-600 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl shadow-black/30;
 }
 
 /* Centered Image Styles */
@@ -332,21 +332,21 @@
 }
 
 .resizable-image__container--dark .resizable-image__img {
-  @apply border-2 border-gray-600 rounded-lg shadow-lg shadow-black/40;
+  @apply border-2 rounded-lg shadow-lg border-zinc-600 shadow-black/40;
   filter: brightness(0.85) contrast(1.15) saturate(1.1);
 }
 
 .resizable-image__container--dark .resizable-image__handle {
-  @apply bg-blue-400 border-gray-800 shadow-sm shadow-black/30;
+  @apply shadow-sm bg-sky-400 border-zinc-800 shadow-black/30;
 }
 
 /* Loading state overlay */
 .resizable-image__loading {
-  @apply absolute inset-0 z-20 flex items-center justify-center border bg-white/90 backdrop-blur-sm rounded-xl border-gray-200/80;
+  @apply absolute inset-0 z-20 flex items-center justify-center border bg-white/90 backdrop-blur-sm rounded-xl border-zinc-200/80;
 }
 
 .dark .resizable-image__loading {
-  @apply bg-gray-900/90 border-gray-600/80;
+  @apply bg-zinc-900/90 border-zinc-600/80;
 }
 
 /* Gallery Styles */
@@ -359,13 +359,11 @@
 }
 
 .resizable-image__thumbnail {
-  @apply relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all duration-200 
-         hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-blue-500
-         bg-gray-100 dark:bg-gray-800;
+  @apply relative overflow-hidden transition-all duration-200 border-2 border-transparent rounded-lg cursor-pointer bg-zinc-100 aspect-square hover:scale-105 hover:shadow-lg hover:border-sky-500 dark:bg-zinc-800;
 }
 
 .resizable-image__thumbnail-image {
-  @apply w-full h-full object-cover transition-transform duration-200;
+  @apply object-cover w-full h-full transition-transform duration-200;
 }
 
 .resizable-image__thumbnail:hover .resizable-image__thumbnail-image {
@@ -373,9 +371,7 @@
 }
 
 .resizable-image__thumbnail-remove {
-  @apply absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full
-         flex items-center justify-center transition-all duration-200 opacity-0 hover:opacity-100
-         z-10 shadow-lg;
+  @apply absolute z-10 flex items-center justify-center w-6 h-6 text-white transition-all duration-200 bg-red-500 rounded-full shadow-lg opacity-0 top-1 right-1 hover:bg-red-600 hover:opacity-100;
 }
 
 .resizable-image__thumbnail:hover .resizable-image__thumbnail-remove {
@@ -383,26 +379,23 @@
 }
 
 .resizable-image__add-more {
-  @apply aspect-square rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600
-         flex flex-col items-center justify-center cursor-pointer transition-all duration-200
-         hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 
-         bg-white dark:bg-gray-800 hover:shadow-md;
+  @apply flex flex-col items-center justify-center transition-all duration-200 bg-white border-2 border-dashed rounded-lg cursor-pointer border-zinc-300 aspect-square dark:border-zinc-600 hover:border-sky-500 hover:bg-sky-50 dark:hover:bg-sky-900/20 dark:bg-zinc-800 hover:shadow-md;
 }
 
 .resizable-image__add-more-icon {
-  @apply w-8 h-8 text-gray-500 dark:text-gray-400 mb-1 transition-colors duration-200;
+  @apply w-8 h-8 mb-1 transition-colors duration-200 text-zinc-500 dark:text-zinc-400;
 }
 
 .resizable-image__add-more:hover .resizable-image__add-more-icon {
-  @apply text-blue-500 dark:text-blue-400;
+  @apply text-sky-500 dark:text-sky-400;
 }
 
 .resizable-image__add-more-text {
-  @apply text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors duration-200;
+  @apply text-xs font-medium transition-colors duration-200 text-zinc-600 dark:text-zinc-400;
 }
 
 .resizable-image__add-more:hover .resizable-image__add-more-text {
-  @apply text-blue-600 dark:text-blue-400;
+  @apply text-sky-600 dark:text-sky-400;
 }
 
 /* Modal Styles */
@@ -419,13 +412,11 @@
 }
 
 .resizable-image__modal-close {
-  @apply absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full
-         flex items-center justify-center transition-all duration-200 z-10;
+  @apply absolute z-10 flex items-center justify-center w-10 h-10 text-white transition-all duration-200 rounded-full top-4 right-4 bg-black/50 hover:bg-black/70;
 }
 
 .resizable-image__modal-nav {
-  @apply absolute top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 text-white 
-         rounded-full flex items-center justify-center transition-all duration-200 z-10;
+  @apply absolute z-10 flex items-center justify-center w-12 h-12 text-white transition-all duration-200 -translate-y-1/2 rounded-full top-1/2 bg-black/50 hover:bg-black/70;
 }
 
 .resizable-image__modal-prev {
@@ -437,8 +428,7 @@
 }
 
 .resizable-image__modal-counter {
-  @apply absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full
-         text-sm font-medium;
+  @apply absolute px-3 py-1 text-sm font-medium text-white -translate-x-1/2 rounded-full bottom-4 left-1/2 bg-black/50;
 }
 
 /* Responsive adjustments */
@@ -446,15 +436,15 @@
   .resizable-image__thumbnail-grid {
     @apply grid-cols-3 gap-2;
   }
-  
+
   .resizable-image__modal-content {
     @apply mx-2;
   }
-  
+
   .resizable-image__modal-nav {
     @apply w-10 h-10;
   }
-  
+
   .resizable-image__modal-close {
     @apply w-8 h-8 top-2 right-2;
   }
@@ -480,16 +470,15 @@
 }
 
 .resizable-image__progress-content {
-  @apply relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
-         border-2 border-gray-200 dark:border-gray-700;
+  @apply relative overflow-hidden border-2 rounded-lg bg-zinc-100 border-zinc-200 aspect-square dark:bg-zinc-800 dark:border-zinc-700;
 }
 
 .resizable-image__progress-thumbnail.status-pending .resizable-image__progress-content {
-  @apply border-gray-300 dark:border-gray-600;
+  @apply border-zinc-300 dark:border-zinc-600;
 }
 
 .resizable-image__progress-thumbnail.status-uploading .resizable-image__progress-content {
-  @apply border-blue-400 dark:border-blue-500;
+  @apply border-sky-400 dark:border-sky-500;
 }
 
 .resizable-image__progress-thumbnail.status-success .resizable-image__progress-content {
@@ -501,15 +490,15 @@
 }
 
 .resizable-image__progress-preview {
-  @apply w-full h-full object-cover;
+  @apply object-cover w-full h-full;
 }
 
 .resizable-image__progress-file-icon {
-  @apply w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500;
+  @apply flex items-center justify-center w-full h-full text-zinc-400 dark:text-zinc-500;
 }
 
 .resizable-image__progress-overlay {
-  @apply absolute inset-0 bg-black/50 dark:bg-black/60 flex items-center justify-center;
+  @apply absolute inset-0 flex items-center justify-center bg-black/50 dark:bg-black/60;
 }
 
 .resizable-image__progress-circle {
@@ -532,7 +521,7 @@
 }
 
 .resizable-image__progress-thumbnail.status-uploading .resizable-image__progress-ring-fill {
-  @apply text-blue-400 dark:text-blue-300;
+  @apply text-sky-400 dark:text-sky-300;
 }
 
 .resizable-image__progress-thumbnail.status-success .resizable-image__progress-ring-fill {
@@ -552,15 +541,15 @@
 }
 
 .resizable-image__progress-name {
-  @apply text-sm font-medium text-gray-900 dark:text-gray-100 truncate;
+  @apply text-sm font-medium truncate text-zinc-900 dark:text-zinc-100;
 }
 
 .resizable-image__progress-status-text {
-  @apply text-xs text-gray-500 dark:text-gray-400;
+  @apply text-xs text-zinc-500 dark:text-zinc-400;
 }
 
 .resizable-image__progress-thumbnail.status-uploading .resizable-image__progress-status-text {
-  @apply text-blue-600 dark:text-blue-400;
+  @apply text-sky-600 dark:text-sky-400;
 }
 
 .resizable-image__progress-thumbnail.status-success .resizable-image__progress-status-text {
@@ -572,9 +561,7 @@
 }
 
 .resizable-image__retry-btn {
-  @apply inline-flex items-center gap-1 px-2 py-1 text-xs bg-red-500 hover:bg-red-600 
-         dark:bg-red-600 dark:hover:bg-red-700 text-white rounded-full transition-colors 
-         duration-200 cursor-pointer mt-1;
+  @apply inline-flex items-center gap-1 px-2 py-1 mt-1 text-xs text-white transition-colors duration-200 bg-red-500 rounded-full cursor-pointer hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700;
 }
 
 .resizable-image__retry-btn:hover {
