@@ -1,12 +1,12 @@
 /* Audio Annotation Component Styles */
 
 .audio-annotation-container {
-    @apply w-full max-w-4xl mx-auto;
+    @apply w-full mx-auto max-w-7xl;
 }
 
 /* Audio Player Wrapper */
 .audio-player-wrapper {
-    @apply overflow-hidden bg-white rounded-lg shadow-lg dark:bg-zinc-800;
+    @apply flex flex-col overflow-hidden bg-white rounded-lg shadow-lg dark:bg-zinc-800 gap-y-2;
 }
 
 /* Audio Controls Header */
@@ -66,11 +66,11 @@
 
 /* Waveform Container */
 .waveform-container {
-    @apply relative p-6 bg-white dark:bg-zinc-800;
+  @apply relative bg-white dark:bg-zinc-800;
 }
 
 .waveform {
-    @apply w-full h-20 rounded;
+    @apply w-full rounded;
 }
 
 /* Ensure all child elements within waveform container hide scrollbars */

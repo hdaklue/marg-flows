@@ -131,7 +131,7 @@
         <!-- Custom Audio Controls -->
         <div class="relative p-2 mt-3 overflow-visible rounded-lg bg-zinc-100 dark:bg-zinc-800 sm:p-3"
             style="overflow: visible !important;">
-            <div class="grid items-center grid-cols-3 gap-2 overflow-visible sm:gap-4">
+            <div class="grid items-center grid-cols-2 gap-2 overflow-visible sm:gap-4 md:grid-cols-3">
                 <!-- START: Play Toggle + Volume -->
                 <div class="flex items-center gap-1 sm:gap-3">
                     <!-- Play/Pause Button -->
@@ -201,7 +201,7 @@
                 </div>
 
                 <!-- CENTER: Frame Navigation Controls -->
-                <div class="flex items-center justify-center gap-1 sm:gap-2">
+                <div x-show="windowWidth >= 768" class="flex items-center justify-center gap-1 sm:gap-2">
                     <!-- Backward Seek Button -->
                     <button @click="seekBackward()" @keydown.stop :disabled="!isLoaded"
                         class="flex items-center justify-center w-8 h-8 transition-all duration-200 rounded-lg audio-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:text-zinc-400 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white dark:focus:ring-zinc-600 dark:focus:ring-offset-zinc-800"
@@ -390,7 +390,9 @@
                         :title="regionLoop ? 'Disable Loop' : 'Enable Loop'">
                         <!-- Loop Icon -->
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                clip-rule="evenodd" />
                         </svg>
                     </button>
                 </div>
