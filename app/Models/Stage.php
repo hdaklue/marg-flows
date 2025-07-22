@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static Builder<static>|Stage whereStageableId($value)
  * @method static Builder<static>|Stage whereStageableType($value)
  * @method static Builder<static>|Stage whereUpdatedAt($value)
+ * @mixin IdeHelperStage
  * @mixin \Eloquent
  */
 class Stage extends Model

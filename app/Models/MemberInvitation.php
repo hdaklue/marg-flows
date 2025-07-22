@@ -31,6 +31,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static Builder<static>|MemberInvitation whereRoleData($value)
  * @method static Builder<static>|MemberInvitation whereSenderId($value)
  * @method static Builder<static>|MemberInvitation whereUpdatedAt($value)
+ * @mixin IdeHelperMemberInvitation
  * @mixin \Eloquent
  */
 class MemberInvitation extends Model

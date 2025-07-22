@@ -49,6 +49,7 @@ use Illuminate\Support\Collection;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereUpdatedAt($value)
+ * @mixin IdeHelperTenant
  * @mixin \Eloquent
  */
 final class Tenant extends Model implements HasStaticType, RoleableEntity

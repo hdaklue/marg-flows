@@ -89,10 +89,10 @@ final class CreateFlow
 
         return new Flow([
             'title' => $data->title,
+            'description' => $data->description,
             'start_date' => $data->start_date,
             'due_date' => $data->due_date,
             'status' => $data->status->value,
-            'blocks' => $data->blocks,
         ]);
     }
 

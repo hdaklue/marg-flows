@@ -11,7 +11,6 @@ use App\Filament\Pages\FlowsKanabanBoard;
 use App\Filament\Resources\FlowResource;
 use App\Forms\Components\ChunkedFileUpload;
 use App\Forms\Components\EditorJs;
-use App\Forms\Components\PlaceholderInput;
 use App\Models\User;
 use App\Services\Flow\TemplateService;
 use Exception;
@@ -20,6 +19,8 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -51,20 +52,19 @@ final class CreateFlow extends CreateRecord
                 Grid::make([
                     'lg' => 4,
                 ])->schema([
-                    PlaceholderInput::make('title')
-                        ->autofocus(true)
-                        ->autocomplete(false)
-                        ->columnSpanFull()
-                        ->placeholder('Title')
-                        ->required(),
 
                     Section::make([
-                        EditorJs::make('blocks')
-                            ->required()
-                            ->columnSpanFull(),
-                        ChunkedFileUpload::make('as')
-                            ->video()
-                            ->maxFiles(5),
+                        TextInput::make('title')
+                            ->required(),
+                        Textarea::make('description')
+                            ->required(),
+
+                        // EditorJs::make('blocks')
+                        //     ->required()
+                        //     ->columnSpanFull(),
+                        // ChunkedFileUpload::make('as')
+                        //     ->video()
+                        //     ->maxFiles(5),
                     ])->columnSpan(3),
                     Section::make([
                         Select::make('template')

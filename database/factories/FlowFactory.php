@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Flow>
  */
-class FlowFactory extends Factory
+final class FlowFactory extends Factory
 {
     protected $model = Flow::class;
 
@@ -28,19 +28,19 @@ class FlowFactory extends Factory
 
         return [
             'title' => $this->getProjectTitle(),
-            'blocks' => '{}',
+            'description' => fake()->sentences(2, true),
             'status' => $statusType,
             'start_date' => $startDate,
             'due_date' => $dueDate,
             'completed_at' => $completedAt,
             'settings' => $this->getProjectSettings(),
-            'tenant_id' => Tenant::inRandomOrder()->first()->id,
-            'creator_id' => User::inRandomOrder()->first()->id,
+            'tenant_id' => Tenant::inRandomOrder()->first()->getKey(),
+            'creator_id' => User::inRandomOrder()->first()->getKey(),
         ];
     }
 
     /**
-     * Create scheduled flows (guaranteed future)
+     * Create scheduled flows (guaranteed future).
      */
     public function scheduled(): static
     {
@@ -59,7 +59,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Create active flows (guaranteed current)
+     * Create active flows (guaranteed current).
      */
     public function active(): static
     {
@@ -78,7 +78,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Create overdue flows (guaranteed past due)
+     * Create overdue flows (guaranteed past due).
      */
     public function overdue(): static
     {
@@ -97,7 +97,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Create paused flows
+     * Create paused flows.
      */
     public function paused(): static
     {
@@ -116,7 +116,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Create completed flows (guaranteed finished)
+     * Create completed flows (guaranteed finished).
      */
     public function completed(): static
     {
@@ -148,7 +148,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Create edge case flows for testing
+     * Create edge case flows for testing.
      */
     public function edgeCases(): static
     {
@@ -189,7 +189,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Get weighted status selection (more predictable than random)
+     * Get weighted status selection (more predictable than random).
      */
     private function getWeightedStatus(): int|string
     {
@@ -214,7 +214,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Generate predictable dates based on status
+     * Generate predictable dates based on status.
      */
     private function generateDatesForStatus(string|int $status): array
     {
@@ -230,7 +230,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Generate dates for scheduled flows (predictable future dates)
+     * Generate dates for scheduled flows (predictable future dates).
      */
     private function scheduledDates(Carbon $now): array
     {
@@ -246,7 +246,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Generate dates for active flows (predictable past start, future due)
+     * Generate dates for active flows (predictable past start, future due).
      */
     private function activeDates(Carbon $now): array
     {
@@ -268,7 +268,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Generate dates for paused flows (started in past, not completed)
+     * Generate dates for paused flows (started in past, not completed).
      */
     private function pausedDates(Carbon $now): array
     {
@@ -284,7 +284,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Generate dates for completed flows (realistic completion scenarios)
+     * Generate dates for completed flows (realistic completion scenarios).
      */
     private function completedDates(Carbon $now): array
     {
@@ -315,7 +315,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Get predictable project titles
+     * Get predictable project titles.
      */
     private function getProjectTitle(): string
     {
@@ -346,7 +346,7 @@ class FlowFactory extends Factory
     }
 
     /**
-     * Get predictable project settings
+     * Get predictable project settings.
      */
     private function getProjectSettings(): ?array
     {

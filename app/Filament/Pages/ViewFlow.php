@@ -9,6 +9,7 @@ use App\Models\Flow;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\MaxWidth;
@@ -63,6 +64,11 @@ final class ViewFlow extends KanbanBoard
         return $this->flow->title;
     }
 
+    public function getSubheading(): string|Htmlable|null // @phpstan-ignore-line
+    {
+        return $this->flow?->description;
+    }
+
     #[On('board-item-updated.{recordId}')]
     public function reloadMembers()
     {
@@ -88,16 +94,19 @@ final class ViewFlow extends KanbanBoard
                     'title' => $this->flow->title,
                     'start_date' => $this->flow->getProgressStartDate(),
                     'due_date' => $this->flow->getProgressDueDate(),
+                    'description' => $this->flow->description,
                 ])
                 ->form([
                     Grid::make([
                         'sm' => 1,
-                        'lg' => 2,
+                        'lg' => 1,
                     ])->schema([
                         TextInput::make('title')
                             ->required()
                             ->minLength(5)
                             ->columnSpanFull(),
+                        Textarea::make('description')
+                            ->required(),
                         // DatePicker::make('start_date')
                         //     ->native(false),
                         DatePicker::make('due_date')

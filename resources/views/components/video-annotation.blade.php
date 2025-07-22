@@ -4,10 +4,13 @@
 {{-- <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
 <script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script> --}}
 
-<div x-data="videoAnnotation(@js($config ?? null), @js($comments ?? []))" class="relative w-full overflow-visible bg-black rounded-lg focus:outline-none"
+<div x-data="videoAnnotation(@js($config ?? null), @js($comments ?? []))" class="relative w-full overflow-visible bg-black rounded-lg focus:outline-none" tabindex="0"
     @destroy.window="destroy()" @contextmenu.prevent="handleVideoRightClick($event)"
-    @keydown.arrow-left.window.prevent="stepBackward()" @keydown.arrow-right.window.prevent="stepForward()"
+    @keydown.arrow-left.window.prevent="stepBackward()" 
+    @keydown.arrow-right.window.prevent="stepForward()"
     @keydown.space.window.prevent="togglePlay()"
+    @keydown.enter.window.prevent="isCreatingRegion && confirmRegionCreation()"
+    @keydown.escape.window.prevent="isCreatingRegion && cancelRegionCreation()"
     @keydown.alt.c.window.prevent="config.annotations?.enableVideoComments && addCommentAtCurrentFrame()"
     @keydown.ctrl.c.window.prevent="config.annotations?.enableVideoComments && addCommentAtCurrentFrame()" tabindex="0">
 
@@ -317,9 +320,9 @@
                             </div>
                         </div>
 
-                        <!-- Progress Bar Time Preview (follows pointer) - Below progress bar -->
+                        <!-- Progress Bar Time Preview (follows pointer) - Above progress bar -->
                         <div x-show="showTooltip"
-                            class="pointer-events-none absolute top-6 z-[9999] hidden -translate-x-1/2 transform sm:block"
+                            class="pointer-events-none absolute bottom-6 z-[9999] hidden -translate-x-1/2 transform sm:block"
                             :style="`left: ${hoverX}px;`" x-transition:enter="transition ease-out duration-150"
                             x-transition:enter-start="opacity-0 scale-90"
                             x-transition:enter-end="opacity-100 scale-100"
@@ -329,20 +332,178 @@
                             <div
                                 class="px-2 py-1 font-mono text-xs text-white rounded shadow-lg bg-zinc-900 dark:bg-zinc-800">
                                 <span x-text="formatTime(dragCurrentTime)">0:00</span>
-                                <!-- Tooltip Arrow pointing up to progress bar -->
+                                <!-- Tooltip Arrow pointing down to progress bar -->
                                 <div
-                                    class="absolute w-0 h-0 transform -translate-x-1/2 border-b-4 border-l-4 border-r-4 bottom-full left-1/2 border-b-zinc-900 border-l-transparent border-r-transparent dark:border-b-zinc-800">
+                                    class="absolute w-0 h-0 transform -translate-x-1/2 border-t-4 border-l-4 border-r-4 top-full left-1/2 border-t-zinc-900 border-l-transparent border-r-transparent dark:border-t-zinc-800">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Time Display Under Progress Bar -->
-                <div class="flex items-center justify-between mt-1 font-mono text-xs text-white drop-shadow-lg">
-                    <span x-text="formatTime(currentTime)"
-                        class="px-1 rounded bg-black/50 backdrop-blur-sm">0:00</span>
-                    <span x-text="formatTime(duration)" class="px-1 rounded bg-black/50 backdrop-blur-sm">0:00</span>
+
+                <!-- Region Bar -->
+                <div x-show="showRegionBar && config.features.enableAnnotations" x-cloak class="mt-2">
+                    <!-- Region Creation Area -->
+                    <div x-ref="regionBar" 
+                        @mousedown.prevent="startRegionCreation($event)"
+                        @mousemove="isCreatingRegion && updateRegionCreation($event)"
+                        @mouseup="isCreatingRegion && finishRegionCreation($event)"
+                        @mouseleave="isCreatingRegion && cancelRegionCreation()"
+                        @touchstart.prevent="startRegionCreation($event)"
+                        @touchmove.prevent="isCreatingRegion && updateRegionCreation($event)"
+                        @touchend.prevent="isCreatingRegion && finishRegionCreation($event)"
+                        class="relative w-full h-8 rounded-md border cursor-crosshair overflow-hidden transition-colors"
+                        :class="isCreatingRegion || regions.length > 0 ? 'bg-zinc-200 border-zinc-400 dark:bg-zinc-800 dark:border-zinc-600' : 'bg-zinc-300 border-zinc-500 dark:bg-zinc-700 dark:border-zinc-500'">
+                        
+                        <!-- Region Creation Preview -->
+                        <div x-show="isCreatingRegion && regionCreationStart && regionCreationEnd" x-cloak
+                            class="absolute top-0 h-full bg-emerald-400 border-l-4 border-r-4 border-emerald-700 shadow-lg dark:bg-emerald-500 dark:border-emerald-800"
+                            :style="regionCreationStart && regionCreationEnd ? `left: ${Math.min(regionCreationStart.x, regionCreationEnd.x)}px; width: ${Math.abs(regionCreationEnd.x - regionCreationStart.x)}px` : ''">
+                            
+                            <!-- Simple Creation Label -->
+                            <div x-show="isCreatingRegion" x-cloak
+                                class="absolute inset-0 flex items-center justify-center text-xs font-bold text-emerald-900 dark:text-emerald-100 pointer-events-none drop-shadow-sm">
+                                Creating Region
+                            </div>
+                            
+                            <!-- Real-time Tooltip Following End Edge -->
+                            <div x-show="isCreatingRegion && regionCreationEnd" x-cloak
+                                class="absolute pointer-events-none bottom-8 z-[9999] -translate-x-1/2 transform"
+                                :style="`left: ${regionCreationEnd ? regionCreationEnd.x : 0}px;`"
+                                x-transition:enter="transition ease-out duration-150"
+                                x-transition:enter-start="opacity-0 scale-90"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-100"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-90">
+                                <div class="px-3 py-2 font-mono text-xs text-white rounded-lg shadow-xl bg-emerald-800 dark:bg-emerald-900">
+                                    <div class="font-bold text-emerald-100">End Time</div>
+                                    <div class="text-emerald-200" x-text="regionCreationEnd ? formatTime(regionCreationEnd.time) : '0:00'">0:00</div>
+                                    <div class="text-[10px] text-emerald-300 mt-1" x-text="regionCreationEnd ? `Frame ${regionCreationEnd.frame}` : 'Frame 0'">Frame 0</div>
+                                    <!-- Tooltip Arrow pointing down -->
+                                    <div class="absolute w-0 h-0 transform -translate-x-1/2 border-t-4 border-l-4 border-r-4 top-full left-1/2 border-t-emerald-800 border-l-transparent border-r-transparent dark:border-t-emerald-900">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Start Time Tooltip (Static at start edge) -->
+                            <div x-show="isCreatingRegion && regionCreationStart" x-cloak
+                                class="absolute pointer-events-none bottom-8 z-[9998] -translate-x-1/2 transform"
+                                :style="`left: ${regionCreationStart ? regionCreationStart.x : 0}px;`">
+                                <div class="px-2 py-1 font-mono text-xs text-white rounded shadow-lg bg-emerald-600 dark:bg-emerald-700">
+                                    <div class="text-emerald-100" x-text="regionCreationStart ? formatTime(regionCreationStart.time) : '0:00'">0:00</div>
+                                    <!-- Tooltip Arrow pointing down -->
+                                    <div class="absolute w-0 h-0 transform -translate-x-1/2 border-t-4 border-l-4 border-r-4 top-full left-1/2 border-t-emerald-600 border-l-transparent border-r-transparent dark:border-t-emerald-700">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Region Creation Controls -->
+                        <div x-show="isCreatingRegion" x-cloak 
+                            class="absolute inset-x-0 -bottom-16 flex items-center justify-center gap-3 p-3 bg-zinc-800 dark:bg-zinc-900 rounded-lg border border-zinc-600 shadow-xl">
+                            <!-- Duration Display -->
+                            <div class="text-xs text-zinc-300 font-mono">
+                                Duration: <span x-text="regionCreationStart && regionCreationEnd ? formatTime(Math.abs(regionCreationEnd.time - regionCreationStart.time)) : '0:00'" class="text-emerald-300 font-bold">0:00</span>
+                            </div>
+                            
+                            <!-- Arrow Controls -->
+                            <div class="flex items-center gap-1">
+                                <button @click="reduceRegionEnd()" 
+                                    class="flex items-center justify-center w-8 h-8 text-orange-300 bg-orange-900/50 hover:bg-orange-800/70 rounded transition-colors"
+                                    title="Reduce End (Shift + ← Arrow)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                    </svg>
+                                </button>
+                                
+                                <div class="text-xs text-zinc-400 px-2">End Edge</div>
+                                
+                                <button @click="expandRegionEnd()" 
+                                    class="flex items-center justify-center w-8 h-8 text-emerald-300 bg-emerald-900/50 hover:bg-emerald-800/70 rounded transition-colors"
+                                    title="Expand End (Shift + → Arrow)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="flex items-center gap-2">
+                                <button @click="cancelRegionCreation()" 
+                                    class="px-3 py-1.5 text-xs font-medium text-red-200 bg-red-900/50 hover:bg-red-800/70 rounded transition-colors"
+                                    title="Cancel (Esc)">
+                                    Cancel
+                                </button>
+                                
+                                <button @click="confirmRegionCreation()" 
+                                    class="px-3 py-1.5 text-xs font-medium text-emerald-200 bg-emerald-900/50 hover:bg-emerald-800/70 rounded transition-colors"
+                                    title="Create Region (Enter)"
+                                    :disabled="!regionCreationStart || !regionCreationEnd || Math.abs(regionCreationEnd.time - regionCreationStart.time) < frameDuration * 2"
+                                    :class="{ 'opacity-50 cursor-not-allowed': !regionCreationStart || !regionCreationEnd || Math.abs(regionCreationEnd.time - regionCreationStart.time) < frameDuration * 2 }">
+                                    ✓ Create Region
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Existing Regions -->
+                        <template x-for="region in regions" :key="region.id">
+                            <div x-show="isRegionVisible(region)" x-cloak
+                                class="absolute top-0 h-full bg-sky-400 border-l-4 border-r-4 border-sky-700 cursor-pointer group hover:bg-sky-500 transition-colors shadow-lg hover:shadow-xl dark:bg-sky-500 dark:border-sky-800 dark:hover:bg-sky-400"
+                                :style="`left: ${getRegionPosition(region).left}px; width: ${getRegionPosition(region).width}px`"
+                                @click="jumpToRegionStart(region)"
+                                @mouseenter="showRegionTooltipFor(region.id)"
+                                @mouseleave="hideRegionTooltips()">
+                                
+                                <!-- Region Tooltip -->
+                                <div x-show="showRegionTooltip === region.id" x-cloak
+                                    class="absolute z-50 p-2 mb-2 text-xs text-white bg-zinc-900 rounded-lg shadow-xl pointer-events-none bottom-full dark:bg-zinc-800 whitespace-nowrap"
+                                    :style="`left: 50%; transform: translateX(-50%)`">
+                                    <div class="font-medium" x-text="region.title"></div>
+                                    <div class="text-zinc-300 dark:text-zinc-400">
+                                        <span x-text="formatTime(region.startTime)"></span>
+                                        - 
+                                        <span x-text="formatTime(region.endTime)"></span>
+                                    </div>
+                                    <div class="text-xs text-zinc-400 dark:text-zinc-500">
+                                        Frames <span x-text="region.startFrame"></span>-<span x-text="region.endFrame"></span>
+                                    </div>
+                                    <!-- Tooltip Arrow -->
+                                    <div class="absolute w-0 h-0 transform -translate-x-1/2 border-l-4 border-r-4 border-t-4 top-full left-1/2 border-l-transparent border-r-transparent border-t-zinc-900 dark:border-t-zinc-800">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <!-- Region Bar Instructions -->
+                        <div x-show="regions.length === 0 && !isCreatingRegion" x-cloak
+                            class="absolute inset-0 flex items-center justify-center text-xs text-zinc-600 dark:text-zinc-400 pointer-events-none">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Drag to create region
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Minimal Timeline Below Region Bar -->
+                    <div x-show="duration > 0" x-cloak class="relative w-full h-4 mt-1">
+                        <!-- Timeline Markers -->
+                        <template x-for="tick in Array.from({length: Math.floor(duration / (duration > 300 ? 30 : 10)) + 1}, (_, i) => i * (duration > 300 ? 30 : 10))" :key="`timeline-${tick}`">
+                            <div class="absolute top-0 pointer-events-none"
+                                :style="`left: ${(tick / duration) * 100}%`"
+                                x-show="tick <= duration && tick > 0">
+                                <!-- Solid tick mark -->
+                                <div class="w-px bg-zinc-600 dark:bg-zinc-400 h-3"></div>
+                                <!-- Clear time label -->
+                                <div class="absolute top-3 text-[8px] text-zinc-700 dark:text-zinc-300 font-mono transform -translate-x-1/2 whitespace-nowrap bg-white dark:bg-zinc-800 px-1 rounded"
+                                    x-text="formatTime(tick)">
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
 

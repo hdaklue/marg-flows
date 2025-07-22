@@ -17,6 +17,7 @@ return new class extends Migration
         Schema::create('flows', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('title');
+            $table->text('description')->nullable();
             $table->tinyInteger('status')
                 ->default(FlowStatus::ACTIVE->value);
 
@@ -30,8 +31,6 @@ return new class extends Migration
             $table->date('canceled_at')->nullable();
 
             $table->json('settings')->nullable();
-
-            $table->json('blocks');
 
             // foreign keys
             $table->foreignUlid('tenant_id')->references('id')->on('tenants');

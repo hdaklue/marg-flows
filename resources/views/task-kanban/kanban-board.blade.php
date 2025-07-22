@@ -3,8 +3,8 @@
     $users = $this->getParticipantsArray;
 @endphp
 <x-filament-panels::page>
-    <div class="flex gap-x-2">
-        <div class="flex items-center gap-x-1">
+    <div class="flex flex-col gap-x-2">
+        <div class="flex flex-row items-center gap-x-1">
             <x-filament::badge size="sm" color="gray" icon="heroicon-o-calendar-days">
                 <div class="flex items-center h-full gap-x-1">
                     <div clas="font-bold"> Due:</div>
@@ -17,18 +17,7 @@
                     <div class="text-xs">{{ toUserDate($this->flow->start_date, filamentUser()) }}</div>
                 </div>
             </x-filament::badge>
-        </div>
-        <div class="flex flex-row -space-x-2">
-
             <x-user-avatar-stack :users="$users" size="xs" :canEdit="$this->canManageFlow" :editableKey="$this->flow->getKey()" />
-            {{-- @foreach ($this->flow->getParticipants() as $participant)
-                <div class="w-6 h-6 rounded-full cursor-default" x-tooltip="name" x-data="{
-                    name: '{{ $participant->model->name }} ({{ RoleEnum::from($participant->role->name)->getLabel() }})'
-                }">
-                    <img class="w-full border rounded-full border-gray-50 dark:border-gray-800"
-                        src="{{ filament()->getUserAvatarUrl($participant->model) }}">
-                </div>
-            @endforeach --}}
         </div>
     </div>
 

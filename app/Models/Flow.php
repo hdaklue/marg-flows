@@ -31,8 +31,6 @@ use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
 /**
- * 
- *
  * @property string $id
  * @property string $title
  * @property int $status
@@ -49,21 +47,22 @@ use Spatie\EloquentSortable\SortableTrait;
  * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $assignedRoles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
- * @property-read \App\Models\User $creator
+ * @property-read User $creator
  * @property-read string $progress_completed_date
  * @property-read string $progress_due_date
  * @property-read string $progress_start_date
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $participants
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $participants
  * @property-read int|null $participants_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $roleAssignments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SideNote> $sideNotes
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, SideNote> $sideNotes
  * @property-read int|null $side_notes_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stage> $stages
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Stage> $stages
  * @property-read int|null $stages_count
- * @property-read \App\Models\Tenant $tenant
+ * @property-read Tenant $tenant
+ *
  * @method static Builder<static>|Flow assignable()
  * @method static Builder<static>|Flow byStage(\App\Enums\FlowStatus|string $status)
  * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStatus|string $status)
@@ -94,6 +93,13 @@ use Spatie\EloquentSortable\SortableTrait;
  * @method static Builder<static>|Flow whereUpdatedAt($value)
  * @method static Builder<static>|Flow withTrashed()
  * @method static Builder<static>|Flow withoutTrashed()
+ *
+ * @mixin IdeHelperFlow
+ *
+ * @property string|null $description
+ *
+ * @method static Builder<static>|Flow whereDescription($value)
+ *
  * @mixin \Eloquent
  */
 final class Flow extends Model implements HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
@@ -116,13 +122,14 @@ final class Flow extends Model implements HasStages, HasStaticType, RoleableEnti
 
     protected $fillable = [
         'title',
+        'description',
         'status',
         'is_default',
         'start_date',
         'due_date',
         'completed_at',
         'canceled_at',
-        'blocks',
+
     ];
 
     /* The model's default values for attributes.
@@ -208,7 +215,6 @@ final class Flow extends Model implements HasStages, HasStaticType, RoleableEnti
     {
         return [
             'settings' => 'array',
-            'blocks' => 'json:unicode',
             'due_date' => 'datetime',
             'start_date' => 'datetime',
             'completed_at' => 'date',

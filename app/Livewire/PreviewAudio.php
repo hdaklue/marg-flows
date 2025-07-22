@@ -71,6 +71,7 @@ final class PreviewAudio extends Component
                 'progressColor' => '#3b82f6',
                 'cursorColor' => '#ef4444',
                 'theme' => 'auto',
+                'progressBarMode' => 'always',
             ],
             'annotations' => [
                 'enableWaveformComments' => true,

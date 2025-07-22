@@ -40,7 +40,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             enableSettingsMenu: true
         },
         ui: {
-            progressBarMode: 'auto-hide',
+            progressBarMode: 'always',
             showControls: true,
             helpTooltipLimit: 3,
             theme: 'auto'
@@ -140,6 +140,20 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         boundHandleDragMove: null,
         boundEndDrag: null,
         wasPlayingBeforeDrag: false,
+
+        // Region Management
+        regions: [], // Array of region objects: {id, startTime, endTime, startFrame, endFrame, title, description}
+        maxRegions: 20,
+        isCreatingRegion: false,
+        regionCreationStart: null,
+        regionCreationEnd: null,
+        showRegionBar: true,
+        regionBarWidth: 0,
+        dragStartRegion: null,
+        isDraggingRegion: false,
+        regionDragOffset: 0,
+        showRegionTooltip: null, // ID of region showing tooltip
+        hiddenRegions: new Set(), // Set of region IDs that are hidden
 
         // Getter for current video time - always references actual player time
         get getCurrentTime() {
@@ -333,6 +347,11 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 }
             });
 
+            // Listen for external region loading
+            this.$el.addEventListener('video-annotation:load-regions', (event) => {
+                this.loadRegions(event.detail.regions || []);
+            });
+
             // Throttled resize handler for better performance
             let resizeTimeout;
             window.addEventListener('resize', () => {
@@ -351,6 +370,12 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 if (progressBar) {
                     this.progressBarWidth = progressBar.offsetWidth;
                     this.updateSeekCirclePosition();
+                }
+
+                // Also update region bar width
+                const regionBar = this.$refs.regionBar;
+                if (regionBar) {
+                    this.regionBarWidth = regionBar.offsetWidth;
                 }
             });
         },
@@ -473,6 +498,12 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         stepForward() {
             if (!this.player) return;
 
+            // If creating region, expand region end instead of normal frame step
+            if (this.isCreatingRegion) {
+                this.expandRegionEnd();
+                return;
+            }
+
             // Store playing state and pause if needed
             this.wasPlayingBeforeFrame = !this.player.paused();
             if (this.wasPlayingBeforeFrame) {
@@ -489,6 +520,12 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
 
         stepBackward() {
             if (!this.player) return;
+
+            // If creating region, reduce region end instead of normal frame step
+            if (this.isCreatingRegion) {
+                this.reduceRegionEnd();
+                return;
+            }
 
             // Store playing state and pause if needed
             this.wasPlayingBeforeFrame = !this.player.paused();
@@ -556,6 +593,259 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         getCurrentFrameNumber() {
             const frameTime = this.getCurrentFrameTime();
             return this.getFrameNumber(frameTime);
+        },
+
+        // Region Management Methods
+
+        startRegionCreation(event) {
+            if (this.isCreatingRegion) return;
+
+            const rect = event.currentTarget.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clickX = clientX - rect.left;
+            const percentage = clickX / rect.width;
+            const startTime = percentage * this.duration;
+
+            this.isCreatingRegion = true;
+            this.regionCreationStart = {
+                time: this.roundToNearestFrame(startTime),
+                x: clickX,
+                frame: this.getFrameNumber(this.roundToNearestFrame(startTime))
+            };
+
+            // Initialize end position to start position
+            this.regionCreationEnd = {
+                time: this.roundToNearestFrame(startTime),
+                x: clickX,
+                frame: this.getFrameNumber(this.roundToNearestFrame(startTime))
+            };
+
+            // Hide existing regions during creation
+            this.showRegionTooltip = null;
+
+            // Pause video during region creation and seek to start time
+            if (this.player) {
+                // Always pause first
+                if (this.isPlaying) {
+                    this.player.pause();
+                }
+                // Then seek to the region start time
+                this.player.currentTime(this.roundToNearestFrame(startTime));
+            }
+        },
+
+        updateRegionCreation(event) {
+            if (!this.isCreatingRegion || !this.regionCreationStart) return;
+
+            const rect = event.currentTarget.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const currentX = clientX - rect.left;
+            const percentage = currentX / rect.width;
+            const currentTime = percentage * this.duration;
+            const frameAlignedTime = this.roundToNearestFrame(currentTime);
+
+            // Update visual feedback for region being created
+            this.regionCreationEnd = {
+                time: frameAlignedTime,
+                x: currentX,
+                frame: this.getFrameNumber(frameAlignedTime)
+            };
+
+            // Real-time video seeking to the end edge for amazing UX
+            if (this.player && this.player.readyState() >= 1) {
+                this.player.currentTime(frameAlignedTime);
+                this.player.pause();
+            }
+        },
+
+        finishRegionCreation(event) {
+            // Don't auto-create on mouse/touch release anymore
+            // Region creation now happens only via explicit finish button
+            return;
+        },
+
+        // Explicit finish region creation via button
+        confirmRegionCreation() {
+            if (!this.isCreatingRegion || !this.regionCreationStart || !this.regionCreationEnd) return;
+
+            const startTime = this.regionCreationStart.time;
+            const endTime = this.regionCreationEnd.time;
+            const startFrame = this.regionCreationStart.frame;
+            const endFrame = this.regionCreationEnd.frame;
+
+            // Ensure minimum region size (at least 2 frames)
+            if (Math.abs(endTime - startTime) < this.frameDuration * 2) {
+                return; // Don't finish if too small
+            }
+
+            // Create region object
+            const region = {
+                id: `region-${Date.now()}`,
+                startTime: Math.min(startTime, endTime),
+                endTime: Math.max(startTime, endTime),
+                startFrame: Math.min(startFrame, endFrame),
+                endFrame: Math.max(startFrame, endFrame),
+                title: `Region ${this.regions.length + 1}`,
+                description: ''
+            };
+
+            // Fire event to add comment with region data
+            this.$dispatch('video-annotation:add-comment', {
+                timestamp: region.startTime,
+                currentTime: region.startTime,
+                frameNumber: region.startFrame,
+                frameRate: this.frameRate,
+                regionData: {
+                    startTime: region.startTime,
+                    endTime: region.endTime,
+                    startFrame: region.startFrame,
+                    endFrame: region.endFrame,
+                    duration: region.endTime - region.startTime
+                }
+            });
+
+            // Add region to list if under limit
+            if (this.regions.length < this.maxRegions) {
+                this.regions.push(region);
+                this.autoHideOldestRegions();
+            }
+
+            this.cleanupRegionCreation();
+        },
+
+        // Arrow key controls for fine-tuning end edge
+        expandRegionEnd() {
+            if (!this.isCreatingRegion || !this.regionCreationEnd) return;
+
+            const newTime = Math.min(this.regionCreationEnd.time + this.frameDuration, this.duration);
+            const newFrame = this.getFrameNumber(newTime);
+            const rect = this.$refs.regionBar.getBoundingClientRect();
+            const newX = (newTime / this.duration) * rect.width;
+
+            this.regionCreationEnd = {
+                time: newTime,
+                x: newX,
+                frame: newFrame
+            };
+
+            // Sync video to new position and ensure it stays paused
+            if (this.player && this.player.readyState() >= 1) {
+                this.player.currentTime(newTime);
+                this.player.pause();
+            }
+        },
+
+        reduceRegionEnd() {
+            if (!this.isCreatingRegion || !this.regionCreationEnd || !this.regionCreationStart) return;
+
+            const newTime = Math.max(this.regionCreationEnd.time - this.frameDuration, this.regionCreationStart.time + this.frameDuration);
+            const newFrame = this.getFrameNumber(newTime);
+            const rect = this.$refs.regionBar.getBoundingClientRect();
+            const newX = (newTime / this.duration) * rect.width;
+
+            this.regionCreationEnd = {
+                time: newTime,
+                x: newX,
+                frame: newFrame
+            };
+
+            // Sync video to new position and ensure it stays paused
+            if (this.player && this.player.readyState() >= 1) {
+                this.player.currentTime(newTime);
+                this.player.pause();
+            }
+        },
+
+        cancelRegionCreation() {
+            this.cleanupRegionCreation();
+        },
+
+        cleanupRegionCreation() {
+            this.isCreatingRegion = false;
+            this.regionCreationStart = null;
+            this.regionCreationEnd = null;
+        },
+
+        autoHideOldestRegions() {
+            if (this.regions.length > this.maxRegions) {
+                // Hide oldest regions that exceed the limit
+                const excessCount = this.regions.length - this.maxRegions;
+                for (let i = 0; i < excessCount; i++) {
+                    this.hiddenRegions.add(this.regions[i].id);
+                }
+            }
+        },
+
+        getRegionPosition(region) {
+            if (!this.duration || !this.regionBarWidth) return { left: 0, width: 0 };
+
+            const startPercentage = region.startTime / this.duration;
+            const endPercentage = region.endTime / this.duration;
+
+            return {
+                left: startPercentage * this.regionBarWidth,
+                width: (endPercentage - startPercentage) * this.regionBarWidth
+            };
+        },
+
+        isRegionVisible(region) {
+            return !this.hiddenRegions.has(region.id);
+        },
+
+        jumpToRegionStart(region) {
+            if (this.player) {
+                this.player.currentTime(region.startTime);
+
+                // Fire event for external handling
+                this.$dispatch('video-annotation:region-seek', {
+                    regionId: region.id,
+                    timestamp: region.startTime,
+                    frameNumber: region.startFrame
+                });
+            }
+        },
+
+        showRegionTooltipFor(regionId) {
+            this.showRegionTooltip = regionId;
+        },
+
+        hideRegionTooltips() {
+            this.showRegionTooltip = null;
+        },
+
+        deleteRegion(regionId) {
+            this.regions = this.regions.filter(r => r.id !== regionId);
+            this.hiddenRegions.delete(regionId);
+            if (this.showRegionTooltip === regionId) {
+                this.showRegionTooltip = null;
+            }
+        },
+
+        toggleRegionVisibility(regionId) {
+            if (this.hiddenRegions.has(regionId)) {
+                this.hiddenRegions.delete(regionId);
+            } else {
+                this.hiddenRegions.add(regionId);
+            }
+        },
+
+        // Load regions from external data
+        loadRegions(regionsData) {
+            this.regions = regionsData || [];
+            this.autoHideOldestRegions();
+            this.updateProgressBarWidth(); // Refresh region bar width
+        },
+
+        // Get visible regions count
+        getVisibleRegionsCount() {
+            return this.regions.filter(r => this.isRegionVisible(r)).length;
+        },
+
+        // Clear all regions
+        clearAllRegions() {
+            this.regions = [];
+            this.hiddenRegions.clear();
+            this.showRegionTooltip = null;
         },
 
         // Note: Keyboard shortcuts are now handled directly in the template with Alpine.js @keydown directives
@@ -1429,7 +1719,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
 
         // Progress bar visibility management
         initializeProgressBarVisibility() {
-            // Always show progress bar initially
+            // Always show progress bar initially by default
             this.showProgressBar = true;
 
             // Check actual player state to determine visibility behavior

@@ -88,6 +88,7 @@ use function ucwords;
  * @method static Builder<static>|User whereRememberToken($value)
  * @method static Builder<static>|User whereTimezone($value)
  * @method static Builder<static>|User whereUpdatedAt($value)
+ * @mixin IdeHelperUser
  * @mixin \Eloquent
  */
 final class User extends Authenticatable implements AssignableEntity, FilamentUser, HasAvatar, HasDefaultTenant, HasTenants

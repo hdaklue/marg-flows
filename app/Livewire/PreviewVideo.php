@@ -101,7 +101,7 @@ final class PreviewVideo extends Component
                 'enableSettingsMenu' => true,
             ],
             'ui' => [
-                'progressBarMode' => 'auto-hide',
+                'progressBarMode' => 'always',
                 'showControls' => true,
                 'helpTooltipLimit' => 3,
                 'theme' => 'auto',

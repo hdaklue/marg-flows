@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static Builder<static>|SideNote whereSidenoteableId($value)
  * @method static Builder<static>|SideNote whereSidenoteableType($value)
  * @method static Builder<static>|SideNote whereUpdatedAt($value)
+ * @mixin IdeHelperSideNote
  * @mixin \Eloquent
  */
 class SideNote extends Model

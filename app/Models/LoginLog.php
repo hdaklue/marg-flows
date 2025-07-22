@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog whereUserAgent($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog whereUserId($value)
+ * @mixin IdeHelperLoginLog
  * @mixin \Eloquent
  */
 class LoginLog extends Model

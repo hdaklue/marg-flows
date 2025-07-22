@@ -24,7 +24,7 @@ final class CreateFlowDto extends ValidatedDTO
 
     public bool $is_default;
 
-    public $blocks;
+    public ?string $description;
 
     public ?int $order_column;
 
@@ -55,8 +55,8 @@ final class CreateFlowDto extends ValidatedDTO
         return [
             'title' => ['required', 'string', 'min:3', 'max:255'],
             'status' => ['sometimes', Rule::enum(FlowStatus::class)],
+            'description' => ['required', 'string'],
             'order_column' => ['interger'],
-            'blocks' => ['required'],
             'start_date' => ['date', 'required', Rule::date()->afterOrEqual(today()->startOfDay())],
             'due_date' => ['date', Rule::date()->afterOrEqual('start_date')],
             'completed_at' => ['date', Rule::date()->afterOrEqual('start_date')],
