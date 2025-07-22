@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\HasStaticTypeTrait;
+use App\Concerns\Role\HasSystemRoles;
 use App\Concerns\Role\ManagesParticipants;
 use App\Contracts\HasStaticType;
+use App\Contracts\Role\HasSystemRoleContract;
 use App\Contracts\Role\RoleableEntity;
-use App\Enums\Role\RoleEnum;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 /**
  * @property string $id
@@ -25,16 +26,16 @@ use Illuminate\Support\Collection;
  * @property string $creator_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $assignedRoles
+ * @property-read Collection<int, Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
  * @property-read User $creator
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Flow> $flows
+ * @property-read Collection<int, Flow> $flows
  * @property-read int|null $flows_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $participants
+ * @property-read Collection<int, ModelHasRole> $participants
  * @property-read int|null $participants_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $roleAssignments
+ * @property-read Collection<int, ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $systemRoles
+ * @property-read Collection<int, Role> $systemRoles
  * @property-read int|null $system_roles_count
  *
  * @method static \Database\Factories\TenantFactory factory($count = null, $state = [])
@@ -51,9 +52,13 @@ use Illuminate\Support\Collection;
  *
  * @mixin \Eloquent
  */
-final class Tenant extends Model implements HasStaticType, RoleableEntity
+final class Tenant extends Model implements HasStaticType, HasSystemRoleContract, RoleableEntity
 {
-    use HasFactory, HasStaticTypeTrait, HasUlids, ManagesParticipants;
+    use HasFactory,
+        HasStaticTypeTrait,
+        HasSystemRoles,
+        HasUlids,
+        ManagesParticipants;
 
     protected $fillable = ['name'];
 
@@ -80,26 +85,6 @@ final class Tenant extends Model implements HasStaticType, RoleableEntity
     public function getTenantId(): string
     {
         return $this->getKey();
-    }
-
-    public function systemRoles(): HasMany
-    {
-        return $this->hasMany(Role::class, 'tenant_id');
-    }
-
-    public function getSystemRoles(): Collection
-    {
-        return $this->systemRoles()->get();
-    }
-
-    public function systemRoleByName(string|RoleEnum $role): Role
-    {
-        if ($role instanceof RoleEnum) {
-            $role = $role->value;
-        }
-
-        // @phpstan-ignore return.type
-        return $this->systemRoles()->where('name', $role)->firstOrFail();
     }
 
     public function creator(): BelongsTo

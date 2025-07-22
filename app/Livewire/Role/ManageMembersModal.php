@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Role;
 
 use App\Contracts\Role\RoleableEntity;
-use App\Models\Flow;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -16,9 +16,11 @@ final class ManageMembersModal extends Component
     public $shouldShowModal = false;
 
     #[On('open-members-modal')]
-    public function handleOpenMemebersModal(string|int $roleable)
+    public function handleOpenMemebersModal(string $roleableKey, string $roleableType)
     {
-        $this->record = Flow::where('id', $roleable)->firstOrFail();
+
+        $modelClass = Relation::getMorphedModel($roleableType);
+        $this->record = $modelClass::query()->where('id', $roleableKey)->firstOrFail();
 
         $this->dispatch('open-modal', id: 'edit-members-modal');
     }

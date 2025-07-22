@@ -6,16 +6,19 @@ namespace App\Models;
 
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
+use App\Concerns\Page\ManagesPages;
 use App\Concerns\Progress\HasTimeProgress;
 use App\Concerns\Role\ManagesParticipants;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\HasStaticType;
+use App\Contracts\Page\Pageable;
 use App\Contracts\Progress\TimeProgressable;
 use App\Contracts\Role\RoleableEntity;
 use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
+use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\FlowStatus;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -98,7 +101,7 @@ use Spatie\EloquentSortable\SortableTrait;
  *
  * @method static Builder<static>|Flow whereDescription($value)
  */
-final class Flow extends Model implements HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
+final class Flow extends Model implements BelongsToTenantContract, HasStages, HasStaticType, Pageable, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
 {
     use BelongsToTenant,
         HasFactory,
@@ -107,6 +110,7 @@ final class Flow extends Model implements HasStages, HasStaticType, RoleableEnti
         HasStaticTypeTrait ,
         HasTimeProgress,
         HasUlids,
+        ManagesPages,
         ManagesParticipants,
         SoftDeletes,
         SortableTrait;

@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\FlowResource\Pages;
 
+use App\Facades\PageManager;
 use App\Filament\Resources\FlowResource;
-use App\Forms\Components\EditorJs;
-use App\Forms\Components\PlaceholderInput;
 use App\Models\Flow;
-use Filament\Forms\Components\Section;
+use App\Models\Page as PageModel;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 /**
@@ -28,8 +28,6 @@ final class FlowPages extends Page implements HasForms
 
     protected static string $view = 'filament.resources.flow-resource.pages.flow-pages';
 
-    public ?array $data = [];
-
     #[Locked]
     public Flow $flow;
 
@@ -38,47 +36,18 @@ final class FlowPages extends Page implements HasForms
 
         $this->flow = Flow::where('id', $record)->first();
         $this->authorize('view', $this->flow);
-        $this->form->fill($this->flow->toArray());
+
+    }
+
+    #[Computed]
+    public function pages(): Collection
+    {
+        return PageManager::getPages($this->flow);
     }
 
     public function getTitle(): string|Htmlable // @phpstan-ignore-line
     {
-        return '';
+        return "{$this->flow->title} pages";
     }
 
-    public function form(Form $form): Form
-    {
-
-        return $form->schema([
-
-            Section::make([
-                PlaceholderInput::make('title')
-                    ->autofocus(true)
-                    ->live(true)
-                    ->readOnly(fn () => ! filamentUser()->can('update', $this->flow))
-                    ->afterStateUpdated(function ($set, $state, $old) {
-                        if (blank($state)) {
-                            Notification::make()
-                                ->body('Title cant be empty')
-                                ->danger()
-                                ->color('danger')
-                                ->send();
-                            $set('title', $old);
-
-                            return;
-                        }
-                        $this->flow->update(['title' => $state]);
-                    })
-                    ->autocomplete(false)
-                    ->placeholder('Title')
-                    ->required(),
-
-                EditorJs::make('blocks')
-                    ->editable(fn () => filamentUser()->can('update', $this->flow))
-                    ->live(true)
-                    ->afterStateUpdated(fn ($state) => $this->flow->update(['blocks' => $state]))
-                    ->required(),
-            ]),
-        ])->statePath('data');
-    }
 }

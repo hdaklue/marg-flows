@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Contracts\Role;
 
-use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\Role\RoleEnum;
 use App\Models\Role;
 use Illuminate\Contracts\Support\Arrayable;
@@ -18,12 +17,8 @@ use Illuminate\Support\Collection;
  * @method load();
  * @method HasMany systemRoles()
  */
-interface RoleableEntity extends Arrayable, BelongsToTenantContract
+interface RoleableEntity extends Arrayable
 {
-    public function systemRoleByName(string $name): ?Role;
-
-    public function getSystemRoles(): Collection;
-
     public function addParticipant(AssignableEntity $target, string|RoleEnum $role): void;
 
     /**
@@ -65,4 +60,6 @@ interface RoleableEntity extends Arrayable, BelongsToTenantContract
      * Unique identifier of the entity (roleable_id).
      */
     public function getKey();
+
+    public function getTenant();
 }

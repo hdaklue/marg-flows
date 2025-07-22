@@ -256,7 +256,7 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
     private function resolveTargetTenant(RoleableEntity $target)
     {
         if (! $target instanceof Tenant) {
-            $target->loadMissing('tenant');
+            // $target->loadMissing('tenant');
 
             return $target->getTenant();
         }

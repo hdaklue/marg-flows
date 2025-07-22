@@ -11,7 +11,7 @@
             <a href="{{ App\Filament\Pages\ViewFlow::getUrl(['record' => $record->getKey()]) }}">{{ $record->title }}</a>
         </div>
         <div class="flex flex-row -space-x-2">
-            <x-user-avatar-stack :canEdit="$this->userPermissions['canManageMembers']" :users="$this->participantsArray" size="2xs" :editable-key="$this->record->getKey()"
+            <x-user-avatar-stack :canEdit="$this->userPermissions['canManageMembers']" :users="$this->participantsArray" size="2xs" :roleableType="$this->record->getMorphClass()" :roleableKey="$this->record->getKey()"
                 :showTooltip="false" />
         </div>
     </div>

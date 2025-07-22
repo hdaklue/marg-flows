@@ -123,6 +123,8 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         'remember_token',
     ];
 
+    protected $appends = ['avatar'];
+
     public function canAccessPanel(Panel $panel): bool
     {
 
@@ -291,6 +293,14 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $this->isAssignedTo($tenant);
     }
 
+    protected function avatar(): Attribute
+    {
+
+        return Attribute::make(
+            get: fn () => Filament::getUserAvatarUrl($this),
+        );
+    }
+
     protected function inviterName(): Attribute
     {
 
@@ -304,14 +314,6 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
     {
         return Attribute::make(
             get: fn ($value) => ucwords($value),
-        );
-    }
-
-    protected function avatar(): Attribute
-    {
-
-        return Attribute::make(
-            get: fn () => Filament::getUserAvatarUrl($this),
         );
     }
 

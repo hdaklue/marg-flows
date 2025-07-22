@@ -164,5 +164,6 @@ final class ManageMembers extends Component implements HasActions, HasForms
         unset($this->manageableMembers);
         $this->form->fill();
         $this->dispatch("board-item-updated.{$this->roleable->getKey()}");
+        $this->dispatch("roleable-entity:members-updated.{$this->roleable->getKey()}");
     }
 }

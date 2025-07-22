@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\Page\PageManagerInterface;
 use App\Listeners\TenantEventSubscriber;
 use App\Models\Flow;
+use App\Models\Page;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Flow\TimeProgressService;
+use App\Services\Page\PageService;
 use App\Services\Role\RoleAssignmentService;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Css;
@@ -31,6 +34,8 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TimeProgressService::class);
         $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
+        $this->app->singleton('page.manager', fn (): PageService => new PageService);
+        $this->app->bind(PageManagerInterface::class, PageService::class);
 
         $this->configureGate();
         $this->configureModel();
@@ -72,6 +77,7 @@ final class AppServiceProvider extends ServiceProvider
             'user' => User::class,
             'tenant' => Tenant::class,
             'flow' => Flow::class,
+            'page' => Page::class,
         ]);
         Model::shouldBeStrict();
     }

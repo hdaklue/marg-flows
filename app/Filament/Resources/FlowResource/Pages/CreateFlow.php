@@ -11,6 +11,7 @@ use App\Filament\Pages\FlowsKanabanBoard;
 use App\Filament\Resources\FlowResource;
 use App\Forms\Components\ChunkedFileUpload;
 use App\Forms\Components\EditorJs;
+use App\Models\ModelHasRole;
 use App\Models\User;
 use App\Services\Flow\TemplateService;
 use Exception;
@@ -83,7 +84,8 @@ final class CreateFlow extends CreateRecord
                             ->afterOrEqual(fn ($get) => $get('start_date'))
                             ->native(false),
                         Select::make('participants')
-                            ->options(User::assignedTo(filamentTenant())->where('id', '!=', filamentUser()->getKey())->pluck('name', 'id'))
+                            // ->options(User::assignedTo(filamentTenant())->where('id', '!=', filamentUser()->getKey())->pluck('name', 'id'))
+                            ->options($this->getParticipantsSelectArray())
                             ->multiple(true)
                             ->native(false),
                         // FileUpload::make('assets')
@@ -141,5 +143,13 @@ final class CreateFlow extends CreateRecord
     protected function getCreatedNotification(): ?Notification
     {
         return null; // Disables automatic notification
+    }
+
+    private function getParticipantsSelectArray(): array
+    {
+        $participants = filamentTenant()->getParticipants()->reject(fn ($modelHasRole) => $modelHasRole->model->getKey() === filamentUser()->getKey());
+
+        return $participants->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => "{$item->model->name} - {$item->role->name}"])->toArray();
+
     }
 }
