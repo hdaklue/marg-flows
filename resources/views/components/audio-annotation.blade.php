@@ -252,6 +252,7 @@
                         <span
                             class="hidden w-8 font-mono text-xs text-center transition-colors duration-200 text-zinc-500 dark:text-zinc-400 sm:inline-block"
                             x-text="(isMuted ? '0' : getVolumePercentage()) + '%'">100%</span>
+
                     </div>
                 </div>
 
@@ -290,7 +291,7 @@
                     <div class="relative">
                         <!-- Speed Button -->
                         <button x-tooltip.raw="Playback speed" x-ref="speedButton"
-                            @click="windowWidth < 640 ? toggleSpeedModal() : toggleSpeedMenu()" @keydown.stop
+                            @click="windowWidth < 768 ? toggleSpeedModal() : toggleSpeedMenu()" @keydown.stop
                             class="flex items-center gap-1 px-2 py-1 text-xs font-medium transition-all duration-200 bg-white border rounded-md shadow-sm border-zinc-300 text-zinc-700 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600"
                             :class="{ 'bg-zinc-100 text-zinc-800 dark:bg-zinc-600 dark:text-white': showSpeedMenu }"
                             title="Playback Speed">
