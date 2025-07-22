@@ -12,16 +12,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * 
- *
  * @property string $id
  * @property string $tenant_id
  * @property string $name
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Collection<int, \App\Models\ModelHasRole> $assignments
+ * @property-read Collection<int, ModelHasRole> $assignments
  * @property-read int|null $assignments_count
- * @property-read \App\Models\Tenant $tenant
+ * @property-read Tenant $tenant
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role byTenant(\App\Models\Tenant $tenant)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role newQuery()
@@ -31,7 +30,7 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereTenantId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereUpdatedAt($value)
- * @mixin IdeHelperRole
+ *
  * @mixin \Eloquent
  */
 final class Role extends Model

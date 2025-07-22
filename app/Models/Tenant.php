@@ -19,25 +19,24 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
- * 
- *
  * @property string $id
  * @property string $name
  * @property int $active
  * @property string $creator_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $assignedRoles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
- * @property-read \App\Models\User $creator
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Flow> $flows
+ * @property-read User $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Flow> $flows
  * @property-read int|null $flows_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $participants
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $participants
  * @property-read int|null $participants_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $roleAssignments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $systemRoles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $systemRoles
  * @property-read int|null $system_roles_count
+ *
  * @method static \Database\Factories\TenantFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant forParticipant(\App\Contracts\Role\AssignableEntity $member)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant newModelQuery()
@@ -49,7 +48,7 @@ use Illuminate\Support\Collection;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereUpdatedAt($value)
- * @mixin IdeHelperTenant
+ *
  * @mixin \Eloquent
  */
 final class Tenant extends Model implements HasStaticType, RoleableEntity

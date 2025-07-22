@@ -5,25 +5,26 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Contracts\Sidenoteable;
+use Eloquent;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
- * 
- *
  * @property string $id
  * @property string $content
  * @property string $sidenoteable_type
  * @property string $sidenoteable_id
  * @property string $owner_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $creator
- * @property-read Model|\Eloquent $sidenoteable
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User $creator
+ * @property-read Model|Eloquent $sidenoteable
+ *
  * @method static Builder<static>|SideNote newModelQuery()
  * @method static Builder<static>|SideNote newQuery()
  * @method static Builder<static>|SideNote query()
@@ -34,10 +35,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static Builder<static>|SideNote whereSidenoteableId($value)
  * @method static Builder<static>|SideNote whereSidenoteableType($value)
  * @method static Builder<static>|SideNote whereUpdatedAt($value)
- * @mixin IdeHelperSideNote
+ *
  * @mixin \Eloquent
  */
-class SideNote extends Model
+final class SideNote extends Model
 {
     use HasUlids;
 

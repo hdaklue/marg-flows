@@ -94,13 +94,9 @@ use Spatie\EloquentSortable\SortableTrait;
  * @method static Builder<static>|Flow withTrashed()
  * @method static Builder<static>|Flow withoutTrashed()
  *
- * @mixin IdeHelperFlow
- *
  * @property string|null $description
  *
  * @method static Builder<static>|Flow whereDescription($value)
- *
- * @mixin \Eloquent
  */
 final class Flow extends Model implements HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
 {

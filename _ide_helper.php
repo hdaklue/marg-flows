@@ -28390,7 +28390,7 @@ namespace App\Filament\Resources\FlowResource\Pages {
     /**
      * 
      *
-     * @property-read \Filament\Forms\Form $form
+     * @property-read Form $form
      */
     class FlowPages {
         /**
@@ -28446,9 +28446,10 @@ namespace App\Filament\Pages {
 
             }
     /**
-     * ViewFlow
+     * ViewFlow.
      *
      * @property-read Flow $flow;
+     * @property-read array $getParticipantsArray
      */
     class ViewFlow {
         /**
@@ -28721,6 +28722,61 @@ namespace App\Livewire {
         public static function modal($name)
         {
             return \App\Livewire\Previewtest::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class PreviewVideo {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Livewire\PreviewVideo::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class PreviewAudio {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Livewire\PreviewAudio::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     * @property-read Form $form
+     */
+    class TestChunkedUpload {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Livewire\TestChunkedUpload::modal($name);
         }
 
             }

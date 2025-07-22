@@ -50,7 +50,7 @@ final class ViewFlow extends KanbanBoard
     #[Computed]
     public function flow(): Flow
     {
-        return Flow::where('id', $this->recordId)->first();
+        return Flow::where('id', $this->recordId)->firstOrFail();
     }
 
     #[Computed]
@@ -66,7 +66,7 @@ final class ViewFlow extends KanbanBoard
 
     public function getSubheading(): string|Htmlable|null // @phpstan-ignore-line
     {
-        return $this->flow?->description;
+        return $this->flow->description;
     }
 
     #[On('board-item-updated.{recordId}')]

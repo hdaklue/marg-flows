@@ -9,18 +9,18 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
- * 
- *
  * @property string $id
  * @property string $sender_id
  * @property string $receiver_id
  * @property array<array-key, mixed> $role_data
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $receiver
- * @property-read \App\Models\User $sender
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User $receiver
+ * @property-read User $sender
+ *
  * @method static Builder<static>|MemberInvitation newModelQuery()
  * @method static Builder<static>|MemberInvitation newQuery()
  * @method static Builder<static>|MemberInvitation query()
@@ -31,10 +31,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static Builder<static>|MemberInvitation whereRoleData($value)
  * @method static Builder<static>|MemberInvitation whereSenderId($value)
  * @method static Builder<static>|MemberInvitation whereUpdatedAt($value)
- * @mixin IdeHelperMemberInvitation
+ *
  * @mixin \Eloquent
  */
-class MemberInvitation extends Model
+final class MemberInvitation extends Model
 {
     use HasFactory, HasUlids;
 
