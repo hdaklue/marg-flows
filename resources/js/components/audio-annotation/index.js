@@ -1,5 +1,6 @@
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
+import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.esm.js';
 import ZoomPlugin from 'wavesurfer.js/dist/plugins/zoom.esm.js';
 
 // Alpine.js Audio Annotation Component
@@ -48,6 +49,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
         wavesurfer: null,
         regionsPlugin: null,
         zoomPlugin: null,
+        timelinePlugin: null,
 
         // Audio state
         isLoaded: false,
@@ -150,6 +152,20 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     maxZoom: this.config.zoom.maxZoom,
                 });
 
+                // Create timeline plugin
+                this.timelinePlugin = TimelinePlugin.create({
+                    // height: this.windowWidth < 768 ? 8 : 10,
+                    timeInterval: .1,
+                    primaryLabelInterval: 1,
+                    secondaryLabelInterval: 0.25,
+                    style: {
+                        fontSize: this.windowWidth < 768 ? '8px' : '10px',
+                        color: '#9ca3af', // zinc-400
+                        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+                        // marginTop: '8px' // Add breathing room above timeline
+                    },
+                });
+
                 // Initialize WaveSurfer
                 this.wavesurfer = WaveSurfer.create({
                     container: container,
@@ -163,12 +179,8 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     height: 100,
                     normalize: true,
                     dragToSeek: false,
-                    plugins: [this.regionsPlugin, this.zoomPlugin]
+                    plugins: [this.regionsPlugin, this.zoomPlugin, this.timelinePlugin]
                 });
-
-                const random = (min, max) => Math.random() * (max - min) + min
-                const randomColor = () => `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, 0.5)`
-
 
 
 
@@ -338,13 +350,13 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     event.preventDefault();
                     const delta = event.deltaY;
                     const volumeStep = 0.05; // 5% volume steps
-                    
+
                     if (delta < 0) {
                         // Scroll up = volume up
                         const newVolume = Math.min(this.volume + volumeStep, 1.0);
                         this.setVolume(newVolume);
                     } else {
-                        // Scroll down = volume down  
+                        // Scroll down = volume down
                         const newVolume = Math.max(this.volume - volumeStep, 0.0);
                         this.setVolume(newVolume);
                     }
@@ -1188,28 +1200,28 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
         // Zoom control methods
         zoomIn() {
             if (!this.wavesurfer || !this.isLoaded) return;
-            
+
             const newZoom = Math.min(this.currentZoom + 50, this.config.zoom.maxZoom);
             this.wavesurfer.zoom(newZoom);
         },
 
         zoomOut() {
             if (!this.wavesurfer || !this.isLoaded) return;
-            
+
             const newZoom = Math.max(this.currentZoom - 50, this.config.zoom.minZoom);
             this.wavesurfer.zoom(newZoom);
         },
 
         zoomToLevel(level) {
             if (!this.wavesurfer || !this.isLoaded) return;
-            
+
             const clampedLevel = Math.max(this.config.zoom.minZoom, Math.min(level, this.config.zoom.maxZoom));
             this.wavesurfer.zoom(clampedLevel);
         },
 
         zoomReset() {
             if (!this.wavesurfer || !this.isLoaded) return;
-            
+
             this.wavesurfer.zoom(150); // Reset to initial zoom level
         },
 
@@ -1226,11 +1238,16 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
 
         // Cleanup
         destroy() {
+            if (this.timelinePlugin) {
+                this.timelinePlugin.destroy();
+                this.timelinePlugin = null;
+            }
+
             if (this.wavesurfer) {
                 this.wavesurfer.destroy();
                 this.wavesurfer = null;
             }
-            
+
             // Remove global event listeners to prevent memory leaks
             // Note: We can't easily remove the exact listener without storing a reference
             // This is acceptable since Alpine.js components are typically long-lived
