@@ -18,9 +18,8 @@ final class ManageMembersModal extends Component
     #[On('open-members-modal')]
     public function handleOpenMemebersModal(string $roleableKey, string $roleableType)
     {
-
         $modelClass = Relation::getMorphedModel($roleableType);
-        $this->record = $modelClass::query()->where('id', $roleableKey)->firstOrFail();
+        $this->record = call_user_func([$modelClass, 'query'])->where('id', $roleableKey)->firstOrFail();
 
         $this->dispatch('open-modal', id: 'edit-members-modal');
     }

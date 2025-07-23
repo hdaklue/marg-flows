@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
+ * 
+ *
  * @property string $id
  * @property string $name
  * @property int $active
@@ -37,7 +39,6 @@ use Illuminate\Support\Carbon;
  * @property-read int|null $role_assignments_count
  * @property-read Collection<int, Role> $systemRoles
  * @property-read int|null $system_roles_count
- *
  * @method static \Database\Factories\TenantFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant forParticipant(\App\Contracts\Role\AssignableEntity $member)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant newModelQuery()
@@ -49,7 +50,6 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 final class Tenant extends Model implements HasStaticType, HasSystemRoleContract, RoleableEntity

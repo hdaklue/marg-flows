@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Contracts\Page;
 
+use App\Contracts\Role\RoleableEntity;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
-interface Pageable
+interface Pageable extends RoleableEntity
 {
     public function pages(): MorphMany;
 

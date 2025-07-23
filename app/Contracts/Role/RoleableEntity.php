@@ -39,7 +39,7 @@ interface RoleableEntity extends Arrayable
 
     public function participants(): MorphMany;
 
-    public function getPaticipant(AssignableEntity|string|int $entity): ?AssignableEntity;
+    public function getParticipant(AssignableEntity|string|int $entity): ?AssignableEntity;
 
     /**
      * Remove a participant's specific role(s).

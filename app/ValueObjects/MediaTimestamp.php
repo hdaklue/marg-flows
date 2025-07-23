@@ -6,24 +6,42 @@ namespace App\ValueObjects;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
+use InvalidArgumentException;
 use JsonSerializable;
 use Livewire\Wireable;
 use Stringable;
 
 abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, Stringable, Wireable
 {
+    /**
+     * Wire deserialization for Livewire.
+     */
+    public static function fromLivewire($value): self
+    {
+        if (! is_array($value) || ! isset($value['type'])) {
+            throw new InvalidArgumentException('Invalid Livewire value for MediaTimestamp');
+        }
+
+        return match ($value['type']) {
+            'audio_region' => AudioRegion::fromArray($value),
+            'video_frame' => VideoFrame::fromArray($value),
+            'video_region' => VideoRegion::fromArray($value),
+            default => throw new InvalidArgumentException('Unknown MediaTimestamp type: ' . $value['type']),
+        };
+    }
+
     abstract public function getType(): string;
 
     abstract public function getStartTime(): CommentTime;
 
-    abstract public function getEndTime(): ?CommentTime;
+    abstract public function getEndTime(): CommentTime;
 
-    abstract public function getDuration(): ?CommentTime;
+    abstract public function getDuration(): CommentTime;
 
     abstract public function getFrameRate(): ?float;
 
     /**
-     * JSON serialization
+     * JSON serialization.
      */
     public function jsonSerialize(): array
     {
@@ -31,7 +49,7 @@ abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, 
     }
 
     /**
-     * JSON string representation
+     * JSON string representation.
      */
     public function toJson($options = 0): string
     {
@@ -39,7 +57,7 @@ abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, 
     }
 
     /**
-     * Wire serialization for Livewire
+     * Wire serialization for Livewire.
      */
     public function toLivewire(): array
     {
@@ -47,39 +65,22 @@ abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, 
     }
 
     /**
-     * Wire deserialization for Livewire
+     * Create instance from array data.
      */
-    public static function fromLivewire($value): static
-    {
-        if (!is_array($value) || !isset($value['type'])) {
-            throw new \InvalidArgumentException('Invalid Livewire value for MediaTimestamp');
-        }
-
-        return match ($value['type']) {
-            'audio_region' => AudioRegion::fromArray($value),
-            'video_frame' => VideoFrame::fromArray($value),
-            'video_region' => VideoRegion::fromArray($value),
-            default => throw new \InvalidArgumentException('Unknown MediaTimestamp type: ' . $value['type']),
-        };
-    }
+    abstract public static function fromArray(array $data): self;
 
     /**
-     * Create instance from array data
-     */
-    abstract public static function fromArray(array $data): static;
-
-    /**
-     * String representation
+     * String representation.
      */
     public function __toString(): string
     {
         $startTime = $this->getStartTime()->display();
-        $endTime = $this->getEndTime()?->display();
-        
+        $endTime = $this->getEndTime()->display();
+
         if ($endTime) {
             return "{$this->getType()}: {$startTime} - {$endTime}";
         }
-        
+
         return "{$this->getType()}: {$startTime}";
     }
 }

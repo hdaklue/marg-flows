@@ -7,6 +7,7 @@ namespace App\Services\Role;
 use App\Contracts\Role\AssignableEntity;
 use App\Contracts\Role\RoleableEntity;
 use App\Contracts\Role\RoleAssignmentManagerInterface;
+use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\Role\RoleEnum;
 use App\Models\ModelHasRole;
 use App\Models\Role;
@@ -82,7 +83,25 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
     }
 
     /**
-     * Summary of getAssignedEntitiesByType
+     * Gets assgined entities by Entity Type and Entity Keys.
+     *
+     * @return Collection<int|string, mixed>
+     */
+    public function getAssignedEntitiesByKeysByType(AssignableEntity $target, array $keys, string $type): Collection
+    {
+        return ModelHasRole::query()->where([
+            'model_type' => $target->getMorphClass(),
+            'model_id' => $target->getKey(),
+            'roleable_type' => $type,
+        ])
+            ->with('roleable')
+            ->whereIn('roleable_id', $keys)
+            ->get()
+            ->pluck('roleable');
+    }
+
+    /**
+     * Get Assigned Entities for a Participant by Entity Type.
      * $type has To be A valid morphMapResult.
      */
     public function getAssignedEntitiesByType(AssignableEntity $entity, string $type): Collection
@@ -204,6 +223,7 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
         $role = $tenant->systemRoleByName($roleName);
 
         if (! $role) {
+            assert($target instanceof BelongsToTenantContract);
             logger()->warning('Missing tenant role', [
                 'role' => $roleName,
                 'tenant' => $target->getTenantId(),

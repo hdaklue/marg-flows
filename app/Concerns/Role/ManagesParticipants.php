@@ -29,6 +29,12 @@ trait ManagesParticipants
         return $this->morphToMany(Role::class, 'roleable', config('role.table_names.model_has_roles'));
     }
 
+    public function getForPerticipant(AssignableEntity $assignable): ?Collection
+    {
+
+        return RoleManager::getAssignedEntitiesByType($assignable, $this->getMorphClass());
+    }
+
     public function isAdmin(AssignableEntity $entity): bool
     {
         return RoleManager::hasRoleOn($entity, $this, RoleEnum::ADMIN);
@@ -41,7 +47,7 @@ trait ManagesParticipants
             ->with(['model', 'role']);
     }
 
-    public function getPaticipant(AssignableEntity|string|int $entity): ?AssignableEntity
+    public function getParticipant(AssignableEntity|string|int $entity): ?AssignableEntity
     {
         if ($entity instanceof AssignableEntity) {
             $entity = $entity->getKey();
@@ -51,7 +57,7 @@ trait ManagesParticipants
         if ($modelHasRole) {
             return $modelHasRole->getModel();
         }
-        
+
         return null;
     }
 

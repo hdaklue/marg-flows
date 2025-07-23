@@ -29,6 +29,11 @@ final class CreatePageDto extends ValidatedDTO
         ];
     }
 
+    protected function casts(): array
+    {
+        return [];
+    }
+
     protected function defaults(): array
     {
         return [

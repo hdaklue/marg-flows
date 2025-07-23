@@ -149,7 +149,7 @@ final class CreateFlow extends CreateRecord
     {
         $participants = filamentTenant()->getParticipants()->reject(fn ($modelHasRole) => $modelHasRole->model->getKey() === filamentUser()->getKey());
 
-        return $participants->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => "{$item->model->name} - {$item->role->name}"])->toArray();
+        return $participants->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => "{$item->model->getAttribute('name')} - {$item->role->name}"])->toArray();
 
     }
 }

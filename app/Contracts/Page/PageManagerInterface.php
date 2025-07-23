@@ -29,7 +29,7 @@ interface PageManagerInterface
     /**
      * Get all pages for a pageable entity.
      *
-     * @return Collection<Page>
+     * @return Collection<int, \App\DTOs\Page\PageDto>
      */
     public function getPages(Pageable $pageable): Collection;
 

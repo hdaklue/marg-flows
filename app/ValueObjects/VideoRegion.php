@@ -84,17 +84,17 @@ final class VideoRegion extends MediaTimestamp
         return $this->startTime;
     }
 
-    public function getEndTime(): ?CommentTime
+    public function getEndTime(): CommentTime
     {
         return $this->endTime;
     }
 
-    public function getDuration(): ?CommentTime
+    public function getDuration(): CommentTime
     {
         return $this->endTime->subtract($this->startTime);
     }
 
-    public function getFrameRate(): ?float
+    public function getFrameRate(): float
     {
         return $this->frameRate;
     }

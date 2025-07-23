@@ -62,17 +62,17 @@ final class VideoFrame extends MediaTimestamp
         return $this->time;
     }
 
-    public function getEndTime(): ?CommentTime
+    public function getEndTime(): CommentTime
     {
-        return null; // Single frame has no end time
+        return $this->time; // Single frame end time is same as start time
     }
 
-    public function getDuration(): ?CommentTime
+    public function getDuration(): CommentTime
     {
         return CommentTime::fromSeconds(1.0 / $this->frameRate); // Duration of one frame
     }
 
-    public function getFrameRate(): ?float
+    public function getFrameRate(): float
     {
         return $this->frameRate;
     }

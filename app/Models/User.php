@@ -38,6 +38,8 @@ use Illuminate\Support\Str;
 use function ucwords;
 
 /**
+ * 
+ *
  * @property string $id
  * @property string $name
  * @property string $email
@@ -66,7 +68,6 @@ use function ucwords;
  * @property-read MemberInvitation|null $receivedInvitation
  * @property-read Collection<int, ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- *
  * @method static Builder<static>|User appAdmin()
  * @method static Builder<static>|User assignedTo(\App\Contracts\Role\RoleableEntity $entity)
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
@@ -87,7 +88,6 @@ use function ucwords;
  * @method static Builder<static>|User whereRememberToken($value)
  * @method static Builder<static>|User whereTimezone($value)
  * @method static Builder<static>|User whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 final class User extends Authenticatable implements AssignableEntity, FilamentUser, HasAvatar, HasDefaultTenant, HasTenants

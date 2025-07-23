@@ -12,6 +12,11 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+/**
+ * @property-read Collection $participants
+ * @property-read array $participantsArray
+ * @property-read array $userPermissions
+ */
 #[Lazy(false)]
 final class PageCard extends Component
 {
@@ -41,7 +46,7 @@ final class PageCard extends Component
     public function participantsArray(): array
     {
 
-        return $this->participants->pluck('model')->map(fn ($item) => ['name' => $item->name, 'avatar' => $item->avatar])->toArray();
+        return $this->participants->pluck('model')->map(fn ($item) => ['name' => $item->getAttribute('name'), 'avatar' => $item->getAttribute('avatar')])->toArray();
     }
 
     #[Computed(true)]

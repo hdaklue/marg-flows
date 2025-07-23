@@ -72,6 +72,13 @@ interface RoleAssignmentManagerInterface
 
     public function getAssignedEntitiesByType(AssignableEntity $entity, string $type): Collection;
 
+    /**
+     * Summary of getAssignedEntitiesByKeysByType.
+     *
+     * @return Collection<int|string, mixed>
+     */
+    public function getAssignedEntitiesByKeysByType(AssignableEntity $target, array $keys, string $type): Collection;
+
     public function changeRoleOn(AssignableEntity $user, RoleableEntity $target, string|RoleEnum $role);
 
     /**

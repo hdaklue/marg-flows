@@ -10,7 +10,7 @@ final class AudioRegion extends MediaTimestamp
 {
     public function __construct(
         private readonly CommentTime $startTime,
-        private readonly CommentTime $endTime
+        private readonly CommentTime $endTime,
     ) {
         $this->validateTimes();
     }
@@ -24,7 +24,7 @@ final class AudioRegion extends MediaTimestamp
     {
         return new self(
             CommentTime::fromSeconds($startSeconds),
-            CommentTime::fromSeconds($endSeconds)
+            CommentTime::fromSeconds($endSeconds),
         );
     }
 
@@ -32,13 +32,13 @@ final class AudioRegion extends MediaTimestamp
     {
         return new self(
             CommentTime::fromFormatted($startTime),
-            CommentTime::fromFormatted($endTime)
+            CommentTime::fromFormatted($endTime),
         );
     }
 
     public static function fromArray(array $data): self
     {
-        $startTime = isset($data['start_time']) 
+        $startTime = isset($data['start_time'])
             ? CommentTime::fromSeconds((float) $data['start_time'])
             : CommentTime::fromSeconds((float) ($data['timing']['start']['seconds'] ?? 0));
 
@@ -59,12 +59,12 @@ final class AudioRegion extends MediaTimestamp
         return $this->startTime;
     }
 
-    public function getEndTime(): ?CommentTime
+    public function getEndTime(): CommentTime
     {
         return $this->endTime;
     }
 
-    public function getDuration(): ?CommentTime
+    public function getDuration(): CommentTime
     {
         return $this->endTime->subtract($this->startTime);
     }
@@ -76,7 +76,7 @@ final class AudioRegion extends MediaTimestamp
 
     public function contains(CommentTime $time): bool
     {
-        return $time->asSeconds() >= $this->startTime->asSeconds() 
+        return $time->asSeconds() >= $this->startTime->asSeconds()
             && $time->asSeconds() <= $this->endTime->asSeconds();
     }
 
@@ -88,7 +88,7 @@ final class AudioRegion extends MediaTimestamp
 
     public function getOverlapDuration(AudioRegion $other): ?CommentTime
     {
-        if (!$this->overlaps($other)) {
+        if (! $this->overlaps($other)) {
             return null;
         }
 
@@ -137,8 +137,8 @@ final class AudioRegion extends MediaTimestamp
     {
         if ($this->startTime->asSeconds() >= $this->endTime->asSeconds()) {
             throw new InvalidArgumentException(
-                'Start time must be before end time. Got start: ' . 
-                $this->startTime->display() . ', end: ' . $this->endTime->display()
+                'Start time must be before end time. Got start: ' .
+                $this->startTime->display() . ', end: ' . $this->endTime->display(),
             );
         }
     }

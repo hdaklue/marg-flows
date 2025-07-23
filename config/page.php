@@ -32,6 +32,7 @@ return [
         'list' => env('PAGE_CACHE_TTL_LIST', 60), // 1 hour for page lists
         'recent' => env('PAGE_CACHE_TTL_RECENT', 60), // 1 hour for recent pages
         'creator' => env('PAGE_CACHE_TTL_CREATOR', 60), // 1 hour for creator pages
+        'user_pages' => env('PAGE_CACHE_TTL_USER_PAGES', 60 * 24), // 1 day for user-assigned pages
     ],
 
     /*

@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * 
+ *
  * @property string $id
  * @property string $content
  * @property string $sidenoteable_type
@@ -24,7 +26,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property-read User $creator
  * @property-read Model|Eloquent $sidenoteable
- *
  * @method static Builder<static>|SideNote newModelQuery()
  * @method static Builder<static>|SideNote newQuery()
  * @method static Builder<static>|SideNote query()
@@ -35,8 +36,8 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|SideNote whereSidenoteableId($value)
  * @method static Builder<static>|SideNote whereSidenoteableType($value)
  * @method static Builder<static>|SideNote whereUpdatedAt($value)
- *
  * @mixin \Eloquent
+ * @mixin Eloquent
  */
 final class SideNote extends Model
 {

@@ -14,7 +14,7 @@ trait ManagesPages
     /**
      * Get all pages for this entity with caching.
      *
-     * @return Collection<Page>
+     * @return Collection<int, \App\DTOs\Page\PageDto>
      */
     public function getPages(): Collection
     {
