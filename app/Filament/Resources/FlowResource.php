@@ -13,6 +13,7 @@ use App\Services\Flow\TimeProgressService;
 use App\Tables\Columns\Progress;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -87,10 +88,13 @@ final class FlowResource extends Resource
                     ->options(FlowStatus::class),
             ], FiltersLayout::AboveContentCollapsible)
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->size(ActionSize::ExtraSmall),
                 Action::make('view')
-                    ->label('Knowledge')
+                    ->label('Pages')
                     ->color('gray')
+                    ->size(ActionSize::ExtraSmall)
+                    ->icon('heroicon-o-document-text')
                     ->outlined()
                     ->url(fn ($record) => FlowResource::getUrl('pages', ['record' => $record])),
             ])

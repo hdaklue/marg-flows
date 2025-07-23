@@ -24,6 +24,8 @@ final class PageDto extends ValidatedDTO
 
     public Carbon $created_at;
 
+    public Carbon $updated_at;
+
     public UserDto $creator;
 
     // public function toEditorJSFormat(): array
@@ -52,6 +54,7 @@ final class PageDto extends ValidatedDTO
             'pageable' => new ObjectCast,
             'creator' => new DTOCast(UserDto::class),
             'created_at' => new CarbonCast,
+            'updated_at' => new CarbonCast,
         ];
     }
 

@@ -191,9 +191,7 @@ final class VideoRegion extends MediaTimestamp
 
     public function toVideoFrame(CommentTime $time): VideoFrame
     {
-        if (!$this->containsTime($time)) {
-            throw new InvalidArgumentException('Time is outside this video region');
-        }
+        throw_unless($this->containsTime($time), new InvalidArgumentException('Time is outside this video region'));
 
         return VideoFrame::fromTime($time, $this->frameRate);
     }
@@ -244,22 +242,16 @@ final class VideoRegion extends MediaTimestamp
 
     private function validateTimes(): void
     {
-        if ($this->startTime->asSeconds() >= $this->endTime->asSeconds()) {
-            throw new InvalidArgumentException(
-                'Start time must be before end time. Got start: ' . 
-                $this->startTime->display() . ', end: ' . $this->endTime->display()
-            );
-        }
+        throw_if($this->startTime->asSeconds() >= $this->endTime->asSeconds(), new InvalidArgumentException(
+            'Start time must be before end time. Got start: ' . 
+            $this->startTime->display() . ', end: ' . $this->endTime->display()
+        ));
     }
 
     private function validateFrameRate(): void
     {
-        if ($this->frameRate <= 0) {
-            throw new InvalidArgumentException('Frame rate must be positive, got: ' . $this->frameRate);
-        }
+        throw_if($this->frameRate <= 0, new InvalidArgumentException('Frame rate must be positive, got: ' . $this->frameRate));
 
-        if (!is_finite($this->frameRate)) {
-            throw new InvalidArgumentException('Frame rate must be finite');
-        }
+        throw_unless(is_finite($this->frameRate), new InvalidArgumentException('Frame rate must be finite'));
     }
 }

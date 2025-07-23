@@ -34,9 +34,7 @@ final class Rectangle implements Arrayable, Jsonable, JsonSerializable, Stringab
 
     public static function fromLivewire($value): self
     {
-        if (!is_array($value)) {
-            throw new InvalidArgumentException('Rectangle fromLivewire expects array');
-        }
+        throw_unless(is_array($value), new InvalidArgumentException('Rectangle fromLivewire expects array'));
 
         return self::fromArray($value);
     }
@@ -132,12 +130,8 @@ final class Rectangle implements Arrayable, Jsonable, JsonSerializable, Stringab
 
     private function validateDimensions(): void
     {
-        if ($this->width < 0) {
-            throw new InvalidArgumentException('Width cannot be negative');
-        }
+        throw_if($this->width < 0, new InvalidArgumentException('Width cannot be negative'));
 
-        if ($this->height < 0) {
-            throw new InvalidArgumentException('Height cannot be negative');
-        }
+        throw_if($this->height < 0, new InvalidArgumentException('Height cannot be negative'));
     }
 }

@@ -96,8 +96,6 @@ final class PageService implements PageManagerInterface
 
     /**
      * Returns pages of a pageable entity can be accessed by User.
-     *
-     * @return void
      */
     public function getPagesForUser(Pageable $pageable, AssignableEntity $user): Collection
     {
@@ -109,7 +107,7 @@ final class PageService implements PageManagerInterface
             $user,
             $pageKeys,
             Relation::getMorphAlias(Page::class),
-        );
+        )->sortByDesc('updated_at');
     }
 
     /**
@@ -348,9 +346,10 @@ final class PageService implements PageManagerInterface
     {
 
         return $pages->map(fn (Page $page) => PageDto::fromArray([
-            'name' => $page->name,
+            'name' => $page->getAttribute('name'),
             'id' => $page->getKey(),
             'created_at' => $page->getAttribute('created_at'),
+            'updated_at' => $page->getAttribute('updated_at'),
             'pageable' => $pageable,
             'creator' => $page->getCreator()->toArray(),
         ]));

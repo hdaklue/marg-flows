@@ -5,16 +5,16 @@
 <x-filament-panels::page>
     <div class="flex flex-col gap-x-2">
         <div class="flex flex-row items-center gap-x-1">
-            <x-filament::badge size="sm" color="gray" icon="heroicon-o-calendar-days">
+            <x-filament::badge size="sm" color="primary" {{-- icon="heroicon-o-calendar-days" --}}>
                 <div class="flex h-full items-center gap-x-1">
                     <div clas="font-bold"> Due:</div>
-                    <div class="text-xs">{{ toUserDate($this->flow->due_date, filamentUser()) }}</div>
+                    <div class="text-xs">{{ toUserDateString($this->flow->due_date, filamentUser()) }}</div>
                 </div>
             </x-filament::badge>
-            <x-filament::badge size="sm" color="gray" icon="heroicon-o-calendar">
+            <x-filament::badge size="sm" color="gray" {{-- icon="heroicon-o-calendar" --}}>
                 <div class="flex items-center gap-x-1">
                     <div clas="font-bold text-xs"> Start:</div>
-                    <div class="text-xs">{{ toUserDate($this->flow->start_date, filamentUser()) }}</div>
+                    <div class="text-xs">{{ toUserDateString($this->flow->start_date, filamentUser()) }}</div>
                 </div>
             </x-filament::badge>
             <x-user-avatar-stack :users="$users" size="xs" :canEdit="$this->canManageFlow" :roleableType="$this->flow->getMorphClass()"

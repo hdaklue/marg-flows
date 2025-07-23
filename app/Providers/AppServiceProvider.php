@@ -13,9 +13,11 @@ use App\Models\User;
 use App\Services\Flow\TimeProgressService;
 use App\Services\Page\PageService;
 use App\Services\Role\RoleAssignmentService;
+use Filament\Actions\Action;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
+use Filament\Support\Enums\ActionSize;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
@@ -45,6 +47,11 @@ final class AppServiceProvider extends ServiceProvider
             $this->app->register(TelescopeServiceProvider::class);
 
         }
+
+        Action::configureUsing(function (Action $action): void {
+
+            $action->size(ActionSize::ExtraSmall);
+        });
     }
 
     /**

@@ -37,13 +37,9 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
      */
     public static function fromFrame(int $frameNumber, float $frameRate): self
     {
-        if ($frameNumber < 0) {
-            throw new InvalidArgumentException('Frame number cannot be negative, got: ' . $frameNumber);
-        }
+        throw_if($frameNumber < 0, new InvalidArgumentException('Frame number cannot be negative, got: ' . $frameNumber));
 
-        if ($frameRate <= 0) {
-            throw new InvalidArgumentException('Frame rate must be positive, got: ' . $frameRate);
-        }
+        throw_if($frameRate <= 0, new InvalidArgumentException('Frame rate must be positive, got: ' . $frameRate));
 
         $seconds = $frameNumber / $frameRate;
         return new self($seconds);
@@ -56,22 +52,16 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     {
         $cleaned = trim($time);
         
-        if (empty($cleaned)) {
-            throw new InvalidArgumentException('Time string cannot be empty');
-        }
+        throw_if(empty($cleaned), new InvalidArgumentException('Time string cannot be empty'));
 
         // Split by colon
         $parts = explode(':', $cleaned);
         
-        if (count($parts) < 2 || count($parts) > 3) {
-            throw new InvalidArgumentException('Invalid time format. Use MM:SS or HH:MM:SS format: ' . $time);
-        }
+        throw_if(count($parts) < 2 || count($parts) > 3, new InvalidArgumentException('Invalid time format. Use MM:SS or HH:MM:SS format: ' . $time));
 
         // Validate each part is numeric
         foreach ($parts as $part) {
-            if (!is_numeric($part)) {
-                throw new InvalidArgumentException('Invalid time format. All parts must be numeric: ' . $time);
-            }
+            throw_unless(is_numeric($part), new InvalidArgumentException('Invalid time format. All parts must be numeric: ' . $time));
         }
 
         $seconds = 0;
@@ -96,9 +86,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     {
         $cleaned = trim($input);
         
-        if (empty($cleaned)) {
-            throw new InvalidArgumentException('Time string cannot be empty');
-        }
+        throw_if(empty($cleaned), new InvalidArgumentException('Time string cannot be empty'));
 
         // If it contains colons, treat as formatted time
         if (str_contains($cleaned, ':')) {
@@ -106,9 +94,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
         }
 
         // Otherwise treat as seconds
-        if (!is_numeric($cleaned)) {
-            throw new InvalidArgumentException('Invalid time string. Must be numeric seconds or formatted time: ' . $input);
-        }
+        throw_unless(is_numeric($cleaned), new InvalidArgumentException('Invalid time string. Must be numeric seconds or formatted time: ' . $input));
 
         return self::fromSeconds((float) $cleaned);
     }
@@ -158,9 +144,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
      */
     public function getFrame(float $frameRate): int
     {
-        if ($frameRate <= 0) {
-            throw new InvalidArgumentException('Frame rate must be positive, got: ' . $frameRate);
-        }
+        throw_if($frameRate <= 0, new InvalidArgumentException('Frame rate must be positive, got: ' . $frameRate));
 
         return (int) round($this->seconds * $frameRate);
     }
@@ -353,13 +337,9 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
      */
     private function validateSeconds(float $seconds): void
     {
-        if (!is_finite($seconds)) {
-            throw new InvalidArgumentException('Seconds must be a finite number');
-        }
+        throw_unless(is_finite($seconds), new InvalidArgumentException('Seconds must be a finite number'));
 
-        if ($seconds < 0) {
-            throw new InvalidArgumentException('Seconds cannot be negative, got: ' . $seconds);
-        }
+        throw_if($seconds < 0, new InvalidArgumentException('Seconds cannot be negative, got: ' . $seconds));
     }
 
     /**

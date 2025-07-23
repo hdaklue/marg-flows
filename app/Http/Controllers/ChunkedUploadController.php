@@ -324,9 +324,7 @@ final class ChunkedUploadController extends Controller
         // Open final file for writing
         $finalHandle = fopen($fullFinalPath, 'wb');
 
-        if (! $finalHandle) {
-            throw new Exception('Could not create final file');
-        }
+        throw_unless($finalHandle, new Exception('Could not create final file'));
 
         // Append all chunks to final file
         for ($i = 0; $i < $totalChunks; $i++) {

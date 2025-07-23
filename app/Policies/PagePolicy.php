@@ -23,7 +23,7 @@ final class PagePolicy
      */
     public function view(User $user, Page $page): bool
     {
-        return false;
+        return $user->isAssignedTo($page);
     }
 
     /**
@@ -39,7 +39,8 @@ final class PagePolicy
      */
     public function update(User $user, Page $page): bool
     {
-        return false;
+        return $user->hasAssignmentOn($page, RoleEnum::ADMIN)
+        || $user->hasAssignmentOn($page, RoleEnum::MANAGER);
     }
 
     /**
@@ -66,9 +67,9 @@ final class PagePolicy
         return false;
     }
 
-    public function manageMembers(User $user, Page $flow): bool
+    public function manageMembers(User $user, Page $page): bool
     {
 
-        return $user->hasAssignmentOn($flow, RoleEnum::ADMIN) || $user->hasAssignmentOn($flow, RoleEnum::MANAGER);
+        return $user->hasAssignmentOn($page, RoleEnum::ADMIN) || $user->hasAssignmentOn($page, RoleEnum::MANAGER);
     }
 }

@@ -12,7 +12,19 @@ if (! function_exists('toUserDate')) {
             $date = $date->toDateTimeString();
         }
 
-        return Carbon::parse($date, 'UTC')->setTimezone($user->timezone)->format('d/m/Y');
+        return Carbon::parse($date, 'UTC')->setTimezone($user->timezone)->format('d/M/Y');
+    }
+}
+
+if (! function_exists('toUserDateString')) {
+    function toUserDateString(string|Carbon $date, User $user): string
+    {
+
+        if ($date instanceof Carbon) {
+            $date = $date->toDateTimeString();
+        }
+
+        return Carbon::parse($date, 'UTC')->setTimezone($user->timezone)->format('D, j M Y');
     }
 }
 

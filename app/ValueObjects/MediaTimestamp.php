@@ -18,9 +18,7 @@ abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, 
      */
     public static function fromLivewire($value): self
     {
-        if (! is_array($value) || ! isset($value['type'])) {
-            throw new InvalidArgumentException('Invalid Livewire value for MediaTimestamp');
-        }
+        throw_if(! is_array($value) || ! isset($value['type']), new InvalidArgumentException('Invalid Livewire value for MediaTimestamp'));
 
         return match ($value['type']) {
             'audio_region' => AudioRegion::fromArray($value),

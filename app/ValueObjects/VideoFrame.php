@@ -99,9 +99,7 @@ final class VideoFrame extends MediaTimestamp
 
     public function previousFrame(): self
     {
-        if ($this->frameNumber <= 0) {
-            throw new InvalidArgumentException('Cannot go to previous frame from frame 0');
-        }
+        throw_if($this->frameNumber <= 0, new InvalidArgumentException('Cannot go to previous frame from frame 0'));
 
         return self::fromFrame($this->frameNumber - 1, $this->frameRate);
     }
@@ -110,9 +108,7 @@ final class VideoFrame extends MediaTimestamp
     {
         $newFrameNumber = $this->frameNumber + $frames;
         
-        if ($newFrameNumber < 0) {
-            throw new InvalidArgumentException('Cannot have negative frame number');
-        }
+        throw_if($newFrameNumber < 0, new InvalidArgumentException('Cannot have negative frame number'));
 
         return self::fromFrame($newFrameNumber, $this->frameRate);
     }
@@ -125,9 +121,7 @@ final class VideoFrame extends MediaTimestamp
 
     public function frameDifference(VideoFrame $other): int
     {
-        if (abs($this->frameRate - $other->frameRate) >= PHP_FLOAT_EPSILON) {
-            throw new InvalidArgumentException('Cannot compare frames with different frame rates');
-        }
+        throw_if(abs($this->frameRate - $other->frameRate) >= PHP_FLOAT_EPSILON, new InvalidArgumentException('Cannot compare frames with different frame rates'));
 
         return abs($this->frameNumber - $other->frameNumber);
     }
@@ -160,12 +154,8 @@ final class VideoFrame extends MediaTimestamp
 
     private function validateFrameRate(): void
     {
-        if ($this->frameRate <= 0) {
-            throw new InvalidArgumentException('Frame rate must be positive, got: ' . $this->frameRate);
-        }
+        throw_if($this->frameRate <= 0, new InvalidArgumentException('Frame rate must be positive, got: ' . $this->frameRate));
 
-        if (!is_finite($this->frameRate)) {
-            throw new InvalidArgumentException('Frame rate must be finite');
-        }
+        throw_unless(is_finite($this->frameRate), new InvalidArgumentException('Frame rate must be finite'));
     }
 }

@@ -135,11 +135,9 @@ final class AudioRegion extends MediaTimestamp
 
     private function validateTimes(): void
     {
-        if ($this->startTime->asSeconds() >= $this->endTime->asSeconds()) {
-            throw new InvalidArgumentException(
-                'Start time must be before end time. Got start: ' .
-                $this->startTime->display() . ', end: ' . $this->endTime->display(),
-            );
-        }
+        throw_if($this->startTime->asSeconds() >= $this->endTime->asSeconds(), new InvalidArgumentException(
+            'Start time must be before end time. Got start: ' .
+            $this->startTime->display() . ', end: ' . $this->endTime->display(),
+        ));
     }
 }

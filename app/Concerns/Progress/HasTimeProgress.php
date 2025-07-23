@@ -17,15 +17,13 @@ trait HasTimeProgress
     public static function bootHasTimeProgress()
     {
         static::saving(function ($model) {
-            if (! $model->hasValidProgressDates()) { // $this refers to the model
-                throw new InvalidArgumentException('Model must have valid progress dates');
-            }
+            // $this refers to the model
+            throw_unless($model->hasValidProgressDates(), new InvalidArgumentException('Model must have valid progress dates'));
         });
 
         static::updating(function ($model) {
-            if (! $model->hasValidProgressDates()) { // $this refers to the model
-                throw new InvalidArgumentException('Model must have valid progress dates');
-            }
+            // $this refers to the model
+            throw_unless($model->hasValidProgressDates(), new InvalidArgumentException('Model must have valid progress dates'));
         });
     }
 
@@ -37,12 +35,10 @@ trait HasTimeProgress
     {
         $startDateAttribute = $this->getProgressStartDateAttribute();
 
-        if (! $this->hasAttribute($startDateAttribute)) {
-            throw new InvalidArgumentException(
-                'Model ' . static::class . " does not have attribute '{$startDateAttribute}' for progress start date. " .
-                'Override getProgressStartDateAttribute() to specify the correct attribute name.',
-            );
-        }
+        throw_unless($this->hasAttribute($startDateAttribute), new InvalidArgumentException(
+            'Model ' . static::class . " does not have attribute '{$startDateAttribute}' for progress start date. " .
+            'Override getProgressStartDateAttribute() to specify the correct attribute name.',
+        ));
 
         return $this->{$startDateAttribute};
     }
@@ -55,12 +51,10 @@ trait HasTimeProgress
     {
         $dueDateAttribute = $this->getProgressDueDateAttribute();
 
-        if (! $this->hasAttribute($dueDateAttribute)) {
-            throw new InvalidArgumentException(
-                'Model ' . static::class . " does not have attribute '{$dueDateAttribute}' for progress due date. " .
-                'Override getProgressDueDateAttribute() to specify the correct attribute name.',
-            );
-        }
+        throw_unless($this->hasAttribute($dueDateAttribute), new InvalidArgumentException(
+            'Model ' . static::class . " does not have attribute '{$dueDateAttribute}' for progress due date. " .
+            'Override getProgressDueDateAttribute() to specify the correct attribute name.',
+        ));
 
         return $this->{$dueDateAttribute};
     }
@@ -73,12 +67,10 @@ trait HasTimeProgress
     {
         $completedDateAttribute = $this->getProgressCompletedDateAttribute();
 
-        if (! $this->hasAttribute($completedDateAttribute)) {
-            throw new InvalidArgumentException(
-                'Model ' . static::class . " does not have attribute '{$completedDateAttribute}' for progress due date. " .
-                'Override getProgressDueDateAttribute() to specify the correct attribute name.',
-            );
-        }
+        throw_unless($this->hasAttribute($completedDateAttribute), new InvalidArgumentException(
+            'Model ' . static::class . " does not have attribute '{$completedDateAttribute}' for progress due date. " .
+            'Override getProgressDueDateAttribute() to specify the correct attribute name.',
+        ));
 
         return $this->{$completedDateAttribute};
     }

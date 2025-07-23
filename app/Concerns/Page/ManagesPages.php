@@ -14,7 +14,7 @@ trait ManagesPages
     /**
      * Get all pages for this entity with caching.
      *
-     * @return Collection<int, \App\DTOs\Page\PageDto>
+     * @return \Illuminate\Support\Collection<int, \App\DTOs\Page\PageDto>
      */
     public function getPages(): Collection
     {
@@ -24,7 +24,7 @@ trait ManagesPages
     /**
      * Get recent pages for this entity.
      *
-     * @return Collection<Page>
+     * @return \Illuminate\Support\Collection<int, \App\Models\Page>
      */
     public function getRecentPages(int $limit = 10): Collection
     {
@@ -34,7 +34,7 @@ trait ManagesPages
     /**
      * Search pages by name or content.
      *
-     * @return Collection<Page>
+     * @return \Illuminate\Support\Collection<int, \App\Models\Page>
      */
     public function searchPages(string $query): Collection
     {

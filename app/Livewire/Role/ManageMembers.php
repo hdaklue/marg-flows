@@ -126,7 +126,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
     public function changeRole(string $role, string|int $target_id)
     {
         $this->authorize('manageMembers', $this->roleable);
-        $targetModel = $this->roleable->getPaticipant($target_id);
+        $targetModel = $this->roleable->getParticipant($target_id);
         if (! $targetModel) {
             return;
         }

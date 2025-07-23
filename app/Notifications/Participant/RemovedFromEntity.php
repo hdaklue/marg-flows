@@ -46,9 +46,7 @@ final class RemovedFromEntity extends Notification implements ShouldQueue
 
     public function toDatabase(object $notifiable): array
     {
-        if (! $this->entity instanceof HasStaticType) {
-            throw new Exception('Entity must implement HasStaticType');
-        }
+        throw_unless($this->entity instanceof HasStaticType, new Exception('Entity must implement HasStaticType'));
         $message = "You've been removed from ({$this->entity->getTypeTitle()}) {$this->entity->getTypeName()}";
 
         return FilamentNotification::make()

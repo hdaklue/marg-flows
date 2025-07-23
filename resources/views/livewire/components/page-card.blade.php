@@ -137,7 +137,7 @@
         </svg>
     </button> --}}
 
-        <div class="flex h-24 w-full items-center justify-center dark:text-zinc-700">
+        <div class="flex h-24 w-full items-center justify-center text-zinc-300 dark:text-zinc-700">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -172,7 +172,9 @@
                         class="w-full resize-none rounded border border-zinc-600 bg-transparent px-1 py-0.5 text-xs font-semibold focus:border-sky-500 focus:outline-none dark:text-zinc-300"></textarea>
                 </div>
             </div>
-            <p class="text-2xs self-baseline text-zinc-500">{{ $createdAt }}</p>
+
+            <p class="text-2xs self-baseline text-zinc-500">Last Update: {{ $updatedAt }}</p>
+            {{-- <p class="text-2xs self-baseline text-zinc-500">Created: {{ $createdAt }}</p> --}}
         </div>
 
         <!-- Desktop Context Menu (Anchored) -->

@@ -37,13 +37,9 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
      */
     public static function fromPercentage(float $percentage): self
     {
-        if (! is_finite($percentage)) {
-            throw new InvalidArgumentException('Percentage must be a finite number');
-        }
+        throw_unless(is_finite($percentage), new InvalidArgumentException('Percentage must be a finite number'));
 
-        if ($percentage < 0 || $percentage > 100) {
-            throw new InvalidArgumentException('Percentage must be between 0 and 100, got: ' . $percentage);
-        }
+        throw_if($percentage < 0 || $percentage > 100, new InvalidArgumentException('Percentage must be between 0 and 100, got: ' . $percentage));
 
         return new self($percentage / 100);
     }
@@ -53,9 +49,7 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
      */
     public static function fromInt(int $percentage): self
     {
-        if ($percentage < 0 || $percentage > 100) {
-            throw new InvalidArgumentException('Percentage must be between 0 and 100, got: ' . $percentage);
-        }
+        throw_if($percentage < 0 || $percentage > 100, new InvalidArgumentException('Percentage must be between 0 and 100, got: ' . $percentage));
 
         return new self($percentage / 100);
     }
@@ -67,9 +61,7 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
     {
         $cleaned = trim($percentage);
 
-        if (empty($cleaned)) {
-            throw new InvalidArgumentException('Percentage string cannot be empty');
-        }
+        throw_if(empty($cleaned), new InvalidArgumentException('Percentage string cannot be empty'));
 
         // Remove percentage symbol if present
         $hasPercentSymbol = str_ends_with($cleaned, '%');
@@ -77,9 +69,7 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
             $cleaned = rtrim($cleaned, '%');
         }
 
-        if (! is_numeric($cleaned)) {
-            throw new InvalidArgumentException('Invalid percentage string: ' . $percentage);
-        }
+        throw_unless(is_numeric($cleaned), new InvalidArgumentException('Invalid percentage string: ' . $percentage));
 
         $numericValue = (float) $cleaned;
 
@@ -232,9 +222,7 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
      */
     public function multiply(float $factor): self
     {
-        if ($factor < 0) {
-            throw new InvalidArgumentException('Factor cannot be negative');
-        }
+        throw_if($factor < 0, new InvalidArgumentException('Factor cannot be negative'));
 
         $newRatio = min(1.0, $this->value * $factor);
 
@@ -290,13 +278,9 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
      */
     private function validateRatio(float $ratio): void
     {
-        if (! is_finite($ratio)) {
-            throw new InvalidArgumentException('Ratio must be a finite number');
-        }
+        throw_unless(is_finite($ratio), new InvalidArgumentException('Ratio must be a finite number'));
 
-        if ($ratio < 0 || $ratio > 1) {
-            throw new InvalidArgumentException('Ratio must be between 0 and 1, got: ' . $ratio);
-        }
+        throw_if($ratio < 0 || $ratio > 1, new InvalidArgumentException('Ratio must be between 0 and 1, got: ' . $ratio));
     }
 
     /**

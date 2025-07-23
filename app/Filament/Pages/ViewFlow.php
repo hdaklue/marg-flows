@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Actions\Flow\EditFlow;
 use App\Filament\Resources\FlowResource;
 use App\Models\Flow;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -92,7 +96,7 @@ final class ViewFlow extends KanbanBoard
                 ->size(ActionSize::ExtraSmall)
                 ->fillForm(fn () => [
                     'title' => $this->flow->title,
-                    'start_date' => $this->flow->getProgressStartDate(),
+
                     'due_date' => $this->flow->getProgressDueDate(),
                     'description' => $this->flow->description,
                 ])
@@ -114,7 +118,24 @@ final class ViewFlow extends KanbanBoard
                             ->required()
                             ->native(false),
                     ]),
-                ])->modalWidth(MaxWidth::Large),
+                ])
+                ->action(function (array $data) {
+                    try {
+                        EditFlow::run($this->flow, $data['title'],
+                            $data['description'], Carbon::parse($data['due_date']));
+                        Notification::make()
+                            ->body('Updated successfully')
+                            ->success()
+                            ->send();
+                    } catch (Exception $e) {
+                        Notification::make()
+                            ->body('Something went wrong')
+                            ->danger()
+                            ->send();
+                        logger()->error($e->getMessage());
+                    }
+                })
+                ->modalWidth(MaxWidth::Large),
             Action::make('add')
                 ->label('Task')
                 ->color('gray')

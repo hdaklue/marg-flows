@@ -7,8 +7,9 @@ namespace App\Filament\Resources\FlowResource\Pages;
 use App\Filament\Resources\FlowResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\ActionSize;
 
-class ListFlows extends ListRecords
+final class ListFlows extends ListRecords
 {
     protected static string $resource = FlowResource::class;
 
@@ -17,7 +18,9 @@ class ListFlows extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->size(ActionSize::ExtraSmall)
+                ->outlined(),
 
         ];
     }

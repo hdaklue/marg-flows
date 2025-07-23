@@ -33,6 +33,8 @@ final class FlowPages extends Page implements HasForms
     #[Locked]
     public Flow $flow;
 
+    protected ?string $maxContentWidth = 'full';
+
     public function mount(string $record)
     {
 

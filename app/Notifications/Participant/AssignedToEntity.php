@@ -55,9 +55,7 @@ final class AssignedToEntity extends Notification implements ShouldQueue
     public function toDatabase(object $notifiable): array
     {
 
-        if (! $this->entity instanceof HasStaticType) {
-            throw new Exception('Entity must implement HasStaticType');
-        }
+        throw_unless($this->entity instanceof HasStaticType, new Exception('Entity must implement HasStaticType'));
         $message = "You've been added to ({$this->entity->getTypeTitle()}) {$this->entity->getTypeName()} as {$this->role} ";
 
         return FilamentNotification::make()
