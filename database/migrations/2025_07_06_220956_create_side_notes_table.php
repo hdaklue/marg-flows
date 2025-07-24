@@ -20,6 +20,9 @@ return new class extends Migration
             $table->foreignUlid('owner_id')->references('id')->on('users');
             $table->timestamps();
 
+            // Indexes for performance (owner_id already indexed by foreign key)
+            $table->index(['owner_id', 'sidenoteable_type', 'sidenoteable_id']);
+            $table->index('created_at');
         });
     }
 

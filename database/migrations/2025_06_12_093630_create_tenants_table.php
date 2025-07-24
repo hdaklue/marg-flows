@@ -18,6 +18,10 @@ return new class extends Migration
             $table->foreignUlid('creator_id')->references('id')->on('users');
 
             $table->timestamps();
+
+            // Indexes for performance (creator_id already indexed by foreign key)
+            $table->index('active');
+            $table->index(['active', 'name']);
         });
     }
 

@@ -112,12 +112,15 @@
     @apply bg-zinc-700;
 }
 
+.ce-toolbar__plus{
+    @apply lg:bg-zinc-200;
+}
 .dark .ce-toolbar__settings-btn {
     @apply bg-zinc-700;
 }
 
 .ce-toolbar__content{
-    @apply -translate-x-10;
+    @apply lg:-translate-x-10;
 }
 .ce-block__content,
 .ce-toolbar__content {

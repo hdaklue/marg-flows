@@ -63,7 +63,7 @@ final class ViewPage extends Page implements HasForms
                 PlaceholderInput::make('title')
                     ->editable($this->canEdit)
                     ->required()
-                    ->live(debounce: 2)
+                    ->live(debounce: '100ms')
                     ->minLength(10)
                     ->afterStateUpdated(function ($state, $livewire) {
                         $livewire->validate();

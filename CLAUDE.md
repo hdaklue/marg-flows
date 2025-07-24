@@ -39,6 +39,9 @@ KluePortal is a sophisticated Laravel application implementing enterprise-level 
 - **Maintains referential integrity** for authorization system
 - **Enables parallel loading** using Laravel's `defer()` function
 
+### 6. Indexing Strategy
+- While indexing a database, don't create separate indexes for the relations, laravel does it already
+
 ## Technical Implementation Details
 
 ### DTOs Created

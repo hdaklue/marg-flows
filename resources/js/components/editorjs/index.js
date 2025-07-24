@@ -48,13 +48,13 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 inlineToolbar: ['bold', 'link', 'convertTo'],
                 tools: this.getEditorTools(csrf, uploadUrl),
                 onChange: () => {
-                    this.editor.save().then((outputData) => {
-                        clearTimeout(this.debounceTimer);
-
-                        this.debounceTimer = setTimeout(() => {
-                            this.state = JSON.stringify(outputData);
-                        }, 500);
-                    });
+                    this.editor.save()
+                        .then((outputData) => {
+                            clearTimeout(this.debounceTimer);
+                            this.debounceTimer = setTimeout(() => {
+                                this.state = JSON.stringify(outputData);
+                            }, 500);
+                        });
                 },
 
                 onReady: () => {
