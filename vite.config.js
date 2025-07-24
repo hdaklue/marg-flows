@@ -6,11 +6,13 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
-                'resources/js/app.js',
+                // 'resources/js/app.js',
                 'resources/css/filament/portal/theme.css',
-                'resources/js/components/editorjs/index.js',
+                // 'resources/js/components/editorjs/index.js',
                 'resources/css/components/editorjs/index.css',
                 'resources/css/components/editorjs/resizable-image.css',
+                'resources/css/components/editorjs/comment-tune.css',
+                'resources/css/components/document/document.css',
                 'resources/css/audio-annotation.css',
             ],
             refresh: [

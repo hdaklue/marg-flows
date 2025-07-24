@@ -8,7 +8,7 @@ import '../../../../css/components/editorjs/resizable-image.css';
 class ResizableImage {
     static get toolbox() {
         return {
-            title: 'Resizable Image',
+            title: 'Images',
             icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
       </svg>`
@@ -34,13 +34,13 @@ class ResizableImage {
         this.config = config || {};
         // Support both old single image format and new multiple images format
         this.data = data || {};
-        
+
         // Convert old single image format to new array format
         if (this.data.file && !Array.isArray(this.data.files)) {
             this.data.files = [this.data.file];
             delete this.data.file; // Remove old format
         }
-        
+
         // Initialize files array if not present
         if (!this.data.files) {
             this.data.files = [];
@@ -57,7 +57,8 @@ class ResizableImage {
         this.defaultConfig = {
             endpoints: {
                 byFile: '/upload-image',
-                byUrl: '/upload-image-by-url'
+                byUrl: '/upload-image-by-url',
+                delete: '/delete-image'
             },
             additionalRequestHeaders: {},
             field: 'image',
@@ -70,23 +71,10 @@ class ResizableImage {
 
         this.config = Object.assign(this.defaultConfig, this.config);
 
-        // Plugin state
-        this.isResizing = false;
-        this.resizeHandle = null;
-        this.startX = 0;
-        this.startY = 0;
-        this.startWidth = 0;
-        this.startHeight = 0;
-        this.aspectRatio = 1;
-        this.currentImage = null;
-        this.currentContainer = null;
 
         // Bind methods
         this.onUpload = this.onUpload.bind(this);
         this.onPaste = this.onPaste.bind(this);
-        this.startResize = this.startResize.bind(this);
-        this.onResize = this.onResize.bind(this);
-        this.stopResize = this.stopResize.bind(this);
     }
 
     render() {
@@ -97,13 +85,13 @@ class ResizableImage {
         this.wrapper = wrapper;
 
         // Check if we have valid image data (support both old and new format)
-        const hasImages = (this.data.files && this.data.files.length > 0) || 
-                         (this.data.file && this.data.file.url && this.data.file.url.trim() !== '');
-        
+        const hasImages = (this.data.files && this.data.files.length > 0) ||
+            (this.data.file && this.data.file.url && this.data.file.url.trim() !== '');
+
         if (hasImages) {
             // Always create upload interface (for adding more images)
             this.createUploadInterface(wrapper);
-            
+
             // If we have images, render the gallery
             if (this.data.files && this.data.files.length > 0) {
                 this.hideUploadContainer();
@@ -125,7 +113,7 @@ class ResizableImage {
         if (this.readOnly) {
             return;
         }
-        
+
         const uploadContainer = document.createElement('div');
         uploadContainer.classList.add('resizable-image__upload-container');
 
@@ -200,7 +188,7 @@ class ResizableImage {
             uploadContainer.classList.remove('resizable-image__upload-container--dragover');
 
             if (!this.readOnly && !this.uploading && e.dataTransfer.files.length) {
-                const files = Array.from(e.dataTransfer.files).filter(file => 
+                const files = Array.from(e.dataTransfer.files).filter(file =>
                     file.type.startsWith('image/')
                 );
                 if (files.length > 0) {
@@ -235,39 +223,13 @@ class ResizableImage {
         image.classList.add('resizable-image__img');
         image.src = this.data.file.url;
         image.alt = this.data.caption || '';
+        image.style.margin = '0';
 
-        // Set initial dimensions if available
-        if (this.data.width) {
-            image.style.width = this.data.width + 'px';
-        }
-        if (this.data.height) {
-            image.style.height = this.data.height + 'px';
-        }
-
-        // Wait for image to load to get natural dimensions
-        image.addEventListener('load', () => {
-            this.aspectRatio = image.naturalWidth / image.naturalHeight;
-
-            if (!this.data.width && !this.data.height) {
-                // Set default width to container width, maintain aspect ratio
-                const containerWidth = Math.min(image.naturalWidth, wrapper.parentElement?.offsetWidth || 600);
-                image.style.width = containerWidth + 'px';
-                image.style.height = (containerWidth / this.aspectRatio) + 'px';
-            }
-        });
 
         imageContainer.appendChild(image);
 
-        // Store references to this specific block's elements
-        this.currentImage = image;
-        this.currentContainer = imageContainer;
-
         // Gallery styling applied automatically
 
-        // Add resize handles if not read-only
-        if (!this.readOnly) {
-            this.addResizeHandles(imageContainer, image);
-        }
 
         // Caption input
         const captionInput = document.createElement('input');
@@ -284,128 +246,9 @@ class ResizableImage {
         wrapper.appendChild(captionInput);
     }
 
-    addResizeHandles(container, image) {
-        const handles = ['nw', 'ne', 'sw', 'se', 'n', 's', 'e', 'w'];
 
-        handles.forEach(position => {
-            const handle = document.createElement('div');
-            handle.classList.add('resizable-image__handle', `resizable-image__handle--${position}`);
-            handle.addEventListener('mousedown', (e) => this.startResize(e, position, image));
-            container.appendChild(handle);
-        });
 
-        container.classList.add('resizable-image__container--resizable');
-    }
 
-    startResize(e, position, image) {
-        e.preventDefault();
-        this.isResizing = true;
-        this.resizeHandle = position;
-        this.startX = e.clientX;
-        this.startY = e.clientY;
-        this.startWidth = parseInt(getComputedStyle(image).width);
-        this.startHeight = parseInt(getComputedStyle(image).height);
-
-        document.addEventListener('mousemove', this.onResize);
-        document.addEventListener('mouseup', this.stopResize);
-        document.body.style.userSelect = 'none';
-        document.body.style.cursor = getComputedStyle(e.target).cursor;
-
-        // Prevent text selection and other default behaviors
-        e.target.style.pointerEvents = 'none';
-    }
-
-    onResize(e) {
-        if (!this.isResizing) return;
-
-        const deltaX = e.clientX - this.startX;
-        const deltaY = e.clientY - this.startY;
-        const handle = this.resizeHandle;
-
-        let newWidth = this.startWidth;
-        let newHeight = this.startHeight;
-
-        // Calculate new dimensions based on handle position
-        switch (handle) {
-            case 'se': // Southeast
-                newWidth = this.startWidth + deltaX;
-                newHeight = newWidth / this.aspectRatio;
-                break;
-            case 'sw': // Southwest
-                newWidth = this.startWidth - deltaX;
-                newHeight = newWidth / this.aspectRatio;
-                break;
-            case 'ne': // Northeast
-                newWidth = this.startWidth + deltaX;
-                newHeight = newWidth / this.aspectRatio;
-                break;
-            case 'nw': // Northwest
-                newWidth = this.startWidth - deltaX;
-                newHeight = newWidth / this.aspectRatio;
-                break;
-            case 'e': // East
-                newWidth = this.startWidth + deltaX;
-                newHeight = newWidth / this.aspectRatio;
-                break;
-            case 'w': // West
-                newWidth = this.startWidth - deltaX;
-                newHeight = newWidth / this.aspectRatio;
-                break;
-            case 'n': // North
-                newHeight = this.startHeight - deltaY;
-                newWidth = newHeight * this.aspectRatio;
-                break;
-            case 's': // South
-                newHeight = this.startHeight + deltaY;
-                newWidth = newHeight * this.aspectRatio;
-                break;
-        }
-
-        // Apply minimum constraints
-        const minWidth = 50;
-        const minHeight = 50;
-
-        if (newWidth < minWidth) {
-            newWidth = minWidth;
-            newHeight = newWidth / this.aspectRatio;
-        }
-
-        if (newHeight < minHeight) {
-            newHeight = minHeight;
-            newWidth = newHeight * this.aspectRatio;
-        }
-
-        // Apply the new dimensions to this specific image
-        if (this.currentImage) {
-            this.currentImage.style.width = newWidth + 'px';
-            this.currentImage.style.height = newHeight + 'px';
-        }
-    }
-
-    stopResize() {
-        if (!this.isResizing) return;
-
-        this.isResizing = false;
-        this.resizeHandle = null;
-
-        document.removeEventListener('mousemove', this.onResize);
-        document.removeEventListener('mouseup', this.stopResize);
-        document.body.style.userSelect = '';
-        document.body.style.cursor = '';
-
-        // Re-enable pointer events for handles in this container
-        if (this.currentContainer) {
-            this.currentContainer.querySelectorAll('.resizable-image__handle').forEach(handle => {
-                handle.style.pointerEvents = '';
-            });
-        }
-
-        // Save the new dimensions from this specific image
-        if (this.currentImage) {
-            this.data.width = parseInt(this.currentImage.style.width);
-            this.data.height = parseInt(this.currentImage.style.height);
-        }
-    }
 
     onUpload(e) {
         const file = e.target.files[0];
@@ -443,7 +286,7 @@ class ResizableImage {
         }
 
         this.uploading = true;
-        
+
         // Initialize upload tracking for each file
         this.uploadProgress = files.map((file, index) => ({
             id: `upload-${Date.now()}-${index}`,
@@ -458,7 +301,7 @@ class ResizableImage {
 
         // Show inline progress interface
         this.showInlineProgress();
-        
+
         // Debug log
         console.log('Upload progress initialized:', this.uploadProgress);
 
@@ -467,7 +310,7 @@ class ResizableImage {
             for (let i = 0; i < this.uploadProgress.length; i++) {
                 await this.uploadSingleFileWithProgress(i);
             }
-            
+
             // Hide progress and show gallery
             this.hideInlineProgress();
             this.hideUploadContainer();
@@ -495,7 +338,7 @@ class ResizableImage {
 
         try {
             const response = await this.uploadSingleFile(uploadItem.file);
-            
+
             // Add to data.files array
             this.data.files.push({
                 url: response.url || response.file?.url,
@@ -507,7 +350,7 @@ class ResizableImage {
             uploadItem.status = 'success';
             uploadItem.progress = 100;
             this.updateProgressItem(index);
-            
+
         } catch (error) {
             uploadItem.status = 'error';
             uploadItem.error = error.message || 'Upload failed';
@@ -594,15 +437,16 @@ class ResizableImage {
     createThumbnail(fileData, index) {
         const thumbnail = document.createElement('div');
         thumbnail.classList.add('resizable-image__thumbnail');
-        
+
         const img = document.createElement('img');
         img.src = fileData.url;
         img.alt = fileData.caption || `Image ${index + 1}`;
         img.classList.add('resizable-image__thumbnail-image');
-        
+        img.style.margin = '0';
+
         // Add click handler to open modal
         img.addEventListener('click', () => this.openModal(index));
-        
+
         // Add remove button if not readonly
         if (!this.readOnly) {
             const removeBtn = document.createElement('button');
@@ -618,7 +462,7 @@ class ResizableImage {
             });
             thumbnail.appendChild(removeBtn);
         }
-        
+
         thumbnail.appendChild(img);
         return thumbnail;
     }
@@ -628,10 +472,10 @@ class ResizableImage {
         if (this.readOnly) {
             return null;
         }
-        
+
         const addButton = document.createElement('div');
         addButton.classList.add('resizable-image__add-more');
-        
+
         addButton.innerHTML = `
             <div class="resizable-image__add-more-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -640,9 +484,9 @@ class ResizableImage {
             </div>
             <span class="resizable-image__add-more-text">Add more</span>
         `;
-        
+
         addButton.addEventListener('click', () => this.openFileSelection());
-        
+
         return addButton;
     }
 
@@ -657,27 +501,35 @@ class ResizableImage {
             }
             return null;
         }
-        
+
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
         captionInput.placeholder = 'Add a caption for this gallery...';
         captionInput.classList.add('resizable-image__caption');
         captionInput.value = this.data.caption || '';
-        
+
         captionInput.addEventListener('input', (e) => {
             this.data.caption = e.target.value;
         });
-        
+
         return captionInput;
     }
 
     removeImage(index) {
         if (this.data.files && this.data.files[index]) {
+            const file = this.data.files[index];
+
+            // Delete from server if file has URL
+            if (file.url) {
+                this.deleteFromServer(file.url);
+            }
+
+            // Remove from data array
             this.data.files.splice(index, 1);
-            
+
             // Re-render gallery
             this.renderGallery();
-            
+
             // If no images left, show upload container
             if (this.data.files.length === 0) {
                 this.showUploadContainer();
@@ -687,23 +539,24 @@ class ResizableImage {
 
     openModal(startIndex = 0) {
         if (!this.data.files || this.data.files.length === 0) return;
-        
+
         this.currentModalIndex = Math.max(0, Math.min(startIndex, this.data.files.length - 1));
-        
+
         // Create modal overlay
         const modal = document.createElement('div');
         modal.classList.add('resizable-image__modal');
-        
+
         // Create modal content
         const modalContent = document.createElement('div');
         modalContent.classList.add('resizable-image__modal-content');
-        
+
         // Create image element
         const modalImage = document.createElement('img');
         modalImage.classList.add('resizable-image__modal-image');
         modalImage.src = this.data.files[this.currentModalIndex].url;
         modalImage.alt = this.data.files[this.currentModalIndex].caption || `Image ${this.currentModalIndex + 1}`;
-        
+        modalImage.style.margin = '0';
+
         // Create close button
         const closeBtn = document.createElement('button');
         closeBtn.classList.add('resizable-image__modal-close');
@@ -712,7 +565,7 @@ class ResizableImage {
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
         `;
-        
+
         // Create navigation buttons (only if more than 1 image)
         let prevBtn, nextBtn, counter;
         if (this.data.files.length > 1) {
@@ -723,7 +576,7 @@ class ResizableImage {
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 18l-6-6 6-6"/>
                 </svg>
             `;
-            
+
             nextBtn = document.createElement('button');
             nextBtn.classList.add('resizable-image__modal-nav', 'resizable-image__modal-next');
             nextBtn.innerHTML = `
@@ -731,13 +584,13 @@ class ResizableImage {
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 18l6-6-6-6"/>
                 </svg>
             `;
-            
+
             // Create counter
             counter = document.createElement('div');
             counter.classList.add('resizable-image__modal-counter');
             counter.textContent = `${this.currentModalIndex + 1} / ${this.data.files.length}`;
         }
-        
+
         // Assemble modal
         modalContent.appendChild(modalImage);
         modalContent.appendChild(closeBtn);
@@ -747,13 +600,13 @@ class ResizableImage {
             modalContent.appendChild(counter);
         }
         modal.appendChild(modalContent);
-        
+
         // Event handlers
         const closeModal = () => {
             modal.remove();
             document.removeEventListener('keydown', handleKeyDown);
         };
-        
+
         const updateModalImage = () => {
             modalImage.src = this.data.files[this.currentModalIndex].url;
             modalImage.alt = this.data.files[this.currentModalIndex].caption || `Image ${this.currentModalIndex + 1}`;
@@ -761,19 +614,19 @@ class ResizableImage {
                 counter.textContent = `${this.currentModalIndex + 1} / ${this.data.files.length}`;
             }
         };
-        
+
         const goToPrev = () => {
-            this.currentModalIndex = this.currentModalIndex === 0 ? 
+            this.currentModalIndex = this.currentModalIndex === 0 ?
                 this.data.files.length - 1 : this.currentModalIndex - 1;
             updateModalImage();
         };
-        
+
         const goToNext = () => {
-            this.currentModalIndex = this.currentModalIndex === this.data.files.length - 1 ? 
+            this.currentModalIndex = this.currentModalIndex === this.data.files.length - 1 ?
                 0 : this.currentModalIndex + 1;
             updateModalImage();
         };
-        
+
         const handleKeyDown = (e) => {
             switch (e.key) {
                 case 'Escape':
@@ -787,23 +640,23 @@ class ResizableImage {
                     break;
             }
         };
-        
+
         // Attach event listeners
         closeBtn.addEventListener('click', closeModal);
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal();
         });
-        
+
         if (prevBtn && nextBtn) {
             prevBtn.addEventListener('click', goToPrev);
             nextBtn.addEventListener('click', goToNext);
         }
-        
+
         document.addEventListener('keydown', handleKeyDown);
-        
+
         // Add to DOM
         document.body.appendChild(modal);
-        
+
         // Focus for keyboard navigation
         modal.focus();
     }
@@ -890,7 +743,7 @@ class ResizableImage {
             if (existingProgress) {
                 existingProgress.remove();
             }
-            
+
             // Create progress element
             const progressElement = document.createElement('div');
             progressElement.classList.add('resizable-image__progress');
@@ -900,12 +753,12 @@ class ResizableImage {
                 </div>
                 <div class="resizable-image__progress-text">Uploading...</div>
             `;
-            
+
             // Hide upload container if it exists
             if (this.uploadContainer) {
                 this.uploadContainer.style.display = 'none';
             }
-            
+
             // Add progress element to wrapper
             this.wrapper.appendChild(progressElement);
         }
@@ -925,7 +778,7 @@ class ResizableImage {
             wrapper: !!this.wrapper,
             uploadProgress: this.uploadProgress?.length || 0
         });
-        
+
         if (!this.wrapper || !this.uploadProgress) return;
 
         // Hide upload container
@@ -976,7 +829,7 @@ class ResizableImage {
         let previewContent = '';
         if (uploadItem.file && uploadItem.file.type.startsWith('image/')) {
             const previewUrl = URL.createObjectURL(uploadItem.file);
-            previewContent = `<img src="${previewUrl}" alt="${uploadItem.name}" class="resizable-image__progress-preview">`;
+            previewContent = `<img src="${previewUrl}" alt="${uploadItem.name}" class="resizable-image__progress-preview" style="margin: 0;">`;
         } else {
             // Use file icon for non-images
             previewContent = `
@@ -1059,7 +912,7 @@ class ResizableImage {
                 </svg>
                 Retry
             `;
-            
+
             retryBtn.addEventListener('click', () => this.retryUpload(index));
             progressInfo.appendChild(retryBtn);
 
@@ -1110,7 +963,7 @@ class ResizableImage {
 
         try {
             await this.uploadSingleFileWithProgress(index);
-            
+
             // Check if all uploads are complete
             const allComplete = this.uploadProgress.every(item => item.status === 'success');
             if (allComplete) {
@@ -1178,12 +1031,17 @@ class ResizableImage {
     // Settings removed for gallery functionality
 
     deleteFromServer(url) {
+        console.log('Attempting to delete image from server:', url);
+
         // Extract file path from URL for deletion
         let filePath = url;
         if (filePath.includes('/storage/')) {
             const storageIndex = filePath.indexOf('/storage/');
             filePath = filePath.substring(storageIndex + '/storage/'.length);
         }
+
+        console.log('Delete endpoint:', this.config.endpoints.delete || '/delete-image');
+        console.log('File path:', filePath);
 
         // Call delete endpoint
         fetch(this.config.endpoints.delete || '/delete-image', {
@@ -1193,6 +1051,11 @@ class ResizableImage {
                 ...this.config.additionalRequestHeaders
             },
             body: JSON.stringify({ path: filePath })
+        }).then(response => {
+            console.log('Delete response:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         }).catch(error => {
             console.warn('Failed to delete file from server:', error);
         });
@@ -1217,6 +1080,20 @@ class ResizableImage {
         // Clean up resize event listeners
         if (this.isResizing) {
             this.stopResize();
+        }
+    }
+
+    /**
+     * Called when Block is removed from the page
+     * Clean up images from server
+     */
+    removed() {
+        if (this.data.files && Array.isArray(this.data.files)) {
+            this.data.files.forEach(file => {
+                if (file.url) {
+                    this.deleteFromServer(file.url);
+                }
+            });
         }
     }
 

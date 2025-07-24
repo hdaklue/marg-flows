@@ -81,7 +81,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                     config: {
                         placeholder: 'Enter a heading',
                         // levels: [2, 3, 4, 5],
-                        // defaultLevel: 2,
+                        defaultLevel: 2,
                     },
                 },
 

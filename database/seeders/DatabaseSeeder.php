@@ -193,22 +193,7 @@ final class DatabaseSeeder extends Seeder
             }
         });
 
-        $this->command->info('Creating 5 pages for each flow...');
-
-        // Create 5 pages for each flow with test user as creator
-        Flow::chunk(50, function ($flows) use ($testUser) {
-            foreach ($flows as $flow) {
-                for ($i = 1; $i <= 5; $i++) {
-                    $page = Page::factory()->make([
-                        'pageable_type' => $flow->getMorphClass(),
-                        'pageable_id' => $flow->id,
-                    ]);
-                    $page->creator()->associate($testUser);
-                    $page->save();
-                    $page->addParticipant($testUser, RoleEnum::ADMIN);
-                }
-            }
-        });
+        $this->command->info('Core database seeding completed!');
 
         $this->command->info('Creating specific test scenarios...');
 

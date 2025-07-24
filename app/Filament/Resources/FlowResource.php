@@ -125,7 +125,6 @@ final class FlowResource extends Resource
             'index' => Pages\ListFlows::route('/'),
             'create' => Pages\CreateFlow::route('/create'),
             'pages' => FlowPages::route('/{record}/pages'),
-            // 'edit' => Pages\EditFlow::route('/{record}/edit'),
         ];
     }
 }

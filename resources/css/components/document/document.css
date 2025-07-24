@@ -1,0 +1,559 @@
+@tailwind components;
+
+.resizable-image {
+    @apply relative mt-5 outline-none;
+}
+
+.resizable-image__upload-container {
+    @apply border-2 border-dashed border-gray-300 rounded-xl py-10 px-5 text-center bg-gray-50 transition-all duration-300 cursor-pointer relative min-h-[140px] flex items-center justify-center shadow-sm;
+}
+
+.resizable-image__upload-container:hover {
+    @apply border-gray-400 bg-gray-100 -translate-y-0.5 shadow-lg;
+}
+
+.resizable-image__upload-container--dragover {
+    @apply border-blue-500 bg-blue-50 border-solid scale-[1.02] shadow-xl shadow-blue-500/15;
+}
+
+.dark .resizable-image__upload-container {
+    @apply bg-gray-800 border-gray-600 shadow-black/30;
+}
+
+.dark .resizable-image__upload-container:hover {
+    @apply bg-gray-900 border-gray-500 shadow-black/40;
+}
+
+.dark .resizable-image__upload-container--dragover {
+    @apply border-blue-400 bg-blue-900/50 shadow-blue-400/25;
+}
+
+.resizable-image__upload-button {
+    @apply flex flex-col items-center w-full gap-4 cursor-pointer;
+}
+
+.resizable-image__upload-icon {
+    @apply flex items-center justify-center w-12 h-12 transition-all duration-300 border border-gray-200 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl;
+}
+
+.resizable-image__upload-container:hover .resizable-image__upload-icon {
+    @apply bg-gradient-to-br from-gray-200 to-gray-300 scale-110 -translate-y-0.5 border-gray-400 shadow-xl shadow-black/10;
+}
+
+.resizable-image__upload-icon svg {
+    @apply text-gray-500 transition-all duration-300 w-9 h-9;
+}
+
+.resizable-image__upload-container:hover .resizable-image__upload-icon svg {
+    @apply text-gray-700 scale-110;
+}
+
+.resizable-image__upload-text {
+    @apply m-0 text-base font-semibold tracking-tight text-gray-700;
+}
+
+.dark .resizable-image__upload-icon {
+    @apply border-gray-600 bg-gradient-to-br from-gray-700 to-gray-800;
+}
+
+.dark .resizable-image__upload-container:hover .resizable-image__upload-icon {
+    @apply border-gray-500 bg-gradient-to-br from-gray-600 to-gray-700 shadow-black/30;
+}
+
+.dark .resizable-image__upload-icon svg {
+    @apply text-gray-400;
+}
+
+.dark .resizable-image__upload-container:hover .resizable-image__upload-icon svg {
+    @apply text-gray-200;
+}
+
+.dark .resizable-image__upload-text {
+    @apply text-gray-200;
+}
+
+.resizable-image__file-input {
+    @apply hidden;
+}
+
+.resizable-image__progress {
+    @apply px-5 py-10 text-center;
+}
+
+.resizable-image__progress-bar {
+    @apply w-full h-1 mb-3 overflow-hidden bg-gray-200 rounded-sm;
+}
+
+.resizable-image__progress-fill {
+    @apply h-full bg-blue-600 rounded-sm w-[30%];
+    animation: progress-indeterminate 2s infinite ease-in-out
+}
+
+.dark .resizable-image__progress-bar {
+    @apply bg-gray-700;
+}
+
+.dark .resizable-image__progress-fill {
+    @apply bg-blue-400;
+}
+
+@keyframes progress-indeterminate {
+    0% {
+        transform: translate(-100%)
+    }
+
+    to {
+        transform: translate(400%)
+    }
+}
+
+.resizable-image__progress-text {
+    @apply text-sm font-medium text-gray-500;
+}
+
+.dark .resizable-image__progress-text {
+    @apply text-gray-300;
+}
+
+.resizable-image__container {
+    @apply relative inline-block max-w-full;
+}
+
+.resizable-image__container--resizable {
+    @apply transition-colors duration-200 border-2 border-transparent;
+}
+
+.resizable-image__container--resizable:hover {
+    @apply border-blue-600;
+}
+
+.dark .resizable-image__container--resizable:hover {
+    @apply border-blue-400;
+}
+
+.resizable-image__img {
+    @apply block h-auto max-w-full rounded-md shadow-md;
+}
+
+.resizable-image__handle {
+    @apply absolute z-10 w-3 h-3 transition-opacity duration-200 bg-blue-600 border-2 border-white rounded-full opacity-0;
+}
+
+.resizable-image__container--resizable:hover .resizable-image__handle {
+    @apply opacity-100;
+}
+
+.dark .resizable-image__handle {
+    @apply bg-blue-400 border-gray-800;
+}
+
+.resizable-image__handle--nw {
+    @apply -top-1.5 -left-1.5 cursor-nw-resize;
+}
+
+.resizable-image__handle--ne {
+    @apply -top-1.5 -right-1.5 cursor-ne-resize;
+}
+
+.resizable-image__handle--sw {
+    @apply -bottom-1.5 -left-1.5 cursor-sw-resize;
+}
+
+.resizable-image__handle--se {
+    @apply -bottom-1.5 -right-1.5 cursor-se-resize;
+}
+
+.resizable-image__handle--n {
+    @apply -top-1.5 left-1/2 -translate-x-1/2 cursor-n-resize;
+}
+
+.resizable-image__handle--s {
+    @apply -bottom-1.5 left-1/2 -translate-x-1/2 cursor-s-resize;
+}
+
+.resizable-image__handle--e {
+    @apply top-1/2 -right-1.5 -translate-y-1/2 cursor-e-resize;
+}
+
+.resizable-image__handle--w {
+    @apply top-1/2 -left-1.5 -translate-y-1/2 cursor-w-resize;
+}
+
+.resizable-image__caption {
+    @apply w-full px-3 py-2 mt-3 text-sm text-gray-600 transition-colors duration-200 bg-white border border-gray-300 rounded-md outline-none;
+}
+
+.resizable-image__caption:focus {
+    @apply border-gray-500 ring-2 ring-gray-500/20;
+}
+
+.resizable-image__caption:read-only {
+    @apply text-gray-500 cursor-default bg-gray-50;
+}
+
+.resizable-image__caption::placeholder {
+    @apply text-gray-400;
+}
+
+.dark .resizable-image__caption {
+    @apply text-gray-200 bg-gray-800 border-gray-600;
+}
+
+.dark .resizable-image__caption:focus {
+    @apply border-gray-400 ring-2 ring-gray-400/20;
+}
+
+.dark .resizable-image__caption:read-only {
+    @apply text-gray-400 bg-gray-900;
+}
+
+.dark .resizable-image__caption::placeholder {
+    @apply text-gray-500;
+}
+
+.resizable-image__caption--readonly {
+    @apply w-full px-3 py-2 mt-3 text-sm text-gray-700 border border-gray-300 rounded-md bg-gray-50;
+}
+
+.dark .resizable-image__caption--readonly {
+    @apply text-gray-300 bg-gray-800 border-gray-600;
+}
+
+@media (max-width: 768px) {
+    .resizable-image__upload-container {
+        @apply py-8 px-4 min-h-[100px];
+    }
+
+    .resizable-image__upload-icon {
+        @apply w-10 h-10;
+    }
+
+    .resizable-image__upload-icon svg {
+        @apply w-5 h-5;
+    }
+
+    .resizable-image__upload-text {
+        @apply text-sm;
+    }
+
+    .resizable-image__handle {
+        @apply w-4 h-4;
+    }
+
+    .resizable-image__handle--nw,
+    .resizable-image__handle--ne,
+    .resizable-image__handle--sw,
+    .resizable-image__handle--se {
+        @apply -top-2 -bottom-2 -left-2 -right-2;
+    }
+
+    .resizable-image__handle--n,
+    .resizable-image__handle--s {
+        @apply -top-2 -bottom-2;
+    }
+
+    .resizable-image__handle--e,
+    .resizable-image__handle--w {
+        @apply -left-2 -right-2;
+    }
+}
+
+.resizable-image__upload-container:focus-within {
+    @apply outline outline-2 outline-blue-600 outline-offset-2;
+}
+
+.resizable-image__handle:focus {
+    @apply opacity-100 outline outline-2 outline-blue-600 outline-offset-2;
+}
+
+.resizable-image__img {
+    @apply transition-transform duration-100 ease-out select-none;
+}
+
+.resizable-image__container--resizable:hover .resizable-image__img {
+    @apply scale-[1.01];
+}
+
+.resizable-image__settings {
+    @apply flex flex-col gap-1 min-w-[200px];
+}
+
+.resizable-image__setting-button {
+    @apply flex items-center gap-2 px-3 py-2 transition-colors duration-200 bg-transparent rounded-md cursor-pointer hover:bg-gray-100;
+}
+
+.resizable-image__setting-icon {
+    @apply flex items-center justify-center w-5 h-5 text-gray-500;
+}
+
+.resizable-image__setting-label {
+    @apply text-sm font-medium text-gray-600;
+}
+
+.dark .resizable-image__setting-button:hover {
+    @apply bg-gray-700;
+}
+
+.dark .resizable-image__setting-icon {
+    @apply text-gray-300;
+}
+
+.dark .resizable-image__setting-label {
+    @apply text-gray-200;
+}
+
+.resizable-image__container--dark {
+    @apply p-3 border border-gray-600 shadow-xl bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-black/30;
+}
+
+.resizable-image__container--centered {
+    @apply block mx-auto;
+}
+
+.resizable-image__container--dark .resizable-image__img {
+    @apply border-2 border-gray-600 rounded-lg shadow-lg shadow-black/40;
+    filter: brightness(.85) contrast(1.15) saturate(1.1)
+}
+
+.resizable-image__container--dark .resizable-image__handle {
+    @apply bg-blue-400 border-gray-800 shadow-sm shadow-black/30;
+}
+
+.resizable-image__loading {
+    @apply absolute inset-0 z-20 flex items-center justify-center border bg-white/90 backdrop-blur-sm rounded-xl border-gray-200/80;
+}
+
+.dark .resizable-image__loading {
+    @apply bg-gray-900/90 border-gray-600/80;
+}
+
+.resizable-image__gallery {
+    @apply mt-4;
+}
+
+.resizable-image__thumbnail-grid {
+    @apply grid grid-cols-4 gap-3 mb-4;
+}
+
+.resizable-image__thumbnail {
+    @apply relative overflow-hidden transition-all duration-200 bg-gray-100 border-2 border-transparent rounded-lg cursor-pointer aspect-square hover:scale-105 hover:shadow-lg hover:border-blue-500 dark:bg-gray-800;
+}
+
+.resizable-image__thumbnail-image {
+    @apply object-cover w-full h-full transition-transform duration-200;
+}
+
+.resizable-image__thumbnail:hover .resizable-image__thumbnail-image {
+    @apply scale-110;
+}
+
+.resizable-image__thumbnail-remove {
+    @apply absolute z-10 flex items-center justify-center w-6 h-6 text-white transition-all duration-200 bg-red-500 rounded-full shadow-lg opacity-0 top-1 right-1 hover:bg-red-600 hover:opacity-100;
+}
+
+.resizable-image__thumbnail:hover .resizable-image__thumbnail-remove {
+    @apply opacity-90;
+}
+
+.resizable-image__add-more {
+    @apply flex flex-col items-center justify-center transition-all duration-200 bg-white border-2 border-gray-300 border-dashed rounded-lg cursor-pointer aspect-square dark:border-gray-600 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:bg-gray-800 hover:shadow-md;
+}
+
+.resizable-image__add-more-icon {
+    @apply w-8 h-8 mb-1 text-gray-500 transition-colors duration-200 dark:text-gray-400;
+}
+
+.resizable-image__add-more:hover .resizable-image__add-more-icon {
+    @apply text-blue-500 dark:text-blue-400;
+}
+
+.resizable-image__add-more-text {
+    @apply text-xs font-medium text-gray-600 transition-colors duration-200 dark:text-gray-400;
+}
+
+.resizable-image__add-more:hover .resizable-image__add-more-text {
+    @apply text-blue-600 dark:text-blue-400;
+}
+
+.resizable-image__modal {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm;
+}
+
+.resizable-image__modal-content {
+    @apply relative max-w-4xl max-h-[90vh] w-full mx-4;
+}
+
+.resizable-image__modal-image {
+    @apply w-full h-auto max-h-[80vh] object-contain rounded-lg shadow-2xl;
+}
+
+.resizable-image__modal-close {
+    @apply absolute z-10 flex items-center justify-center w-10 h-10 text-white transition-all duration-200 rounded-full top-4 right-4 bg-black/50 hover:bg-black/70;
+}
+
+.resizable-image__modal-nav {
+    @apply absolute z-10 flex items-center justify-center w-12 h-12 text-white transition-all duration-200 -translate-y-1/2 rounded-full top-1/2 bg-black/50 hover:bg-black/70;
+}
+
+.resizable-image__modal-prev {
+    @apply left-4;
+}
+
+.resizable-image__modal-next {
+    @apply right-4;
+}
+
+.resizable-image__modal-counter {
+    @apply absolute px-3 py-1 text-sm font-medium text-white -translate-x-1/2 rounded-full bottom-4 left-1/2 bg-black/50;
+}
+
+@media (max-width: 640px) {
+    .resizable-image__thumbnail-grid {
+        @apply grid-cols-3 gap-2;
+    }
+
+    .resizable-image__modal-content {
+        @apply mx-2;
+    }
+
+    .resizable-image__modal-nav {
+        @apply w-10 h-10;
+    }
+
+    .resizable-image__modal-close {
+        @apply w-8 h-8 top-2 right-2;
+    }
+}
+
+@media (max-width: 480px) {
+    .resizable-image__thumbnail-grid {
+        @apply grid-cols-2 gap-2;
+    }
+}
+
+.resizable-image__inline-progress {
+    @apply mt-4;
+}
+
+.resizable-image__progress-grid {
+    @apply grid grid-cols-4 gap-3;
+}
+
+.resizable-image__progress-thumbnail {
+    @apply relative transition-all duration-200;
+}
+
+.resizable-image__progress-content {
+    @apply relative overflow-hidden bg-gray-100 border-2 border-gray-200 rounded-lg aspect-square dark:bg-gray-800 dark:border-gray-700;
+}
+
+.resizable-image__progress-thumbnail.status-pending .resizable-image__progress-content {
+    @apply border-gray-300 dark:border-gray-600;
+}
+
+.resizable-image__progress-thumbnail.status-uploading .resizable-image__progress-content {
+    @apply border-blue-400 dark:border-blue-500;
+}
+
+.resizable-image__progress-thumbnail.status-success .resizable-image__progress-content {
+    @apply border-green-400 dark:border-green-500;
+}
+
+.resizable-image__progress-thumbnail.status-error .resizable-image__progress-content {
+    @apply border-red-400 dark:border-red-500;
+}
+
+.resizable-image__progress-preview {
+    @apply object-cover w-full h-full;
+}
+
+.resizable-image__progress-file-icon {
+    @apply flex items-center justify-center w-full h-full text-gray-400 dark:text-gray-500;
+}
+
+.resizable-image__progress-overlay {
+    @apply absolute inset-0 flex items-center justify-center bg-black/50 dark:bg-black/60;
+}
+
+.resizable-image__progress-circle {
+    @apply relative;
+}
+
+.resizable-image__progress-ring {
+    @apply transform -rotate-90;
+}
+
+.resizable-image__progress-ring-bg {
+    @apply text-white/30 dark:text-white/20;
+}
+
+.resizable-image__progress-ring-fill {
+    @apply text-white transition-all duration-300 ease-out;
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100
+}
+
+.resizable-image__progress-thumbnail.status-uploading .resizable-image__progress-ring-fill {
+    @apply text-blue-400 dark:text-blue-300;
+}
+
+.resizable-image__progress-thumbnail.status-success .resizable-image__progress-ring-fill {
+    @apply text-green-400 dark:text-green-300;
+}
+
+.resizable-image__progress-thumbnail.status-error .resizable-image__progress-ring-fill {
+    @apply text-red-400 dark:text-red-300;
+}
+
+.resizable-image__progress-icon {
+    @apply absolute inset-0 flex items-center justify-center text-white;
+}
+
+.resizable-image__progress-info {
+    @apply mt-2 space-y-1;
+}
+
+.resizable-image__progress-name {
+    @apply text-sm font-medium text-gray-900 truncate dark:text-gray-100;
+}
+
+.resizable-image__progress-status-text {
+    @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.resizable-image__progress-thumbnail.status-uploading .resizable-image__progress-status-text {
+    @apply text-blue-600 dark:text-blue-400;
+}
+
+.resizable-image__progress-thumbnail.status-success .resizable-image__progress-status-text {
+    @apply text-green-600 dark:text-green-400;
+}
+
+.resizable-image__progress-thumbnail.status-error .resizable-image__progress-status-text {
+    @apply text-red-600 dark:text-red-400;
+}
+
+.resizable-image__retry-btn {
+    @apply inline-flex items-center gap-1 px-2 py-1 mt-1 text-xs text-white transition-colors duration-200 bg-red-500 rounded-full cursor-pointer hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700;
+}
+
+.resizable-image__retry-btn:hover {
+    @apply bg-red-600 dark:bg-red-700;
+}
+
+.resizable-image__retry-btn svg {
+    @apply w-3 h-3;
+}
+
+@media (max-width: 640px) {
+    .resizable-image__progress-grid {
+        @apply grid-cols-3 gap-2;
+    }
+}
+
+@media (max-width: 480px) {
+    .resizable-image__progress-grid {
+        @apply grid-cols-2 gap-2;
+    }
+}

@@ -51,6 +51,12 @@ compile({
 
 compile({
     ...defaultOptions,
+    entryPoints: ['./resources/js/components/document/index.js'],
+    outfile: './resources/js/dist/components/document.js',
+})
+
+compile({
+    ...defaultOptions,
     entryPoints: ['./resources/js/components/chunked-file-upload.js'],
     outfile: './resources/js/dist/components/chunked-file-upload.js',
 })

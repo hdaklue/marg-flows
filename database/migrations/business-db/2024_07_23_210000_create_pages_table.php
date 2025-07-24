@@ -13,18 +13,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pages', function (Blueprint $table) {
+        Schema::connection('business_db')->create('pages', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('name');
             $table->json('blocks');
 
-            $table->foreignUlid('creator_id')->references('id')->on('users');
+            // Cross-database reference to users table
+            $table->string('creator_id');
 
-            $table->ulidMorphs('pageable');
+            // Polymorphic relation (likely to flows in main db)
+            $table->string('pageable_type');
+            $table->string('pageable_id');
             $table->timestamps();
 
+            // Optimized indexes for cross-database queries
             $table->index('creator_id');
             $table->index('created_at');
+            $table->index(['pageable_type', 'pageable_id']);
             $table->index(['pageable_type', 'created_at']);
             $table->index(['creator_id', 'pageable_type', 'pageable_id']);
         });
@@ -35,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pages');
+        Schema::connection('business_db')->dropIfExists('pages');
     }
 };

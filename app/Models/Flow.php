@@ -34,8 +34,6 @@ use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
 /**
- * 
- *
  * @property string $id
  * @property string $title
  * @property int $status
@@ -67,6 +65,7 @@ use Spatie\EloquentSortable\SortableTrait;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Stage> $stages
  * @property-read int|null $stages_count
  * @property-read Tenant $tenant
+ *
  * @method static Builder<static>|Flow assignable()
  * @method static Builder<static>|Flow byStage(\App\Enums\FlowStatus|string $status)
  * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStatus|string $status)
@@ -97,10 +96,14 @@ use Spatie\EloquentSortable\SortableTrait;
  * @method static Builder<static>|Flow whereUpdatedAt($value)
  * @method static Builder<static>|Flow withTrashed()
  * @method static Builder<static>|Flow withoutTrashed()
+ *
  * @property string|null $description
+ *
  * @method static Builder<static>|Flow whereDescription($value)
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Page> $pages
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Page> $pages
  * @property-read int|null $pages_count
+ *
  * @mixin \Eloquent
  */
 final class Flow extends Model implements BelongsToTenantContract, HasStages, HasStaticType, Pageable, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
@@ -121,6 +124,10 @@ final class Flow extends Model implements BelongsToTenantContract, HasStages, Ha
         'order_column_name' => 'order_column',
         'sort_when_creating' => true,
     ];
+
+    protected $connection = 'mysql';
+
+    protected $table = 'klueportal.flows';
 
     protected $fillable = [
         'title',

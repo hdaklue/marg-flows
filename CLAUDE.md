@@ -152,6 +152,8 @@ php artisan db:seed --class=DatabaseSeeder
 - **Always use alpine's event syntax @ and .stop or .prevent instead of native js registering events, also .window for global events**
 - **Use zinc instead of gray and sky instead of blue**
 - **Always use alpines x-tooltip plugin for tooltips**
+- **Always use ulids for bd. and for morphs always use getMorphClass()**
+- **Stick to Relation::getMorphAlias, and Relation::getMorphedModel()**
 
 ---
 

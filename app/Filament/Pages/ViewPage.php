@@ -76,12 +76,12 @@ final class ViewPage extends Page implements HasForms
                             'name' => $state,
                         ]);
                     }),
-                EditorJs::make('blocks')
-                    ->editable($this->canEdit)
-                    ->live()
-                    ->afterStateUpdated(fn ($state) => $this->record->update([
-                        'blocks' => $state,
-                    ])),
+                // EditorJs::make('blocks')
+                //     ->editable($this->canEdit)
+                //     ->live()
+                //     ->afterStateUpdated(fn ($state) => $this->record->update([
+                //         'blocks' => $state,
+                //     ])),
             ])
             ->statePath('data');
     }

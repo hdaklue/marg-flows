@@ -30,12 +30,12 @@ class PageFactory extends Factory
                 'type' => 'header',
                 'data' => [
                     'text' => fake()->sentence(rand(3, 8)),
-                    'level' => rand(1, 3),
+                    'level' => rand(2, 4), // Match EditorJS config: levels 2, 3, 4
                 ],
             ],
         ];
 
-        $blockCount = rand(2, 8);
+        $blockCount = rand(2, 4);
         for ($i = 0; $i < $blockCount; $i++) {
             $blocks[] = $this->generateRandomBlock();
         }
@@ -49,10 +49,19 @@ class PageFactory extends Factory
 
     private function generateRandomBlock(): array
     {
-        $blockTypes = ['paragraph', 'list', 'quote', 'delimiter'];
+        // Only use blocks that are actually loaded in EditorJS
+        $blockTypes = ['header', 'table', 'paragraph'];
         $type = fake()->randomElement($blockTypes);
 
         return match ($type) {
+            'header' => [
+                'id' => fake()->uuid(),
+                'type' => 'header',
+                'data' => [
+                    'text' => fake()->sentence(rand(4, 8)),
+                    'level' => rand(2, 4), // Match EditorJS config
+                ],
+            ],
             'paragraph' => [
                 'id' => fake()->uuid(),
                 'type' => 'paragraph',
@@ -60,28 +69,33 @@ class PageFactory extends Factory
                     'text' => fake()->paragraph(rand(2, 5)),
                 ],
             ],
-            'list' => [
+            'table' => [
                 'id' => fake()->uuid(),
-                'type' => 'list',
+                'type' => 'table',
                 'data' => [
-                    'style' => fake()->randomElement(['ordered', 'unordered']),
-                    'items' => fake()->sentences(rand(2, 5)),
+                    'withHeadings' => fake()->boolean(70),
+                    'content' => $this->generateTableContent(),
                 ],
-            ],
-            'quote' => [
-                'id' => fake()->uuid(),
-                'type' => 'quote',
-                'data' => [
-                    'text' => fake()->sentence(rand(8, 15)),
-                    'caption' => fake()->name(),
-                    'alignment' => fake()->randomElement(['left', 'center']),
-                ],
-            ],
-            'delimiter' => [
-                'id' => fake()->uuid(),
-                'type' => 'delimiter',
-                'data' => [],
             ],
         };
+    }
+
+    private function generateTableContent(): array
+    {
+        $rows = rand(2, 4);
+        $cols = rand(2, 4);
+        $content = [];
+
+        for ($row = 0; $row < $rows; $row++) {
+            $rowData = [];
+            for ($col = 0; $col < $cols; $col++) {
+                $rowData[] = $row === 0 
+                    ? fake()->word() // Headers
+                    : fake()->words(rand(1, 3), true); // Content
+            }
+            $content[] = $rowData;
+        }
+
+        return $content;  
     }
 }

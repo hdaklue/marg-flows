@@ -64,6 +64,7 @@ final class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             AlpineComponent::make('editorJs', __DIR__ . '/../../resources/js/dist/components/editorjs.js'),
             AlpineComponent::make('chunkedFileUploadComponent', __DIR__ . '/../../resources/js/dist/components/chunked-file-upload.js'),
+            AlpineComponent::make('documentEditor', __DIR__ . '/../../resources/js/dist/components/document.js'),
             Css::make('chunkedFileUploadCss', __DIR__ . '/../../resources/css/components/chunked-file-upload.css')
                 ->loadedOnRequest(),
 

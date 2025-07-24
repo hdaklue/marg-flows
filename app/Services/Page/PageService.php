@@ -307,7 +307,8 @@ final class PageService implements PageManagerInterface
     {
         $pages = Page::whereHasMorph('pageable',
             $pageable->getMorphClass(), function ($query) use ($pageable) {
-                $query->where('id', $pageable->getKey());
+                $query
+                    ->where('id', $pageable->getKey());
             })->get();
 
         if (config('page.should_cache')) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Database\LivesInOriginalDB;
 use App\Contracts\Stage\HasStages;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,8 +14,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
- * 
- *
  * @property string $id
  * @property string $name
  * @property string $stageable_type
@@ -25,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Model|Eloquent $stageable
+ *
  * @method static Builder<static>|Stage by(\App\Contracts\Stage\HasStages $entity)
  * @method static Builder<static>|Stage newModelQuery()
  * @method static Builder<static>|Stage newQuery()
@@ -38,12 +38,13 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|Stage whereStageableId($value)
  * @method static Builder<static>|Stage whereStageableType($value)
  * @method static Builder<static>|Stage whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  * @mixin Eloquent
  */
 final class Stage extends Model
 {
-    use HasUlids;
+    use HasUlids, LivesInOriginalDB;
 
     protected $fillable = [
         'name',

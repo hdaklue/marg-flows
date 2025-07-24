@@ -6,6 +6,8 @@ namespace App\Filament\Resources\FlowResource\Pages;
 
 use App\Facades\PageManager;
 use App\Filament\Resources\FlowResource;
+use App\Forms\Components\EditorJs;
+use App\Forms\Components\PlaceholderInput;
 use App\Models\Flow;
 use Filament\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -13,6 +15,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -47,6 +50,14 @@ final class FlowPages extends Page implements HasForms
     {
         return [
             Action::make('Create')
+                ->form([
+                    PlaceholderInput::make('title')
+                        ->placeholder('Title'),
+                    EditorJs::make('blocks'),
+                ])
+                ->slideOver()
+                ->action(fn ($data) => dd($data))
+                ->modalWidth(MaxWidth::Full)
                 ->outlined()
                 ->color('primary')
                 ->icon('heroicon-o-document-plus')

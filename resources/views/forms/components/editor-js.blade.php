@@ -13,9 +13,9 @@
             '{{ $getUploadUrl() }}',
             @js($getEditable()),
             '{{ $getHolderId() }}'
-        )" class="space-y-4">
+        )">
 
-        <div id="editor-wrap" class="min-w-full"></div>
+        <div id="editor-wrap" class="mx-auto max-w-6xl"></div>
     </div>
 
     @vite(['resources/css/components/editorjs/index.css', 'resources/css/components/editorjs/resizable-image.css'])

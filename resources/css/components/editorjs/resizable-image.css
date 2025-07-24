@@ -145,6 +145,7 @@
   @apply block h-auto max-w-full rounded-md shadow-md;
 }
 
+
 /* Resize Handles */
 .resizable-image__handle {
   @apply absolute z-10 w-3 h-3 transition-opacity duration-200 border-2 border-white rounded-full opacity-0 bg-sky-600;
@@ -365,6 +366,7 @@
 .resizable-image__thumbnail-image {
   @apply object-cover w-full h-full transition-transform duration-200;
 }
+
 
 .resizable-image__thumbnail:hover .resizable-image__thumbnail-image {
   @apply scale-110;

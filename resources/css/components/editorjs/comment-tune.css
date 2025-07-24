@@ -1,0 +1,98 @@
+@tailwind components;
+
+.comment-tune {
+    @apply relative;
+}
+
+.comment-tune__button {
+    @apply relative flex items-center justify-center w-8 h-8 text-zinc-500 transition-all duration-200 bg-transparent border border-transparent rounded-md hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2;
+}
+
+.comment-tune__button:hover {
+    @apply border-zinc-300;
+}
+
+.comment-tune__button--has-comments {
+    @apply text-sky-600 bg-sky-50 border-sky-200;
+}
+
+.comment-tune__button--has-comments:hover {
+    @apply text-sky-700 bg-sky-100 border-sky-300;
+}
+
+.comment-tune__badge {
+    @apply absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-xs font-medium text-white bg-sky-600 rounded-full;
+    min-width: 1rem;
+}
+
+/* Dark mode styles */
+.dark .comment-tune__button {
+    @apply text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200;
+}
+
+.dark .comment-tune__button:hover {
+    @apply border-zinc-600;
+}
+
+.dark .comment-tune__button--has-comments {
+    @apply text-sky-400 bg-sky-900/50 border-sky-700;
+}
+
+.dark .comment-tune__button--has-comments:hover {
+    @apply text-sky-300 bg-sky-900 border-sky-600;
+}
+
+.dark .comment-tune__badge {
+    @apply bg-sky-500 text-white;
+}
+
+/* Focus styles for accessibility */
+.comment-tune__button:focus {
+    @apply ring-2 ring-sky-500 ring-offset-2;
+}
+
+.dark .comment-tune__button:focus {
+    @apply ring-sky-400 ring-offset-zinc-900;
+}
+
+/* Animation for comment count changes */
+.comment-tune__badge {
+    @apply transition-all duration-200 ease-in-out transform;
+}
+
+.comment-tune__badge.animate-bounce-in {
+    animation: bounce-in 0.3s ease-out;
+}
+
+@keyframes bounce-in {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Hover tooltip style */
+.comment-tune__button::after {
+    @apply absolute invisible px-2 py-1 text-xs text-white transition-opacity duration-200 bg-zinc-900 rounded opacity-0 pointer-events-none whitespace-nowrap;
+    content: attr(title);
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    z-index: 1000;
+}
+
+.comment-tune__button:hover::after {
+    @apply visible opacity-100;
+}
+
+.dark .comment-tune__button::after {
+    @apply bg-zinc-700 text-zinc-200;
+}

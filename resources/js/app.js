@@ -7,6 +7,8 @@ import audioAnnotation from "./components/audio-annotation";
 import designReviewApp from "./components/image-review";
 import videoAnnotationComponent from "./components/video-annotation";
 
+import documentEditor from './components/document';
+
 import anchor from "@alpinejs/anchor";
 
 // Make video annotation available globally for Blade component
@@ -15,6 +17,7 @@ window.videoAnnotationComponent = videoAnnotationComponent;
 Alpine.data('designReviewApp', designReviewApp)
 Alpine.data('videoAnnotation', videoAnnotationComponent)
 Alpine.data('audioAnnotation', audioAnnotation)
+Alpine.data('document', documentEditor);
 Alpine.plugin(Autosize);
 Alpine.plugin(Tooltip);
 Alpine.plugin(sort);

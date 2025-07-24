@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Database\LivesInBusinessDB;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
 use App\Concerns\Role\ManagesParticipants;
@@ -24,7 +25,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property string $id
  * @property string $name
- * @property array<array-key, mixed> $blocks
+ * @property string|array<array-key, mixed> $blocks
  * @property string $creator_id
  * @property string $pageable_type
  * @property string $pageable_id
@@ -58,7 +59,7 @@ use Illuminate\Support\Carbon;
 final class Page extends Model implements HasStaticType, RoleableEntity, Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\PageFactory> */
-    use HasFactory, HasSideNotes, HasStaticTypeTrait, HasUlids, ManagesParticipants;
+    use HasFactory, HasSideNotes, HasStaticTypeTrait, HasUlids, ManagesParticipants, LivesInBusinessDB;
 
     protected $fillable = [
         'name',
@@ -67,7 +68,7 @@ final class Page extends Model implements HasStaticType, RoleableEntity, Sidenot
 
     public function pageable(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo()->setConnection(config('database.default'));
     }
 
     public function creator(): BelongsTo
