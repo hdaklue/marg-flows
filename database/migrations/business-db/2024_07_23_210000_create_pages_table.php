@@ -21,6 +21,9 @@ return new class extends Migration
             // Cross-database reference to users table
             $table->string('creator_id');
 
+            // Cross-database reference to tenants table for efficient querying
+            $table->string('tenant_id');
+
             // Polymorphic relation (likely to flows in main db)
             $table->string('pageable_type');
             $table->string('pageable_id');
@@ -28,9 +31,11 @@ return new class extends Migration
 
             // Optimized indexes for cross-database queries
             $table->index('creator_id');
+            $table->index('tenant_id');
             $table->index('created_at');
             $table->index(['pageable_type', 'pageable_id']);
             $table->index(['pageable_type', 'created_at']);
+            $table->index(['tenant_id', 'created_at']);
             $table->index(['creator_id', 'pageable_type', 'pageable_id']);
         });
     }

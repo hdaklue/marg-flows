@@ -2,58 +2,28 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Pages;
+namespace App\Filament\Resources\PageResource\Pages;
 
-use App\Forms\Components\EditorJs;
+use App\Filament\Resources\PageResource;
 use App\Forms\Components\PlaceholderInput;
-use App\Models\Page as PageModel;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Filament\Pages\Page;
+use Filament\Resources\Pages\ViewRecord;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 
-/**
- * @property-read bool $canEdit
- * @property-read Form $form
- */
-final class ViewPage extends Page implements HasForms
+final class ViewDocument extends ViewRecord
 {
-    use InteractsWithForms;
+    protected static string $resource = PageResource::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static bool $shouldRegisterNavigation = false;
-
-    protected static string $view = 'filament.pages.view-page';
-
-    protected static ?string $title = '';
+    protected static string $view = 'filament.resources.page-resource.pages.view';
 
     public ?array $data = [];
 
-    #[Url('record')]
-    #[Locked]
-    public string $recordKey;
-
-    public $record = null;
-
-    public function mount(): void
+    public function mount(int|string $record): void
     {
-
-        $this->record = PageModel::where('id', $this->recordKey)->firstOrFail();
-
-        $this->esnsureTenantIntegrity();
-
-        // abort_if(filamentTenant()->getKey() !== $this->record->getTenant(), 404, '');
-        $this->authorize('view', $this->record);
-
+        $this->record = $this->resolveRecord($record);
         $this->form->fill([
             'title' => $this->record->getAttribute('name'),
-            'blocks' => $this->record->getAttribute('blocks'),
         ]);
-
     }
 
     public function form(Form $form): Form
@@ -65,6 +35,9 @@ final class ViewPage extends Page implements HasForms
                     ->required()
                     ->live(debounce: '100ms')
                     ->minLength(10)
+                    ->placeholder('Page Title')
+                    ->columnSpanFull()
+                    ->maxLength(length: 100)
                     ->afterStateUpdated(function ($state, $livewire) {
                         $livewire->validate();
 
@@ -86,14 +59,9 @@ final class ViewPage extends Page implements HasForms
             ->statePath('data');
     }
 
-    #[Computed()]
+    #[Computed]
     public function canEdit(): bool
     {
         return filamentUser()->can('update', $this->record);
-    }
-
-    private function esnsureTenantIntegrity(): void
-    {
-        abort_if($this->record->getTenant()->getKey() !== filamentTenant()->getKey(), 404);
     }
 }

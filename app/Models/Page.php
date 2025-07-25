@@ -8,6 +8,7 @@ use App\Concerns\Database\LivesInBusinessDB;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
 use App\Concerns\Role\ManagesParticipants;
+use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\HasStaticType;
 use App\Contracts\Role\RoleableEntity;
 use App\Contracts\Sidenoteable;
@@ -27,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string|array<array-key, mixed> $blocks
  * @property string $creator_id
+ * @property string $tenant_id
  * @property string $pageable_type
  * @property string $pageable_id
  * @property Carbon|null $created_at
@@ -56,10 +58,10 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-final class Page extends Model implements HasStaticType, RoleableEntity, Sidenoteable
+final class Page extends Model implements BelongsToTenantContract, HasStaticType, RoleableEntity, Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\PageFactory> */
-    use HasFactory, HasSideNotes, HasStaticTypeTrait, HasUlids, ManagesParticipants, LivesInBusinessDB;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasStaticTypeTrait, HasUlids, LivesInBusinessDB, ManagesParticipants;
 
     protected $fillable = [
         'name',
@@ -68,7 +70,7 @@ final class Page extends Model implements HasStaticType, RoleableEntity, Sidenot
 
     public function pageable(): MorphTo
     {
-        return $this->morphTo()->setConnection(config('database.default'));
+        return $this->morphTo();
     }
 
     public function creator(): BelongsTo
@@ -81,13 +83,13 @@ final class Page extends Model implements HasStaticType, RoleableEntity, Sidenot
         return $this->creator;
     }
 
-    public function getTenant(): Tenant
-    {
-        if ($this->pageable instanceof BelongsToTenantContract) {
-            return $this->pageable->getTenant();
-        }
-        throw new Exception("Can't resolve tenant of {static::class}");
-    }
+    // public function getTenant(): Tenant
+    // {
+    //     if ($this->pageable instanceof BelongsToTenantContract) {
+    //         return $this->pageable->getTenant();
+    //     }
+    //     throw new Exception("Can't resolve tenant of {static::class}");
+    // }
 
     public function casts(): array
     {

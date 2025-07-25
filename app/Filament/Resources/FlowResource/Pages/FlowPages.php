@@ -6,6 +6,7 @@ namespace App\Filament\Resources\FlowResource\Pages;
 
 use App\Facades\PageManager;
 use App\Filament\Resources\FlowResource;
+use App\Filament\Resources\PageResource;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
 use App\Models\Flow;
@@ -50,14 +51,15 @@ final class FlowPages extends Page implements HasForms
     {
         return [
             Action::make('Create')
-                ->form([
-                    PlaceholderInput::make('title')
-                        ->placeholder('Title'),
-                    EditorJs::make('blocks'),
-                ])
-                ->slideOver()
-                ->action(fn ($data) => dd($data))
-                ->modalWidth(MaxWidth::Full)
+                ->url(PageResource::getUrl('create', ['pageable' => $this->flow->getKey()]))
+                // ->form([
+                //     PlaceholderInput::make('title')
+                //         ->placeholder('Title'),
+                //     EditorJs::make('blocks'),
+                // ])
+                // ->slideOver()
+                // ->action(fn ($data) => dd($data))
+                // ->modalWidth(MaxWidth::Full)
                 ->outlined()
                 ->color('primary')
                 ->icon('heroicon-o-document-plus')

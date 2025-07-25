@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Components;
 
-use App\Filament\Pages\ViewPage;
+use App\Filament\Resources\PageResource;
 use App\Models\Page;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -33,7 +33,10 @@ final class PageCard extends Component
 
     public ?string $updatedAt;
 
-    public function mount(string $pageId): void
+    #[Locked]
+    public string $pageableId;
+
+    public function mount(string $pageId, string $pageableId): void
     {
         $this->page = Page::where('id', $pageId)->firstOrFail();
         $this->createdAt = toUserDateTime($this->page->created_at, filamentUser());
@@ -84,7 +87,7 @@ final class PageCard extends Component
 
     public function openPage(): void
     {
-        $this->redirect(ViewPage::getUrl(['record' => $this->page->id]));
+        $this->redirect(PageResource::getUrl('view', ['record' => $this->page->getKey()]));
         $this->dispatch('open-page', $this->pageId);
     }
 

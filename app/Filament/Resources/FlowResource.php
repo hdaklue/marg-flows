@@ -30,6 +30,8 @@ final class FlowResource extends Resource
 {
     protected static ?string $model = Flow::class;
 
+    protected static ?string $slug = 'f';
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function table(Table $table): Table
@@ -112,19 +114,19 @@ final class FlowResource extends Resource
         ];
     }
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            FlowPages::class,
-        ]);
-    }
+    // public static function getRecordSubNavigation(Page $page): array
+    // {
+    //     return $page->generateNavigationItems([
+    //         FlowPages::class,
+    //     ]);
+    // }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListFlows::route('/'),
             'create' => Pages\CreateFlow::route('/create'),
-            'pages' => FlowPages::route('/{record}/pages'),
+            'pages' => FlowPages::route('/{record}/ps'),
         ];
     }
 }

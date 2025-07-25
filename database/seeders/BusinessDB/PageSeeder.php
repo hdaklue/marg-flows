@@ -45,6 +45,7 @@ class PageSeeder extends Seeder
                     'pageable_type' => $flow->getMorphClass(),
                     'pageable_id' => $flow->id,
                     'creator_id' => $testUser->id,
+                    'tenant_id' => $flow->tenant_id,
                 ]);
 
                 // Assign test user as ADMIN to this page
@@ -62,6 +63,7 @@ class PageSeeder extends Seeder
                 'pageable_type' => $randomFlow->getMorphClass(),
                 'pageable_id' => $randomFlow->id,
                 'creator_id' => $testUser->id,
+                'tenant_id' => $randomFlow->tenant_id,
             ]);
 
             // Assign test user as ADMIN to this page

@@ -18,8 +18,8 @@ final class Document extends Component
     public function mount(string $pageId, $canEdit = true)
     {
         $this->page = Page::where('id', $pageId)->firstOrFail();
-        $this->content = is_array($this->page->blocks) 
-            ? json_encode($this->page->blocks) 
+        $this->content = is_array($this->page->blocks)
+            ? json_encode($this->page->blocks)
             : $this->page->blocks;
         $this->canEdit = $canEdit;
     }
