@@ -28,8 +28,9 @@ class ResizableImage {
     }
 
 
-    constructor({ data, config, api, readOnly }) {
+    constructor({ data, config, api, readOnly, block }) {
         this.api = api;
+        this.blockAPI = block;
         this.readOnly = readOnly;
         this.config = config || {};
         // Support both old single image format and new multiple images format
@@ -350,11 +351,26 @@ class ResizableImage {
             uploadItem.status = 'success';
             uploadItem.progress = 100;
             this.updateProgressItem(index);
+            
+            // Tell Editor that block was changed
+            if (this.blockAPI && this.blockAPI.dispatchChange) {
+                this.blockAPI.dispatchChange();
+            }
+            
+            // Let onChange fire first, then signal editor is free
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent('editor:free'));
+            }, 0);
 
         } catch (error) {
             uploadItem.status = 'error';
             uploadItem.error = error.message || 'Upload failed';
             this.updateProgressItem(index);
+            
+            // Signal editor is free even on error (after onChange has chance to fire)
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent('editor:free'));
+            }, 0);
             throw error;
         }
     }
@@ -527,6 +543,16 @@ class ResizableImage {
             // Remove from data array
             this.data.files.splice(index, 1);
 
+            // Ensure data always has a valid structure (empty array)
+            if (this.data.files.length === 0) {
+                // Keep empty files array as placeholder to maintain valid state
+                this.data.files = [];
+                // Ensure caption property exists
+                if (!this.data.caption) {
+                    this.data.caption = '';
+                }
+            }
+
             // Re-render gallery
             this.renderGallery();
 
@@ -534,6 +560,16 @@ class ResizableImage {
             if (this.data.files.length === 0) {
                 this.showUploadContainer();
             }
+
+            // Tell Editor that block was changed
+            if (this.blockAPI && this.blockAPI.dispatchChange) {
+                this.blockAPI.dispatchChange();
+            }
+
+            // Let onChange fire first, then signal editor is free
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent('editor:free'));
+            }, 0);
         }
     }
 
@@ -695,11 +731,15 @@ class ResizableImage {
         const formData = new FormData();
         formData.append(this.config.field, file);
 
+        // Signal editor is busy at start of fetch
+        document.dispatchEvent(new CustomEvent('editor:busy'));
+
         return fetch(this.config.endpoints.byFile, {
             method: 'POST',
             body: formData,
             headers: this.config.additionalRequestHeaders
-        }).then(response => response.json());
+        })
+            .then(response => response.json());
     }
 
     onUploadSuccess(response) {
@@ -954,6 +994,7 @@ class ResizableImage {
         const uploadItem = this.uploadProgress[index];
         if (!uploadItem) return;
 
+
         uploadItem.retryCount++;
         uploadItem.status = 'uploading';
         uploadItem.progress = 0;
@@ -1006,8 +1047,12 @@ class ResizableImage {
         // Allow empty data for new blocks
         if (Object.keys(savedData).length === 0) return true;
 
-        // For existing blocks, check if we have file data (new or old format)
-        if (savedData.files && savedData.files.length > 0 && savedData.files[0].url) return true;
+        // Allow empty files array (when all images are deleted)
+        if (savedData.files && Array.isArray(savedData.files)) {
+            return true; // Allow both empty and populated arrays
+        }
+
+        // Support legacy single file format
         if (savedData.file && savedData.file.url) return true;
 
         return false;
@@ -1043,8 +1088,11 @@ class ResizableImage {
         console.log('Delete endpoint:', this.config.endpoints.delete || '/delete-image');
         console.log('File path:', filePath);
 
+        // Signal editor is busy at start of delete fetch
+        document.dispatchEvent(new CustomEvent('editor:busy'));
+
         // Call delete endpoint
-        fetch(this.config.endpoints.delete || '/delete-image', {
+        return fetch(this.config.endpoints.delete || '/delete-image', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -1089,11 +1137,13 @@ class ResizableImage {
      */
     removed() {
         if (this.data.files && Array.isArray(this.data.files)) {
+
             this.data.files.forEach(file => {
                 if (file.url) {
                     this.deleteFromServer(file.url);
                 }
             });
+
         }
     }
 

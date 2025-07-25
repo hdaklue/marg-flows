@@ -12,7 +12,7 @@
             x-transition:enter-end="transform translate-y-0 opacity-100" x-transition:leave="transition ease-in"
             x-transition:leave-start="transform translate-y-0 opacity-100"
             x-transition:leave-end="transform translate-y-full opacity-0"
-            class="md:w-2xl fixed bottom-0 left-1/2 z-50 h-4/5 w-full -translate-x-1/2 transform rounded-lg bg-gray-50 p-4 shadow-2xl md:h-1/2 dark:bg-zinc-900"
+            class="md:w-2xl fixed bottom-0 left-1/2 z-50 h-4/5 w-full -translate-x-1/2 transform rounded-lg bg-gray-50 p-4 shadow-2xl dark:bg-zinc-900 md:h-1/2"
             x-cloak>
             <div class="mb-4 flex h-full flex-col text-gray-600 dark:text-gray-400">
                 <!-- Fixed top section -->
@@ -206,7 +206,7 @@
                         :style="commentPopupStyle" @click.stop>
 
                         <textarea x-autosize x-ref="commentTextarea" x-model="newComment.text" :disabled="isSaving"
-                            class="w-full rounded border border-gray-300 p-1.5 text-sm font-semibold focus:border-blue-500 focus:outline-none lg:font-normal dark:bg-gray-800 dark:text-gray-50"
+                            class="w-full rounded border border-gray-300 p-1.5 text-sm font-semibold focus:border-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-50 lg:font-normal"
                             placeholder="Add your comment..." @keydown.ctrl.enter="saveComment()" @keydown.meta.enter="saveComment()"></textarea>
                         <div class="mt-2 flex justify-end gap-2">
                             <button @click.stop="cancelComment()" @touchend.prevent="cancelComment()"

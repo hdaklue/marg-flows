@@ -62,18 +62,15 @@ final class PageCard extends Component
     {
         return [
             'canManageMembers' => filamentUser()->can('manageMembers', $this->page),
+            'canEdit' => filamentUser()->can('update', $this->page),
         ];
     }
 
     public function updateTitle(string $title): void
     {
-        // Simulate network delay for now
-        sleep(1);
+        $this->authorize('update', $this->page);
 
-        // TODO: Implement actual update logic
-
-        // Update the name property
-        $this->name = $title;
+        $this->page->update(['name' => $title]);
 
         // Emit event to parent to refresh if needed
         $this->dispatch('page-updated', $this->pageId);
