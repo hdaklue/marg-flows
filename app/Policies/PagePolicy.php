@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Contracts\Page\Pageable;
 use App\Enums\Role\RoleEnum;
 use App\Models\Page;
 use App\Models\User;
@@ -29,9 +30,9 @@ final class PagePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Pageable $pageable): bool
     {
-        return false;
+        return true;
     }
 
     /**

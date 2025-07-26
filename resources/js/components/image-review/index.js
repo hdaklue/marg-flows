@@ -1,5 +1,6 @@
 
 export default function designReviewApp() {
+    // Utility functions
     function uuidv4() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             const r = Math.random() * 16 | 0,
@@ -7,15 +8,34 @@ export default function designReviewApp() {
             return v.toString(16);
         });
     }
+
     function debounce(func, wait) {
         let timeout;
-        return function executedFunction(...args) {
+        const debouncedFunction = function executedFunction(...args) {
             const later = () => {
-                clearTimeout(timeout);
+                timeout = null;
                 func.apply(this, args);
             };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
+        };
+
+        debouncedFunction.cancel = () => {
+            clearTimeout(timeout);
+            timeout = null;
+        };
+
+        return debouncedFunction;
+    }
+
+    function throttle(func, limit) {
+        let inThrottle;
+        return function (...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
         };
     }
 
@@ -26,14 +46,10 @@ export default function designReviewApp() {
         comments: [],
         showingComment: false,
         activeCommentId: null,
-        showCommentPopup: false,
-        showConfirmDialog: false,
-        hasUnsavedChanges: false,
         isSelecting: false,
         isDragging: false,
         allCommentsHidden: false,
         _openedViaEvent: false,
-        isSaving: false, // Add loading state
         selectionStart: {
             x: 0,
             y: 0,
@@ -46,11 +62,6 @@ export default function designReviewApp() {
             width: 0,
             height: 0
         },
-        newComment: null,
-        popupAnchor: {
-            x: 0,
-            y: 0
-        },
         selectedCommentIds: [],
         showCommentFilter: false,
         visibleComments: [],
@@ -58,41 +69,98 @@ export default function designReviewApp() {
         touchStartTime: 0,
         longPressTimer: null,
         touchMoved: false,
+        isMobile: false,
+        // Responsive zoom system
+        zoomLevel: 1,
+        minZoom: 1,
+        maxZoom: 9,
+        mainContainerWidth: 0,
+        mainContainerHeight: 0,
+        innerWrapperWidth: 0,
+        innerWrapperHeight: 0,
+        // Pan properties for keyboard navigation
+        panX: 0,
+        panY: 0,
+        arrowKeyStep: 50, // Pixels to move per arrow key press
         callbacks: {
-            onSaveComment: null,
             onDeleteComment: null,
-            onEditComment: null,
             onCommentClick: null,
             onModalOpen: null,
             onModalClose: null
         },
 
-        get commentPopupStyle() {
-            if (!this.popupAnchor || !this.$refs.imageContainer) return '';
-            const rect = this.$refs.imageContainer.getBoundingClientRect();
-            const popupWidth = 300,
-                popupHeight = 180;
-            let left = this.popupAnchor.x - rect.left - popupWidth / 2;
-            let top = (this.popupAnchor.y + 10) - rect.top;
-            left = Math.max(10, Math.min(left, rect.width - popupWidth - 10));
-            top = Math.max(10, Math.min(top, rect.height - popupHeight - 10));
-            return `top: ${top}px; left: ${left}px;`;
-        },
 
         get hasActiveFilter() {
             if (this.allCommentsHidden) return false;
             return this.selectedCommentIds.length < this.comments.length;
         },
 
-        get hasValidComment() {
-            return this.newComment?.text?.trim() !== '';
+
+        get canZoomIn() {
+            return this.zoomLevel < this.responsiveMaxZoom;
         },
 
-        get canSave() {
-            return this.hasValidComment && !this.isSaving;
+        get canZoomOut() {
+            return this.zoomLevel > this.minZoom;
+        },
+
+        get isZoomed() {
+            return this.zoomLevel > 1;
+        },
+
+        get imageDisplayWidth() {
+            return this.imageNaturalWidth * this.zoomLevel;
+        },
+
+        get imageDisplayHeight() {
+            return this.imageNaturalHeight * this.zoomLevel;
+        },
+
+        // Responsive zoom step based on viewport size (Tailwind breakpoints)
+        get currentZoomStep() {
+            const width = window.innerWidth;
+
+            // Tailwind breakpoints: sm(640), md(768), lg(1024), xl(1280), 2xl(1536)
+            if (width < 640) {
+                // Mobile: smaller steps for precise control
+                return Math.max(100, this.mainContainerWidth * 0.15);
+            } else if (width < 768) {
+                // Small tablet: moderate steps
+                return Math.max(120, this.mainContainerWidth * 0.18);
+            } else if (width < 1024) {
+                // Tablet: balanced steps
+                return Math.max(150, this.mainContainerWidth * 0.20);
+            } else if (width < 1280) {
+                // Large screens: bigger steps
+                return Math.max(180, this.mainContainerWidth * 0.22);
+            } else {
+                // XL+ screens: largest steps
+                return Math.max(200, this.mainContainerWidth * 0.25);
+            }
+        },
+
+        // Responsive max zoom based on viewport
+        get responsiveMaxZoom() {
+            const width = window.innerWidth;
+
+            if (width < 640) {
+                return 4; // Mobile: less zoom to avoid performance issues
+            } else if (width < 768) {
+                return 5; // Small tablet
+            } else if (width < 1024) {
+                return 6; // Tablet
+            } else {
+                return 8; // Desktop: more zoom capability
+            }
         },
 
         init(callbacks = {}) {
+            // Detect mobile device with better accuracy
+            this.isMobile = this.detectMobileDevice();
+
+            // Throttled update function for performance
+            this.throttledUpdateSelection = throttle(this.updateSelection.bind(this), 16);
+
             if (callbacks && Object.keys(callbacks).length > 0) {
                 this.setCallbacks(callbacks);
             }
@@ -102,8 +170,8 @@ export default function designReviewApp() {
                 }
             });
 
-            // Register event listener for opening modal
-            window.addEventListener('open-design-review', (event) => {
+            // Create bound event handler for proper cleanup
+            this.handleOpenEvent = (event) => {
                 this._openedViaEvent = true;
                 const {
                     imageUrl,
@@ -111,20 +179,10 @@ export default function designReviewApp() {
                     designId
                 } = event.detail;
 
-                this.openModal(imageUrl, comments || [], {
-                    onSaveComment: async (comment, image) => {
-                        if (window.Livewire) {
-                            // Return promise for async operations
-                            return new Promise((resolve, reject) => {
-                                Livewire.emit('saveComment', {
-                                    designId: designId,
-                                    comment: comment
-                                });
-                                // You might want to listen for Livewire response
-                                resolve();
-                            });
-                        }
-                    },
+                this.openModal(imageUrl, comments || [], designId);
+
+                // Set up callbacks for this specific design
+                this.setCallbacks({
                     onDeleteComment: async (commentId) => {
                         if (window.Livewire) {
                             return new Promise((resolve, reject) => {
@@ -140,17 +198,41 @@ export default function designReviewApp() {
                         console.log('Comment clicked:', comment);
                     }
                 });
-            });
+            };
+
+            // Register event listener for opening modal
+            window.addEventListener('open-design-review', this.handleOpenEvent);
 
 
 
 
         },
         destroy() {
-            window.removeEventListener('open-design-review', this.handleOpenEvent);
+            // Remove event listeners
+            if (this.handleOpenEvent) {
+                window.removeEventListener('open-design-review', this.handleOpenEvent);
+                this.handleOpenEvent = null;
+            }
+
+            // Clear all timers and handlers
             if (this.longPressTimer) {
                 clearTimeout(this.longPressTimer);
+                this.longPressTimer = null;
             }
+
+            // Clear debounce timeout if exists
+            if (this.updateSelection && this.updateSelection.cancel) {
+                this.updateSelection.cancel();
+            }
+
+            // Reset zoom state
+            this.resetZoomState();
+
+            // Clear all references to prevent memory leaks
+            this.comments = [];
+            this.visibleComments = [];
+            this.selectedCommentIds = [];
+            this.callbacks = {};
         },
 
         handleEscape() {
@@ -158,17 +240,7 @@ export default function designReviewApp() {
                 this.closeComment();
                 return;
             }
-            if (!this.showConfirmDialog) {
-                this.handleClose();
-                return;
-
-            }
-            if (this.showConfirmDialog) {
-                this.handleCancelConfirmationDialog();
-
-                return;
-            }
-
+            this.handleClose();
         },
 
         updateVisibleComments() {
@@ -184,7 +256,6 @@ export default function designReviewApp() {
         },
 
         toggleAllComments() {
-            if (this.showCommentPopup) return;
             this.allCommentsHidden ? this.showAllComments() : this.hideAllComments();
         },
 
@@ -214,15 +285,14 @@ export default function designReviewApp() {
             this.comments = existingComments;
             this.selectedCommentIds = this.comments.map(c => c.id);
 
-            // Update callbacks if provided
-            // if (callbacks && Object.keys(callbacks).length > 0) {
-            //     this.setCallbacks(callbacks);
-            // }
 
             this.isOpen = true;
-            this.hasUnsavedChanges = false;
-            this.isSaving = false;
             this.updateVisibleComments();
+
+            // Initialize dimensions after modal is open
+            this.$nextTick(() => {
+                this.updateImageDimensions();
+            });
 
             if (this.callbacks.onModalOpen) {
                 this.callbacks.onModalOpen(this.currentImage);
@@ -237,51 +307,74 @@ export default function designReviewApp() {
             }
         },
 
-        handleCancelConfirmationDialog() {
-            this.showConfirmDialog = false;
-            this.$nextTick(() => this.$refs.commentTextarea?.focus());
-        },
 
         reset() {
             this.comments = [];
             this.selectedCommentIds = [];
             this.activeCommentId = null;
-            this.showCommentPopup = false;
-            this.hasUnsavedChanges = false;
             this.isSelecting = false;
             this.isDragging = false;
             this.allCommentsHidden = false;
-            this.newComment = null;
             this.visibleComments = [];
             this.filterMode = false;
             this.showCommentFilter = false;
-            this.isSaving = false;
+            this.resetZoomState();
+
             if (this.longPressTimer) {
                 clearTimeout(this.longPressTimer);
                 this.longPressTimer = null;
             }
         },
+
+        resetZoomState() {
+            this.zoomLevel = 1;
+            this.mainContainerWidth = 0;
+            this.mainContainerHeight = 0;
+            this.innerWrapperWidth = 0;
+            this.innerWrapperHeight = 0;
+            this.panX = 0;
+            this.panY = 0;
+        },
+
+        resetPan() {
+            this.panX = 0;
+            this.panY = 0;
+        },
+
+        // Touch navigation methods
+        moveUp() {
+            if (!this.isZoomed) return;
+            const maxPanY = Math.max(0, (this.innerWrapperHeight - this.mainContainerHeight) / 2);
+            this.panY = Math.min(maxPanY, this.panY + this.arrowKeyStep);
+        },
+
+        moveDown() {
+            if (!this.isZoomed) return;
+            const maxPanY = Math.max(0, (this.innerWrapperHeight - this.mainContainerHeight) / 2);
+            this.panY = Math.max(-maxPanY, this.panY - this.arrowKeyStep);
+        },
+
+        moveLeft() {
+            if (!this.isZoomed) return;
+            const maxPanX = Math.max(0, (this.innerWrapperWidth - this.mainContainerWidth) / 2);
+            this.panX = Math.min(maxPanX, this.panX + this.arrowKeyStep);
+        },
+
+        moveRight() {
+            if (!this.isZoomed) return;
+            const maxPanX = Math.max(0, (this.innerWrapperWidth - this.mainContainerWidth) / 2);
+            this.panX = Math.max(-maxPanX, this.panX - this.arrowKeyStep);
+        },
+
+        detectMobileDevice() {
+            return (
+                'ontouchstart' in window ||
+                navigator.maxTouchPoints > 0 ||
+                /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                window.innerWidth < 768
+            );
+        },
         handleClose() {
-            if (this.isSaving) {
-                return;
-            }
-
-            // Simplified empty comment check
-            if (this.showCommentPopup) {
-                const hasText = this.newComment?.text && this.newComment.text.trim().length > 0;
-
-                if (!hasText) {
-                    this.showCommentPopup = false;
-                    this.newComment = null;
-                    return;
-                }
-
-                if (this.hasUnsavedChanges) {
-                    this.showConfirmDialog = true;
-                    return;
-                }
-            }
-
             if (this.showCommentFilter) {
                 this.showCommentFilter = false;
                 this.filterMode = false;
@@ -291,15 +384,6 @@ export default function designReviewApp() {
             this.closeModal();
         },
 
-        handleConfirmCloseConfirmationDialog() {
-            this.showConfirmDialog = false;
-            if (this.showCommentPopup) {
-                this.showCommentPopup = false;
-                this.newComment = null;
-                return;
-            }
-
-        },
 
         handleBackdropClick(event) {
             if (event.target === event.currentTarget) this.handleClose();
@@ -307,13 +391,17 @@ export default function designReviewApp() {
 
         // Mouse Events
         startSelection(event) {
-            if (event.button !== 0 || this.showCommentPopup) return;
-            const rect = this.$refs.imageContainer.getBoundingClientRect();
+            if (event.button !== 0) return;
+
+            const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
+
+            const coords = this.getImageCoordinates(event.clientX, event.clientY);
+
             this.selectionStart = {
-                x: (x / rect.width) * 100,
-                y: (y / rect.height) * 100,
+                x: coords.x,
+                y: coords.y,
                 xPx: x,
                 yPx: y
             };
@@ -321,29 +409,36 @@ export default function designReviewApp() {
             this.isSelecting = false;
         },
 
-        updateSelection: debounce(function (event) {
+        updateSelection(event) {
             if (!this.isDragging || !this.selectionStart.xPx) return;
-            const rect = this.$refs.imageContainer.getBoundingClientRect();
+
+            const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
             const y = Math.max(0, Math.min(event.clientY - rect.top, rect.height));
-            const distance = Math.sqrt(Math.pow(x - this.selectionStart.xPx, 2) + Math.pow(y - this.selectionStart
-                .yPx, 2));
-            if (distance > 5) this.isSelecting = true;
+            const distance = Math.sqrt(
+                Math.pow(x - this.selectionStart.xPx, 2) +
+                Math.pow(y - this.selectionStart.yPx, 2)
+            );
+
+            if (distance > (this.isMobile ? 8 : 5)) {
+                this.isSelecting = true;
+            }
+
             if (!this.isSelecting) return;
 
-            const xPercent = (x / rect.width) * 100;
-            const yPercent = (y / rect.height) * 100;
+            const coords = this.getImageCoordinates(event.clientX, event.clientY);
             this.selectionBox = {
-                x: Math.min(this.selectionStart.x, xPercent),
-                y: Math.min(this.selectionStart.y, yPercent),
-                width: Math.abs(xPercent - this.selectionStart.x),
-                height: Math.abs(yPercent - this.selectionStart.y)
+                x: Math.min(this.selectionStart.x, coords.x),
+                y: Math.min(this.selectionStart.y, coords.y),
+                width: Math.abs(coords.x - this.selectionStart.x),
+                height: Math.abs(coords.y - this.selectionStart.y)
             };
-        }, 16),
+        },
 
         endSelection(event) {
             if (!this.isDragging) return;
-            const rect = this.$refs.imageContainer.getBoundingClientRect();
+
+            const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
             this.isDragging = false;
@@ -359,36 +454,41 @@ export default function designReviewApp() {
 
         // Touch Events
         handleTouchStart(event) {
-            if (this.showCommentPopup) return;
             const touch = event.touches[0];
-            const rect = this.$refs.imageContainer.getBoundingClientRect();
+            const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const x = touch.clientX - rect.left;
             const y = touch.clientY - rect.top;
 
             this.touchStartTime = Date.now();
             this.touchMoved = false;
+
+            const coords = this.getImageCoordinates(touch.clientX, touch.clientY);
             this.selectionStart = {
-                x: (x / rect.width) * 100,
-                y: (y / rect.height) * 100,
+                x: coords.x,
+                y: coords.y,
                 xPx: x,
                 yPx: y
             };
             this.isDragging = true;
             this.isSelecting = false;
 
-            // Long press for area selection on mobile
+            // Optimized long press for area selection
             this.longPressTimer = setTimeout(() => {
                 if (!this.touchMoved && this.isDragging) {
-                    navigator.vibrate && navigator.vibrate(50);
+                    // Enhanced haptic feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate([10, 50, 10]);
+                    }
                     this.isSelecting = true;
                 }
-            }, 500);
+            }, 300); // Further reduced for better responsiveness
         },
 
         handleTouchMove(event) {
             if (!this.isDragging) return;
+
             const touch = event.touches[0];
-            const rect = this.$refs.imageContainer.getBoundingClientRect();
+            const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const x = Math.max(0, Math.min(touch.clientX - rect.left, rect.width));
             const y = Math.max(0, Math.min(touch.clientY - rect.top, rect.height));
 
@@ -397,7 +497,8 @@ export default function designReviewApp() {
                 Math.pow(y - this.selectionStart.yPx, 2)
             );
 
-            if (distance > 10) {
+            // Enhanced movement detection for mobile
+            if (distance > 12) {
                 this.touchMoved = true;
                 if (this.longPressTimer) {
                     clearTimeout(this.longPressTimer);
@@ -408,13 +509,12 @@ export default function designReviewApp() {
 
             if (!this.isSelecting) return;
 
-            const xPercent = (x / rect.width) * 100;
-            const yPercent = (y / rect.height) * 100;
+            const coords = this.getImageCoordinates(touch.clientX, touch.clientY);
             this.selectionBox = {
-                x: Math.min(this.selectionStart.x, xPercent),
-                y: Math.min(this.selectionStart.y, yPercent),
-                width: Math.abs(xPercent - this.selectionStart.x),
-                height: Math.abs(yPercent - this.selectionStart.y)
+                x: Math.min(this.selectionStart.x, coords.x),
+                y: Math.min(this.selectionStart.y, coords.y),
+                width: Math.abs(coords.x - this.selectionStart.x),
+                height: Math.abs(coords.y - this.selectionStart.y)
             };
         },
 
@@ -426,13 +526,12 @@ export default function designReviewApp() {
                 this.longPressTimer = null;
             }
 
-            const rect = this.$refs.imageContainer.getBoundingClientRect();
+            const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const touchDuration = Date.now() - this.touchStartTime;
 
             if (this.isSelecting && this.selectionBox.width > 1 && this.selectionBox.height > 1) {
                 this.createAreaComment();
-            } else if (!this.touchMoved && touchDuration < 500) {
-                // It's a tap
+            } else if (!this.touchMoved && touchDuration < 300) {
                 const touch = event.changedTouches[0];
                 this.handleClick(touch.clientX, touch.clientY, rect);
             }
@@ -443,57 +542,58 @@ export default function designReviewApp() {
 
         // Common handlers
         handleClick(clientX, clientY, rect) {
-            const x = clientX - rect.left;
-            const y = clientY - rect.top;
-            const xPercent = (x / rect.width) * 100;
-            const yPercent = (y / rect.height) * 100;
+            // Skip comment detection when zoomed (comments are hidden)
+            if (!this.isZoomed) {
+                const coords = this.getImageCoordinates(clientX, clientY);
+                const searchRadius = this.isMobile ? 2.5 : 1.5;
+                const clickedComment = this.findCommentAtPoint(coords.x, coords.y, searchRadius);
 
-            if (this.isClickInsideNewComment(xPercent, yPercent)) return;
-
-            const isMobile = 'ontouchstart' in window;
-
-            const searchRadius = isMobile ? 2.2 : 1.5; // 2% padding on mobile
-            const clickedComment = this.findCommentAtPoint(xPercent, yPercent, searchRadius);
-            if (clickedComment) {
-                return this.selectComment(clickedComment);
+                if (clickedComment) {
+                    return this.selectComment(clickedComment);
+                }
             }
 
-            this.newComment = {
-                text: '',
-                x: xPercent - 1,
-                y: yPercent - 1,
-                width: 2,
-                height: 2,
-                type: 'point'
+            // Calculate coordinates for comment creation
+            const coords = this.getImageCoordinates(clientX, clientY);
+            const commentSize = this.isMobile ? 3 : 2;
+            const offset = commentSize / 2;
+
+            const commentData = {
+                x: Math.max(0, Math.min(100 - commentSize, coords.x - offset)),
+                y: Math.max(0, Math.min(100 - commentSize, coords.y - offset)),
+                width: commentSize,
+                height: commentSize,
+                type: 'point',
+                designId: this.designId,
+                imageUrl: this.currentImage,
+                isMobile: this.isMobile,
+                zoomLevel: this.zoomLevel
             };
-            this.popupAnchor = {
-                x: clientX,
-                y: clientY
-            };
-            this.showCommentPopup = true;
-            this.hasUnsavedChanges = true;
-            this.$nextTick(() => this.$refs.commentTextarea?.focus());
+
+            this.dispatchCommentEvent(commentData);
         },
 
         createAreaComment() {
-            this.newComment = {
-                text: '',
-                x: this.selectionBox.x,
-                y: this.selectionBox.y,
-                width: this.selectionBox.width,
-                height: this.selectionBox.height,
-                type: 'area'
+            const commentData = {
+                x: Math.max(0, Math.min(100, this.selectionBox.x)),
+                y: Math.max(0, Math.min(100, this.selectionBox.y)),
+                width: Math.min(this.selectionBox.width, 100 - this.selectionBox.x),
+                height: Math.min(this.selectionBox.height, 100 - this.selectionBox.y),
+                type: 'area',
+                designId: this.designId,
+                imageUrl: this.currentImage,
+                isMobile: this.isMobile,
+                zoomLevel: this.zoomLevel
             };
-            const rect = this.$refs.imageContainer.getBoundingClientRect();
-            const anchorX = this.selectionBox.x + this.selectionBox.width / 2;
-            const anchorY = this.selectionBox.y + this.selectionBox.height;
-            this.popupAnchor = {
-                x: rect.left + (anchorX * rect.width / 100),
-                y: rect.top + (anchorY * rect.height / 100)
-            };
-            this.showCommentPopup = true;
-            this.hasUnsavedChanges = true;
-            this.$nextTick(() => this.$refs.commentTextarea?.focus());
+
+            this.dispatchCommentEvent(commentData);
+        },
+
+        dispatchCommentEvent(commentData) {
+            window.dispatchEvent(new CustomEvent('open-comment-modal', {
+                detail: commentData,
+                bubbles: true
+            }));
         },
 
         cancelSelection() {
@@ -522,11 +622,6 @@ export default function designReviewApp() {
             this.isSelecting = false;
         },
 
-        isClickInsideNewComment(xPercent, yPercent) {
-            if (!this.newComment) return false;
-            const c = this.newComment;
-            return xPercent >= c.x && xPercent <= c.x + c.width && yPercent >= c.y && yPercent <= c.y + c.height;
-        },
 
         findCommentAtPoint(x, y, searchRadius = 0) {
             return this.visibleComments.find(c => {
@@ -553,66 +648,10 @@ export default function designReviewApp() {
             this.activeCommentId = null;
             this.$wire.set('activeCommentId', null);
         },
-        async saveComment() {
-            if (!this.newComment?.text?.trim() || this.isSaving) return;
-
-            this.isSaving = true;
-
-            try {
-                const comment = {
-                    id: uuidv4(),
-                    ...this.newComment,
-                    author: 'Current User',
-                    timestamp: new Date().toISOString(),
-                    resolved: false
-                };
-
-                // Add to local state first for immediate UI feedback
-
-
-
-                // Call the async callback if it exists
-                if (this.callbacks.onSaveComment) {
-                    await this.callbacks.onSaveComment(comment, this.designId, this.currentImage);
-                }
-
-
-                // Close popup after successful save
-                this.showCommentPopup = false;
-                this.hasUnsavedChanges = false;
-                this.newComment = null;
-                this.updateVisibleComments();
-
-
-            } catch (error) {
-                console.error('Error saving comment:', error);
-
-                // Rollback on error
-                this.comments = this.comments.filter(c => c.id !== comment.id);
-                this.selectedCommentIds = this.selectedCommentIds.filter(id => id !== comment.id);
-                this.updateVisibleComments();
-
-                // You might want to show an error message to the user
-                alert('Failed to save comment. Please try again.');
-
-            } finally {
-                this.isSaving = false;
-            }
-        },
-
-        cancelComment() {
-            if (this.canSave) {
-                this.showConfirmDialog = true;
-                return;
-            }
-            this.showCommentPopup = false;
-            this.hasUnsavedChanges = false;
-            this.newComment = null;
-        },
 
         // Public API methods
         setCallbacks(callbacks = {}) {
-            const validCallbacks = ['onSaveComment', 'onDeleteComment', 'onEditComment', 'onCommentClick', 'onModalOpen', 'onModalClose'];
+            const validCallbacks = ['onDeleteComment', 'onCommentClick', 'onModalOpen', 'onModalClose'];
 
             Object.keys(callbacks).forEach(key => {
                 if (validCallbacks.includes(key) && typeof callbacks[key] === 'function') {
@@ -626,12 +665,20 @@ export default function designReviewApp() {
         },
 
         addComment(comment) {
-            this.comments.push({
+            // Ensure comment has a valid ID before adding
+            const commentWithId = {
                 id: comment.id || uuidv4(),
                 ...comment
-            });
-            this.selectedCommentIds.push(comment.id);
-            this.updateVisibleComments();
+            };
+
+            // Check for duplicates before adding
+            if (!this.comments.find(c => c.id === commentWithId.id)) {
+                this.comments.push(commentWithId);
+                if (!this.selectedCommentIds.includes(commentWithId.id)) {
+                    this.selectedCommentIds.push(commentWithId.id);
+                }
+                this.updateVisibleComments();
+            }
         },
 
         async removeComment(commentId) {
@@ -659,6 +706,233 @@ export default function designReviewApp() {
 
                 alert('Failed to delete comment. Please try again.');
             }
-        }
+        },
+
+        // Enhanced zoom methods using wrapper dimensions
+        zoomIn(factor = 1.2) {
+            const newZoom = Math.min(this.zoomLevel * factor, this.maxZoom);
+            this.setZoom(newZoom);
+        },
+
+        zoomOut(factor = 1.2) {
+            const newZoom = Math.max(this.zoomLevel / factor, this.minZoom);
+            this.setZoom(newZoom);
+        },
+
+        resetZoom() {
+            this.setZoom(1);
+            this.resetPan();
+        },
+
+        setZoom(newZoom) {
+            this.zoomLevel = newZoom;
+            this.updateImageDimensions();
+        },
+
+        updateImageDimensions() {
+            this.$nextTick(() => {
+                const viewport = this.$refs.scrollContainer;
+                const mainContainer = this.$refs.mainContainer;
+                const innerWrapper = this.$refs.innerWrapper;
+                const image = this.$refs.image;
+
+                if (!viewport || !mainContainer || !innerWrapper || !image) {
+                    console.log('Missing refs:', { viewport: !!viewport, mainContainer: !!mainContainer, innerWrapper: !!innerWrapper, image: !!image });
+                    return;
+                }
+
+                // Wait for image to load and get natural dimensions
+                if (image.naturalWidth === 0 || image.naturalHeight === 0) {
+                    console.log('Image not loaded yet, waiting...');
+                    return;
+                }
+
+                // Initialize main container size once (based on image + viewport constraints)
+                if (this.mainContainerWidth === 0) {
+                    const maxWidth = viewport.clientWidth;
+                    const maxHeight = viewport.clientHeight;
+                    const imageAspectRatio = image.naturalWidth / image.naturalHeight;
+
+                    // Use full viewport dimensions with image aspect ratio
+                    let containerWidth, containerHeight;
+
+                    // Try to use full viewport width first
+                    containerWidth = maxWidth;
+                    containerHeight = maxWidth / imageAspectRatio;
+
+                    // If height exceeds viewport, use full viewport height instead
+                    if (containerHeight > maxHeight) {
+                        containerHeight = maxHeight;
+                        containerWidth = maxHeight * imageAspectRatio;
+                    }
+
+                    // This ensures we use maximum possible viewport space while maintaining aspect ratio
+
+                    this.mainContainerWidth = containerWidth;
+                    this.mainContainerHeight = containerHeight;
+
+                    // Inner wrapper starts at same size as main container (zoom level 1)
+                    this.innerWrapperWidth = containerWidth;
+                    this.innerWrapperHeight = containerHeight;
+
+                    console.log('Container dimensions set:', {
+                        viewport: { width: maxWidth, height: maxHeight },
+                        mainContainer: { width: this.mainContainerWidth, height: this.mainContainerHeight },
+                        innerWrapper: { width: this.innerWrapperWidth, height: this.innerWrapperHeight },
+                        aspectRatio: imageAspectRatio,
+                        expectedAspectRatio: image.naturalWidth / image.naturalHeight,
+                        calculatedAspectRatio: containerWidth / containerHeight,
+                        naturalSize: { width: image.naturalWidth, height: image.naturalHeight },
+                        calculations: {
+                            fitWidth: maxWidth,
+                            fitHeight: maxWidth / imageAspectRatio,
+                            finalWidth: containerWidth,
+                            finalHeight: containerHeight
+                        }
+                    });
+
+                    // Force update to show the image
+                    this.$nextTick(() => {
+                        console.log('Image should be visible now');
+                        console.log('DOM elements:', {
+                            viewport: {
+                                width: viewport.offsetWidth,
+                                height: viewport.offsetHeight,
+                                display: getComputedStyle(viewport).display
+                            },
+                            mainContainer: {
+                                width: this.$refs.mainContainer.offsetWidth,
+                                height: this.$refs.mainContainer.offsetHeight,
+                                display: getComputedStyle(this.$refs.mainContainer).display
+                            },
+                            innerWrapper: {
+                                width: this.$refs.innerWrapper.offsetWidth,
+                                height: this.$refs.innerWrapper.offsetHeight,
+                                display: getComputedStyle(this.$refs.innerWrapper).display
+                            },
+                            image: {
+                                width: image.offsetWidth,
+                                height: image.offsetHeight,
+                                naturalWidth: image.naturalWidth,
+                                naturalHeight: image.naturalHeight,
+                                display: getComputedStyle(image).display
+                            }
+                        });
+                    });
+                    return;
+                }
+
+                // Update inner wrapper size based on zoom level (main container stays fixed)
+                const additionalPixels = (this.zoomLevel - 1) * this.currentZoomStep;
+
+                // Scale both dimensions proportionally by the same factor
+                const scaleFactor = 1 + (additionalPixels / Math.max(this.mainContainerWidth, this.mainContainerHeight));
+                this.innerWrapperWidth = this.mainContainerWidth * scaleFactor;
+                this.innerWrapperHeight = this.mainContainerHeight * scaleFactor;
+
+                console.log('Inner wrapper updated:', {
+                    zoomLevel: this.zoomLevel,
+                    scaleFactor: scaleFactor,
+                    additionalPixels: additionalPixels,
+                    mainContainer: { width: this.mainContainerWidth, height: this.mainContainerHeight },
+                    innerWrapper: { width: this.innerWrapperWidth, height: this.innerWrapperHeight }
+                });
+            });
+        },
+
+        get currentMainContainerWidth() {
+            console.log('Getting main container width:', this.mainContainerWidth);
+            return this.mainContainerWidth || 'auto';
+        },
+
+        get currentMainContainerHeight() {
+            console.log('Getting main container height:', this.mainContainerHeight);
+            return this.mainContainerHeight || 'auto';
+        },
+
+        get currentInnerWrapperWidth() {
+            const width = this.innerWrapperWidth || this.mainContainerWidth;
+            console.log('Getting inner wrapper width:', width);
+            return width;
+        },
+
+        get currentInnerWrapperHeight() {
+            const height = this.innerWrapperHeight || this.mainContainerHeight;
+            console.log('Getting inner wrapper height:', height);
+            return height;
+        },
+
+        handleWheel(event) {
+            event.preventDefault();
+            const delta = event.deltaY;
+            const zoomFactor = 1.1;
+
+            if (delta < 0 && this.canZoomIn) {
+                this.zoomIn(zoomFactor);
+            } else if (delta > 0 && this.canZoomOut) {
+                this.zoomOut(zoomFactor);
+            }
+        },
+
+        handleArrowKeys(event) {
+            // Only handle arrow keys when zoomed in
+            if (!this.isZoomed) return;
+
+            event.preventDefault();
+            const step = this.arrowKeyStep;
+
+            // Calculate movement bounds
+            const maxPanX = Math.max(0, (this.innerWrapperWidth - this.mainContainerWidth) / 2);
+            const maxPanY = Math.max(0, (this.innerWrapperHeight - this.mainContainerHeight) / 2);
+
+            switch (event.key) {
+                case 'ArrowUp':
+                    this.panY = Math.min(maxPanY, this.panY + step);
+                    break;
+                case 'ArrowDown':
+                    this.panY = Math.max(-maxPanY, this.panY - step);
+                    break;
+                case 'ArrowLeft':
+                    this.panX = Math.min(maxPanX, this.panX + step);
+                    break;
+                case 'ArrowRight':
+                    this.panX = Math.max(-maxPanX, this.panX - step);
+                    break;
+            }
+
+            console.log('Pan updated:', { panX: this.panX, panY: this.panY, maxPanX, maxPanY });
+        },
+
+        // Enhanced coordinate calculation for improved zoom system
+        getImageCoordinates(clientX, clientY) {
+            const innerWrapper = this.$refs.innerWrapper;
+            const image = this.$refs.image;
+
+            if (!innerWrapper || !image) {
+                return { x: 0, y: 0 };
+            }
+
+            const wrapperRect = innerWrapper.getBoundingClientRect();
+            const imageRect = image.getBoundingClientRect();
+
+            // Calculate relative position within the visible image area
+            const x = clientX - imageRect.left;
+            const y = clientY - imageRect.top;
+
+            // Convert to percentage of the actual image dimensions
+            const xPercent = (x / imageRect.width) * 100;
+            const yPercent = (y / imageRect.height) * 100;
+
+            return {
+                x: Math.max(0, Math.min(100, xPercent)),
+                y: Math.max(0, Math.min(100, yPercent))
+            };
+        },
+
+        // Image load handler to set up dimensions
+        onImageLoad() {
+            this.updateImageDimensions();
+        },
+
     };
 }

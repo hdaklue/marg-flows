@@ -47,7 +47,6 @@ final class PageResource extends Resource
     {
         return [
             'index' => Pages\ListPages::route('/'),
-            'create' => Pages\CreatePage::route('/{pageable}/create'),
             'view' => ViewDocument::route('/{record}'),
             // 'edit' => Pages\EditPage::route('/{record}/edit'),
         ];

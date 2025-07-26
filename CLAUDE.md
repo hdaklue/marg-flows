@@ -154,6 +154,7 @@ php artisan db:seed --class=DatabaseSeeder
 - **Always use alpines x-tooltip plugin for tooltips**
 - **Always use ulids for bd. and for morphs always use getMorphClass()**
 - **Stick to Relation::getMorphAlias, and Relation::getMorphedModel()**
+- **Always use x-anchor for any drop down**
 
 ---
 

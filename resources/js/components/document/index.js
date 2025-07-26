@@ -35,6 +35,15 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         autosaveTimer: null,
         debounceTimer: null,
         isSticky: false,
+        cachedTopbarHeight: 80,
+        editorReady: false,
+        
+        // Event listener references for cleanup
+        editorBusyHandler: null,
+        editorFreeHandler: null,
+        beforeUnloadHandler: null,
+        livewireNavigatingHandler: null,
+        resizeHandler: null,
         get isDirty() {
 
             // Compare current editor time with last saved time
@@ -55,8 +64,12 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         },
 
         get topbarHeight() {
+            return this.cachedTopbarHeight;
+        },
+        
+        updateTopbarHeight() {
             const topbar = document.querySelector('.fi-topbar');
-            return topbar ? topbar.offsetHeight : 80;
+            this.cachedTopbarHeight = topbar ? topbar.offsetHeight : 80;
         },
 
 
@@ -69,13 +82,14 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 this.lastSavedTime = initialStateTime;
                 this.currentEditorTime = initialStateTime;
             } catch (e) {
-                console(e.message)
+                console.error('Failed to parse initial state:', e.message);
                 const now = Date.now();
                 this.lastSavedTime = now;
                 this.currentEditorTime = now;
             }
 
             this.lastSaved = initialUpdatedAt ? new Date(initialUpdatedAt) : null;
+            this.updateTopbarHeight();
             this.startUpdateTimer();
             this.initializeEditor();
             this.watchStateChanges();
@@ -94,26 +108,18 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         },
 
         setupEditorBusyListeners() {
-            // Listen for editor busy/free events from plugins
-            document.addEventListener('editor:busy', () => {
+            // Create bound event handlers for cleanup
+            this.editorBusyHandler = () => {
                 this.isEditorBusy = true;
                 // Pause autosave while editor is busy
                 if (this.autosaveTimer) {
                     clearInterval(this.autosaveTimer);
                     this.autosaveTimer = null;
                 }
-            });
+            };
 
-            document.addEventListener('editor:free', () => {
+            this.editorFreeHandler = () => {
                 this.isEditorBusy = false;
-
-                // Sync currentEditorTime with actual current state
-                // try {
-                //     const currentState = JSON.parse(this.state);
-                //     this.currentEditorTime = currentState.time;
-                // } catch (e) {
-                //     console.warn('Failed to sync currentEditorTime:', e);
-                // }
 
                 // Safety save after editor operations complete, then restart autosave timer
                 if (this.isDirty && this.saveCallback && !this.isSaving) {
@@ -125,25 +131,36 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     }
                     this.startAutosave();
                 }
-            });
+            };
+
+            // Listen for editor busy/free events from plugins
+            document.addEventListener('editor:busy', this.editorBusyHandler);
+            document.addEventListener('editor:free', this.editorFreeHandler);
         },
 
         initializeEditor() {
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             const initialData = this.normalizeState(this.state);
 
+            // Track editor readiness
+            this.editorReady = false;
+
             this.editor = new EditorJS({
                 holder: 'editor-wrap',
                 data: initialData,
                 readOnly: !this.canEdit,
                 placeholder: 'Let`s write an awesome story!',
-                defaultBlock: 'paragraph',
-                inlineToolbar: ['bold', 'link', 'convertTo'],
+                defaultBlock: false, // Disable default block during initialization
+                inlineToolbar: false, // Disable during initialization
                 tools: this.getEditorTools(csrf, uploadUrl),
                 onChange: () => {
+                    // Only process changes if editor is ready
+                    if (!this.editorReady) {
+                        return;
+                    }
+                    
                     this.editor.save()
                         .then((outputData) => {
-
                             clearTimeout(this.debounceTimer);
                             this.debounceTimer = setTimeout(() => {
                                 this.state = JSON.stringify(outputData);
@@ -158,12 +175,28 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
                                 this.saveStatus = null; // Reset status on change
                             }, 100); // Reduced from 300ms to 100ms for faster UI feedback
-
+                        })
+                        .catch((error) => {
+                            console.error('Editor save failed during onChange:', error);
                         });
                 },
 
                 onReady: () => {
                     this.editor.isReady?.then(() => {
+                        // Mark editor as ready
+                        this.editorReady = true;
+                        
+                        // Enable inline toolbar now that editor is ready
+                        if (this.editor.configuration) {
+                            this.editor.configuration.inlineToolbar = ['bold', 'link', 'convertTo'];
+                            this.editor.configuration.defaultBlock = 'paragraph';
+                        }
+                        
+                        // If editor is empty, add a default paragraph block
+                        if (this.editor.blocks.getBlocksCount() === 0) {
+                            this.editor.blocks.insert('paragraph', {}, {}, 0, true);
+                        }
+                        
                         const undo = new Undo({ editor: this.editor });
                         new DragDrop(this.editor);
                         undo.initialize(initialData);
@@ -178,7 +211,6 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             return {
                 paragraph: {
                     class: Paragraph,
-                    inlineToolbar: true,
                     config: { preserveBlank: true },
                     tunes: ['commentTune']
                 },
@@ -235,7 +267,6 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 },
                 nestedList: {
                     class: EditorJsList,
-                    inlineToolbar: true,
                     config: {
                         defaultStyle: 'unordered',
                         placeholder: "Add an item",
@@ -245,7 +276,6 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 },
                 alert: {
                     class: Alert,
-                    inlineToolbar: true,
                     shortcut: 'CMD+SHIFT+A',
                     config: {
                         alertTypes: ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'light', 'dark'],
@@ -274,12 +304,13 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
         normalizeState(state) {
             try {
-                if (typeof state === 'string') {
-                    state = JSON.parse(state);
-                }
-
-                if (state && Array.isArray(state.blocks)) {
-                    return JSON.parse(JSON.stringify(state));
+                const parsed = typeof state === 'string' ? JSON.parse(state) : state;
+                
+                if (parsed && Array.isArray(parsed.blocks)) {
+                    return {
+                        ...parsed,
+                        blocks: [...parsed.blocks] // Shallow clone sufficient
+                    };
                 }
             } catch (e) {
                 console.warn('Invalid EditorJS state', e);
@@ -293,8 +324,8 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         },
 
         setupEventListeners() {
-            // Save on page unload with processing check (only for refresh/close)
-            window.addEventListener('beforeunload', (e) => {
+            // Create bound event handlers for cleanup
+            this.beforeUnloadHandler = (e) => {
                 if (this.isEditorBusy || this.isDirty) {
                     const message = this.isEditorBusy
                         ? 'Page is processing. You may lose unsaved data if you leave now.'
@@ -303,10 +334,9 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     e.returnValue = message; // For older browsers
                     return message;
                 }
-            });
+            };
 
-            // Save on Livewire navigate with processing check
-            document.addEventListener('livewire:navigating', (e) => {
+            this.livewireNavigatingHandler = (e) => {
                 if (this.isEditorBusy || (this.isDirty && this.saveCallback)) {
                     e.preventDefault();
                     
@@ -317,8 +347,16 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     
                     return false;
                 }
-            });
+            };
 
+            this.resizeHandler = () => {
+                this.updateTopbarHeight();
+            };
+
+            // Add event listeners
+            window.addEventListener('beforeunload', this.beforeUnloadHandler);
+            document.addEventListener('livewire:navigating', this.livewireNavigatingHandler);
+            window.addEventListener('resize', this.resizeHandler);
         },
 
         // Navigation modal methods
@@ -328,11 +366,16 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             this.navigationActiveTab = 'save';
         },
 
-        saveAndClose() {
-            this.saveDocument().then(() => {
+        async saveAndClose() {
+            try {
+                await this.saveDocument();
                 window.location.href = this.navigationUrl;
-            });
-            this.closeNavigationModal();
+                this.closeNavigationModal();
+            } catch (error) {
+                console.error('Save failed during navigation:', error);
+                // Keep modal open and show error
+                this.saveStatus = 'error';
+            }
         },
 
         discardAndClose() {
@@ -358,7 +401,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         },
 
         async saveDocument(isSync = false) {
-            if (!this.saveCallback || this.isSaving) return;
+            if (!this.saveCallback || this.isSaving || !this.editorReady) return;
 
             // Check if document is empty
             const parsedState = this.normalizeState(this.state);
@@ -378,38 +421,33 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             }
 
             try {
-                this.editor.save().then((outputData) => {
-                    this.state = outputData;
-                    this.saveCallback(JSON.stringify(this.state)).then(() => {
-
-                        this.saveStatus = 'success';
-
-                        // Get the time from the state that was just saved
-                        const savedStateTime = this.state.time;
-                        this.lastSaved = new Date(savedStateTime); // Convert to Date object for formatLastSaved()
-                        this.lastSavedTime = savedStateTime;
-                        this.currentEditorTime = savedStateTime; // Set both to same value after save
-                        this.justSaved = true; // Flag to prevent onChange from overriding this
-                        // this.lastSavedTime = savedStateTime;
-                        // this.currentEditorTime = savedStateTime;
-
-                        this.restartUpdateTimer(); // Restart timer from the new save time
-
-                        // Clear success status after 3 seconds
-                        setTimeout(() => {
-                            if (this.saveStatus === 'success') {
-                                this.saveStatus = null;
-                            }
-                        }, 3000);
-                    })
-                })
-
-
-
+                const outputData = await this.editor.save();
+                this.state = outputData;
+                
+                await this.saveCallback(JSON.stringify(this.state));
+                
+                this.saveStatus = 'success';
+                
+                // Get the time from the state that was just saved
+                const savedStateTime = this.state.time;
+                this.lastSaved = new Date(savedStateTime); // Convert to Date object for formatLastSaved()
+                this.lastSavedTime = savedStateTime;
+                this.currentEditorTime = savedStateTime; // Set both to same value after save
+                this.justSaved = true; // Flag to prevent onChange from overriding this
+                
+                this.restartUpdateTimer(); // Restart timer from the new save time
+                
+                // Clear success status after 3 seconds
+                setTimeout(() => {
+                    if (this.saveStatus === 'success') {
+                        this.saveStatus = null;
+                    }
+                }, 3000);
+                
             } catch (error) {
                 console.error('Save failed:', error);
                 this.saveStatus = 'error';
-
+                
                 // Clear error status after 5 seconds
                 setTimeout(() => {
                     if (this.saveStatus === 'error') {
@@ -456,12 +494,38 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             // Cleanup timers
             if (this.autosaveTimer) {
                 clearInterval(this.autosaveTimer);
+                this.autosaveTimer = null;
             }
             if (this.debounceTimer) {
                 clearTimeout(this.debounceTimer);
+                this.debounceTimer = null;
             }
             if (this.updateTimer) {
                 clearInterval(this.updateTimer);
+                this.updateTimer = null;
+            }
+            
+            // Cleanup event listeners
+            if (this.editorBusyHandler) {
+                document.removeEventListener('editor:busy', this.editorBusyHandler);
+            }
+            if (this.editorFreeHandler) {
+                document.removeEventListener('editor:free', this.editorFreeHandler);
+            }
+            if (this.beforeUnloadHandler) {
+                window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+            }
+            if (this.livewireNavigatingHandler) {
+                document.removeEventListener('livewire:navigating', this.livewireNavigatingHandler);
+            }
+            if (this.resizeHandler) {
+                window.removeEventListener('resize', this.resizeHandler);
+            }
+            
+            // Cleanup editor
+            if (this.editor && this.editor.destroy) {
+                this.editor.destroy();
+                this.editor = null;
             }
         }
     }

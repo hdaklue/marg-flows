@@ -72,7 +72,7 @@
         </div>
     </div>
 
-    <div id="editor-wrap" wire:ignore @keydown.alt.s.prevent="saveDoument()"
+    <div id="editor-wrap" wire:ignore @keydown.window.ctrl.k.prevent="saveDoument()" @keydown.meta.k="saveDocument()"
         class="prose:img:my-0 prose prose-sm prose-zinc mx-auto min-h-96 w-full dark:prose-invert lg:prose-xl prose-table:w-full">
     </div>
 

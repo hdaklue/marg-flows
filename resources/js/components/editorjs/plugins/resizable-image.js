@@ -357,7 +357,7 @@ class ResizableImage {
                 this.blockAPI.dispatchChange();
             }
             
-            // Let onChange fire first, then signal editor is free
+            // Signal editor is free after upload completes
             setTimeout(() => {
                 document.dispatchEvent(new CustomEvent('editor:free'));
             }, 0);
@@ -531,45 +531,57 @@ class ResizableImage {
         return captionInput;
     }
 
-    removeImage(index) {
+    async removeImage(index) {
         if (this.data.files && this.data.files[index]) {
             const file = this.data.files[index];
 
-            // Delete from server if file has URL
-            if (file.url) {
-                this.deleteFromServer(file.url);
-            }
+            // Signal editor is busy for the delete operation
+            document.dispatchEvent(new CustomEvent('editor:busy'));
 
-            // Remove from data array
-            this.data.files.splice(index, 1);
-
-            // Ensure data always has a valid structure (empty array)
-            if (this.data.files.length === 0) {
-                // Keep empty files array as placeholder to maintain valid state
-                this.data.files = [];
-                // Ensure caption property exists
-                if (!this.data.caption) {
-                    this.data.caption = '';
+            try {
+                // Delete from server if file has URL and wait for completion
+                if (file.url) {
+                    await this.deleteFromServer(file.url);
                 }
+
+                // Remove from data array
+                this.data.files.splice(index, 1);
+
+                // Ensure data always has a valid structure (empty array)
+                if (this.data.files.length === 0) {
+                    // Keep empty files array as placeholder to maintain valid state
+                    this.data.files = [];
+                    // Ensure caption property exists
+                    if (!this.data.caption) {
+                        this.data.caption = '';
+                    }
+                }
+
+                // Re-render gallery
+                this.renderGallery();
+
+                // If no images left, show upload container
+                if (this.data.files.length === 0) {
+                    this.showUploadContainer();
+                }
+
+                // Tell Editor that block was changed
+                if (this.blockAPI && this.blockAPI.dispatchChange) {
+                    this.blockAPI.dispatchChange();
+                }
+
+                // Signal editor is free after successful delete and block change
+                setTimeout(() => {
+                    document.dispatchEvent(new CustomEvent('editor:free'));
+                }, 0);
+
+            } catch (error) {
+                console.error('Failed to delete image:', error);
+                // Signal editor is free even on error
+                setTimeout(() => {
+                    document.dispatchEvent(new CustomEvent('editor:free'));
+                }, 0);
             }
-
-            // Re-render gallery
-            this.renderGallery();
-
-            // If no images left, show upload container
-            if (this.data.files.length === 0) {
-                this.showUploadContainer();
-            }
-
-            // Tell Editor that block was changed
-            if (this.blockAPI && this.blockAPI.dispatchChange) {
-                this.blockAPI.dispatchChange();
-            }
-
-            // Let onChange fire first, then signal editor is free
-            setTimeout(() => {
-                document.dispatchEvent(new CustomEvent('editor:free'));
-            }, 0);
         }
     }
 
@@ -731,7 +743,7 @@ class ResizableImage {
         const formData = new FormData();
         formData.append(this.config.field, file);
 
-        // Signal editor is busy at start of fetch
+        // Signal editor is busy during upload
         document.dispatchEvent(new CustomEvent('editor:busy'));
 
         return fetch(this.config.endpoints.byFile, {
@@ -1135,15 +1147,34 @@ class ResizableImage {
      * Called when Block is removed from the page
      * Clean up images from server
      */
-    removed() {
+    async removed() {
         if (this.data.files && Array.isArray(this.data.files)) {
+            // Signal editor is busy during cleanup
+            document.dispatchEvent(new CustomEvent('editor:busy'));
 
-            this.data.files.forEach(file => {
-                if (file.url) {
-                    this.deleteFromServer(file.url);
-                }
-            });
+            try {
+                // Delete all images from server
+                const deletePromises = this.data.files.map(file => {
+                    if (file.url) {
+                        return this.deleteFromServer(file.url);
+                    }
+                    return Promise.resolve();
+                });
 
+                await Promise.all(deletePromises);
+
+                // Signal editor is free after cleanup
+                setTimeout(() => {
+                    document.dispatchEvent(new CustomEvent('editor:free'));
+                }, 0);
+
+            } catch (error) {
+                console.error('Failed to cleanup images on block removal:', error);
+                // Signal editor is free even on error
+                setTimeout(() => {
+                    document.dispatchEvent(new CustomEvent('editor:free'));
+                }, 0);
+            }
         }
     }
 
