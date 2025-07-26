@@ -8,7 +8,6 @@ use App\Filament\Resources\PageResource;
 use App\Models\Page;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -18,7 +17,6 @@ use Livewire\Component;
  * @property-read array $participantsArray
  * @property-read array $userPermissions
  */
-#[Lazy(false)]
 final class PageCard extends Component
 {
     #[Locked]

@@ -7,14 +7,15 @@
             this.content = '';
         }
     },
-}" class="fixed bottom-4 right-4 z-50" @keydown.window.shift.s.prevent="show = true">
+}" class="fixed bottom-4 right-4 z-50" @keydown.window.alt.s.prevent="show = true"
+    @keydown.window.ctrl.s.prevent="show = true">
     <div class="relative">
         <div class="relative cursor-pointer rounded-full bg-zinc-400 p-2 transition-all hover:bg-zinc-300 dark:bg-zinc-600 dark:hover:bg-zinc-500"x-show="!show"
             @click.prevent="show = !show" x-transition:enter="transition ease-out duration-50"
             x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-50" x-transition:leave-start="opacity-0 scale-100"
             x-transition:leave-end="opacity-100 scale-90">
-            <a x-tooltip.arrowless.raw="Sidenotes [Shift + S]" class="relative h-5 w-5">
+            <a x-tooltip.arrowless.raw="Sidenotes [Alt + S]" class="relative h-5 w-5">
                 <div
                     class="text-2xs absolute -right-2/3 -top-1/2 h-4 w-4 rounded-full bg-yellow-300 p-0.5 text-center text-yellow-800 dark:bg-yellow-600 dark:text-yellow-800">
                     {{ $this->notes->count() }}

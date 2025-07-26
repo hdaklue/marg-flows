@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\PageResource\Pages;
 
+use App\Facades\PageManager;
 use App\Filament\Resources\PageResource;
 use App\Forms\Components\PlaceholderInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Computed;
 
 final class ViewDocument extends ViewRecord
@@ -24,6 +26,11 @@ final class ViewDocument extends ViewRecord
         $this->form->fill([
             'title' => $this->record->getAttribute('name'),
         ]);
+    }
+
+    public function resolveRecord(int|string $key): Model
+    {
+        return PageManager::getPage($key);
     }
 
     public function form(Form $form): Form
