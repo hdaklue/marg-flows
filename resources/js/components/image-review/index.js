@@ -44,8 +44,6 @@ export default function designReviewApp() {
         currentImage: '',
         designId: null,
         comments: [],
-        showingComment: false,
-        activeCommentId: null,
         isSelecting: false,
         isDragging: false,
         allCommentsHidden: false,
@@ -652,17 +650,12 @@ export default function designReviewApp() {
         },
 
         selectComment(comment) {
-
-            this.showingComment = true;
-            this.activeCommentId = comment.id;
-            this.$wire.set('activeCommentId', comment.id);
-
-        },
-
-        closeComment() {
-            this.showingComment = false;
-            this.activeCommentId = null;
-            this.$wire.set('activeCommentId', null);
+            // For now, just log comment selection - this could be used for a separate comment viewer modal
+            console.log('Comment selected:', comment);
+            
+            if (this.callbacks.onCommentClick) {
+                this.callbacks.onCommentClick(comment);
+            }
         },
 
         // Public API methods

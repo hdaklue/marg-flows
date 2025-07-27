@@ -60,3 +60,9 @@ compile({
     entryPoints: ['./resources/js/components/chunked-file-upload.js'],
     outfile: './resources/js/dist/components/chunked-file-upload.js',
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/components/mentionable/index.js'],
+    outfile: './resources/js/dist/components/mentionable.js',
+})

@@ -1,66 +1,12 @@
-<div x-data="designReviewApp()" x-init="init({})" @keydown.escape.window="!$wire.showCommentModal && handleEscape()"
+<div x-data="designReviewApp()" x-init="init({})" @keydown.escape.window="!window.commentModalOpen && handleEscape()"
     @keydown.arrow-up.window.prevent="handleArrowKeys($event)"
     @keydown.arrow-down.window.prevent="handleArrowKeys($event)"
     @keydown.arrow-left.window.prevent="handleArrowKeys($event)"
     @keydown.arrow-right.window.prevent="handleArrowKeys($event)"
-    @open-comment-modal.window="$wire.openCommentModal($event.detail)" role="application"
+    role="application"
     aria-label="Design Review Interface">
-    <!-- Comment Detail Modal -->
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-800/90 backdrop-blur-sm"
-        x-show="showingComment" x-cloak role="dialog" aria-modal="true" aria-labelledby="comment-title">
-
-        <!-- Comment container -->
-        <div x-show="showingComment" x-transition:enter="transition ease-out duration-300"
-            @click.outside="closeComment()" x-transition:enter-start="transform translate-y-full opacity-0"
-            x-transition:enter-end="transform translate-y-0 opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="transform translate-y-0 opacity-100"
-            x-transition:leave-end="transform translate-y-full opacity-0"
-            class="fixed bottom-0 left-1/2 z-50 h-4/5 w-full max-w-2xl -translate-x-1/2 transform rounded-t-xl bg-white p-6 shadow-2xl dark:bg-zinc-900 md:relative md:h-auto md:max-h-[80vh] md:rounded-xl"
-            x-cloak>
-            <div class="flex h-full flex-col text-zinc-600 dark:text-zinc-400">
-                <!-- Header -->
-                <div class="flex-shrink-0 border-b border-zinc-200 pb-4 dark:border-zinc-700">
-                    <div class="flex items-center justify-between">
-                        <h3 id="comment-title" class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                            Comment Details
-                        </h3>
-                        <button @click="closeComment()"
-                            class="rounded-lg p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-sky-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-                            aria-label="Close comment details">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Content -->
-                <div class="flex-1 overflow-auto py-4">
-                    <div class="space-y-4">
-                        @if ($activeCommentId)
-                            <div class="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-800/50">
-                                <p class="text-sm text-zinc-600 dark:text-zinc-400">Comment ID:</p>
-                                <p class="font-mono text-sm text-zinc-900 dark:text-zinc-100">{{ $activeCommentId }}</p>
-                            </div>
-                            <!-- Add more comment content here -->
-                        @else
-                            <p class="text-center text-zinc-500 dark:text-zinc-400">No comment selected</p>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="flex-shrink-0 border-t border-zinc-200 pt-4 dark:border-zinc-700">
-                    <button @click="closeComment()"
-                        class="w-full rounded-lg bg-zinc-100 px-4 py-2 font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-sky-500 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Create Feedback Modal Component -->
+    @livewire('feedback.create-feedback-modal')
     <!-- Demo Container -->
     <div class="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow-sm dark:bg-zinc-800">
 
@@ -110,7 +56,7 @@
         style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-title">
 
         <div class="relative flex max-h-[95vh] max-w-[95vw] flex-col rounded-lg bg-white shadow-2xl transition-all duration-200 dark:bg-zinc-900"
-            @click.stop :class="showingComment ? 'scale-95' : ''" role="document">
+            @click.stop role="document">
 
             <!-- Clean Modal Topbar -->
             <div
@@ -193,7 +139,6 @@
                         <template x-for="(comment, index) in visibleComments" :key="comment.id">
                             <div x-show="!isZoomed"
                                 class="absolute cursor-pointer border-2 border-sky-500 bg-sky-500/20 transition-all duration-200 hover:z-10 hover:border-sky-600 hover:bg-sky-500/30 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
-                                :class="{ 'bg-sky-500/40 border-sky-700 z-20 shadow-lg': activeCommentId === comment.id }"
                                 :style="`left: ${comment.x}%; top: ${comment.y}%; width: ${comment.width}%; height: ${comment.height}%; min-width: 20px; min-height: 20px;`"
                                 @click="selectComment(comment)" @keydown.enter="selectComment(comment)"
                                 @keydown.space.prevent="selectComment(comment)" tabindex="0" role="button"
@@ -512,103 +457,4 @@
         </div>
     </div>
 
-    <!-- Comment Creation Modal -->
-    @if ($showCommentModal)
-        <div x-data="{
-            show: @entangle('showCommentModal'),
-            focusFirstInput() {
-                this.$nextTick(() => {
-                    const textarea = this.$el.querySelector('textarea');
-                    if (textarea) {
-                        textarea.focus();
-                        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-                    }
-                });
-            }
-        }" x-show="show" x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0" x-init="$watch('show', value => { if (value) focusFirstInput(); })"
-            class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm md:p-4"
-            @keydown.escape.window="$wire.cancelComment()" role="dialog" aria-modal="true"
-            aria-labelledby="comment-modal-title" <!-- Desktop Modal -->
-            <div class="mx-4 hidden w-full max-w-md rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900 md:block"
-                @click.stop role="document">
-                <div class="border-b border-zinc-200 px-6 py-4 dark:border-zinc-700">
-                    <h3 id="comment-modal-title" class="text-lg font-semibold text-zinc-900 dark:text-white">Add
-                        Comment</h3>
-                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                        {{ $pendingComment['type'] === 'area' ? 'Add feedback for the selected area' : 'Add feedback for this point' }}
-                    </p>
-                </div>
-
-                <div class="p-6">
-                    <label for="comment-text-desktop" class="sr-only">Comment text</label>
-                    <textarea id="comment-text-desktop" wire:model="commentText"
-                        class="w-full resize-none rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 transition-colors focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-sky-400"
-                        rows="4" placeholder="Describe your feedback or suggestion..." autofocus aria-describedby="comment-help"></textarea>
-                    <p id="comment-help" class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                        Be specific and constructive in your feedback.
-                    </p>
-                </div>
-
-                <div class="flex justify-end gap-3 border-t border-zinc-200 px-6 py-4 dark:border-zinc-700">
-                    <button wire:click="cancelComment"
-                        class="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 active:scale-95 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                        type="button">
-                        Cancel
-                    </button>
-                    <button wire:click="saveNewComment" :disabled="!$wire.commentText.trim()"
-                        class="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-                        type="button">
-                        Save Comment
-                    </button>
-                </div>
-            </div>
-
-            <!-- Mobile Modal (Bottom Sheet) -->
-            <div class="fixed inset-0 z-[70] flex items-end md:hidden">
-                <div class="w-full rounded-t-3xl bg-white px-4 pb-8 pt-6 shadow-2xl dark:bg-zinc-900" @click.stop
-                    role="document">
-                    <!-- Handle -->
-                    <div class="mx-auto mb-4 h-1.5 w-12 rounded-full bg-zinc-300 dark:bg-zinc-600" aria-hidden="true">
-                    </div>
-
-                    <!-- Header -->
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Add Feedback</h3>
-                        <p class="text-sm text-zinc-600 dark:text-zinc-400">
-                            {{ $pendingComment['type'] === 'area' ? 'Add feedback for the selected area' : 'Add feedback for this point' }}
-                        </p>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="space-y-4">
-                        <label for="comment-text-mobile" class="sr-only">Comment text</label>
-                        <textarea id="comment-text-mobile" wire:model="commentText"
-                            class="w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base placeholder-zinc-400 transition-colors focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-sky-400"
-                            rows="4" placeholder="Describe your feedback or suggestion..." autofocus
-                            aria-describedby="comment-help-mobile"></textarea>
-                        <p id="comment-help-mobile" class="text-xs text-zinc-500 dark:text-zinc-400">
-                            Be specific and constructive in your feedback.
-                        </p>
-
-                        <!-- Actions -->
-                        <div class="flex gap-3 pt-2">
-                            <button wire:click="cancelComment"
-                                class="flex-1 rounded-xl bg-zinc-100 py-3 text-center font-medium text-zinc-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-zinc-500 active:scale-95 dark:bg-zinc-800 dark:text-zinc-300"
-                                type="button">
-                                Cancel
-                            </button>
-                            <button wire:click="saveNewComment" :disabled="!$wire.commentText.trim()"
-                                class="flex-1 rounded-xl bg-sky-500 py-3 text-center font-medium text-white shadow-lg shadow-sky-500/25 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sky-500 active:scale-95 disabled:opacity-50"
-                                type="button">
-                                Save Comment
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
 </div>

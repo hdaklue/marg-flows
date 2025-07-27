@@ -65,7 +65,10 @@ final class AppServiceProvider extends ServiceProvider
             AlpineComponent::make('editorJs', __DIR__ . '/../../resources/js/dist/components/editorjs.js'),
             AlpineComponent::make('chunkedFileUploadComponent', __DIR__ . '/../../resources/js/dist/components/chunked-file-upload.js'),
             AlpineComponent::make('documentEditor', __DIR__ . '/../../resources/js/dist/components/document.js'),
+            AlpineComponent::make('mentionableText', __DIR__ . '/../../resources/js/dist/components/mentionable.js'),
             Css::make('chunkedFileUploadCss', __DIR__ . '/../../resources/css/components/chunked-file-upload.css')
+                ->loadedOnRequest(),
+            Css::make('mentionableTextCss', __DIR__ . '/../../resources/css/components/mentionable-text.css')
                 ->loadedOnRequest(),
 
             // Js::make('editorJs', __DIR__ . '/../../public/build/assets/index-C9DEfZiz.js')->loadedOnRequest(),

@@ -8,6 +8,7 @@ import designReviewApp from "./components/image-review";
 import videoAnnotationComponent from "./components/video-annotation";
 
 import documentEditor from './components/document';
+import mentionableText from './components/mentionable';
 
 import anchor from "@alpinejs/anchor";
 
@@ -18,6 +19,7 @@ Alpine.data('designReviewApp', designReviewApp)
 Alpine.data('videoAnnotation', videoAnnotationComponent)
 Alpine.data('audioAnnotation', audioAnnotation)
 Alpine.data('document', documentEditor);
+Alpine.data('mentionableText', mentionableText);
 Alpine.plugin(Autosize);
 Alpine.plugin(Tooltip);
 Alpine.plugin(sort);
