@@ -66,3 +66,15 @@ compile({
     entryPoints: ['./resources/js/components/mentionable/index.js'],
     outfile: './resources/js/dist/components/mentionable.js',
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/components/voice-recorder/index.js'],
+    outfile: './resources/js/dist/components/voice-recorder.js',
+})
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/components/audio-player/index.js'],
+    outfile: './resources/js/dist/components/audio-player.js',
+})

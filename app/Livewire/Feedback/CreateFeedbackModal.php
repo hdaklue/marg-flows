@@ -8,6 +8,9 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
+/**
+ * Summary of CreateFeedbackModal.
+ */
 final class CreateFeedbackModal extends Component
 {
     public bool $showCommentModal = false;
@@ -41,11 +44,13 @@ final class CreateFeedbackModal extends Component
         $this->commentText = '';
         $this->currentMentions = [];
         $this->currentHashtags = [];
+
         $this->showCommentModal = true;
     }
 
     public function saveNewComment()
     {
+        // Allow saving if we have text
         if (empty(trim($this->commentText))) {
             return;
         }
@@ -71,6 +76,9 @@ final class CreateFeedbackModal extends Component
         $this->showCommentModal = false;
         $this->pendingComment = [];
         $this->commentText = '';
+        $this->currentMentions = [];
+        $this->currentHashtags = [];
+        $this->voiceNoteUrls = [];
 
         // Dispatch comment created event
         $this->dispatch('comment-created', [
@@ -87,6 +95,8 @@ final class CreateFeedbackModal extends Component
         $this->commentText = '';
         $this->currentMentions = [];
         $this->currentHashtags = [];
+        $this->voiceNoteUrls = [];
+        $this->dispatch('voice-note:canceled');
     }
 
     #[Renderless]
@@ -95,6 +105,7 @@ final class CreateFeedbackModal extends Component
         if (! in_array($mentionId, $this->currentMentions)) {
             $this->currentMentions[] = $mentionId;
         }
+        logger()->info('mentiond', $this->currentMentions);
     }
 
     #[Renderless]
@@ -128,7 +139,7 @@ final class CreateFeedbackModal extends Component
         $this->mentionables = [
             [
                 'id' => '1',
-                'name' => 'Alice Johnson',
+                'name' => 'اليس جونسون',
                 'email' => 'alice@example.com',
                 'avatar' => null,
                 'title' => 'Designer',

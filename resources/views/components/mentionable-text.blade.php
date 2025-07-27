@@ -2,7 +2,7 @@
     'model' => 'content',
     'mentionables' => [],
     'hashables' => [],
-    'minHeight' => '120px',
+    'minHeight' => '60px',
     'class' => '',
     'id' => null,
     'hint' => 'Use @ to mention people and # for hashtags',
@@ -11,7 +11,7 @@
 @php
     $id = $id ?? 'mentionable-text-' . uniqid();
     $baseClasses =
-        'w-full resize-none rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 transition-colors focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-sky-400';
+        'w-full resize-none rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 transition-colors focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-600 dark:bg-zinc-800 relative dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-sky-400';
     $finalClasses = $class ? $baseClasses . ' ' . $class : $baseClasses;
 @endphp
 
@@ -31,8 +31,7 @@
 
     <div contenteditable="true" x-ref="textarea" x-model="content" wire:model="{{ $model }}"
         id="{{ $id }}" class="{{ $finalClasses }}" style="min-height: {{ $minHeight }};"
-        x-init="$watch('$wire.showCommentModal', value => value && setTimeout(() => $el.focus(), 100))" @input="content = $el.innerHTML" required
-        ></div>
+        x-init="$watch('$wire.showCommentModal', value => value && setTimeout(() => $el.focus(), 100))" @input="content = $el.innerHTML" required></div>
 
     <!-- Optional: Display mentioned users and hashtags for debugging -->
     {{-- @if (app()->environment('local'))

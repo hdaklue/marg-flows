@@ -52,17 +52,17 @@ export default function mentionableText(mentions, hashables) {
                     lookup: 'name',
                     fillAttr: 'email',
                     selectTemplate: (item) => {
-                        return `<span contenteditable="false"><span class="text-xs px-2 py-1 bg-sky-800 text-sky-100 rounded-md border border-sky-700 dark:bg-sky-700 dark:text-sky-100 dark:border-sky-600">@${item.original.name}</span></span>`;
+                        return `<span contenteditable="false"><span class="text-sm font-semibold text-sky-500 dark:text-sky-300">@${item.original.name}</span></span > `;
                     },
                     menuItemTemplate: (item) => {
                         const data = item.original;
                         const avatar = data.avatar
-                            ? `<img src="${data.avatar}" class="tribute-item-avatar" alt="${data.name}">`
-                            : `<div class="tribute-item-avatar-placeholder">${data.name.charAt(0).toUpperCase()}</div>`;
+                            ? `< img src = "${data.avatar}" class="tribute-item-avatar" alt = "${data.name}" > `
+                            : `<div div class="tribute-item-avatar-placeholder" > ${data.name.charAt(0).toUpperCase()}</div > `;
 
-                        const title = data.title ? `<div class="tribute-item-title">${data.title}</div>` : '';
+                        const title = data.title ? `<div div class="tribute-item-title" > ${data.title}</div > ` : '';
 
-                        return `<div style="display: flex; align-items: center; gap: 0.5rem;">${avatar}<div class="tribute-item-content"><div class="tribute-item-name">${item.string}</div><div class="tribute-item-email">${data.email}</div>${title}</div></div>`;
+                        return `<div div style = "display: flex; align-items: center; gap: 0.5rem;" > ${avatar} <div class="tribute-item-content"><div class="tribute-item-name">${item.string}</div><div class="tribute-item-email">${data.email}</div>${title}</div></div > `;
                     },
                     searchOpts: {
                         pre: '<span>',
@@ -72,7 +72,8 @@ export default function mentionableText(mentions, hashables) {
                     requireLeadingSpace: false,
                     allowSpaces: false,
                     menuItemLimit: 8,
-                    menuShowMinLength: 1
+                    menuShowMinLength: 1,
+                    replaceTextSuffix: '\n',
                 });
             }
             console.log('first collection', collections)
@@ -93,11 +94,11 @@ export default function mentionableText(mentions, hashables) {
                     lookup: 'name',
                     fillAttr: 'name',
                     selectTemplate: (item) => {
-                        return `<span contenteditable="false"><a class="text-xs px-2 py-1 bg-indigo-800 text-indigo-100 rounded-md border border-indigo-700 dark:bg-indigo-700 dark:text-indigo-100 dark:border-indigo-600 no-underline" href='${item.original.url}'>#${item.original.name}</a></span>`;
+                        return `<span span contenteditable = "false" > <a class="text-sm text-indigo-600 underline dark:text-indigo-300 font-semibold" tabindex="-1" href='${item.original.url}'>#${item.original.name}</a></span > `;
                     },
                     menuItemTemplate: (item) => {
                         const data = item.original;
-                        return `<div style="display: flex; align-items: center; gap: 0.5rem;"><div class="tribute-item-hashtag-icon">#</div><div class="tribute-item-content"><div class="tribute-item-name">${item.string}</div>${data.url ? `<div class="tribute-item-url">${data.url}</div>` : ''}</div></div>`;
+                        return `<div div style = "display: flex; align-items: center; gap: 0.5rem;" ><div class="tribute-item-hashtag-icon">#</div><div class="tribute-item-content"><div class="tribute-item-name">${item.string}</div>${data.url ? `<div class="tribute-item-url">${data.url}</div>` : ''}</div></div > `;
                     },
                     searchOpts: {
                         pre: '<span>',
@@ -109,6 +110,7 @@ export default function mentionableText(mentions, hashables) {
                     menuItemLimit: 8,
                     menuShowMinLength: 1,
                     autocompleteMode: true,
+                    replaceTextSuffix: '\n',
                 });
             }
             // console.log('is it ebent work?');
@@ -119,7 +121,7 @@ export default function mentionableText(mentions, hashables) {
             //     console.log(collections);
             this.tribute = new Tribute({
                 collection: collections,
-                menuContainer: document.body,
+                menuContainer: document.querySelector(this.$refs.textarea.id),
                 spaceSelectsMatch: true,
                 positionMenu: true
             });
@@ -131,7 +133,7 @@ export default function mentionableText(mentions, hashables) {
             // Listen for tribute events to trigger Alpine reactivity and update Livewire arrays
             this.$refs.textarea.addEventListener('tribute-replaced', (e) => {
                 const item = e.detail.item;
-                
+
                 // Update Livewire arrays based on mention type
                 if (item.original) {
                     if (e.detail.event.key === '@' || item.original.email) {
@@ -142,7 +144,7 @@ export default function mentionableText(mentions, hashables) {
                         this.$wire.call('addCurrentHashtag', item.original.id);
                     }
                 }
-                
+
                 // Trigger Alpine reactivity by dispatching input event
                 this.$refs.textarea.dispatchEvent(new Event('input', { bubbles: true }));
             });
