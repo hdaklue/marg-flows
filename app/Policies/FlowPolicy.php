@@ -75,6 +75,11 @@ final class FlowPolicy
 
     public function manageMembers(User $user, Flow $flow): bool
     {
+        return $user->hasAssignmentOn($flow, RoleEnum::ADMIN) || $user->hasAssignmentOn($flow, RoleEnum::MANAGER);
+    }
+
+    public function manageFlow(User $user, Flow $flow): bool
+    {
 
         return $user->hasAssignmentOn($flow, RoleEnum::ADMIN) || $user->hasAssignmentOn($flow, RoleEnum::MANAGER);
     }

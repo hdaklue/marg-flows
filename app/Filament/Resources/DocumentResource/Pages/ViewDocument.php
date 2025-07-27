@@ -2,21 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\PageResource\Pages;
+namespace App\Filament\Resources\DocumentResource\Pages;
 
-use App\Facades\PageManager;
-use App\Filament\Resources\PageResource;
+use App\Facades\DocumentManager;
+use App\Filament\Resources\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Computed;
 
+/**
+ * @property-read bool $canEdit
+ */
 final class ViewDocument extends ViewRecord
 {
-    protected static string $resource = PageResource::class;
+    protected static string $resource = DocumentResource::class;
 
-    protected static string $view = 'filament.resources.page-resource.pages.view';
+    protected static string $view = 'filament.resources.document-resource.pages.view';
 
     public ?array $data = [];
 
@@ -30,7 +33,7 @@ final class ViewDocument extends ViewRecord
 
     public function resolveRecord(int|string $key): Model
     {
-        return PageManager::getPage($key);
+        return DocumentManager::getDocument($key);
     }
 
     public function form(Form $form): Form

@@ -74,7 +74,6 @@ final class ManageMembers extends Component implements HasActions, HasForms
                     ->required(),
                 Select::make('role')
                     ->required()
-
                     ->options(function () {
                         if (! $this->roleable) {
                             return [];

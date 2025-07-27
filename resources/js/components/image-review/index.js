@@ -344,24 +344,28 @@ export default function designReviewApp() {
         // Touch navigation methods
         moveUp() {
             if (!this.isZoomed) return;
+            this.enableSmoothTransitions();
             const maxPanY = Math.max(0, (this.innerWrapperHeight - this.mainContainerHeight) / 2);
             this.panY = Math.min(maxPanY, this.panY + this.arrowKeyStep);
         },
 
         moveDown() {
             if (!this.isZoomed) return;
+            this.enableSmoothTransitions();
             const maxPanY = Math.max(0, (this.innerWrapperHeight - this.mainContainerHeight) / 2);
             this.panY = Math.max(-maxPanY, this.panY - this.arrowKeyStep);
         },
 
         moveLeft() {
             if (!this.isZoomed) return;
+            this.enableSmoothTransitions();
             const maxPanX = Math.max(0, (this.innerWrapperWidth - this.mainContainerWidth) / 2);
             this.panX = Math.min(maxPanX, this.panX + this.arrowKeyStep);
         },
 
         moveRight() {
             if (!this.isZoomed) return;
+            this.enableSmoothTransitions();
             const maxPanX = Math.max(0, (this.innerWrapperWidth - this.mainContainerWidth) / 2);
             this.panX = Math.max(-maxPanX, this.panX - this.arrowKeyStep);
         },
@@ -392,6 +396,9 @@ export default function designReviewApp() {
         // Mouse Events
         startSelection(event) {
             if (event.button !== 0) return;
+
+            // Disable transitions during interaction for responsiveness
+            this.disableSmoothTransitions();
 
             const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const x = event.clientX - rect.left;
@@ -443,6 +450,9 @@ export default function designReviewApp() {
             const y = event.clientY - rect.top;
             this.isDragging = false;
 
+            // Re-enable transitions after interaction
+            this.enableSmoothTransitions();
+
             if (this.isSelecting && this.selectionBox.width > 1 && this.selectionBox.height > 1) {
                 this.createAreaComment();
             } else if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
@@ -454,6 +464,9 @@ export default function designReviewApp() {
 
         // Touch Events
         handleTouchStart(event) {
+            // Disable transitions during touch interaction
+            this.disableSmoothTransitions();
+
             const touch = event.touches[0];
             const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const x = touch.clientX - rect.left;
@@ -525,6 +538,9 @@ export default function designReviewApp() {
                 clearTimeout(this.longPressTimer);
                 this.longPressTimer = null;
             }
+
+            // Re-enable transitions after touch interaction
+            this.enableSmoothTransitions();
 
             const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const touchDuration = Date.now() - this.touchStartTime;
@@ -710,11 +726,13 @@ export default function designReviewApp() {
 
         // Enhanced zoom methods using wrapper dimensions
         zoomIn(factor = 1.2) {
+            this.enableSmoothTransitions();
             const newZoom = Math.min(this.zoomLevel * factor, this.maxZoom);
             this.setZoom(newZoom);
         },
 
         zoomOut(factor = 1.2) {
+            this.enableSmoothTransitions();
             const newZoom = Math.max(this.zoomLevel / factor, this.minZoom);
             this.setZoom(newZoom);
         },
@@ -726,7 +744,70 @@ export default function designReviewApp() {
 
         setZoom(newZoom) {
             this.zoomLevel = newZoom;
-            this.updateImageDimensions();
+            this.updateImageDimensionsAndCenter();
+        },
+
+        centerImage() {
+            // Center the image within the viewport
+            if (this.innerWrapperWidth <= this.mainContainerWidth) {
+                this.panX = 0;
+            } else {
+                // Keep current pan position but constrain it
+                const maxPanX = Math.max(0, (this.innerWrapperWidth - this.mainContainerWidth) / 2);
+                this.panX = Math.max(-maxPanX, Math.min(maxPanX, this.panX));
+            }
+
+            if (this.innerWrapperHeight <= this.mainContainerHeight) {
+                this.panY = 0;
+            } else {
+                // Keep current pan position but constrain it
+                const maxPanY = Math.max(0, (this.innerWrapperHeight - this.mainContainerHeight) / 2);
+                this.panY = Math.max(-maxPanY, Math.min(maxPanY, this.panY));
+            }
+        },
+
+        enableSmoothTransitions() {
+            // Ultra smooth transitions with natural easing
+            if (this.$refs.innerWrapper) {
+                this.$refs.innerWrapper.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            }
+        },
+
+        disableSmoothTransitions() {
+            // Disable transitions for responsive interactions
+            if (this.$refs.innerWrapper) {
+                this.$refs.innerWrapper.style.transition = 'none';
+            }
+        },
+
+        updateImageDimensionsAndCenter() {
+            // Calculate new dimensions
+            const additionalPixels = (this.zoomLevel - 1) * this.currentZoomStep;
+            const scaleFactor = 1 + (additionalPixels / Math.max(this.mainContainerWidth, this.mainContainerHeight));
+            
+            // Update dimensions and centering simultaneously
+            if (this.mainContainerWidth > 0) {
+                this.innerWrapperWidth = this.mainContainerWidth * scaleFactor;
+                this.innerWrapperHeight = this.mainContainerHeight * scaleFactor;
+                
+                // Calculate centering at the same time
+                if (this.innerWrapperWidth <= this.mainContainerWidth) {
+                    this.panX = 0;
+                } else {
+                    const maxPanX = Math.max(0, (this.innerWrapperWidth - this.mainContainerWidth) / 2);
+                    this.panX = Math.max(-maxPanX, Math.min(maxPanX, this.panX));
+                }
+
+                if (this.innerWrapperHeight <= this.mainContainerHeight) {
+                    this.panY = 0;
+                } else {
+                    const maxPanY = Math.max(0, (this.innerWrapperHeight - this.mainContainerHeight) / 2);
+                    this.panY = Math.max(-maxPanY, Math.min(maxPanY, this.panY));
+                }
+            } else {
+                // Initial setup - call original method
+                this.updateImageDimensions();
+            }
         },
 
         updateImageDimensions() {

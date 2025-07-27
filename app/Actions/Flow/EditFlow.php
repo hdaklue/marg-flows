@@ -14,7 +14,6 @@ final class EditFlow
 
     public function handle(Flow $flow, string $title, string $description, Carbon $due_date)
     {
-
         $flow->update([
             'title' => $title,
             'description' => $description,

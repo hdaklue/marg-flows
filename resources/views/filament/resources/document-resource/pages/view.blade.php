@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     <div class="mx-auto w-full lg:w-4/5">
         {{ $this->form }}
-        <livewire:page.document :pageId="$this->record->getKey()" />
+        <livewire:document.document-component :pageId="$this->record->getKey()" />
     </div>
     <div>
     </div>

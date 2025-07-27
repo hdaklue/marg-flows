@@ -18,7 +18,7 @@ final class EnsureTenantIntegrity
      */
     public function handle($request, Closure $next)
     {
-        dd($request->route()->parameters());
+
         // Check route parameters for tenant access
         foreach ($request->route()->parameters() as $parameter) {
             if ($parameter instanceof BelongsToTenantContract) {

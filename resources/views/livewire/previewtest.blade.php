@@ -159,7 +159,7 @@
 
                     <!-- Inner Wrapper - Absolute positioned, centered, scales with zoom -->
                     <div x-ref="innerWrapper"
-                        style="position: absolute; left: 50%; top: 50%; background: transparent;"
+                        style="position: absolute; left: 50%; top: 50%; background: transparent; transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);"
                         :style="{
                             width: innerWrapperWidth > 0 ? innerWrapperWidth + 'px' : '400px',
                             height: innerWrapperHeight > 0 ? innerWrapperHeight + 'px' : '300px',

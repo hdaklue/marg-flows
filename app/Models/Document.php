@@ -29,38 +29,39 @@ use Illuminate\Support\Carbon;
  * @property string|array<array-key, mixed> $blocks
  * @property string $creator_id
  * @property string $tenant_id
- * @property string $pageable_type
- * @property string $pageable_id
+ * @property string $documentable_type
+ * @property string $documentable_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection<int, Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
  * @property-read User $creator
- * @property-read Model|Eloquent $pageable
+ * @property-read Model|Eloquent $documentable
+ * @property-read Flow $flow
  * @property-read Collection<int, ModelHasRole> $participants
  * @property-read int|null $participants_count
  * @property-read Collection<int, ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
  *
- * @method static \Database\Factories\PageFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page forParticipant(\App\Contracts\Role\AssignableEntity $member)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page whereBlocks($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page whereCreatorId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page wherePageableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page wherePageableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Page whereUpdatedAt($value)
+ * @method static \Database\Factories\DocumentFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document forParticipant(\App\Contracts\Role\AssignableEntity $member)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document whereBlocks($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document whereCreatorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document whereDocumentableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document whereDocumentableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Document whereUpdatedAt($value)
  *
  * @mixin \Eloquent
  */
-final class Page extends Model implements BelongsToTenantContract, HasStaticType, RoleableEntity, Sidenoteable
+final class Document extends Model implements BelongsToTenantContract, HasStaticType, RoleableEntity, Sidenoteable
 {
-    /** @use HasFactory<\Database\Factories\PageFactory> */
+    /** @use HasFactory<\Database\Factories\DocumentFactory> */
     use BelongsToTenant, HasFactory, HasSideNotes, HasStaticTypeTrait, HasUlids, LivesInBusinessDB, ManagesParticipants;
 
     protected $fillable = [
@@ -68,7 +69,7 @@ final class Page extends Model implements BelongsToTenantContract, HasStaticType
         'blocks',
     ];
 
-    public function pageable(): MorphTo
+    public function documentable(): MorphTo
     {
         return $this->morphTo();
     }
@@ -85,8 +86,8 @@ final class Page extends Model implements BelongsToTenantContract, HasStaticType
 
     // public function getTenant(): Tenant
     // {
-    //     if ($this->pageable instanceof BelongsToTenantContract) {
-    //         return $this->pageable->getTenant();
+    //     if ($this->Documentable instanceof BelongsToTenantContract) {
+    //         return $this->Documentable->getTenant();
     //     }
     //     throw new Exception("Can't resolve tenant of {static::class}");
     // }

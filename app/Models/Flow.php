@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Document\ManagesDocuments;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
-use App\Concerns\Page\ManagesPages;
 use App\Concerns\Progress\HasTimeProgress;
 use App\Concerns\Role\ManagesParticipants;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
+use App\Contracts\Document\Documentable;
 use App\Contracts\HasStaticType;
-use App\Contracts\Page\Pageable;
 use App\Contracts\Progress\TimeProgressable;
 use App\Contracts\Role\RoleableEntity;
 use App\Contracts\ScopedToTenant;
@@ -101,12 +101,12 @@ use Spatie\EloquentSortable\SortableTrait;
  *
  * @method static Builder<static>|Flow whereDescription($value)
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Page> $pages
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Document> $pages
  * @property-read int|null $pages_count
  *
  * @mixin \Eloquent
  */
-final class Flow extends Model implements BelongsToTenantContract, HasStages, HasStaticType, Pageable, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
+final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
 {
     use BelongsToTenant,
         HasFactory,
@@ -115,7 +115,7 @@ final class Flow extends Model implements BelongsToTenantContract, HasStages, Ha
         HasStaticTypeTrait ,
         HasTimeProgress,
         HasUlids,
-        ManagesPages,
+        ManagesDocuments,
         ManagesParticipants,
         SoftDeletes,
         SortableTrait;

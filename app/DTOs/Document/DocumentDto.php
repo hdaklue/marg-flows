@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\DTOs\Page;
+namespace App\DTOs\Document;
 
 use App\DTOs\User\UserDto;
 use Carbon\Carbon;
@@ -12,7 +12,7 @@ use WendellAdriel\ValidatedDTO\Casting\ObjectCast;
 use WendellAdriel\ValidatedDTO\Concerns\Wireable;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-final class PageDto extends ValidatedDTO
+final class DocumentDto extends ValidatedDTO
 {
     use Wireable;
 

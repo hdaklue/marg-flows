@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts\Page;
+namespace App\Contracts\Document;
 
 use App\Contracts\Role\RoleableEntity;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
-interface Pageable extends RoleableEntity
+interface Documentable extends RoleableEntity
 {
-    public function pages(): MorphMany;
+    public function documents(): MorphMany;
 
-    public function getPages(): Collection;
+    public function getDocuments(): Collection;
 
     public function getKey();
 

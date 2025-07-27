@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\FeedbackStatus;
+use App\Models\Document;
 use App\Models\Feedback;
-use App\Models\Page;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use App\ValueObjects\FeedbackMetadata;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Feedback>
  */
-class FeedbackFactory extends Factory
+final class FeedbackFactory extends Factory
 {
     protected $model = Feedback::class;
 
@@ -25,8 +24,8 @@ class FeedbackFactory extends Factory
             'creator_id' => User::factory(),
             'content' => $this->faker->paragraph(),
             'metadata' => $this->createDocumentBlockMetadata(),
-            'feedbackable_type' => Relation::getMorphAlias(Page::class),
-            'feedbackable_id' => fn() => Page::inRandomOrder()->first()?->id ?? Page::factory()->create()->id,
+            'feedbackable_type' => Relation::getMorphAlias(Document::class),
+            'feedbackable_id' => fn () => Document::inRandomOrder()->first()?->id ?? Document::factory()->create()->id,
             'status' => $this->faker->randomElement(FeedbackStatus::cases()),
             'resolution' => null,
             'resolved_by' => null,
@@ -106,10 +105,10 @@ class FeedbackFactory extends Factory
         ]);
     }
 
-    public function forPage(Page $page): static
+    public function forPage(Document $page): static
     {
         return $this->state(fn (array $attributes) => [
-            'feedbackable_type' => Relation::getMorphAlias(Page::class),
+            'feedbackable_type' => Relation::getMorphAlias(Document::class),
             'feedbackable_id' => $page->id,
         ]);
     }
@@ -238,7 +237,7 @@ class FeedbackFactory extends Factory
     {
         $minutes = (int) ($seconds / 60);
         $remainingSeconds = $seconds % 60;
-        
+
         return sprintf('%02d:%05.2f', $minutes, $remainingSeconds);
     }
 }

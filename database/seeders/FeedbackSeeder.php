@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\Document;
 use App\Models\Feedback;
-use App\Models\Page;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class FeedbackSeeder extends Seeder
+final class FeedbackSeeder extends Seeder
 {
     public function run(): void
     {
         // Get existing users and pages for realistic relationships
         $users = User::limit(10)->get();
-        $pages = Page::limit(5)->get();
+        $pages = Document::limit(5)->get();
 
         if ($users->isEmpty() || $pages->isEmpty()) {
             $this->command->warn('No users or pages found. Please run UserSeeder and PageSeeder first.');
+
             return;
         }
 
@@ -27,7 +28,7 @@ class FeedbackSeeder extends Seeder
         foreach ($pages as $page) {
             // Create document block feedbacks for each page
             $this->createDocumentFeedbacks($page, $users);
-            
+
             // Create some media feedbacks (if applicable)
             $this->createMediaFeedbacks($page, $users);
         }
@@ -35,7 +36,7 @@ class FeedbackSeeder extends Seeder
         $this->command->info('Feedback seeding completed!');
     }
 
-    private function createDocumentFeedbacks(Page $page, $users): void
+    private function createDocumentFeedbacks(Document $page, $users): void
     {
         // Create various document block feedbacks
         $feedbackTypes = [
@@ -48,7 +49,7 @@ class FeedbackSeeder extends Seeder
 
         foreach ($feedbackTypes as $index => $feedbackData) {
             $creator = $users->random();
-            
+
             $feedback = Feedback::factory()
                 ->documentBlock()
                 ->forPage($page)
@@ -64,7 +65,7 @@ class FeedbackSeeder extends Seeder
                 $feedback->update([
                     'resolved_by' => $resolver->id,
                     'resolved_at' => now()->subDays(rand(1, 7)),
-                    'resolution' => $feedbackData['status'] === 'resolved' 
+                    'resolution' => $feedbackData['status'] === 'resolved'
                         ? 'Fixed the issue as requested.'
                         : 'This change is not needed at this time.',
                 ]);
@@ -81,7 +82,7 @@ class FeedbackSeeder extends Seeder
             ]);
     }
 
-    private function createMediaFeedbacks(Page $page, $users): void
+    private function createMediaFeedbacks(Document $page, $users): void
     {
         // Create some audio region feedbacks
         Feedback::factory()

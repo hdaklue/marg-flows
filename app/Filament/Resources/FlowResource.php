@@ -7,7 +7,8 @@ namespace App\Filament\Resources;
 use App\Enums\FlowStatus;
 use App\Filament\Pages\ViewFlow;
 use App\Filament\Resources\FlowResource\Pages;
-use App\Filament\Resources\FlowResource\Pages\FlowPages;
+use App\Filament\Resources\FlowResource\Pages\CreateDocument;
+use App\Filament\Resources\FlowResource\Pages\FlowDocuments;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
 use App\Tables\Columns\Progress;
@@ -126,7 +127,8 @@ final class FlowResource extends Resource
         return [
             'index' => Pages\ListFlows::route('/'),
             'create' => Pages\CreateFlow::route('/create'),
-            'pages' => FlowPages::route('/{record}/ps'),
+            'pages' => FlowDocuments::route('/{record}/ps'),
+            'createDocument' => CreateDocument::route('{flow}/p/c'),
         ];
     }
 }

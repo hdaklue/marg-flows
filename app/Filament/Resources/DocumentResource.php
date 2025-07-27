@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PageResource\Pages;
-use App\Filament\Resources\PageResource\Pages\ViewDocument;
-use App\Models\Page;
+use App\Filament\Resources\DocumentResource\Pages;
+use App\Filament\Resources\DocumentResource\Pages\ViewDocument;
+use App\Models\Document;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-final class PageResource extends Resource
+final class DocumentResource extends Resource
 {
-    protected static ?string $model = Page::class;
+    protected static ?string $model = Document::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -46,7 +46,7 @@ final class PageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPages::route('/'),
+            'index' => Pages\ListDocuments::route('/'),
             'view' => ViewDocument::route('/{record}'),
             // 'edit' => Pages\EditPage::route('/{record}/edit'),
         ];

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\DTOs\Page;
+namespace App\DTOs\Document;
 
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-final class CreatePageDto extends ValidatedDTO
+final class CreateDocumentDto extends ValidatedDTO
 {
     public string $name;
 

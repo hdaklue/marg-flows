@@ -7,7 +7,6 @@ namespace Database\Seeders;
 use App\Enums\Account\AccountType;
 use App\Enums\Role\RoleEnum;
 use App\Models\Flow;
-use App\Models\Page;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
 use Exception;

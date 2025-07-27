@@ -142,6 +142,9 @@ final class Previewtest extends Component
         $this->comments[] = $comment;
 
         // Close modal
+        // Store design_id before resetting pendingComment
+        $designId = $this->pendingComment['designId'] ?? null;
+        
         $this->showCommentModal = false;
         $this->pendingComment = [];
         $this->commentText = '';
@@ -149,8 +152,7 @@ final class Previewtest extends Component
         // Log the comment data for debugging
         Log::info('New comment created', [
             'comment' => $comment,
-            'pending_comment' => $this->pendingComment,
-            'design_id' => $this->pendingComment['designId'] ?? null,
+            'design_id' => $designId,
         ]);
 
         // Return sample response data

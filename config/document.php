@@ -5,34 +5,34 @@ declare(strict_types=1);
 return [
     /*
     |--------------------------------------------------------------------------
-    | Page Caching
+    | DOCUMENT Caching
     |--------------------------------------------------------------------------
     |
-    | This option controls whether the page management system should use
-    | caching to improve performance. When enabled, pages and page lists
+    | This option controls whether the DOCUMENT management system should use
+    | caching to improve performance. When enabled, DOCUMENTs and DOCUMENT lists
     | will be cached using content-based hashing for automatic invalidation.
     |
     */
 
-    'should_cache' => env('PAGE_CACHE_ENABLED', true),
+    'should_cache' => env('DOCUMENT_CACHE_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------
     | Cache TTL Settings
     |--------------------------------------------------------------------------
     |
-    | These options control how long different types of page data should
-    | be cached. Individual pages use content-based caching, so they can
+    | These options control how long different types of DOCUMENT data should
+    | be cached. Individual DOCUMENTs use content-based caching, so they can
     | have longer TTL values since they auto-invalidate on changes.
     |
     */
 
     'cache_ttl' => [
-        'page' => env('PAGE_CACHE_TTL_PAGE', 60 * 24), // 1 day for individual pages
-        'list' => env('PAGE_CACHE_TTL_LIST', 60), // 1 hour for page lists
-        'recent' => env('PAGE_CACHE_TTL_RECENT', 60), // 1 hour for recent pages
-        'creator' => env('PAGE_CACHE_TTL_CREATOR', 60), // 1 hour for creator pages
-        'user_pages' => env('PAGE_CACHE_TTL_USER_PAGES', 60 * 24), // 1 day for user-assigned pages
+        'document' => env('DOCUMENT_CACHE_TTL_DOCUMENT', 60 * 24), // 1 day for individual DOCUMENTs
+        'list' => env('DOCUMENT_CACHE_TTL_LIST', 60), // 1 hour for DOCUMENT lists
+        'recent' => env('DOCUMENT_CACHE_TTL_RECENT', 60), // 1 hour for recent DOCUMENTs
+        'creator' => env('DOCUMENT_CACHE_TTL_CREATOR', 60), // 1 hour for creator DOCUMENTs
+        'user_DOCUMENTs' => env('DOCUMENT_CACHE_TTL_USER_DOCUMENTS', 60 * 24), // 1 day for user-assigned DOCUMENTs
     ],
 
     /*
@@ -40,7 +40,7 @@ return [
     | EditorJS Configuration
     |--------------------------------------------------------------------------
     |
-    | Default configuration for EditorJS content blocks when creating new pages.
+    | Default configuration for EditorJS content blocks when creating new DOCUMENTs.
     |
     */
 
@@ -61,7 +61,7 @@ return [
     | Search Configuration
     |--------------------------------------------------------------------------
     |
-    | Configuration for page search functionality.
+    | Configuration for DOCUMENT search functionality.
     |
     */
 

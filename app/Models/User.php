@@ -320,6 +320,38 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
     }
 
     /**
+     * Check if user has any of the specified roles.
+     */
+    public function hasRole(array|string $roles): bool
+    {
+        $rolesToCheck = is_array($roles) ? $roles : [$roles];
+        
+        foreach ($rolesToCheck as $role) {
+            if ($this->hasAssignmentOn($this->activeTenant(), $role)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if user can view a flow.
+     */
+    public function canViewFlow(Flow $flow): bool
+    {
+        return $this->isAssignedTo($flow);
+    }
+
+    /**
+     * Check if user has a specific role on a flow.
+     */
+    public function hasRoleOnFlow(Flow $flow, string $role): bool
+    {
+        return $this->hasAssignmentOn($flow, $role);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

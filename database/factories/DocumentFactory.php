@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Page>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Document>
  */
-class PageFactory extends Factory
+final class DocumentFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -89,13 +91,13 @@ class PageFactory extends Factory
         for ($row = 0; $row < $rows; $row++) {
             $rowData = [];
             for ($col = 0; $col < $cols; $col++) {
-                $rowData[] = $row === 0 
+                $rowData[] = $row === 0
                     ? fake()->word() // Headers
                     : fake()->words(rand(1, 3), true); // Content
             }
             $content[] = $rowData;
         }
 
-        return $content;  
+        return $content;
     }
 }

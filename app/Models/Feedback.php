@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property string $creator_id
+ * @property FeedbackStatus $status
+ * @property FeedbackMetadata $metadata
+ */
 final class Feedback extends Model
 {
     use HasFactory, HasUlids, LivesInBusinessDB;
@@ -47,12 +52,12 @@ final class Feedback extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'creator_id')->setConnection(config('database.default'));
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
     public function resolver(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'resolved_by')->setConnection(config('database.default'));
+        return $this->belongsTo(User::class, 'resolved_by');
     }
 
     // Scopes

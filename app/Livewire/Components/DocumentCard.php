@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Components;
 
-use App\Filament\Resources\PageResource;
-use App\Models\Page;
+use App\Filament\Resources\DocumentResource;
+use App\Models\Document;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -17,7 +17,7 @@ use Livewire\Component;
  * @property-read array $participantsArray
  * @property-read array $userPermissions
  */
-final class PageCard extends Component
+final class DocumentCard extends Component
 {
     #[Locked]
     public string $pageId;
@@ -25,7 +25,7 @@ final class PageCard extends Component
     #[Locked]
     public string $createdAt;
 
-    public Page $page;
+    public Document $page;
 
     public string $name;
 
@@ -36,7 +36,7 @@ final class PageCard extends Component
 
     public function mount(string $pageId, string $pageableId): void
     {
-        $this->page = Page::where('id', $pageId)->firstOrFail();
+        $this->page = Document::where('id', $pageId)->firstOrFail();
         $this->createdAt = toUserDateTime($this->page->created_at, filamentUser());
         $this->updatedAt = toUserDateTime($this->page->updated_at, filamentUser());
 
@@ -82,12 +82,12 @@ final class PageCard extends Component
 
     public function openPage(): void
     {
-        $this->redirect(PageResource::getUrl('view', ['record' => $this->page->getKey()]));
+        $this->redirect(DocumentResource::getUrl('view', ['record' => $this->page->getKey()]));
         $this->dispatch('open-page', $this->pageId);
     }
 
     public function render()
     {
-        return view('livewire.components.page-card');
+        return view('livewire.components.document-card');
     }
 }

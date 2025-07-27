@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\FlowResource\Pages;
 
-use App\Facades\PageManager;
+use App\Facades\DocumentManager;
 use App\Filament\Resources\FlowResource;
-use App\Filament\Resources\PageResource;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
 use App\Models\Flow;
@@ -26,13 +25,13 @@ use Livewire\Attributes\Locked;
  * @property-read Form $form
  * @property-read Flow $flow
  */
-final class FlowPages extends Page implements HasForms
+final class FlowDocuments extends Page implements HasForms
 {
     use InteractsWithForms;
 
     protected static string $resource = FlowResource::class;
 
-    protected static string $view = 'filament.resources.flow-resource.pages.flow-pages';
+    protected static string $view = 'filament.resources.flow-resource.pages.flow-documents';
 
     #[Locked]
     public Flow $flow;
@@ -51,7 +50,7 @@ final class FlowPages extends Page implements HasForms
     {
         return [
             Action::make('Create')
-                ->url(PageResource::getUrl('create', ['pageable' => $this->flow->getKey()]))
+                ->url(FlowResource::getUrl('createDocument', ['flow' => $this->flow->getKey()]))
                 // ->form([
                 //     PlaceholderInput::make('title')
                 //         ->placeholder('Title'),
@@ -70,7 +69,7 @@ final class FlowPages extends Page implements HasForms
     #[Computed]
     public function pages(): Collection
     {
-        return PageManager::getPagesForUser($this->flow, filamentUser());
+        return DocumentManager::getDocumentsForUser($this->flow, filamentUser());
     }
 
     public function getTitle(): string|Htmlable // @phpstan-ignore-line

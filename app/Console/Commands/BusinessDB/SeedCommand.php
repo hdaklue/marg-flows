@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\BusinessDB;
 
-use Database\Seeders\BusinessDB\PageSeeder;
+use Database\Seeders\BusinessDB\DocumentSeeder;
 use Database\Seeders\FeedbackSeeder;
 use Illuminate\Console\Command;
 
-class SeedCommand extends Command
+final class SeedCommand extends Command
 {
-    protected $signature = 'business-db:seed 
+    protected $signature = 'business-db:seed
                             {--class= : The class name of the seeder}
                             {--force : Force the operation to run when in production}';
 
@@ -27,19 +27,20 @@ class SeedCommand extends Command
             $this->runSeeder($class);
         } else {
             // Run all business database seeders in order
-            $this->runSeeder(PageSeeder::class);
+            $this->runSeeder(DocumentSeeder::class);
             $this->runSeeder(FeedbackSeeder::class);
         }
 
         $this->info('✅ Business database seeding completed!');
+
         return 0;
     }
 
     private function runSeeder(string $class): void
     {
         $this->info("Running {$class}...");
-        
-        $seeder = new $class();
+
+        $seeder = new $class;
         $seeder->setCommand($this);
         $seeder->run();
     }

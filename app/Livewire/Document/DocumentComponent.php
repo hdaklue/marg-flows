@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Page;
+namespace App\Livewire\Document;
 
-use App\Models\Page;
+use App\Models\Document;
 use Exception;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -13,17 +13,17 @@ use Log;
 /**
  * @property-read string  $updatedAtString
  */
-final class Document extends Component
+final class DocumentComponent extends Component
 {
     public $canEdit = true;
 
-    public Page $page;
+    public Document $page;
 
     public string $content;
 
     public function mount(string $pageId, $canEdit = true)
     {
-        $this->page = Page::where('id', $pageId)->firstOrFail();
+        $this->page = Document::where('id', $pageId)->firstOrFail();
         $this->content = is_array($this->page->blocks)
             ? json_encode($this->page->blocks)
             : $this->page->blocks;
@@ -69,6 +69,6 @@ final class Document extends Component
 
     public function render()
     {
-        return view('livewire.page.document');
+        return view('livewire.page.document-component');
     }
 }
