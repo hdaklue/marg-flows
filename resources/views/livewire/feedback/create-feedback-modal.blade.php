@@ -56,12 +56,13 @@ window.addEventListener('resize', () => { isDesktop = window.innerWidth >= 768 }
                         <label x-show="!isDesktop" for="comment-text" class="sr-only">Comment text</label>
                         <div :class="isDesktop ? 'mt-1' : ''">
                             <x-mentionable-text model="commentText" :mentionables="$mentionables ?? []" :hashables="$hashables ?? []"
-                                hint="Use @ to mention people and # for hashtags" min-height="30px" id="comment-text"
-                                ::class="isDesktop ? '' :
+                                hint="Use @ to mention people and # to embed documents" min-height="30px"
+                                id="comment-text" ::class="isDesktop ? '' :
                                     'w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base transition-colors focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-sky-400'" />
 
-                            <!-- Voice Note Component -->
-                            <div class="w-full mt-3">
+                            <!-- Media Components -->
+                            <div class="w-full mt-3 space-y-3">
+                                <!-- Voice Notes -->
                                 <livewire:reusable.voice-note-component />
                             </div>
                         </div>

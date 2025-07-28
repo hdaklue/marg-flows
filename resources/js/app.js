@@ -11,6 +11,7 @@ import audioPlayer from './components/audio-player';
 import documentEditor from './components/document';
 import mentionableText from './components/mentionable';
 
+import videoRecorder from './components/video-recorder';
 import recorder from './components/voice-recorder';
 
 import anchor from "@alpinejs/anchor";
@@ -26,6 +27,7 @@ Alpine.data('document', documentEditor);
 Alpine.data('mentionableText', mentionableText);
 Alpine.data('recorder', recorder);
 Alpine.data('audioPlayer', audioPlayer);
+Alpine.data('videoRecorder', videoRecorder);
 Alpine.plugin(Autosize);
 Alpine.plugin(Tooltip);
 Alpine.plugin(sort);

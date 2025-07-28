@@ -26,11 +26,14 @@
         "editorjs-alert": "^1.1.4",
         "howler": "^2.2.4",
         "laravel-vite-plugin": "^1.2.0",
+        "recordrtc": "^5.6.2",
         "tailwind-scrollbar-hide": "^4.0.0",
         "tributejs": "^5.1.3",
         "video.js": "^8.23.3",
+        "videojs-record": "^4.8.0",
         "vite": "^6.0.11",
-        "wavesurfer.js": "^7.10.0"
+        "wavesurfer.js": "^7.10.1",
+        "webrtc-adapter": "^9.0.3"
     },
     "devDependencies": {
         "@editorjs/warning": "^1.4.1",

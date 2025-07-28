@@ -78,3 +78,9 @@ compile({
     entryPoints: ['./resources/js/components/audio-player/index.js'],
     outfile: './resources/js/dist/components/audio-player.js',
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/components/video-recorder/index.js'],
+    outfile: './resources/js/dist/components/video-recorder.js',
+})

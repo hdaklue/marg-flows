@@ -15,7 +15,8 @@ export default defineConfig({
                 'resources/css/components/document/document.css',
                 'resources/css/audio-annotation.css',
                 'resources/css/components/mentionable-text.css',
-                'resources/css/components/voice-recorder.css'
+                'resources/css/components/voice-recorder.css',
+                'resources/css/components/video-recorder.css',
             ],
             refresh: [
                 ...refreshPaths,

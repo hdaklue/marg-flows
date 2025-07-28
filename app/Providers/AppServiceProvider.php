@@ -67,12 +67,15 @@ final class AppServiceProvider extends ServiceProvider
             AlpineComponent::make('documentEditor', __DIR__ . '/../../resources/js/dist/components/document.js'),
             AlpineComponent::make('mentionableText', __DIR__ . '/../../resources/js/dist/components/mentionable.js'),
             AlpineComponent::make('voiceRecorder', __DIR__ . '/../../resources/js/dist/components/voice-recorder.js'),
+            AlpineComponent::make('videoRecorder', __DIR__ . '/../../resources/js/dist/components/video-recorder.js'),
             AlpineComponent::make('audioPlayer', __DIR__ . '/../../resources/js/dist/components/audio-player.js'),
             Css::make('chunkedFileUploadCss', __DIR__ . '/../../resources/css/components/chunked-file-upload.css')
                 ->loadedOnRequest(),
             Css::make('mentionableTextCss', __DIR__ . '/../../resources/css/components/mentionable-text.css')
                 ->loadedOnRequest(),
             Css::make('voiceRecorderCss', __DIR__ . '/../../resources/css/components/voice-recorder.css')
+                ->loadedOnRequest(),
+            Css::make('videoRecorderCss', __DIR__ . '/../../resources/css/components/video-recorder.css')
                 ->loadedOnRequest(),
 
             // Js::make('editorJs', __DIR__ . '/../../public/build/assets/index-C9DEfZiz.js')->loadedOnRequest(),

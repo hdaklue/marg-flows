@@ -17,7 +17,7 @@ final class CreateDocumentDto extends ValidatedDTO
         return [
             'time' => now()->timestamp,
             'blocks' => $this->blocks,
-            'version' => config('page.editorjs.version', '2.28.2'),
+            'version' => config('document.editorjs.version', '2.28.2'),
         ];
     }
 
@@ -37,7 +37,7 @@ final class CreateDocumentDto extends ValidatedDTO
     protected function defaults(): array
     {
         return [
-            'blocks' => config('page.editorjs.default_blocks', []),
+            'blocks' => config('document.editorjs.default_blocks', []),
         ];
     }
 }

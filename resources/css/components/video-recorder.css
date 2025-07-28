@@ -1,0 +1,366 @@
+/* VideoJS Record Font Icons */
+@font-face {
+  font-family: videojs-record;
+  src: url(data:application/font-woff;charset=utf-8;base64,d09GRgABAAAAAAW0AAsAAAAACewAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABHU1VCAAABCAAAADsAAABUIIslek9TLzIAAAFEAAAAPAAAAFY6l0dQY21hcAAAAYAAAAByAAAB4PJQ5/VnbHlmAAAB9AAAAYYAAALMPcs3OGhlYWQAAAN8AAAALQAAADYQhba0aGhlYQAAA6wAAAAWAAAAJABhADtobXR4AAADxAAAAA4AAAAoAbAAAGxvY2EAAAPUAAAAFgAAABYELgNEbWF4cAAAA+wAAAAdAAAAIAEXADxuYW1lAAAEDAAAATYAAAJemUJQLnBvc3QAAAVEAAAAcAAAALoqjqNHeJxjYGRgYOBiMGCwY2BycfMJYeDLSSzJY5BiYGGAAJA8MpsxJzM9kYEDxgPKsYBpDiBmg4gCACY7BUgAeJxjYGTQZpzAwMrAwCDHoAgk2aC0OAMTAw8DkGBlZsAKAtJcUxgcPjJ+5GQwAHJZwCQDAyOIAADEhgVmeJztkcENw0AIBOd8+GyilOKXC/IrZaTpq8BhIWUYaXbFCvEAYAV6cAQG7UNDdUXaMu+8MjfOnDHl0+87tEmjt9QlZi02DjZ2PKLBU+/U779zXa3IOy4F8l7oH9MKXXauhX41R4F8K5DvBXIv8B9LThoJAAB4nG1Sf0+DMBC9a4+WEJxTgRGdywKEzTmngXX7w+j3/1i+g/0wxhZer23u9d1ryZC2N9pQTe9Ex3pV+7pyz5wVnxx2HPqs6A5A5/O+O3zxvvWZq1oEh67I105ScQZtIk4iFwEnOjNi8LWCoUTEXmwUWfE8Lkw1JVbA6Txo2FBDD1AQ9u0rnxXoibNQMZfMA8RPXqNMwccFjfpb2lJKS2SPEsf0YzbhCiXU2YL7vA/dN4fSiLYbC63WWmcFfyYmxbqCs5Ex2HHiPSYn/g96gbb5hf8ssK9BuwqV84djmK21nuVQ2UehriRxakymCwARL8YmRjxdan5DT8FaTRgaoW+/4zJKoihJFLanEXDNadAtcvq8TsuyKUlnA9eWYmh8wZ7emboQrnd5Fr7ysGT/zd2CYc89qlcT3EW6E/UEKwrlYJG9Gy9tvMrFaQ9A57Pf6RXRA830BeX98c+pvg59O51KoxwjNFUKT+YaA5ZzZRm93uEl3A4v4R+WzW+KzZXgsSD6Act6LFcAAHicY2BkYGAA4gm5SzLj+W2+MnAzGABFGG7M3rMWmQaK6gJJDgYmEAcANXsKBgAAAHicY2BkYGAwYGBAIhkZUAEXAA5yAJ0AAHicY2AAAgPCGAAgOAGxAAAAAAAAAEIAYACQALwA1gDiASABRgFmAAB4nGNgZGBg4GIwYGBmAAEmMI8LSP4H8xkADk0BVAAAAHicfZA/asMwGMWf8680hlIo7ZRBUOhSYicZQ+cEOmbI7tiyY2NbRlYCuUEP0hP0EB17kJ6iL6qWZLAE0u+9732fQADu8Q0P5+Xhzp7n1cMN1T/3SY+OB+Rnx0P4mDse0X9zPMYr3h37eMCBE7zBLZ0JPhz3mP903Kf/5XhA/nE8xBN+HY8w8eB4jK03cezjxdPHPJGqaKdaxkonG5kdyujKvFRbqdtc1WIezC4La1lLHRmZiN1JtMdsYUwqUq0qsVK1kWWpRKNVIWMT7I1plmGYOj+IVYUjciSQUCjQYgpNjqk03Q0541+UiKi7kl21LVnTzalrCP5/gFlnx5pc264IhnfCrh1OPFv2ZVjQNUipU2YUKtLKTj+nS25Fp7G1ws41fHNvuxosEXKnV/nAvl79AXudcPYAAHicfctLDsIwDARQT/mUJt3DJXIoK7HULIotN+35QS1ihZjVG42GOvqfgA4nnHHBFT1uGBAQquctmfgctlpED/Ja6sG4ZBd57h5dsnpJS2Nv8VvURpu0aco8i/PDam6rS6rv14f74/5zUCN6AYpyMIA=) format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* VideoJS Record Icons */
+.vjs-icon-av-perm { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-av-perm:before { content: "\f101"; }
+.vjs-icon-sv-perm { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-sv-perm:before { content: "\f104"; }
+.vjs-icon-video-perm { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-video-perm:before { content: "\f102"; }
+.vjs-icon-audio-perm { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-audio-perm:before { content: "\f103"; }
+.vjs-icon-screen-perm { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-screen-perm:before { content: "\f104"; }
+.vjs-icon-record-start { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-record-start:before { content: "\f105"; }
+.vjs-icon-record-stop { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-record-stop:before { content: "\f106"; }
+.vjs-icon-photo-camera { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-photo-camera:before { content: "\f107"; }
+.vjs-icon-picture-in-picture-start { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-picture-in-picture-start:before { content: "\f108"; }
+.vjs-icon-picture-in-picture-stop { font-family: videojs-record; font-weight: normal; font-style: normal; }
+.vjs-icon-picture-in-picture-stop:before { content: "\f109"; }
+
+/* Video Recorder Component Styles */
+.video-recorder {
+    @apply relative;
+    /* Prevent video recorder from interfering with region selection */
+    contain: layout style;
+    isolation: isolate;
+    /* Ensure video recorder stays below region selection overlay */
+    z-index: auto;
+}
+
+/* VideoJS player isolation to prevent interference with region selection */
+.video-js {
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
+    transform: translateZ(0);
+    will-change: auto;
+    max-width: 100%;
+    height: auto;
+}
+
+/* General plugin style - themed for our design */
+.vjs-record.video-js .vjs-control.vjs-fullscreen-control {
+    position: absolute;
+    right: 0;
+}
+
+.vjs-record .vjs-using-native-controls .vjs-control-bar {
+    display: flex !important;
+}
+
+.vjs-record.video-js .vjs-tech {
+    -webkit-perspective: 1000;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+/* Handle responsive / fluid view */
+.vjs-record.vjs-fluid wave.vjs-wavedisplay,
+.vjs-record.vjs-fluid .vjs-record-canvas > canvas:nth-child(1),
+.vjs-record.vjs-fluid .vjs-animation-display > img:nth-child(1) {
+    top: 0;
+    position: absolute !important;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: 100%;
+}
+
+/* Device Button (large centered button at startup) - themed */
+.vjs-record .vjs-device-button.vjs-control {
+    font-size: 3em;
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    width: 4em;
+    height: 2.8em;
+    margin-top: -1.8em;
+    margin-left: -2.1em;
+    display: block;
+    cursor: pointer;
+    opacity: 1;
+    transition: all 0.4s;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 0.8em;
+    /* Themed background */
+    @apply bg-zinc-800/70 dark:bg-zinc-900/80;
+    @apply shadow-lg shadow-zinc-900/25;
+    @apply hover:bg-zinc-700/80 dark:hover:bg-zinc-800/90;
+}
+
+.vjs-record .vjs-error .vjs-device-button {
+    display: none;
+}
+
+.vjs-record button.vjs-device-button.vjs-control.vjs-icon-av-perm:before,
+.vjs-record button.vjs-device-button.vjs-control.vjs-icon-sv-perm:before,
+.vjs-record button.vjs-device-button.vjs-control.vjs-icon-audio-perm:before,
+.vjs-record button.vjs-device-button.vjs-control.vjs-icon-video-perm:before,
+.vjs-record button.vjs-device-button.vjs-control.vjs-icon-screen-perm:before {
+    font-size: 2.4em;
+    @apply text-white;
+}
+
+/* Record Toggle (start/stop recording button in controlbar) - themed */
+.vjs-record .vjs-record-button.vjs-control {
+    cursor: pointer;
+    @apply text-white hover:text-zinc-200;
+    @apply bg-green-500 hover:bg-green-600;
+    @apply rounded-lg px-3 py-1 mx-1;
+    transition: all 0.2s ease;
+}
+
+.vjs-record .vjs-error .vjs-record-button {
+    display: none;
+}
+
+.vjs-record .vjs-record-button.vjs-control.vjs-icon-record-start:before {
+    font-size: 1.4em;
+    line-height: 2.2em;
+}
+
+.vjs-record .vjs-record-button.vjs-control.vjs-icon-record-stop:before {
+    font-size: 2.2em;
+    line-height: 1.4em;
+}
+
+/* When recording, make button red */
+.vjs-record .vjs-record-button.vjs-control.vjs-icon-record-stop {
+    @apply bg-red-500 hover:bg-red-600;
+}
+
+.vjs-record .vjs-play-control.vjs-control {
+    cursor: pointer;
+    @apply text-white hover:text-zinc-200;
+}
+
+/* Camera Button (snapshot try/retry) - themed */
+.vjs-record .vjs-camera-button.vjs-control {
+    cursor: pointer;
+    @apply text-white hover:text-zinc-200;
+    @apply bg-blue-500 hover:bg-blue-600;
+    @apply rounded-lg px-3 py-1 mx-1;
+    transition: all 0.2s ease;
+}
+
+.vjs-record .vjs-error .vjs-camera-button {
+    display: none;
+}
+
+.vjs-record .vjs-camera-button.vjs-control.vjs-icon-photo-camera:before {
+    font-size: 2em;
+    line-height: 1.4em;
+}
+
+.vjs-record .vjs-camera-button.vjs-control.vjs-icon-replay:before {
+    font-size: 2.2em;
+    line-height: 1.4em;
+}
+
+/* Record Indicator (dot in top-right corner visible when recording) - themed */
+.vjs-record.video-js .vjs-control.vjs-record-indicator.vjs-hidden {
+    display: block !important;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(1em) rotateX(-90deg) scale(0.9);
+    transition: all 0.5s, transform 0.5s 0.25s;
+}
+
+.vjs-record.video-js .vjs-control.vjs-record-indicator {
+    width: 0.8em;
+    height: 0.8em;
+    @apply bg-red-500;
+    pointer-events: none;
+    line-height: 1.1em;
+    border-radius: 50%;
+    right: 2.5ex;
+    top: 2ex;
+    position: absolute;
+    opacity: 1;
+    transform: rotateX(0) scale(1.3);
+    transition: all 0.5s, transform 0.2s 0.1s;
+}
+
+.vjs-record.video-js .vjs-control.vjs-record-indicator:before {
+    content: attr(data-label);
+    @apply text-white;
+    position: absolute;
+    pointer-events: none;
+    left: -2.7em;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    animation-name: pulsetext;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+    top: -0.1em;
+    font-size: 0.8em;
+    opacity: 1;
+    transition: opacity 0.5s 0.2s;
+}
+
+.vjs-record.video-js .vjs-control.vjs-record-indicator:after {
+    content: "";
+    display: block;
+    pointer-events: none;
+    height: calc(0.8em - 4px);
+    width: calc(0.8em - 4px);
+    @apply border-2 border-red-500;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transform-origin: center;
+    animation-name: pulse;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-delay: 0.25s;
+}
+
+@keyframes pulsetext {
+    from { opacity: 0.75; }
+    25% { opacity: 0.5; }
+    50% { opacity: 0.75; }
+    75% { opacity: 0.5; }
+    to { opacity: 0.75; }
+}
+
+@keyframes pulse {
+    from {
+        opacity: 1;
+        transform: scale(1.6);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(2.5);
+    }
+    to {
+        opacity: 0;
+        transform: scale(3.5);
+    }
+}
+
+/* Picture-In-Picture Toggle (button in controlbar) - themed */
+.vjs-record .vjs-pip-button.vjs-control {
+    cursor: pointer;
+    @apply text-white hover:text-zinc-200;
+    @apply bg-zinc-600 hover:bg-zinc-700;
+    @apply rounded-lg px-3 py-1 mx-1;
+    transition: all 0.2s ease;
+}
+
+.vjs-record .vjs-error .vjs-pip-button {
+    display: none;
+}
+
+.vjs-record .vjs-pip-button.vjs-control.vjs-icon-picture-in-picture-start:before {
+    font-size: 1.4em;
+    line-height: 2.2em;
+}
+
+.vjs-record .vjs-pip-button.vjs-control.vjs-icon-picture-in-picture-stop:before {
+    font-size: 1.4em;
+    line-height: 2.2em;
+}
+
+/* Control bar theming */
+.video-js .vjs-control-bar {
+    @apply bg-zinc-900/80 dark:bg-zinc-800/90;
+    backdrop-filter: blur(4px);
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+}
+
+.video-js .vjs-button {
+    @apply text-white hover:text-zinc-200;
+}
+
+.video-js .vjs-button:focus {
+    @apply outline-none ring-2 ring-green-500/50;
+}
+
+/* Play button theming */
+.video-js .vjs-big-play-button {
+    @apply bg-green-500/80 hover:bg-green-500 text-white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    line-height: 58px;
+    font-size: 24px;
+}
+
+.video-js .vjs-big-play-button:focus {
+    @apply ring-2 ring-green-500/50 outline-none;
+}
+
+/* Progress bar theming */
+.video-js .vjs-progress-control {
+    @apply bg-zinc-600/50;
+}
+
+.video-js .vjs-progress-holder {
+    @apply bg-zinc-600/50;
+    height: 4px;
+}
+
+.video-js .vjs-play-progress {
+    @apply bg-green-500;
+}
+
+.video-js .vjs-load-progress {
+    @apply bg-zinc-400/50;
+}
+
+/* Volume control theming */
+.video-js .vjs-volume-level {
+    @apply bg-green-500;
+}
+
+.video-js .vjs-volume-bar {
+    @apply bg-zinc-600/50;
+}
+
+/* Hide default VideoJS controls during recording setup */
+.vjs-record .vjs-play-control,
+.vjs-record .vjs-fullscreen-control {
+    display: none;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .video-recorder {
+        @apply text-sm;
+    }
+    
+    .vjs-record .vjs-control-bar {
+        padding: 6px 8px;
+    }
+    
+    .vjs-record .vjs-record-button {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .video-js .vjs-big-play-button {
+        width: 50px;
+        height: 50px;
+        line-height: 48px;
+        font-size: 20px;
+    }
+}

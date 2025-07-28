@@ -11,12 +11,14 @@
     onSubmit: {{ $onSubmitCallback }}
 })" x-load
     x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('voiceRecorder') }}"
-    x-init="init()" x-on:destroy="resetState()" x-on:comment-created.window="resetState()"
+    x-init="init()" 
+    x-on:destroy="destroy()" 
+    x-on:comment-created.window="deleteRecording()"
     class="{{ $class }} relative flex w-full items-center rounded-full border border-zinc-300 p-1 transition-all duration-300 dark:border-zinc-600"
     :class="{
         'border-red-500 shadow-lg shadow-red-500/20': isRecording
     }"
-    @voice-note:canceled.window="resetState()">
+    @voice-note:canceled.window="deleteRecording()">
     
     <!-- Upload Progress Bar (absolute positioned at top) -->
     <div x-show="isUploading" x-cloak 
@@ -28,41 +30,28 @@
              :style="`width: ${uploadProgress}%`"></div>
     </div>
 
-    <!-- Button (always visible, fixed position) -->
+    <!-- Record Button (always visible, fixed position) -->
     <div class="grow-0">
         <button
-            @click="!isRecording && !hasRecording ? handleMainButtonClick() : (isRecording ? handleMainButtonClick() : submitRecording())"
+            @click="isRecording ? stopRecording() : startRecording()"
             :disabled="!isSupported || isUploading"
-            class="flex items-center justify-center p-2 text-sm font-semibold text-white transition-all duration-300 rounded-full button-morph shrink-0"
+            class="flex items-center justify-center p-2 text-sm font-semibold text-white transition-all duration-300 rounded-full shrink-0"
             :class="{
-                'bg-sky-500 hover:bg-sky-600': !isRecording && !hasRecording && isSupported && !isUploading,
-                'bg-red-500 hover:bg-red-600 recording-pulse': isRecording,
-                'bg-green-600 hover:bg-green-700': hasRecording && !isRecording && !isUploading,
+                'bg-emerald-500 hover:bg-emerald-600': !isRecording && isSupported && !isUploading,
+                'bg-red-500 hover:bg-red-600 animate-pulse': isRecording,
                 'bg-amber-500': isUploading,
                 'bg-zinc-400 cursor-not-allowed': !isSupported || isUploading
             }">
 
-            <!-- Start Recording Icon (Microphone) -->
-            <svg x-show="!isRecording && !hasRecording && !isUploading" class="w-4 h-4" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v1a7 7 0 0 1-14 0v-1" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19v4" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 23h8" />
+            <!-- Start Recording Icon (Microphone - Hero Icon) -->
+            <svg x-show="!isRecording && !isUploading" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v4.5a3.75 3.75 0 1 1-7.5 0V4.5Z" />
+                <path d="M6 10.5a.75.75 0 0 1 .75.75 5.25 5.25 0 0 0 10.5 0 .75.75 0 0 1 1.5 0 6.751 6.751 0 0 1-6 6.709v2.291h3a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1 0-1.5h3v-2.291A6.751 6.751 0 0 1 5.25 11.25.75.75 0 0 1 6 10.5Z" />
             </svg>
 
-            <!-- Stop Recording Icon (Stop Square) -->
-            <svg x-show="isRecording && !isUploading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
-            </svg>
-
-            <!-- Upload Icon (Arrow Up) -->
-            <svg x-show="hasRecording && !isRecording && !isUploading" class="w-4 h-4" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7" />
+            <!-- Stop Recording Icon (Stop - Hero Icon) -->
+            <svg x-show="isRecording && !isUploading" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clip-rule="evenodd" />
             </svg>
 
             <!-- Upload Spinner -->
@@ -73,67 +62,46 @@
         </button>
     </div>
 
-
-    <!-- Content Container (waveform/player) -->
-    <div x-show="isRecording || hasRecording" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95" class="flex-1 mx-3" x-cloak>
+    <!-- Waveform Container (recording or playback) -->
+    <div x-show="isRecording || hasRecording" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95" 
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200" 
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95" 
+         class="flex-1 mx-3" x-cloak>
 
         <!-- Recording Waveform -->
         <div x-show="isRecording" class="w-full">
-            <div class="flex h-8 items-center justify-center space-x-0.5 overflow-hidden">
-                <template x-for="i in 15" :key="i">
-                    <div class="w-0.5 rounded-full bg-gradient-to-t from-red-500 to-red-300 transition-all duration-75 ease-out"
-                        :style="`height: ${Math.max(2, 8 + Math.sin((Date.now() + i * 100) / 150) * 4 + (volumeLevel * (20 + Math.sin(i * 0.5) * 15)))}px;
-                                                                                                          opacity: ${0.6 + volumeLevel * 0.4 + Math.sin((Date.now() + i * 50) / 300) * 0.2}`">
-                    </div>
-                </template>
-            </div>
+            <div x-ref="recordingWaveform" class="w-full h-8 rounded bg-zinc-50 dark:bg-zinc-800"></div>
         </div>
 
-        <!-- Audio Player Interface -->
-        <div x-show="hasRecording && !isRecording" class="w-full"
-             x-init="$watch('hasRecording', value => {
-                 if (value && audioUrl && !wavesurfer) {
-                     $nextTick(() => initWavesurfer());
-                 }
-             })">
+        <!-- Playback Interface -->
+        <div x-show="hasRecording && !isRecording" class="w-full">
             <div class="flex items-center gap-2">
                 <!-- Play/Pause Button -->
                 <button @click="togglePlayback()" 
-                    :disabled="!playerLoaded"
-                    class="flex items-center justify-center w-7 h-7 transition-colors duration-200 rounded-full shrink-0 border"
+                    class="flex items-center justify-center w-6 h-6 transition-colors duration-200 rounded-full shrink-0 border"
                     :class="{
-                        'border-sky-500 text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-950': !isPlaying && playerLoaded,
-                        'border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-950': isPlaying,
-                        'border-zinc-300 text-zinc-400 cursor-not-allowed dark:border-zinc-600': !playerLoaded
+                        'border-sky-500 text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-950': !isPlaying,
+                        'border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-950': isPlaying
                     }">
                     
-                    <!-- Play Icon -->
+                    <!-- Play Icon (Hero Icon) -->
                     <svg x-show="!isPlaying" class="w-3 h-3 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
+                        <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
                     </svg>
                     
-                    <!-- Pause Icon -->
+                    <!-- Pause Icon (Hero Icon) -->
                     <svg x-show="isPlaying" class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
                     </svg>
                 </button>
 
-                <!-- Waveform Container -->
+                <!-- Playback Waveform Container -->
                 <div class="flex-1 min-w-0">
-                    <div x-ref="playbackWaveform" class="w-full h-6 rounded">
-                        <!-- Loading state -->
-                        <div x-show="!playerLoaded" class="flex items-center justify-center h-full">
-                            <div class="w-3 h-3 border border-zinc-400 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Time Display -->
-                <div class="text-xs font-mono text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
-                    <span x-text="formatTime(playbackCurrentTime)">0:00</span>
+                    <div x-ref="playbackWaveform" class="w-full h-8 rounded bg-zinc-50 dark:bg-zinc-800"></div>
                 </div>
             </div>
         </div>
@@ -143,13 +111,23 @@
     <div x-show="isRecording" class="text-xs whitespace-nowrap text-zinc-500 dark:text-zinc-400"
         x-text="formatTime(currentDuration)"></div>
 
-    <!-- Delete Button (when has recording) -->
-    <div x-show="hasRecording && !isRecording">
-        <button @click.prevent="deleteRecording()"
+    <!-- Action Buttons (when has recording) -->
+    <div x-show="hasRecording && !isRecording" class="flex items-center gap-1">
+        <!-- Submit Button -->
+        <button @click="submitRecording()"
+                :disabled="isUploading"
+                class="flex items-center justify-center p-1 text-green-500 rounded hover:bg-green-50 dark:hover:bg-green-900/20"
+                :class="{ 'opacity-50 cursor-not-allowed': isUploading }">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+            </svg>
+        </button>
+
+        <!-- Delete Button -->
+        <button @click="deleteRecording()"
             class="flex items-center justify-center p-1 text-red-500 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
             </svg>
         </button>
     </div>
@@ -159,4 +137,5 @@
         Voice recording is not supported in your browser
     </p>
 </div>
+
 @vite(['resources/css/components/voice-recorder.css'])

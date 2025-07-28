@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\FlowResource\Pages;
 
+use App\DTOs\Document\CreateDocumentDto;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Resources\FlowResource;
 use App\Forms\Components\EditorJs;
@@ -17,7 +18,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @property-read Form $form
@@ -44,9 +47,11 @@ final class CreateDocument extends Page implements HasForms
     public function form(Form $form): Form
     {
         return $form->schema([
-            Select::make('Available only for')
+            Select::make('participants')
                 ->hint('Assign to specific Users or leave it for all users')
                 ->native(false)
+                ->searchable()
+                ->preload()
                 ->multiple()
                 ->searchable()
                 ->options(fn () => $this->flow->getParticipants()->filter(fn (ModelHasRole $item) => $item->model->getKey() !== filamentUser()->getKey())
@@ -58,13 +63,36 @@ final class CreateDocument extends Page implements HasForms
                     ->minLength(10)
                     ->columnSpanFull()
                     ->Placeholder('name'),
-                EditorJs::make('blocks')->columnSpanFull(),
+                EditorJs::make('blocks')
+                    ->live()
+                    ->columnSpanFull(),
             ])->columns(3),
             Actions::make([
                 FormAction::make('save')
                     ->color('primary')
-                    ->action(fn ($data) => dd($this->form->getState())),
+                    ->action(fn () => $this->createDocument()),
             ]),
         ])->statePath('data');
+    }
+
+    private function createDocument()
+    {
+        $data = $this->form->getState();
+        try {
+            $dto = new CreateDocumentDto([
+                'name' => $data['name'],
+                'blocks' => json_decode($data['blocks']),
+            ]);
+            \App\Actions\Flow\CreateDocument::run(filamentUser(), $this->flow, $dto);
+
+            Notification::make()
+                ->body('Document Created Suceessfully')
+                ->success()
+                ->send();
+            $this->redirect(FlowResource::getUrl('pages', ['record' => $this->flow]));
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
     }
 }

@@ -11,8 +11,6 @@ export default function mentionableText(mentions, hashables) {
 
         // Initialize component
         init() {
-            console.log(this.mentionables);
-
             // Only setup if not already initialized
             if (!this.isInitialized) {
                 this.setupTribute();
@@ -23,9 +21,7 @@ export default function mentionableText(mentions, hashables) {
         // Setup Tribute.js with mentions and hashtags using collections
         setupTribute() {
             const textareaId = this.$refs.textarea ? this.$refs.textarea.id : 'unknown';
-            // console.log(`MentionableText[${textareaId}]: setupTribute called`);
-            // console.log(`MentionableText[${textareaId}]: mentionables`, this.mentionables);
-            // console.log(`MentionableText[${textareaId}]: hashables`, this.hashables);
+
 
             if (!this.$refs.textarea) {
                 console.warn(`MentionableText[${textareaId}]: textarea ref not found`);
@@ -40,12 +36,11 @@ export default function mentionableText(mentions, hashables) {
 
             // Build collections array for Tribute
             const collections = [];
-            console.log(`MentionableText[${textareaId}]: Building collections...`);
+
 
             // Add mentions collection if mentionables are provided
             if (this.mentionables && this.mentionables.length > 0) {
-                console.log(collections)
-                console.log('MentionableText: Adding mentions collection');
+
                 collections.push({
                     trigger: '@',
                     values: JSON.parse(this.mentionables),
@@ -76,18 +71,10 @@ export default function mentionableText(mentions, hashables) {
                     replaceTextSuffix: '\n',
                 });
             }
-            console.log('first collection', collections)
-            // this.tribute = new Tribute({
-            //     collection: collections,
-            //     menuContainer: document.querySelector('.mentionable-text-container'),
-            //     spaceSelectsMatch: true,
-            //     positionMenu: true
-            // });
-            // this.tribute.attach(this.$refs.textarea);
-            // this.$refs.textarea.setAttribute('data-tribute', 'true');
-            // Add hashtags collection if hashables are provided
+
+
             if (this.hashables && this.hashables.length > 0) {
-                console.log('MentionableText: Adding hashtags collection');
+
                 collections.push({
                     trigger: '#',
                     values: JSON.parse(this.hashables),
@@ -113,12 +100,7 @@ export default function mentionableText(mentions, hashables) {
                     replaceTextSuffix: '\n',
                 });
             }
-            // console.log('is it ebent work?');
-            // // Only initialize Tribute if we have collections
-            // console.log('MentionableText: Collections built:', collections);
-            // if (collections.length > 0) {
-            //     console.log('MentionableText: Initializing Tribute with', collections.length, 'collections');
-            //     console.log(collections);
+
             this.tribute = new Tribute({
                 collection: collections,
                 menuContainer: document.querySelector(this.$refs.textarea.id),
@@ -126,7 +108,7 @@ export default function mentionableText(mentions, hashables) {
                 positionMenu: true
             });
 
-            //     console.log('MentionableText: Attaching Tribute to textarea');
+
             this.tribute.attach(this.$refs.textarea);
             this.$refs.textarea.setAttribute('data-tribute', 'true');
 
@@ -148,18 +130,6 @@ export default function mentionableText(mentions, hashables) {
                 // Trigger Alpine reactivity by dispatching input event
                 this.$refs.textarea.dispatchEvent(new Event('input', { bubbles: true }));
             });
-
-            //     // Listen for tribute events to update content
-            //     this.$refs.textarea.addEventListener('tribute-replaced', (e) => {
-            //         console.log('MentionableText: tribute-replaced event', e);
-            //         this.content = e.target.value;
-            //         this.updateContent();
-            //     });
-
-            //     console.log('MentionableText: Tribute setup complete');
-            // } else {
-            //     console.warn('MentionableText: No collections to initialize');
-            // }
 
             this.setupTributeStyles();
         },
@@ -183,25 +153,8 @@ export default function mentionableText(mentions, hashables) {
                 this.updateContent();
             }
         },
-
-        // Set mentionables data
-        // setMentionables(mentionables) {
-        //     console.log('MentionableText: setMentionables called with', mentionables);
-        //     this.mentionables = mentionables || [];
-        // },
-
-        // Set hashables data
-        // setHashables(hashables) {
-        //     console.log('MentionableText: setHashables called with', hashables);
-        //     this.hashables = hashables || [];
-        // },
-
         // Initialize tribute after data is set
         initializeWithData() {
-            console.log('MentionableText: initializeWithData called');
-            console.log('MentionableText: mentionables length:', this.mentionables.length);
-            console.log('MentionableText: hashables length:', this.hashables.length);
-
             if (!this.isInitialized) {
                 this.setupTribute();
                 this.isInitialized = true;
