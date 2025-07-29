@@ -1,13 +1,23 @@
 import Tribute from "tributejs";
-export default function mentionableText(mentions, hashables) {
+export default function mentionableText(mentions, hashables, maxLength = 500) {
     return {
         // Component state
         content: '',
-        contentModel: '',
         tribute: null,
         mentionables: JSON.stringify(mentions),
         hashables: JSON.stringify(hashables),
+        maxLength: maxLength,
+        currentLength: 0,
+        isOverLimit: false,
+        previousContent: '',
         isInitialized: false,
+        
+        // Validation UI state
+        showValidationError: false,
+        validationMessage: '',
+        showPasteWarning: false,
+        pasteMessage: '',
+        remainingChars: maxLength,
 
         // Initialize component
         init() {
@@ -15,13 +25,23 @@ export default function mentionableText(mentions, hashables) {
             if (!this.isInitialized) {
                 this.setupTribute();
                 this.isInitialized = true;
+                this.$refs.textarea.innerHtml = null;
+                
+                // Watch content changes for dispatching
+                this.$watch('content', (newContent) => {
+                    this.currentLength = this.getTextLength(newContent);
+                    this.remainingChars = this.maxLength - this.currentLength;
+                    this.$dispatch('mentionable:text', { state: newContent });
+                });
+                
+                // Setup paste validation
+                this.setupPasteValidation();
             }
         },
 
         // Setup Tribute.js with mentions and hashtags using collections
         setupTribute() {
             const textareaId = this.$refs.textarea ? this.$refs.textarea.id : 'unknown';
-
 
             if (!this.$refs.textarea) {
                 console.warn(`MentionableText[${textareaId}]: textarea ref not found`);
@@ -36,7 +56,6 @@ export default function mentionableText(mentions, hashables) {
 
             // Build collections array for Tribute
             const collections = [];
-
 
             // Add mentions collection if mentionables are provided
             if (this.mentionables && this.mentionables.length > 0) {
@@ -115,23 +134,91 @@ export default function mentionableText(mentions, hashables) {
             // Listen for tribute events to trigger Alpine reactivity and update Livewire arrays
             this.$refs.textarea.addEventListener('tribute-replaced', (e) => {
                 const item = e.detail.item;
-
+                // console.log(JSON.parse(JSON.stringify(e.detail)));
+                console.log(e.detail.instance.trigger)
                 // Update Livewire arrays based on mention type
                 if (item.original) {
-                    if (e.detail.event.key === '@' || item.original.email) {
+                    if (e.detail.instance.trigger === '@') {
                         // This is a mention - add to currentMentions
-                        this.$wire.call('addCurrentMention', item.original.id);
-                    } else if (e.detail.event.key === '#' || item.original.url) {
+                        this.handelMentionAdded(item.original.id)
+                        // this.$wire.call('addCurrentMention', item.original.id);
+                    } else if (e.detail.instance.trigger === '#') {
+                        console.log(item);
                         // This is a hashtag - add to currentHashtags
-                        this.$wire.call('addCurrentHashtag', item.original.id);
+                        this.handleHashableAdded(item.original.id);
+                        // this.$wire.call('addCurrentHashtag', item.original.id);
                     }
                 }
 
                 // Trigger Alpine reactivity by dispatching input event
-                this.$refs.textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                // this.$refs.textarea.dispatchEvent(new Event('input', { bubbles: true }));
             });
 
             this.setupTributeStyles();
+        },
+
+        handelMentionAdded(id) {
+            this.$dispatch('mentionable:mention-added', { id: id });
+        },
+        handleHashableAdded(id) {
+            this.$dispatch('mentionable:hash-added', { id: id });
+        },
+
+
+        // Get plain text length (excluding HTML tags)
+        getTextLength(content) {
+            // Create temporary element to strip HTML and get plain text length
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            return tempDiv.textContent?.length || 0;
+        },
+
+        // Setup paste validation
+        setupPasteValidation() {
+            if (!this.$refs.textarea) return;
+            
+            // Prevent paste if it would exceed limit
+            this.$refs.textarea.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const currentLength = this.getTextLength(this.content);
+                const pastedLength = pastedText.length;
+                
+                if (currentLength + pastedLength <= this.maxLength) {
+                    // Allow paste if within limit
+                    document.execCommand('insertText', false, pastedText);
+                } else {
+                    // Calculate how much we can paste
+                    const allowedLength = this.maxLength - currentLength;
+                    if (allowedLength > 0) {
+                        const truncatedText = pastedText.substring(0, allowedLength);
+                        document.execCommand('insertText', false, truncatedText);
+                    }
+                    
+                    // Show paste warning
+                    this.showPasteWarning = true;
+                    this.pasteMessage = `Paste truncated. Only ${Math.max(0, allowedLength)} characters were added.`;
+                    setTimeout(() => { this.showPasteWarning = false; }, 2000);
+                    
+                    // Dispatch paste limit event
+                    this.$dispatch('mentionable:paste-limited', {
+                        attempted: pastedLength,
+                        allowed: Math.max(0, allowedLength)
+                    });
+                }
+            });
+        },
+
+        // Set cursor to end of content
+        setCursorToEnd() {
+            if (!this.$refs.textarea) return;
+            
+            const range = document.createRange();
+            const selection = window.getSelection();
+            range.selectNodeContents(this.$refs.textarea);
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
         },
 
         // Setup custom styles for Tribute menu (now handled by CSS file)
@@ -140,19 +227,19 @@ export default function mentionableText(mentions, hashables) {
         },
 
         // Update content and sync with wire:model
-        updateContent() {
-            if (this.contentModel && this.$wire) {
-                this.$wire.set(this.contentModel, this.content);
-            }
-        },
+        // updateContent() {
+        //     if (this.contentModel && this.$wire) {
+        //         this.$wire.set(this.contentModel, this.content);
+        //     }
+        // },
 
         // Sync contenteditable with Alpine data
-        syncContent() {
-            if (this.$refs.textarea) {
-                this.content = this.$refs.textarea.innerHTML;
-                this.updateContent();
-            }
-        },
+        // syncContent() {
+        //     if (this.$refs.textarea) {
+        //         this.content = this.$refs.textarea.innerHTML;
+        //         this.updateContent();
+        //     }
+        // },
         // Initialize tribute after data is set
         initializeWithData() {
             if (!this.isInitialized) {

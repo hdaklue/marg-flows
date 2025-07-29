@@ -1,247 +1,285 @@
 import WaveSurfer from 'wavesurfer.js';
+import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
+
+// Module-level state
+let activePlayer = {
+    wavesurfer: null,
+    instanceKey: null,
+};
+let voiceRecorder = null; // This remains separate and untouched
 
 /**
- * Voice Note Wavesurfer Manager
- * Ensures only one voice note wavesurfer instance exists (separate from main audio annotations)
- * Scoped to window.voiceNote to avoid conflicts with main audio system
+ * Creates and configures a new WaveSurfer instance.
+ * @private
  */
-class VoiceNoteWavesurferManager {
-    constructor() {
-        if (window.voiceNote?.wavesurfer) {
-            return window.voiceNote.wavesurfer;
+const createInstance = async (container, audioUrl, onReady, options, withRecorder = false) => {
+    const wavesurfer = WaveSurfer.create({
+        container,
+        waveColor: options.waveColor,
+        progressColor: options.progressColor,
+        cursorColor: options.cursorColor,
+        barWidth: 2,
+        barGap: 1,
+        responsive: true,
+        height: 32,
+        normalize: true,
+        backend: 'WebAudio',
+        ...options,
+    });
+
+    // Pass the created instance to the onReady callback if provided
+    wavesurfer.on('ready', () => {
+        if (onReady) {
+            onReady(wavesurfer);
         }
-        
-        // Initialize voiceNote namespace
-        if (!window.voiceNote) {
-            window.voiceNote = {};
-        }
-        
-        this.wavesurfer = null;
-        this.currentContainer = null;
-        this.currentCallback = null;
-        this.isInitialized = false;
-        
-        // Store in global scope under voiceNote namespace
-        window.voiceNote.wavesurfer = this;
+    });
+
+    wavesurfer.on('error', (error) => {
+        console.error(`Wavesurfer error:`, error);
+    });
+
+    // Initialize record plugin if requested
+    let recordPlugin = null;
+    if (withRecorder) {
+        recordPlugin = wavesurfer.registerPlugin(
+            RecordPlugin.create({
+                renderRecordedAudio: false,
+                scrollingWaveform: false,
+                continuousWaveform: true,
+                continuousWaveformDuration: options.maxDuration || 180,
+                mediaRecorderOptions: {
+                    mimeType: 'audio/webm;codecs=opus'
+                }
+            })
+        );
     }
 
-    /**
-     * Initialize or switch wavesurfer to a new container
-     * @param {HTMLElement} container - Container element for wavesurfer
-     * @param {string} audioUrl - URL of the audio file
-     * @param {Function} onReady - Callback when wavesurfer is ready
-     * @param {Object} options - Additional wavesurfer options
-     */
-    async init(container, audioUrl, onReady = null, options = {}) {
-        // Destroy existing instance if switching containers
-        if (this.wavesurfer && this.currentContainer !== container) {
-            this.destroy();
+    if (audioUrl) {
+        try {
+            await wavesurfer.load(audioUrl);
+        } catch (error) {
+            console.error(`Failed to load audio:`, error);
+            throw error;
+        }
+    }
+
+    return { wavesurfer, recordPlugin };
+};
+
+/**
+ * Player Manager - Handles a single, dynamic audio player instance
+ */
+export const playerManager = {
+
+    // Destroy all active players
+    destroyAll() {
+        if (activePlayer.wavesurfer) {
+            try {
+                activePlayer.wavesurfer.destroy();
+            } catch (error) {
+                console.warn('Error destroying active player:', error);
+            }
+            activePlayer = { wavesurfer: null, instanceKey: null };
+        }
+    },
+    async togglePlay(instanceKey, container, audioUrl, onReady, options) {
+        // If the user clicks the same player that is already active, just toggle play/pause.
+        if (activePlayer.instanceKey === instanceKey) {
+            if (activePlayer.wavesurfer) {
+                activePlayer.wavesurfer.playPause();
+            }
+            return;
         }
 
-        // If same container and already initialized, just load new audio
-        if (this.wavesurfer && this.currentContainer === container) {
-            await this.loadAudio(audioUrl);
-            if (onReady) onReady(this.wavesurfer);
-            return this.wavesurfer;
+        // If a different player is clicked, properly transition:
+        // 1. Pause current player
+        if (activePlayer.wavesurfer) {
+            try {
+                if (activePlayer.wavesurfer.isPlaying()) {
+                    activePlayer.wavesurfer.pause();
+                }
+            } catch (error) {
+                console.warn('Error pausing current player:', error);
+            }
+
+            // 2. Destroy the old player
+            try {
+                activePlayer.wavesurfer.destroy();
+            } catch (error) {
+                console.warn('Error destroying current player:', error);
+            }
         }
 
-        // Create new wavesurfer instance
-        const defaultOptions = {
-            container: container,
-            waveColor: '#e4e4e7', // zinc-300
-            progressColor: '#0ea5e9', // sky-500
-            cursorColor: '#0369a1', // sky-700
-            barWidth: 2,
-            barGap: 1,
-            responsive: true,
-            height: 32,
-            normalize: true,
-            backend: 'WebAudio',
-            ...options
+        // 3. Create and initialize the new player with new URL
+        const { wavesurfer: newWavesurfer } = await createInstance(container, audioUrl, onReady, options, false);
+
+        // 4. Assign the new player
+        activePlayer = {
+            wavesurfer: newWavesurfer,
+            instanceKey: instanceKey,
         };
 
+        // 5. Play the new audio (different URL)
         try {
-            this.wavesurfer = WaveSurfer.create(defaultOptions);
-            this.currentContainer = container;
-            this.currentCallback = onReady;
-
-            // Load audio
-            await this.loadAudio(audioUrl);
-
-            // Set up event listeners
-            this.setupEventListeners();
-
-            if (onReady) {
-                onReady(this.wavesurfer);
-            }
-
-            this.isInitialized = true;
-            return this.wavesurfer;
-
+            await newWavesurfer.play();
         } catch (error) {
-            console.error('Wavesurfer initialization failed:', error);
-            this.cleanup();
-            throw error;
+            console.warn('Error playing new audio:', error);
         }
-    }
+    },
 
-    /**
-     * Load new audio into existing wavesurfer instance
-     * @param {string} audioUrl - URL of the audio file
-     */
-    async loadAudio(audioUrl) {
-        if (!this.wavesurfer) {
-            throw new Error('Wavesurfer not initialized');
-        }
-
-        try {
-            await this.wavesurfer.load(audioUrl);
-        } catch (error) {
-            console.error('Failed to load audio:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Setup common event listeners
-     */
-    setupEventListeners() {
-        if (!this.wavesurfer) return;
-
-        this.wavesurfer.on('ready', () => {
-            console.log('Wavesurfer ready');
-            // Trigger ready callback if it exists
-            if (this.currentCallback) {
-                this.currentCallback(this.wavesurfer);
-            }
-        });
-
-        this.wavesurfer.on('error', (error) => {
-            console.error('Wavesurfer error:', error);
-        });
-
-        this.wavesurfer.on('finish', () => {
-            console.log('Audio finished playing');
-        });
-
-        this.wavesurfer.on('play', () => {
-            console.log('Audio started playing');
-        });
-
-        this.wavesurfer.on('pause', () => {
-            console.log('Audio paused');
-        });
-    }
-
-    /**
-     * Play/pause toggle
-     */
-    togglePlay() {
-        if (!this.wavesurfer) return;
-        this.wavesurfer.playPause();
-    }
-
-    /**
-     * Play audio
-     */
-    play() {
-        if (!this.wavesurfer) return;
-        this.wavesurfer.play();
-    }
-
-    /**
-     * Pause audio
-     */
-    pause() {
-        if (!this.wavesurfer) return;
-        this.wavesurfer.pause();
-    }
-
-    /**
-     * Stop audio
-     */
-    stop() {
-        if (!this.wavesurfer) return;
-        this.wavesurfer.stop();
-    }
-
-    /**
-     * Get current playing state
-     */
     isPlaying() {
-        return this.wavesurfer ? this.wavesurfer.isPlaying() : false;
-    }
+        return activePlayer.wavesurfer ? activePlayer.wavesurfer.isPlaying() : false;
+    },
 
-    /**
-     * Get current time
-     */
     getCurrentTime() {
-        return this.wavesurfer ? this.wavesurfer.getCurrentTime() : 0;
-    }
+        return activePlayer.wavesurfer ? activePlayer.wavesurfer.getCurrentTime() : 0;
+    },
 
-    /**
-     * Get duration
-     */
     getDuration() {
-        return this.wavesurfer ? this.wavesurfer.getDuration() : 0;
-    }
+        return activePlayer.wavesurfer ? activePlayer.wavesurfer.getDuration() : 0;
+    },
 
-    /**
-     * Seek to specific time
-     * @param {number} time - Time in seconds
-     */
-    seekTo(time) {
-        if (!this.wavesurfer) return;
-        const duration = this.getDuration();
-        if (duration > 0) {
-            this.wavesurfer.seekTo(time / duration);
+    getActiveInstanceKey() {
+        return activePlayer.instanceKey;
+    },
+
+    destroy(instanceKey) {
+        // Only destroy if the key matches the active instance
+        if (activePlayer.instanceKey === instanceKey) {
+            activePlayer.wavesurfer?.destroy();
+            activePlayer = { wavesurfer: null, instanceKey: null };
         }
-    }
+    },
+};
 
-    /**
-     * Set volume
-     * @param {number} volume - Volume level (0-1)
-     */
-    setVolume(volume) {
-        if (!this.wavesurfer) return;
-        this.wavesurfer.setVolume(volume);
-    }
+/**
+ * Recorder Manager - Handles voice recorder instances with recording capability
+ */
+export const recorderManager = {
+    instances: new Map(),
 
-    /**
-     * Destroy wavesurfer instance
-     */
-    destroy() {
-        if (this.wavesurfer) {
-            this.wavesurfer.destroy();
-            this.wavesurfer = null;
+
+    // Stop all active recordings
+    stopAllRecording() {
+        for (const [instanceKey, instance] of this.instances) {
+            if (instance.recordPlugin) {
+                try {
+                    if (instance.recordPlugin.isRecording()) {
+                        instance.recordPlugin.stopRecording();
+                    }
+                } catch (error) {
+                    console.warn(`Error stopping recording for ${instanceKey}:`, error);
+                }
+            }
         }
-        this.cleanup();
-    }
+    },
 
-    /**
-     * Cleanup references
-     */
-    cleanup() {
-        this.currentContainer = null;
-        this.currentCallback = null;
-        this.isInitialized = false;
-    }
+    async init(instanceKey, container, audioUrl = null, onReady = null, options = {}) {
+        // Destroy existing instance with same key
+        if (this.instances.has(instanceKey)) {
+            this.destroy(instanceKey);
+        }
 
-    /**
-     * Check if wavesurfer is initialized
-     */
-    isReady() {
-        return this.isInitialized && this.wavesurfer !== null;
-    }
+        // Clear container to ensure clean slate
+        container.innerHTML = '';
 
-    /**
-     * Get the wavesurfer instance (for advanced usage)
-     */
-    getInstance() {
-        return this.wavesurfer;
-    }
-}
+        const defaultOptions = {
+            waveColor: '#71717a', // zinc-500
+            progressColor: '#10b981', // emerald-500
+            cursorColor: '#059669', // emerald-600
+            interact: false,
+            maxDuration: 180,
+            ...options,
+        };
 
-// Create and export singleton instance
-const voiceNoteWavesurfer = new VoiceNoteWavesurferManager();
-export default voiceNoteWavesurfer;
+        const { wavesurfer, recordPlugin } = await createInstance(
+            container,
+            audioUrl,
+            onReady,
+            defaultOptions,
+            true // withRecorder = true
+        );
+
+        // Store the instance
+        this.instances.set(instanceKey, {
+            wavesurfer,
+            recordPlugin,
+            container
+        });
+
+        return { wavesurfer, recordPlugin };
+    },
+
+    getRecord(instanceKey) {
+        const instance = this.instances.get(instanceKey);
+        return instance?.recordPlugin || null;
+    },
+
+    getWavesurfer(instanceKey) {
+        const instance = this.instances.get(instanceKey);
+        return instance?.wavesurfer || null;
+    },
+
+    togglePlay(instanceKey) {
+        const instance = this.instances.get(instanceKey);
+        if (instance?.wavesurfer) {
+            instance.wavesurfer.playPause();
+        }
+    },
+
+    isPlaying(instanceKey) {
+        const instance = this.instances.get(instanceKey);
+        return instance?.wavesurfer ? instance.wavesurfer.isPlaying() : false;
+    },
+
+    getCurrentTime(instanceKey) {
+        const instance = this.instances.get(instanceKey);
+        return instance?.wavesurfer ? instance.wavesurfer.getCurrentTime() : 0;
+    },
+
+    getDuration(instanceKey) {
+        const instance = this.instances.get(instanceKey);
+        return instance?.wavesurfer ? instance.wavesurfer.getDuration() : 0;
+    },
+
+    destroy(instanceKey) {
+        const instance = this.instances.get(instanceKey);
+        if (instance) {
+            try {
+                // Clean up record plugin listeners first
+                if (instance.recordPlugin) {
+                    instance.recordPlugin.unAll();
+                }
+                // Then destroy the wavesurfer instance
+                if (instance.wavesurfer) {
+                    instance.wavesurfer.unAll();
+                    instance.wavesurfer.destroy();
+                }
+            } catch (error) {
+                console.warn('Error destroying recorder wavesurfer:', error);
+            }
+            this.instances.delete(instanceKey);
+        }
+    },
+
+    destroyAll() {
+        for (const [instanceKey] of this.instances) {
+
+            this.destroy(instanceKey);
+        }
+    },
+};
+
+// Event listeners for cleanup
+window.addEventListener('wv-manager:player:destroy', () => {
+    console.log('listening inside the manager');
+    playerManager.destroyAll();
+});
+
+window.addEventListener('wv-manager:recorder:destroy', () => {
+    console.log('listening inside the manager');
+    recorderManager.destroyAll();
+});
+
+// Default export for backward compatibility
+export default playerManager;

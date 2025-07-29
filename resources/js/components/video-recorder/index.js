@@ -1,5 +1,7 @@
+import RecordRTC from 'recordrtc';
 import videojs from 'video.js';
-import 'videojs-record/dist/videojs.record.js';
+import Record from 'videojs-record/dist/videojs.record.js';
+
 
 export default function videoRecorder({ onSubmit = null } = {}) {
     return {
@@ -12,54 +14,96 @@ export default function videoRecorder({ onSubmit = null } = {}) {
         recordedBlob: null,
         videoElement: null,
         initialized: false,
+        recordPlugin: Record,
+        rtcPlugin: RecordRTC,
+        currentTime: 0,
+        timer: null,
+        deviceReady: false,
 
         init() {
             this.initialized = true;
+            // Wait for DOM refs to be available (like video-annotation does)
             this.$nextTick(() => {
-                this.setupVideoJS();
+                this.videoElement = this.$refs.videoRecorder;
+                console.log(this.videoElement);
+
+                if (this.videoElement) {
+                    this.setupVideoJS();
+                }
             });
         },
 
         setupVideoJS() {
-            this.videoElement = this.$refs.videoRecorder;
             if (!this.videoElement) {
                 console.error('Video element not found');
                 return;
             }
 
+            // Check if element is in DOM
+            // if (!document.contains(this.videoElement)) {
+            //     console.error('Video element not in DOM');
+            //     return;
+            // }
+
+            // Clear any existing player
+            // if (this.player) {
+            //     this.player.dispose();
+            //     this.player = null;
+            // }
+
+            // // Check if videojs instance already exists on this element
+            // if (this.videoElement.player) {
+            //     this.videoElement.player.dispose();
+            //     this.videoElement.player = null;
+            // }
+
+            // Detect if mobile device
+            const isMobile = window.innerWidth <= 768;
+
             const options = {
-                controls: true,
+                controls: false,
                 bigPlayButton: false,
-                width: 320,
-                height: 240,
-                fluid: false,
+                fluid: true,
                 responsive: true,
-                // Prevent VideoJS from interfering with modal events
-                userActions: {
-                    hotkeys: false,
-                    doubleClick: false
-                },
+                aspectRatio: isMobile ? '9:16' : '16:9', // Story ratio on mobile, landscape on desktop
                 plugins: {
                     record: {
-                        audio: true,
+                        image: false,
+                        audio: false,
                         video: true,
-                        maxLength: 300, // 5 minutes
-                        debug: false,
-                        videoMimeType: 'video/webm;codecs=vp9,opus',
-                        videoBitsPerSecond: 2500000
+                        maxLength: 30,
+                        videoMimeType: 'video/webm;codecs=vp8',
+                        displayMilliseconds: true,
+                        debug: false
                     }
                 }
             };
 
-            this.player = videojs(this.videoElement, options, () => {
+            this.player = videojs('video-recorder', options, () => {
                 console.log('VideoJS Record player ready');
+                console.log('Using video.js', videojs.VERSION);
+                if (videojs.getPluginVersion) {
+                    console.log('with videojs-record', videojs.getPluginVersion('record'));
+                }
             });
 
             // Set up event listeners
+            this.player.on('deviceReady', () => {
+                console.log('Device ready');
+                this.deviceReady = true;
+            });
+
             this.player.on('startRecord', () => {
                 console.log('Recording started');
                 this.isRecording = true;
                 this.hasRecording = false;
+                this.currentTime = 0;
+                this.startTimer();
+            });
+
+            this.player.on('stopRecord', () => {
+                console.log('Recording stopped');
+                this.stopTimer();
             });
 
             this.player.on('finishRecord', () => {
@@ -67,84 +111,113 @@ export default function videoRecorder({ onSubmit = null } = {}) {
                 this.isRecording = false;
                 this.hasRecording = true;
                 this.recordedBlob = this.player.recordedData;
+                this.stopTimer();
+                console.log(this.recordedBlob.type);
+                console.log(URL.createObjectURL(this.recordedBlob));
+                this.player.src({
+                    type: 'video/webm',
+                    src: URL.createObjectURL(this.recordedBlob)
+                });
+                this.player.controls(true);
+                // Optional: show big play button
+
+
+                // Optional: autoplay preview
+                this.player.ready(() => {
+                    this.player.play();
+                });
+
             });
 
             this.player.on('error', (error) => {
                 console.error('VideoJS Error:', error);
-                this.showError('Recording failed. Please try again.');
             });
 
             this.player.on('deviceError', () => {
                 console.error('Device error:', this.player.deviceErrorCode);
-                this.showError('Camera/microphone access denied. Please check your browser settings.');
             });
 
-            // Prevent VideoJS events from bubbling to region selection
-            this.player.el().addEventListener('mousedown', (e) => {
-                e.stopPropagation();
-            });
-            this.player.el().addEventListener('mousemove', (e) => {
-                e.stopPropagation();
-            });
-            this.player.el().addEventListener('mouseup', (e) => {
-                e.stopPropagation();
-            });
-            this.player.el().addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-            });
-            this.player.el().addEventListener('touchmove', (e) => {
-                e.stopPropagation();
-            });
-            this.player.el().addEventListener('touchend', (e) => {
-                e.stopPropagation();
-            });
+            // Prevent VideoJS events from bubbling
+            const playerEl = this.player.el();
+            if (playerEl) {
+                ['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend', 'click'].forEach(event => {
+                    playerEl.addEventListener(event, (e) => {
+                        e.stopPropagation();
+                    });
+                });
+            }
         },
 
-        submitRecording() {
+        // Custom control methods
+        startRecording() {
+            if (this.player && this.player.record && !this.isRecording) {
+                this.player.record().start();
+            }
+        },
+
+        stopRecording() {
+            if (this.player && this.player.record && this.isRecording) {
+                this.player.record().stop();
+            }
+        },
+
+        getRecordingTime() {
+            if (this.player && this.player.record) {
+                return this.player.record().getCurrentTime() || 0;
+            }
+            return 0;
+        },
+
+        formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        },
+
+        startTimer() {
+            this.currentTime = 0;
+            this.timer = setInterval(() => {
+                this.currentTime++;
+            }, 1000);
+        },
+
+        stopTimer() {
+            if (this.timer) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+        },
+
+        async submitRecording() {
             if (!this.recordedBlob || this.isUploading) return;
-            
+
             this.isUploading = true;
             this.uploadProgress = 0;
-            
-            // Simulate upload progress
-            const progressInterval = setInterval(() => {
-                this.uploadProgress += 20;
-                if (this.uploadProgress >= 100) {
-                    clearInterval(progressInterval);
-                }
-            }, 300);
-            
-            if (typeof this.submitCallback === 'function') {
-                this.submitCallback(this.recordedBlob)
-                    .then(() => {
-                        clearInterval(progressInterval);
-                        this.uploadProgress = 100;
-                        
-                        setTimeout(() => {
-                            this.isUploading = false;
-                            this.uploadProgress = 0;
-                            this.resetRecording();
-                        }, 500);
-                    })
-                    .catch((e) => {
-                        console.error('Submit error:', e);
-                        clearInterval(progressInterval);
-                        this.isUploading = false;
-                        this.uploadProgress = 0;
-                        this.showError('Failed to submit recording.');
-                    });
-            } else {
-                // Simulate upload completion
-                setTimeout(() => {
-                    clearInterval(progressInterval);
+
+            try {
+                if (typeof this.submitCallback === 'function') {
+                    // Use Livewire's $wire.upload for proper file handling
+                    const result = await this.submitCallback(this.recordedBlob);
+                    
                     this.uploadProgress = 100;
                     setTimeout(() => {
                         this.isUploading = false;
                         this.uploadProgress = 0;
-                        this.showError('Video submitted successfully!');
                         this.resetRecording();
-                    }, 300);
-                }, 2000);
+                    }, 500);
+                    
+                    return result;
+                } else {
+                    console.warn('No submit callback provided');
+                    this.isUploading = false;
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                this.isUploading = false;
+                this.uploadProgress = 0;
+                
+                // Dispatch error event for parent to handle
+                this.$dispatch('video-upload-error', { error: error.message });
             }
         },
 
@@ -155,21 +228,13 @@ export default function videoRecorder({ onSubmit = null } = {}) {
             this.hasRecording = false;
             this.isRecording = false;
             this.recordedBlob = null;
+            this.currentTime = 0;
+            this.stopTimer();
         },
 
-        showError(message) {
-            const errorMessage = message || 'An unknown error occurred';
-            console.error('Video Recorder:', errorMessage);
-            
-            // Only dispatch events after component is initialized to avoid Alpine init errors
-            if (this.initialized && typeof window !== 'undefined' && window.dispatchEvent) {
-                window.dispatchEvent(new CustomEvent('video-recorder:error', { 
-                    detail: { message: errorMessage } 
-                }));
-            }
-        },
 
         destroy() {
+            this.stopTimer();
             if (this.player) {
                 this.player.dispose();
                 this.player = null;

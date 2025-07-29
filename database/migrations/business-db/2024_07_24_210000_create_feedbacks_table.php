@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,6 +19,8 @@ return new class extends Migration
             $table->string('creator_id');
             $table->index('creator_id');
 
+            $table->string('status')->default(FeedbackStatus::OPEN);
+
             // Content
             $table->text('content');
 
@@ -27,15 +31,17 @@ return new class extends Migration
             $table->ulidMorphs('feedbackable');
 
             // Status and resolution
-            $table->string('status')->default('open');
             $table->text('resolution')->nullable();
             $table->string('resolved_by')->nullable();
             $table->timestamp('resolved_at')->nullable();
+            $table->string('urgency')->default(FeedbackUrgency::NORMAL);
 
             $table->timestamps();
 
             // Optimized indexes for common queries
             $table->index('status');
+            $table->index('urgency');
+            $table->index(['urgency', 'status']);
             $table->index('resolved_at');
             $table->index('resolved_by');
             $table->index(['creator_id', 'created_at']);

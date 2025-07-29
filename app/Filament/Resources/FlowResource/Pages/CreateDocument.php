@@ -21,6 +21,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Validation\ValidationException;
+use Log;
 
 /**
  * @property-read Form $form
@@ -64,7 +65,7 @@ final class CreateDocument extends Page implements HasForms
                     ->columnSpanFull()
                     ->Placeholder('name'),
                 EditorJs::make('blocks')
-                    ->live()
+                    ->required()
                     ->columnSpanFull(),
             ])->columns(3),
             Actions::make([
@@ -78,21 +79,33 @@ final class CreateDocument extends Page implements HasForms
     private function createDocument()
     {
         $data = $this->form->getState();
+
         try {
-            $dto = new CreateDocumentDto([
+            // Create DTO without validation first
+            $dto = CreateDocumentDto::fromArray([
                 'name' => $data['name'],
-                'blocks' => json_decode($data['blocks']),
+                'blocks' => json_decode($data['blocks'], true),
             ]);
+
+            // Set properties manually
+            // $dto->name = $data['name'];
+            // $dto->blocks = json_decode($data['blocks'], true) ?: [];
+
+            // Now validate explicitl
+
             \App\Actions\Flow\CreateDocument::run(filamentUser(), $this->flow, $dto);
 
             Notification::make()
-                ->body('Document Created Suceessfully')
+                ->body('Document Created Successfully')
                 ->success()
                 ->send();
             $this->redirect(FlowResource::getUrl('pages', ['record' => $this->flow]));
         } catch (ValidationException $e) {
-            throw $e;
+            Log::error('DTO Validation failed', $e->errors());
+            Notification::make()
+                ->body('Something went wrong')
+                ->danger()
+                ->send();
         }
-
     }
 }

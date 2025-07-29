@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Enums;
+namespace App\Enums\Feedback;
 
 enum FeedbackStatus: string
 {
@@ -11,6 +11,16 @@ enum FeedbackStatus: string
     case RESOLVED = 'resolved';
     case REJECTED = 'rejected';
     case URGENT = 'urgent';
+
+    public static function openStatuses(): array
+    {
+        return [self::OPEN, self::IN_PROGRESS, self::URGENT];
+    }
+
+    public static function closedStatuses(): array
+    {
+        return [self::RESOLVED, self::REJECTED];
+    }
 
     public function label(): string
     {
@@ -42,15 +52,5 @@ enum FeedbackStatus: string
     public function isOpen(): bool
     {
         return in_array($this, [self::OPEN, self::IN_PROGRESS, self::URGENT]);
-    }
-
-    public static function openStatuses(): array
-    {
-        return [self::OPEN, self::IN_PROGRESS, self::URGENT];
-    }
-
-    public static function closedStatuses(): array
-    {
-        return [self::RESOLVED, self::REJECTED];
     }
 }

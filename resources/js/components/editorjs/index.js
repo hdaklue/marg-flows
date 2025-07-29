@@ -26,18 +26,20 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
 
         watchStateChanges() {
             this.$watch('state', (newState) => {
-
                 if (newState === null && this.editor) {
                     this.editor.blocks.clear();
                     return;
                 }
-
             });
         },
 
         initializeEditor() {
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             const initialData = this.normalizeState(this.state);
+            // If state was empty/null, sync the normalized data back to Livewire
+            if (!this.state || this.state === 'null') {
+                this.state = JSON.stringify(initialData);
+            }
 
             this.editor = new EditorJS({
                 holder: 'editor-wrap',
@@ -50,10 +52,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 onChange: () => {
                     this.editor.save()
                         .then((outputData) => {
-                            clearTimeout(this.debounceTimer);
-                            this.debounceTimer = setTimeout(() => {
-                                this.state = JSON.stringify(outputData);
-                            }, 500);
+                            this.state = JSON.stringify(outputData);
                         });
                 },
 

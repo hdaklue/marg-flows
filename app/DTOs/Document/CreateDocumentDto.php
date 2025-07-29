@@ -26,6 +26,7 @@ final class CreateDocumentDto extends ValidatedDTO
         return [
             'name' => ['required', 'string', 'min:1', 'max:255'],
             'blocks' => ['required', 'array'],
+            'block.*' => ['required'],
         ];
     }
 

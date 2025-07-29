@@ -7,19 +7,10 @@
     $onSubmitCallback = $onSubmit ?? 'null';
 @endphp
 
-<div x-data="{
-    errorMessage: '',
-    showError: false,
-    ...videoRecorder({ onSubmit: {{ $onSubmitCallback }} })
-}" x-init="window.addEventListener('video-recorder:error', (e) => {
-    errorMessage = e.detail.message;
-    showError = true;
-    setTimeout(() => showError = false, 5000);
-});" x-load
+<div x-data="videoRecorder({ onSubmit: {{ $onSubmitCallback }} })" x-load
     x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('videoRecorder') }}"
     x-on:destroy="destroy()" x-on:comment-created.window="resetRecording()"
     class="{{ $class }} video-recorder relative w-full transition-all duration-300">
-
     <!-- Upload Progress Bar -->
     <div x-show="isUploading" x-cloak class="w-full h-1 mb-3 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
         x-transition:enter="transition-opacity ease-out duration-300" x-transition:enter-start="opacity-0"
@@ -28,32 +19,52 @@
             :style="`width: ${uploadProgress}%`"></div>
     </div>
 
-    <!-- Error Message -->
-    <div x-show="showError" x-cloak x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 transform translate-y-2"
-        x-transition:enter-end="opacity-100 transform translate-y-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 transform translate-y-0"
-        x-transition:leave-end="opacity-0 transform translate-y-2"
-        class="p-3 mb-3 border border-red-200 rounded-lg bg-red-50 dark:border-red-800 dark:bg-red-900/20">
-        <div class="flex items-start gap-2">
-            <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clip-rule="evenodd"></path>
-            </svg>
-            <div class="flex-1">
-                <p class="text-sm font-medium text-red-800 dark:text-red-200">Video Recording</p>
-                <p class="text-sm text-red-700 dark:text-red-300" x-text="errorMessage"></p>
+
+    <!-- Video Player Container -->
+    <div class="relative w-full overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
+        <!-- VideoJS Player -->
+        <div class="w-full" @mousedown.stop @mousemove.stop @mouseup.stop @touchstart.stop @touchmove.stop
+            @touchend.stop @click.stop>
+            <video x-ref="videoRecorder" id="video-recorder" class="w-full video-js vjs-default-skin" playsinline
+                data-setup='{}'>
+            </video>
+        </div>
+
+        <!-- Custom Controls Overlay -->
+        <div class="absolute inset-0 z-50 pointer-events-none">
+            <!-- Recording Timer (when recording) -->
+            <div x-show="isRecording" x-cloak
+                class="absolute px-3 py-1 font-mono text-sm text-white bg-red-500 rounded-full shadow-lg pointer-events-none right-4 top-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    <span x-text="formatTime(currentTime)"></span>
+                </div>
+            </div>
+
+            <!-- Record Button (positioned at bottom center) -->
+            <div x-show="deviceReady && !isRecording && !hasRecording" x-cloak
+                class="absolute transform -translate-x-1/2 pointer-events-auto bottom-8 left-1/2">
+                <button @click="startRecording()"
+                    class="flex items-center justify-center w-20 h-20 text-white transition-all duration-200 bg-red-500 rounded-full shadow-lg hover:scale-105 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-500/30">
+                    <!-- Record Icon (Hero Icon) -->
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="6" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Stop Recording Button (positioned at bottom center) -->
+            <div x-show="isRecording" x-cloak
+                class="absolute transform -translate-x-1/2 pointer-events-auto bottom-8 left-1/2">
+                <button @click="stopRecording()"
+                    class="flex items-center justify-center w-20 h-20 text-white transition-all duration-200 rounded-full shadow-lg bg-zinc-800/80 backdrop-blur-sm hover:scale-105 hover:bg-zinc-700/80 focus:outline-none focus:ring-4 focus:ring-zinc-500/30">
+                    <!-- Stop Icon (Hero Icon) -->
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <rect x="6" y="6" width="12" height="12" rx="2" />
+                    </svg>
+                </button>
             </div>
         </div>
-    </div>
-
-    <!-- VideoJS Player -->
-    <div class="w-full overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800" @mousedown.stop @mousemove.stop
-        @mouseup.stop @touchstart.stop @touchmove.stop @touchend.stop @click.stop>
-        <video x-ref="videoRecorder" class="w-full video-js vjs-default-skin" playsinline data-setup='{}'>
-        </video>
     </div>
 
     <!-- Submit Button -->

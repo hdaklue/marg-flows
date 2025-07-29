@@ -1,11 +1,12 @@
-import voiceNoteWavesurfer from "../audioplayer/wavesurfer-manager.js";
+import { playerManager } from "../audioplayer/wavesurfer-manager.js";
 
-export default function audioPlayer({ audioUrl = '', useVoiceNoteManager = false, size = 'md' } = {}) {
+export default function audioPlayer({ audioUrl = '', useVoiceNoteManager = false, size = 'md', containerRef = 'waveformContainer', instanceKey = null } = {}) {
     return {
         audioUrl: audioUrl,
         useVoiceNoteManager: useVoiceNoteManager,
         size: size,
-        wavesurfer: null,
+        containerRef: containerRef,
+        instanceKey: instanceKey,
         isLoaded: false,
         isPlaying: false,
         currentTime: 0,
@@ -13,38 +14,40 @@ export default function audioPlayer({ audioUrl = '', useVoiceNoteManager = false
         updateInterval: null,
 
         init() {
-            if (!this.audioUrl) {
-                return;
+            // Start a timer to keep the UI in sync with the playerManager state.
+            if (this.useVoiceNoteManager) {
+                this.startTimeUpdates();
             }
-
-            this.initializeWavesurfer();
         },
 
-        initializeWavesurfer() {
-            try {
-                const container = this.$refs.waveformContainer;
+        onWavesurferReady(wavesurfer) {
+            this.isLoaded = true;
+            this.duration = wavesurfer.getDuration();
+        },
+
+        async togglePlay() {
+            if (this.useVoiceNoteManager) {
+                const container = this.$refs[this.containerRef];
                 if (!container) {
+                    console.error('Waveform container not found');
                     return;
                 }
 
+                // Clear the container before passing it to the manager
                 container.innerHTML = '';
 
-                // Size-based configuration
                 const sizeConfig = {
                     sm: { height: 24, barWidth: 1.5, barGap: 0.5 },
                     md: { height: 32, barWidth: 2, barGap: 1 },
                     lg: { height: 40, barWidth: 3, barGap: 1.5 }
                 };
-
                 const config = sizeConfig[this.size] || sizeConfig.md;
-
-                // Check theme for colors
                 const isDark = document.documentElement.classList.contains('dark');
                 const waveformOptions = {
                     height: config.height,
-                    waveColor: isDark ? '#52525b' : '#e4e4e7', // zinc-600 dark, zinc-300 light
-                    progressColor: '#0ea5e9', // sky-500
-                    cursorColor: isDark ? '#0284c7' : '#0369a1', // sky-600 dark, sky-700 light
+                    waveColor: isDark ? '#52525b' : '#e4e4e7',
+                    progressColor: '#0ea5e9',
+                    cursorColor: isDark ? '#0284c7' : '#0369a1',
                     barWidth: config.barWidth,
                     barGap: config.barGap,
                     responsive: true,
@@ -52,74 +55,24 @@ export default function audioPlayer({ audioUrl = '', useVoiceNoteManager = false
                     backend: 'WebAudio'
                 };
 
-                if (this.useVoiceNoteManager) {
-                    // Use the voice note wavesurfer manager
-                    this.wavesurfer = voiceNoteWavesurfer.init(
-                        container,
-                        this.audioUrl,
-                        this.onWavesurferReady.bind(this),
-                        waveformOptions
-                    );
-                } else {
+                await playerManager.togglePlay(
+                    this.instanceKey,
+                    container,
+                    this.audioUrl,
+                    this.onWavesurferReady.bind(this),
+                    waveformOptions
+                );
+            } else {
+                // This is the logic for a non-managed, standalone player.
+                if (!this.wavesurfer) {
                     import('wavesurfer.js').then((WaveSurfer) => {
-                        this.wavesurfer = WaveSurfer.default.create({
-                            container: container,
-                            ...waveformOptions
-                        });
-
-                        this.setupEventListeners();
+                        this.wavesurfer = WaveSurfer.default.create({ container: this.$refs[this.containerRef] /* ... add options ... */ });
                         this.wavesurfer.load(this.audioUrl);
+                        this.wavesurfer.on('ready', () => this.wavesurfer.play());
                     });
+                } else {
+                    this.wavesurfer.playPause();
                 }
-            } catch (error) {
-                console.error('Audio player: Failed to initialize wavesurfer:', error);
-                this.showError();
-            }
-        },
-
-        onWavesurferReady() {
-            this.isLoaded = true;
-            if (this.useVoiceNoteManager) {
-                this.duration = voiceNoteWavesurfer.getDuration();
-            } else {
-                this.duration = this.wavesurfer.getDuration();
-            }
-            this.startTimeUpdates();
-        },
-
-        setupEventListeners() {
-            if (!this.wavesurfer) return;
-
-            this.wavesurfer.on('ready', () => {
-                this.onWavesurferReady();
-            });
-
-            this.wavesurfer.on('play', () => {
-                this.isPlaying = true;
-            });
-
-            this.wavesurfer.on('pause', () => {
-                this.isPlaying = false;
-            });
-
-            this.wavesurfer.on('finish', () => {
-                this.isPlaying = false;
-            });
-
-            this.wavesurfer.on('error', (error) => {
-                console.error('Audio player: Wavesurfer error:', error);
-                this.showError();
-            });
-        },
-
-        togglePlay() {
-            if (!this.isLoaded) return;
-
-            if (this.useVoiceNoteManager) {
-                voiceNoteWavesurfer.togglePlay();
-                this.isPlaying = voiceNoteWavesurfer.isPlaying();
-            } else {
-                this.wavesurfer.playPause();
             }
         },
 
@@ -129,12 +82,12 @@ export default function audioPlayer({ audioUrl = '', useVoiceNoteManager = false
             }
 
             this.updateInterval = setInterval(() => {
-                if (this.useVoiceNoteManager) {
-                    this.currentTime = voiceNoteWavesurfer.getCurrentTime();
-                    this.isPlaying = voiceNoteWavesurfer.isPlaying();
-                } else if (this.wavesurfer) {
-                    this.currentTime = this.wavesurfer.getCurrentTime();
-                    this.isPlaying = this.wavesurfer.isPlaying();
+                if (this.useVoiceNoteManager && playerManager.getActiveInstanceKey() === this.instanceKey) {
+                    this.currentTime = playerManager.getCurrentTime();
+                    this.isPlaying = playerManager.isPlaying();
+                } else {
+                    // If this component is not the active one, ensure its state is paused.
+                    this.isPlaying = false;
                 }
             }, 100);
         },
@@ -147,7 +100,7 @@ export default function audioPlayer({ audioUrl = '', useVoiceNoteManager = false
         },
 
         showError() {
-            const container = this.$refs.waveformContainer;
+            const container = this.$refs[this.containerRef];
             if (container) {
                 container.innerHTML = `
                     <div class="flex items-center justify-center h-full text-red-500 text-xs">
@@ -167,17 +120,8 @@ export default function audioPlayer({ audioUrl = '', useVoiceNoteManager = false
             }
 
             if (this.useVoiceNoteManager) {
-                // Voice note manager handles its own cleanup
-                voiceNoteWavesurfer.stop();
-            } else if (this.wavesurfer) {
-                this.wavesurfer.destroy();
-                this.wavesurfer = null;
+                playerManager.destroy(this.instanceKey);
             }
-
-            this.isLoaded = false;
-            this.isPlaying = false;
-            this.currentTime = 0;
-            this.duration = 0;
         }
     }
 }

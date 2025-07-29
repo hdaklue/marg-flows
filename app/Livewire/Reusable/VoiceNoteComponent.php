@@ -6,6 +6,7 @@ namespace App\Livewire\Reusable;
 
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
@@ -14,24 +15,25 @@ use Livewire\Component;
  */
 final class VoiceNoteComponent extends Component
 {
-    public bool $uploading = false;
-
     public bool $hasRecording = false;
 
-    public ?array $voiceNoteUrls = [];
+    public array $voiceNoteUrls = [];
+
+    public int $maxNotes = 3;
+
+    public string $recorderKey = '';
 
     public function mount()
     {
-
-        $this->uploading = false;
         $this->hasRecording = false;
+        $this->recorderKey = 'recorder_' . uniqid();
     }
 
-    #[Computed]
-    public function voiceNoteUrls(): array
-    {
-        return $this->voiceNoteUrls;
-    }
+    // #[Computed]
+    // public function voiceNoteUrls(): array
+    // {
+    //     return $this->voiceNoteUrls;
+    // }
 
     #[Computed]
     public function canAcceptNotes(): bool
@@ -39,34 +41,63 @@ final class VoiceNoteComponent extends Component
         return count($this->voiceNoteUrls) < 3;
     }
 
-    public function addVoiceNote($audioBlob)
+    #[Computed]
+    public function getNotesUrls(): array
     {
-        // Check if we already have 3 voice notes
-        if (count($this->voiceNoteUrls) >= 3) {
-            return false;
+        return $this->voiceNoteUrls;
+    }
+
+    #[On('voice-recorder:voice-uploaded')]
+    public function onVoiceUploaded($url)
+    {
+        logger()->info('VoiceNote received voice-recorder:voice-uploaded event', ['url' => $url]);
+
+        $this->voiceNoteUrls[] = $url;
+        $this->hasRecording = ! empty($this->voiceNoteUrls);
+
+        logger()->info('VoiceNote updated URLs', ['voiceNoteUrls' => $this->voiceNoteUrls]);
+
+        unset($this->getNotesUrls);
+
+        // Fire event to parent components
+        $this->dispatch('voice-note:uploaded', $url);
+    }
+
+    #[On('voice-note:canceled')]
+    public function clear()
+    {
+        // Delete all uploaded files from storage before clearing the array
+        foreach ($this->voiceNoteUrls as $url) {
+            // Extract the file path from the URL and delete from storage
+            // URL format: /storage/voice-notes/filename.webm
+            $path = str_replace('/storage/', '', parse_url($url, PHP_URL_PATH));
+            
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+                logger()->info('Deleted voice note file during clear', ['path' => $path]);
+            }
         }
-
-        $this->uploading = true;
-
-        // Simulate upload progress with sleep
-        sleep(2);
-
-        // For demo purposes, use local audio file
-        $newUrl = Storage::url('audio/audio.mp3');
-
-        $this->voiceNoteUrls[] = $newUrl;
-        $this->hasRecording = true;
-        $this->uploading = false;
-
-        // Dispatch event to notify parent component
-        $this->dispatch('voice-note:uploaded', $newUrl);
-
-        return true;
+        
+        $this->reset('voiceNoteUrls');
+        // Generate new key to force recorder reinitialization
+        $this->recorderKey = 'recorder_' . uniqid();
     }
 
     public function removeVoiceNote($index)
     {
         if (isset($this->voiceNoteUrls[$index])) {
+            $url = $this->voiceNoteUrls[$index];
+            
+            // Extract the file path from the URL and delete from storage
+            // URL format: /storage/voice-notes/filename.webm
+            $path = str_replace('/storage/', '', parse_url($url, PHP_URL_PATH));
+            
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+                logger()->info('Deleted voice note file', ['path' => $path]);
+            }
+            
+            // Remove from array
             array_splice($this->voiceNoteUrls, $index, 1);
             $this->voiceNoteUrls = array_values($this->voiceNoteUrls); // Reindex array
         }
@@ -77,9 +108,9 @@ final class VoiceNoteComponent extends Component
         $this->dispatch('voice-note:removed', $index);
     }
 
-    public function canAddMore()
+    public function canAddMore(): bool
     {
-        return count($this->voiceNoteUrls) < 3;
+        return count($this->voiceNoteUrls) < $this->maxNotes;
     }
 
     public function render()

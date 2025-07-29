@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\Database\LivesInBusinessDB;
-use App\Enums\FeedbackStatus;
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
 use App\ValueObjects\FeedbackMetadata;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
@@ -36,12 +38,6 @@ final class Feedback extends Model
         'resolved_at',
     ];
 
-    protected $casts = [
-        'metadata' => FeedbackMetadata::class,
-        'status' => FeedbackStatus::class,
-        'resolved_at' => 'datetime',
-    ];
-
     protected $with = ['creator'];
 
     // Relationships
@@ -58,6 +54,11 @@ final class Feedback extends Model
     public function resolver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');
+    }
+
+    public function acknowledgments(): MorphMany
+    {
+        return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
     }
 
     // Scopes
@@ -189,5 +190,15 @@ final class Feedback extends Model
     public function isForMedia(): bool
     {
         return in_array($this->metadata->getType(), ['audio_region', 'video_region', 'video_frame']);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'metadata' => FeedbackMetadata::class,
+            'status' => FeedbackStatus::class,
+            'urgency' => FeedbackUrgency::class,
+            'resolved_at' => 'datetime',
+        ];
     }
 }
