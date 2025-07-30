@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace App\Enums\Feedback;
 
-enum FeedbackStatus: string
+use App\Traits\EnumSelectArrays;
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
+
+enum FeedbackStatus: string implements HasColor, HasLabel
 {
+    use EnumSelectArrays;
     case OPEN = 'open';
     case RUNNING = 'running';
     case RESOLVED = 'resolved';
     case REJECTED = 'rejected';
-    case URGENT = 'urgent';
 
     public static function openStatuses(): array
     {
-        return [self::OPEN, self::RUNNING, self::URGENT];
+        return [self::OPEN, self::RUNNING];
     }
 
     public static function closedStatuses(): array
@@ -22,25 +26,23 @@ enum FeedbackStatus: string
         return [self::RESOLVED, self::REJECTED];
     }
 
-    public function label(): string
+    public function getLabel(): string
     {
         return match ($this) {
             self::OPEN => 'Open',
             self::RUNNING => 'Running',
             self::RESOLVED => 'Resolved',
             self::REJECTED => 'Rejected',
-            self::URGENT => 'Urgent',
         };
     }
 
-    public function color(): string
+    public function getColor(): string
     {
         return match ($this) {
             self::OPEN => 'zinc',
             self::RUNNING => 'sky',
             self::RESOLVED => 'emerald',
             self::REJECTED => 'red',
-            self::URGENT => 'amber',
         };
     }
 
@@ -51,6 +53,6 @@ enum FeedbackStatus: string
 
     public function isOpen(): bool
     {
-        return in_array($this, [self::OPEN, self::RUNNING, self::URGENT]);
+        return in_array($this, [self::OPEN, self::RUNNING]);
     }
 }

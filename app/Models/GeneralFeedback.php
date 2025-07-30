@@ -4,26 +4,100 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Database\LivesInBusinessDB;
+use App\Concerns\Model\IsBaseModel;
+use App\Contracts\Model\BaseModelContract;
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * General feedback model for simple cases that don't fit specialized models
- * Maintains backwards compatibility and handles edge cases
- * 
+ * Maintains backwards compatibility and handles edge cases.
+ *
+ * @property string $id
+ * @property string $creator_id
+ * @property string $content
+ * @property string $feedbackable_type
+ * @property string $feedbackable_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
+ * @property string|null $resolution
+ * @property string|null $resolved_by
+ * @property \Carbon\Carbon|null $resolved_at
  * @property array|null $metadata Flexible metadata storage for various feedback types
  * @property string|null $feedback_category Optional category for organization
  * @property array|null $custom_data Additional custom data as needed
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
  */
-final class GeneralFeedback extends BaseFeedback
+final class GeneralFeedback extends Model implements BaseModelContract
 {
+    use HasFactory, HasUlids, LivesInBusinessDB, IsBaseModel;
+
     protected $table = 'general_feedbacks';
 
     protected $fillable = [
-        ...parent::getFillable(),
+        'creator_id',
+        'content',
+        'feedbackable_type',
+        'feedbackable_id',
+        'status',
+        'urgency',
+        'resolution',
+        'resolved_by',
+        'resolved_at',
         'metadata',
         'feedback_category',
         'custom_data',
     ];
+
+    protected $with = ['creator'];
+
+    // Common Relationships
+    public function feedbackable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function resolver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
+    }
+
+    public function acknowledgments(): MorphMany
+    {
+        return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
+    }
+
+    // Migration helpers for converting from old feedback system
+    public static function createFromLegacyFeedback(array $attributes): static
+    {
+        // Extract category from metadata if available
+        $category = null;
+        $metadata = $attributes['metadata'] ?? null;
+
+        if (is_array($metadata)) {
+            $category = $metadata['category'] ?? $metadata['type'] ?? null;
+        }
+
+        return self::create([
+            ...$attributes,
+            'feedback_category' => $category,
+            'metadata' => $metadata,
+        ]);
+    }
 
     // Type-specific scopes
     public function scopeByCategory(Builder $query, string $category): Builder
@@ -68,17 +142,17 @@ final class GeneralFeedback extends BaseFeedback
     // Type-specific methods
     public function hasCategory(): bool
     {
-        return !empty($this->feedback_category);
+        return ! empty($this->feedback_category);
     }
 
     public function hasMetadata(): bool
     {
-        return !empty($this->metadata);
+        return ! empty($this->metadata);
     }
 
     public function hasCustomData(): bool
     {
-        return !empty($this->custom_data);
+        return ! empty($this->custom_data);
     }
 
     public function getMetadataValue(string $key, mixed $default = null): mixed
@@ -90,9 +164,9 @@ final class GeneralFeedback extends BaseFeedback
     {
         $metadata = $this->metadata ?? [];
         data_set($metadata, $key, $value);
-        
+
         $this->update(['metadata' => $metadata]);
-        
+
         return $this;
     }
 
@@ -100,9 +174,9 @@ final class GeneralFeedback extends BaseFeedback
     {
         $metadata = $this->metadata ?? [];
         data_forget($metadata, $key);
-        
+
         $this->update(['metadata' => $metadata]);
-        
+
         return $this;
     }
 
@@ -115,15 +189,15 @@ final class GeneralFeedback extends BaseFeedback
     {
         $customData = $this->custom_data ?? [];
         data_set($customData, $key, $value);
-        
+
         $this->update(['custom_data' => $customData]);
-        
+
         return $this;
     }
 
     public function getCategoryDisplay(): string
     {
-        if (!$this->hasCategory()) {
+        if (! $this->hasCategory()) {
             return 'Uncategorized';
         }
 
@@ -140,7 +214,7 @@ final class GeneralFeedback extends BaseFeedback
             'improvement' => 'Improvement',
             'question' => 'Question',
             'other' => 'Other',
-            default => ucfirst($this->feedback_category)
+            default => ucfirst($this->feedback_category),
         };
     }
 
@@ -159,7 +233,7 @@ final class GeneralFeedback extends BaseFeedback
             'improvement' => '📈',
             'question' => '❓',
             'other' => '📋',
-            default => '💬'
+            default => '💬',
         };
     }
 
@@ -186,7 +260,7 @@ final class GeneralFeedback extends BaseFeedback
     public function getFeedbackDescription(): string
     {
         $category = $this->getCategoryDisplay();
-        
+
         if ($this->hasMetadata()) {
             $type = $this->getMetadataValue('type');
             if ($type) {
@@ -202,46 +276,49 @@ final class GeneralFeedback extends BaseFeedback
         return 'general';
     }
 
-    // Migration helpers for converting from old feedback system
-    public static function createFromLegacyFeedback(array $attributes): static
-    {
-        // Extract category from metadata if available
-        $category = null;
-        $metadata = $attributes['metadata'] ?? null;
-        
-        if (is_array($metadata)) {
-            $category = $metadata['category'] ?? $metadata['type'] ?? null;
-        }
-
-        return static::create([
-            ...$attributes,
-            'feedback_category' => $category,
-            'metadata' => $metadata,
-        ]);
-    }
-
-    public function convertToSpecializedModel(): ?BaseFeedback
+    public function convertToSpecializedModel(): ?Model
     {
         // Attempt to convert to specialized model based on metadata
-        if (!$this->hasMetadata()) {
+        if (! $this->hasMetadata()) {
             return null;
         }
 
         $type = $this->getMetadataValue('type');
-        
+
         return match ($type) {
             'video_frame', 'video_region' => $this->convertToVideoFeedback(),
             'audio_region' => $this->convertToAudioFeedback(),
             'document_block' => $this->convertToDocumentFeedback(),
             'image_annotation', 'design_annotation' => $this->convertToDesignFeedback(),
-            default => null
+            default => null,
         };
+    }
+
+    public function getModelType(): string
+    {
+        return $this->getFeedbackType();
+    }
+
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status' => FeedbackStatus::class,
+            'urgency' => FeedbackUrgency::class,
+            'resolved_at' => 'datetime',
+            'metadata' => 'array',
+            'custom_data' => 'array',
+        ];
     }
 
     private function convertToVideoFeedback(): ?VideoFeedback
     {
         $data = $this->getMetadataValue('data', []);
-        
+
         if (empty($data)) {
             return null;
         }
@@ -266,7 +343,7 @@ final class GeneralFeedback extends BaseFeedback
     private function convertToAudioFeedback(): ?AudioFeedback
     {
         $data = $this->getMetadataValue('data', []);
-        
+
         if (empty($data['start_time']) || empty($data['end_time'])) {
             return null;
         }
@@ -289,7 +366,7 @@ final class GeneralFeedback extends BaseFeedback
     private function convertToDocumentFeedback(): ?DocumentFeedback
     {
         $data = $this->getMetadataValue('data', []);
-        
+
         if (empty($data['block_id'])) {
             return null;
         }
@@ -311,8 +388,8 @@ final class GeneralFeedback extends BaseFeedback
     private function convertToDesignFeedback(): ?DesignFeedback
     {
         $data = $this->getMetadataValue('data', []);
-        
-        if (!isset($data['x_coordinate']) || !isset($data['y_coordinate'])) {
+
+        if (! isset($data['x_coordinate']) || ! isset($data['y_coordinate'])) {
             return null;
         }
 
@@ -331,14 +408,5 @@ final class GeneralFeedback extends BaseFeedback
             'color' => $data['color'] ?? null,
             'zoom_level' => $data['zoom_level'] ?? null,
         ]);
-    }
-
-    protected function casts(): array
-    {
-        return [
-            ...parent::casts(),
-            'metadata' => 'array',
-            'custom_data' => 'array',
-        ];
     }
 }

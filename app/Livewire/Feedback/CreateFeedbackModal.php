@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Feedback;
 
+use App\Enums\Feedback\FeedbackUrgency;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
@@ -69,6 +70,7 @@ final class CreateFeedbackModal extends Component
         $this->voiceNoteUrls = [];
         $this->hasVoiceNotes = false;
         $this->hasUnuploadedVoiceNotes = false;
+        $this->urgency = FeedbackUrgency::NORMAL->value;
         $this->setupSampleData();
     }
 
@@ -99,7 +101,7 @@ final class CreateFeedbackModal extends Component
 
     public function saveNewComment()
     {
-        dd($this->commentText);
+        dd($this->urgency);
         // Check for unuploaded voice notes first
         if ($this->hasUnuploadedVoiceNotes) {
             $this->addError('form', 'Please wait for voice notes to finish uploading.');

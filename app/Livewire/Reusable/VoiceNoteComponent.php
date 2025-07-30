@@ -12,6 +12,7 @@ use Livewire\Component;
 /**
  * @property-read bool $canAcceptNotes
  * @property-read array $voiceNoteUrls
+ * @property-read array  $getNoteUrls
  */
 final class VoiceNoteComponent extends Component
 {
@@ -71,13 +72,13 @@ final class VoiceNoteComponent extends Component
             // Extract the file path from the URL and delete from storage
             // URL format: /storage/voice-notes/filename.webm
             $path = str_replace('/storage/', '', parse_url($url, PHP_URL_PATH));
-            
+
             if (Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
                 logger()->info('Deleted voice note file during clear', ['path' => $path]);
             }
         }
-        
+
         $this->reset('voiceNoteUrls');
         // Generate new key to force recorder reinitialization
         $this->recorderKey = 'recorder_' . uniqid();
@@ -87,16 +88,16 @@ final class VoiceNoteComponent extends Component
     {
         if (isset($this->voiceNoteUrls[$index])) {
             $url = $this->voiceNoteUrls[$index];
-            
+
             // Extract the file path from the URL and delete from storage
             // URL format: /storage/voice-notes/filename.webm
             $path = str_replace('/storage/', '', parse_url($url, PHP_URL_PATH));
-            
+
             if (Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
                 logger()->info('Deleted voice note file', ['path' => $path]);
             }
-            
+
             // Remove from array
             array_splice($this->voiceNoteUrls, $index, 1);
             $this->voiceNoteUrls = array_values($this->voiceNoteUrls); // Reindex array

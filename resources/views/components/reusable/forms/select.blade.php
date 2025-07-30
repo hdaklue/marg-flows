@@ -9,19 +9,8 @@
     'error' => null,
     'class' => '',
     'allowColors' => false,
+    'defaultValue' => null,
 ])
-
-@php
-    // Fallback options if none provided (for backward compatibility)
-    if (empty($options)) {
-        $options = [
-            ['value' => 1, 'label' => 'Low', 'disabled' => false, 'color' => 'indigo'],
-            ['value' => 2, 'label' => 'Medium', 'disabled' => false, 'selected' => false, 'color' => 'slate'],
-            ['value' => 3, 'label' => 'High', 'disabled' => false, 'color' => 'sky'],
-            ['value' => 4, 'label' => 'Urgent', 'disabled' => false, 'color' => 'amber'],
-        ];
-    }
-@endphp
 
 @php
     $uid = Str::uuid();
@@ -61,6 +50,8 @@
     value: null,
     options: @js($options),
     allowColors: {{ $allowColors ? 'true' : 'false' }},
+    defaultValue: @js($defaultValue),
+    sourceOfTruthValue: null,
     get selectedOption() {
         return this.options.find(option => option.value == this.value) || null;
     },
@@ -71,18 +62,30 @@
         return this.selectedOption.color;
     },
     init() {
-        // Set initial value from selected option
+        // Determine source of truth
         const preSelected = this.options.find(option => option.selected);
         if (preSelected) {
+            this.sourceOfTruthValue = preSelected.value;
             this.value = preSelected.value;
-            // Make selected option disabled
-            preSelected.disabled = true;
+        } else if (this.defaultValue) {
+            this.sourceOfTruthValue = this.defaultValue;
+            this.value = this.defaultValue;
+        }
+    },
+    updateOptionAvailability() {
+        // Use x-ref to directly control the source of truth option
+        if (this.sourceOfTruthValue && this.$refs['option_' + this.sourceOfTruthValue]) {
+            const sourceElement = this.$refs['option_' + this.sourceOfTruthValue];
+            // Disable only when currently selected, enable when not selected
+            sourceElement.disabled = this.value == this.sourceOfTruthValue;
         }
     }
 }" x-init="init();
+updateOptionAvailability();
 $watch('value', v => {
     $refs.hiddenInput.value = v;
     $refs.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+    updateOptionAvailability();
 });
 // Trigger initial sync to show checkmark
 $nextTick(() => {
@@ -112,7 +115,7 @@ $nextTick(() => {
 
         <!-- Button -->
         <button x-listbox:button @if ($disabled) disabled @endif
-            class="{{ $classes['button'] }} group flex w-full items-center justify-between gap-2 rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+            class="{{ $classes['button'] }} group flex w-auto items-center justify-between gap-2 rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
             :class="{
                 @if ($disabled) 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed': true
                 @elseif($error)
@@ -166,7 +169,8 @@ $nextTick(() => {
         <ul x-listbox:options x-cloak
             class="{{ $classes['options'] }} absolute left-0 z-10 mt-2 max-h-80 w-full overflow-y-auto overscroll-contain rounded-lg border border-zinc-200 bg-white shadow-lg outline-none dark:border-zinc-700 dark:bg-zinc-900">
             <template x-for="option in options" :key="option.value">
-                <li x-listbox:option :value="option.value" :disabled="option.disabled || option.selected"
+                <li x-listbox:option :value="option.value" :disabled="option.disabled"
+                    :x-ref="option.value == sourceOfTruthValue ? 'option_' + option.value : null"
                     :class="{
                         ['bg-' + option.color + '-50 dark:bg-' + option.color + '-900/20 text-' + option.color +
                             '-700 dark:text-' + option.color + '-300'

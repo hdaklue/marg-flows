@@ -4,30 +4,90 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Database\LivesInBusinessDB;
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Audio-specific feedback model
- * Handles time-based audio feedback with waveform data
- * 
+ * Handles time-based audio feedback with waveform data.
+ *
+ * @property string $id
+ * @property string $creator_id
+ * @property string $content
+ * @property string $feedbackable_type
+ * @property string $feedbackable_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
+ * @property string|null $resolution
+ * @property string|null $resolved_by
+ * @property Carbon|null $resolved_at
  * @property float $start_time Start time in seconds
  * @property float $end_time End time in seconds
  * @property array|null $waveform_data Waveform visualization data
  * @property float|null $peak_amplitude Peak amplitude in the selection
  * @property array|null $frequency_data Frequency analysis data
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
-final class AudioFeedback extends BaseFeedback
+final class AudioFeedback extends Model
 {
+    use HasFactory, HasUlids, LivesInBusinessDB;
+
     protected $table = 'audio_feedbacks';
 
     protected $fillable = [
-        ...parent::getFillable(),
+        'creator_id',
+        'content',
+        'feedbackable_type',
+        'feedbackable_id',
+        'status',
+        'urgency',
+        'resolution',
+        'resolved_by',
+        'resolved_at',
         'start_time',
         'end_time',
         'waveform_data',
         'peak_amplitude',
         'frequency_data',
     ];
+
+    protected $with = ['creator'];
+
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
+
+    // Common Relationships
+    public function feedbackable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function resolver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
+    }
+
+    public function acknowledgments(): MorphMany
+    {
+        return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
+    }
 
     // Type-specific scopes
     public function scopeAtTimestamp(Builder $query, float $timestamp): Builder
@@ -41,19 +101,19 @@ final class AudioFeedback extends BaseFeedback
         return $query->where(function ($q) use ($startTime, $endTime) {
             // Feedback that overlaps with the given range
             $q->whereBetween('start_time', [$startTime, $endTime])
-              ->orWhereBetween('end_time', [$startTime, $endTime])
-              ->orWhere(function ($contains) use ($startTime, $endTime) {
-                  // Feedback that completely contains the range
-                  $contains->where('start_time', '<=', $startTime)
-                           ->where('end_time', '>=', $endTime);
-              });
+                ->orWhereBetween('end_time', [$startTime, $endTime])
+                ->orWhere(function ($contains) use ($startTime, $endTime) {
+                    // Feedback that completely contains the range
+                    $contains->where('start_time', '<=', $startTime)
+                        ->where('end_time', '>=', $endTime);
+                });
         });
     }
 
     public function scopeByDuration(Builder $query, float $minDuration, ?float $maxDuration = null): Builder
     {
         $query->whereRaw('(end_time - start_time) >= ?', [$minDuration]);
-        
+
         if ($maxDuration !== null) {
             $query->whereRaw('(end_time - start_time) <= ?', [$maxDuration]);
         }
@@ -80,7 +140,7 @@ final class AudioFeedback extends BaseFeedback
     {
         return $query->where(function ($q) use ($startTime, $endTime) {
             $q->where('start_time', '<', $endTime)
-              ->where('end_time', '>', $startTime);
+                ->where('end_time', '>', $startTime);
         });
     }
 
@@ -98,14 +158,14 @@ final class AudioFeedback extends BaseFeedback
     public function getDurationDisplay(): string
     {
         $duration = $this->getDuration();
-        
+
         if ($duration < 60) {
             return number_format($duration, 1) . 's';
         }
 
         $minutes = floor($duration / 60);
         $seconds = $duration % 60;
-        
+
         return sprintf('%dm %ds', $minutes, $seconds);
     }
 
@@ -136,12 +196,12 @@ final class AudioFeedback extends BaseFeedback
 
     public function hasWaveformData(): bool
     {
-        return !empty($this->waveform_data);
+        return ! empty($this->waveform_data);
     }
 
     public function hasFrequencyData(): bool
     {
-        return !empty($this->frequency_data);
+        return ! empty($this->frequency_data);
     }
 
     public function hasAmplitudeData(): bool
@@ -170,7 +230,7 @@ final class AudioFeedback extends BaseFeedback
             $this->peak_amplitude >= 0.6 => 'high',
             $this->peak_amplitude >= 0.4 => 'medium',
             $this->peak_amplitude >= 0.2 => 'low',
-            default => 'very low'
+            default => 'very low',
         };
     }
 
@@ -182,7 +242,7 @@ final class AudioFeedback extends BaseFeedback
     // Analysis methods
     public function analyzeOverlaps(): array
     {
-        $overlapping = static::where('id', '!=', $this->id)
+        $overlapping = self::where('id', '!=', $this->id)
             ->overlapping($this->start_time, $this->end_time)
             ->get();
 
@@ -192,15 +252,23 @@ final class AudioFeedback extends BaseFeedback
             'total_overlap_duration' => $overlapping->sum(function ($feedback) {
                 $overlapStart = max($this->start_time, $feedback->start_time);
                 $overlapEnd = min($this->end_time, $feedback->end_time);
+
                 return max(0, $overlapEnd - $overlapStart);
             }),
         ];
     }
 
+    public function getModelType(): string
+    {
+        return $this->getFeedbackType();
+    }
+
     protected function casts(): array
     {
         return [
-            ...parent::casts(),
+            'status' => FeedbackStatus::class,
+            'urgency' => FeedbackUrgency::class,
+            'resolved_at' => 'datetime',
             'start_time' => 'float',
             'end_time' => 'float',
             'peak_amplitude' => 'float',
@@ -213,7 +281,7 @@ final class AudioFeedback extends BaseFeedback
     {
         $minutes = floor($seconds / 60);
         $seconds = $seconds % 60;
-        
+
         return sprintf('%02d:%05.2f', $minutes, $seconds);
     }
 }

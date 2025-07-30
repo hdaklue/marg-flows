@@ -4,13 +4,34 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Database\LivesInBusinessDB;
+use App\Concerns\Model\IsBaseModel;
+use App\Contracts\Model\BaseModelContract;
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Video-specific feedback model
  * Handles both frame comments (specific timestamp + coordinates) 
  * and region comments (time range + optional area)
  * 
+ * @property string $id
+ * @property string $creator_id
+ * @property string $content
+ * @property string $feedbackable_type
+ * @property string $feedbackable_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
+ * @property string|null $resolution
+ * @property string|null $resolved_by
+ * @property \Carbon\Carbon|null $resolved_at
  * @property string $feedback_type 'frame' or 'region'
  * @property float|null $timestamp Frame timestamp in seconds (for frame feedback)
  * @property float|null $start_time Start time in seconds (for region feedback)
@@ -18,13 +39,25 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $x_coordinate X coordinate on video frame
  * @property int|null $y_coordinate Y coordinate on video frame
  * @property array|null $region_data Additional region metadata (bounds, shape, etc.)
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
  */
-final class VideoFeedback extends BaseFeedback
+final class VideoFeedback extends Model implements BaseModelContract
 {
+    use HasFactory, HasUlids, LivesInBusinessDB, IsBaseModel;
+
     protected $table = 'video_feedbacks';
 
     protected $fillable = [
-        ...parent::getFillable(),
+        'creator_id',
+        'content',
+        'feedbackable_type',
+        'feedbackable_id',
+        'status',
+        'urgency',
+        'resolution',
+        'resolved_by',
+        'resolved_at',
         'feedback_type',
         'timestamp',
         'start_time',
@@ -33,6 +66,29 @@ final class VideoFeedback extends BaseFeedback
         'y_coordinate',
         'region_data',
     ];
+
+    protected $with = ['creator'];
+
+    // Common Relationships
+    public function feedbackable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function resolver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
+    }
+
+    public function acknowledgments(): MorphMany
+    {
+        return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
+    }
 
     // Type-specific scopes
     public function scopeFrameComments(Builder $query): Builder
@@ -188,10 +244,22 @@ final class VideoFeedback extends BaseFeedback
         ]);
     }
 
+    public function getModelType(): string
+    {
+        return $this->getFeedbackType();
+    }
+
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
+
     protected function casts(): array
     {
         return [
-            ...parent::casts(),
+            'status' => FeedbackStatus::class,
+            'urgency' => FeedbackUrgency::class,
+            'resolved_at' => 'datetime',
             'timestamp' => 'float',
             'start_time' => 'float',
             'end_time' => 'float',

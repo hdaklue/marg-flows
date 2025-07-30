@@ -4,30 +4,119 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Database\LivesInBusinessDB;
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Document-specific feedback model
- * Handles Editor.js block-level feedback with positioning data
- * 
+ * Handles Editor.js block-level feedback with positioning data.
+ *
+ * @property string $id
+ * @property string $creator_id
+ * @property string $content
+ * @property string $feedbackable_type
+ * @property string $feedbackable_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
+ * @property string|null $resolution
+ * @property string|null $resolved_by
+ * @property Carbon|null $resolved_at
  * @property string $block_id Editor.js block identifier
  * @property string|null $element_type Type of block element (paragraph, header, list, etc.)
  * @property array|null $position_data Position metadata (selection, offset, etc.)
  * @property string|null $block_version Version/hash of the block content when feedback was created
  * @property array|null $selection_data Text selection data (start, end, selected text)
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
-final class DocumentFeedback extends BaseFeedback
+final class DocumentFeedback extends Model
 {
+    use HasFactory, HasUlids, LivesInBusinessDB;
+
     protected $table = 'document_feedbacks';
 
     protected $fillable = [
-        ...parent::getFillable(),
+        'creator_id',
+        'content',
+        'feedbackable_type',
+        'feedbackable_id',
+        'status',
+        'urgency',
+        'resolution',
+        'resolved_by',
+        'resolved_at',
         'block_id',
         'element_type',
         'position_data',
         'block_version',
         'selection_data',
     ];
+
+    protected $with = ['creator'];
+
+    public static function createForBlock(string $blockId, array $attributes): static
+    {
+        return self::create([
+            ...$attributes,
+            'block_id' => $blockId,
+            'element_type' => $attributes['element_type'] ?? null,
+            'position_data' => $attributes['position_data'] ?? null,
+        ]);
+    }
+
+    public static function createForTextSelection(
+        string $blockId,
+        string $selectedText,
+        int $start,
+        int $end,
+        array $attributes,
+    ): static {
+        return static::create([
+            ...$attributes,
+            'block_id' => $blockId,
+            'selection_data' => [
+                'selectedText' => $selectedText,
+                'start' => $start,
+                'end' => $end,
+                'length' => $end - $start,
+            ],
+        ]);
+    }
+
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
+
+    // Common Relationships
+    public function feedbackable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function resolver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
+    }
+
+    public function acknowledgments(): MorphMany
+    {
+        return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
+    }
 
     // Type-specific scopes
     public function scopeForBlock(Builder $query, string $blockId): Builder
@@ -71,9 +160,9 @@ final class DocumentFeedback extends BaseFeedback
     // Type-specific methods
     public function hasTextSelection(): bool
     {
-        return !empty($this->selection_data) && 
-               isset($this->selection_data['selectedText']) && 
-               !empty($this->selection_data['selectedText']);
+        return ! empty($this->selection_data) &&
+               isset($this->selection_data['selectedText']) &&
+               ! empty($this->selection_data['selectedText']);
     }
 
     public function getSelectedText(): ?string
@@ -93,7 +182,7 @@ final class DocumentFeedback extends BaseFeedback
 
     public function getSelectionLength(): int
     {
-        if (!$this->hasTextSelection()) {
+        if (! $this->hasTextSelection()) {
             return 0;
         }
 
@@ -119,7 +208,7 @@ final class DocumentFeedback extends BaseFeedback
 
     public function isBlockLevelFeedback(): bool
     {
-        return !$this->hasTextSelection();
+        return ! $this->hasTextSelection();
     }
 
     public function isTextLevelFeedback(): bool
@@ -141,7 +230,7 @@ final class DocumentFeedback extends BaseFeedback
             'delimiter' => 'Delimiter',
             'warning' => 'Warning Box',
             'checklist' => 'Checklist',
-            default => ucfirst($this->element_type ?? 'Unknown')
+            default => ucfirst($this->element_type ?? 'Unknown'),
         };
     }
 
@@ -168,7 +257,7 @@ final class DocumentFeedback extends BaseFeedback
             'delimiter' => '➖',
             'warning' => '⚠️',
             'checklist' => '✅',
-            default => '📄'
+            default => '📄',
         };
     }
 
@@ -176,13 +265,13 @@ final class DocumentFeedback extends BaseFeedback
     {
         $scope = $this->getFeedbackScope();
         $element = $this->getElementTypeDisplay();
-        
+
         if ($this->hasTextSelection()) {
             $selectedText = $this->getSelectedText();
-            $preview = mb_strlen($selectedText) > 50 
+            $preview = mb_strlen($selectedText) > 50
                 ? mb_substr($selectedText, 0, 47) . '...'
                 : $selectedText;
-            
+
             return "Text selection in {$element}: \"{$preview}\"";
         }
 
@@ -191,7 +280,7 @@ final class DocumentFeedback extends BaseFeedback
 
     public function hasBlockVersion(): bool
     {
-        return !empty($this->block_version);
+        return ! empty($this->block_version);
     }
 
     public function isBlockVersionCurrent(string $currentVersion): bool
@@ -202,7 +291,7 @@ final class DocumentFeedback extends BaseFeedback
     public function markAsOutdated(): static
     {
         $this->update([
-            'urgency' => \App\Enums\Feedback\FeedbackUrgency::LOW,
+            'urgency' => FeedbackUrgency::LOW,
         ]);
 
         return $this;
@@ -234,39 +323,17 @@ final class DocumentFeedback extends BaseFeedback
         ];
     }
 
-    public static function createForBlock(string $blockId, array $attributes): static
+    public function getModelType(): string
     {
-        return static::create([
-            ...$attributes,
-            'block_id' => $blockId,
-            'element_type' => $attributes['element_type'] ?? null,
-            'position_data' => $attributes['position_data'] ?? null,
-        ]);
-    }
-
-    public static function createForTextSelection(
-        string $blockId, 
-        string $selectedText, 
-        int $start, 
-        int $end, 
-        array $attributes
-    ): static {
-        return static::create([
-            ...$attributes,
-            'block_id' => $blockId,
-            'selection_data' => [
-                'selectedText' => $selectedText,
-                'start' => $start,
-                'end' => $end,
-                'length' => $end - $start,
-            ],
-        ]);
+        return $this->getFeedbackType();
     }
 
     protected function casts(): array
     {
         return [
-            ...parent::casts(),
+            'status' => FeedbackStatus::class,
+            'urgency' => FeedbackUrgency::class,
+            'resolved_at' => 'datetime',
             'position_data' => 'array',
             'selection_data' => 'array',
         ];

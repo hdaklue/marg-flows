@@ -9,7 +9,17 @@ use WendellAdriel\ValidatedDTO\ValidatedDTO;
 final class HashableDTO extends ValidatedDTO
 {
     public string $name;
+
     public string $url;
+
+    public function toTributeFormat(): array
+    {
+        return [
+            'key' => $this->name,
+            'value' => $this->name,
+            'url' => $this->url,
+        ];
+    }
 
     protected function rules(): array
     {
@@ -27,12 +37,8 @@ final class HashableDTO extends ValidatedDTO
         ];
     }
 
-    public function toTributeFormat(): array
+    protected function defaults(): array
     {
-        return [
-            'key' => $this->name,
-            'value' => $this->name,
-            'url' => $this->url,
-        ];
+        return [];
     }
 }

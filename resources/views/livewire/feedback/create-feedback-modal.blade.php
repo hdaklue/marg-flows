@@ -1,5 +1,7 @@
 <!-- Comment Creation Modal -->
-
+@php
+    $urgencyArray = App\Enums\Feedback\FeedbackUrgency::colorfulArray($urgency);
+@endphp
 <div x-data="{
     isDesktop: window.innerWidth >= 768,
     showCancelConfirm: false,
@@ -88,7 +90,8 @@
                                     'w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base transition-colors focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-sky-400'" />
                             <div class="grid grid-cols-3">
 
-                                <x-reusable.forms.select statePath="urgency" allowColors size="sm" />
+                                <x-reusable.forms.select statePath="urgency" allowColors size="sm"
+                                    :options="$urgencyArray" defaultValue="2" />
                             </div>
 
                             <!-- Media Components -->

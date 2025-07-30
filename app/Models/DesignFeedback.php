@@ -4,12 +4,33 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Database\LivesInBusinessDB;
+use App\Concerns\Model\IsBaseModel;
+use App\Contracts\Model\BaseModelContract;
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Design-specific feedback model
  * Handles image annotations, design reviews, and visual feedback
  * 
+ * @property string $id
+ * @property string $creator_id
+ * @property string $content
+ * @property string $feedbackable_type
+ * @property string $feedbackable_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
+ * @property string|null $resolution
+ * @property string|null $resolved_by
+ * @property \Carbon\Carbon|null $resolved_at
  * @property int $x_coordinate X coordinate on the design/image
  * @property int $y_coordinate Y coordinate on the design/image
  * @property string|null $annotation_type Type of annotation (point, area, arrow, etc.)
@@ -17,13 +38,25 @@ use Illuminate\Database\Eloquent\Builder;
  * @property array|null $area_bounds Bounds for area-based annotations (x, y, width, height)
  * @property string|null $color Annotation color/theme
  * @property float|null $zoom_level Zoom level when annotation was created
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
  */
-final class DesignFeedback extends BaseFeedback
+final class DesignFeedback extends Model implements BaseModelContract
 {
+    use HasFactory, HasUlids, LivesInBusinessDB, IsBaseModel;
+
     protected $table = 'design_feedbacks';
 
     protected $fillable = [
-        ...parent::getFillable(),
+        'creator_id',
+        'content',
+        'feedbackable_type',
+        'feedbackable_id',
+        'status',
+        'urgency',
+        'resolution',
+        'resolved_by',
+        'resolved_at',
         'x_coordinate',
         'y_coordinate',
         'annotation_type',
@@ -32,6 +65,29 @@ final class DesignFeedback extends BaseFeedback
         'color',
         'zoom_level',
     ];
+
+    protected $with = ['creator'];
+
+    // Common Relationships
+    public function feedbackable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function resolver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
+    }
+
+    public function acknowledgments(): MorphMany
+    {
+        return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
+    }
 
     // Type-specific scopes
     public function scopeAtCoordinates(Builder $query, int $x, int $y, int $tolerance = 20): Builder
@@ -340,10 +396,22 @@ final class DesignFeedback extends BaseFeedback
         return $nearby->count() / $area * 10000; // Normalize to per 10k pixels
     }
 
+    public function getModelType(): string
+    {
+        return $this->getFeedbackType();
+    }
+
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
+
     protected function casts(): array
     {
         return [
-            ...parent::casts(),
+            'status' => FeedbackStatus::class,
+            'urgency' => FeedbackUrgency::class,
+            'resolved_at' => 'datetime',
             'x_coordinate' => 'integer',
             'y_coordinate' => 'integer',
             'annotation_data' => 'array',

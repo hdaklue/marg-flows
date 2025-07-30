@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\Database\LivesInBusinessDB;
-use App\Concerns\Model\IsBaseModel;
 use App\Contracts\Model\BaseModelContract;
 use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
- * Base abstract class for all feedback types
- * 
+ * Base abstract class for all feedback types.
+ *
  * @property string $id
  * @property string $creator_id
  * @property string $content
@@ -28,13 +28,13 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property FeedbackUrgency $urgency
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Carbon\Carbon|null $resolved_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon|null $resolved_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
-abstract class BaseFeedback extends Model implements BaseModelContract
+abstract class BaseFeedback extends Model
 {
-    use HasFactory, HasUlids, LivesInBusinessDB, IsBaseModel;
+    use HasFactory, HasUlids, LivesInBusinessDB;
 
     protected $fillable = [
         'creator_id',
@@ -49,6 +49,14 @@ abstract class BaseFeedback extends Model implements BaseModelContract
     ];
 
     protected $with = ['creator'];
+
+    /**
+     * Get concrete model classes that extend this base model.
+     */
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
 
     // Common Relationships
     public function feedbackable(): MorphTo
@@ -115,22 +123,22 @@ abstract class BaseFeedback extends Model implements BaseModelContract
 
     public function getStatusColorAttribute(): string
     {
-        return $this->status->color();
+        return $this->status->getColor();
     }
 
     public function getStatusLabelAttribute(): string
     {
-        return $this->status->label();
+        return $this->status->getLabel();
     }
 
     public function getUrgencyColorAttribute(): string
     {
-        return $this->urgency->color();
+        return $this->urgency->getColor();
     }
 
     public function getUrgencyLabelAttribute(): string
     {
-        return $this->urgency->label();
+        return $this->urgency->getLabel();
     }
 
     // Common Methods
@@ -186,7 +194,7 @@ abstract class BaseFeedback extends Model implements BaseModelContract
 
     public function markInProgress(): static
     {
-        $this->update(['status' => FeedbackStatus::IN_PROGRESS]);
+        $this->update(['status' => FeedbackStatus::RUNNING]);
 
         return $this;
     }
@@ -200,7 +208,7 @@ abstract class BaseFeedback extends Model implements BaseModelContract
     {
         return in_array($this->status, [
             FeedbackStatus::OPEN,
-            FeedbackStatus::IN_PROGRESS,
+            FeedbackStatus::RUNNING,
             FeedbackStatus::URGENT,
         ]);
     }
@@ -215,24 +223,16 @@ abstract class BaseFeedback extends Model implements BaseModelContract
 
     /**
      * Get the feedback type identifier
-     * Override in child classes to provide specific type
+     * Override in child classes to provide specific type.
      */
     abstract public function getFeedbackType(): string;
 
     /**
-     * Get the model type identifier (required by BaseModelContract)
+     * Get the model type identifier (required by BaseModelContract).
      */
     public function getModelType(): string
     {
         return $this->getFeedbackType();
-    }
-
-    /**
-     * Get concrete model classes that extend this base model
-     */
-    public static function getConcreteModels(): array
-    {
-        return array_values(config('feedback.concrete_models', []));
     }
 
     protected function casts(): array
