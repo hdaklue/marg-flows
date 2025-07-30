@@ -376,6 +376,13 @@
   @apply absolute z-10 flex items-center justify-center w-6 h-6 text-white transition-all duration-200 bg-red-500 rounded-full shadow-lg opacity-0 top-1 right-1 hover:bg-red-600 hover:opacity-100;
 }
 
+/* Show delete button on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .resizable-image__thumbnail-remove {
+    @apply opacity-90;
+  }
+}
+
 .resizable-image__thumbnail:hover .resizable-image__thumbnail-remove {
   @apply opacity-90;
 }
@@ -417,6 +424,22 @@
   @apply absolute z-10 flex items-center justify-center w-10 h-10 text-white transition-all duration-200 rounded-full top-4 right-4 bg-black/50 hover:bg-black/70;
 }
 
+.resizable-image__modal-delete {
+  @apply absolute z-10 flex items-center justify-center w-9 h-9 text-white transition-all duration-200 rounded-full top-6 right-16 opacity-0;
+  background-color: rgb(239 68 68) !important; /* red-500 */
+}
+
+.resizable-image__modal-delete:hover {
+  background-color: rgb(220 38 38) !important; /* red-600 */
+}
+
+/* Show delete button on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .resizable-image__modal-delete {
+    @apply opacity-100;
+  }
+}
+
 .resizable-image__modal-nav {
   @apply absolute z-10 flex items-center justify-center w-12 h-12 text-white transition-all duration-200 -translate-y-1/2 rounded-full top-1/2 bg-black/50 hover:bg-black/70;
 }
@@ -450,12 +473,18 @@
   .resizable-image__modal-close {
     @apply w-8 h-8 top-2 right-2;
   }
+
+  .resizable-image__modal-delete {
+    @apply w-7 h-7 top-4 right-12;
+  }
+
 }
 
 @media (max-width: 480px) {
   .resizable-image__thumbnail-grid {
     @apply grid-cols-2 gap-2;
   }
+
 }
 
 /* Inline Progress Styles */

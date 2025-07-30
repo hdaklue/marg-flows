@@ -130,7 +130,7 @@
                 </button>
                 <button @click="$wire.saveNewComment()" :disabled="!$wire.canSave"
                     :class="isDesktop ?
-                        'flex-1 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-zinc-300 dark:disabled:bg-zinc-600' :
+                        'flex-1 px-4 py-2 font-medium text-center transition-colors rounded-lg border border-sky-500 text-sky-500 hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 dark:hover:bg-sky-950/20 dark:text-sky-400 dark:border-sky-400' :
                         'flex-1 py-2 font-medium text-center transition-colors rounded-xl border border-sky-500 text-sky-500 hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 dark:hover:bg-sky-950/20 dark:text-sky-400 dark:border-sky-400'">
                     Save Comment
                 </button>

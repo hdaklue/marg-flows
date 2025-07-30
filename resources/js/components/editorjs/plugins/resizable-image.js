@@ -150,7 +150,7 @@ class ResizableImage {
             e.preventDefault();
             const files = Array.from(e.target.files);
             if (files.length > 0 && !this.uploading) {
-                this.uploadFiles(files);
+                this.handleUpload(files);
             }
             // Clear input to allow same file selection
             e.target.value = '';
@@ -193,7 +193,7 @@ class ResizableImage {
                     file.type.startsWith('image/')
                 );
                 if (files.length > 0) {
-                    this.uploadFiles(files);
+                    this.handleUpload(files);
                 }
             }
         };
@@ -254,7 +254,7 @@ class ResizableImage {
     onUpload(e) {
         const file = e.target.files[0];
         if (file) {
-            this.uploadFile(file);
+            this.handleUpload([file]);
         }
     }
 
@@ -266,7 +266,7 @@ class ResizableImage {
                 if (item.type.indexOf('image') !== -1) {
                     const file = item.getAsFile();
                     if (file) {
-                        this.uploadFile(file);
+                        this.handleUpload([file]);
                         e.preventDefault();
                     }
                 }
@@ -280,7 +280,13 @@ class ResizableImage {
         }
     }
 
-    async uploadFiles(files) {
+    /**
+     * UNIFIED UPLOAD HANDLER - Single source of truth for all uploads
+     */
+    async handleUpload(files) {
+        // Convert single file to array for unified processing
+        const fileArray = Array.isArray(files) ? files : [files];
+        
         // Prevent multiple uploads
         if (this.uploading) {
             return;
@@ -288,108 +294,135 @@ class ResizableImage {
 
         this.uploading = true;
 
-        // Initialize upload tracking for each file
-        this.uploadProgress = files.map((file, index) => ({
-            id: `upload-${Date.now()}-${index}`,
+        // Initialize upload tracking for each file with unique IDs
+        this.uploadProgress = fileArray.map((file, index) => ({
+            id: `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             file,
             name: file.name,
             size: file.size,
-            status: 'pending', // pending, uploading, success, error
+            status: 'pending',
             progress: 0,
             error: null,
             retryCount: 0
         }));
 
-        // Show inline progress interface
+        // Show progress interface
         this.showInlineProgress();
 
-        // Debug log
-        console.log('Upload progress initialized:', this.uploadProgress);
-
         try {
-            // Upload files sequentially to avoid overwhelming the server
+            // Process each file sequentially
             for (let i = 0; i < this.uploadProgress.length; i++) {
-                await this.uploadSingleFileWithProgress(i);
+                await this.processFileUpload(i);
             }
 
-            // Hide progress and show gallery
-            this.hideInlineProgress();
-            this.hideUploadContainer();
-            this.renderGallery();
+            // Complete upload process (handles both success and error cases)
+            this.completeUpload();
         } catch (error) {
-            // Don't hide progress on error - let user retry
-            console.error('Upload error:', error);
+            console.error('Upload process error:', error);
         } finally {
             this.uploading = false;
         }
     }
 
-    uploadFile(file) {
-        // Legacy method - convert to use new uploadFiles method
-        this.uploadFiles([file]);
-    }
-
-    async uploadSingleFileWithProgress(index) {
+    async processFileUpload(index) {
         const uploadItem = this.uploadProgress[index];
         if (!uploadItem) return;
 
+        // Update status to uploading
         uploadItem.status = 'uploading';
         uploadItem.progress = 0;
         this.updateProgressItem(index);
 
         try {
-            const response = await this.uploadSingleFile(uploadItem.file);
+            // Perform the actual upload
+            const response = await this.performUpload(uploadItem.file);
+            
+            // Validate response
+            if (!response.url && !response.file?.url) {
+                throw new Error('No URL in response');
+            }
 
-            // Add to data.files array
-            this.data.files.push({
-                url: response.url || response.file?.url,
-                caption: response.caption || '',
-                width: response.width || null,
-                height: response.height || null
-            });
-
+            // Add successful upload to data
+            this.addUploadedFile(response);
+            
+            // Update progress item
             uploadItem.status = 'success';
             uploadItem.progress = 100;
             this.updateProgressItem(index);
             
-            // Tell Editor that block was changed
-            if (this.blockAPI && this.blockAPI.dispatchChange) {
-                this.blockAPI.dispatchChange();
-            }
+            // Remove successful upload from DOM immediately
+            this.removeProgressItem(uploadItem.id);
             
-            // Signal editor is free after upload completes
-            setTimeout(() => {
-                document.dispatchEvent(new CustomEvent('editor:free'));
-            }, 0);
+            // Notify editor of changes
+            this.notifyEditorChange();
 
         } catch (error) {
+            // Handle upload error
             uploadItem.status = 'error';
             uploadItem.error = error.message || 'Upload failed';
             this.updateProgressItem(index);
             
-            // Signal editor is free even on error (after onChange has chance to fire)
-            setTimeout(() => {
-                document.dispatchEvent(new CustomEvent('editor:free'));
-            }, 0);
-            throw error;
+            console.error(`Upload failed for file ${index}:`, error);
         }
     }
 
-    async uploadSingleFile(file) {
-        // Upload a single file and add to data.files array
-        return new Promise((resolve, reject) => {
-            if (this.config.uploader && typeof this.config.uploader.uploadByFile === 'function') {
-                // Use custom uploader
-                this.config.uploader.uploadByFile(file)
-                    .then(resolve)
-                    .catch(reject);
-            } else {
-                // Use default upload method
-                this.defaultUpload(file)
-                    .then(resolve)
-                    .catch(reject);
-            }
-        });
+    async performUpload(file) {
+        // Single method for actual upload logic
+        if (this.config.uploader && typeof this.config.uploader.uploadByFile === 'function') {
+            return await this.config.uploader.uploadByFile(file);
+        } else {
+            return await this.executeUploadRequest(file);
+        }
+    }
+
+    addUploadedFile(response) {
+        const fileData = {
+            url: response.url || response.file?.url,
+            caption: response.caption || '',
+            width: response.width || null,
+            height: response.height || null
+        };
+        this.data.files.push(fileData);
+    }
+
+    completeUpload() {
+        // Check if any uploads failed
+        const hasErrors = this.uploadProgress.some(item => item.status === 'error');
+        const successCount = this.uploadProgress.filter(item => item.status === 'success').length;
+        const errorCount = this.uploadProgress.filter(item => item.status === 'error').length;
+        
+        
+        // Always render gallery if there are successful uploads
+        if (successCount > 0) {
+            this.renderGallery();
+            // Hide upload container when gallery is showing
+            this.hideUploadContainer();
+        }
+        
+        if (hasErrors) {
+            // Keep progress visible for failed uploads
+            return;
+        }
+        
+        this.hideInlineProgress();
+    }
+
+    notifyEditorChange() {
+        if (this.blockAPI && this.blockAPI.dispatchChange) {
+            this.blockAPI.dispatchChange();
+        }
+        setTimeout(() => {
+            document.dispatchEvent(new CustomEvent('editor:free'));
+        }, 0);
+    }
+
+    // Legacy method support
+    uploadFiles(files) {
+        return this.handleUpload(files);
+    }
+
+    uploadFile(file) {
+        return this.handleUpload([file]);
     }
 
     hideUploadContainer() {
@@ -405,6 +438,7 @@ class ResizableImage {
     }
 
     renderGallery() {
+        
         // Remove existing gallery if any
         const existingGallery = this.wrapper.querySelector('.resizable-image__gallery');
         if (existingGallery) {
@@ -474,7 +508,7 @@ class ResizableImage {
             `;
             removeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                this.removeImage(index);
+                this.handleDelete(index);
             });
             thumbnail.appendChild(removeBtn);
         }
@@ -531,58 +565,65 @@ class ResizableImage {
         return captionInput;
     }
 
-    async removeImage(index) {
-        if (this.data.files && this.data.files[index]) {
-            const file = this.data.files[index];
+    /**
+     * UNIFIED DELETE HANDLER - Single source of truth for all deletions
+     */
+    async handleDelete(index) {
+        if (!this.data.files || !this.data.files[index]) {
+            return;
+        }
 
-            // Signal editor is busy for the delete operation
-            document.dispatchEvent(new CustomEvent('editor:busy'));
+        const file = this.data.files[index];
 
-            try {
-                // Delete from server if file has URL and wait for completion
-                if (file.url) {
-                    await this.deleteFromServer(file.url);
-                }
+        // Signal editor is busy
+        document.dispatchEvent(new CustomEvent('editor:busy'));
 
-                // Remove from data array
-                this.data.files.splice(index, 1);
+        try {
+            // Delete from server if URL exists
+            if (file.url) {
+                await this.executeDeleteRequest(file.url);
+            }
 
-                // Ensure data always has a valid structure (empty array)
-                if (this.data.files.length === 0) {
-                    // Keep empty files array as placeholder to maintain valid state
-                    this.data.files = [];
-                    // Ensure caption property exists
-                    if (!this.data.caption) {
-                        this.data.caption = '';
-                    }
-                }
+            // Remove from data array
+            this.removeFileFromData(index);
 
-                // Re-render gallery
-                this.renderGallery();
+            // Update UI
+            this.updateAfterDelete();
 
-                // If no images left, show upload container
-                if (this.data.files.length === 0) {
-                    this.showUploadContainer();
-                }
+            // Notify editor
+            this.notifyEditorChange();
 
-                // Tell Editor that block was changed
-                if (this.blockAPI && this.blockAPI.dispatchChange) {
-                    this.blockAPI.dispatchChange();
-                }
+        } catch (error) {
+            console.error('Delete operation failed:', error);
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent('editor:free'));
+            }, 0);
+        }
+    }
 
-                // Signal editor is free after successful delete and block change
-                setTimeout(() => {
-                    document.dispatchEvent(new CustomEvent('editor:free'));
-                }, 0);
+    removeFileFromData(index) {
+        this.data.files.splice(index, 1);
 
-            } catch (error) {
-                console.error('Failed to delete image:', error);
-                // Signal editor is free even on error
-                setTimeout(() => {
-                    document.dispatchEvent(new CustomEvent('editor:free'));
-                }, 0);
+        // Ensure valid data structure
+        if (this.data.files.length === 0) {
+            this.data.files = [];
+            if (!this.data.caption) {
+                this.data.caption = '';
             }
         }
+    }
+
+    updateAfterDelete() {
+        this.renderGallery();
+        
+        if (this.data.files.length === 0) {
+            this.showUploadContainer();
+        }
+    }
+
+    // Legacy method support
+    async removeImage(index) {
+        return this.handleDelete(index);
     }
 
     openModal(startIndex = 0) {
@@ -614,6 +655,18 @@ class ResizableImage {
             </svg>
         `;
 
+        // Create delete button (only if not readonly)
+        let deleteBtn;
+        if (!this.readOnly) {
+            deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('resizable-image__modal-delete');
+            deleteBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2m-6 5v6m4-6v6"/>
+                </svg>
+            `;
+        }
+
         // Create navigation buttons (only if more than 1 image)
         let prevBtn, nextBtn, counter;
         if (this.data.files.length > 1) {
@@ -642,6 +695,9 @@ class ResizableImage {
         // Assemble modal
         modalContent.appendChild(modalImage);
         modalContent.appendChild(closeBtn);
+        if (deleteBtn) {
+            modalContent.appendChild(deleteBtn);
+        }
         if (prevBtn && nextBtn) {
             modalContent.appendChild(prevBtn);
             modalContent.appendChild(nextBtn);
@@ -691,6 +747,32 @@ class ResizableImage {
 
         // Attach event listeners
         closeBtn.addEventListener('click', closeModal);
+        
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                try {
+                    await this.handleDelete(this.currentModalIndex);
+                    // If no files left, close modal
+                    if (!this.data.files || this.data.files.length === 0) {
+                        closeModal();
+                    } else {
+                        // Adjust index if needed and update modal
+                        if (this.currentModalIndex >= this.data.files.length) {
+                            this.currentModalIndex = this.data.files.length - 1;
+                        }
+                        updateModalImage();
+                        // Update counter if exists
+                        if (counter) {
+                            counter.textContent = `${this.currentModalIndex + 1} / ${this.data.files.length}`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to delete image from modal:', error);
+                }
+            });
+        }
+        
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal();
         });
@@ -709,49 +791,42 @@ class ResizableImage {
         modal.focus();
     }
 
-    uploadFileOld(file) {
-        // Prevent multiple uploads
-        if (this.uploading) {
-            return;
-        }
 
-        this.uploading = true;
-        this.showProgress();
-
-        if (this.config.uploader && typeof this.config.uploader.uploadByFile === 'function') {
-            // Use custom uploader
-            this.config.uploader.uploadByFile(file)
-                .then(response => this.onUploadSuccess(response))
-                .catch(error => this.onUploadError(error))
-                .finally(() => {
-                    this.hideProgress();
-                    this.uploading = false;
-                });
-        } else {
-            // Use default upload method
-            this.defaultUpload(file)
-                .then(response => this.onUploadSuccess(response))
-                .catch(error => this.onUploadError(error))
-                .finally(() => {
-                    this.hideProgress();
-                    this.uploading = false;
-                });
-        }
-    }
-
-    defaultUpload(file) {
+    async executeUploadRequest(file) {
         const formData = new FormData();
         formData.append(this.config.field, file);
 
         // Signal editor is busy during upload
         document.dispatchEvent(new CustomEvent('editor:busy'));
 
-        return fetch(this.config.endpoints.byFile, {
-            method: 'POST',
-            body: formData,
-            headers: this.config.additionalRequestHeaders
-        })
-            .then(response => response.json());
+        try {
+            const response = await fetch(this.config.endpoints.byFile, {
+                method: 'POST',
+                body: formData,
+                headers: this.config.additionalRequestHeaders
+            });
+
+            // Parse JSON response
+            let json;
+            try {
+                json = await response.json();
+            } catch (parseError) {
+                throw new Error(`Invalid response format: ${response.status}`);
+            }
+
+            // Validate response success
+            if (json.success === 0 || json.success === false) {
+                throw new Error(json.message || 'Upload failed');
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return json;
+        } catch (error) {
+            throw error;
+        }
     }
 
     onUploadSuccess(response) {
@@ -826,10 +901,6 @@ class ResizableImage {
     }
 
     showInlineProgress() {
-        console.log('showInlineProgress called', {
-            wrapper: !!this.wrapper,
-            uploadProgress: this.uploadProgress?.length || 0
-        });
 
         if (!this.wrapper || !this.uploadProgress) return;
 
@@ -854,7 +925,6 @@ class ResizableImage {
 
         // Create progress thumbnails
         this.uploadProgress.forEach((item, index) => {
-            console.log('Creating progress thumbnail for:', item.name);
             const progressThumbnail = this.createProgressThumbnail(item, index);
             thumbnailGrid.appendChild(progressThumbnail);
         });
@@ -872,10 +942,27 @@ class ResizableImage {
         }
     }
 
+    removeProgressItem(itemId) {
+        const progressItem = this.wrapper.querySelector(`.resizable-image__progress-thumbnail[data-id="${itemId}"]`);
+        if (progressItem) {
+            progressItem.remove();
+        }
+        
+        // Remove from uploadProgress array
+        this.uploadProgress = this.uploadProgress.filter(item => item.id !== itemId);
+        
+        // Check if progress container should be hidden
+        const remainingItems = this.wrapper.querySelectorAll('.resizable-image__progress-thumbnail');
+        if (remainingItems.length === 0) {
+            this.hideInlineProgress();
+        }
+    }
+
     createProgressThumbnail(uploadItem, index) {
         const thumbnail = document.createElement('div');
         thumbnail.classList.add('resizable-image__progress-thumbnail');
-        thumbnail.setAttribute('data-index', index);
+        thumbnail.setAttribute('data-id', uploadItem.id);
+        thumbnail.setAttribute('data-index', index); // Keep for backward compatibility
 
         // Create preview if it's an image
         let previewContent = '';
@@ -950,23 +1037,40 @@ class ResizableImage {
 
         // Handle retry for failed uploads
         if (uploadItem.status === 'error') {
-            // Remove existing retry button if any
+            // Remove existing buttons if any
             const existingRetry = progressInfo.querySelector('.resizable-image__retry-btn');
-            if (existingRetry) {
-                existingRetry.remove();
-            }
+            const existingDiscard = progressInfo.querySelector('.resizable-image__discard-btn');
+            if (existingRetry) existingRetry.remove();
+            if (existingDiscard) existingDiscard.remove();
 
+            // Create button container
+            const buttonContainer = document.createElement('div');
+            buttonContainer.classList.add('resizable-image__error-buttons');
+            buttonContainer.style.cssText = 'display: flex; gap: 8px; margin-top: 4px;';
+
+            // Retry button
             const retryBtn = document.createElement('button');
             retryBtn.classList.add('resizable-image__retry-btn');
             retryBtn.innerHTML = `
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
-                Retry
             `;
+            retryBtn.addEventListener('click', () => this.retryUpload(uploadItem.id));
 
-            retryBtn.addEventListener('click', () => this.retryUpload(index));
-            progressInfo.appendChild(retryBtn);
+            // Discard button
+            const discardBtn = document.createElement('button');
+            discardBtn.classList.add('resizable-image__discard-btn');
+            discardBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            `;
+            discardBtn.addEventListener('click', () => this.discardUpload(uploadItem.id));
+
+            buttonContainer.appendChild(retryBtn);
+            buttonContainer.appendChild(discardBtn);
+            progressInfo.appendChild(buttonContainer);
 
             // Show error message
             if (uploadItem.error && statusText) {
@@ -1002,31 +1106,59 @@ class ResizableImage {
         }
     }
 
-    async retryUpload(index) {
-        const uploadItem = this.uploadProgress[index];
+    async retryUpload(itemId) {
+        const uploadIndex = this.uploadProgress.findIndex(item => item.id === itemId);
+        const uploadItem = this.uploadProgress[uploadIndex];
         if (!uploadItem) return;
-
 
         uploadItem.retryCount++;
         uploadItem.status = 'uploading';
         uploadItem.progress = 0;
         uploadItem.error = null;
 
-        this.updateProgressItem(index);
+        this.updateProgressItem(uploadIndex);
 
         try {
-            await this.uploadSingleFileWithProgress(index);
+            await this.processFileUpload(uploadIndex);
 
             // Check if all uploads are complete
             const allComplete = this.uploadProgress.every(item => item.status === 'success');
             if (allComplete) {
-                this.hideInlineProgress();
-                this.hideUploadContainer();
-                this.renderGallery();
+                this.completeUpload();
             }
         } catch (error) {
-            // Error handling is done in uploadSingleFileWithProgress
             console.error('Retry failed:', error);
+        }
+    }
+
+    discardUpload(itemId) {
+        const uploadItem = this.uploadProgress.find(item => item.id === itemId);
+        if (!uploadItem || uploadItem.status !== 'error') {
+            return;
+        }
+
+
+        // Remove using the new method
+        this.removeProgressItem(itemId);
+
+        // Notify editor of changes
+        this.notifyEditorChange();
+
+        // Check if all remaining uploads are complete or if no uploads left
+        if (this.uploadProgress.length === 0) {
+            
+            // Check if we have existing images in the gallery
+            if (this.data.files && this.data.files.length > 0) {
+                // Gallery already has "Add more" button, just ensure upload container is hidden
+                this.hideUploadContainer();
+            } else {
+                this.showUploadContainer();
+            }
+        } else {
+            const allComplete = this.uploadProgress.every(item => item.status === 'success');
+            if (allComplete) {
+                this.completeUpload();
+            }
         }
     }
 
@@ -1087,38 +1219,42 @@ class ResizableImage {
 
     // Settings removed for gallery functionality
 
-    deleteFromServer(url) {
-        console.log('Attempting to delete image from server:', url);
-
-        // Extract file path from URL for deletion
+    async executeDeleteRequest(url) {
+        // Extract file path from URL
         let filePath = url;
         if (filePath.includes('/storage/')) {
             const storageIndex = filePath.indexOf('/storage/');
             filePath = filePath.substring(storageIndex + '/storage/'.length);
         }
+        
+        // Ensure documents/ prefix
+        if (!filePath.startsWith('documents/')) {
+            filePath = 'documents/' + filePath;
+        }
 
-        console.log('Delete endpoint:', this.config.endpoints.delete || '/delete-image');
-        console.log('File path:', filePath);
+        try {
+            const response = await fetch(this.config.endpoints.delete || '/delete-image', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.config.additionalRequestHeaders
+                },
+                body: JSON.stringify({ path: filePath })
+            });
 
-        // Signal editor is busy at start of delete fetch
-        document.dispatchEvent(new CustomEvent('editor:busy'));
-
-        // Call delete endpoint
-        return fetch(this.config.endpoints.delete || '/delete-image', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                ...this.config.additionalRequestHeaders
-            },
-            body: JSON.stringify({ path: filePath })
-        }).then(response => {
-            console.log('Delete response:', response.status);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`Delete failed: ${response.status}`);
             }
-        }).catch(error => {
-            console.warn('Failed to delete file from server:', error);
-        });
+
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Legacy method support
+    deleteFromServer(url) {
+        return this.executeDeleteRequest(url);
     }
 
     cleanupEventListeners() {
@@ -1156,7 +1292,7 @@ class ResizableImage {
                 // Delete all images from server
                 const deletePromises = this.data.files.map(file => {
                     if (file.url) {
-                        return this.deleteFromServer(file.url);
+                        return this.executeDeleteRequest(file.url);
                     }
                     return Promise.resolve();
                 });

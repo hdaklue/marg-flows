@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\EditorJs;
 
-use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Spatie\Image\Image;
 
-class OptimizeEditorJsImage
+final class OptimizeEditorJsImage
 {
     use AsAction;
 
-    public function handle()
+    public function handle(string $image)
     {
-        Log::info('OptimizeEditorJsImage');
+        Image::load($image)
+            ->optimize()
+            ->save();
+    }
+
+    public function asJob(string $image): void
+    {
+        $this->handle($image);
     }
 }

@@ -23,6 +23,7 @@ final class DocumentComponent extends Component
 
     public function mount(string $pageId, $canEdit = true)
     {
+
         $this->page = Document::where('id', $pageId)->firstOrFail();
         $this->content = is_array($this->page->blocks)
             ? json_encode($this->page->blocks)

@@ -69,6 +69,7 @@ final class AppServiceProvider extends ServiceProvider
             AlpineComponent::make('voiceRecorder', __DIR__ . '/../../resources/js/dist/components/voice-recorder.js'),
             AlpineComponent::make('videoRecorder', __DIR__ . '/../../resources/js/dist/components/video-recorder.js'),
             AlpineComponent::make('audioPlayer', __DIR__ . '/../../resources/js/dist/components/audio-player.js'),
+            AlpineComponent::make('designAnnotation', __DIR__ . '/../../resources/js/dist/components/design-annotation.js'),
             Css::make('chunkedFileUploadCss', __DIR__ . '/../../resources/css/components/chunked-file-upload.css')
                 ->loadedOnRequest(),
             Css::make('mentionableTextCss', __DIR__ . '/../../resources/css/components/mentionable-text.css')

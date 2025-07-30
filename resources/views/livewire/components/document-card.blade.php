@@ -272,6 +272,7 @@
         </div>
     </div>
     <div class="flex justify-end w-full py-2">
+
         <x-user-avatar-stack :users="$this->participantsArray" :roleableKey="$this->page->getKey()" :roleableType="$this->page->getMorphClass()" :canEdit="$this->userPermissions['canManageMembers']" size='2xs' />
     </div>
 </div>

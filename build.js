@@ -84,3 +84,9 @@ compile({
     entryPoints: ['./resources/js/components/video-recorder/index.js'],
     outfile: './resources/js/dist/components/video-recorder.js',
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/components/design-annotation/index.js'],
+    outfile: './resources/js/dist/components/design-annotation.js',
+})

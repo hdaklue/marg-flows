@@ -9,6 +9,7 @@ use App\Filament\Resources\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Computed;
 
@@ -22,6 +23,11 @@ final class ViewDocument extends ViewRecord
     protected static string $view = 'filament.resources.document-resource.pages.view';
 
     public ?array $data = [];
+
+    public function getTitle(): string|Htmlable
+    {
+        return '';
+    }
 
     public function mount(int|string $record): void
     {

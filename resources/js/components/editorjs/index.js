@@ -41,10 +41,12 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 this.state = JSON.stringify(initialData);
             }
 
+            console.log(this.canEdit);
+
             this.editor = new EditorJS({
                 holder: 'editor-wrap',
                 data: initialData,
-                readOnly: !this.canEdit,
+                readOnly: this.canEdit,
                 placeholder: 'Let`s write an awesome story!',
                 defaultBlock: 'paragraph',
                 inlineToolbar: ['bold', 'link', 'convertTo'],

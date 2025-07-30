@@ -37,7 +37,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         isSticky: false,
         cachedTopbarHeight: 80,
         editorReady: false,
-        
+
         // Event listener references for cleanup
         editorBusyHandler: null,
         editorFreeHandler: null,
@@ -66,7 +66,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         get topbarHeight() {
             return this.cachedTopbarHeight;
         },
-        
+
         updateTopbarHeight() {
             const topbar = document.querySelector('.fi-topbar');
             this.cachedTopbarHeight = topbar ? topbar.offsetHeight : 80;
@@ -158,7 +158,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     if (!this.editorReady) {
                         return;
                     }
-                    
+
                     this.editor.save()
                         .then((outputData) => {
                             clearTimeout(this.debounceTimer);
@@ -185,18 +185,18 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     this.editor.isReady?.then(() => {
                         // Mark editor as ready
                         this.editorReady = true;
-                        
+
                         // Enable inline toolbar now that editor is ready
                         if (this.editor.configuration) {
                             this.editor.configuration.inlineToolbar = ['bold', 'link', 'convertTo'];
                             this.editor.configuration.defaultBlock = 'paragraph';
                         }
-                        
+
                         // If editor is empty, add a default paragraph block
                         if (this.editor.blocks.getBlocksCount() === 0) {
                             this.editor.blocks.insert('paragraph', {}, {}, 0, true);
                         }
-                        
+
                         const undo = new Undo({ editor: this.editor });
                         new DragDrop(this.editor);
                         undo.initialize(initialData);
@@ -305,7 +305,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         normalizeState(state) {
             try {
                 const parsed = typeof state === 'string' ? JSON.parse(state) : state;
-                
+
                 if (parsed && Array.isArray(parsed.blocks)) {
                     return {
                         ...parsed,
@@ -339,12 +339,12 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             this.livewireNavigatingHandler = (e) => {
                 if (this.isEditorBusy || (this.isDirty && this.saveCallback)) {
                     e.preventDefault();
-                    
+
                     // Store navigation URL and show modal
                     this.navigationUrl = e.detail.url || e.target.href;
                     this.showNavigationModal = true;
                     this.navigationActiveTab = this.isEditorBusy ? 'cancel' : 'save';
-                    
+
                     return false;
                 }
             };
@@ -423,31 +423,31 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             try {
                 const outputData = await this.editor.save();
                 this.state = outputData;
-                
+
                 await this.saveCallback(JSON.stringify(this.state));
-                
+
                 this.saveStatus = 'success';
-                
+
                 // Get the time from the state that was just saved
                 const savedStateTime = this.state.time;
                 this.lastSaved = new Date(savedStateTime); // Convert to Date object for formatLastSaved()
                 this.lastSavedTime = savedStateTime;
                 this.currentEditorTime = savedStateTime; // Set both to same value after save
                 this.justSaved = true; // Flag to prevent onChange from overriding this
-                
+
                 this.restartUpdateTimer(); // Restart timer from the new save time
-                
+
                 // Clear success status after 3 seconds
                 setTimeout(() => {
                     if (this.saveStatus === 'success') {
                         this.saveStatus = null;
                     }
                 }, 3000);
-                
+
             } catch (error) {
                 console.error('Save failed:', error);
                 this.saveStatus = 'error';
-                
+
                 // Clear error status after 5 seconds
                 setTimeout(() => {
                     if (this.saveStatus === 'error') {
@@ -504,7 +504,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 clearInterval(this.updateTimer);
                 this.updateTimer = null;
             }
-            
+
             // Cleanup event listeners
             if (this.editorBusyHandler) {
                 document.removeEventListener('editor:busy', this.editorBusyHandler);
@@ -521,7 +521,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             if (this.resizeHandler) {
                 window.removeEventListener('resize', this.resizeHandler);
             }
-            
+
             // Cleanup editor
             if (this.editor && this.editor.destroy) {
                 this.editor.destroy();

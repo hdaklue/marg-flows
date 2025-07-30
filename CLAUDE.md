@@ -34,6 +34,10 @@ php artisan db:seed --class=DatabaseSeeder  # Performance testing
 ## Available Libraries (Context7)
 - **Laravel Actions** (`/lorisleiva/laravel-actions-docs`) - Single-purpose action classes with controller/job/command/listener support
 - **Laravel Soulbscription** (`/lucasdotvin/laravel-soulbscription`) - Subscription and feature consumption management
+- **Tailwind CSS 3** (`/context7/v3_tailwindcss`) - Utility-first CSS framework for rapidly building custom user interfaces
+- **Alpine.js 3** (`/alpinejs/alpine`) - Rugged, minimal framework for composing JavaScript behavior in markup
+- **Filament 3** (`/context7/filamentphp`) - Collection of tools for rapidly building beautiful TALL stack applications
+- **Livewire 3** (`/context7/livewire_laravel_com-docs`) - Full-stack framework for Laravel that simplifies building dynamic UIs
 
 ## Local Documentation
 - **Laravel Validated DTO** (`laravel-validated-dto-docs.md`) - Data Transfer Objects with validation for Laravel applications

@@ -13,11 +13,11 @@
             comments.</p>
 
 
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
             @foreach ($images as $image)
-                <div class="flex p-2 space-x-3 overflow-hidden transition-all rounded cursor-pointer bg-zinc-100 hover:scale-105 dark:bg-zinc-800 dark:hover:bg-zinc-700"
+                <div class="flex p-2 space-x-3 overflow-hidden transition-all rounded cursor-pointer bg-zinc-100 hover:scale-105 focus-within:ring-2 focus-within:ring-sky-500 focus-within:ring-offset-2 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:focus-within:ring-offset-zinc-900"
                     @click="openModal('{{ asset($image['url']) }}', @js($image['comments'] ?? []), '{{ $image['id'] }}')">
-                    <div class="w-20 h-20 overflow-hidden">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 overflow-hidden flex-shrink-0">
                         <img src="{{ asset($image['url']) }}" alt="Design" class="object-cover w-full h-auto"
                             loading="lazy">
                     </div>
@@ -46,10 +46,10 @@
     </div>
 
     <!-- Main Review Modal -->
-    <div x-show="isOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+    <div x-show="isOpen" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/90" @click="handleBackdropClick($event)"
+        class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click="handleBackdropClick($event)"
         style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-title">
 
         <div class="relative flex max-h-[95vh] max-w-[95vw] flex-col rounded-lg bg-white shadow-2xl transition-all duration-200 dark:bg-zinc-900"
@@ -161,27 +161,7 @@
 
                     <!-- Up Arrow -->
                     <button x-show="isMobile && isZoomed" @click.stop="moveUp()" @touchend.stop.prevent="moveUp()"
-                        style="
-                                position: absolute;
-                                top: 20px;
-                                left: 50%;
-                                transform: translateX(-50%);
-                                width: 48px;
-                                height: 48px;
-                                background: rgba(9, 9, 11, 0.85);
-                                border: 1px solid rgba(255, 255, 255, 0.2);
-                                border-radius: 12px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                padding: 13px;
-                                color: white;
-                                backdrop-filter: blur(8px);
-                                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                                cursor: pointer;
-                                z-index: 25;
-                            "
+                        class="absolute top-5 left-1/2 -translate-x-1/2 w-12 h-12 bg-zinc-900/85 border border-white/20 rounded-xl flex items-center justify-center p-3 text-white backdrop-blur-sm shadow-2xl transition-all duration-300 ease-out cursor-pointer z-25"
                         aria-label="Move image up">
                         <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             stroke-width="2.5">
@@ -192,27 +172,7 @@
                     <!-- Down Arrow -->
                     <button x-show="isMobile && isZoomed" @click.stop="moveDown()"
                         @touchend.stop.prevent="moveDown()"
-                        style="
-                                position: absolute;
-                                bottom: 20px;
-                                left: 50%;
-                                transform: translateX(-50%);
-                                width: 48px;
-                                height: 48px;
-                                background: rgba(9, 9, 11, 0.85);
-                                border: 1px solid rgba(255, 255, 255, 0.2);
-                                border-radius: 12px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                padding: 13px;
-                                color: white;
-                                backdrop-filter: blur(8px);
-                                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                                cursor: pointer;
-                                z-index: 25;
-                            "
+                        class="absolute bottom-5 left-1/2 -translate-x-1/2 w-12 h-12 bg-zinc-900/85 border border-white/20 rounded-xl flex items-center justify-center p-3 text-white backdrop-blur-sm shadow-2xl transition-all duration-300 ease-out cursor-pointer z-25"
                         aria-label="Move image down">
                         <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             stroke-width="2.5">
@@ -223,27 +183,7 @@
                     <!-- Left Arrow -->
                     <button x-show="isMobile && isZoomed" @click.stop="moveLeft()"
                         @touchend.stop.prevent="moveLeft()"
-                        style="
-                                position: absolute;
-                                left: 20px;
-                                top: 50%;
-                                transform: translateY(-50%);
-                                width: 48px;
-                                height: 48px;
-                                background: rgba(9, 9, 11, 0.85);
-                                border: 1px solid rgba(255, 255, 255, 0.2);
-                                border-radius: 12px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                padding: 13px;
-                                color: white;
-                                backdrop-filter: blur(8px);
-                                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                                cursor: pointer;
-                                z-index: 25;
-                            "
+                        class="absolute left-5 top-1/2 -translate-y-1/2 w-12 h-12 bg-zinc-900/85 border border-white/20 rounded-xl flex items-center justify-center p-3 text-white backdrop-blur-sm shadow-2xl transition-all duration-300 ease-out cursor-pointer z-25"
                         aria-label="Move image left">
                         <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             stroke-width="2.5">
@@ -254,27 +194,7 @@
                     <!-- Right Arrow -->
                     <button x-show="isMobile && isZoomed" @click.stop="moveRight()"
                         @touchend.stop.prevent="moveRight()"
-                        style="
-                                position: absolute;
-                                right: 20px;
-                                top: 50%;
-                                transform: translateY(-50%);
-                                width: 48px;
-                                height: 48px;
-                                background: rgba(9, 9, 11, 0.85);
-                                border: 1px solid rgba(255, 255, 255, 0.2);
-                                border-radius: 12px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                padding: 13px;
-                                color: white;
-                                backdrop-filter: blur(8px);
-                                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                                cursor: pointer;
-                                z-index: 25;
-                            "
+                        class="absolute right-5 top-1/2 -translate-y-1/2 w-12 h-12 bg-zinc-900/85 border border-white/20 rounded-xl flex items-center justify-center p-3 text-white backdrop-blur-sm shadow-2xl transition-all duration-300 ease-out cursor-pointer z-25"
                         aria-label="Move image right">
                         <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             stroke-width="2.5">
@@ -310,7 +230,7 @@
                         x-transition:leave="transition ease-in duration-150"
                         x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                         x-trap="showCommentFilter"
-                        class="absolute bottom-full left-1/2 z-[80] mb-2 hidden w-56 -translate-x-1/2 space-y-1 rounded-lg border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-700 dark:bg-zinc-800 sm:block"
+                        class="absolute bottom-full left-1/2 z-50 mb-2 hidden w-56 -translate-x-1/2 space-y-1 rounded-lg border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-700 dark:bg-zinc-800 sm:block"
                         role="menu" aria-label="Comment filter options">
                         <div class="mb-2">
                             <h4 class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Filter Comments</h4>
@@ -400,7 +320,7 @@
     <div x-show="showCommentFilter && isMobile" x-cloak x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0" class="fixed inset-0 z-[90] flex items-end bg-black/50 backdrop-blur-sm"
+        x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-end bg-black/50 backdrop-blur-sm"
         @click="showCommentFilter = false" role="dialog" aria-modal="true" aria-labelledby="filter-modal-title">
 
         <div class="w-full px-4 pt-6 pb-8 bg-white shadow-2xl rounded-t-3xl dark:bg-zinc-900" @click.stop

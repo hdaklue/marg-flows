@@ -12,7 +12,6 @@
             {{ $resolvedStatePath }},
             '{{ $getUploadUrl() }}',
             @js($getEditable()),
-            '{{ $getHolderId() }}'
         )">
 
         <div id="editor-wrap" class="mx-auto max-w-6xl"></div>

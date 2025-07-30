@@ -5,6 +5,7 @@ import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.e
 import audioAnnotation from "./components/audio-annotation";
 
 import designReviewApp from "./components/image-review";
+import designAnnotationApp from "./components/design-annotation";
 import videoAnnotationComponent from "./components/video-annotation";
 
 import audioPlayer from './components/audio-player';
@@ -15,12 +16,17 @@ import videoRecorder from './components/video-recorder';
 import recorder from './components/voice-recorder';
 
 import anchor from "@alpinejs/anchor";
+import Hammer from 'hammerjs';
+
+// Make Hammer.js available globally
+window.Hammer = Hammer;
 
 
 // Make video annotation available globally for Blade component
 window.videoAnnotationComponent = videoAnnotationComponent;
 
 Alpine.data('designReviewApp', designReviewApp)
+Alpine.data('designAnnotationApp', designAnnotationApp)
 Alpine.data('videoAnnotation', videoAnnotationComponent)
 Alpine.data('audioAnnotation', audioAnnotation)
 Alpine.data('document', documentEditor);

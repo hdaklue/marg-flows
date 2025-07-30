@@ -21,6 +21,7 @@
         "predis/predis": "^3.0",
         "rinvex/countries": "^9.0",
         "spatie/eloquent-sortable": "^4.5",
+        "spatie/image": "^3.8",
         "spatie/laravel-image-optimizer": "^1.8",
         "wendelladriel/laravel-validated-dto": "^4.1"
     },

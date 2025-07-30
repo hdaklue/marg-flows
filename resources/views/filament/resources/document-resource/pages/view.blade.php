@@ -5,5 +5,5 @@
     </div>
     <div>
     </div>
-    <livewire:reusable.side-note-list :sidenoteable="$this->record" />
+    <livewire:reusable.side-note-list :sidenoteable="$this->record" :editable="$this->canEdit" />
 </x-filament-panels::page>
