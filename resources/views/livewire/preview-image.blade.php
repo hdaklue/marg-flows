@@ -210,7 +210,7 @@
             class="flex h-12 w-full grow-0 items-center justify-center gap-3 place-self-end rounded-b-lg border-t border-zinc-200 bg-white px-4 py-3 dark:border-zinc-700 dark:bg-zinc-900">
             <!-- Comment Filter -->
             <div class="relative" @click.outside="showCommentFilter = false">
-                <button @click="toggleCommentFilter" @touchend.prevent="toggleCommentFilter"
+                <button @click="toggleCommentFilter" @touchstart.passive @touchend.passive="toggleCommentFilter"
                     :class="showCommentFilter || hasActiveFilter ?
                         'bg-sky-500 hover:bg-sky-400 text-white' :
                         'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300'"
@@ -223,7 +223,7 @@
                 </button>
 
                 <!-- Dropdown positioned above footer -->
-                <div x-show="showCommentFilter" x-transition:enter="transition ease-out duration-200"
+                <div x-show="showCommentFilter" x-cloak x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                     x-transition:leave="transition ease-in duration-150"
                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
@@ -249,7 +249,7 @@
             </div>
 
             <!-- Show/Hide Comments -->
-            <button @click="toggleAllComments" @touchend.prevent="toggleAllComments"
+            <button @click="toggleAllComments" @touchstart.passive @touchend.passive="toggleAllComments"
                 :class="allCommentsHidden ?
                     'bg-sky-500 text-white hover:bg-sky-400' :
                     'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300'"
@@ -277,7 +277,7 @@
 
             <!-- Enhanced Zoom Controls with Gesture Status -->
             <div class="flex items-center gap-1">
-                <button @click="zoomOut()" @touchend.prevent="zoomOut()" :disabled="!canZoomOut"
+                <button @click="zoomOut()" @touchstart.passive @touchend.passive="zoomOut()" :disabled="!canZoomOut"
                     :class="!canZoomOut ? 'opacity-50 cursor-not-allowed' : 'hover:bg-zinc-200 dark:hover:bg-zinc-700'"
                     class="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sky-500 dark:bg-zinc-800 dark:text-zinc-300 sm:h-8 sm:w-8"
                     x-tooltip="'Zoom out'" aria-label="Zoom out">
@@ -288,7 +288,7 @@
                     </svg>
                 </button>
 
-                <button @click="resetZoom()" @touchend.prevent="resetZoom()"
+                <button @click="resetZoom()" @touchstart.passive @touchend.passive="resetZoom()"
                     :class="[
                         zoomLevel === 1 ? 'opacity-50' : 'hover:bg-zinc-200 dark:hover:bg-zinc-700',
                         currentGesture === 'pinching' ? 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20' : ''
@@ -299,7 +299,7 @@
                     <span class="text-xs font-bold" x-text="`${Math.round(zoomLevel * 100)}%`"></span>
                 </button>
 
-                <button @click="zoomIn()" @touchend.prevent="zoomIn()" :disabled="!canZoomIn"
+                <button @click="zoomIn()" @touchstart.passive @touchend.passive="zoomIn()" :disabled="!canZoomIn"
                     :class="!canZoomIn ? 'opacity-50 cursor-not-allowed' : 'hover:bg-zinc-200 dark:hover:bg-zinc-700'"
                     class="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sky-500 dark:bg-zinc-800 dark:text-zinc-300 sm:h-8 sm:w-8"
                     x-tooltip="'Zoom in'" aria-label="Zoom in">

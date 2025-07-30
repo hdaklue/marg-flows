@@ -87,6 +87,9 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
         metadata: {},
         imageNaturalWidth: 0,
         imageNaturalHeight: 0,
+        // Viewport dimensions
+        viewportWidth: 0,
+        viewportHeight: 0,
 
         get hasActiveFilter() {
             if (this.allCommentsHidden) return false;
@@ -191,11 +194,8 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
                 metadata.exists &&
                 !metadata.hasError &&
                 metadata.dimensions &&
-                metadata.container &&
                 metadata.dimensions.width > 0 &&
-                metadata.dimensions.height > 0 &&
-                metadata.container.width > 0 &&
-                metadata.container.height > 0;
+                metadata.dimensions.height > 0;
         },
 
         /**
@@ -206,11 +206,22 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
             this.imageNaturalWidth = metadata.dimensions.width;
             this.imageNaturalHeight = metadata.dimensions.height;
 
+            // Get viewport dimensions
+            this.updateViewportDimensions();
+
+            // Calculate container dimensions based on viewport and image
+            const containerDimensions = this.calculateContainerDimensions(
+                this.imageNaturalWidth,
+                this.imageNaturalHeight,
+                this.viewportWidth,
+                this.viewportHeight
+            );
+
             // Set container dimensions immediately - no async waiting
-            this.mainContainerWidth = metadata.container.width;
-            this.mainContainerHeight = metadata.container.height;
-            this.innerWrapperWidth = metadata.container.width;
-            this.innerWrapperHeight = metadata.container.height;
+            this.mainContainerWidth = containerDimensions.width;
+            this.mainContainerHeight = containerDimensions.height;
+            this.innerWrapperWidth = containerDimensions.width;
+            this.innerWrapperHeight = containerDimensions.height;
 
             // Mark as ready immediately - ZERO delay
             this.imageReady = true;
@@ -231,17 +242,20 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
 
                 // Try to calculate reasonable container dimensions
                 if (this.imageNaturalWidth > 0 && this.imageNaturalHeight > 0) {
-                    const optimal = this.calculateOptimalDimensions(
+                    // Get viewport dimensions
+                    this.updateViewportDimensions();
+
+                    const containerDimensions = this.calculateContainerDimensions(
                         this.imageNaturalWidth,
                         this.imageNaturalHeight,
-                        800,
-                        600
+                        this.viewportWidth,
+                        this.viewportHeight
                     );
 
-                    this.mainContainerWidth = optimal.width;
-                    this.mainContainerHeight = optimal.height;
-                    this.innerWrapperWidth = optimal.width;
-                    this.innerWrapperHeight = optimal.height;
+                    this.mainContainerWidth = containerDimensions.width;
+                    this.mainContainerHeight = containerDimensions.height;
+                    this.innerWrapperWidth = containerDimensions.width;
+                    this.innerWrapperHeight = containerDimensions.height;
 
                     this.imageReady = true;
                     this.initFinished = true;
@@ -285,40 +299,68 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
         },
 
         /**
-         * Calculate optimal container dimensions while preserving aspect ratio
+         * Update viewport dimensions from the container
          */
-        calculateOptimalDimensions(imageWidth, imageHeight, maxWidth, maxHeight) {
+        updateViewportDimensions() {
+            // Use 95vw and 90vh as the responsive container sizing from the blade template
+            this.viewportWidth = Math.round(window.innerWidth * 0.95);
+            this.viewportHeight = Math.round(window.innerHeight * 0.90);
+        },
+
+        /**
+         * Calculate container dimensions with responsive logic and percentage precision
+         */
+        calculateContainerDimensions(imageWidth, imageHeight, containerWidth, containerHeight) {
             if (imageWidth <= 0 || imageHeight <= 0) {
-                return { width: maxWidth, height: maxHeight };
+                return {
+                    width: containerWidth,
+                    height: containerHeight,
+                    widthPercent: this.toPercentage(containerWidth, containerWidth),
+                    heightPercent: this.toPercentage(containerHeight, containerHeight)
+                };
             }
 
             const imageAspectRatio = imageWidth / imageHeight;
-            const containerAspectRatio = maxWidth / maxHeight;
 
-            let optimalWidth, optimalHeight;
-
-            if (imageAspectRatio > containerAspectRatio) {
-                // Image is wider - fit to width
-                optimalWidth = Math.min(imageWidth, maxWidth);
-                optimalHeight = Math.round(optimalWidth / imageAspectRatio);
-            } else {
-                // Image is taller - fit to height
-                optimalHeight = Math.min(imageHeight, maxHeight);
-                optimalWidth = Math.round(optimalHeight * imageAspectRatio);
+            // If image dimensions are smaller than component dimensions, use image dimensions
+            if (imageWidth <= containerWidth && imageHeight <= containerHeight) {
+                return {
+                    width: imageWidth,
+                    height: imageHeight,
+                    widthPercent: this.toPercentage(imageWidth, containerWidth),
+                    heightPercent: this.toPercentage(imageHeight, containerHeight)
+                };
             }
 
-            // Ensure we don't exceed maximum dimensions
-            if (optimalWidth > maxWidth) {
-                optimalWidth = maxWidth;
-                optimalHeight = Math.round(maxWidth / imageAspectRatio);
+            // Use container width, calculate height respecting aspect ratio
+            const calculatedHeight = Math.round(containerWidth / imageAspectRatio);
+
+            // If calculated height fits within container height, use it
+            if (calculatedHeight <= containerHeight) {
+                return {
+                    width: containerWidth,
+                    height: calculatedHeight,
+                    widthPercent: this.toPercentage(containerWidth, containerWidth),
+                    heightPercent: this.toPercentage(calculatedHeight, containerHeight)
+                };
             }
 
-            if (optimalHeight > maxHeight) {
-                optimalHeight = maxHeight;
-                optimalWidth = Math.round(maxHeight * imageAspectRatio);
-            }
+            // Otherwise, use container height and calculate width
+            const calculatedWidth = Math.round(containerHeight * imageAspectRatio);
+            return {
+                width: calculatedWidth,
+                height: containerHeight,
+                widthPercent: this.toPercentage(calculatedWidth, containerWidth),
+                heightPercent: this.toPercentage(containerHeight, containerHeight)
+            };
+        },
 
-            return { width: optimalWidth, height: optimalHeight };
+        /**
+         * Convert value to percentage with 9 decimal precision
+         */
+        toPercentage(value, total) {
+            if (total === 0) return 0.000000000;
+            return parseFloat(((value / total) * 100).toFixed(9));
         },
 
 
@@ -488,11 +530,11 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
                     [Hammer.Tap, {
                         taps: 1,
                         threshold: 10,
-                        time: 250
+                        time: 150
                     }],
 
                     // Press (force selection mode)
-                    [Hammer.Press, { time: 200 }]
+                    [Hammer.Press, { time: 250 }]
                 ]
             });
 
@@ -669,15 +711,27 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
                 navigator.vibrate(forced ? [10, 50, 10] : [10, 30, 10]);
             }
 
-            // Store selection start
+            // Store selection start with 9 decimal precision
             const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const coords = this.getImageCoordinates(event.center.x, event.center.y);
 
+            // Convert to 9 decimal precision percentages
+            const startX = parseFloat(coords.x.toFixed(9));
+            const startY = parseFloat(coords.y.toFixed(9));
+
             this.selectionStart = {
-                x: coords.x,
-                y: coords.y,
+                x: startX,
+                y: startY,
                 xPx: event.center.x - rect.left,
                 yPx: event.center.y - rect.top
+            };
+
+            // Initialize selection box at press position to prevent flicker
+            this.selectionBox = {
+                x: startX,
+                y: startY,
+                width: parseFloat((0).toFixed(9)),
+                height: parseFloat((0).toFixed(9))
             };
 
             this.isSelecting = true;
@@ -709,17 +763,23 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
         },
 
         /**
-         * Update selection area during drag
+         * Update selection area during drag with 9 decimal precision
          */
         updateSelectionArea(event) {
             const rect = this.$refs.innerWrapper.getBoundingClientRect();
             const coords = this.getImageCoordinates(event.center.x, event.center.y);
 
+            // Ensure 9 decimal precision for all calculations
+            const currentX = parseFloat(coords.x.toFixed(9));
+            const currentY = parseFloat(coords.y.toFixed(9));
+            const startX = this.selectionStart.x;
+            const startY = this.selectionStart.y;
+
             this.selectionBox = {
-                x: Math.min(this.selectionStart.x, coords.x),
-                y: Math.min(this.selectionStart.y, coords.y),
-                width: Math.abs(coords.x - this.selectionStart.x),
-                height: Math.abs(coords.y - this.selectionStart.y)
+                x: parseFloat(Math.min(startX, currentX).toFixed(9)),
+                y: parseFloat(Math.min(startY, currentY).toFixed(9)),
+                width: parseFloat(Math.abs(currentX - startX).toFixed(9)),
+                height: parseFloat(Math.abs(currentY - startY).toFixed(9))
             };
         },
 
@@ -898,11 +958,11 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
                 }
             }
 
-            // Start selection mode (default)
+            // Start selection mode (default) with 9 decimal precision
             const coords = this.getImageCoordinates(event.clientX, event.clientY);
             this.selectionStart = {
-                x: coords.x,
-                y: coords.y,
+                x: parseFloat(coords.x.toFixed(9)),
+                y: parseFloat(coords.y.toFixed(9)),
                 xPx: x,
                 yPx: y
             };
@@ -937,11 +997,18 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
             if (!this.isSelecting) return;
 
             const coords = this.getImageCoordinates(event.clientX, event.clientY);
+            
+            // Ensure 9 decimal precision for desktop mouse events
+            const currentX = parseFloat(coords.x.toFixed(9));
+            const currentY = parseFloat(coords.y.toFixed(9));
+            const startX = this.selectionStart.x;
+            const startY = this.selectionStart.y;
+            
             this.selectionBox = {
-                x: Math.min(this.selectionStart.x, coords.x),
-                y: Math.min(this.selectionStart.y, coords.y),
-                width: Math.abs(coords.x - this.selectionStart.x),
-                height: Math.abs(coords.y - this.selectionStart.y)
+                x: parseFloat(Math.min(startX, currentX).toFixed(9)),
+                y: parseFloat(Math.min(startY, currentY).toFixed(9)),
+                width: parseFloat(Math.abs(currentX - startX).toFixed(9)),
+                height: parseFloat(Math.abs(currentY - startY).toFixed(9))
             };
         },
 
@@ -997,8 +1064,8 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
 
             const coords = this.getImageCoordinates(touch.clientX, touch.clientY);
             this.selectionStart = {
-                x: coords.x,
-                y: coords.y,
+                x: parseFloat(coords.x.toFixed(9)),
+                y: parseFloat(coords.y.toFixed(9)),
                 xPx: x,
                 yPx: y
             };
@@ -1046,11 +1113,18 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
             if (!this.isSelecting) return;
 
             const coords = this.getImageCoordinates(touch.clientX, touch.clientY);
+            
+            // Ensure 9 decimal precision for touch events  
+            const currentX = parseFloat(coords.x.toFixed(9));
+            const currentY = parseFloat(coords.y.toFixed(9));
+            const startX = this.selectionStart.x;
+            const startY = this.selectionStart.y;
+            
             this.selectionBox = {
-                x: Math.min(this.selectionStart.x, coords.x),
-                y: Math.min(this.selectionStart.y, coords.y),
-                width: Math.abs(coords.x - this.selectionStart.x),
-                height: Math.abs(coords.y - this.selectionStart.y)
+                x: parseFloat(Math.min(startX, currentX).toFixed(9)),
+                y: parseFloat(Math.min(startY, currentY).toFixed(9)),
+                width: parseFloat(Math.abs(currentX - startX).toFixed(9)),
+                height: parseFloat(Math.abs(currentY - startY).toFixed(9))
             };
         },
 
@@ -1096,14 +1170,18 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
                 }
             }
 
-            // Calculate coordinates for comment creation
+            // Calculate coordinates for comment creation with 9 decimal precision
             const coords = this.getImageCoordinates(clientX, clientY);
-            const commentSize = this.isMobile ? 3 : 2;
-            const offset = commentSize / 2;
+            const commentSize = parseFloat((this.isMobile ? 3 : 2).toFixed(9));
+            const offset = parseFloat((commentSize / 2).toFixed(9));
+
+            // Ensure point comment stays within bounds with 9 decimal precision
+            const maxX = parseFloat((100 - commentSize).toFixed(9));
+            const maxY = parseFloat((100 - commentSize).toFixed(9));
 
             const commentData = {
-                x: Math.max(0, Math.min(100 - commentSize, coords.x - offset)),
-                y: Math.max(0, Math.min(100 - commentSize, coords.y - offset)),
+                x: parseFloat(Math.max(0, Math.min(maxX, coords.x - offset)).toFixed(9)),
+                y: parseFloat(Math.max(0, Math.min(maxY, coords.y - offset)).toFixed(9)),
                 width: commentSize,
                 height: commentSize,
                 type: 'point',
@@ -1116,11 +1194,22 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
         },
 
         createAreaComment() {
+            // Ensure all values are properly bounded and maintain 9 decimal precision
+            const boundedX = parseFloat(Math.max(0, Math.min(100, this.selectionBox.x)).toFixed(9));
+            const boundedY = parseFloat(Math.max(0, Math.min(100, this.selectionBox.y)).toFixed(9));
+            
+            // Calculate width and height with edge case protection
+            const maxWidth = parseFloat((100 - boundedX).toFixed(9));
+            const maxHeight = parseFloat((100 - boundedY).toFixed(9));
+            
+            const boundedWidth = parseFloat(Math.max(0, Math.min(this.selectionBox.width, maxWidth)).toFixed(9));
+            const boundedHeight = parseFloat(Math.max(0, Math.min(this.selectionBox.height, maxHeight)).toFixed(9));
+
             const commentData = {
-                x: Math.max(0, Math.min(100, this.selectionBox.x)),
-                y: Math.max(0, Math.min(100, this.selectionBox.y)),
-                width: Math.min(this.selectionBox.width, 100 - this.selectionBox.x),
-                height: Math.min(this.selectionBox.height, 100 - this.selectionBox.y),
+                x: boundedX,
+                y: boundedY,
+                width: boundedWidth,
+                height: boundedHeight,
                 type: 'area',
                 imageUrl: this.imageUrl,
                 isMobile: this.isMobile,
@@ -1139,16 +1228,16 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
 
         resetSelectionState() {
             this.selectionStart = {
-                x: 0,
-                y: 0,
+                x: parseFloat((0).toFixed(9)),
+                y: parseFloat((0).toFixed(9)),
                 xPx: null,
                 yPx: null
             };
             this.selectionBox = {
-                x: 0,
-                y: 0,
-                width: 0,
-                height: 0
+                x: parseFloat((0).toFixed(9)),
+                y: parseFloat((0).toFixed(9)),
+                width: parseFloat((0).toFixed(9)),
+                height: parseFloat((0).toFixed(9))
             };
             this.isSelecting = false;
         },
@@ -1379,18 +1468,21 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
                 this.imageNaturalHeight = imageHeight;
             }
 
-            // Calculate optimal container dimensions
-            const optimal = this.calculateOptimalDimensions(
+            // Update viewport dimensions
+            this.updateViewportDimensions();
+
+            // Calculate container dimensions
+            const containerDimensions = this.calculateContainerDimensions(
                 imageWidth,
                 imageHeight,
                 maxWidth,
                 maxHeight
             );
 
-            this.mainContainerWidth = optimal.width;
-            this.mainContainerHeight = optimal.height;
-            this.innerWrapperWidth = optimal.width;
-            this.innerWrapperHeight = optimal.height;
+            this.mainContainerWidth = containerDimensions.width;
+            this.mainContainerHeight = containerDimensions.height;
+            this.innerWrapperWidth = containerDimensions.width;
+            this.innerWrapperHeight = containerDimensions.height;
         },
 
         /**
@@ -1464,29 +1556,41 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
 
         },
 
-        // Enhanced coordinate calculation for improved zoom system
+        // Enhanced coordinate calculation with edge case protection and 9 decimal precision
         getImageCoordinates(clientX, clientY) {
             const innerWrapper = this.$refs.innerWrapper;
             const image = this.$refs.image;
 
             if (!innerWrapper || !image) {
-                return { x: 0, y: 0 };
+                return { 
+                    x: parseFloat((0).toFixed(9)), 
+                    y: parseFloat((0).toFixed(9))
+                };
             }
 
             const wrapperRect = innerWrapper.getBoundingClientRect();
             const imageRect = image.getBoundingClientRect();
 
+            // Edge case: Prevent division by zero
+            if (imageRect.width <= 0 || imageRect.height <= 0) {
+                return { 
+                    x: parseFloat((0).toFixed(9)), 
+                    y: parseFloat((0).toFixed(9))
+                };
+            }
+
             // Calculate relative position within the visible image area
             const x = clientX - imageRect.left;
             const y = clientY - imageRect.top;
 
-            // Convert to percentage of the actual image dimensions
+            // Convert to percentage of the actual image dimensions with safe math
             const xPercent = (x / imageRect.width) * 100;
             const yPercent = (y / imageRect.height) * 100;
 
+            // Ensure values are within bounds and maintain 9 decimal precision
             return {
-                x: Math.max(0, Math.min(100, xPercent)),
-                y: Math.max(0, Math.min(100, yPercent))
+                x: parseFloat(Math.max(0, Math.min(100, xPercent)).toFixed(9)),
+                y: parseFloat(Math.max(0, Math.min(100, yPercent)).toFixed(9))
             };
         },
 
