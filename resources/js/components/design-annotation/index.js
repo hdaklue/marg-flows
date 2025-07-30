@@ -39,6 +39,7 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
     }
 
     return {
+
         testWrapper: null,
         imageUrl: '',
         imageReady: true,
@@ -149,13 +150,13 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
         },
 
         init() {
-
             // Initialize core properties immediately to prevent layout shifts
             this.isMobile = this.detectMobileDevice();
             this.imageUrl = imageUrl;
             this.comments = existingComments;
             this.selectedCommentIds = this.comments.map(c => c.id);
             this.metadata = metadata || {};
+
 
             // Set up optimized throttled selection handler
             this.throttledUpdateSelection = throttle(this.updateSelection.bind(this), 16);
@@ -857,6 +858,8 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
             }
         },
 
+
+
         /**
          * Handle desktop keyboard for mode switching
          */
@@ -997,13 +1000,13 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
             if (!this.isSelecting) return;
 
             const coords = this.getImageCoordinates(event.clientX, event.clientY);
-            
+
             // Ensure 9 decimal precision for desktop mouse events
             const currentX = parseFloat(coords.x.toFixed(9));
             const currentY = parseFloat(coords.y.toFixed(9));
             const startX = this.selectionStart.x;
             const startY = this.selectionStart.y;
-            
+
             this.selectionBox = {
                 x: parseFloat(Math.min(startX, currentX).toFixed(9)),
                 y: parseFloat(Math.min(startY, currentY).toFixed(9)),
@@ -1113,13 +1116,13 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
             if (!this.isSelecting) return;
 
             const coords = this.getImageCoordinates(touch.clientX, touch.clientY);
-            
-            // Ensure 9 decimal precision for touch events  
+
+            // Ensure 9 decimal precision for touch events
             const currentX = parseFloat(coords.x.toFixed(9));
             const currentY = parseFloat(coords.y.toFixed(9));
             const startX = this.selectionStart.x;
             const startY = this.selectionStart.y;
-            
+
             this.selectionBox = {
                 x: parseFloat(Math.min(startX, currentX).toFixed(9)),
                 y: parseFloat(Math.min(startY, currentY).toFixed(9)),
@@ -1197,11 +1200,11 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
             // Ensure all values are properly bounded and maintain 9 decimal precision
             const boundedX = parseFloat(Math.max(0, Math.min(100, this.selectionBox.x)).toFixed(9));
             const boundedY = parseFloat(Math.max(0, Math.min(100, this.selectionBox.y)).toFixed(9));
-            
+
             // Calculate width and height with edge case protection
             const maxWidth = parseFloat((100 - boundedX).toFixed(9));
             const maxHeight = parseFloat((100 - boundedY).toFixed(9));
-            
+
             const boundedWidth = parseFloat(Math.max(0, Math.min(this.selectionBox.width, maxWidth)).toFixed(9));
             const boundedHeight = parseFloat(Math.max(0, Math.min(this.selectionBox.height, maxHeight)).toFixed(9));
 
@@ -1562,8 +1565,8 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
             const image = this.$refs.image;
 
             if (!innerWrapper || !image) {
-                return { 
-                    x: parseFloat((0).toFixed(9)), 
+                return {
+                    x: parseFloat((0).toFixed(9)),
                     y: parseFloat((0).toFixed(9))
                 };
             }
@@ -1573,8 +1576,8 @@ export default function designAnnotationApp(imageUrl, existingComments = [], ima
 
             // Edge case: Prevent division by zero
             if (imageRect.width <= 0 || imageRect.height <= 0) {
-                return { 
-                    x: parseFloat((0).toFixed(9)), 
+                return {
+                    x: parseFloat((0).toFixed(9)),
                     y: parseFloat((0).toFixed(9))
                 };
             }

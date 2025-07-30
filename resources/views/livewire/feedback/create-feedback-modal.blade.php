@@ -30,7 +30,7 @@
     @mentionable:text="this.commentText = $event.detail.state;"
     @feedback-modal:comment-created="$dispatch('wv-manager:player:destroy'); $dispatch('wv-manager:recorder:destroy')"
     @feedback-modal:show-cancel-confirmation.stop="showCancelConfirm = true" x-show="$wire.showCommentModal"
-    x-trap="$wire.showCommentModal" x-cloak x-transition:enter="transition ease-out duration-200"
+    x-trap.noscroll.inert="$wire.showCommentModal" x-cloak x-transition:enter="transition ease-out duration-200"
     x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
     x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0" role="dialog" aria-modal="true" aria-labelledby="comment-title">
@@ -82,10 +82,14 @@
                         </label>
                         <label x-show="!isDesktop" for="comment-text" class="sr-only">Comment text</label>
                         <div :class="isDesktop ? 'mt-1' : ''">
-                            <x-mentionable-text :mentionables="$mentionables ?? []" :hashables="$hashables ?? []"
-                                hint="Use @ to mention people and # to embed documents" min-height="30px"
-                                id="comment-text" ::class="isDesktop ? '' :
+                            <x-mentionable-text live="true" statePath="commentText" :mentionables="$mentionables ?? []"
+                                :hashables="$hashables ?? []" hint="Use @ to mention people and # to embed documents"
+                                min-height="30px" id="comment-text" ::class="isDesktop ? '' :
                                     'w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base transition-colors focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-sky-400'" />
+                            <div class="grid grid-cols-3">
+
+                                <x-reusable.forms.select statePath="urgency" allowColors size="sm" />
+                            </div>
 
                             <!-- Media Components -->
                             <div class="w-full mt-3 space-y-3">

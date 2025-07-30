@@ -10,10 +10,10 @@ enum FeedbackUrgency: int implements HasLabel
 {
     case NORMAL = 1;
 
-    case GOODTOHAVE = 3;
-    case MUSTHAVE = 2;
+    case GOODTOHAVE = 2;
+    case MUSTHAVE = 3;
 
-    case URGENT = 2;
+    case URGENT = 4;
 
     public function getLabel(): string
     {

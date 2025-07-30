@@ -1,0 +1,95 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::connection('business_db')->create('design_feedbacks', function (Blueprint $table) {
+            $table->ulid('id')->primary();
+
+            // Base feedback fields
+            $table->string('creator_id');
+            $table->index('creator_id');
+
+            $table->string('status')->default(FeedbackStatus::OPEN);
+            $table->string('urgency')->default(FeedbackUrgency::NORMAL);
+
+            // Content
+            $table->text('content');
+
+            // Polymorphic feedbackable relationship
+            $table->ulidMorphs('feedbackable');
+
+            // Status and resolution
+            $table->text('resolution')->nullable();
+            $table->string('resolved_by')->nullable();
+            $table->timestamp('resolved_at')->nullable();
+
+            // Design-specific fields
+            $table->integer('x_coordinate')->comment('X coordinate on the design/image');
+            $table->integer('y_coordinate')->comment('Y coordinate on the design/image');
+            $table->enum('annotation_type', [
+                'point', 'rectangle', 'circle', 'arrow', 'text', 
+                'polygon', 'area', 'line', 'freehand'
+            ])->default('point')->comment('Type of annotation');
+            $table->json('annotation_data')->nullable()->comment('Additional annotation metadata (shape, color, size, etc.)');
+            $table->json('area_bounds')->nullable()->comment('Bounds for area-based annotations (x, y, width, height)');
+            $table->string('color', 50)->nullable()->comment('Annotation color/theme');
+            $table->decimal('zoom_level', 5, 3)->nullable()->comment('Zoom level when annotation was created');
+
+            $table->timestamps();
+
+            // Base feedback indexes
+            $table->index('status');
+            $table->index('urgency');
+            $table->index(['urgency', 'status']);
+            $table->index('resolved_at');
+            $table->index('resolved_by');
+            $table->index(['creator_id', 'created_at']);
+            $table->index(['feedbackable_type', 'status']);
+            $table->index(['status', 'created_at']);
+            $table->index(['creator_id', 'status']);
+
+            // Design-specific indexes
+            $table->index(['x_coordinate', 'y_coordinate']);
+            $table->index('annotation_type');
+            $table->index(['annotation_type', 'status']);
+            $table->index('color');
+            $table->index('zoom_level');
+            
+            // Coordinate-based queries
+            $table->index(['feedbackable_type', 'feedbackable_id', 'x_coordinate', 'y_coordinate']);
+            
+            // Spatial queries for finding nearby annotations
+            $table->index(['x_coordinate', 'y_coordinate', 'annotation_type']);
+            
+            // Area-based annotations
+            $table->rawIndex(
+                '(CASE WHEN area_bounds IS NOT NULL AND JSON_LENGTH(area_bounds) > 0 THEN 1 ELSE 0 END)',
+                'design_feedbacks_has_area_bounds_idx'
+            );
+            
+            // Type-specific queries
+            $table->index(['annotation_type', 'feedbackable_type', 'feedbackable_id']);
+            
+            // Color-based grouping
+            $table->index(['feedbackable_type', 'feedbackable_id', 'color']);
+            
+            // Zoom level analysis
+            $table->index(['zoom_level', 'annotation_type']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::connection('business_db')->dropIfExists('design_feedbacks');
+    }
+};

@@ -14,6 +14,40 @@ export default {
     presets: [preset],
     plugins: [require('tailwind-scrollbar-hide')
     ],
+    safelist: [
+        {
+            pattern: /bg-(red|blue|green|yellow|purple|pink|indigo|gray|orange|teal|cyan|lime|emerald|violet|fuchsia|rose|sky|amber|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/,
+            variants: ['hover', 'focus', 'dark', 'dark:hover', 'disabled', 'dark:disabled'],
+        },
+        // Text colors with all shades
+        {
+            pattern: /text-(red|blue|green|yellow|purple|pink|indigo|gray|orange|teal|cyan|lime|emerald|violet|fuchsia|rose|sky|amber|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/,
+            variants: ['hover', 'focus', 'dark', 'dark:hover', 'disabled', 'dark:disabled'],
+        },
+        // Background colors with opacity (specifically for your use case)
+        {
+            pattern: /bg-(red|blue|green|yellow|purple|pink|indigo|gray|orange|teal|cyan|lime|emerald|violet|fuchsia|rose|sky|amber|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)\/(5|10|20|25|30|40|50|60|70|75|80|90|95)/,
+            variants: ['hover', 'focus', 'dark', 'dark:hover', 'disabled', 'dark:disabled'],
+        },
+        // Text colors with opacity
+        {
+            pattern: /text-(red|blue|green|yellow|purple|pink|indigo|gray|orange|teal|cyan|lime|emerald|violet|fuchsia|rose|sky|amber|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)\/(5|10|20|25|30|40|50|60|70|75|80|90|95)/,
+            variants: ['hover', 'focus', 'dark', 'dark:hover', 'disabled', 'dark:disabled'],
+        },
+        {
+            pattern: /border-(red|blue|green|yellow|purple|pink|indigo|gray|orange|teal|cyan|lime|emerald|violet|fuchsia|rose|sky|amber|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/,
+            variants: ['hover', 'focus', 'dark', 'dark:hover', 'disabled', 'dark:disabled'],
+        },
+        {
+            pattern: /border-(red|blue|green|yellow|purple|pink|indigo|gray|orange|teal|cyan|lime|emerald|violet|fuchsia|rose|sky|amber|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)\/(5|10|20|25|30|40|50|60|70|75|80|90|95)/,
+            variants: ['hover', 'focus', 'dark', 'dark:hover', 'disabled', 'dark:disabled'],
+        },
+        // Ring colors for focus states
+        {
+            pattern: /ring-(red|blue|green|yellow|purple|pink|indigo|gray|orange|teal|cyan|lime|emerald|violet|fuchsia|rose|sky|amber|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/,
+            variants: ['focus', 'dark:focus'],
+        }
+    ],
     theme: {
         extend: {
             fontFamily: {
@@ -26,32 +60,7 @@ export default {
             backdropBlur: {
                 'sm': '4px',
             },
-            colors: {
-                'emerald': {
-                    600: '#059669',
-                    700: '#047857',
-                },
-                'sky': {
-                    50: '#f0f9ff',
-                    400: '#38bdf8',
-                    500: '#0ea5e9',
-                    600: '#0284c7',
-                    700: '#0369a1',
-                    900: '#0c4a6e',
-                },
-                'zinc': {
-                    50: '#fafafa',
-                    100: '#f4f4f5',
-                    200: '#e4e4e7',
-                    300: '#d4d4d8',
-                    400: '#a1a1aa',
-                    500: '#71717a',
-                    600: '#52525b',
-                    700: '#3f3f46',
-                    800: '#27272a',
-                    900: '#18181b',
-                }
-            }
+
         }
     }
 

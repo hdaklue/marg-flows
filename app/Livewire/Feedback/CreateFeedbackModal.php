@@ -38,6 +38,8 @@ final class CreateFeedbackModal extends Component
 
     public bool $hasUnuploadedVoiceNotes = false;
 
+    public int|string|null $urgency = null;
+
     #[Renderless]
     public function hasUnuploadedNotes()
     {
@@ -97,7 +99,7 @@ final class CreateFeedbackModal extends Component
 
     public function saveNewComment()
     {
-
+        dd($this->commentText);
         // Check for unuploaded voice notes first
         if ($this->hasUnuploadedVoiceNotes) {
             $this->addError('form', 'Please wait for voice notes to finish uploading.');
@@ -188,6 +190,7 @@ final class CreateFeedbackModal extends Component
 
         $this->pendingComment = [];
         $this->commentText = '';
+        $this->urgency = null;
         $this->currentMentions = [];
         $this->currentHashtags = [];
         $this->voiceNoteUrls = [];

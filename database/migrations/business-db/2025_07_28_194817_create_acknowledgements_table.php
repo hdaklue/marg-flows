@@ -16,8 +16,11 @@ return new class extends Migration
         Schema::create('acknowledgements', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->ulidMorphs('acknowledgeable');
-            $table->foreignUlid('actor_id')->references('id')->on('user');
+            // $table->foreignUlid('actor_id')->references('id')->on('user');
+            $table->string('actor_id');
             $table->timestamps();
+
+            $table->index('actor_id');
         });
     }
 

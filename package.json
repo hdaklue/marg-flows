@@ -8,7 +8,9 @@
     },
     "dependencies": {
         "@alpinejs/anchor": "^3.14.9",
+        "@alpinejs/focus": "^3.14.9",
         "@alpinejs/sort": "^3.14.9",
+        "@alpinejs/ui": "^3.14.9",
         "@editorjs/checklist": "^1.6.0",
         "@editorjs/editorjs": "^2.30.8",
         "@editorjs/header": "^2.8.8",

@@ -11,7 +11,7 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
         isOverLimit: false,
         previousContent: '',
         isInitialized: false,
-        
+
         // Validation UI state
         showValidationError: false,
         validationMessage: '',
@@ -26,14 +26,14 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                 this.setupTribute();
                 this.isInitialized = true;
                 this.$refs.textarea.innerHtml = null;
-                
+
                 // Watch content changes for dispatching
                 this.$watch('content', (newContent) => {
                     this.currentLength = this.getTextLength(newContent);
                     this.remainingChars = this.maxLength - this.currentLength;
-                    this.$dispatch('mentionable:text', { state: newContent });
+                    this.$dispatch('mentionable:text-update', { state: newContent });
                 });
-                
+
                 // Setup paste validation
                 this.setupPasteValidation();
             }
@@ -176,14 +176,14 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
         // Setup paste validation
         setupPasteValidation() {
             if (!this.$refs.textarea) return;
-            
+
             // Prevent paste if it would exceed limit
             this.$refs.textarea.addEventListener('paste', (e) => {
                 e.preventDefault();
                 const pastedText = (e.clipboardData || window.clipboardData).getData('text');
                 const currentLength = this.getTextLength(this.content);
                 const pastedLength = pastedText.length;
-                
+
                 if (currentLength + pastedLength <= this.maxLength) {
                     // Allow paste if within limit
                     document.execCommand('insertText', false, pastedText);
@@ -194,12 +194,12 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                         const truncatedText = pastedText.substring(0, allowedLength);
                         document.execCommand('insertText', false, truncatedText);
                     }
-                    
+
                     // Show paste warning
                     this.showPasteWarning = true;
                     this.pasteMessage = `Paste truncated. Only ${Math.max(0, allowedLength)} characters were added.`;
                     setTimeout(() => { this.showPasteWarning = false; }, 2000);
-                    
+
                     // Dispatch paste limit event
                     this.$dispatch('mentionable:paste-limited', {
                         attempted: pastedLength,
@@ -212,7 +212,7 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
         // Set cursor to end of content
         setCursorToEnd() {
             if (!this.$refs.textarea) return;
-            
+
             const range = document.createRange();
             const selection = window.getSelection();
             range.selectNodeContents(this.$refs.textarea);
