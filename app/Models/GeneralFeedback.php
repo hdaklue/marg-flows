@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\Database\LivesInBusinessDB;
-use App\Concerns\Model\IsBaseModel;
-use App\Contracts\Model\BaseModelContract;
 use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,16 +29,16 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property FeedbackUrgency $urgency
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property array|null $metadata Flexible metadata storage for various feedback types
  * @property string|null $feedback_category Optional category for organization
  * @property array|null $custom_data Additional custom data as needed
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
-final class GeneralFeedback extends Model implements BaseModelContract
+final class GeneralFeedback extends Model
 {
-    use HasFactory, HasUlids, LivesInBusinessDB, IsBaseModel;
+    use HasFactory, HasUlids, LivesInBusinessDB;
 
     protected $table = 'general_feedbacks';
 
@@ -60,6 +59,29 @@ final class GeneralFeedback extends Model implements BaseModelContract
 
     protected $with = ['creator'];
 
+    // Migration helpers for converting from old feedback system
+    public static function createFromLegacyFeedback(array $attributes): static
+    {
+        // Extract category from metadata if available
+        $category = null;
+        $metadata = $attributes['metadata'] ?? null;
+
+        if (is_array($metadata)) {
+            $category = $metadata['category'] ?? $metadata['type'] ?? null;
+        }
+
+        return self::create([
+            ...$attributes,
+            'feedback_category' => $category,
+            'metadata' => $metadata,
+        ]);
+    }
+
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
+
     // Common Relationships
     public function feedbackable(): MorphTo
     {
@@ -79,24 +101,6 @@ final class GeneralFeedback extends Model implements BaseModelContract
     public function acknowledgments(): MorphMany
     {
         return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
-    }
-
-    // Migration helpers for converting from old feedback system
-    public static function createFromLegacyFeedback(array $attributes): static
-    {
-        // Extract category from metadata if available
-        $category = null;
-        $metadata = $attributes['metadata'] ?? null;
-
-        if (is_array($metadata)) {
-            $category = $metadata['category'] ?? $metadata['type'] ?? null;
-        }
-
-        return self::create([
-            ...$attributes,
-            'feedback_category' => $category,
-            'metadata' => $metadata,
-        ]);
     }
 
     // Type-specific scopes
@@ -297,11 +301,6 @@ final class GeneralFeedback extends Model implements BaseModelContract
     public function getModelType(): string
     {
         return $this->getFeedbackType();
-    }
-
-    public static function getConcreteModels(): array
-    {
-        return array_values(config('feedback.concrete_models', []));
     }
 
     protected function casts(): array

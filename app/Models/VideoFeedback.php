@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\Database\LivesInBusinessDB;
-use App\Concerns\Model\IsBaseModel;
-use App\Contracts\Model\BaseModelContract;
 use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,9 +18,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Video-specific feedback model
- * Handles both frame comments (specific timestamp + coordinates) 
- * and region comments (time range + optional area)
- * 
+ * Handles both frame comments (specific timestamp + coordinates)
+ * and region comments (time range + optional area).
+ *
  * @property string $id
  * @property string $creator_id
  * @property string $content
@@ -31,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property FeedbackUrgency $urgency
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property string $feedback_type 'frame' or 'region'
  * @property float|null $timestamp Frame timestamp in seconds (for frame feedback)
  * @property float|null $start_time Start time in seconds (for region feedback)
@@ -39,12 +38,12 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int|null $x_coordinate X coordinate on video frame
  * @property int|null $y_coordinate Y coordinate on video frame
  * @property array|null $region_data Additional region metadata (bounds, shape, etc.)
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
-final class VideoFeedback extends Model implements BaseModelContract
+final class VideoFeedback extends Model
 {
-    use HasFactory, HasUlids, LivesInBusinessDB, IsBaseModel;
+    use HasFactory, HasUlids, LivesInBusinessDB;
 
     protected $table = 'video_feedbacks';
 
@@ -68,6 +67,28 @@ final class VideoFeedback extends Model implements BaseModelContract
     ];
 
     protected $with = ['creator'];
+
+    // Factory methods for creating specific types
+    public static function createFrameComment(array $attributes): static
+    {
+        return self::create([
+            ...$attributes,
+            'feedback_type' => 'frame',
+        ]);
+    }
+
+    public static function createRegionComment(array $attributes): static
+    {
+        return static::create([
+            ...$attributes,
+            'feedback_type' => 'region',
+        ]);
+    }
+
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
 
     // Common Relationships
     public function feedbackable(): MorphTo
@@ -110,11 +131,11 @@ final class VideoFeedback extends Model implements BaseModelContract
                     ->whereBetween('timestamp', [$timestamp - $tolerance, $timestamp + $tolerance]);
             })
             // Region comments: timestamp falls within range
-            ->orWhere(function ($regionQuery) use ($timestamp) {
-                $regionQuery->where('feedback_type', 'region')
-                    ->where('start_time', '<=', $timestamp)
-                    ->where('end_time', '>=', $timestamp);
-            });
+                ->orWhere(function ($regionQuery) use ($timestamp) {
+                    $regionQuery->where('feedback_type', 'region')
+                        ->where('start_time', '<=', $timestamp)
+                        ->where('end_time', '>=', $timestamp);
+                });
         });
     }
 
@@ -127,17 +148,17 @@ final class VideoFeedback extends Model implements BaseModelContract
                     ->whereBetween('timestamp', [$startTime, $endTime]);
             })
             // Region comments that overlap with the range
-            ->orWhere(function ($regionQuery) use ($startTime, $endTime) {
-                $regionQuery->where('feedback_type', 'region')
-                    ->where(function ($overlap) use ($startTime, $endTime) {
-                        $overlap->whereBetween('start_time', [$startTime, $endTime])
-                            ->orWhereBetween('end_time', [$startTime, $endTime])
-                            ->orWhere(function ($contains) use ($startTime, $endTime) {
-                                $contains->where('start_time', '<=', $startTime)
-                                    ->where('end_time', '>=', $endTime);
-                            });
-                    });
-            });
+                ->orWhere(function ($regionQuery) use ($startTime, $endTime) {
+                    $regionQuery->where('feedback_type', 'region')
+                        ->where(function ($overlap) use ($startTime, $endTime) {
+                            $overlap->whereBetween('start_time', [$startTime, $endTime])
+                                ->orWhereBetween('end_time', [$startTime, $endTime])
+                                ->orWhere(function ($contains) use ($startTime, $endTime) {
+                                    $contains->where('start_time', '<=', $startTime)
+                                        ->where('end_time', '>=', $endTime);
+                                });
+                        });
+                });
         });
     }
 
@@ -151,7 +172,7 @@ final class VideoFeedback extends Model implements BaseModelContract
     {
         return $query->whereRaw(
             'SQRT(POW(x_coordinate - ?, 2) + POW(y_coordinate - ?, 2)) <= ?',
-            [$x, $y, $radius]
+            [$x, $y, $radius],
         );
     }
 
@@ -173,14 +194,14 @@ final class VideoFeedback extends Model implements BaseModelContract
 
     public function hasTimeRange(): bool
     {
-        return $this->isRegionComment() && 
-               $this->start_time !== null && 
+        return $this->isRegionComment() &&
+               $this->start_time !== null &&
                $this->end_time !== null;
     }
 
     public function getDuration(): ?float
     {
-        if (!$this->hasTimeRange()) {
+        if (! $this->hasTimeRange()) {
             return null;
         }
 
@@ -202,7 +223,7 @@ final class VideoFeedback extends Model implements BaseModelContract
 
     public function getCoordinatesDisplay(): string
     {
-        if (!$this->hasCoordinates()) {
+        if (! $this->hasCoordinates()) {
             return 'No coordinates';
         }
 
@@ -227,31 +248,9 @@ final class VideoFeedback extends Model implements BaseModelContract
         return 'video';
     }
 
-    // Factory methods for creating specific types
-    public static function createFrameComment(array $attributes): static
-    {
-        return static::create([
-            ...$attributes,
-            'feedback_type' => 'frame',
-        ]);
-    }
-
-    public static function createRegionComment(array $attributes): static
-    {
-        return static::create([
-            ...$attributes,
-            'feedback_type' => 'region',
-        ]);
-    }
-
     public function getModelType(): string
     {
         return $this->getFeedbackType();
-    }
-
-    public static function getConcreteModels(): array
-    {
-        return array_values(config('feedback.concrete_models', []));
     }
 
     protected function casts(): array
@@ -273,7 +272,7 @@ final class VideoFeedback extends Model implements BaseModelContract
     {
         $minutes = floor($seconds / 60);
         $seconds = $seconds % 60;
-        
+
         return sprintf('%02d:%05.2f', $minutes, $seconds);
     }
 }

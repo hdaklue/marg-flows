@@ -87,12 +87,6 @@ final class CreateDocument extends Page implements HasForms
                 'blocks' => json_decode($data['blocks'], true),
             ]);
 
-            // Set properties manually
-            // $dto->name = $data['name'];
-            // $dto->blocks = json_decode($data['blocks'], true) ?: [];
-
-            // Now validate explicitl
-
             \App\Actions\Flow\CreateDocument::run(filamentUser(), $this->flow, $dto);
 
             Notification::make()

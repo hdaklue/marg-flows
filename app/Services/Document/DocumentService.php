@@ -284,7 +284,7 @@ final class DocumentService implements DocumentManagerInterface
 
     public function generateContentHash(Document $page): string
     {
-        $content = serialize([
+        $content = json_encode([
             'name' => $page->name,
             'blocks' => $page->blocks,
         ]);

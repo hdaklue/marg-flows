@@ -20,6 +20,7 @@ final class OptimizeEditorJsImage
 
     public function asJob(string $image): void
     {
+        logger()->info('inside action', ['image' => $image]);
         $this->handle($image);
     }
 }

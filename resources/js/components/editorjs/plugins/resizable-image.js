@@ -350,11 +350,11 @@ class ResizableImage {
             uploadItem.progress = 100;
             this.updateProgressItem(index);
             
-            // Remove successful upload from DOM immediately
-            this.removeProgressItem(uploadItem.id);
-            
-            // Notify editor of changes
-            this.notifyEditorChange();
+            // Remove successful upload from DOM only, keep in uploadProgress for completeUpload()
+            const progressThumbnail = this.wrapper.querySelector(`.resizable-image__progress-thumbnail[data-id="${uploadItem.id}"]`);
+            if (progressThumbnail) {
+                progressThumbnail.remove();
+            }
 
         } catch (error) {
             // Handle upload error
@@ -395,16 +395,38 @@ class ResizableImage {
         // Always render gallery if there are successful uploads
         if (successCount > 0) {
             this.renderGallery();
-            // Hide upload container when gallery is showing
+        }
+        
+        // Only hide upload container if ALL uploads completed successfully (no errors)
+        if (!hasErrors && successCount > 0) {
             this.hideUploadContainer();
-        }
-        
-        if (hasErrors) {
-            // Keep progress visible for failed uploads
+            this.hideInlineProgress();
+            // Clear upload progress after successful completion
+            this.uploadProgress = [];
+            // Notify editor of changes only when all uploads are successful
+            this.notifyEditorChange();
+        } else if (hasErrors) {
+            // Only show upload container if there are no existing images
+            // If there are existing images, the "Add more" button handles new uploads
+            if (!this.data.files || this.data.files.length === 0) {
+                this.showUploadContainer();
+            } else {
+                this.hideUploadContainer();
+            }
+            // Remove only successful items from uploadProgress, keep failed ones for retry
+            this.uploadProgress = this.uploadProgress.filter(item => item.status === 'error');
+            // Still notify editor of any successful uploads
+            if (successCount > 0) {
+                this.notifyEditorChange();
+            }
             return;
+        } else {
+            // No successful uploads, show upload container
+            this.showUploadContainer();
+            this.hideInlineProgress();
+            // Clear upload progress
+            this.uploadProgress = [];
         }
-        
-        this.hideInlineProgress();
     }
 
     notifyEditorChange() {

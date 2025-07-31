@@ -1,6 +1,6 @@
 <!-- Comment Creation Modal -->
 @php
-    $urgencyArray = App\Enums\Feedback\FeedbackUrgency::colorfulArray($urgency);
+    $urgencyArray = App\Enums\Feedback\FeedbackUrgency::simpleArray($urgency);
 @endphp
 <div x-data="{
     isDesktop: window.innerWidth >= 768,

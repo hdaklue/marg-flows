@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\Database\LivesInBusinessDB;
-use App\Concerns\Model\IsBaseModel;
-use App\Contracts\Model\BaseModelContract;
 use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Design-specific feedback model
- * Handles image annotations, design reviews, and visual feedback
- * 
+ * Handles image annotations, design reviews, and visual feedback.
+ *
  * @property string $id
  * @property string $creator_id
  * @property string $content
@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property FeedbackUrgency $urgency
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property int $x_coordinate X coordinate on the design/image
  * @property int $y_coordinate Y coordinate on the design/image
  * @property string|null $annotation_type Type of annotation (point, area, arrow, etc.)
@@ -38,12 +38,12 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property array|null $area_bounds Bounds for area-based annotations (x, y, width, height)
  * @property string|null $color Annotation color/theme
  * @property float|null $zoom_level Zoom level when annotation was created
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
-final class DesignFeedback extends Model implements BaseModelContract
+final class DesignFeedback extends Model
 {
-    use HasFactory, HasUlids, LivesInBusinessDB, IsBaseModel;
+    use HasFactory, HasUlids, LivesInBusinessDB;
 
     protected $table = 'design_feedbacks';
 
@@ -67,6 +67,62 @@ final class DesignFeedback extends Model implements BaseModelContract
     ];
 
     protected $with = ['creator'];
+
+    // Factory methods for different annotation types
+    public static function createPointAnnotation(int $x, int $y, array $attributes): static
+    {
+        return self::create([
+            ...$attributes,
+            'x_coordinate' => $x,
+            'y_coordinate' => $y,
+            'annotation_type' => 'point',
+        ]);
+    }
+
+    public static function createAreaAnnotation(
+        int $x,
+        int $y,
+        int $width,
+        int $height,
+        string $type,
+        array $attributes,
+    ): static {
+        return static::create([
+            ...$attributes,
+            'x_coordinate' => $x,
+            'y_coordinate' => $y,
+            'annotation_type' => $type,
+            'area_bounds' => [
+                'width' => $width,
+                'height' => $height,
+            ],
+        ]);
+    }
+
+    public static function createArrowAnnotation(
+        int $startX,
+        int $startY,
+        int $endX,
+        int $endY,
+        array $attributes,
+    ): static {
+        return static::create([
+            ...$attributes,
+            'x_coordinate' => $startX,
+            'y_coordinate' => $startY,
+            'annotation_type' => 'arrow',
+            'annotation_data' => [
+                'endX' => $endX,
+                'endY' => $endY,
+                'length' => sqrt(pow($endX - $startX, 2) + pow($endY - $startY, 2)),
+            ],
+        ]);
+    }
+
+    public static function getConcreteModels(): array
+    {
+        return array_values(config('feedback.concrete_models', []));
+    }
 
     // Common Relationships
     public function feedbackable(): MorphTo
@@ -100,7 +156,7 @@ final class DesignFeedback extends Model implements BaseModelContract
     {
         return $query->whereRaw(
             'SQRT(POW(x_coordinate - ?, 2) + POW(y_coordinate - ?, 2)) <= ?',
-            [$x, $y, $radius]
+            [$x, $y, $radius],
         );
     }
 
@@ -168,7 +224,7 @@ final class DesignFeedback extends Model implements BaseModelContract
             'area' => 'Area Selection',
             'line' => 'Line',
             'freehand' => 'Freehand Drawing',
-            default => ucfirst($this->annotation_type ?? 'Unknown')
+            default => ucfirst($this->annotation_type ?? 'Unknown'),
         };
     }
 
@@ -184,7 +240,7 @@ final class DesignFeedback extends Model implements BaseModelContract
             'area' => '🔲',
             'line' => '📏',
             'freehand' => '✏️',
-            default => '📌'
+            default => '📌',
         };
     }
 
@@ -210,7 +266,7 @@ final class DesignFeedback extends Model implements BaseModelContract
 
     public function hasAreaBounds(): bool
     {
-        return !empty($this->area_bounds) && 
+        return ! empty($this->area_bounds) &&
                isset($this->area_bounds['width'], $this->area_bounds['height']);
     }
 
@@ -226,7 +282,7 @@ final class DesignFeedback extends Model implements BaseModelContract
 
     public function getAreaSize(): ?int
     {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             return null;
         }
 
@@ -236,8 +292,8 @@ final class DesignFeedback extends Model implements BaseModelContract
     public function getDistanceFrom(int $x, int $y): float
     {
         return sqrt(
-            pow($this->x_coordinate - $x, 2) + 
-            pow($this->y_coordinate - $y, 2)
+            pow($this->x_coordinate - $x, 2) +
+            pow($this->y_coordinate - $y, 2),
         );
     }
 
@@ -248,32 +304,32 @@ final class DesignFeedback extends Model implements BaseModelContract
 
     public function containsPoint(int $x, int $y): bool
     {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             return false;
         }
 
         $bounds = $this->area_bounds;
-        
-        return $x >= $this->x_coordinate && 
+
+        return $x >= $this->x_coordinate &&
                $x <= $this->x_coordinate + $bounds['width'] &&
-               $y >= $this->y_coordinate && 
+               $y >= $this->y_coordinate &&
                $y <= $this->y_coordinate + $bounds['height'];
     }
 
     public function overlapsWithArea(int $x, int $y, int $width, int $height): bool
     {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             // For point annotations, check if the point is within the area
-            return $this->x_coordinate >= $x && 
+            return $this->x_coordinate >= $x &&
                    $this->x_coordinate <= $x + $width &&
-                   $this->y_coordinate >= $y && 
+                   $this->y_coordinate >= $y &&
                    $this->y_coordinate <= $y + $height;
         }
 
         $bounds = $this->area_bounds;
-        
+
         // Check if rectangles overlap
-        return !($this->x_coordinate > $x + $width ||
+        return ! ($this->x_coordinate > $x + $width ||
                 $x > $this->x_coordinate + $bounds['width'] ||
                 $this->y_coordinate > $y + $height ||
                 $y > $this->y_coordinate + $bounds['height']);
@@ -292,14 +348,14 @@ final class DesignFeedback extends Model implements BaseModelContract
             'black' => '⚫ Black',
             'white' => '⚪ White',
             'gray' => '🩶 Gray',
-            default => $this->color ? ucfirst($this->color) : 'Default'
+            default => $this->color ? ucfirst($this->color) : 'Default',
         };
     }
 
     public function hasCustomColor(): bool
     {
-        return $this->color !== null && 
-               !in_array($this->color, ['red', 'blue', 'green', 'yellow', 'orange', 'purple']);
+        return $this->color !== null &&
+               ! in_array($this->color, ['red', 'blue', 'green', 'yellow', 'orange', 'purple']);
     }
 
     public function getZoomLevelDisplay(): string
@@ -315,9 +371,10 @@ final class DesignFeedback extends Model implements BaseModelContract
     {
         $type = $this->getAnnotationTypeDisplay();
         $coords = $this->getCoordinatesDisplay();
-        
+
         if ($this->hasAreaBounds()) {
             $size = $this->getAreaWidth() . 'x' . $this->getAreaHeight();
+
             return "{$type} annotation at {$coords} (size: {$size})";
         }
 
@@ -329,59 +386,8 @@ final class DesignFeedback extends Model implements BaseModelContract
         return 'design';
     }
 
-    // Factory methods for different annotation types
-    public static function createPointAnnotation(int $x, int $y, array $attributes): static
-    {
-        return static::create([
-            ...$attributes,
-            'x_coordinate' => $x,
-            'y_coordinate' => $y,
-            'annotation_type' => 'point',
-        ]);
-    }
-
-    public static function createAreaAnnotation(
-        int $x, 
-        int $y, 
-        int $width, 
-        int $height, 
-        string $type,
-        array $attributes
-    ): static {
-        return static::create([
-            ...$attributes,
-            'x_coordinate' => $x,
-            'y_coordinate' => $y,
-            'annotation_type' => $type,
-            'area_bounds' => [
-                'width' => $width,
-                'height' => $height,
-            ],
-        ]);
-    }
-
-    public static function createArrowAnnotation(
-        int $startX, 
-        int $startY, 
-        int $endX, 
-        int $endY, 
-        array $attributes
-    ): static {
-        return static::create([
-            ...$attributes,
-            'x_coordinate' => $startX,
-            'y_coordinate' => $startY,
-            'annotation_type' => 'arrow',
-            'annotation_data' => [
-                'endX' => $endX,
-                'endY' => $endY,
-                'length' => sqrt(pow($endX - $startX, 2) + pow($endY - $startY, 2)),
-            ],
-        ]);
-    }
-
     // Analysis methods
-    public function findNearbyAnnotations(int $radius = 100): \Illuminate\Database\Eloquent\Collection
+    public function findNearbyAnnotations(int $radius = 100): Collection
     {
         return static::where('id', '!=', $this->id)
             ->nearCoordinates($this->x_coordinate, $this->y_coordinate, $radius)
@@ -392,18 +398,13 @@ final class DesignFeedback extends Model implements BaseModelContract
     {
         $nearby = $this->findNearbyAnnotations($radius);
         $area = pi() * pow($radius, 2);
-        
+
         return $nearby->count() / $area * 10000; // Normalize to per 10k pixels
     }
 
     public function getModelType(): string
     {
         return $this->getFeedbackType();
-    }
-
-    public static function getConcreteModels(): array
-    {
-        return array_values(config('feedback.concrete_models', []));
     }
 
     protected function casts(): array

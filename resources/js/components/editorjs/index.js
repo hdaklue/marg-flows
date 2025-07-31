@@ -16,7 +16,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
         state: livewireState,
         currentLocale: null,
         editorLocale: null,
-        canEdit: canEdit,
+        canEdit: !canEdit,
 
         init() {
 
@@ -99,7 +99,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 //         types: 'image/png, image/jpeg, image/jpg',
                 //     }
                 // },
-                resizableImage: {
+                images: {
                     class: ResizableImage,
                     config: {
                         endpoints: {
