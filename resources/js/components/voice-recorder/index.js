@@ -1,7 +1,7 @@
 import WaveSurfer from 'wavesurfer.js';
 import { recorderManager } from '../audioplayer/wavesurfer-manager.js';
 
-export default function recorder({ onSubmit = null, instanceKey = null, maxDuration = 30 } = {}) {
+export default function recorder({ onSubmit = null, instanceKey = null, maxDuration = 30, size = 'sm' } = {}) {
     return {
         // Core state
         isSupported: false,
@@ -27,6 +27,7 @@ export default function recorder({ onSubmit = null, instanceKey = null, maxDurat
         recordedUrl: null,
         currentDuration: 0,
         maxDuration: maxDuration, // 3 minutes
+        size: size,
 
         // Timer
         timer: null,
@@ -90,8 +91,18 @@ export default function recorder({ onSubmit = null, instanceKey = null, maxDurat
                 // Check theme for colors
                 const isDark = document.documentElement.classList.contains('dark');
 
+                // Map size to height
+                const getWaveformHeight = (size) => {
+                    switch (size) {
+                        case 'sm': return 24; // h-6
+                        case 'lg': return 40; // h-10
+                        case 'md':
+                        default: return 32; // h-8
+                    }
+                };
+
                 const options = {
-                    height: 32,
+                    height: getWaveformHeight(this.size),
                     waveColor: isDark ? '#71717a' : '#d4d4d8', // zinc-500/300
                     progressColor: '#10b981', // emerald-500
                     cursorColor: isDark ? '#059669' : '#047857', // emerald-600/700
@@ -235,10 +246,20 @@ export default function recorder({ onSubmit = null, instanceKey = null, maxDurat
                 // Check theme for colors
                 const isDark = document.documentElement.classList.contains('dark');
 
+                // Map size to height
+                const getWaveformHeight = (size) => {
+                    switch (size) {
+                        case 'sm': return 24; // h-6
+                        case 'lg': return 40; // h-10
+                        case 'md':
+                        default: return 32; // h-8
+                    }
+                };
+
                 // Create isolated wavesurfer instance for recorder playback
                 this.playbackWavesurfer = WaveSurfer.create({
                     container: container,
-                    height: 32,
+                    height: getWaveformHeight(this.size),
                     waveColor: isDark ? '#71717a' : '#d4d4d8', // zinc-500/300
                     progressColor: '#0ea5e9', // sky-500
                     cursorColor: isDark ? '#0284c7' : '#0369a1', // sky-600/700

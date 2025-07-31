@@ -70,7 +70,7 @@
         <div class="flex items-center justify-between mt-1 text-xs">
             <div class="flex items-center gap-2">
                 <!-- Validation Error -->
-                <div x-show="showValidationError" x-transition.opacity
+                <div x-show="showValidationError" x-cloak x-transition.opacity
                     class="flex items-center gap-1 text-red-600 dark:text-red-400">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
@@ -81,7 +81,7 @@
                 </div>
 
                 <!-- Paste Warning -->
-                <div x-show="showPasteWarning" x-transition.opacity
+                <div x-show="showPasteWarning" x-cloak x-transition.opacity
                     class="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
