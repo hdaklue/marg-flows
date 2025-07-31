@@ -141,6 +141,10 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         boundEndDrag: null,
         wasPlayingBeforeDrag: false,
 
+        // Region creation global handlers
+        boundUpdateRegionCreation: null,
+        boundFinishRegionCreation: null,
+
         // Region Management
         regions: [], // Array of region objects: {id, startTime, endTime, startFrame, endFrame, title, description}
         maxRegions: 20,
@@ -159,6 +163,11 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         get getCurrentTime() {
             const currentTime = this.player ? this.player.currentTime() : 0;
             return currentTime;
+        },
+
+        // Getter for mobile device detection
+        get isMobile() {
+            return this.isTouchDevice();
         },
 
         init() {
@@ -244,7 +253,9 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             });
 
             this.player.ready(() => {
-                this.player.play().catch(e => console.warn("Playback blocked", e));
+                // Don't auto-play on initialization to avoid conflicts with browser policies
+                // Let user interaction trigger playback instead
+                console.log("Video player ready");
             });
 
             this.setupPlayerEventListeners();
@@ -623,6 +634,15 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             // Hide existing regions during creation
             this.showRegionTooltip = null;
 
+            // Add global document listeners for region creation
+            this.boundUpdateRegionCreation = this.handleGlobalRegionUpdate.bind(this);
+            this.boundFinishRegionCreation = this.handleGlobalRegionFinish.bind(this);
+            
+            document.addEventListener('mousemove', this.boundUpdateRegionCreation);
+            document.addEventListener('mouseup', this.boundFinishRegionCreation);
+            document.addEventListener('touchmove', this.boundUpdateRegionCreation);
+            document.addEventListener('touchend', this.boundFinishRegionCreation);
+
             // Pause video during region creation and seek to start time
             if (this.player) {
                 // Always pause first
@@ -760,10 +780,58 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             this.cleanupRegionCreation();
         },
 
+        // Global handlers for region creation (work outside region bar bounds)
+        handleGlobalRegionUpdate(event) {
+            if (!this.isCreatingRegion || !this.regionCreationStart) return;
+            
+            const regionBar = this.$refs.regionBar;
+            if (!regionBar) return;
+
+            const rect = regionBar.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const currentX = Math.max(0, Math.min(clientX - rect.left, rect.width)); // Constrain to region bar bounds
+            const percentage = currentX / rect.width;
+            const currentTime = percentage * this.duration;
+            const frameAlignedTime = this.roundToNearestFrame(currentTime);
+
+            // Update visual feedback for region being created
+            this.regionCreationEnd = {
+                time: frameAlignedTime,
+                x: currentX,
+                frame: this.getFrameNumber(frameAlignedTime)
+            };
+
+            // Real-time video seeking to the end edge for amazing UX
+            if (this.player && this.player.readyState() >= 1) {
+                this.player.currentTime(frameAlignedTime);
+                this.player.pause();
+            }
+        },
+
+        handleGlobalRegionFinish(event) {
+            if (!this.isCreatingRegion) return;
+            
+            // Don't auto-finish on global mouse up - only via explicit finish button
+            // This prevents accidental region creation when user releases mouse outside region bar
+            return;
+        },
+
         cleanupRegionCreation() {
             this.isCreatingRegion = false;
             this.regionCreationStart = null;
             this.regionCreationEnd = null;
+            
+            // Remove global document listeners
+            if (this.boundUpdateRegionCreation) {
+                document.removeEventListener('mousemove', this.boundUpdateRegionCreation);
+                document.removeEventListener('touchmove', this.boundUpdateRegionCreation);
+                this.boundUpdateRegionCreation = null;
+            }
+            if (this.boundFinishRegionCreation) {
+                document.removeEventListener('mouseup', this.boundFinishRegionCreation);
+                document.removeEventListener('touchend', this.boundFinishRegionCreation);
+                this.boundFinishRegionCreation = null;
+            }
         },
 
         autoHideOldestRegions() {
@@ -1273,7 +1341,14 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             if (this.isPlaying) {
                 this.player.pause();
             } else {
-                this.player.play();
+                // Handle play promise to avoid AbortError
+                const playPromise = this.player.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        // Handle play interruption silently
+                        console.debug("Play interrupted:", e.name);
+                    });
+                }
             }
 
             // Ensure keyboard shortcuts work after interaction
@@ -1321,15 +1396,10 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         handleVideoClick() {
             if (!this.player) return;
 
-            // If video hasn't loaded yet, load it first and then play
+            // If video hasn't loaded yet, load it first
             if (!this.videoLoaded) {
                 this.player.load();
-                this.player.ready(() => {
-                    this.player.play().catch(e => {
-                        // Handle autoplay restrictions silently
-                        // Silently handle autoplay prevention
-                    });
-                });
+                // Don't auto-play after loading - wait for explicit user interaction
                 return;
             }
 

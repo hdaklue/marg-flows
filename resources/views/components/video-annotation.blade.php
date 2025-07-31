@@ -345,13 +345,13 @@
                 <!-- Region Bar -->
                 <div x-show="showRegionBar && config.features.enableAnnotations" x-cloak class="mt-2">
                     <!-- Region Creation Area -->
-                    <div x-ref="regionBar" @mousedown.prevent="startRegionCreation($event)"
-                        @mousemove="isCreatingRegion && updateRegionCreation($event)"
-                        @mouseup="isCreatingRegion && finishRegionCreation($event)"
-                        @mouseleave="isCreatingRegion && cancelRegionCreation()"
-                        @touchstart.prevent="startRegionCreation($event)"
-                        @touchmove.prevent="isCreatingRegion && updateRegionCreation($event)"
-                        @touchend.prevent="isCreatingRegion && finishRegionCreation($event)"
+                    <div x-ref="regionBar" @mousedown.prevent.stop="startRegionCreation($event)"
+                        @mousemove.stop="isCreatingRegion && updateRegionCreation($event)"
+                        @mouseup.stop="isCreatingRegion && finishRegionCreation($event)"
+                        @click.stop
+                        @touchstart.prevent.stop="startRegionCreation($event)"
+                        @touchmove.prevent.stop="isCreatingRegion && updateRegionCreation($event)"
+                        @touchend.prevent.stop="isCreatingRegion && finishRegionCreation($event)"
                         class="relative w-full h-8 overflow-hidden transition-colors border rounded-md cursor-crosshair"
                         :class="isCreatingRegion || regions.length > 0 ?
                             'bg-zinc-200 border-zinc-400 dark:bg-zinc-800 dark:border-zinc-600' :
@@ -414,7 +414,7 @@
                         </div>
 
                         <!-- Region Creation Controls -->
-                        <div x-show="isCreatingRegion && !isMobile" x-cloak
+                        <div x-show="isCreatingRegion && !isMobile" x-cloak @click.stop
                             class="absolute inset-x-0 flex items-center justify-center gap-3 p-3 border rounded-lg shadow-xl -bottom-16 border-zinc-600 bg-zinc-800 dark:bg-zinc-900">
                             <!-- Duration Display -->
                             <div class="font-mono text-xs text-zinc-300">
@@ -425,7 +425,7 @@
 
                             <!-- Arrow Controls -->
                             <div class="flex items-center gap-1">
-                                <button @click="reduceRegionEnd()"
+                                <button @click.stop="reduceRegionEnd()"
                                     class="flex items-center justify-center w-8 h-8 text-orange-300 transition-colors rounded bg-orange-900/50 hover:bg-orange-800/70"
                                     title="Reduce End (Shift + ← Arrow)">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -436,7 +436,7 @@
 
                                 <div class="px-2 text-xs text-zinc-400">End Edge</div>
 
-                                <button @click="expandRegionEnd()"
+                                <button @click.stop="expandRegionEnd()"
                                     class="flex items-center justify-center w-8 h-8 transition-colors rounded bg-emerald-900/50 text-emerald-300 hover:bg-emerald-800/70"
                                     title="Expand End (Shift + → Arrow)">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -448,13 +448,13 @@
 
                             <!-- Action Buttons -->
                             <div class="flex items-center gap-2">
-                                <button @click="cancelRegionCreation()"
+                                <button @click.stop="cancelRegionCreation()"
                                     class="rounded bg-red-900/50 px-3 py-1.5 text-xs font-medium text-red-200 transition-colors hover:bg-red-800/70"
                                     title="Cancel (Esc)">
                                     Cancel
                                 </button>
 
-                                <button @click="confirmRegionCreation()"
+                                <button @click.stop="confirmRegionCreation()"
                                     class="rounded bg-emerald-900/50 px-3 py-1.5 text-xs font-medium text-emerald-200 transition-colors hover:bg-emerald-800/70"
                                     title="Create Region (Enter)"
                                     :disabled="!regionCreationStart || !regionCreationEnd || Math.abs(regionCreationEnd.time -
@@ -472,7 +472,7 @@
                             <div x-show="isRegionVisible(region)" x-cloak
                                 class="absolute top-0 h-full transition-colors border-l-4 border-r-4 shadow-lg cursor-pointer group border-sky-700 bg-sky-400 hover:bg-sky-500 hover:shadow-xl dark:border-sky-800 dark:bg-sky-500 dark:hover:bg-sky-400"
                                 :style="`left: ${getRegionPosition(region).left}px; width: ${getRegionPosition(region).width}px`"
-                                @click="jumpToRegionStart(region)" @mouseenter="showRegionTooltipFor(region.id)"
+                                @click.stop="jumpToRegionStart(region)" @mouseenter="showRegionTooltipFor(region.id)"
                                 @mouseleave="hideRegionTooltips()">
 
                                 <!-- Region Tooltip -->
