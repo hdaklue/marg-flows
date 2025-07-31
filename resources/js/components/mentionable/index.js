@@ -66,7 +66,7 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                     lookup: 'name',
                     fillAttr: 'email',
                     selectTemplate: (item) => {
-                        return `<span contenteditable="false"><span class="text-sm font-semibold text-sky-500 dark:text-sky-300">@${item.original.name}</span></span > `;
+                        return `<span contenteditable="false"><span class="text-sm font-semibold text-sky-500 dark:text-sky-300">${item.original.name}</span></span > `;
                     },
                     menuItemTemplate: (item) => {
                         const data = item.original;
@@ -90,7 +90,7 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                     allowSpaces: false,
                     menuItemLimit: 8,
                     menuShowMinLength: 0,
-                    replaceTextSuffix: '\n',
+                    replaceTextSuffix: '&#32;',
                 });
             }
 
@@ -122,7 +122,7 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                     menuItemLimit: 8,
                     menuShowMinLength: 0,
                     autocompleteMode: true,
-                    replaceTextSuffix: '\n',
+                    replaceTextSuffix: '&#32;',
                 });
             }
 
@@ -149,6 +149,7 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                     this.tribute.hideMenu();
                 }
             });
+
 
             // Listen for tribute events to trigger Alpine reactivity and update Livewire arrays
             this.$refs.textarea.addEventListener('tribute-replaced', (e) => {
