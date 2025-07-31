@@ -28,6 +28,7 @@ class ResizableImage {
     }
 
 
+
     constructor({ data, config, api, readOnly, block }) {
         this.api = api;
         this.blockAPI = block;
@@ -54,6 +55,7 @@ class ResizableImage {
         this.uploadContainer = null;
         this.eventHandlers = null;
 
+
         // Default configuration
         this.defaultConfig = {
             endpoints: {
@@ -75,7 +77,6 @@ class ResizableImage {
 
         // Bind methods
         this.onUpload = this.onUpload.bind(this);
-        this.onPaste = this.onPaste.bind(this);
     }
 
     render() {
@@ -84,6 +85,9 @@ class ResizableImage {
 
         // Store wrapper reference for later use
         this.wrapper = wrapper;
+
+        // Add drag-drop functionality to the entire block wrapper
+        this.setupBlockDragDrop(wrapper);
 
         // Check if we have valid image data (support both old and new format)
         const hasImages = (this.data.files && this.data.files.length > 0) ||
@@ -107,6 +111,55 @@ class ResizableImage {
         }
 
         return wrapper;
+    }
+
+    setupBlockDragDrop(wrapper) {
+        if (this.readOnly) {
+            return;
+        }
+
+        // Block-level drag and drop handlers
+        const handleBlockDragOver = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            wrapper.classList.add('resizable-image--dragover');
+        };
+
+        const handleBlockDragLeave = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // Only remove class if leaving the wrapper entirely
+            if (!wrapper.contains(e.relatedTarget)) {
+                wrapper.classList.remove('resizable-image--dragover');
+            }
+        };
+
+        const handleBlockDrop = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            wrapper.classList.remove('resizable-image--dragover');
+
+            if (!this.readOnly && !this.uploading && e.dataTransfer.files.length) {
+                const files = Array.from(e.dataTransfer.files).filter(file =>
+                    file.type.startsWith('image/')
+                );
+                if (files.length > 0) {
+                    this.handleUpload(files);
+                }
+            }
+        };
+
+        // Add event listeners to the wrapper
+        wrapper.addEventListener('dragover', handleBlockDragOver);
+        wrapper.addEventListener('dragleave', handleBlockDragLeave);
+        wrapper.addEventListener('drop', handleBlockDrop);
+
+        // Store handlers for cleanup
+        this.blockDragHandlers = {
+            handleBlockDragOver,
+            handleBlockDragLeave,
+            handleBlockDrop
+        };
     }
 
     createUploadInterface(wrapper) {
@@ -163,52 +216,14 @@ class ResizableImage {
             }
         };
 
-        // Attach event listeners
+        // Attach event listeners (drag-drop is now handled at block level)
         fileInput.addEventListener('change', handleFileChange);
         uploadLabel.addEventListener('click', handleLabelClick);
-
-        // Drag and drop support with improved handling
-        const handleDragOver = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadContainer.classList.add('resizable-image__upload-container--dragover');
-        };
-
-        const handleDragLeave = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // Only remove class if actually leaving the container
-            if (!uploadContainer.contains(e.relatedTarget)) {
-                uploadContainer.classList.remove('resizable-image__upload-container--dragover');
-            }
-        };
-
-        const handleDrop = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadContainer.classList.remove('resizable-image__upload-container--dragover');
-
-            if (!this.readOnly && !this.uploading && e.dataTransfer.files.length) {
-                const files = Array.from(e.dataTransfer.files).filter(file =>
-                    file.type.startsWith('image/')
-                );
-                if (files.length > 0) {
-                    this.handleUpload(files);
-                }
-            }
-        };
-
-        uploadContainer.addEventListener('dragover', handleDragOver);
-        uploadContainer.addEventListener('dragleave', handleDragLeave);
-        uploadContainer.addEventListener('drop', handleDrop);
 
         // Store event handlers for cleanup
         this.eventHandlers = {
             handleFileChange,
-            handleLabelClick,
-            handleDragOver,
-            handleDragLeave,
-            handleDrop
+            handleLabelClick
         };
 
         uploadContainer.appendChild(uploadLabel);
@@ -258,19 +273,99 @@ class ResizableImage {
         }
     }
 
-    onPaste(e) {
-        // Handle paste events for images
-        const items = e.clipboardData?.items;
-        if (items) {
-            for (let item of items) {
-                if (item.type.indexOf('image') !== -1) {
-                    const file = item.getAsFile();
-                    if (file) {
-                        this.handleUpload([file]);
-                        e.preventDefault();
-                    }
-                }
+    async handlePastedUrl(url) {
+        if (!url || this.uploading || this.readOnly) {
+            return;
+        }
+
+        // Validate URL format
+        try {
+            new URL(url);
+        } catch (e) {
+            console.error('Invalid URL format:', url);
+            return;
+        }
+
+        // Create a mock file object for consistent handling
+        const urlUpload = {
+            id: `url-upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            url: url,
+            name: url.split('/').pop() || 'pasted-image',
+            status: 'pending',
+            progress: 0,
+            error: null,
+            retryCount: 0
+        };
+
+        this.uploading = true;
+        this.uploadProgress = [urlUpload];
+        this.showInlineProgress();
+
+        try {
+            // Use the byUrl endpoint if available
+            const uploadEndpoint = this.config.endpoints.byUrl || this.config.endpoints.byFile;
+            const response = await this.executeUrlUploadRequest(url, uploadEndpoint);
+
+            if (!response.url && !response.file?.url) {
+                throw new Error('No URL in response');
             }
+
+            // Add successful upload to data
+            this.addUploadedFile(response);
+
+            // Update progress
+            urlUpload.status = 'success';
+            urlUpload.progress = 100;
+            this.updateProgressItem(0);
+
+            // Complete the upload process
+            this.completeUpload();
+
+        } catch (error) {
+            console.error('URL upload failed:', error);
+            urlUpload.status = 'error';
+            urlUpload.error = error.message || 'Failed to load image from URL';
+            this.updateProgressItem(0);
+
+            // Show error state
+            this.completeUpload();
+        } finally {
+            this.uploading = false;
+        }
+    }
+
+    async executeUrlUploadRequest(url, endpoint) {
+        // Signal editor is busy during upload
+        document.dispatchEvent(new CustomEvent('editor:busy'));
+
+        try {
+            const formData = new FormData();
+            formData.append('url', url);
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                body: formData,
+                headers: this.config.additionalRequestHeaders
+            });
+
+            let json;
+            try {
+                json = await response.json();
+            } catch (parseError) {
+                throw new Error(`Invalid response format: ${response.status}`);
+            }
+
+            if (json.success === 0 || json.success === false) {
+                throw new Error(json.message || 'URL upload failed');
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return json;
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -286,7 +381,7 @@ class ResizableImage {
     async handleUpload(files) {
         // Convert single file to array for unified processing
         const fileArray = Array.isArray(files) ? files : [files];
-        
+
         // Prevent multiple uploads
         if (this.uploading) {
             return;
@@ -336,7 +431,7 @@ class ResizableImage {
         try {
             // Perform the actual upload
             const response = await this.performUpload(uploadItem.file);
-            
+
             // Validate response
             if (!response.url && !response.file?.url) {
                 throw new Error('No URL in response');
@@ -344,12 +439,12 @@ class ResizableImage {
 
             // Add successful upload to data
             this.addUploadedFile(response);
-            
+
             // Update progress item
             uploadItem.status = 'success';
             uploadItem.progress = 100;
             this.updateProgressItem(index);
-            
+
             // Remove successful upload from DOM only, keep in uploadProgress for completeUpload()
             const progressThumbnail = this.wrapper.querySelector(`.resizable-image__progress-thumbnail[data-id="${uploadItem.id}"]`);
             if (progressThumbnail) {
@@ -361,7 +456,7 @@ class ResizableImage {
             uploadItem.status = 'error';
             uploadItem.error = error.message || 'Upload failed';
             this.updateProgressItem(index);
-            
+
             console.error(`Upload failed for file ${index}:`, error);
         }
     }
@@ -390,13 +485,13 @@ class ResizableImage {
         const hasErrors = this.uploadProgress.some(item => item.status === 'error');
         const successCount = this.uploadProgress.filter(item => item.status === 'success').length;
         const errorCount = this.uploadProgress.filter(item => item.status === 'error').length;
-        
-        
+
+
         // Always render gallery if there are successful uploads
         if (successCount > 0) {
             this.renderGallery();
         }
-        
+
         // Only hide upload container if ALL uploads completed successfully (no errors)
         if (!hasErrors && successCount > 0) {
             this.hideUploadContainer();
@@ -460,7 +555,7 @@ class ResizableImage {
     }
 
     renderGallery() {
-        
+
         // Remove existing gallery if any
         const existingGallery = this.wrapper.querySelector('.resizable-image__gallery');
         if (existingGallery) {
@@ -637,7 +732,7 @@ class ResizableImage {
 
     updateAfterDelete() {
         this.renderGallery();
-        
+
         if (this.data.files.length === 0) {
             this.showUploadContainer();
         }
@@ -769,7 +864,7 @@ class ResizableImage {
 
         // Attach event listeners
         closeBtn.addEventListener('click', closeModal);
-        
+
         if (deleteBtn) {
             deleteBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -794,7 +889,7 @@ class ResizableImage {
                 }
             });
         }
-        
+
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal();
         });
@@ -969,10 +1064,10 @@ class ResizableImage {
         if (progressItem) {
             progressItem.remove();
         }
-        
+
         // Remove from uploadProgress array
         this.uploadProgress = this.uploadProgress.filter(item => item.id !== itemId);
-        
+
         // Check if progress container should be hidden
         const remainingItems = this.wrapper.querySelectorAll('.resizable-image__progress-thumbnail');
         if (remainingItems.length === 0) {
@@ -989,14 +1084,18 @@ class ResizableImage {
         // Create preview if it's an image
         let previewContent = '';
         if (uploadItem.file && uploadItem.file.type.startsWith('image/')) {
+            // File upload - create blob URL for preview
             const previewUrl = URL.createObjectURL(uploadItem.file);
             previewContent = `<img src="${previewUrl}" alt="${uploadItem.name}" class="resizable-image__progress-preview" style="margin: 0;">`;
+        } else if (uploadItem.url) {
+            // URL upload - use the URL directly for preview
+            previewContent = `<img src="${uploadItem.url}" alt="${uploadItem.name}" class="resizable-image__progress-preview" style="margin: 0;">`;
         } else {
-            // Use file icon for non-images
+            // Use generic image icon for unknown types
             previewContent = `
                 <div class="resizable-image__progress-file-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                     </svg>
                 </div>
             `;
@@ -1168,7 +1267,7 @@ class ResizableImage {
 
         // Check if all remaining uploads are complete or if no uploads left
         if (this.uploadProgress.length === 0) {
-            
+
             // Check if we have existing images in the gallery
             if (this.data.files && this.data.files.length > 0) {
                 // Gallery already has "Add more" button, just ensure upload container is hidden
@@ -1248,7 +1347,7 @@ class ResizableImage {
             const storageIndex = filePath.indexOf('/storage/');
             filePath = filePath.substring(storageIndex + '/storage/'.length);
         }
-        
+
         // Ensure documents/ prefix
         if (!filePath.startsWith('documents/')) {
             filePath = 'documents/' + filePath;
@@ -1289,10 +1388,11 @@ class ResizableImage {
             this.uploadLabel.removeEventListener('click', this.eventHandlers.handleLabelClick);
         }
 
-        if (this.uploadContainer && this.eventHandlers) {
-            this.uploadContainer.removeEventListener('dragover', this.eventHandlers.handleDragOver);
-            this.uploadContainer.removeEventListener('dragleave', this.eventHandlers.handleDragLeave);
-            this.uploadContainer.removeEventListener('drop', this.eventHandlers.handleDrop);
+        // Clean up block-level drag-drop listeners
+        if (this.wrapper && this.blockDragHandlers) {
+            this.wrapper.removeEventListener('dragover', this.blockDragHandlers.handleBlockDragOver);
+            this.wrapper.removeEventListener('dragleave', this.blockDragHandlers.handleBlockDragLeave);
+            this.wrapper.removeEventListener('drop', this.blockDragHandlers.handleBlockDrop);
         }
 
         // Clean up resize event listeners
@@ -1346,6 +1446,7 @@ class ResizableImage {
         this.uploadContainer = null;
         this.wrapper = null;
         this.eventHandlers = null;
+        this.blockDragHandlers = null;
     }
 }
 
