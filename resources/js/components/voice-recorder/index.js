@@ -1,6 +1,7 @@
-import { playerManager, recorderManager } from '../audioplayer/wavesurfer-manager.js';
+import WaveSurfer from 'wavesurfer.js';
+import { recorderManager } from '../audioplayer/wavesurfer-manager.js';
 
-export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
+export default function recorder({ onSubmit = null, instanceKey = null, maxDuration = 30 } = {}) {
     return {
         // Core state
         isSupported: false,
@@ -18,11 +19,14 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
         // Only keep playback reference for UI state
         playbackWavesurfer: null,
 
+        // Prevent multiple simultaneous initializations
+        isInitializing: false,
+
         // Recording data
         recordedBlob: null,
         recordedUrl: null,
         currentDuration: 0,
-        maxDuration: 180, // 3 minutes
+        maxDuration: maxDuration, // 3 minutes
 
         // Timer
         timer: null,
@@ -43,14 +47,44 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
         },
 
         async createWaveSurfer() {
+            // Prevent multiple simultaneous calls
+            if (this.isInitializing) {
+                console.log('⏳ Already initializing, skipping...');
+                return;
+            }
+
             try {
+                console.log('🎙️ createWaveSurfer called, instanceKey:', this.instanceKey);
+                this.isInitializing = true;
                 // Mark as not initialized while setting up
                 this.isInitialized = false;
 
                 const container = this.$refs.recordingWaveform;
                 if (!container) {
                     console.error('Recording waveform container not found');
+                    this.isInitializing = false;
                     return;
+                }
+
+                console.log('📦 Container found, existing children:', container.children.length);
+
+                // Destroy existing instance first if it exists
+                if (this.instanceKey) {
+                    console.log('🗑️ Destroying existing recorder instance...');
+                    recorderManager.destroy(this.instanceKey);
+
+                    // Wait a moment for cleanup to complete
+                    await new Promise(resolve => setTimeout(resolve, 50));
+
+                    // Manually clear any remaining DOM elements that weren't cleaned up
+                    if (container.children.length > 0) {
+                        console.log('🧹 Manually clearing remaining DOM elements...');
+                        while (container.firstChild) {
+                            container.removeChild(container.firstChild);
+                        }
+                    }
+
+                    console.log('✨ Container after cleanup, children:', container.children.length);
                 }
 
                 // Check theme for colors
@@ -70,7 +104,8 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
                     maxDuration: this.maxDuration,
                 };
 
-                // Initialize recorder with manager - manager handles everything
+                // Always initialize - let WaveSurfer handle container visibility
+                console.log('🔧 Initializing recorder with manager...');
                 await recorderManager.init(
                     this.instanceKey,
                     container,
@@ -80,6 +115,7 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
                 );
 
                 // Set up event listeners via manager (manager should handle duplicates internally)
+                console.log('🎧 Setting up event listeners...');
                 const recordPlugin = recorderManager.getRecord(this.instanceKey);
                 if (recordPlugin) {
                     // Remove any existing listeners first to prevent duplicates
@@ -88,7 +124,29 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
                     recordPlugin.on('record-start', () => {
                         this.isRecording = true;
                         this.startTimer();
-                        console.log('Recording started');
+                        console.log('📹 Recording started - isRecording:', this.isRecording);
+
+                        // Check if the container is visible in the DOM
+                        setTimeout(() => {
+                            const container = this.$refs.recordingWaveform;
+                            if (container) {
+                                const rect = container.getBoundingClientRect();
+                                console.log('📐 Container visibility - width:', rect.width, 'height:', rect.height, 'visible:', rect.width > 0 && rect.height > 0);
+                                console.log('🎨 Container computed display:', window.getComputedStyle(container).display);
+                                console.log('👁️ Container parent visibility:', window.getComputedStyle(container.parentElement).display);
+
+                                // Force WaveSurfer to redraw if container became visible
+                                const wavesurfer = recorderManager.getWavesurfer(this.instanceKey);
+                                if (wavesurfer && rect.width > 0 && rect.height > 0) {
+                                    console.log('🔄 Forcing WaveSurfer redraw...');
+                                    try {
+                                        wavesurfer.drawer.fireEvent('redraw');
+                                    } catch (error) {
+                                        console.log('⚠️ Could not force redraw:', error.message);
+                                    }
+                                }
+                            }
+                        }, 100);
                     });
 
                     recordPlugin.on('record-end', (blob) => {
@@ -100,6 +158,9 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
                             this.recordedUrl = URL.createObjectURL(blob);
                             this.hasRecording = true;
                             console.log('Recording ended successfully, blob size:', blob.size);
+
+                            // Create playback wavesurfer for the recorded audio
+                            this.createPlaybackWaveSurfer();
                         } else {
                             console.error('Recording ended with empty or invalid blob');
                             this.showError('Recording failed - no audio data captured');
@@ -108,6 +169,7 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
 
                     recordPlugin.on('record-progress', (time) => {
                         this.currentDuration = Math.floor(time / 1000);
+                        console.log('📊 Record progress:', time, 'ms, duration:', this.currentDuration, 's');
 
                         // Auto-stop at max duration
                         if (this.currentDuration >= this.maxDuration) {
@@ -124,6 +186,7 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
 
                     // Mark as initialized once everything is set up
                     this.isInitialized = true;
+                    console.log('✅ WaveSurfer recording initialized successfully');
                 } else {
                     console.error('Failed to get record plugin from manager');
                     this.showError('Failed to initialize recording plugin');
@@ -143,6 +206,9 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
                 console.error('Failed to create WaveSurfer instance:', error);
                 this.showError('Failed to initialize audio recorder');
                 this.isInitialized = false;
+            } finally {
+                // Always reset the initializing flag
+                this.isInitializing = false;
             }
         },
 
@@ -156,10 +222,22 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
                     return;
                 }
 
+                // Destroy existing playback instance first
+                if (this.playbackWavesurfer) {
+                    try {
+                        this.playbackWavesurfer.destroy();
+                    } catch (error) {
+                        console.warn('Error destroying previous playback wavesurfer:', error);
+                    }
+                    this.playbackWavesurfer = null;
+                }
+
                 // Check theme for colors
                 const isDark = document.documentElement.classList.contains('dark');
 
-                const options = {
+                // Create isolated wavesurfer instance for recorder playback
+                this.playbackWavesurfer = WaveSurfer.create({
+                    container: container,
                     height: 32,
                     waveColor: isDark ? '#71717a' : '#d4d4d8', // zinc-500/300
                     progressColor: '#0ea5e9', // sky-500
@@ -169,13 +247,28 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
                     responsive: true,
                     normalize: true,
                     hideScrollbar: true,
-                };
+                });
 
-                // Use playerManager for playback with unique instance key
-                const playbackKey = `${this.instanceKey}_playback`;
+                // Set up playback event listeners
+                this.playbackWavesurfer.on('play', () => {
+                    this.isPlaying = true;
+                });
 
-                // Just prepare the playback for when user clicks play
-                // The actual creation will happen in togglePlayback via playerManager
+                this.playbackWavesurfer.on('pause', () => {
+                    this.isPlaying = false;
+                });
+
+                this.playbackWavesurfer.on('finish', () => {
+                    this.isPlaying = false;
+                });
+
+                this.playbackWavesurfer.on('error', (error) => {
+                    console.error('Playback error:', error);
+                    this.showError('Playback error: ' + error.message);
+                });
+
+                // Load the recorded audio
+                await this.playbackWavesurfer.load(this.recordedUrl);
 
             } catch (error) {
                 console.error('Failed to create playback WaveSurfer:', error);
@@ -184,19 +277,29 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
         },
 
         async startRecording() {
-            if (!this.isSupported || this.isRecording || !this.instanceKey || !this.isInitialized) {
-                if (!this.isInitialized) {
-                    this.showError('Recorder is still initializing, please wait...');
-                }
+            console.log('🔴 startRecording called - Fresh initialization approach');
+
+            if (!this.isSupported || this.isRecording || !this.instanceKey) {
                 return;
             }
 
             try {
+                // Always create fresh WaveSurfer + RecordPlugin on each record click
+                console.log('🔄 Creating fresh WaveSurfer instance for recording...');
+                await this.createWaveSurfer();
+
+                if (!this.isInitialized) {
+                    this.showError('Failed to initialize recorder');
+                    return;
+                }
+
+                // Start recording with the fresh instance
                 const recordPlugin = recorderManager.getRecord(this.instanceKey);
                 if (recordPlugin) {
+                    console.log('🎬 Starting recording with fresh plugin...');
                     await recordPlugin.startRecording();
                 } else {
-                    this.showError('Recording plugin not initialized');
+                    this.showError('Recording plugin not found');
                 }
             } catch (error) {
                 console.error('Failed to start recording:', error);
@@ -213,52 +316,17 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
             }
         },
 
-        togglePlayback() {
-            if (!this.hasRecording || !this.instanceKey) return;
+        async togglePlayback() {
+            if (!this.hasRecording) return;
 
-            const playbackKey = `${this.instanceKey}_playback`;
-            if (playerManager.getActiveInstanceKey() === playbackKey && this.playbackWavesurfer) {
-                // If this recorder's playback is active, just toggle
+            // Create playback wavesurfer if it doesn't exist
+            if (!this.playbackWavesurfer) {
+                await this.createPlaybackWaveSurfer();
+            }
+
+            // Toggle playback using our isolated instance
+            if (this.playbackWavesurfer) {
                 this.playbackWavesurfer.playPause();
-            } else {
-                // Use playerManager's togglePlay for centralized control
-                const container = this.$refs.playbackWaveform;
-                if (!container) return;
-
-                const isDark = document.documentElement.classList.contains('dark');
-                const options = {
-                    height: 32,
-                    waveColor: isDark ? '#71717a' : '#d4d4d8',
-                    progressColor: '#0ea5e9',
-                    cursorColor: isDark ? '#0284c7' : '#0369a1',
-                    barWidth: 2,
-                    barGap: 1,
-                    responsive: true,
-                    normalize: true,
-                    hideScrollbar: true,
-                };
-
-                playerManager.togglePlay(
-                    playbackKey,
-                    container,
-                    this.recordedUrl,
-                    (wavesurfer) => {
-                        this.playbackWavesurfer = wavesurfer;
-
-                        wavesurfer.on('play', () => {
-                            this.isPlaying = true;
-                        });
-
-                        wavesurfer.on('pause', () => {
-                            this.isPlaying = false;
-                        });
-
-                        wavesurfer.on('finish', () => {
-                            this.isPlaying = false;
-                        });
-                    },
-                    options
-                );
             }
         },
 
@@ -271,6 +339,16 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
                 } catch (error) {
                     console.warn('Error pausing playback during delete:', error);
                 }
+            }
+
+            // Destroy isolated playback wavesurfer instance
+            if (this.playbackWavesurfer) {
+                try {
+                    this.playbackWavesurfer.destroy();
+                } catch (error) {
+                    console.warn('Error destroying playback wavesurfer:', error);
+                }
+                this.playbackWavesurfer = null;
             }
 
             // Clean up URLs
@@ -287,32 +365,7 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
             this.isUploading = false;
             this.uploadProgress = 0;
 
-            // Destroy playback waveform with proper cleanup
-            if (this.instanceKey) {
-                const playbackKey = `${this.instanceKey}_playback`;
-                
-                // Check if this is the active player and pause it first
-                if (playerManager.getActiveInstanceKey() === playbackKey) {
-                    try {
-                        // Use the existing wavesurfer instance to pause
-                        const activeWavesurfer = this.playbackWavesurfer;
-                        if (activeWavesurfer && activeWavesurfer.isPlaying()) {
-                            activeWavesurfer.pause();
-                        }
-                    } catch (error) {
-                        console.warn('Error pausing active player during delete:', error);
-                    }
-                }
-                
-                // Then destroy the instance
-                playerManager.destroy(playbackKey);
-            }
-            this.playbackWavesurfer = null;
-
-            // Clear containers
-            if (this.$refs.playbackWaveform) {
-                this.$refs.playbackWaveform.innerHTML = '';
-            }
+            // Note: Don't clear containers with innerHTML - WaveSurfer manages its own DOM
         },
 
         async submitRecording() {
@@ -375,7 +428,7 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
         },
 
         resetAfterUpload() {
-            console.log('Resetting recorder after successful upload...');
+            console.log('🧹 Resetting recorder after successful upload...');
 
             this.isUploading = false;
             this.uploadProgress = 0;
@@ -383,47 +436,19 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
             // Clean up current recording
             this.deleteRecording();
 
-            // Reset WaveSurfer state and reinitialize - but only if still valid
-            if (this.instanceKey && this.isInitialized) {
-                this.resetWaveSurfer();
+            // Completely destroy recorder instance - fresh one will be created on next record click
+            if (this.instanceKey) {
+                console.log('💥 Destroying recorder instance completely...');
+                recorderManager.destroy(this.instanceKey);
+                this.isInitialized = false;
             }
 
-            // Always reinitialize for next recording
-            if (this.instanceKey) {
-                this.createWaveSurfer();
-            }
+            console.log('✅ Reset complete - ready for fresh recording');
         },
 
         resetWaveSurfer() {
-            // Only proceed if we have a valid instance
-            if (!this.instanceKey || !this.isInitialized) {
-                console.warn('Cannot reset WaveSurfer - no valid instance');
-                return;
-            }
-
-            // Stop any ongoing recording via manager
-            if (this.isRecording) {
-                try {
-                    const recordPlugin = recorderManager.getRecord(this.instanceKey);
-                    if (recordPlugin) {
-                        recordPlugin.stopRecording();
-                    }
-                } catch (error) {
-                    console.warn('Error stopping recording during reset:', error);
-                }
-            }
-
-            // Clear the recording waveform via manager
-            const wavesurfer = recorderManager.getWavesurfer(this.instanceKey);
-            if (wavesurfer) {
-                try {
-                    wavesurfer.empty();
-                } catch (error) {
-                    console.warn('Error clearing waveform:', error);
-                }
-            }
-
-            // Reset recording state
+            // This method is deprecated - we handle reset in createWaveSurfer now
+            // Just reset the state without touching WaveSurfer instances
             this.isRecording = false;
             this.currentDuration = 0;
             this.stopTimer();
@@ -550,12 +575,15 @@ export default function recorder({ onSubmit = null, instanceKey = null } = {}) {
             // Mark as no longer initialized
             this.isInitialized = false;
 
-            // Destroy playback instance if exists
-            if (this.instanceKey) {
-                const playbackKey = `${this.instanceKey}_playback`;
-                playerManager.destroy(playbackKey);
+            // Destroy isolated playback instance if exists
+            if (this.playbackWavesurfer) {
+                try {
+                    this.playbackWavesurfer.destroy();
+                } catch (error) {
+                    console.warn('Error destroying playback wavesurfer during component destroy:', error);
+                }
+                this.playbackWavesurfer = null;
             }
-            this.playbackWavesurfer = null;
 
             // Clean up object URLs
             if (this.recordedUrl) {

@@ -1,6 +1,6 @@
 <!-- Comment Creation Modal -->
 @php
-    $urgencyArray = App\Enums\Feedback\FeedbackUrgency::simpleArray($urgency);
+    $urgencyArray = App\Enums\Feedback\FeedbackUrgency::colorfulArray($urgency);
 @endphp
 <div x-data="{
     isDesktop: window.innerWidth >= 768,
@@ -97,7 +97,7 @@
                             <!-- Media Components -->
                             <div class="w-full mt-3 space-y-3">
                                 <!-- Voice Notes -->
-                                <livewire:reusable.voice-note-component />
+                                <livewire:reusable.voice-note-component outlined />
                             </div>
                         </div>
                     </div>

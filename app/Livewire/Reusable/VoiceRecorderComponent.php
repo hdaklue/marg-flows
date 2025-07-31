@@ -15,10 +15,17 @@ final class VoiceRecorderComponent extends Component
 
     public string $instanceKey = '';
 
+    public bool $outlined = false;
+
+    public ?int $maxDuration = null;
+
+    public int $maxDurationInSeconds;
+
     public $audio;
 
     public function mount()
     {
+        $this->maxDurationInSeconds = $this->maxDuration ?? config('voice-notes.maxDuration');
         $this->instanceKey = 'recorder_' . uniqid();
     }
 

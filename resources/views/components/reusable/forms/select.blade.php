@@ -117,21 +117,21 @@ $nextTick(() => {
 
         <!-- Button -->
         <button x-listbox:button @if ($disabled) disabled @endif
-            class="{{ $classes['button'] }} group flex w-auto items-center justify-between gap-2 rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+            :class="isIconOnly ? 'p-1.5 group flex w-auto items-center justify-center rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-1' : '{{ $classes['button'] }} group flex w-auto items-center justify-between gap-2 rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-1'"
+            class="
+            @if ($disabled) border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed
+            @elseif($error)
+                border-red-300 dark:border-red-600 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:border-red-400 dark:hover:border-red-500 focus:ring-red-500/20
+            @else
+                bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 focus:ring-sky-500/20 @endif"
             :class="{
-                @if ($disabled) 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed': true
-                @elseif($error)
-                    'border-red-300 dark:border-red-600 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:border-red-400 dark:hover:border-red-500 focus:ring-red-500': true
-                @else
-                    'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100': true,
+                @if (!$disabled && !$error)
                     ['border-' + currentColor + '-200 dark:border-' + currentColor + '-700']: allowColors && selectedOption && selectedOption.color,
                     ['hover:border-' + currentColor + '-300 dark:hover:border-' + currentColor + '-600']: allowColors && selectedOption && selectedOption.color,
                     ['focus:border-' + currentColor + '-500 dark:focus:border-' + currentColor + '-400']: allowColors && selectedOption && selectedOption.color,
-                    ['focus:ring-' + currentColor + '-500']: allowColors && selectedOption && selectedOption.color,
-                    'border-zinc-200 dark:border-zinc-700': !allowColors || !selectedOption || !selectedOption.color,
-                    'hover:border-zinc-300 dark:hover:border-zinc-600': !allowColors || !selectedOption || !selectedOption.color,
-                    'focus:border-sky-500 dark:focus:border-sky-400': !allowColors || !selectedOption || !selectedOption.color,
-                    'focus:ring-sky-500': !allowColors || !selectedOption || !selectedOption.color @endif
+                    ['focus:ring-' + currentColor + '-500/20']: allowColors && selectedOption && selectedOption.color,
+                    'focus:border-sky-500 dark:focus:border-sky-400': !allowColors || !selectedOption || !selectedOption.color
+                @endif
             }">
             <!-- Selected option display -->
             <div class="flex items-center flex-1 min-w-0"

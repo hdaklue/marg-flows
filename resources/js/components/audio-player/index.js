@@ -33,8 +33,8 @@ export default function audioPlayer({ audioUrl = '', useVoiceNoteManager = false
                     return;
                 }
 
-                // Clear the container before passing it to the manager
-                container.innerHTML = '';
+                // Don't clear container with innerHTML - WaveSurfer manages its own DOM
+                // The playerManager.togglePlay() handles cleanup properly
 
                 const sizeConfig = {
                     sm: { height: 24, barWidth: 1.5, barGap: 0.5 },

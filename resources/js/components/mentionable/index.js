@@ -78,6 +78,9 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
 
                         return `<div div style = "display: flex; align-items: center; gap: 0.5rem;" > ${avatar} <div class="tribute-item-content"><div class="tribute-item-name">${item.string}</div><div class="tribute-item-email">${data.email}</div>${title}</div></div > `;
                     },
+                    noMatchTemplate: () => {
+                        return '<div style="padding: 8px; color: #666;">No users found</div>';
+                    },
                     searchOpts: {
                         pre: '<span>',
                         post: '</span>',
@@ -86,7 +89,7 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                     requireLeadingSpace: false,
                     allowSpaces: false,
                     menuItemLimit: 8,
-                    menuShowMinLength: 1,
+                    menuShowMinLength: 0,
                     replaceTextSuffix: '\n',
                 });
             }
@@ -106,6 +109,9 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                         const data = item.original;
                         return `<div div style = "display: flex; align-items: center; gap: 0.5rem;" ><div class="tribute-item-hashtag-icon">#</div><div class="tribute-item-content"><div class="tribute-item-name">${item.string}</div>${data.url ? `<div class="tribute-item-url">${data.url}</div>` : ''}</div></div > `;
                     },
+                    noMatchTemplate: () => {
+                        return '<div style="padding: 8px; color: #666;">No hashtags found</div>';
+                    },
                     searchOpts: {
                         pre: '<span>',
                         post: '</span>',
@@ -114,7 +120,7 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
                     requireLeadingSpace: false,
                     allowSpaces: false,
                     menuItemLimit: 8,
-                    menuShowMinLength: 1,
+                    menuShowMinLength: 0,
                     autocompleteMode: true,
                     replaceTextSuffix: '\n',
                 });
@@ -122,14 +128,27 @@ export default function mentionableText(mentions, hashables, maxLength = 500) {
 
             this.tribute = new Tribute({
                 collection: collections,
-                menuContainer: document.querySelector(this.$refs.textarea.id),
-                spaceSelectsMatch: true,
+                spaceSelectsMatch: false,
                 positionMenu: true
             });
 
 
             this.tribute.attach(this.$refs.textarea);
             this.$refs.textarea.setAttribute('data-tribute', 'true');
+
+            // Hide menu when window loses focus (e.g., Cmd+Tab)
+            window.addEventListener('blur', () => {
+                if (this.tribute && this.tribute.isActive) {
+                    this.tribute.hideMenu();
+                }
+            });
+
+            // Hide menu when textarea loses focus
+            this.$refs.textarea.addEventListener('blur', () => {
+                if (this.tribute && this.tribute.isActive) {
+                    this.tribute.hideMenu();
+                }
+            });
 
             // Listen for tribute events to trigger Alpine reactivity and update Livewire arrays
             this.$refs.textarea.addEventListener('tribute-replaced', (e) => {

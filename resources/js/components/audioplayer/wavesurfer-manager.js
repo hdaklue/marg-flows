@@ -2,10 +2,9 @@ import WaveSurfer from 'wavesurfer.js';
 import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
 
 // Module-level state
-let activePlayer = {
-    wavesurfer: null,
-    instanceKey: null,
-};
+let activeInstanceKey = null;
+let playerInstances = new Map(); // Store all player instances
+const MAX_ACTIVE_PLAYERS = 10; // Increased limit for better user experience
 let voiceRecorder = null; // This remains separate and untouched
 
 /**
@@ -54,100 +53,177 @@ const createInstance = async (container, audioUrl, onReady, options, withRecorde
         );
     }
 
+    // Always load audio immediately for both recorders and players
     if (audioUrl) {
         try {
             await wavesurfer.load(audioUrl);
+            if (!withRecorder) {
+                // For players, mark as loaded
+                wavesurfer._isLoaded = true;
+            }
         } catch (error) {
             console.error(`Failed to load audio:`, error);
             throw error;
         }
+    } else if (!withRecorder) {
+        // Players without audioUrl - set lazy load flags
+        wavesurfer._audioUrl = null;
+        wavesurfer._isLoaded = false;
     }
 
     return { wavesurfer, recordPlugin };
 };
 
 /**
- * Player Manager - Handles a single, dynamic audio player instance
+ * Manages LRU cache for player instances
+ * @private
+ */
+const managePlayerCache = (currentInstanceKey) => {
+    // If we're at the limit and adding a new instance
+    if (playerInstances.size >= MAX_ACTIVE_PLAYERS && !playerInstances.has(currentInstanceKey)) {
+        // Find the oldest instance (first in Map iteration order)
+        const oldestKey = playerInstances.keys().next().value;
+        
+        if (oldestKey && oldestKey !== activeInstanceKey) {
+            console.log(`🗑️ LRU Cache: Destroying oldest player instance: ${oldestKey} (limit: ${MAX_ACTIVE_PLAYERS})`);
+            const oldestInstance = playerInstances.get(oldestKey);
+            
+            try {
+                // Destroy the wavesurfer instance - it will handle its own DOM cleanup
+                oldestInstance.wavesurfer?.destroy();
+            } catch (error) {
+                console.warn('Error destroying oldest player:', error);
+            }
+            
+            playerInstances.delete(oldestKey);
+        }
+    }
+};
+
+/**
+ * Updates access order for LRU cache
+ * @private
+ */
+const updateAccessOrder = (instanceKey) => {
+    if (playerInstances.has(instanceKey)) {
+        // Remove and re-add to move to end (most recently used)
+        const instance = playerInstances.get(instanceKey);
+        playerInstances.delete(instanceKey);
+        playerInstances.set(instanceKey, instance);
+    }
+};
+
+/**
+ * Player Manager - Handles multiple audio player instances with LRU cache
  */
 export const playerManager = {
 
     // Destroy all active players
     destroyAll() {
-        if (activePlayer.wavesurfer) {
+        for (const [instanceKey, instance] of playerInstances) {
             try {
-                activePlayer.wavesurfer.destroy();
+                if (instance.wavesurfer) {
+                    instance.wavesurfer.destroy();
+                }
             } catch (error) {
-                console.warn('Error destroying active player:', error);
+                console.warn('Error destroying player:', error);
             }
-            activePlayer = { wavesurfer: null, instanceKey: null };
         }
+        playerInstances.clear();
+        activeInstanceKey = null;
     },
     async togglePlay(instanceKey, container, audioUrl, onReady, options) {
-        // If the user clicks the same player that is already active, just toggle play/pause.
-        if (activePlayer.instanceKey === instanceKey) {
-            if (activePlayer.wavesurfer) {
-                activePlayer.wavesurfer.playPause();
-            }
+        // Check if this instance already exists
+        let instance = playerInstances.get(instanceKey);
+        console.log(`🎵 togglePlay called for ${instanceKey}, exists: ${!!instance}, active: ${activeInstanceKey}`);
+        
+        // If clicking the same active player, just toggle play/pause
+        if (activeInstanceKey === instanceKey && instance) {
+            console.log(`▶️ Toggling play/pause for active player ${instanceKey}`);
+            instance.wavesurfer.playPause();
             return;
         }
 
-        // If a different player is clicked, properly transition:
-        // 1. Pause current player
-        if (activePlayer.wavesurfer) {
+        // Pause the currently active player (but don't destroy it)
+        if (activeInstanceKey && playerInstances.has(activeInstanceKey)) {
+            const currentInstance = playerInstances.get(activeInstanceKey);
             try {
-                if (activePlayer.wavesurfer.isPlaying()) {
-                    activePlayer.wavesurfer.pause();
+                if (currentInstance.wavesurfer.isPlaying()) {
+                    currentInstance.wavesurfer.pause();
                 }
             } catch (error) {
                 console.warn('Error pausing current player:', error);
             }
-
-            // 2. Destroy the old player
-            try {
-                activePlayer.wavesurfer.destroy();
-            } catch (error) {
-                console.warn('Error destroying current player:', error);
-            }
         }
 
-        // 3. Create and initialize the new player with new URL
-        const { wavesurfer: newWavesurfer } = await createInstance(container, audioUrl, onReady, options, false);
+        // Manage cache before creating new instance
+        if (!instance) {
+            managePlayerCache(instanceKey);
+        }
 
-        // 4. Assign the new player
-        activePlayer = {
-            wavesurfer: newWavesurfer,
-            instanceKey: instanceKey,
-        };
+        // Create new instance if it doesn't exist
+        if (!instance) {
+            console.log(`🔄 Creating new WaveSurfer instance for ${instanceKey}`);
+            const { wavesurfer } = await createInstance(container, audioUrl, onReady, options, false);
+            instance = { 
+                wavesurfer,
+                container,
+                audioUrl 
+            };
+            playerInstances.set(instanceKey, instance);
+        } else {
+            console.log(`♻️ Reusing existing instance for ${instanceKey}`);
+            // Update access order for existing instance
+            updateAccessOrder(instanceKey);
+        }
 
-        // 5. Play the new audio (different URL)
+        // Set as active and play
+        activeInstanceKey = instanceKey;
+        
         try {
-            await newWavesurfer.play();
+            console.log(`🎬 Playing ${instanceKey}`);
+            await instance.wavesurfer.play();
         } catch (error) {
-            console.warn('Error playing new audio:', error);
+            console.warn('Error playing audio:', error);
         }
     },
 
     isPlaying() {
-        return activePlayer.wavesurfer ? activePlayer.wavesurfer.isPlaying() : false;
+        if (!activeInstanceKey || !playerInstances.has(activeInstanceKey)) return false;
+        const instance = playerInstances.get(activeInstanceKey);
+        return instance.wavesurfer ? instance.wavesurfer.isPlaying() : false;
     },
 
     getCurrentTime() {
-        return activePlayer.wavesurfer ? activePlayer.wavesurfer.getCurrentTime() : 0;
+        if (!activeInstanceKey || !playerInstances.has(activeInstanceKey)) return 0;
+        const instance = playerInstances.get(activeInstanceKey);
+        return instance.wavesurfer ? instance.wavesurfer.getCurrentTime() : 0;
     },
 
     getDuration() {
-        return activePlayer.wavesurfer ? activePlayer.wavesurfer.getDuration() : 0;
+        if (!activeInstanceKey || !playerInstances.has(activeInstanceKey)) return 0;
+        const instance = playerInstances.get(activeInstanceKey);
+        return instance.wavesurfer ? instance.wavesurfer.getDuration() : 0;
     },
 
     getActiveInstanceKey() {
-        return activePlayer.instanceKey;
+        return activeInstanceKey;
     },
 
     destroy(instanceKey) {
-        // Only destroy if the key matches the active instance
-        if (activePlayer.instanceKey === instanceKey) {
-            activePlayer.wavesurfer?.destroy();
-            activePlayer = { wavesurfer: null, instanceKey: null };
+        const instance = playerInstances.get(instanceKey);
+        if (instance) {
+            try {
+                instance.wavesurfer?.destroy();
+            } catch (error) {
+                console.warn('Error destroying wavesurfer instance:', error);
+            }
+            playerInstances.delete(instanceKey);
+            
+            // If this was the active instance, clear the active key
+            if (activeInstanceKey === instanceKey) {
+                activeInstanceKey = null;
+            }
         }
     },
 };
@@ -180,8 +256,8 @@ export const recorderManager = {
             this.destroy(instanceKey);
         }
 
-        // Clear container to ensure clean slate
-        container.innerHTML = '';
+        // Don't clear container with innerHTML - WaveSurfer manages its own DOM
+        // The destroy() method above already handles cleanup properly
 
         const defaultOptions = {
             waveColor: '#71717a', // zinc-500

@@ -6,6 +6,7 @@ namespace App\Livewire\Reusable;
 
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -20,7 +21,11 @@ final class VoiceNoteComponent extends Component
 
     public array $voiceNoteUrls = [];
 
-    public int $maxNotes = 3;
+    #[Locked]
+    public int $maxNotes = 1;
+
+    #[Locked]
+    public int $maxDurationInSeconds = 30;
 
     public string $recorderKey = '';
 
@@ -39,7 +44,7 @@ final class VoiceNoteComponent extends Component
     #[Computed]
     public function canAcceptNotes(): bool
     {
-        return count($this->voiceNoteUrls) < 3;
+        return count($this->voiceNoteUrls) < $this->maxNotes;
     }
 
     #[Computed]
