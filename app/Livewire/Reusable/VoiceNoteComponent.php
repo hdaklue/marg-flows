@@ -93,6 +93,10 @@ final class VoiceNoteComponent extends Component
     {
         if (isset($this->voiceNoteUrls[$index])) {
             $url = $this->voiceNoteUrls[$index];
+            $playerKey = 'voice-note-' . $this->getUniqueVoiceNoteKey($url);
+
+            // Dispatch event to destroy the specific audio player instance
+            $this->dispatch('destroy-audio-player', playerKey: $playerKey);
 
             // Extract the file path from the URL and delete from storage
             // URL format: /storage/voice-notes/filename.webm
@@ -122,5 +126,10 @@ final class VoiceNoteComponent extends Component
     public function render()
     {
         return view('livewire.reusable.voice-note-component');
+    }
+
+    private function getUniqueVoiceNoteKey(string $url): string
+    {
+        return md5($url);
     }
 }

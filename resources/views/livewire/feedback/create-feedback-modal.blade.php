@@ -1,6 +1,6 @@
 <!-- Comment Creation Modal -->
 @php
-    $urgencyArray = App\Enums\Feedback\FeedbackUrgency::colorfulArray($urgency);
+    $urgencyArray = App\Enums\Feedback\FeedbackUrgency::colorfulArray();
 @endphp
 <div x-data="{
     isDesktop: window.innerWidth >= 768,
@@ -17,6 +17,7 @@
         } else {
             $wire.set('showCommentModal', false);
             this.$dispatch('voice-note:canceled');
+            this.$dispatch('feedback-modal:empty-cancel');
         }
     },
     confirmCancelling() {
@@ -91,7 +92,7 @@
                             <div class="grid grid-cols-3">
 
                                 <x-reusable.forms.select statePath="urgency" allowColors size="sm"
-                                    :options="$urgencyArray" defaultValue="2" />
+                                    :options="$urgencyArray" outlined />
                             </div>
 
                             <!-- Media Components -->

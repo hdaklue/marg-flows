@@ -61,7 +61,9 @@
     instanceKey: @js($playerKey)
 })"
     x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('audioPlayer') }}"
-    x-on:destroy="cleanup()" class="{{ $finalClasses }}">
+    x-on:destroy="cleanup()"
+    @destroy-audio-player.window="if ($event.detail.playerKey === @js($playerKey)) cleanup()"
+    class="{{ $finalClasses }}">
 
     <!-- Play/Pause Button -->
     <button @click="togglePlay()" {{-- :disabled="!isLoaded" --}}

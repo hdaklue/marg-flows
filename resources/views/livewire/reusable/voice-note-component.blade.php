@@ -10,7 +10,7 @@
             @foreach ($this->getNotesUrls as $index => $url)
                 <div wire:ignore class="flex items-center gap-2" wire:key="voice-note-{{ md5($url) }}">
                     <div class="flex-1">
-                        <x-audio-player :audio-url="$url" size="sm" :outlined="false" :player-key="'voice-note-' . $index" />
+                        <x-audio-player :audio-url="$url" size="sm" :outlined="false" :player-key="'voice-note-' . md5($url)" />
                     </div>
                     <button wire:click="removeVoiceNote({{ $index }})"
                         class="flex items-center justify-center w-6 h-6 text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">

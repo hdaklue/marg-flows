@@ -6,8 +6,8 @@ use App\Http\Controllers\AcceptInvitation;
 use App\Http\Controllers\ChunkedUploadController;
 use App\Http\Controllers\EditorJsImageDelete;
 use App\Http\Controllers\EditorJsUpload;
+use App\Livewire\Feedback\CreateFeedbackComponent;
 use App\Livewire\PreviewAudio;
-use App\Livewire\PreviewImage;
 use App\Livewire\PreviewVideo;
 use App\Livewire\Reusable\VideoRecorder;
 use App\Livewire\Settings\Appearance;
@@ -18,7 +18,7 @@ use App\Models\Flow;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/imagePreview', action: PreviewImage::class)->name('home');
+Route::get('/imagePreview', action: CreateFeedbackComponent::class)->name('home');
 
 // Route::get('/', function () {
 //     return Flow::byStatus('pause')->get();

@@ -214,6 +214,11 @@ export const playerManager = {
         const instance = playerInstances.get(instanceKey);
         if (instance) {
             try {
+                // Explicitly stop playback first
+                if (instance.wavesurfer && instance.wavesurfer.isPlaying()) {
+                    instance.wavesurfer.pause();
+                }
+                // Then destroy the instance
                 instance.wavesurfer?.destroy();
             } catch (error) {
                 console.warn('Error destroying wavesurfer instance:', error);
@@ -225,6 +230,11 @@ export const playerManager = {
                 activeInstanceKey = null;
             }
         }
+    },
+
+    // Debug method to list active instances
+    getActiveInstances() {
+        return Array.from(playerInstances.keys());
     },
 };
 
@@ -356,6 +366,9 @@ window.addEventListener('wv-manager:recorder:destroy', () => {
     console.log('listening inside the manager');
     recorderManager.destroyAll();
 });
+
+// Make playerManager available globally for cleanup from Livewire
+window.playerManager = playerManager;
 
 // Default export for backward compatibility
 export default playerManager;

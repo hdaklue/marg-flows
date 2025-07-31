@@ -9,7 +9,6 @@
     'error' => null,
     'class' => '',
     'allowColors' => false,
-    'defaultValue' => null,
     'iconOnly' => false,
 ])
 
@@ -48,13 +47,17 @@
 @endphp
 
 <div x-data="{
-    value: null,
+    value: $wire.entangle('{{ $statePath }}'),
     isIconOnly: @js($iconOnly),
     options: @js($options),
     allowColors: {{ $allowColors ? 'true' : 'false' }},
-    defaultValue: @js($defaultValue),
-    sourceOfTruthValue: null,
+    isTouchDevice: false,
+    showModal: false,
     get selectedOption() {
+        // Only compute if we have a valid value and options
+        if (!this.value || !this.options || this.options.length === 0) {
+            return null;
+        }
         return this.options.find(option => option.value == this.value) || null;
     },
     get currentColor() {
@@ -64,41 +67,14 @@
         return this.selectedOption.color;
     },
     init() {
-        // Determine source of truth
-        const preSelected = this.options.find(option => option.selected);
-        if (preSelected) {
-            this.sourceOfTruthValue = preSelected.value;
-            this.value = preSelected.value;
-        } else if (this.defaultValue) {
-            this.sourceOfTruthValue = this.defaultValue;
-            this.value = this.defaultValue;
-        }
+        // Detect touch device
+        this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     },
-    updateOptionAvailability() {
-        // Use x-ref to directly control the source of truth option
-        if (this.sourceOfTruthValue && this.$refs['option_' + this.sourceOfTruthValue]) {
-            const sourceElement = this.$refs['option_' + this.sourceOfTruthValue];
-            // Disable only when currently selected, enable when not selected
-            sourceElement.disabled = this.value == this.sourceOfTruthValue;
-        }
+    selectOption(optionValue) {
+        this.value = optionValue;
+        this.showModal = false;
     }
-}" x-init="init();
-updateOptionAvailability();
-$watch('value', v => {
-    $refs.hiddenInput.value = v;
-    $refs.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
-    updateOptionAvailability();
-});
-// Trigger initial sync to show checkmark
-$nextTick(() => {
-    if (value) {
-        $refs.hiddenInput.value = value;
-        $refs.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-})" class="{{ $class }}">
-    <!-- Hidden input to bind value to Livewire -->
-    <input type="hidden" id="{{ $uid }}" x-ref="hiddenInput" wire:model="{{ $statePath }}"
-        @if ($required) required @endif>
+}" class="{{ $class }}">
 
     @if ($label)
         <label for="{{ $uid }}" class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -117,21 +93,20 @@ $nextTick(() => {
 
         <!-- Button -->
         <button x-listbox:button @if ($disabled) disabled @endif
-            :class="isIconOnly ? 'p-1.5 group flex w-auto items-center justify-center rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-1' : '{{ $classes['button'] }} group flex w-auto items-center justify-between gap-2 rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-1'"
-            class="
-            @if ($disabled) border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed
+            :class="isIconOnly ?
+                'p-1.5 group flex w-auto items-center justify-center rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-1' :
+                '{{ $classes['button'] }} group flex w-auto items-center justify-between gap-2 rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-1'"
+            class="@if ($disabled) border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed
             @elseif($error)
                 border-red-300 dark:border-red-600 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:border-red-400 dark:hover:border-red-500 focus:ring-red-500/20
             @else
                 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 focus:ring-sky-500/20 @endif"
             :class="{
-                @if (!$disabled && !$error)
-                    ['border-' + currentColor + '-200 dark:border-' + currentColor + '-700']: allowColors && selectedOption && selectedOption.color,
+                @if (!$disabled && !$error) ['border-' + currentColor + '-200 dark:border-' + currentColor + '-700']: allowColors && selectedOption && selectedOption.color,
                     ['hover:border-' + currentColor + '-300 dark:hover:border-' + currentColor + '-600']: allowColors && selectedOption && selectedOption.color,
                     ['focus:border-' + currentColor + '-500 dark:focus:border-' + currentColor + '-400']: allowColors && selectedOption && selectedOption.color,
                     ['focus:ring-' + currentColor + '-500/20']: allowColors && selectedOption && selectedOption.color,
-                    'focus:border-sky-500 dark:focus:border-sky-400': !allowColors || !selectedOption || !selectedOption.color
-                @endif
+                    'focus:border-sky-500 dark:focus:border-sky-400': !allowColors || !selectedOption || !selectedOption.color @endif
             }">
             <!-- Selected option display -->
             <div class="flex items-center flex-1 min-w-0"
@@ -145,7 +120,8 @@ $nextTick(() => {
 
                 <!-- Status color square (when no icon but color exists) -->
                 <template x-if="allowColors && selectedOption && selectedOption.color && !selectedOption.icon">
-                    <div class="{{ $classes['checkIcon'] }} shrink-0 rounded-md border border-opacity-20"
+                    <div x-tooltip="isIconOnly && selectedOption.label"
+                        class="{{ $classes['checkIcon'] }} shrink-0 rounded-md border border-opacity-20"
                         :class="'bg-' + selectedOption.color + '-500 border-' + selectedOption.color + '-600'"></div>
                 </template>
 
@@ -172,12 +148,17 @@ $nextTick(() => {
             @endif
         </button>
 
+        <!-- Backdrop for touch devices -->
+        <div x-show="$listbox.isOpen && isTouchDevice" x-cloak class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            @click="$listbox.button.click()"></div>
+
         <!-- Options -->
         <ul x-listbox:options x-cloak
-            class="{{ $classes['options'] }} absolute left-0 z-10 mt-2 max-h-80 w-full overflow-y-auto overscroll-contain rounded-lg border border-zinc-200 bg-white shadow-lg outline-none dark:border-zinc-700 dark:bg-zinc-900">
+            :class="isTouchDevice ?
+                'fixed inset-x-4 bottom-4 z-50 max-h-96 overflow-y-auto overscroll-contain rounded-xl border border-zinc-200 bg-white shadow-2xl outline-none dark:border-zinc-700 dark:bg-zinc-900 p-2 space-y-1' :
+                '{{ $classes['options'] }} absolute left-0 z-10 mt-2 max-h-80 w-full overflow-y-auto overscroll-contain rounded-lg border border-zinc-200 bg-white shadow-lg outline-none dark:border-zinc-700 dark:bg-zinc-900'">
             <template x-for="option in options" :key="option.value">
                 <li x-listbox:option :value="option.value" :disabled="option.disabled"
-                    :x-ref="option.value == sourceOfTruthValue ? 'option_' + option.value : null"
                     :class="{
                         ['bg-' + option.color + '-50 dark:bg-' + option.color + '-900/20 text-' + option.color +
                             '-700 dark:text-' + option.color + '-300'
@@ -186,8 +167,11 @@ $nextTick(() => {
                             $listboxOption.isDisabled && (!allowColors || !option.color),
                             'text-zinc-900 dark:text-zinc-100': !$listboxOption.isActive && !$listboxOption.isDisabled,
                             'text-zinc-400 dark:text-zinc-500 cursor-not-allowed': $listboxOption.isDisabled,
+                            'px-4 py-2 text-base': isTouchDevice,
+                            '{{ $classes['option'] }}': !isTouchDevice,
+                            'flex items-center w-full transition-colors duration-150 rounded-md cursor-default group':
+                            true
                     }"
-                    class="{{ $classes['option'] }} group flex w-full cursor-default items-center rounded-md transition-colors duration-150">
                     <!-- Icon or Color Square Container -->
                     <template x-if="option.icon || (allowColors && option.color)">
                         <div class="{{ $classes['checkContainer'] }} flex shrink-0 items-center justify-center">

@@ -39,6 +39,10 @@ final class CreateFeedbackModal extends Component
 
     public bool $hasUnuploadedVoiceNotes = false;
 
+    // public $listeners = [
+    //     'voice-note:canceled' => '$refresh',
+    // ];
+
     public int|string|null $urgency = null;
 
     #[Renderless]
@@ -64,13 +68,6 @@ final class CreateFeedbackModal extends Component
 
     public function mount()
     {
-        $this->pendingComment = [];
-        $this->currentMentions = [];
-        $this->currentHashtags = [];
-        $this->voiceNoteUrls = [];
-        $this->hasVoiceNotes = false;
-        $this->hasUnuploadedVoiceNotes = false;
-        $this->urgency = FeedbackUrgency::NORMAL->value;
         $this->setupSampleData();
     }
 
@@ -83,19 +80,13 @@ final class CreateFeedbackModal extends Component
         $this->voiceNoteUrls = [];
         $this->hasVoiceNotes = false;
         $this->hasUnuploadedVoiceNotes = false;
-
+        $this->urgency = FeedbackUrgency::SUGGESTION->value;
         $this->showCommentModal = true;
     }
 
     public function clear()
     {
-        $this->pendingComment = [];
-        $this->currentMentions = [];
-        $this->currentHashtags = [];
-        $this->voiceNoteUrls = [];
-        $this->hasVoiceNotes = false;
-        $this->hasUnuploadedVoiceNotes = false;
-        $this->showCommentModal = false;
+        $this->clearData();
         $this->setupSampleData();
     }
 
@@ -136,13 +127,8 @@ final class CreateFeedbackModal extends Component
         // Store design_id before resetting pendingComment
         $designId = $this->pendingComment['designId'] ?? null;
 
-        $this->showCommentModal = false;
-        $this->pendingComment = [];
-        $this->commentText = '';
-        $this->currentMentions = [];
-        $this->currentHashtags = [];
-        $this->voiceNoteUrls = [];
-        $this->hasUnuploadedVoiceNotes = false;
+        // Clear all data using single source of truth
+        $this->clearData();
 
         // Dispatch comment created event
         $this->dispatch('feedback-modal:comment-created', [
@@ -150,6 +136,13 @@ final class CreateFeedbackModal extends Component
             'comment' => $comment,
             'message' => 'Comment saved successfully',
         ]);
+    }
+
+    #[On('feedback-modal:empty-cancel')]
+    public function onCancelEmptyFeedback()
+    {
+        logger()->info('onCancelEmptyFeedback called');
+        $this->clearData();
     }
 
     #[Renderless]
@@ -181,27 +174,22 @@ final class CreateFeedbackModal extends Component
         }
 
         logger()->info('No unsaved changes, calling performCancel');
-        $this->performCancel();
+        $this->urgency = FeedbackUrgency::NORMAL->value;
+        logger()->info('urgency', [$this->urgency]);
+
+        // $this->performCancel();
     }
 
     // #[On('confirm-cancel')]
     public function handleConfirmCancel()
     {
+        logger()->info('handleConfirmCancel called');
 
-        logger()->info('handelling cancel:');
-
-        $this->pendingComment = [];
-        $this->commentText = '';
-        $this->urgency = null;
-        $this->currentMentions = [];
-        $this->currentHashtags = [];
-        $this->voiceNoteUrls = [];
-        $this->hasVoiceNotes = false;
-        $this->hasUnuploadedVoiceNotes = false;
-        $this->showCommentModal = false;
-
-        // Dispatch events to clean up any active recordings or players
+        // Dispatch events to clean up any active recordings or players first
         $this->dispatch('voice-note:canceled');
+
+        // Clear all data using single source of truth
+        $this->clearData();
     }
 
     #[On('voice-note:uploaded')]
@@ -287,6 +275,20 @@ final class CreateFeedbackModal extends Component
             'commentText.required_without' => 'Please add a comment or voice note.',
             'hasVoiceNotes.required_without' => 'Please add a comment or voice note.',
         ];
+    }
+
+    private function clearData()
+    {
+        logger()->info('clearData called - resetting all modal data');
+        $this->pendingComment = [];
+        $this->commentText = '';
+        $this->currentMentions = [];
+        $this->currentHashtags = [];
+        $this->voiceNoteUrls = [];
+        $this->hasVoiceNotes = false;
+        $this->hasUnuploadedVoiceNotes = false;
+        $this->urgency = FeedbackUrgency::NORMAL->value;
+        $this->showCommentModal = false;
     }
 
     private function setupSampleData()
