@@ -178,7 +178,7 @@ export default function audioAnnotation(userConfig = null, initialComments = [])
                     minPxPerSec: 150,
                     height: 100,
                     normalize: true,
-                    dragToSeek: false,
+                    dragToSeek: true,
                     plugins: [this.regionsPlugin, this.zoomPlugin, this.timelinePlugin]
                 });
 

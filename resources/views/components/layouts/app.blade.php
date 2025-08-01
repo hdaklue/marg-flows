@@ -19,11 +19,11 @@
 </head>
 
 <body class="font-sans antialiased dark:bg-zinc-950">
-    <div class="min-h-screen">
-        <main>
-            {{ $slot }}
-        </main>
-    </div>
+
+    <main class="min-h-screen">
+        {{ $slot }}
+    </main>
+
 
     {{-- ✅ Load Livewire scripts at the end of <body> --}}
     @livewireScriptConfig

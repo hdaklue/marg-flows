@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('creator_id');
             $table->index('creator_id');
 
-            $table->string('status')->default(FeedbackStatus::OPEN);
-            $table->string('urgency')->default(FeedbackUrgency::NORMAL);
+            $table->string('status')->default(FeedbackStatus::OPEN->value);
+            $table->string('urgency')->default(FeedbackUrgency::NORMAL->value);
 
             // Content
             $table->text('content');
@@ -34,12 +34,15 @@ return new class extends Migration
             $table->timestamp('resolved_at')->nullable();
 
             // Design-specific fields
-            $table->integer('x_coordinate')->comment('X coordinate on the design/image');
-            $table->integer('y_coordinate')->comment('Y coordinate on the design/image');
-            $table->enum('annotation_type', [
-                'point', 'rectangle', 'circle', 'arrow', 'text', 
-                'polygon', 'area', 'line', 'freehand'
-            ])->default('point')->comment('Type of annotation');
+            $table->decimal('x_coordinate', 12, 8)->comment('X coordinate on the design/image');
+            $table->decimal('y_coordinate', 12, 8)->comment('Y coordinate on the design/image');
+            $table->decimal('width', 12, 8);
+            $table->decimal('height', 12, 8);
+
+            // $table->enum('annotation_type', [
+            //     'point', 'rectangle', 'circle', 'arrow', 'text',
+            //     'polygon', 'area', 'line', 'freehand',
+            // ])->default('point')->comment('Type of annotation');
             $table->json('annotation_data')->nullable()->comment('Additional annotation metadata (shape, color, size, etc.)');
             $table->json('area_bounds')->nullable()->comment('Bounds for area-based annotations (x, y, width, height)');
             $table->string('color', 50)->nullable()->comment('Annotation color/theme');
@@ -64,25 +67,25 @@ return new class extends Migration
             $table->index(['annotation_type', 'status']);
             $table->index('color');
             $table->index('zoom_level');
-            
+
             // Coordinate-based queries
             $table->index(['feedbackable_type', 'feedbackable_id', 'x_coordinate', 'y_coordinate']);
-            
+
             // Spatial queries for finding nearby annotations
             $table->index(['x_coordinate', 'y_coordinate', 'annotation_type']);
-            
+
             // Area-based annotations
             $table->rawIndex(
                 '(CASE WHEN area_bounds IS NOT NULL AND JSON_LENGTH(area_bounds) > 0 THEN 1 ELSE 0 END)',
-                'design_feedbacks_has_area_bounds_idx'
+                'design_feedbacks_has_area_bounds_idx',
             );
-            
+
             // Type-specific queries
             $table->index(['annotation_type', 'feedbackable_type', 'feedbackable_id']);
-            
+
             // Color-based grouping
             $table->index(['feedbackable_type', 'feedbackable_id', 'color']);
-            
+
             // Zoom level analysis
             $table->index(['zoom_level', 'annotation_type']);
         });

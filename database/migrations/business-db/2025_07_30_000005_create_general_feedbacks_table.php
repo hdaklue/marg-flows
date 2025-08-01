@@ -36,11 +36,7 @@ return new class extends Migration
             // General feedback fields
             $table->json('metadata')->nullable()
                 ->comment('Flexible metadata storage for various feedback types');
-            $table->enum('feedback_category', [
-                'ui', 'ux', 'content', 'functionality', 'performance',
-                'accessibility', 'security', 'bug', 'feature',
-                'improvement', 'question', 'other',
-            ])->nullable()->comment('Optional category for organization');
+            $table->string('feedback_category')->nullable()->comment('Optional category for organization');
             $table->json('custom_data')->nullable()->comment('Additional custom data as needed');
 
             $table->timestamps();

@@ -1,3 +1,4 @@
+import Hammer from 'hammerjs';
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 
@@ -107,22 +108,25 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         frameNavigationTimeout: null, // Timeout for hiding feedback
         showFrameHelpers: true, // Show frame navigation helper arrows
         currentFrameNumber: 0, // Real-time frame number for display
-        // Touch handling
-        touchStartTime: 0,
-        touchStartPos: { x: 0, y: 0 },
-        isTouchMove: false,
-        touchTimeout: null,
+        // Unified Input Handling
+        pointerState: {
+            isDown: false,
+            startTime: 0,
+            startPos: { x: 0, y: 0 },
+            currentPos: { x: 0, y: 0 },
+            hasMoved: false,
+            longPressTriggered: false,
+            ghostClickPrevention: false,
+            activePointer: null // 'mouse', 'touch', or null
+        },
         longPressTimeout: null,
-        longPressActive: false,
         hasUserInteracted: false,
-        progressBarLongPressTriggered: false,
-        // Click handling
-        clickTimeout: null,
-        clickCount: 0,
-        // Mobile tap handling
-        tapTimeout: null,
-        tapCount: 0,
-        lastTapTime: 0,
+        clickPreventionTimeout: null,
+        lastVideoClickTime: 0,
+        // Unified region creation toolbar
+        showRegionToolbar: false,
+        currentRegionId: null,
+        tempRegionFrame: null,
         // Mobile comment interactions
         activeCommentId: null,
         // Right-click context menu
@@ -132,9 +136,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         contextMenuTime: 0,
         // Draggable seek circle
         isDragging: false,
-        showSeekCircle: false,
         showTooltip: false,
-        seekCircleX: 0,
         dragStartX: 0,
         dragCurrentTime: 0,
         boundHandleDragMove: null,
@@ -144,6 +146,16 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         // Region creation global handlers
         boundUpdateRegionCreation: null,
         boundFinishRegionCreation: null,
+
+        // Hammer.js touch interface
+        hammer: null,
+        touchInterface: {
+            enabled: false,
+            mode: 'NORMAL', // NORMAL, REGION_CREATE, COMMENT_ADD, CONTEXT_MENU
+            contextMenuVisible: false,
+            unifiedTimelineVisible: false,
+            actionModalVisible: false,
+        },
 
         // Region Management
         regions: [], // Array of region objects: {id, startTime, endTime, startFrame, endFrame, title, description}
@@ -170,6 +182,43 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             return this.isTouchDevice();
         },
 
+        // Getter for frame-aligned progress percentage
+        get frameAlignedProgressPercentage() {
+            if (!this.duration || this.duration <= 0) return 0;
+            const frameState = this.currentFrameState;
+            const progressPercentage = frameState.progressPercentage;
+
+            // Adjust progress fill to center around the circle position
+            // The circle should be centered at the current time, not at the end of the fill
+            return progressPercentage;
+        },
+
+        // Single Source of Truth: Current Frame State
+        get currentFrameState() {
+            if (!this.player || !this.duration) {
+                return {
+                    rawTime: 0,
+                    frameAlignedTime: 0,
+                    frameNumber: 0,
+                    progressPercentage: 0,
+                    isValid: false
+                };
+            }
+
+            const rawTime = this.player.currentTime();
+            const frameAlignedTime = this.roundToNearestFrame(rawTime);
+            const frameNumber = this.getFrameNumber(frameAlignedTime);
+            const progressPercentage = (frameAlignedTime / this.duration) * 100;
+
+            return {
+                rawTime,
+                frameAlignedTime,
+                frameNumber,
+                progressPercentage,
+                isValid: true
+            };
+        },
+
         init() {
             // Comments are already initialized from initialComments parameter
             // Keep window.videoComments as fallback for backward compatibility
@@ -194,6 +243,8 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 if (this.videoElement) {
                     this.setupVideoJS();
                     this.setupEventListeners();
+                    this.setupTouchInterface();
+                    this.resizeVideoWrapper(); // Initial sizing
                 }
             });
         },
@@ -248,7 +299,6 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 muted: false,
                 preload: 'auto',
                 playsinline: true,
-                responsive: true,
                 fluid: true
             });
 
@@ -272,15 +322,11 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             });
 
             this.player.on('timeupdate', () => {
-                this.currentTime = this.player.currentTime();
+                // Update using single source of truth
+                const frameState = this.currentFrameState;
+                this.currentTime = frameState.frameAlignedTime;
+                this.currentFrameNumber = frameState.frameNumber;
 
-                // Update frame number in real-time
-                this.currentFrameNumber = this.getFrameNumber(this.currentTime);
-
-                // Always update circle position when time changes (unless actively dragging)
-                if (!this.isDragging) {
-                    this.forceUpdateSeekCirclePosition();
-                }
             });
 
             this.player.on('play', () => {
@@ -327,6 +373,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 this.duration = this.player.duration();
                 this.updateProgressBarWidth();
                 this.detectFrameRate();
+                this.updateAspectRatio();
             });
 
             this.player.on('loadeddata', () => {
@@ -336,6 +383,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
 
             this.player.on('resize', () => {
                 this.updateProgressBarWidth();
+                this.updateAspectRatio();
             });
         },
 
@@ -369,10 +417,174 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
                     this.updateProgressBarWidth();
+                    this.resizeVideoWrapper(); // Resize video wrapper on window resize
+                    // Update video container size on window resize
+                    if (this.player) {
+                        const width = this.player.videoWidth();
+                        const height = this.player.videoHeight();
+                        if (width && height) {
+                            this.updateVideoContainerSize(width, height);
+                        }
+                    }
                 }, 100);
             });
 
             // Note: Keyboard events are handled via @keydown.window in the template
+        },
+
+        setupTouchInterface() {
+            // Only enable touch interface on touch devices
+            if (!this.isTouchDevice()) {
+                return;
+            }
+
+            this.touchInterface.enabled = true;
+            console.log('Touch interface enabled, setting up Hammer.js');
+
+            // Initialize Hammer.js on the main video container with optimized settings
+            this.$nextTick(() => {
+                const videoContainer = this.$el.querySelector('.relative.flex.justify-center');
+                if (videoContainer) {
+                    this.hammer = new Hammer(videoContainer, {
+                        recognizers: [
+                            // Pinch (highest priority - can interrupt others)
+                            [Hammer.Pinch, { enable: true }],
+
+                            // Pan (works with pinch simultaneously) - optimized thresholds
+                            [Hammer.Pan, {
+                                direction: Hammer.DIRECTION_ALL,
+                                threshold: 10, // Increased for better touch recognition
+                                pointers: 1
+                            }],
+
+                            // Tap - optimized to prevent multiple rapid detections
+                            [Hammer.Tap, {
+                                taps: 1,
+                                threshold: 20, // Higher threshold for cleaner detection
+                                time: 200,     // Shorter time window
+                                interval: 400  // Longer interval to prevent rapid duplicates
+                            }],
+
+                            // Double tap - properly configured
+                            [Hammer.Tap, {
+                                event: 'doubletap',
+                                taps: 2,
+                                threshold: 15,
+                                time: 250,
+                                interval: 400  // Increased interval
+                            }],
+
+                            // Press - optimized timing
+                            [Hammer.Press, {
+                                time: 500,     // Increased from 250ms
+                                threshold: 15   // Added threshold
+                            }],
+
+                            // Swipe - optimized for better recognition
+                            [Hammer.Swipe, {
+                                direction: Hammer.DIRECTION_ALL,
+                                threshold: 30,  // Reduced threshold for easier swipes
+                                velocity: 0.2   // Reduced velocity requirement
+                            }]
+                        ]
+                    });
+
+                    // Configure recognizer relationships to prevent conflicts
+                    this.hammer.get('doubletap').recognizeWith('tap');
+                    this.hammer.get('tap').requireFailure('doubletap');
+                    this.hammer.get('press').recognizeWith(['pan', 'swipe']);
+                    this.hammer.get('pan').requireFailure('swipe');
+
+                    // Set up gesture handlers
+                    console.log('Hammer.js created successfully, setting up handlers');
+                    this.setupGestureHandlers();
+                }
+            });
+        },
+
+        setupGestureHandlers() {
+            if (!this.hammer) return;
+
+            // TAP: Context-aware action with debouncing
+            this.hammer.on('tap', (event) => {
+                console.log('Hammer tap detected, mode:', this.touchInterface.mode);
+
+                // Debounce rapid taps (same as handleVideoClick)
+                const now = Date.now();
+                if (this.lastVideoClickTime && (now - this.lastVideoClickTime) < 300) {
+                    console.log('Hammer tap debounced - too rapid');
+                    return;
+                }
+                this.lastVideoClickTime = now;
+
+                if (this.touchInterface.mode === 'NORMAL') {
+                    console.log('Calling togglePlay from Hammer tap');
+                    this.togglePlay();
+                } else if (this.touchInterface.mode === 'REGION_CREATE') {
+                    this.confirmRegionCreation();
+                    this.exitRegionCreationMode();
+                }
+            });
+
+            // LONG PRESS: Direct add comment
+            this.hammer.on('press', (event) => {
+                if (this.touchInterface.mode === 'NORMAL') {
+                    this.addCommentAtCurrentFrame();
+                } else if (this.touchInterface.mode === 'REGION_CREATE') {
+                    this.exitRegionCreationMode(); // Cancel creation
+                }
+            });
+
+            // DOUBLE TAP: Quick add comment
+            this.hammer.on('doubletap', (event) => {
+                if (this.touchInterface.mode === 'NORMAL' && this.config.annotations?.enableVideoComments) {
+                    this.addCommentAtCurrentFrame();
+                }
+            });
+
+            // PAN: Context-aware dragging
+            this.hammer.on('panstart', (event) => {
+                this.handleTouchPanStart(event);
+            });
+
+            this.hammer.on('panmove', (event) => {
+                this.handleTouchPanMove(event);
+            });
+
+            this.hammer.on('panend', (event) => {
+                this.handleTouchPanEnd(event);
+            });
+
+            // SWIPE: Context-aware based on current mode
+            this.hammer.on('swipeleft', (event) => {
+                if (this.touchInterface.mode === 'NORMAL') {
+                    this.stepForward();
+                } else if (this.touchInterface.mode === 'REGION_CREATE') {
+                    this.shrinkRegionEnd();
+                }
+            });
+
+            this.hammer.on('swiperight', (event) => {
+                if (this.touchInterface.mode === 'NORMAL') {
+                    this.stepBackward();
+                } else if (this.touchInterface.mode === 'REGION_CREATE') {
+                    this.expandRegionEnd();
+                }
+            });
+
+            this.hammer.on('swipeup', (event) => {
+                if (this.touchInterface.mode === 'NORMAL') {
+                    this.toggleUnifiedTimeline();
+                } else if (this.touchInterface.mode === 'REGION_CREATE') {
+                    this.expandRegionStart();
+                }
+            });
+
+            this.hammer.on('swipedown', (event) => {
+                if (this.touchInterface.mode === 'REGION_CREATE') {
+                    this.shrinkRegionStart();
+                }
+            });
         },
 
         updateProgressBarWidth() {
@@ -380,7 +592,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 const progressBar = this.$refs.progressBar;
                 if (progressBar) {
                     this.progressBarWidth = progressBar.offsetWidth;
-                    this.updateSeekCirclePosition();
+                    // Circle positioning removed
                 }
 
                 // Also update region bar width
@@ -470,6 +682,19 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
             return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        },
+
+        // Computed hover time based on mouse position
+        get hoverTime() {
+            if (!this.duration || !this.$refs.progressBar) {
+                return '0:00';
+            }
+
+            const rect = this.$refs.progressBar.getBoundingClientRect();
+            const percentage = this.hoverX / rect.width;
+            const timeInSeconds = percentage * this.duration;
+
+            return this.formatTime(Math.max(0, Math.min(timeInSeconds, this.duration)));
         },
 
         // Frame navigation methods
@@ -583,12 +808,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
 
         // Get current timestamp aligned to frame boundary
         getCurrentFrameTime() {
-            if (!this.player) {
-                return 0;
-            }
-
-            const currentTime = this.player.currentTime();
-            return this.roundToNearestFrame(currentTime);
+            return this.currentFrameState.frameAlignedTime;
         },
 
         // Calculate frame number from timestamp
@@ -602,8 +822,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
 
         // Get current frame number
         getCurrentFrameNumber() {
-            const frameTime = this.getCurrentFrameTime();
-            return this.getFrameNumber(frameTime);
+            return this.currentFrameState.frameNumber;
         },
 
         // Region Management Methods
@@ -637,7 +856,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             // Add global document listeners for region creation
             this.boundUpdateRegionCreation = this.handleGlobalRegionUpdate.bind(this);
             this.boundFinishRegionCreation = this.handleGlobalRegionFinish.bind(this);
-            
+
             document.addEventListener('mousemove', this.boundUpdateRegionCreation);
             document.addEventListener('mouseup', this.boundFinishRegionCreation);
             document.addEventListener('touchmove', this.boundUpdateRegionCreation);
@@ -679,9 +898,28 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         },
 
         finishRegionCreation(event) {
-            // Don't auto-create on mouse/touch release anymore
-            // Region creation now happens only via explicit finish button
-            return;
+            if (!this.isCreatingRegion || !this.regionCreationStart || !this.regionCreationEnd) return;
+
+            // For desktop drag-based creation, use the exact end position from mouse
+            // For toolbar-based creation, update to current frame
+            if (event && event.type.includes('mouse')) {
+                // Desktop drag - keep existing end position from mouse
+                // regionCreationEnd is already set by updateRegionCreation
+            } else {
+                // Toolbar navigation - update region end to current frame
+                const frameState = this.currentFrameState;
+                const frameAlignedTime = frameState.frameAlignedTime;
+                const frameNumber = frameState.frameNumber;
+
+                this.regionCreationEnd = {
+                    x: this.regionCreationEnd.x,
+                    time: frameAlignedTime,
+                    frame: frameNumber
+                };
+            }
+
+            // Use existing confirmRegionCreation logic
+            this.confirmRegionCreation();
         },
 
         // Explicit finish region creation via button
@@ -783,7 +1021,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         // Global handlers for region creation (work outside region bar bounds)
         handleGlobalRegionUpdate(event) {
             if (!this.isCreatingRegion || !this.regionCreationStart) return;
-            
+
             const regionBar = this.$refs.regionBar;
             if (!regionBar) return;
 
@@ -810,7 +1048,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
 
         handleGlobalRegionFinish(event) {
             if (!this.isCreatingRegion) return;
-            
+
             // Don't auto-finish on global mouse up - only via explicit finish button
             // This prevents accidental region creation when user releases mouse outside region bar
             return;
@@ -820,7 +1058,16 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             this.isCreatingRegion = false;
             this.regionCreationStart = null;
             this.regionCreationEnd = null;
-            
+
+            // Hide toolbar
+            this.showRegionToolbar = false;
+
+            // Prevent ghost clicks for a short time after region creation
+            this.pointerState.ghostClickPrevention = true;
+            setTimeout(() => {
+                this.pointerState.ghostClickPrevention = false;
+            }, 300);
+
             // Remove global document listeners
             if (this.boundUpdateRegionCreation) {
                 document.removeEventListener('mousemove', this.boundUpdateRegionCreation);
@@ -937,6 +1184,515 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             });
         },
 
+        // ========================================
+        // Unified Input Handling System
+        // ========================================
+
+        // Universal pointer event handler - works for both touch and mouse
+        handlePointerStart(event, context = 'video') {
+            // Prevent ghost clicks if this is a touch event after a recent touch interaction
+            if (event.type === 'mousedown' && this.pointerState.ghostClickPrevention) {
+                event.preventDefault();
+                return false;
+            }
+
+            // Determine input type
+            const isTouch = event.type.includes('touch');
+            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
+            const clientY = isTouch ? event.touches[0].clientY : event.clientY;
+
+            // Initialize pointer state
+            this.pointerState = {
+                isDown: true,
+                startTime: Date.now(),
+                startPos: { x: clientX, y: clientY },
+                currentPos: { x: clientX, y: clientY },
+                hasMoved: false,
+                longPressTriggered: false,
+                ghostClickPrevention: isTouch,
+                activePointer: isTouch ? 'touch' : 'mouse'
+            };
+
+            // Set ghost click prevention timeout for touch events
+            if (isTouch) {
+                clearTimeout(this.clickPreventionTimeout);
+                this.clickPreventionTimeout = setTimeout(() => {
+                    this.pointerState.ghostClickPrevention = false;
+                }, 400);
+            }
+
+            // Mark user interaction
+            this.hasUserInteracted = true;
+
+            // Start long press detection for annotations
+            if (context === 'video' && this.config.annotations?.enableVideoComments) {
+                this.longPressTimeout = setTimeout(() => {
+                    if (!this.pointerState.hasMoved && this.pointerState.isDown) {
+                        this.handleLongPress(event, context);
+                    }
+                }, this.config.timing.longPressDuration || 500);
+            }
+
+            return true;
+        },
+
+        handlePointerMove(event) {
+            if (!this.pointerState.isDown) return;
+
+            const isTouch = event.type.includes('touch');
+            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
+            const clientY = isTouch ? event.touches[0].clientY : event.clientY;
+
+            // Update current position
+            this.pointerState.currentPos = { x: clientX, y: clientY };
+
+            // Check if moved significantly
+            const deltaX = Math.abs(clientX - this.pointerState.startPos.x);
+            const deltaY = Math.abs(clientY - this.pointerState.startPos.y);
+            const threshold = isTouch ? 10 : 5; // Larger threshold for touch
+
+            if (deltaX > threshold || deltaY > threshold) {
+                this.pointerState.hasMoved = true;
+
+                // Cancel long press if user moves
+                if (this.longPressTimeout) {
+                    clearTimeout(this.longPressTimeout);
+                    this.longPressTimeout = null;
+                }
+            }
+        },
+
+        handlePointerEnd(event, context = 'video') {
+            if (!this.pointerState.isDown) return;
+
+            const duration = Date.now() - this.pointerState.startTime;
+            const wasLongPress = this.pointerState.longPressTriggered;
+            const wasMoved = this.pointerState.hasMoved;
+
+            // Clear long press timeout
+            if (this.longPressTimeout) {
+                clearTimeout(this.longPressTimeout);
+                this.longPressTimeout = null;
+            }
+
+            // Handle tap/click actions
+            if (!wasLongPress && !wasMoved && duration < 300) {
+                this.handleTap(event, context);
+            }
+
+            // Reset pointer state
+            this.pointerState.isDown = false;
+            this.pointerState.longPressTriggered = false;
+        },
+
+        handleTap(event, context) {
+            if (context === 'video') {
+                // Use the existing handleVideoClick logic to maintain consistency
+                this.handleVideoClick();
+            } else if (context === 'button') {
+                // Handled by specific button action in template
+                return;
+            }
+        },
+
+        handleLongPress(event, context) {
+            this.pointerState.longPressTriggered = true;
+
+            // Add haptic feedback
+            if (this.config.annotations?.enableHapticFeedback) {
+                this.triggerHapticFeedback(100);
+            }
+
+            if (context === 'video') {
+                if (this.touchInterface.mode === 'NORMAL') {
+                    // Directly add comment instead of showing context menu
+                    this.addCommentAtCurrentFrame();
+                } else if (this.touchInterface.mode === 'REGION_CREATE') {
+                    this.exitRegionCreationMode();
+                }
+            } else if (context === 'progressbar' && this.config.annotations?.enableProgressBarComments) {
+                // Add comment at current position
+                const rect = event.currentTarget.getBoundingClientRect();
+                const clientX = this.pointerState.activePointer === 'touch' ?
+                    event.touches?.[0]?.clientX || this.pointerState.startPos.x :
+                    this.pointerState.startPos.x;
+                const clickX = clientX - rect.left;
+                const percentage = clickX / rect.width;
+                const targetTime = percentage * this.duration;
+                const frameAlignedTime = this.roundToNearestFrame(targetTime);
+
+                this.$dispatch('video-annotation:add-comment', {
+                    timestamp: frameAlignedTime,
+                    currentTime: frameAlignedTime,
+                    frameNumber: this.getFrameNumber(frameAlignedTime),
+                    frameRate: this.frameRate
+                });
+            }
+        },
+
+        // ========================================
+        // Touch Interface Methods (Hammer.js)
+        // ========================================
+
+        showTouchContextMenu(event) {
+            if (!this.config.annotations?.enableContextMenu) return;
+
+            // Pause video and capture current time
+            if (this.player) {
+                this.player.pause();
+            }
+
+            this.touchInterface.mode = 'CONTEXT_MENU';
+            this.touchInterface.contextMenuVisible = true;
+
+            // Add haptic feedback
+            if (this.config.annotations.enableHapticFeedback) {
+                this.triggerHapticFeedback(100);
+            }
+        },
+
+        hideTouchContextMenu() {
+            this.touchInterface.mode = 'NORMAL';
+            this.touchInterface.contextMenuVisible = false;
+        },
+
+        toggleUnifiedTimeline() {
+            this.touchInterface.unifiedTimelineVisible = !this.touchInterface.unifiedTimelineVisible;
+
+            // Add haptic feedback
+            if (this.config.annotations.enableHapticFeedback) {
+                this.triggerHapticFeedback(50);
+            }
+        },
+
+        handleTouchPanStart(event) {
+            if (!this.player) return;
+
+            // Determine what we're panning based on current mode and position
+            const panY = event.deltaY;
+            const panX = event.deltaX;
+
+            if (this.touchInterface.mode === 'NORMAL') {
+                // Check if pan is primarily horizontal (timeline scrubbing)
+                if (Math.abs(panX) > Math.abs(panY)) {
+                    this.touchInterface.mode = 'SCRUBBING';
+                    // Remember if video was playing before scrubbing
+                    this.wasPlayingBeforeDrag = this.isPlaying;
+                    if (this.wasPlayingBeforeDrag) {
+                        this.player.pause();
+                    }
+                }
+            }
+        },
+
+        handleTouchPanMove(event) {
+            if (!this.player) return;
+
+            if (this.touchInterface.mode === 'SCRUBBING') {
+                // Calculate new time based on pan distance
+                const containerWidth = this.$el.offsetWidth;
+                const panPercentage = event.deltaX / containerWidth;
+                const timeChange = panPercentage * this.duration;
+
+                // Constrain to video bounds
+                const newTime = Math.max(0, Math.min(this.currentTime + timeChange, this.duration));
+
+                this.player.currentTime(newTime);
+            }
+        },
+
+        handleTouchPanEnd(event) {
+            if (this.touchInterface.mode === 'SCRUBBING') {
+                // Resume playing if it was playing before
+                if (this.wasPlayingBeforeDrag && this.player) {
+                    this.player.play().catch(e => {
+                        console.debug("Play after scrub interrupted:", e.name);
+                    });
+                }
+
+                this.touchInterface.mode = 'NORMAL';
+                this.wasPlayingBeforeDrag = false;
+            }
+        },
+
+        enterRegionCreationMode() {
+            this.touchInterface.mode = 'REGION_CREATE';
+            this.touchInterface.actionModalVisible = true;
+            this.isCreatingRegion = true;
+
+            // Pause video
+            if (this.player && this.isPlaying) {
+                this.player.pause();
+            }
+        },
+
+        exitRegionCreationMode() {
+            // Force reactivity update
+            this.touchInterface = {
+                ...this.touchInterface,
+                mode: 'NORMAL',
+                actionModalVisible: false
+            };
+            this.isCreatingRegion = false;
+            this.cleanupRegionCreation();
+
+            console.log('Region creation exited:', {
+                mode: this.touchInterface.mode,
+                modalVisible: this.touchInterface.actionModalVisible
+            });
+        },
+
+        // Touch-optimized region creation
+        createRegionAtCurrentTime() {
+            if (!this.player) return;
+
+            // Set mode first - force reactivity update
+            this.touchInterface = {
+                ...this.touchInterface,
+                mode: 'REGION_CREATE',
+                actionModalVisible: true
+            };
+            this.isCreatingRegion = true;
+
+            const currentTime = this.getCurrentFrameTime();
+            const frameNumber = this.getCurrentFrameNumber();
+
+            // Create a 2-second region centered on current time
+            const regionDuration = 2.0;
+            const startTime = Math.max(0, currentTime - regionDuration / 2);
+            const endTime = Math.min(this.duration, currentTime + regionDuration / 2);
+
+            this.regionCreationStart = {
+                time: startTime,
+                x: 0, // Not used in touch mode but needed for compatibility
+                frame: this.getFrameNumber(startTime)
+            };
+
+            this.regionCreationEnd = {
+                time: endTime,
+                x: 0, // Not used in touch mode but needed for compatibility
+                frame: this.getFrameNumber(endTime)
+            };
+
+            // Pause video
+            if (this.player && this.isPlaying) {
+                this.player.pause();
+            }
+
+            // Ensure the interface updates
+            this.$nextTick(() => {
+                console.log('Region creation started:', {
+                    start: this.regionCreationStart,
+                    end: this.regionCreationEnd,
+                    mode: this.touchInterface.mode,
+                    modalVisible: this.touchInterface.actionModalVisible
+                });
+            });
+        },
+
+        // Touch-based region adjustment methods
+        expandRegionEnd() {
+            if (!this.isCreatingRegion || !this.regionCreationEnd) return;
+
+            // Use frame-perfect duration instead of 0.5 seconds
+            const newTime = Math.min(this.duration, this.regionCreationEnd.time + this.frameDuration);
+            const newFrame = this.getFrameNumber(newTime);
+
+            // Update x position for visual alignment
+            const rect = this.$refs.regionBar?.getBoundingClientRect();
+            const newX = rect ? (newTime / this.duration) * rect.width : this.regionCreationEnd.x;
+
+            this.regionCreationEnd = {
+                time: newTime,
+                frame: newFrame,
+                x: newX
+            };
+
+            // Seek video to show the change
+            this.player.currentTime(newTime);
+            this.player.pause();
+
+            // Haptic feedback
+            if (this.config.annotations?.enableHapticFeedback) {
+                this.triggerHapticFeedback(50);
+            }
+        },
+
+        shrinkRegionEnd() {
+            if (!this.isCreatingRegion || !this.regionCreationEnd || !this.regionCreationStart) return;
+
+            // Use frame-perfect duration instead of 0.5 seconds
+            const minTime = this.regionCreationStart.time + this.frameDuration; // Keep minimum 1 frame region
+            const newTime = Math.max(minTime, this.regionCreationEnd.time - this.frameDuration);
+            const newFrame = this.getFrameNumber(newTime);
+
+            // Update x position for visual alignment
+            const rect = this.$refs.regionBar?.getBoundingClientRect();
+            const newX = rect ? (newTime / this.duration) * rect.width : this.regionCreationEnd.x;
+
+            this.regionCreationEnd = {
+                time: newTime,
+                frame: newFrame,
+                x: newX
+            };
+
+            // Seek video to show the change
+            this.player.currentTime(newTime);
+            this.player.pause();
+
+            // Haptic feedback
+            if (this.config.annotations?.enableHapticFeedback) {
+                this.triggerHapticFeedback(50);
+            }
+        },
+
+        expandRegionStart() {
+            if (!this.isCreatingRegion || !this.regionCreationStart) return;
+
+            // Use frame-perfect duration instead of 0.5 seconds
+            const newTime = Math.max(0, this.regionCreationStart.time - this.frameDuration);
+            const newFrame = this.getFrameNumber(newTime);
+
+            // Update x position for visual alignment
+            const rect = this.$refs.regionBar?.getBoundingClientRect();
+            const newX = rect ? (newTime / this.duration) * rect.width : this.regionCreationStart.x;
+
+            this.regionCreationStart = {
+                time: newTime,
+                frame: newFrame,
+                x: newX
+            };
+
+            // Seek video to show the change
+            this.player.currentTime(newTime);
+            this.player.pause();
+
+            // Haptic feedback
+            if (this.config.annotations?.enableHapticFeedback) {
+                this.triggerHapticFeedback(50);
+            }
+        },
+
+        shrinkRegionStart() {
+            if (!this.isCreatingRegion || !this.regionCreationStart || !this.regionCreationEnd) return;
+
+            // Use frame-perfect duration instead of 0.5 seconds
+            const maxTime = this.regionCreationEnd.time - this.frameDuration; // Keep minimum 1 frame region
+            const newTime = Math.min(maxTime, this.regionCreationStart.time + this.frameDuration);
+            const newFrame = this.getFrameNumber(newTime);
+
+            // Update x position for visual alignment
+            const rect = this.$refs.regionBar?.getBoundingClientRect();
+            const newX = rect ? (newTime / this.duration) * rect.width : this.regionCreationStart.x;
+
+            this.regionCreationStart = {
+                time: newTime,
+                frame: newFrame,
+                x: newX
+            };
+
+            // Seek video to show the change
+            this.player.currentTime(newTime);
+            this.player.pause();
+
+            // Haptic feedback
+            if (this.config.annotations?.enableHapticFeedback) {
+                this.triggerHapticFeedback(50);
+            }
+        },
+
+        // Simplified region creation - no modal needed!
+        startSimpleRegionCreation() {
+            if (!this.player) return;
+
+            // Set mode to region creation
+            this.touchInterface = {
+                ...this.touchInterface,
+                mode: 'REGION_CREATE'
+            };
+            this.isCreatingRegion = true;
+
+            // Reset region creation state for fresh start
+            this.regionCreationStart = null;
+            this.regionCreationEnd = null;
+
+            // Pause video for precise frame selection
+            if (this.isPlaying) {
+                this.player.pause();
+            }
+
+            // Region creation started - user will set start/end with buttons
+            console.log('Mobile region creation mode activated');
+        },
+
+        // Jump frames helper for region creation
+        jumpFrames(frameCount) {
+            if (!this.player) return;
+
+            const currentTime = this.player.currentTime();
+            const newTime = Math.max(0, Math.min(currentTime + (frameCount * this.frameDuration), this.duration));
+            this.player.currentTime(newTime);
+
+            // Add haptic feedback for frame jumps
+            if (this.config.annotations?.enableHapticFeedback) {
+                this.triggerHapticFeedback(30);
+            }
+        },
+
+        // Set region start at current frame
+        setRegionStart() {
+            if (!this.player) return;
+
+            const currentTime = this.getCurrentFrameTime();
+            const frameNumber = this.getCurrentFrameNumber();
+
+            this.regionCreationStart = {
+                time: currentTime,
+                x: 0, // Not used in mobile mode
+                frame: frameNumber
+            };
+
+            // Haptic feedback
+            if (this.config.annotations?.enableHapticFeedback) {
+                this.triggerHapticFeedback(100);
+            }
+
+            console.log('Region start set at frame:', frameNumber);
+        },
+
+        // Set region end at current frame
+        setRegionEnd() {
+            if (!this.player || !this.regionCreationStart) return;
+
+            const currentTime = this.getCurrentFrameTime();
+            const frameNumber = this.getCurrentFrameNumber();
+
+            // Ensure end is after start
+            if (frameNumber <= this.regionCreationStart.frame) {
+                // Auto-adjust to be at least 1 frame after start
+                const minEndTime = this.regionCreationStart.time + this.frameDuration;
+                this.player.currentTime(minEndTime);
+                this.regionCreationEnd = {
+                    time: minEndTime,
+                    x: 0,
+                    frame: this.regionCreationStart.frame + 1
+                };
+            } else {
+                this.regionCreationEnd = {
+                    time: currentTime,
+                    x: 0,
+                    frame: frameNumber
+                };
+            }
+
+            // Haptic feedback
+            if (this.config.annotations?.enableHapticFeedback) {
+                this.triggerHapticFeedback(100);
+            }
+
+            console.log('Region end set at frame:', this.regionCreationEnd.frame);
+        },
+
         onProgressBarClick(event) {
             const rect = event.currentTarget.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
@@ -948,76 +1704,165 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             }
         },
 
-        handleProgressBarClick(event) {
-            // Mark that user has interacted with the page
-            this.hasUserInteracted = true;
+        // Unified progress bar interaction handler
+        handleProgressBarPointer(event, action = 'click') {
+            // Prevent ghost clicks
+            if (event.type === 'mousedown' && this.pointerState.ghostClickPrevention) {
+                event.preventDefault();
+                return;
+            }
 
-            // Hide context menu if open
+            // Mark user interaction
+            this.hasUserInteracted = true;
             this.hideContextMenu();
 
-            // Clear initial hide timeout on interaction
+            // Clear progress bar timeout
             if (this.progressBarTimeout) {
                 clearTimeout(this.progressBarTimeout);
             }
 
-            // Store click info for potential double-click detection
             const rect = event.currentTarget.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
+            const isTouch = event.type.includes('touch');
+            const clientX = isTouch ? event.touches?.[0]?.clientX || event.changedTouches?.[0]?.clientX : event.clientX;
+            const clickX = clientX - rect.left;
             const percentage = clickX / rect.width;
             const targetTime = percentage * this.duration;
 
-            this.clickCount++;
+            if (action === 'click' || action === 'tap') {
+                // Handle single click/tap - seek to position
+                if (this.player) {
+                    this.player.currentTime(targetTime);
+                }
 
-            if (this.clickCount === 1) {
-                // Store event data for timeout execution
-                const storedEventData = {
-                    clickX: clickX,
-                    rect: rect,
-                    percentage: percentage,
-                    targetTime: targetTime
-                };
-
-                // First click - wait to see if there's a second click
-                this.clickTimeout = setTimeout(() => {
-                    // Single click confirmed - perform seek operation
-                    if (this.player) {
-                        this.player.currentTime(storedEventData.targetTime);
-                    }
-
-                    this.clickCount = 0;
-                }, 300); // 300ms delay to detect double click
+                // Update visual position
+                this.hoverX = clickX;
+                this.dragCurrentTime = targetTime;
+            } else if (action === 'doubleclick') {
+                // Handle double click/tap - add comment
+                if (this.config.annotations?.enableProgressBarComments) {
+                    const frameAlignedTime = this.roundToNearestFrame(targetTime);
+                    const frameNumber = this.getFrameNumber(frameAlignedTime);
+                    this.$dispatch('video-annotation:add-comment', {
+                        timestamp: frameAlignedTime,
+                        currentTime: frameAlignedTime,
+                        frameNumber: frameNumber,
+                        frameRate: this.frameRate
+                    });
+                }
             }
         },
 
-        handleProgressBarDoubleClick(event) {
-            // Double click detected - cancel single click timeout
-            if (this.clickTimeout) {
-                clearTimeout(this.clickTimeout);
-                this.clickTimeout = null;
+        // Unified drag handling for progress bar seek circle
+        handleProgressBarDragStart(event) {
+            if (!this.handlePointerStart(event, 'progressbar-drag')) return;
+
+            // Remember if video was playing
+            this.wasPlayingBeforeDrag = this.isPlaying;
+
+            this.isDragging = true;
+            this.showSeekCircle = true;
+            this.showTooltip = true;
+            this.showProgressBar = true;
+
+            // Clear auto-hide timeout
+            if (this.progressBarTimeout) {
+                clearTimeout(this.progressBarTimeout);
+                this.progressBarTimeout = null;
             }
-            this.clickCount = 0;
 
-            // Only handle double-click for comments if annotations are enabled
-            if (!this.config.annotations.enableProgressBarComments) {
-                return;
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) return;
+
+            const rect = progressBar.getBoundingClientRect();
+            const isTouch = event.type.includes('touch');
+            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
+
+            this.dragStartX = clientX - rect.left;
+            // Removed circle positioning: this.seekCircleX = this.dragStartX;
+
+            const percentage = this.dragStartX / rect.width;
+            this.dragCurrentTime = percentage * this.duration;
+
+            // Add global listeners for unified drag handling
+            const moveEvent = isTouch ? 'touchmove' : 'mousemove';
+            const endEvent = isTouch ? 'touchend' : 'mouseup';
+
+            this.boundHandleDragMove = this.handleProgressBarDragMove.bind(this);
+            this.boundEndDrag = this.handleProgressBarDragEnd.bind(this);
+
+            document.addEventListener(moveEvent, this.boundHandleDragMove, { passive: false });
+            document.addEventListener(endEvent, this.boundEndDrag);
+        },
+
+        handleProgressBarDragMove(event) {
+            if (!this.isDragging) return;
+
+            this.handlePointerMove(event);
+
+            const progressBar = this.$refs.progressBar;
+            if (!progressBar) return;
+
+            const rect = progressBar.getBoundingClientRect();
+            const isTouch = event.type.includes('touch');
+            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
+            let newX = clientX - rect.left;
+
+            // Constrain to bounds
+            newX = Math.max(0, Math.min(newX, rect.width));
+
+            // Removed circle positioning: this.seekCircleX = newX;
+            this.hoverX = newX;
+            const percentage = newX / rect.width;
+            this.dragCurrentTime = percentage * this.duration;
+        },
+
+        handleProgressBarDragEnd(event) {
+            if (!this.isDragging) return;
+
+            this.handlePointerEnd(event, 'progressbar-drag');
+
+            // Seek to final position
+            if (this.player && this.player.readyState() >= 1) {
+                const targetTime = Math.max(0, Math.min(this.dragCurrentTime || 0, this.duration || 0));
+                if (isFinite(targetTime)) {
+                    this.player.currentTime(targetTime);
+                    this.currentTime = targetTime;
+                    // Circle positioning removed
+
+                    // Resume playing if was playing before
+                    if (this.wasPlayingBeforeDrag) {
+                        this.player.play().catch(e => {
+                            console.debug('Play after drag interrupted:', e.name);
+                        });
+                    }
+                }
             }
 
-            // Double click - add comment at position
-            const rect = event.currentTarget.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const percentage = clickX / rect.width;
-            const targetTime = percentage * this.duration;
+            // Clean up
+            this.isDragging = false;
+            this.wasPlayingBeforeDrag = false;
 
-            // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
-            const frameAlignedTime = this.roundToNearestFrame(targetTime);
-            const frameNumber = this.getFrameNumber(frameAlignedTime);
-            this.$dispatch('video-annotation:add-comment', {
-                timestamp: frameAlignedTime,  // Where to add comment (frame-aligned)
-                currentTime: frameAlignedTime,  // Same as timestamp for progress bar actions
-                frameNumber: frameNumber,  // Frame number for reference
-                frameRate: this.frameRate  // Include frame rate for context
-            });
+            // Remove global listeners
+            const moveEvent = this.pointerState.activePointer === 'touch' ? 'touchmove' : 'mousemove';
+            const endEvent = this.pointerState.activePointer === 'touch' ? 'touchend' : 'mouseup';
 
+            document.removeEventListener(moveEvent, this.boundHandleDragMove);
+            document.removeEventListener(endEvent, this.boundEndDrag);
+            this.boundHandleDragMove = null;
+            this.boundEndDrag = null;
+
+            // Hide UI elements after a delay
+            setTimeout(() => {
+                this.showTooltip = false;
+                this.showSeekCircle = false;
+            }, 100);
+
+            // Resume auto-hide if needed
+            if (this.progressBarMode === 'auto-hide' && this.isPlaying) {
+                this.progressBarTimeout = setTimeout(() => {
+                    this.showProgressBar = false;
+                }, this.config.timing.progressBarAutoHideDelay);
+            }
         },
 
         updateHoverPosition(event) {
@@ -1036,7 +1881,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 this.showSeekCircle = true;
                 this.showTooltip = true;
                 // Show circle at current progress position (aligned with progress fill)
-                this.forceUpdateSeekCirclePosition();
+                // Circle positioning removed
                 // Update hover position for tooltip only
                 this.updateHoverPosition(event);
             }
@@ -1053,25 +1898,6 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         },
 
 
-        updateSeekCirclePosition() {
-            // Update seek circle position to align with current progress fill
-            // Only update if not actively dragging and we have valid dimensions
-            if (!this.isDragging && this.duration > 0 && this.progressBarWidth > 0) {
-                const progressPercentage = this.currentTime / this.duration;
-                // Position circle at the end of the progress fill
-                this.seekCircleX = progressPercentage * this.progressBarWidth;
-            }
-        },
-
-        forceUpdateSeekCirclePosition() {
-            // Force update circle position regardless of drag state
-            // Always position circle at the end of the progress fill (current playback position)
-            if (this.duration > 0 && this.progressBarWidth > 0) {
-                const progressPercentage = this.currentTime / this.duration;
-                // Align circle with the end of the blue progress fill
-                this.seekCircleX = progressPercentage * this.progressBarWidth;
-            }
-        },
 
         startDrag(event) {
             // Only handle mousedown events for dragging, let touch events use separate handler
@@ -1101,7 +1927,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
 
             const rect = progressBar.getBoundingClientRect();
             this.dragStartX = event.clientX - rect.left;
-            this.seekCircleX = this.dragStartX;
+            // Removed circle positioning: this.seekCircleX = this.dragStartX;
 
             // Calculate initial time
             const percentage = this.dragStartX / rect.width;
@@ -1139,7 +1965,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             const rect = progressBar.getBoundingClientRect();
             const touch = event.touches[0];
             this.dragStartX = touch.clientX - rect.left;
-            this.seekCircleX = this.dragStartX;
+            // Removed circle positioning: this.seekCircleX = this.dragStartX;
 
             const percentage = this.dragStartX / rect.width;
             this.dragCurrentTime = percentage * this.duration;
@@ -1159,7 +1985,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             newX = Math.max(0, Math.min(newX, rect.width));
 
 
-            this.seekCircleX = newX;
+            // Removed circle positioning: this.seekCircleX = newX;
             this.hoverX = newX;
             const percentage = newX / rect.width;
             this.dragCurrentTime = percentage * (this.duration || 0);
@@ -1178,7 +2004,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 if (isFinite(targetTime)) {
                     this.player.currentTime(targetTime);
                     this.currentTime = targetTime;
-                    this.forceUpdateSeekCirclePosition();
+                    // Circle positioning removed
 
                     // Resume playing if video was playing before drag
                     if (this.wasPlayingBeforeDrag) {
@@ -1223,7 +2049,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             newX = Math.max(0, Math.min(newX, rect.width));
 
             // Update both circle position and drag time during drag
-            this.seekCircleX = newX;
+            // Removed circle positioning: this.seekCircleX = newX;
             this.hoverX = newX; // Also update hover position for tooltip
             const percentage = newX / rect.width;
             this.dragCurrentTime = percentage * this.duration;
@@ -1239,7 +2065,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 // Force update the current time immediately for UI consistency
                 this.currentTime = this.dragCurrentTime;
                 // Update circle position to match the seek
-                this.forceUpdateSeekCirclePosition();
+                // Circle positioning removed
 
                 // Resume playing if video was playing before drag
                 if (this.wasPlayingBeforeDrag) {
@@ -1253,7 +2079,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                     if (this.player) {
                         this.player.currentTime(this.dragCurrentTime);
                         this.currentTime = this.dragCurrentTime;
-                        this.forceUpdateSeekCirclePosition();
+                        // Circle positioning removed
 
                         // Resume playing if video was playing before drag
                         if (this.wasPlayingBeforeDrag) {
@@ -1328,6 +2154,12 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 window.removeEventListener('resize', this.updateProgressBarWidth);
             }
 
+            // Cleanup Hammer.js
+            if (this.hammer) {
+                this.hammer.destroy();
+                this.hammer = null;
+            }
+
             // Note: Window keyboard events are automatically cleaned up by Alpine.js
         },
 
@@ -1394,7 +2226,19 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         },
 
         handleVideoClick() {
-            if (!this.player) return;
+            console.log('handleVideoClick called');
+            if (!this.player) {
+                console.log('No player available');
+                return;
+            }
+
+            // Debounce rapid clicks to prevent immediate play/pause toggling
+            const now = Date.now();
+            if (this.lastVideoClickTime && (now - this.lastVideoClickTime) < 300) {
+                console.log('Debounced - too rapid');
+                return; // Ignore rapid clicks within 300ms
+            }
+            this.lastVideoClickTime = now;
 
             // If video hasn't loaded yet, load it first
             if (!this.videoLoaded) {
@@ -1461,8 +2305,27 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             return this.currentResolutionSrc === source.src;
         },
 
-        // Touch event handlers for video area
+        // Touch event handlers for video area (works alongside Hammer.js)
         handleTouchStart(event) {
+            // Skip if we have a recent pointer interaction to prevent conflicts
+            if (this.pointerState.ghostClickPrevention) {
+                return;
+            }
+
+            // If Hammer.js is enabled, only handle basic touch tracking
+            if (this.touchInterface.enabled && this.hammer) {
+                // Let Hammer.js handle the gesture recognition
+                // Just track basic touch state for compatibility
+                this.touchStartTime = Date.now();
+                const touch = event.touches && event.touches[0] ? event.touches[0] : event;
+                this.touchStartPos = {
+                    x: touch.clientX || touch.pageX || 0,
+                    y: touch.clientY || touch.pageY || 0
+                };
+                this.isTouchMove = false;
+                return;
+            }
+
             this.touchStartTime = Date.now();
 
             // Safely get touch coordinates with fallbacks
@@ -1558,8 +2421,16 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             // Remove touch move listener
             document.removeEventListener('touchmove', this.handleTouchMoveDetection);
 
+            // If Hammer.js is enabled, let it handle the gesture
+            if (this.touchInterface.enabled && this.hammer) {
+                // Just reset touch state, Hammer.js handles the action
+                this.touchStartPos = { x: 0, y: 0 };
+                return;
+            }
+
             // Only handle tap if it was a short touch and minimal movement
-            if (touchDuration < 300 && !this.isTouchMove) {
+            // Skip if unified pointer system is handling this
+            if (touchDuration < 300 && !this.isTouchMove && !this.pointerState.ghostClickPrevention) {
                 this.handleVideoClick();
             }
 
@@ -1580,7 +2451,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             // Show circle on touch for mobile progress bar area
             this.showSeekCircle = true;
             this.showTooltip = true;
-            this.forceUpdateSeekCirclePosition();
+            // Circle positioning removed
 
             // Update touch position for tooltip and store for progress bar
             const touch = event.touches[0];
@@ -1902,7 +2773,331 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             if (this.isDragging) {
                 this.endTouchDrag({ preventDefault: () => { }, stopPropagation: () => { } });
             }
+        },
+
+        // Region Creation Method for Frame Helper Button
+        startRegionCreationAtCurrentFrame() {
+            if (!this.player) return;
+
+            // Pause video
+            this.player.pause();
+
+            // Get current frame state from single source of truth
+            const frameState = this.currentFrameState;
+            const frameAlignedTime = frameState.frameAlignedTime;
+            const frameNumber = frameState.frameNumber;
+
+            // Calculate X position for region bar visualization
+            const rect = this.$refs.regionBar?.getBoundingClientRect();
+            const currentX = rect ? (frameAlignedTime / this.duration) * rect.width : 0;
+
+            // Start region creation at current frame (same as clicking region area)
+            this.isCreatingRegion = true;
+            this.regionCreationStart = {
+                x: currentX,
+                time: frameAlignedTime,
+                frame: frameNumber
+            };
+
+            // Set end to same frame initially
+            this.regionCreationEnd = {
+                x: currentX,
+                time: frameAlignedTime,
+                frame: frameNumber
+            };
+
+            // Show toolbar
+            this.showRegionToolbar = true;
+
+            console.log('Region creation started at frame:', frameNumber);
+        },
+
+        cancelRegionCreation() {
+            // Reset region creation state (same as existing cancelRegionCreation logic)
+            this.isCreatingRegion = false;
+            this.regionCreationStart = null;
+            this.regionCreationEnd = null;
+
+            // Hide toolbar
+            this.showRegionToolbar = false;
+
+            console.log('Region creation cancelled');
+        },
+
+        generateRegionId() {
+            return `region-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        },
+
+        seekToFrame(frameNumber) {
+            if (!this.player || typeof frameNumber !== 'number') return;
+
+            const targetTime = frameNumber / this.frameRate;
+            this.player.currentTime(targetTime);
+
+            console.log(`Seeked to frame ${frameNumber} (${targetTime.toFixed(3)}s)`);
+        },
+
+        // Mobile region modal navigation helpers
+        goToPreviousFrame() {
+            if (!this.player) return;
+
+            const currentTime = this.player.currentTime();
+            const currentFrame = this.getFrameNumber(currentTime);
+            const previousFrame = Math.max(0, currentFrame - 1);
+
+            this.seekToFrame(previousFrame);
+        },
+
+        goToNextFrame() {
+            if (!this.player) return;
+
+            const currentTime = this.player.currentTime();
+            const currentFrame = this.getFrameNumber(currentTime);
+            const duration = this.player.duration();
+            const maxFrame = Math.floor(duration * this.frameRate);
+            const nextFrame = Math.min(maxFrame, currentFrame + 1);
+
+            this.seekToFrame(nextFrame);
+        },
+
+        jumpFrames(frameCount) {
+            if (!this.player) return;
+
+            const currentTime = this.player.currentTime();
+            const currentFrame = this.getFrameNumber(currentTime);
+            const duration = this.player.duration();
+            const maxFrame = Math.floor(duration * this.frameRate);
+
+            const targetFrame = Math.max(0, Math.min(maxFrame, currentFrame + frameCount));
+            this.seekToFrame(targetFrame);
+        },
+
+        // Update aspect ratio based on video dimensions
+        updateAspectRatio() {
+            if (!this.player) return;
+
+            const width = this.player.videoWidth();
+            const height = this.player.videoHeight();
+
+            if (width && height) {
+                // Assign appropriate VideoJS fluid class
+                this.assignFluidClass(width, height);
+
+                // Update container dimensions dynamically
+                this.updateVideoContainerSize(width, height);
+                console.log(`Video aspect ratio updated: ${width}x${height}`);
+            }
+        },
+
+        assignFluidClass(width, height) {
+            if (!this.player) return;
+
+            // Remove any existing aspect ratio classes (but keep vjs-fluid always)
+            const playerEl = this.player.el();
+            const aspectRatioClasses = ['vjs-16-9', 'vjs-4-3', 'vjs-9-16', 'vjs-1-1'];
+            aspectRatioClasses.forEach(cls => playerEl.classList.remove(cls));
+
+            // Always ensure vjs-fluid is present
+            if (!playerEl.classList.contains('vjs-fluid')) {
+                playerEl.classList.add('vjs-fluid');
+            }
+
+            // Calculate aspect ratio
+            const aspectRatio = width / height;
+
+            // Check for common aspect ratios with tolerance and add specific class
+            const tolerance = 0.05;
+            let specificClass = null;
+
+            if (Math.abs(aspectRatio - (16 / 9)) < tolerance) {
+                specificClass = 'vjs-16-9';
+            } else if (Math.abs(aspectRatio - (4 / 3)) < tolerance) {
+                specificClass = 'vjs-4-3';
+            } else if (Math.abs(aspectRatio - (9 / 16)) < tolerance) {
+                specificClass = 'vjs-9-16';
+            } else if (Math.abs(aspectRatio - 1) < tolerance) {
+                specificClass = 'vjs-1-1';
+            }
+
+            // Apply specific aspect ratio class if detected
+            if (specificClass) {
+                playerEl.classList.add(specificClass);
+                console.log(`Applied VideoJS classes: vjs-fluid + ${specificClass} (ratio: ${aspectRatio.toFixed(3)})`);
+            } else {
+                console.log(`Applied VideoJS class: vjs-fluid only (custom ratio: ${aspectRatio.toFixed(3)})`);
+            }
+        },
+
+        updateVideoContainerSize(videoWidth, videoHeight) {
+            const videoContainer = this.$refs.videoContainer;
+            if (!videoContainer) return;
+
+            // Get the main video annotation container (the one with flex flex-col)
+            const mainContainer = this.$el;
+            if (!mainContainer) return;
+
+            // Get the flex-1 parent (video area)
+            const playerParent = videoContainer.closest('.flex-1');
+            if (!playerParent) return;
+
+            // Get available space from the main container
+            const mainRect = mainContainer.getBoundingClientRect();
+            let availableWidth = mainRect.width;
+            let availableHeight = mainRect.height;
+
+            // Subtract toolbar height from available height
+            const toolbar = this.$refs('tool-bar-container')
+            if (toolbar) {
+                const toolbarHeight = toolbar.getBoundingClientRect().height;
+                console.log(toolbarHeight);
+                availableHeight;
+            }
+
+            // Add some padding for safety
+            availableHeight = Math.max(availableHeight - 20, 200); // Minimum 200px height
+
+            // Calculate aspect ratio
+            const videoAspectRatio = videoWidth / videoHeight;
+
+            // Calculate dimensions that fit within available space
+            let containerWidth = availableWidth;
+            let containerHeight = containerWidth / videoAspectRatio;
+
+            // If height exceeds available space, constrain by height
+            if (containerHeight > availableHeight) {
+                containerHeight = availableHeight;
+                containerWidth = containerHeight * videoAspectRatio;
+            }
+
+            // For flex layout, let CSS handle the dimensions naturally
+            // Remove any explicit sizing to let flex work
+            playerParent.style.width = '';
+            playerParent.style.height = '';
+            playerParent.style.flexShrink = '';
+            playerParent.style.flexGrow = '';
+
+            console.log(`Video area resized to: ${containerWidth}x${containerHeight} (available: ${availableWidth}x${availableHeight}, toolbar subtracted)`);
+        },
+
+        // Initialize Region Toolbar Drag with Hammer.js
+        initRegionToolbarDrag(element) {
+            if (!element) return;
+
+            // Create Hammer.js instance for the toolbar
+            const toolbarHammer = new Hammer(element);
+
+            // Enable pan gesture
+            toolbarHammer.get('pan').set({
+                direction: Hammer.DIRECTION_ALL,
+                threshold: 10
+            });
+
+            let startPosition = { x: 0, y: 0 };
+            let currentPosition = { x: 0, y: 0 };
+
+            toolbarHammer.on('panstart', (event) => {
+                this.isDragging = true;
+                this.dragStarted = true;
+                startPosition.x = currentPosition.x;
+                startPosition.y = currentPosition.y;
+
+                // Add active dragging styles
+                element.style.transition = 'none';
+                element.style.transform = `translate(calc(-50% + ${currentPosition.x}px), ${currentPosition.y}px)`;
+            });
+
+            toolbarHammer.on('panmove', (event) => {
+                if (!this.isDragging) return;
+
+                const newX = startPosition.x + event.deltaX;
+                const newY = startPosition.y + event.deltaY;
+
+                // Constrain to viewport bounds
+                const rect = element.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                const constrainedX = Math.max(
+                    -(viewportWidth / 2 - rect.width / 2),
+                    Math.min(viewportWidth / 2 - rect.width / 2, newX)
+                );
+
+                const constrainedY = Math.max(
+                    -(viewportHeight - rect.height - 20),
+                    Math.min(-20, newY)
+                );
+
+                currentPosition.x = constrainedX;
+                currentPosition.y = constrainedY;
+
+                element.style.transform = `translate(calc(-50% + ${currentPosition.x}px), ${currentPosition.y}px)`;
+            });
+
+            toolbarHammer.on('panend', (event) => {
+                this.isDragging = false;
+
+                // Restore transition for smooth hover effects
+                element.style.transition = 'opacity 200ms';
+
+                // Snap to edges if close enough
+                const snapThreshold = 50;
+                const rect = element.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+
+                if (Math.abs(currentPosition.x + viewportWidth / 2 - rect.width / 2) < snapThreshold) {
+                    // Snap to left edge
+                    currentPosition.x = -(viewportWidth / 2 - rect.width / 2);
+                } else if (Math.abs(currentPosition.x - viewportWidth / 2 + rect.width / 2) < snapThreshold) {
+                    // Snap to right edge
+                    currentPosition.x = viewportWidth / 2 - rect.width / 2;
+                }
+
+                element.style.transform = `translate(calc(-50% + ${currentPosition.x}px), ${currentPosition.y}px)`;
+            });
+        },
+
+        // Resize video wrapper based on available space minus actual toolbar height
+        resizeVideoWrapper() {
+            const videoWrapper = this.$refs.videoWrapper;
+            if (!videoWrapper) return;
+
+            const mainContainer = this.$el;
+            if (!mainContainer) return;
+
+            // Get the main container dimensions
+            const containerRect = mainContainer.getBoundingClientRect();
+            const containerWidth = containerRect.width;
+            const containerHeight = containerRect.height;
+
+            // Get actual toolbar height by measuring it (wait for render if needed)
+            const toolbar = mainContainer.querySelector('.absolute.bottom-0');
+            let toolbarHeight = 80; // fallback
+            if (toolbar) {
+                // Force layout calculation
+                toolbar.style.visibility = 'visible';
+                const rect = toolbar.getBoundingClientRect();
+                toolbarHeight = rect.height || 80;
+                console.log('Actual toolbar height measured:', toolbarHeight);
+            }
+
+            // Calculate available height for video wrapper
+            const availableHeight = containerHeight - toolbarHeight;
+
+            // Set video wrapper as flex container with strict height constraints
+            videoWrapper.style.width = '100%';
+            videoWrapper.style.height = `${availableHeight}px`;
+            videoWrapper.style.maxHeight = `${availableHeight}px`;
+            videoWrapper.style.minHeight = `${availableHeight}px`;
+            videoWrapper.style.display = 'flex';
+            videoWrapper.style.justifyContent = 'center';
+            videoWrapper.style.alignItems = 'center';
+            videoWrapper.style.overflow = 'hidden';
+            videoWrapper.style.flexShrink = '0';
+            videoWrapper.style.flexGrow = '0';
+
+            console.log(`Video wrapper resized to: ${containerWidth}x${availableHeight} (toolbar height: ${toolbarHeight}px, container: ${containerHeight}px)`);
         }
+
 
     };
 }

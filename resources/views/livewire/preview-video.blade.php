@@ -1,17 +1,16 @@
-<div class="mx-auto max-w-7xl lg:p-6">
-    <div class="mb-6">
-        <h1 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">Video Preview with Annotations</h1>
-        <p class="text-gray-600 dark:text-gray-400">Click on avatar markers to load comments or add new ones at any
-            timestamp.</p>
-    </div>
-
-    @if (session()->has('message'))
+<!-- Full viewport container for testing -->
+<div class="fixed inset-0 h-screen max-w-5xl mx-auto overflow-hidden bg-red-100"> {{-- @if (session()->has('message'))
         <div class="p-4 mb-4 text-green-700 bg-green-100 rounded-lg dark:bg-green-900 dark:text-green-100">
             {{ session('message') }}
         </div>
-    @endif
+    @endif --}}
+    <!-- Video Annotation Component - Takes full screen -->
+    <div wire:ignore class="w-full h-full overflow-hidden">
+        <x-video-annotaion :video-src="$videoUrl" :quality-sources="$qualitySources" :comments="$comments" :config="$config" />
+    </div>
 
-    <div class="" x-data="{
+    <!-- Hidden Livewire Event Handlers -->
+    <div class="hidden" x-data="{
         comments: @js($comments)
     }"
         @video-annotation:add-comment.window="console.log('Add comment:', $event.detail); @this.call('addComment', $event.detail.timestamp, $event.detail.frameNumber, $event.detail.frameRate)"
@@ -19,15 +18,17 @@
         @video-annotation:seek-comment="console.log('Seek comment:', $event.detail)"
         @comments-updated.window="comments = $event.detail.comments"
         @comment-loaded.window="console.log('Comment loaded:', $event.detail.comment)">
+    </div>
 
+    <!-- Second Column - Right Sidebar -->
+    {{-- <div class="h-full bg-gray-100 border-l border-gray-200 w-80 dark:bg-gray-800 dark:border-gray-700">
+        <div class="p-4">
+            <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Comments & Details</h3>
+            <!-- Add sidebar content here -->
+        </div> --}}
 
-        <!-- Video Annotation Component -->
-        <div wire:ignore>
-            <x-video-annotation :video-src="$videoUrl" :quality-sources="$qualitySources" :comments="$comments" :config="$config" />
-        </div>
-
-        <!-- Comments Summary -->
-        {{-- <div class="p-6 mt-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+    <!-- Comments Summary -->
+    {{-- <div class="p-6 mt-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
             <h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Comments Summary (<span x-text="comments.length"></span>)
             </h2>
@@ -50,8 +51,8 @@
             </div>
         </div> --}}
 
-        <!-- Instructions -->
-        {{-- <div class="p-6 mt-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+    <!-- Instructions -->
+    {{-- <div class="p-6 mt-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
             <h3 class="mb-3 text-lg font-medium text-blue-900 dark:text-blue-100">How to use:</h3>
             <ul class="space-y-2 text-blue-800 dark:text-blue-200">
                 <li class="flex items-start space-x-2">
@@ -72,14 +73,14 @@
                 </li>
             </ul>
         </div> --}}
-    </div>
+</div>
 
-    <script>
-        function formatTime(timestamp) {
-            const seconds = Math.floor(timestamp / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-    </script>
+<script>
+    function formatTime(timestamp) {
+        const seconds = Math.floor(timestamp / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+</script>
 </div>
