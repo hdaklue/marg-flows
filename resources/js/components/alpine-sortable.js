@@ -9,8 +9,103 @@ const sortableInstances = new WeakMap();
 const sortableHandlers = new Map();
 const hammerInstances = new WeakMap();
 
+// Auto-scroll during drag
+const autoScrollConfig = {
+    edgeSize: 100, // pixels from edge to trigger scroll
+    maxSpeed: 8, // max scroll speed
+    acceleration: 1.2, // acceleration curve
+};
+
+let autoScrollState = {
+    isScrolling: false,
+    animationFrame: null,
+    direction: null,
+    speed: 0,
+    container: null,
+};
+
 // Modal management
 let modalInstance = null;
+
+// Auto-scroll functions
+function startAutoScroll(container, direction, proximity) {
+    if (autoScrollState.isScrolling && autoScrollState.direction === direction) {
+        return; // Already scrolling in this direction
+    }
+    
+    stopAutoScroll(); // Stop any existing scroll
+    
+    // Calculate speed based on proximity to edge (closer = faster)
+    const normalizedProximity = Math.max(0, Math.min(1, (autoScrollConfig.edgeSize - proximity) / autoScrollConfig.edgeSize));
+    const speed = normalizedProximity * autoScrollConfig.maxSpeed;
+    
+    autoScrollState.isScrolling = true;
+    autoScrollState.direction = direction;
+    autoScrollState.speed = speed;
+    autoScrollState.container = container;
+    
+    // Start animation loop
+    function scroll() {
+        if (!autoScrollState.isScrolling) return;
+        
+        const scrollAmount = autoScrollState.speed * autoScrollConfig.acceleration;
+        
+        if (autoScrollState.direction === 'left') {
+            autoScrollState.container.scrollLeft = Math.max(0, autoScrollState.container.scrollLeft - scrollAmount);
+        } else if (autoScrollState.direction === 'right') {
+            const maxScroll = autoScrollState.container.scrollWidth - autoScrollState.container.clientWidth;
+            autoScrollState.container.scrollLeft = Math.min(maxScroll, autoScrollState.container.scrollLeft + scrollAmount);
+        }
+        
+        autoScrollState.animationFrame = requestAnimationFrame(scroll);
+    }
+    
+    autoScrollState.animationFrame = requestAnimationFrame(scroll);
+}
+
+function stopAutoScroll() {
+    if (autoScrollState.animationFrame) {
+        cancelAnimationFrame(autoScrollState.animationFrame);
+        autoScrollState.animationFrame = null;
+    }
+    
+    autoScrollState.isScrolling = false;
+    autoScrollState.direction = null;
+    autoScrollState.speed = 0;
+    autoScrollState.container = null;
+}
+
+function checkAutoScroll(event, container) {
+    if (!container || isTouchDevice()) {
+        return; // Skip on touch devices to avoid conflicts
+    }
+    
+    const rect = container.getBoundingClientRect();
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+    
+    // Check if mouse is within container bounds
+    if (mouseY < rect.top || mouseY > rect.bottom) {
+        stopAutoScroll();
+        return;
+    }
+    
+    const leftEdgeDistance = mouseX - rect.left;
+    const rightEdgeDistance = rect.right - mouseX;
+    
+    // Check left edge
+    if (leftEdgeDistance < autoScrollConfig.edgeSize && leftEdgeDistance > 0) {
+        startAutoScroll(container, 'left', leftEdgeDistance);
+    }
+    // Check right edge  
+    else if (rightEdgeDistance < autoScrollConfig.edgeSize && rightEdgeDistance > 0) {
+        startAutoScroll(container, 'right', rightEdgeDistance);
+    }
+    // Not in scroll zone
+    else {
+        stopAutoScroll();
+    }
+}
 
 // Create and show column picker modal
 function showColumnPickerModal({ taskId, taskTitle, currentColumn, availableColumns }) {
@@ -124,7 +219,10 @@ function getColumnColorClass(color) {
     const colorMap = {
         'zinc': 'bg-zinc-500',
         'amber': 'bg-amber-500',
-        'emerald': 'bg-emerald-500'
+        'blue': 'bg-blue-500',
+        'purple': 'bg-purple-500',
+        'emerald': 'bg-emerald-500',
+        'red': 'bg-red-500'
     };
     return colorMap[color] || 'bg-zinc-500';
 }

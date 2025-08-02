@@ -24,10 +24,28 @@ $colorClasses = [
         'hover' => 'md:hover:bg-amber-100 md:dark:hover:bg-amber-800/30',
         'handle' => 'bg-zinc-100 dark:bg-zinc-700',
     ],
+    'blue' => [
+        'border' => 'border-blue-200 dark:border-blue-800',
+        'bg' => 'bg-blue-50 dark:bg-blue-900/20',
+        'hover' => 'md:hover:bg-blue-100 md:dark:hover:bg-blue-800/30',
+        'handle' => 'bg-zinc-100 dark:bg-zinc-700',
+    ],
+    'purple' => [
+        'border' => 'border-purple-200 dark:border-purple-800',
+        'bg' => 'bg-purple-50 dark:bg-purple-900/20',
+        'hover' => 'md:hover:bg-purple-100 md:dark:hover:bg-purple-800/30',
+        'handle' => 'bg-zinc-100 dark:bg-zinc-700',
+    ],
     'emerald' => [
         'border' => 'border-emerald-200 dark:border-emerald-800',
         'bg' => 'bg-emerald-50 dark:bg-emerald-900/20', 
         'hover' => 'md:hover:bg-emerald-100 md:dark:hover:bg-emerald-800/30',
+        'handle' => 'bg-zinc-100 dark:bg-zinc-700',
+    ],
+    'red' => [
+        'border' => 'border-red-200 dark:border-red-800',
+        'bg' => 'bg-red-50 dark:bg-red-900/20',
+        'hover' => 'md:hover:bg-red-100 md:dark:hover:bg-red-800/30',
         'handle' => 'bg-zinc-100 dark:bg-zinc-700',
     ]
 ];

@@ -66,6 +66,27 @@ final class SortableDemo extends Component
         ['id' => '42', 'title' => 'Create basic layouts', 'status' => 'done'],
     ];
 
+    public $testing = [
+        ['id' => '43', 'title' => 'Write unit tests for core features', 'status' => 'testing'],
+        ['id' => '44', 'title' => 'Perform integration testing', 'status' => 'testing'],
+        ['id' => '45', 'title' => 'Run performance tests', 'status' => 'testing'],
+        ['id' => '46', 'title' => 'Execute security testing', 'status' => 'testing'],
+        ['id' => '47', 'title' => 'Test mobile responsiveness', 'status' => 'testing'],
+    ];
+
+    public $review = [
+        ['id' => '48', 'title' => 'Code review for authentication', 'status' => 'review'],
+        ['id' => '49', 'title' => 'Security audit review', 'status' => 'review'],
+        ['id' => '50', 'title' => 'Performance optimization review', 'status' => 'review'],
+        ['id' => '51', 'title' => 'UI/UX design review', 'status' => 'review'],
+    ];
+
+    public $deployment = [
+        ['id' => '52', 'title' => 'Deploy to staging environment', 'status' => 'deployment'],
+        ['id' => '53', 'title' => 'Configure production servers', 'status' => 'deployment'],
+        ['id' => '54', 'title' => 'Setup monitoring and alerts', 'status' => 'deployment'],
+    ];
+
     protected array $sortableRules = [
         'items' => ['required', 'array', 'max:50'],
         'items.*' => ['required', 'string'],
@@ -92,10 +113,28 @@ final class SortableDemo extends Component
                 'property' => 'inProgress',
             ],
             [
+                'id' => 'testing',
+                'name' => 'Testing',
+                'color' => 'blue',
+                'property' => 'testing',
+            ],
+            [
+                'id' => 'review',
+                'name' => 'Review',
+                'color' => 'purple',
+                'property' => 'review',
+            ],
+            [
                 'id' => 'done',
                 'name' => 'Done',
                 'color' => 'emerald',
                 'property' => 'done',
+            ],
+            [
+                'id' => 'deployment',
+                'name' => 'Deployment',
+                'color' => 'red',
+                'property' => 'deployment',
             ],
         ];
     }
@@ -373,8 +412,17 @@ final class SortableDemo extends Component
         if (str_contains($containerData, 'in-progress')) {
             return 'inProgress';
         }
+        if (str_contains($containerData, 'testing')) {
+            return 'testing';
+        }
+        if (str_contains($containerData, 'review')) {
+            return 'review';
+        }
         if (str_contains($containerData, 'done')) {
             return 'done';
+        }
+        if (str_contains($containerData, 'deployment')) {
+            return 'deployment';
         }
 
         return 'todos';
@@ -403,7 +451,10 @@ final class SortableDemo extends Component
         return match ($property) {
             'todos' => 'todo',
             'inProgress' => 'in_progress',
+            'testing' => 'testing',
+            'review' => 'review',
             'done' => 'done',
+            'deployment' => 'deployment',
             default => 'todo',
         };
     }

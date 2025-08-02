@@ -1,4 +1,4 @@
-<div class="max-w-6xl p-4 mx-auto md:p-6">
+<div class="w-full p-4 mx-auto md:p-6">
     {{-- <div class="mb-6 md:mb-8">
         <h1 class="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100 md:text-3xl">
             Mobile Kanban Board
@@ -71,26 +71,77 @@
         </button>
     </div> --}}
 
-    <!-- Mobile: Horizontal scrolling columns, Desktop: Grid layout -->
-    <x-sortable.container 
-        group-name="todo" 
-        class="md:grid md:grid-cols-3 md:gap-6"
-    >
-        <!-- Mobile column container with scroll snap -->
-        <div class="flex gap-4 pb-4 overflow-x-auto snap-x snap-mandatory scroll-smooth md:contents"
+    <!-- Horizontal scrolling columns for both mobile and desktop -->
+    <x-sortable.container group-name="todo" class="w-full">
+        <!-- Column container with scroll snap -->
+        <div class="flex gap-6 pb-4 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide"
             x-data="{
                 currentColumnIndex: 0,
-                totalColumns: 3,
+                totalColumns: {{ count($this->columns) }},
                 updateColumnIndex() {
                     const container = this.$el;
                     const scrollLeft = container.scrollLeft;
-                    const columnWidth = container.clientWidth * 0.85; // 85vw per column
-                    this.currentColumnIndex = Math.round(scrollLeft / (columnWidth + 16)); // 16px gap
+                    // Mobile: 85vw per column, Desktop: Column width based on total columns
+                    const isMobile = window.innerWidth < 768;
+                    const columnWidth = isMobile ?
+                        container.clientWidth * 0.85 :
+                        container.clientWidth / Math.min(this.totalColumns, 4); // Max 4 columns visible on desktop
+                    const gap = isMobile ? 16 : 24; // 1rem = 16px, 1.5rem = 24px
+                    this.currentColumnIndex = Math.round(scrollLeft / (columnWidth + gap));
+                },
+                scrollToColumn(index) {
+                    const container = this.$refs.columnsContainer;
+                    const isMobile = window.innerWidth < 768;
+                    const columnWidth = isMobile ?
+                        container.clientWidth * 0.85 :
+                        container.clientWidth / Math.min(this.totalColumns, 4);
+                    const gap = isMobile ? 16 : 24;
+                    container.scrollTo({
+                        left: index * (columnWidth + gap),
+                        behavior: 'smooth'
+                    });
+                    this.currentColumnIndex = index;
+                },
+                scrollLeft() {
+                    if (this.currentColumnIndex > 0) {
+                        this.scrollToColumn(this.currentColumnIndex - 1);
+                    }
+                },
+                scrollRight() {
+                    if (this.currentColumnIndex < this.totalColumns - 1) {
+                        this.scrollToColumn(this.currentColumnIndex + 1);
+                    }
                 }
-            }" x-ref="columnsContainer" @scroll.passive="updateColumnIndex()">
+            }" x-ref="columnsContainer" @scroll.passive="updateColumnIndex()"
+            @keydown.arrow-left.window.prevent="scrollLeft()" @keydown.arrow-right.window.prevent="scrollRight()">
+
+            <!-- Desktop arrow navigation -->
+            <div
+                class="hidden md:fixed md:bottom-8 md:left-1/2 md:z-40 md:flex md:-translate-x-1/2 md:transform md:gap-3">
+                <!-- Left arrow -->
+                <button @click="scrollLeft()" :disabled="currentColumnIndex === 0"
+                    class="p-3 transition-all duration-200 border rounded-lg shadow-lg border-zinc-200 bg-white/90 backdrop-blur-sm hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950/90 dark:hover:bg-zinc-900"
+                    aria-label="Scroll to previous column">
+                    <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                </button>
+
+                <!-- Right arrow -->
+                <button @click="scrollRight()" :disabled="currentColumnIndex >= totalColumns - 1"
+                    class="p-3 transition-all duration-200 border rounded-lg shadow-lg border-zinc-200 bg-white/90 backdrop-blur-sm hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950/90 dark:hover:bg-zinc-900"
+                    aria-label="Scroll to next column">
+                    <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
 
             <!-- Column navigation indicators (mobile only) -->
-            <div class="fixed z-40 flex p-2 space-x-2 transform -translate-x-1/2 rounded-full bottom-8 left-1/2 bg-zinc-900/80 backdrop-blur-sm md:hidden"
+            <div class="fixed z-40 flex p-2 space-x-2 transform -translate-x-1/2 rounded-lg bottom-8 left-1/2 bg-zinc-900/80 backdrop-blur-sm md:hidden"
                 x-show="true" x-transition.opacity x-data="{
                     columns: @js($this->columns)
                 }">
@@ -98,9 +149,13 @@
                     <button
                         @click="
                         const container = $refs.columnsContainer;
-                        const columnWidth = container.clientWidth * 0.85 + 16; // 85vw + gap
+                        const isMobile = window.innerWidth < 768;
+                        const columnWidth = isMobile ?
+                            container.clientWidth * 0.85 :
+                            container.clientWidth / 3;
+                        const gap = isMobile ? 16 : 24;
                         container.scrollTo({
-                            left: index * columnWidth,
+                            left: index * (columnWidth + gap),
                             behavior: 'smooth'
                         });
                         currentColumnIndex = index;
@@ -109,7 +164,7 @@
                         class="relative p-2 transition-all duration-200 touch-manipulation focus:outline-none"
                         :aria-label="`Navigate to ${column.name} column`">
                         <!-- Visual indicator bar -->
-                        <div class="transition-all duration-200 rounded-full"
+                        <div class="transition-all duration-200 rounded-lg"
                             :class="{
                                 [`w-6 h-2 bg-${column.color}-500`]: currentColumnIndex === index,
                                     [`w-2 h-2 bg-${column.color}-500 opacity-60`]: currentColumnIndex !== index
@@ -117,7 +172,7 @@
                         </div>
                         <!-- Column name tooltip -->
                         <div x-show="currentColumnIndex === index"
-                            class="absolute px-2 py-1 text-xs font-medium text-white transform -translate-x-1/2 rounded-md shadow-lg pointer-events-none -top-8 left-1/2 whitespace-nowrap bg-zinc-800/90"
+                            class="absolute px-2 py-1 text-xs font-medium text-white transform -translate-x-1/2 rounded-lg shadow-lg pointer-events-none -top-8 left-1/2 whitespace-nowrap bg-zinc-800/90"
                             x-transition.opacity.duration.200ms x-text="column.name">
                         </div>
                     </button>
@@ -125,30 +180,17 @@
             </div>
 
             @foreach ($this->columns as $column)
-                <x-sortable.group 
-                    :id="$column['id']" 
-                    :container="$column['id']" 
-                    :title="$column['name']" 
-                    :count="count($this->{$column['property']})" 
-                    :color="$column['color']" 
-                    :wire-key="$column['id']"
-                    :sort-enabled="$this->isSortingEnabled()">
-                    
+                <x-sortable.group :id="$column['id']" :container="$column['id']" :title="$column['name']" :count="count($this->{$column['property']})"
+                    :color="$column['color']" :wire-key="$column['id']" :sort-enabled="$this->isSortingEnabled()">
+
                     @foreach ($this->{$column['property']} as $task)
-                        <x-sortable.item 
-                            :item-id="$task['id']"
-                            :title="$task['title']"
-                            :subtitle="'ID: ' . $task['id'] . ($column['id'] === 'done' ? ' • Completed' : ($column['id'] === 'in-progress' ? ' • In Progress' : ''))"
-                            :color="$column['color']"
-                            :current-column="$column['id']"
-                            :available-columns="$this->getAvailableColumnsFor($column['id'])"
-                            :sort-enabled="$this->isSortingEnabled()"
-                        />
+                        <x-sortable.item :item-id="$task['id']" :title="$task['title']" :subtitle="'ID: ' . $task['id'] . ($column['id'] === 'done' ? ' • Completed' : ($column['id'] === 'in-progress' ? ' • In Progress' : ''))" :color="$column['color']"
+                            :current-column="$column['id']" :available-columns="$this->getAvailableColumnsFor($column['id'])" :sort-enabled="$this->isSortingEnabled()" />
                     @endforeach
-                    
+
                     @if (empty($this->{$column['property']}))
                         <x-slot name="emptyState">
-                            @if($column['id'] === 'todos')
+                            @if ($column['id'] === 'todos')
                                 <svg class="w-10 h-10 mx-auto mb-3 opacity-50 md:h-12 md:w-12" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -333,7 +375,7 @@
         }
 
         /* Ensure scroll snap works with spacing */
-        .list-group > * + * {
+        .list-group>*+* {
             scroll-snap-stop: always;
         }
 
