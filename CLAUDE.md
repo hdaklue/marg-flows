@@ -31,6 +31,15 @@ php artisan db:seed --class=DatabaseSeeder  # Performance testing
 - Use ULIDs and `getMorphClass()` for morphs
 - Use `Relation::getMorphAlias` and `getMorphedModel()`
 
+## Colors Guid
+- Always use light shades for both dark and light mode
+- Primary: Sky
+- Gray: Zinc
+- Secondary: Indigo
+- Sucess: Emeralde 
+- Warning: Amber
+- Danger: Red
+- 
 ## Available Libraries (Context7)
 - **Laravel Actions** (`/lorisleiva/laravel-actions-docs`) - Single-purpose action classes with controller/job/command/listener support
 - **Laravel Soulbscription** (`/lucasdotvin/laravel-soulbscription`) - Subscription and feature consumption management

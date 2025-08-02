@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Feedbacks;
 
 use App\Concerns\Database\LivesInBusinessDB;
+use App\Concerns\Mentions\HasMentionsContract;
+use App\Contracts\Mentions\HasMentions;
 use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
 use Carbon\Carbon;
@@ -38,9 +40,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-final class AudioFeedback extends Model
+final class AudioFeedback extends Model implements HasMentionsContract
 {
-    use HasFactory, HasUlids, LivesInBusinessDB;
+    use HasFactory, HasMentions, HasUlids, LivesInBusinessDB;
 
     protected $table = 'audio_feedbacks';
 

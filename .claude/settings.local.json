@@ -4,7 +4,8 @@
       "WebFetch(domain:wendell-adriel.gitbook.io)",
       "mcp__filesystem__read_multiple_files",
       "Bash(php artisan view:clear:*)",
-      "Bash(php artisan tinker:*)"
+      "Bash(php artisan tinker:*)",
+      "mcp__filesystem__read_text_file"
     ],
     "deny": []
   },
