@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\Document\ManagesDocuments;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
@@ -115,6 +116,7 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
         HasStaticTypeTrait ,
         HasTimeProgress,
         HasUlids,
+        LivesInOriginalDB,
         ManagesDocuments,
         ManagesParticipants,
         SoftDeletes,
@@ -125,9 +127,9 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
         'sort_when_creating' => true,
     ];
 
-    protected $connection = 'mysql';
+    // protected $connection = 'mysql';
 
-    protected $table = 'klueportal.flows';
+    // protected $table = 'klueportal.flows';
 
     protected $fillable = [
         'title',

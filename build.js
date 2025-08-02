@@ -90,3 +90,9 @@ compile({
     entryPoints: ['./resources/js/components/design-annotation/index.js'],
     outfile: './resources/js/dist/components/design-annotation.js',
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/components/alpine-sortable.js'],
+    outfile: './resources/js/dist/components/alpine-sortable.js',
+})

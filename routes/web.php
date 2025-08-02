@@ -13,16 +13,14 @@ use App\Livewire\Reusable\VideoRecorder;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\SortableDemo;
 use App\Livewire\TestChunkedUpload;
-use App\Models\Flow;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/imagePreview', action: CreateFeedbackComponent::class)->name('home');
 
-// Route::get('/', function () {
-//     return Flow::byStatus('pause')->get();
-// });
+Route::get('/', SortableDemo::class);
 Route::get('/annotation', fn () => view('annotation'));
 Route::get('/videoPreview', PreviewVideo::class)->name('video.preview');
 Route::get('/audioPreview', PreviewAudio::class)->name('audio.preview');
@@ -58,6 +56,10 @@ Route::post('chunked-upload/cancel', [ChunkedUploadController::class, 'cancel'])
 Route::get('test-chunked-upload', TestChunkedUpload::class)
     // ->middleware(['auth'])
     ->name('test-chunked-upload');
+
+// Demo route for sortable
+Route::get('sortable-demo', SortableDemo::class)
+    ->name('sortable-demo');
 
 // Route::view('dashboard', 'dashboard')
 //     ->middleware(['auth', 'verified'])

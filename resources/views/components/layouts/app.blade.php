@@ -15,6 +15,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-auto-animate@latest/dist/alpine-auto-animate.min.js"
         defer></script>
+
     {{-- ❌ Do NOT load @livewireScripts in <head> --}}
 </head>
 
@@ -27,7 +28,6 @@
 
     {{-- ✅ Load Livewire scripts at the end of <body> --}}
     @livewireScriptConfig
-
     {{-- ✅ AlpineJS must be loaded after Livewire --}}
     {{-- <script src="https://unpkg.com/alpinejs" defer></script> --}}
 

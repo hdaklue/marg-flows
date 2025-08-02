@@ -1,6 +1,13 @@
 <?php
 
 declare(strict_types=1);
+use App\Enums\Feedback\FeedbackStatus;
+use App\Enums\Feedback\FeedbackUrgency;
+use App\Models\Feedbacks\AudioFeedback;
+use App\Models\Feedbacks\DesignFeedback;
+use App\Models\Feedbacks\DocumentFeedback;
+use App\Models\Feedbacks\GeneralFeedback;
+use App\Models\Feedbacks\VideoFeedback;
 
 return [
 
@@ -16,11 +23,11 @@ return [
     */
 
     'concrete_models' => [
-        'video' => \App\Models\VideoFeedback::class,
-        'audio' => \App\Models\AudioFeedback::class,
-        'document' => \App\Models\DocumentFeedback::class,
-        'design' => \App\Models\DesignFeedback::class,
-        'general' => \App\Models\GeneralFeedback::class,
+        'video' => VideoFeedback::class,
+        'audio' => AudioFeedback::class,
+        'document' => DocumentFeedback::class,
+        'design' => DesignFeedback::class,
+        'general' => GeneralFeedback::class,
     ],
 
     /*
@@ -33,8 +40,8 @@ return [
     */
 
     'defaults' => [
-        'status' => \App\Enums\Feedback\FeedbackStatus::OPEN,
-        'urgency' => \App\Enums\Feedback\FeedbackUrgency::NORMAL,
+        'status' => FeedbackStatus::OPEN,
+        'urgency' => FeedbackUrgency::NORMAL,
         'auto_resolve_timeout' => 30, // days
         'notification_enabled' => true,
     ],
@@ -103,7 +110,7 @@ return [
     'document' => [
         'supported_block_types' => [
             'paragraph', 'header', 'list', 'quote', 'code',
-            'table', 'image', 'embed', 'delimiter', 'warning', 'checklist'
+            'table', 'image', 'embed', 'delimiter', 'warning', 'checklist',
         ],
         'max_selection_length' => 5000, // characters
         'block_id_pattern' => '/^block_[a-f0-9-]{36}$/', // UUID pattern
@@ -130,7 +137,7 @@ return [
     'design' => [
         'supported_annotation_types' => [
             'point', 'rectangle', 'circle', 'arrow', 'text',
-            'polygon', 'area', 'line', 'freehand'
+            'polygon', 'area', 'line', 'freehand',
         ],
         'canvas_limits' => [
             'max_width' => 8192,

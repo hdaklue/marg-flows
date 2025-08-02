@@ -18,6 +18,9 @@ import recorder from './components/voice-recorder';
 
 import anchor from "@alpinejs/anchor";
 import Hammer from 'hammerjs';
+import './dist/components/alpine-sortable';
+
+
 
 
 
@@ -45,3 +48,5 @@ Alpine.plugin(sort);
 Alpine.plugin(anchor);
 
 Livewire.start()
+
+

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models;
+namespace App\Models\Feedbacks;
 
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Enums\Feedback\FeedbackStatus;

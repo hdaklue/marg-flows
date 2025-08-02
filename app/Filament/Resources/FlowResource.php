@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\FlowStatus;
-use App\Filament\Pages\ViewFlow;
 use App\Filament\Resources\FlowResource\Pages;
 use App\Filament\Resources\FlowResource\Pages\CreateDocument;
 use App\Filament\Resources\FlowResource\Pages\FlowDocuments;
@@ -49,7 +48,7 @@ final class FlowResource extends Resource
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
             ->reorderable('order_column')
-            ->recordUrl(fn (Model $record) => ViewFlow::getUrl(['record' => $record->getKey()]))
+            ->recordUrl(fn (Model $record) => FlowResource::getUrl('view', ['record' => $record->getKey()]))
             ->columns([
                 TextColumn::make('title')
                     ->weight(FontWeight::Bold),
@@ -127,6 +126,7 @@ final class FlowResource extends Resource
         return [
             'index' => Pages\ListFlows::route('/'),
             'create' => Pages\CreateFlow::route('/create'),
+            'view' => Pages\ViewFlow::route('/{record}'),
             'pages' => FlowDocuments::route('{record}/ps'),
             'createDocument' => CreateDocument::route('{flow}/p/c'),
         ];

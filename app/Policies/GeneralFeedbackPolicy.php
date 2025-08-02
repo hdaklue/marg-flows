@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Document;
-use App\Models\Feedback;
+use App\Models\Feedbacks\GeneralFeedback;
 use App\Models\User;
 
-final class FeedbackPolicy
+final class GeneralFeedbackPolicy
 {
     /**
      * Determine whether the user can view any feedbacks.
@@ -22,7 +22,7 @@ final class FeedbackPolicy
     /**
      * Determine whether the user can view the feedback.
      */
-    public function view(User $user, Feedback $feedback): bool
+    public function view(User $user, GeneralFeedback $feedback): bool
     {
         // User can view feedback if:
         // 1. They created it
@@ -53,7 +53,7 @@ final class FeedbackPolicy
     /**
      * Determine whether the user can update the feedback.
      */
-    public function update(User $user, Feedback $feedback): bool
+    public function update(User $user, GeneralFeedback $feedback): bool
     {
         // User can update feedback if:
         // 1. They created it and it's still open
@@ -69,7 +69,7 @@ final class FeedbackPolicy
     /**
      * Determine whether the user can delete the feedback.
      */
-    public function delete(User $user, Feedback $feedback): bool
+    public function delete(User $user, GeneralFeedback $feedback): bool
     {
         // User can delete feedback if:
         // 1. They created it and it's still open
@@ -85,7 +85,7 @@ final class FeedbackPolicy
     /**
      * Determine whether the user can restore the feedback.
      */
-    public function restore(User $user, Feedback $feedback): bool
+    public function restore(User $user, GeneralFeedback $feedback): bool
     {
         return $user->hasRole('ADMIN');
     }
@@ -93,7 +93,7 @@ final class FeedbackPolicy
     /**
      * Determine whether the user can permanently delete the feedback.
      */
-    public function forceDelete(User $user, Feedback $feedback): bool
+    public function forceDelete(User $user, GeneralFeedback $feedback): bool
     {
         return $user->hasRole('ADMIN');
     }
@@ -101,7 +101,7 @@ final class FeedbackPolicy
     /**
      * Determine whether the user can resolve feedbacks.
      */
-    public function resolve(User $user, Feedback $feedback): bool
+    public function resolve(User $user, GeneralFeedback $feedback): bool
     {
         // User can resolve feedback if:
         // 1. They are an admin/moderator
@@ -123,7 +123,7 @@ final class FeedbackPolicy
     /**
      * Determine whether the user can reject feedbacks.
      */
-    public function reject(User $user, Feedback $feedback): bool
+    public function reject(User $user, GeneralFeedback $feedback): bool
     {
         // Same rules as resolve
         return $this->resolve($user, $feedback);
@@ -132,7 +132,7 @@ final class FeedbackPolicy
     /**
      * Determine whether the user can reopen feedbacks.
      */
-    public function reopen(User $user, Feedback $feedback): bool
+    public function reopen(User $user, GeneralFeedback $feedback): bool
     {
         // User can reopen feedback if:
         // 1. They are an admin/moderator
@@ -178,7 +178,7 @@ final class FeedbackPolicy
     /**
      * Check if user can access the feedbackable entity.
      */
-    private function canAccessFeedbackable(User $user, Feedback $feedback): bool
+    private function canAccessFeedbackable(User $user, GeneralFeedback $feedback): bool
     {
         $feedbackable = $feedback->feedbackable;
 
@@ -202,7 +202,7 @@ final class FeedbackPolicy
     /**
      * Check if user can manage feedback on the feedbackable entity.
      */
-    private function canManageFeedbackable(User $user, Feedback $feedback): bool
+    private function canManageFeedbackable(User $user, GeneralFeedback $feedback): bool
     {
         $feedbackable = $feedback->feedbackable;
 

@@ -79,7 +79,7 @@ final class AppServiceProvider extends ServiceProvider
             Css::make('videoRecorderCss', __DIR__ . '/../../resources/css/components/video-recorder.css')
                 ->loadedOnRequest(),
 
-            // Js::make('editorJs', __DIR__ . '/../../public/build/assets/index-C9DEfZiz.js')->loadedOnRequest(),
+            Js::make('alpinesortable', __DIR__ . '/../../resources/js/dist/components/alpine-sortable.js'),
             // Js::make('editorJs', __DIR__ . '/../../resources/js/components/editorjs/index.js'),
         ]);
 

@@ -17,6 +17,7 @@ export default defineConfig({
                 'resources/css/components/mentionable-text.css',
                 'resources/css/components/voice-recorder.css',
                 'resources/css/components/video-recorder.css',
+                // 'resources/js/dist/components/alpine-sortable.js',
             ],
             refresh: [
                 ...refreshPaths,

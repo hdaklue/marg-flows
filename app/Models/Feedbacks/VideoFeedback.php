@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Models;
+namespace App\Models\Feedbacks;
 
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
+use App\Models\Acknowledgement;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
