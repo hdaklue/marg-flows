@@ -7,6 +7,7 @@
     'availableColumns' => [],
     'class' => '',
     'ariaLabel' => '',
+    'sortEnabled' => false,
 ])
 
 @php
@@ -72,7 +73,8 @@ $itemClasses = $baseClasses . ' ' . $colors['border'] . ' ' . $colors['bg'] . ' 
         </div>
         
         <div class="flex items-center space-x-1 md:space-x-2">
-            <!-- Mobile-only drag handle -->
+            <!-- Mobile-only drag handle (only shown when sorting is enabled) -->
+            @if($sortEnabled)
             <div x-sortable:handle
                 class="flex items-center justify-center w-12 h-12 transition-all duration-200 rounded-lg opacity-100 sortable-handle cursor-grab touch-manipulation hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-sky-500 active:cursor-grabbing dark:hover:bg-zinc-600 md:hidden {{ $colors['handle'] }}"
                 aria-label="Drag handle for {{ $title }}">
@@ -80,12 +82,13 @@ $itemClasses = $baseClasses . ' ' . $colors['border'] . ' ' . $colors['bg'] . ' 
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
                 </svg>
             </div>
+            @endif
         </div>
     </div>
 
     <!-- Screen reader only action descriptions -->
     <div id="task-{{ $itemId }}-actions" class="sr-only">
-        Available actions: Drag to reorder tasks. On mobile: Swipe to show move options.
+        Available actions: @if($sortEnabled)Drag to reorder tasks. @endif@if($availableColumns)On mobile: Swipe to show move options.@endif
     </div>
 
     @if($availableColumns)

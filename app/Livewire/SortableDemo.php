@@ -83,141 +83,155 @@ final class SortableDemo extends Component
                 'id' => 'todos',
                 'name' => 'Todo',
                 'color' => 'zinc',
-                'property' => 'todos'
+                'property' => 'todos',
             ],
             [
-                'id' => 'in-progress', 
+                'id' => 'in-progress',
                 'name' => 'In Progress',
                 'color' => 'amber',
-                'property' => 'inProgress'
+                'property' => 'inProgress',
             ],
             [
                 'id' => 'done',
-                'name' => 'Done', 
+                'name' => 'Done',
                 'color' => 'emerald',
-                'property' => 'done'
-            ]
+                'property' => 'done',
+            ],
         ];
     }
 
     public function getAvailableColumnsFor(string $currentColumnId): array
     {
         return collect($this->columns)
-            ->reject(fn($column) => $column['id'] === $currentColumnId)
+            ->reject(fn ($column) => $column['id'] === $currentColumnId)
             ->values()
             ->toArray();
     }
 
-    public function moveToColumn(string $itemId, string $targetColumnId): void
+    public function isSortingEnabled(): bool
     {
-        // Find the item in all columns
-        $sourceColumn = null;
-        $item = null;
-        
-        foreach ($this->columns as $column) {
-            $property = $column['property'];
-            $foundItem = collect($this->$property)->firstWhere('id', $itemId);
-            if ($foundItem) {
-                $sourceColumn = $column;
-                $item = $foundItem;
-                break;
-            }
-        }
-        
-        if (!$item || !$sourceColumn) {
-            logger()->warning('moveToColumn: Item not found', ['itemId' => $itemId]);
-            return;
-        }
-        
-        // Find target column
-        $targetColumn = collect($this->columns)->firstWhere('id', $targetColumnId);
-        if (!$targetColumn) {
-            logger()->warning('moveToColumn: Target column not found', ['targetColumnId' => $targetColumnId]);
-            return;
-        }
-        
-        // Remove from source
-        $sourceProperty = $sourceColumn['property'];
-        $this->$sourceProperty = collect($this->$sourceProperty)
-            ->reject(fn($i) => $i['id'] === $itemId)
-            ->values()
-            ->toArray();
-        
-        // Update status and add to target
-        $item['status'] = $this->getStatusFromProperty($targetColumn['property']);
-        $targetProperty = $targetColumn['property'];
-        $this->$targetProperty[] = $item;
-        
-        logger()->info('moveToColumn completed', [
-            'itemId' => $itemId,
-            'from' => $sourceColumn['id'],
-            'to' => $targetColumnId,
-            'new_status' => $item['status']
-        ]);
+        // You can customize this logic based on your needs
+        // For now, sorting is disabled by default as per the JavaScript configuration
+        return false;
     }
 
-    #[On('sortable:sort')]
-    public function updateSort($payload)
+    public function onSort(array $itemIds, ?string $from = null, ?string $to = null): mixed
     {
-
-        $itemIds = $args[0] ?? [];
-        $eventData = $args[1] ?? null;
-
-        logger()->info('updateSort called', [
-            'itemIds' => $payload['items'],
-            'eventData' => $eventData,
-            // 'args_count' => count($args),
-        ]);
-
-        try {
-            $this->handleSort($itemIds, $eventData);
-        } catch (Exception $e) {
-            logger()->error('updateSort failed', [
-                'error' => $e->getMessage(),
-                'itemIds' => $itemIds,
-                'eventData' => $eventData,
-            ]);
-            $this->addError('sort', 'Failed to update sort order: ' . $e->getMessage());
-        }
+        return true;
     }
 
-    public function onSort(array $itemIds, ?string $from = null, ?string $to = null): array
-    {
-        logger()->info('onSort called', [
-            'itemIds' => $itemIds,
-            'from' => $from,
-            'to' => $to,
-        ]);
+    // public function moveToColumn(string $itemId, string $targetColumnId): void
+    // {
+    //     // Find the item in all columns
+    //     $sourceColumn = null;
+    //     $item = null;
 
-        // Handle cross-group sorting
-        if ($from !== null && $to !== null && $from !== $to) {
-            return $this->handleCrossGroupMove($itemIds, $from, $to);
-        }
+    //     foreach ($this->columns as $column) {
+    //         $property = $column['property'];
+    //         $foundItem = collect($this->$property)->firstWhere('id', $itemId);
+    //         if ($foundItem) {
+    //             $sourceColumn = $column;
+    //             $item = $foundItem;
+    //             break;
+    //         }
+    //     }
 
-        // Handle same-group sorting
-        $property = $this->determinePropertyFromContainer($to ?? $from ?? 'todos');
+    //     if (! $item || ! $sourceColumn) {
+    //         logger()->warning('moveToColumn: Item not found', ['itemId' => $itemId]);
 
-        logger()->info('onSort determined property', [
-            'property' => $property,
-            'current_data' => $this->$property ?? null,
-        ]);
+    //         return;
+    //     }
 
-        if ($property) {
-            $oldData = $this->$property;
-            $this->$property = $this->reorderItems($this->$property, $itemIds);
+    //     // Find target column
+    //     $targetColumn = collect($this->columns)->firstWhere('id', $targetColumnId);
+    //     if (! $targetColumn) {
+    //         logger()->warning('moveToColumn: Target column not found', ['targetColumnId' => $targetColumnId]);
 
-            logger()->info('onSort completed', [
-                'property' => $property,
-                'old_data' => $oldData,
-                'new_data' => $this->$property,
-            ]);
+    //         return;
+    //     }
 
-            return $this->$property;
-        }
+    //     // Remove from source
+    //     $sourceProperty = $sourceColumn['property'];
+    //     $this->$sourceProperty = collect($this->$sourceProperty)
+    //         ->reject(fn ($i) => $i['id'] === $itemId)
+    //         ->values()
+    //         ->toArray();
 
-        logger()->error('onSort failed - unable to determine property');
-        throw new RuntimeException('Unable to determine which property to sort');
-    }
+    //     // Update status and add to target
+    //     $item['status'] = $this->getStatusFromProperty($targetColumn['property']);
+    //     $targetProperty = $targetColumn['property'];
+    //     $this->$targetProperty[] = $item;
+
+    //     logger()->info('moveToColumn completed', [
+    //         'itemId' => $itemId,
+    //         'from' => $sourceColumn['id'],
+    //         'to' => $targetColumnId,
+    //         'new_status' => $item['status'],
+    //     ]);
+    // }
+
+    // #[On('sortable:sort')]
+    // public function updateSort($payload)
+    // {
+
+    //     $itemIds = $args[0] ?? [];
+    //     $eventData = $args[1] ?? null;
+
+    //     logger()->info('updateSort called', [
+    //         'itemIds' => $payload['items'],
+    //         'eventData' => $eventData,
+    //         // 'args_count' => count($args),
+    //     ]);
+
+    //     try {
+    //         $this->handleSort($itemIds, $eventData);
+    //     } catch (Exception $e) {
+    //         logger()->error('updateSort failed', [
+    //             'error' => $e->getMessage(),
+    //             'itemIds' => $itemIds,
+    //             'eventData' => $eventData,
+    //         ]);
+    //         $this->addError('sort', 'Failed to update sort order: ' . $e->getMessage());
+    //     }
+    // }
+
+    // public function onSort(array $itemIds, ?string $from = null, ?string $to = null): array
+    // {
+    //     logger()->info('onSort called', [
+    //         'itemIds' => $itemIds,
+    //         'from' => $from,
+    //         'to' => $to,
+    //     ]);
+
+    //     // Handle cross-group sorting
+    //     if ($from !== null && $to !== null && $from !== $to) {
+    //         return $this->handleCrossGroupMove($itemIds, $from, $to);
+    //     }
+
+    //     // Handle same-group sorting
+    //     $property = $this->determinePropertyFromContainer($to ?? $from ?? 'todos');
+
+    //     logger()->info('onSort determined property', [
+    //         'property' => $property,
+    //         'current_data' => $this->$property ?? null,
+    //     ]);
+
+    //     if ($property) {
+    //         $oldData = $this->$property;
+    //         $this->$property = $this->reorderItems($this->$property, $itemIds);
+
+    //         logger()->info('onSort completed', [
+    //             'property' => $property,
+    //             'old_data' => $oldData,
+    //             'new_data' => $this->$property,
+    //         ]);
+
+    //         return $this->$property;
+    //     }
+
+    //     logger()->error('onSort failed - unable to determine property');
+    //     throw new RuntimeException('Unable to determine which property to sort');
+    // }
 
     public function onCrossGroupSort(array $itemIds, string $from, string $to): array
     {
@@ -228,56 +242,6 @@ final class SortableDemo extends Component
         ]);
 
         return $this->handleCrossGroupMove($itemIds, $from, $to);
-    }
-
-    private function handleCrossGroupMove(array $itemIds, string $from, string $to): array
-    {
-        $fromProperty = $this->getPropertyFromContainer($from);
-        $toProperty = $this->getPropertyFromContainer($to);
-
-        logger()->info('handleCrossGroupMove properties determined', [
-            'fromProperty' => $fromProperty,
-            'toProperty' => $toProperty,
-            'from_container' => $from,
-            'to_container' => $to,
-        ]);
-
-        $movedItemId = $itemIds[0] ?? null;
-        if (!$movedItemId) {
-            logger()->error('handleCrossGroupMove failed - no item ID');
-            throw new InvalidArgumentException('No item ID provided for cross-group sort');
-        }
-
-        logger()->info('handleCrossGroupMove moving item', [
-            'itemId' => $movedItemId,
-            'from' => $fromProperty,
-            'to' => $toProperty,
-        ]);
-
-        $movedItem = $this->findAndRemoveItem($fromProperty, $movedItemId);
-
-        if ($movedItem) {
-            $oldStatus = $movedItem['status'];
-            $movedItem['status'] = $this->getStatusFromProperty($toProperty);
-            $this->addItemToProperty($toProperty, $movedItem, -1);
-
-            logger()->info('handleCrossGroupMove completed', [
-                'itemId' => $movedItemId,
-                'old_status' => $oldStatus,
-                'new_status' => $movedItem['status'],
-                'from_property' => $fromProperty,
-                'to_property' => $toProperty,
-                'from_count' => count($this->$fromProperty),
-                'to_count' => count($this->$toProperty),
-            ]);
-        } else {
-            logger()->error('handleCrossGroupMove failed - item not found', [
-                'itemId' => $movedItemId,
-                'fromProperty' => $fromProperty,
-            ]);
-        }
-
-        return $this->$toProperty;
     }
 
     public function addTodo(): void
@@ -346,6 +310,56 @@ final class SortableDemo extends Component
         ];
     }
 
+    private function handleCrossGroupMove(array $itemIds, string $from, string $to): array
+    {
+        $fromProperty = $this->getPropertyFromContainer($from);
+        $toProperty = $this->getPropertyFromContainer($to);
+
+        logger()->info('handleCrossGroupMove properties determined', [
+            'fromProperty' => $fromProperty,
+            'toProperty' => $toProperty,
+            'from_container' => $from,
+            'to_container' => $to,
+        ]);
+
+        $movedItemId = $itemIds[0] ?? null;
+        if (! $movedItemId) {
+            logger()->error('handleCrossGroupMove failed - no item ID');
+            throw new InvalidArgumentException('No item ID provided for cross-group sort');
+        }
+
+        logger()->info('handleCrossGroupMove moving item', [
+            'itemId' => $movedItemId,
+            'from' => $fromProperty,
+            'to' => $toProperty,
+        ]);
+
+        $movedItem = $this->findAndRemoveItem($fromProperty, $movedItemId);
+
+        if ($movedItem) {
+            $oldStatus = $movedItem['status'];
+            $movedItem['status'] = $this->getStatusFromProperty($toProperty);
+            $this->addItemToProperty($toProperty, $movedItem, -1);
+
+            logger()->info('handleCrossGroupMove completed', [
+                'itemId' => $movedItemId,
+                'old_status' => $oldStatus,
+                'new_status' => $movedItem['status'],
+                'from_property' => $fromProperty,
+                'to_property' => $toProperty,
+                'from_count' => count($this->$fromProperty),
+                'to_count' => count($this->$toProperty),
+            ]);
+        } else {
+            logger()->error('handleCrossGroupMove failed - item not found', [
+                'itemId' => $movedItemId,
+                'fromProperty' => $fromProperty,
+            ]);
+        }
+
+        return $this->$toProperty;
+    }
+
     private function determinePropertyFromContainer(string $containerData): string
     {
         return $this->getPropertyFromContainer($containerData);
@@ -371,16 +385,16 @@ final class SortableDemo extends Component
         usort($currentItems, function ($a, $b) use ($sortedIds) {
             $idA = $a['id'] ?? '';
             $idB = $b['id'] ?? '';
-            
+
             $posA = array_search($idA, $sortedIds);
             $posB = array_search($idB, $sortedIds);
-            
+
             $posA = $posA !== false ? $posA : 9999;
             $posB = $posB !== false ? $posB : 9999;
-            
+
             return $posA <=> $posB;
         });
-        
+
         return $currentItems;
     }
 

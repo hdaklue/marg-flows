@@ -131,7 +131,8 @@
                     :title="$column['name']" 
                     :count="count($this->{$column['property']})" 
                     :color="$column['color']" 
-                    :wire-key="$column['id']">
+                    :wire-key="$column['id']"
+                    :sort-enabled="$this->isSortingEnabled()">
                     
                     @foreach ($this->{$column['property']} as $task)
                         <x-sortable.item 
@@ -141,6 +142,7 @@
                             :color="$column['color']"
                             :current-column="$column['id']"
                             :available-columns="$this->getAvailableColumnsFor($column['id'])"
+                            :sort-enabled="$this->isSortingEnabled()"
                         />
                     @endforeach
                     

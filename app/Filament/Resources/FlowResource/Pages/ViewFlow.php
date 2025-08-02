@@ -51,6 +51,11 @@ final class ViewFlow extends ViewRecord
         return $this->record->stages;
     }
 
+    public function onSort(array $itemIds, ?string $from = null, ?string $to = null): mixed
+    {
+        return true;
+    }
+
     #[On('sortable:sort')]
     public function updateSort($payload)
     {

@@ -152,9 +152,48 @@ document.addEventListener('alpine:init', () => {
     });
 
     // x-sortable-group creates new Sortable instances
-    Alpine.directive('sortable-group', (el, { expression }) => {
+    Alpine.directive('sortable-group', (el, { expression }, { evaluate }) => {
         // Cache group name lookup for performance
         const groupName = el.closest('[x-sortable]')?.getAttribute('x-sortable') || 'shared';
+        
+        // Parse configuration from expression to determine sorting behavior
+        let allowWithinGroupSort = false; // Disabled by default
+        
+        if (expression) {
+            try {
+                // Handle simple string patterns first
+                if (expression === 'sort' || expression === 'sort:true') {
+                    allowWithinGroupSort = true;
+                } else if (expression.includes('sort')) {
+                    allowWithinGroupSort = true;
+                } else if (expression.startsWith('{') || expression.includes('sort')) {
+                    // Try to evaluate as Alpine expression or object
+                    const config = evaluate(expression) || {};
+                    if (typeof config === 'object') {
+                        // Handle object configuration: {sort: true}, {allowSort: true}, {sortWithinGroup: true}
+                        if (config.sort === true || config.allowSort === true || config.sortWithinGroup === true) {
+                            allowWithinGroupSort = true;
+                        }
+                    } else if (typeof config === 'boolean') {
+                        // Handle direct boolean evaluation: sort: true
+                        allowWithinGroupSort = config;
+                    }
+                }
+            } catch (e) {
+                // If evaluation fails, fall back to string pattern matching
+                if (expression.includes('sort') && !expression.includes('sort:false') && !expression.includes('false')) {
+                    allowWithinGroupSort = true;
+                }
+            }
+        }
+        
+        // Also check for data attributes as alternative configuration methods
+        if (el.hasAttribute('data-allow-sort') && el.getAttribute('data-allow-sort') === 'true') {
+            allowWithinGroupSort = true;
+        }
+        if (el.hasAttribute('data-sort') && el.getAttribute('data-sort') === 'true') {
+            allowWithinGroupSort = true;
+        }
 
         // Clean up existing instance if it exists
         const existingInstance = sortableInstances.get(el);
@@ -166,6 +205,7 @@ document.addEventListener('alpine:init', () => {
         // Create new Sortable instance with conditional touch handling
         const sortableConfig = {
             group: groupName, // Use group name from parent x-sortable
+            sort: allowWithinGroupSort, // Control within-group sorting
             animation: 200,
             ghostClass: 'sortable-ghost',
             chosenClass: 'sortable-chosen',
@@ -234,6 +274,14 @@ document.addEventListener('alpine:init', () => {
                 
                 // Restore page scrolling
                 document.body.style.overflow = '';
+                
+                // Check if there was an actual change (position change or cross-group move)
+                const actualChange = evt.from !== evt.to || evt.oldIndex !== evt.newIndex;
+                
+                // Only proceed if there was an actual change
+                if (!actualChange) {
+                    return; // No change occurred, don't dispatch events
+                }
                 
                 // Add success haptic feedback for successful drops
                 if (navigator.vibrate && evt.from !== evt.to) {

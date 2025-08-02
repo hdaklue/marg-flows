@@ -6,6 +6,7 @@
     'count' => null,
     'color' => 'zinc',
     'wireKey' => null,
+    'sortEnabled' => false,
 ])
 
 @php
@@ -42,9 +43,10 @@ $baseClasses = 'min-w-[85vw] flex-shrink-0 snap-center rounded-xl border border-
     @endif
     
     <div 
-        x-sortable-group 
+        x-sortable-group{{ $sortEnabled ? '="sort"' : '' }}
         id="{{ $id }}" 
         data-container="{{ $container ?: $id }}"
+        data-sort-enabled="{{ $sortEnabled ? 'true' : 'false' }}"
         {{ $attributes->merge(['class' => "list-group min-h-[200px] h-full max-h-[calc(100vh-200px)] overflow-y-auto space-y-2 p-3 md:space-y-3 md:p-4 scroll-smooth snap-y snap-mandatory $class"]) }}
         @if($wireKey) wire:key="{{ $wireKey }}" @endif
     >
