@@ -170,7 +170,8 @@ document.addEventListener('alpine:init', () => {
             ghostClass: 'sortable-ghost',
             chosenClass: 'sortable-chosen',
             dragClass: 'sortable-drag',
-            handle: '.sortable-handle', // Only drag by handle if present
+            // Handle only on touch devices, entire item draggable on desktop
+            ...(isTouchDevice() && { handle: '.sortable-handle' }),
             
             // Performance optimizations
             preventOnFilter: false,
@@ -404,7 +405,6 @@ document.addEventListener('alpine:init', () => {
     Alpine.directive('swipe', (el, { expression }, { evaluate, cleanup }) => {
         // Only initialize on touch devices to avoid conflicts
         if (!isTouchDevice()) {
-            console.log('Skipping Hammer.js initialization on non-touch device');
             return () => {}; // Return empty cleanup function
         }
 
