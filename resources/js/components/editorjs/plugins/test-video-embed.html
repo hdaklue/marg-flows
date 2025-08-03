@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEmbed Plugin Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #editor { border: 1px solid #ccc; padding: 20px; margin: 20px 0; }
+        .test-results { background: #f5f5f5; padding: 15px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>VideoEmbed Plugin Test</h1>
+    
+    <div id="editor"></div>
+    
+    <button onclick="saveData()">Save Data</button>
+    <button onclick="loadTestData()">Load Test Data</button>
+    
+    <div class="test-results">
+        <h3>Test URLs (try pasting these):</h3>
+        <ul>
+            <li><code>https://www.youtube.com/watch?v=dQw4w9WgXcQ</code></li>
+            <li><code>https://youtu.be/dQw4w9WgXcQ</code></li>
+            <li><code>https://www.youtube.com/embed/dQw4w9WgXcQ</code></li>
+            <li><code>https://m.youtube.com/watch?v=dQw4w9WgXcQ</code></li>
+        </ul>
+        <p><strong>Instructions:</strong> Copy any URL above and paste it directly into the editor. The VideoEmbed block should automatically be created!</p>
+    </div>
+    
+    <div class="test-results">
+        <h3>Output:</h3>
+        <pre id="output"></pre>
+    </div>
+
+    <script type="module">
+        import VideoEmbed from './video-embed.js';
+        
+        const editor = new EditorJS({
+            holder: 'editor',
+            tools: {
+                videoEmbed: {
+                    class: VideoEmbed,
+                    config: {
+                        placeholder: 'Paste a YouTube URL...',
+                        useVideoJS: true, // Enable Video.js for testing
+                        allowDirectUrls: true
+                    }
+                }
+            },
+            data: {
+                blocks: []
+            }
+        });
+
+        window.saveData = async function() {
+            try {
+                const outputData = await editor.save();
+                document.getElementById('output').textContent = JSON.stringify(outputData, null, 2);
+                console.log('Article data: ', outputData);
+            } catch (error) {
+                console.log('Saving failed: ', error);
+            }
+        };
+
+        window.loadTestData = async function() {
+            const testData = {
+                blocks: [
+                    {
+                        type: "videoEmbed",
+                        data: {
+                            url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                            videoId: "dQw4w9WgXcQ",
+                            embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                            type: "youtube",
+                            caption: "Test video caption"
+                        }
+                    }
+                ]
+            };
+            
+            try {
+                await editor.render(testData);
+                console.log('Test data loaded');
+            } catch (error) {
+                console.log('Loading failed: ', error);
+            }
+        };
+    </script>
+</body>
+</html>

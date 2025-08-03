@@ -1,4 +1,4 @@
-<div class="w-full p-4 mx-auto md:p-6">
+<div id="snap-to" class="max-w-full p-4 mx-auto md:p-8 lg:p-12">
     {{-- <div class="mb-6 md:mb-8">
         <h1 class="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100 md:text-3xl">
             Mobile Kanban Board
@@ -6,7 +6,6 @@
         <p class="text-sm text-zinc-600 dark:text-zinc-400 md:text-base">
             Drag and drop items between columns. Optimized for mobile with touch-friendly interactions.
         </p>
-
         <!-- Keyboard shortcuts help -->
         <div class="mt-2" x-data="{ showKeyboardHelp: false }" wire:ignore>
             <button @click="showKeyboardHelp = !showKeyboardHelp"
@@ -72,9 +71,9 @@
     </div> --}}
 
     <!-- Horizontal scrolling columns for both mobile and desktop -->
-    <x-sortable.container group-name="todo" class="w-full">
+    <x-sortable group-name="todo" class="w-full">
         <!-- Column container with scroll snap -->
-        <div class="flex gap-6 pb-4 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide"
+        <div id="scrollable" class="flex gap-6 pb-4 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide"
             x-data="{
                 currentColumnIndex: 0,
                 totalColumns: {{ count($this->columns) }},
@@ -221,282 +220,282 @@
                 </x-sortable.group>
             @endforeach
         </div>
-    </x-sortable.container>
+        </x-sortable.container>
 
-    <!-- Pure JS modal is injected by alpine-sortable.js -->
+        <!-- Pure JS modal is injected by alpine-sortable.js -->
 
-    <style>
-        /* Enhanced mobile-first drag states */
-        .sortable-ghost {
-            opacity: 0.3;
-            transform: scale(0.95);
-            transition: all 0.2s ease;
-        }
+        <style>
+            /* Enhanced mobile-first drag states */
+            .sortable-ghost {
+                opacity: 0.3;
+                transform: scale(0.95);
+                transition: all 0.2s ease;
+            }
 
-        .sortable-chosen {
-            transform: scale(1.05);
-            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
-            z-index: 999;
-            transition: all 0.2s ease;
-        }
-
-        .sortable-drag {
-            transform: rotate(2deg) scale(1.05);
-            z-index: 9999;
-            opacity: 0.9;
-            transition: all 0.2s ease;
-        }
-
-        .sortable-placeholder {
-            background: theme('colors.sky.100');
-            border: 2px dashed theme('colors.sky.300');
-            border-radius: 0.75rem;
-            margin: 0.5rem 0;
-            min-height: 60px;
-            transition: all 0.2s ease;
-        }
-
-        .dark .sortable-placeholder {
-            background: theme('colors.sky.900/20');
-            border-color: theme('colors.sky.700');
-        }
-
-        /* Mobile-specific enhancements */
-        @media (max-width: 768px) {
             .sortable-chosen {
-                transform: scale(1.08);
-                box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.2);
+                transform: scale(1.05);
+                box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+                z-index: 999;
+                transition: all 0.2s ease;
             }
 
             .sortable-drag {
-                transform: rotate(1deg) scale(1.08);
+                transform: rotate(2deg) scale(1.05);
+                z-index: 9999;
+                opacity: 0.9;
+                transition: all 0.2s ease;
             }
 
             .sortable-placeholder {
-                min-height: 70px;
-                border-width: 3px;
+                background: theme('colors.sky.100');
+                border: 2px dashed theme('colors.sky.300');
+                border-radius: 0.75rem;
+                margin: 0.5rem 0;
+                min-height: 60px;
+                transition: all 0.2s ease;
             }
 
-            /* Mobile column scroll snap */
-            .snap-x {
-                scroll-snap-type: x mandatory;
+            .dark .sortable-placeholder {
+                background: theme('colors.sky.900/20');
+                border-color: theme('colors.sky.700');
             }
 
-            .snap-center {
-                scroll-snap-align: center;
+            /* Mobile-specific enhancements */
+            @media (max-width: 768px) {
+                .sortable-chosen {
+                    transform: scale(1.08);
+                    box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.2);
+                }
+
+                .sortable-drag {
+                    transform: rotate(1deg) scale(1.08);
+                }
+
+                .sortable-placeholder {
+                    min-height: 70px;
+                    border-width: 3px;
+                }
+
+                /* Mobile column scroll snap */
+                .snap-x {
+                    scroll-snap-type: x mandatory;
+                }
+
+                .snap-center {
+                    scroll-snap-align: center;
+                }
+
+                /* Touch-friendly scrollbars */
+                .overflow-x-auto::-webkit-scrollbar {
+                    height: 6px;
+                }
+
+                .overflow-x-auto::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+
+                .overflow-x-auto::-webkit-scrollbar-thumb {
+                    background: theme('colors.zinc.300');
+                    border-radius: 3px;
+                }
+
+                .dark .overflow-x-auto::-webkit-scrollbar-thumb {
+                    background: theme('colors.zinc.600');
+                }
+
+                /* Smooth scrolling for mobile */
+                .scroll-smooth {
+                    scroll-behavior: smooth;
+                }
+
+                /* Enhanced mobile touch targets */
+                .touch-manipulation {
+                    touch-action: manipulation;
+                    -webkit-tap-highlight-color: transparent;
+                }
+
+                /* Mobile column width consistency */
+                .min-w-\[85vw\] {
+                    min-width: 85vw;
+                }
             }
 
-            /* Touch-friendly scrollbars */
-            .overflow-x-auto::-webkit-scrollbar {
-                height: 6px;
+            /* Performance optimization for 60fps animations */
+            .sortable-ghost,
+            .sortable-chosen,
+            .sortable-drag {
+                will-change: transform, opacity;
+                backface-visibility: hidden;
             }
 
-            .overflow-x-auto::-webkit-scrollbar-track {
+            /* Enhanced column scrolling */
+            .list-group {
+                /* Custom scrollbar for better UX */
+                scrollbar-width: thin;
+                scrollbar-color: theme('colors.zinc.300') transparent;
+            }
+
+            .list-group::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .list-group::-webkit-scrollbar-track {
                 background: transparent;
             }
 
-            .overflow-x-auto::-webkit-scrollbar-thumb {
+            .list-group::-webkit-scrollbar-thumb {
                 background: theme('colors.zinc.300');
                 border-radius: 3px;
             }
 
-            .dark .overflow-x-auto::-webkit-scrollbar-thumb {
+            .list-group::-webkit-scrollbar-thumb:hover {
+                background: theme('colors.zinc.400');
+            }
+
+            .dark .list-group {
+                scrollbar-color: theme('colors.zinc.600') transparent;
+            }
+
+            .dark .list-group::-webkit-scrollbar-thumb {
                 background: theme('colors.zinc.600');
             }
 
-            /* Smooth scrolling for mobile */
-            .scroll-smooth {
-                scroll-behavior: smooth;
+            .dark .list-group::-webkit-scrollbar-thumb:hover {
+                background: theme('colors.zinc.500');
             }
 
-            /* Enhanced mobile touch targets */
-            .touch-manipulation {
-                touch-action: manipulation;
-                -webkit-tap-highlight-color: transparent;
+            /* Smooth scroll snap behavior */
+            .snap-y {
+                scroll-snap-type: y mandatory;
             }
 
-            /* Mobile column width consistency */
-            .min-w-\[85vw\] {
-                min-width: 85vw;
-            }
-        }
-
-        /* Performance optimization for 60fps animations */
-        .sortable-ghost,
-        .sortable-chosen,
-        .sortable-drag {
-            will-change: transform, opacity;
-            backface-visibility: hidden;
-        }
-
-        /* Enhanced column scrolling */
-        .list-group {
-            /* Custom scrollbar for better UX */
-            scrollbar-width: thin;
-            scrollbar-color: theme('colors.zinc.300') transparent;
-        }
-
-        .list-group::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .list-group::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .list-group::-webkit-scrollbar-thumb {
-            background: theme('colors.zinc.300');
-            border-radius: 3px;
-        }
-
-        .list-group::-webkit-scrollbar-thumb:hover {
-            background: theme('colors.zinc.400');
-        }
-
-        .dark .list-group {
-            scrollbar-color: theme('colors.zinc.600') transparent;
-        }
-
-        .dark .list-group::-webkit-scrollbar-thumb {
-            background: theme('colors.zinc.600');
-        }
-
-        .dark .list-group::-webkit-scrollbar-thumb:hover {
-            background: theme('colors.zinc.500');
-        }
-
-        /* Smooth scroll snap behavior */
-        .snap-y {
-            scroll-snap-type: y mandatory;
-        }
-
-        .snap-start {
-            scroll-snap-align: start;
-        }
-
-        /* Ensure scroll snap works with spacing */
-        .list-group>*+* {
-            scroll-snap-stop: always;
-        }
-
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-
-            .sortable-ghost,
-            .sortable-chosen,
-            .sortable-drag,
-            .sortable-placeholder {
-                transform: none !important;
-                transition: none !important;
-            }
-        }
-
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            .sortable-placeholder {
-                border-width: 3px;
-                border-style: solid;
-            }
-        }
-
-        /* Mobile handle feedback states */
-        .handle-active {
-            background-color: theme('colors.zinc.200') !important;
-            transform: scale(0.95);
-        }
-
-        .dark .handle-active {
-            background-color: theme('colors.zinc.600') !important;
-        }
-
-        .handle-long-press {
-            background-color: theme('colors.sky.200') !important;
-            transform: scale(1.1);
-            box-shadow: 0 0 0 2px theme('colors.sky.400');
-        }
-
-        .dark .handle-long-press {
-            background-color: theme('colors.sky.700') !important;
-            box-shadow: 0 0 0 2px theme('colors.sky.500');
-        }
-
-        /* Dragging state for items */
-        .dragging {
-            z-index: 1000;
-            pointer-events: none;
-        }
-
-        /* Loading states for better UX */
-        .sortable-loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        .sortable-loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid theme('colors.zinc.200');
-            border-top: 2px solid theme('colors.sky.500');
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
+            .snap-start {
+                scroll-snap-align: start;
             }
 
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Screen reader only content */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        /* Enhanced focus styles for accessibility */
-        .focus\:ring-sky-500:focus {
-            ring-color: theme('colors.sky.500');
-        }
-
-        .focus\:ring-red-500:focus {
-            ring-color: theme('colors.red.500');
-        }
-
-        /* High contrast focus indicators */
-        @media (prefers-contrast: high) {
-
-            .focus\:ring-2:focus,
-            .focus\:ring-4:focus {
-                ring-width: 3px;
-                ring-color: #000;
+            /* Ensure scroll snap works with spacing */
+            .list-group>*+* {
+                scroll-snap-stop: always;
             }
 
-            .dark .focus\:ring-2:focus,
-            .dark .focus\:ring-4:focus {
-                ring-color: #fff;
-            }
-        }
+            /* Reduced motion support */
+            @media (prefers-reduced-motion: reduce) {
 
-        /* Keyboard navigation improvements */
-        .list-group-item:focus-within {
-            ring-width: 2px;
-            ring-color: theme('colors.sky.500');
-            ring-offset-width: 2px;
-        }
-    </style>
+                .sortable-ghost,
+                .sortable-chosen,
+                .sortable-drag,
+                .sortable-placeholder {
+                    transform: none !important;
+                    transition: none !important;
+                }
+            }
+
+            /* High contrast mode support */
+            @media (prefers-contrast: high) {
+                .sortable-placeholder {
+                    border-width: 3px;
+                    border-style: solid;
+                }
+            }
+
+            /* Mobile handle feedback states */
+            .handle-active {
+                background-color: theme('colors.zinc.200') !important;
+                transform: scale(0.95);
+            }
+
+            .dark .handle-active {
+                background-color: theme('colors.zinc.600') !important;
+            }
+
+            .handle-long-press {
+                background-color: theme('colors.sky.200') !important;
+                transform: scale(1.1);
+                box-shadow: 0 0 0 2px theme('colors.sky.400');
+            }
+
+            .dark .handle-long-press {
+                background-color: theme('colors.sky.700') !important;
+                box-shadow: 0 0 0 2px theme('colors.sky.500');
+            }
+
+            /* Dragging state for items */
+            .dragging {
+                z-index: 1000;
+                pointer-events: none;
+            }
+
+            /* Loading states for better UX */
+            .sortable-loading {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+
+            .sortable-loading::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 20px;
+                height: 20px;
+                margin: -10px 0 0 -10px;
+                border: 2px solid theme('colors.zinc.200');
+                border-top: 2px solid theme('colors.sky.500');
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* Screen reader only content */
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            /* Enhanced focus styles for accessibility */
+            .focus\:ring-sky-500:focus {
+                ring-color: theme('colors.sky.500');
+            }
+
+            .focus\:ring-red-500:focus {
+                ring-color: theme('colors.red.500');
+            }
+
+            /* High contrast focus indicators */
+            @media (prefers-contrast: high) {
+
+                .focus\:ring-2:focus,
+                .focus\:ring-4:focus {
+                    ring-width: 3px;
+                    ring-color: #000;
+                }
+
+                .dark .focus\:ring-2:focus,
+                .dark .focus\:ring-4:focus {
+                    ring-color: #fff;
+                }
+            }
+
+            /* Keyboard navigation improvements */
+            .list-group-item:focus-within {
+                ring-width: 2px;
+                ring-color: theme('colors.sky.500');
+                ring-offset-width: 2px;
+            }
+        </style>

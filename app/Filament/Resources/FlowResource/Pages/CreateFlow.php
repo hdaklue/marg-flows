@@ -59,6 +59,8 @@ final class CreateFlow extends CreateRecord
                             ->required(),
                         Textarea::make('description')
                             ->required(),
+                        ChunkedFileUpload::make('attachments')
+                            ->maxFiles(5),
 
                         // EditorJs::make('blocks')
                         //     ->required()

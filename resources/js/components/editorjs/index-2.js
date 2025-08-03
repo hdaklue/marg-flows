@@ -9,6 +9,7 @@ import DragDrop from 'editorjs-drag-drop';
 
 import HyperLink from 'editorjs-hyperlink';
 import Undo from 'editorjs-undo';
+import VideoEmbed from './plugins/video-embed.js';
 
 
 Alpine.data('editorJs', ({ livewireState, uploadUrl }) => ({
@@ -139,6 +140,13 @@ Alpine.data('editorJs', ({ livewireState, uploadUrl }) => ({
                 config: {
                     showLocaleOption: true,
                     locale: ['ar-AR', 'en-EN'],
+                }
+            },
+            videoEmbed: {
+                class: VideoEmbed,
+                config: {
+                    placeholder: 'Paste a YouTube URL...',
+                    allowDirectUrls: true
                 }
             },
         };

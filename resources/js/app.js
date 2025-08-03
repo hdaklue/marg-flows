@@ -18,14 +18,16 @@ import recorder from './components/voice-recorder';
 
 import anchor from "@alpinejs/anchor";
 import Hammer from 'hammerjs';
+import Draggabilly from 'draggabilly';
 import './dist/components/alpine-sortable';
 
 
 
 
 
-// Make Hammer.js available globally
+// Make Hammer.js and Draggabilly available globally
 window.Hammer = Hammer;
+window.Draggabilly = Draggabilly;
 window.ui = ui;
 
 

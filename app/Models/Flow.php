@@ -21,6 +21,7 @@ use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\FlowStatus;
+use App\Services\MentionService;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -150,6 +151,11 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     protected $attributes = [
         'status' => FlowStatus::ACTIVE->value,
     ];
+
+    public function getMentionables(): Collection
+    {
+        return (new MentionService)->getMentionables($this);
+    }
 
     public function systemRoleByName(string $name): Role
     {

@@ -16,7 +16,7 @@ final class Mention extends Model
 {
     use HasUlids, LivesInOriginalDB;
 
-    protected $append = ['mentionable', 'actor', 'mentioned'];
+    protected $with = ['mentionable', 'actor', 'mentioned'];
 
     public function mentionable(): MorphTo
     {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Contracts\Mentions;
 
 use App\Models\Mentions\Mention;
+use App\Services\MentionService;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
@@ -15,10 +16,8 @@ trait HasMentions
         return $this->morphMany(Mention::class, 'mentionable');
     }
 
-    public function getMentions(): Collection
+    public function getMentionables(): Collection
     {
-        return $this->mentions->map(function (Mention $mention) {
-            return $mention->mentionable;
-        });
+        return new MentionService()->getMentionables($this);
     }
 }

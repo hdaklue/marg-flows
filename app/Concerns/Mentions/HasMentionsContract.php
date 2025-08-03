@@ -11,5 +11,5 @@ interface HasMentionsContract
 {
     public function mentions(): MorphMany;
 
-    public function getMentions(): Collection;
+    public function getMentionables(): Collection;
 }

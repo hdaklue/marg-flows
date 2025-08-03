@@ -9,6 +9,7 @@ import HyperLink from 'editorjs-hyperlink';
 import Undo from 'editorjs-undo';
 import CommentTune from '../editorjs/plugins/comment-tune';
 import ResizableImage from '../editorjs/plugins/resizable-image';
+import VideoEmbed from '../editorjs/plugins/video-embed';
 
 
 export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null) {
@@ -293,6 +294,14 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         availableTargets: ['_blank', '_self'],
                         availableRels: ['author', 'noreferrer'],
                         validate: false,
+                    },
+                    tunes: ['commentTune']
+                },
+                videoEmbed: {
+                    class: VideoEmbed,
+                    config: {
+                        placeholder: 'Paste a YouTube URL...',
+                        allowDirectUrls: true
                     },
                     tunes: ['commentTune']
                 },
