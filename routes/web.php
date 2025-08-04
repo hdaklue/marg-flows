@@ -6,6 +6,8 @@ use App\Http\Controllers\AcceptInvitation;
 use App\Http\Controllers\ChunkedUploadController;
 use App\Http\Controllers\EditorJsImageDelete;
 use App\Http\Controllers\EditorJsUpload;
+use App\Http\Controllers\EditorJsVideoDelete;
+use App\Http\Controllers\EditorJsVideoUpload;
 use App\Livewire\PreviewAudio;
 use App\Livewire\PreviewImage;
 use App\Livewire\PreviewVideo;
@@ -36,6 +38,14 @@ Route::post('uploader/editorjs', EditorJsUpload::class)
 Route::delete('delete-image', EditorJsImageDelete::class)
     ->middleware(['auth'])
     ->name('editorjs.delete-image');
+
+// Video upload routes for EditorJS
+Route::post('upload-video', EditorJsVideoUpload::class)
+    ->middleware(['auth'])
+    ->name('editorjs.upload-video');
+Route::delete('delete-video', EditorJsVideoDelete::class)
+    ->middleware(['auth'])
+    ->name('editorjs.delete-video');
 
 // Chunked upload routes
 Route::post('chunked-upload', [ChunkedUploadController::class, 'store'])

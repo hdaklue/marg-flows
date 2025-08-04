@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 
 /**
@@ -23,6 +24,8 @@ final class ViewDocument extends ViewRecord
     protected static string $view = 'filament.resources.document-resource.pages.view';
 
     public ?array $data = [];
+
+    public ?string $maxContentWidth = 'full';
 
     public function getTitle(): string|Htmlable
     {
@@ -40,6 +43,14 @@ final class ViewDocument extends ViewRecord
     public function resolveRecord(int|string $key): Model
     {
         return DocumentManager::getDocument($key);
+    }
+
+    #[Computed]
+    public function relatedDocuments(): Collection
+    {
+        $documentable = $this->record->documentable;
+
+        return DocumentManager::getDocumentsForUser($documentable, filamentUser())->reject(fn ($doc) => $doc->getKey() === $this->record->getKey() && $doc->getMorphClass() === $this->record->getMorphClass());
     }
 
     public function form(Form $form): Form

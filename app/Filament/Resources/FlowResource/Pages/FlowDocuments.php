@@ -18,7 +18,6 @@ use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 /**
@@ -66,7 +65,6 @@ final class FlowDocuments extends Page implements HasForms
         ];
     }
 
-    #[Computed]
     public function pages(): Collection
     {
         return DocumentManager::getDocumentsForUser($this->flow, filamentUser());

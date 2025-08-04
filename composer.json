@@ -18,6 +18,7 @@
         "livewire/volt": "^1.7.0",
         "lorisleiva/laravel-actions": "^2.9",
         "mokhosh/filament-kanban": "^2.10",
+        "pbmedia/laravel-ffmpeg": "^8.7",
         "predis/predis": "^3.0",
         "rinvex/countries": "^9.0",
         "spatie/eloquent-sortable": "^4.5",

@@ -69,6 +69,7 @@ final class DocumentCard extends Component
         $this->authorize('update', $this->page);
 
         $this->page->update(['name' => $title]);
+        $this->name = $title;
 
         // Emit event to parent to refresh if needed
         $this->dispatch('page-updated', $this->pageId);

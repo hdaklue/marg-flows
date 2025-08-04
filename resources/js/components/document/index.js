@@ -10,6 +10,7 @@ import Undo from 'editorjs-undo';
 import CommentTune from '../editorjs/plugins/comment-tune';
 import ResizableImage from '../editorjs/plugins/resizable-image';
 import VideoEmbed from '../editorjs/plugins/video-embed';
+import VideoUpload from '../editorjs/plugins/video-upload';
 
 
 export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null) {
@@ -302,6 +303,22 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     config: {
                         placeholder: 'Paste a YouTube URL...',
                         allowDirectUrls: true
+                    },
+                    tunes: ['commentTune']
+                },
+                videoUpload: {
+                    class: VideoUpload,
+                    config: {
+                        endpoints: {
+                            byFile: '/upload-video',
+                            delete: '/delete-video'
+                        },
+                        additionalRequestHeaders: {
+                            'X-CSRF-TOKEN': csrf,
+                        },
+                        types: 'video/*',
+                        field: 'video',
+                        maxFileSize: 50 * 1024 * 1024 // 50MB
                     },
                     tunes: ['commentTune']
                 },

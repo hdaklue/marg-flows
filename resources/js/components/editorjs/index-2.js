@@ -10,6 +10,7 @@ import DragDrop from 'editorjs-drag-drop';
 import HyperLink from 'editorjs-hyperlink';
 import Undo from 'editorjs-undo';
 import VideoEmbed from './plugins/video-embed.js';
+import VideoUpload from './plugins/video-upload.js';
 
 
 Alpine.data('editorJs', ({ livewireState, uploadUrl }) => ({
@@ -147,6 +148,21 @@ Alpine.data('editorJs', ({ livewireState, uploadUrl }) => ({
                 config: {
                     placeholder: 'Paste a YouTube URL...',
                     allowDirectUrls: true
+                }
+            },
+            videoUpload: {
+                class: VideoUpload,
+                config: {
+                    endpoints: {
+                        byFile: '/upload-video',
+                        delete: '/delete-video'
+                    },
+                    additionalRequestHeaders: {
+                        'X-CSRF-TOKEN': csrf,
+                    },
+                    types: 'video/*',
+                    field: 'video',
+                    maxFileSize: 50 * 1024 * 1024 // 50MB
                 }
             },
         };
