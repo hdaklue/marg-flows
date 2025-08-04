@@ -3,9 +3,7 @@
  * Mimics ResizableImage structure for video file uploads with Video.js rendering
  */
 
-// Import Video.js for rendering
-import videojs from 'video.js';
-import 'videojs-youtube';
+// Video.js will be loaded dynamically when needed
 
 // Import the plugin styles
 import '../../../../css/components/editorjs/video-upload.css';
@@ -106,7 +104,10 @@ class VideoUpload {
         const handleBlockDragOver = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            wrapper.classList.add('video-upload--dragover');
+            const uploadArea = wrapper.querySelector('.ce-video-upload__upload-area');
+            if (uploadArea) {
+                uploadArea.classList.add('drag-over');
+            }
         };
 
         const handleBlockDragLeave = (e) => {
@@ -114,14 +115,20 @@ class VideoUpload {
             e.stopPropagation();
             // Only remove class if leaving the wrapper entirely
             if (!wrapper.contains(e.relatedTarget)) {
-                wrapper.classList.remove('video-upload--dragover');
+                const uploadArea = wrapper.querySelector('.ce-video-upload__upload-area');
+                if (uploadArea) {
+                    uploadArea.classList.remove('drag-over');
+                }
             }
         };
 
         const handleBlockDrop = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            wrapper.classList.remove('video-upload--dragover');
+            const uploadArea = wrapper.querySelector('.ce-video-upload__upload-area');
+            if (uploadArea) {
+                uploadArea.classList.remove('drag-over');
+            }
 
             if (!this.readOnly && !this.uploading && e.dataTransfer.files.length) {
                 const files = Array.from(e.dataTransfer.files).filter(file =>
@@ -162,26 +169,33 @@ class VideoUpload {
         fileInput.type = 'file';
         fileInput.accept = this.config.types;
         fileInput.multiple = true; // Enable multiple file selection
-        fileInput.classList.add('video-upload__file-input');
+        fileInput.classList.add('ce-video-upload__file-input');
         fileInput.id = inputId;
 
-        // Create label that triggers the file input
-        const uploadLabel = document.createElement('label');
-        uploadLabel.setAttribute('for', inputId);
-        uploadLabel.classList.add('video-upload__upload-button');
-        uploadLabel.innerHTML = `
-            <div class="video-upload__upload-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/>
-                </svg>
+        // Create modern upload area
+        const uploadArea = document.createElement('div');
+        uploadArea.classList.add('ce-video-upload__upload-area');
+        uploadArea.setAttribute('for', inputId);
+        
+        uploadArea.innerHTML = `
+            <div class="ce-video-upload__upload-content">
+                <div class="ce-video-upload__upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/>
+                    </svg>
+                </div>
+                <div class="ce-video-upload__upload-text">
+                    <div class="ce-video-upload__upload-title">Upload a video</div>
+                    <div class="ce-video-upload__upload-subtitle">Drag and drop or click to select</div>
+                </div>
+                <div class="ce-video-upload__upload-formats">MP4, WebM, MOV up to 100MB</div>
             </div>
-            <div class="video-upload__upload-text">${this.config.buttonContent}</div>
         `;
 
         // Store references for cleanup
         this.fileInput = fileInput;
         this.uploadContainer = uploadContainer;
-        this.uploadLabel = uploadLabel;
+        this.uploadArea = uploadArea;
 
         const handleFileChange = (e) => {
             e.preventDefault();
@@ -193,7 +207,7 @@ class VideoUpload {
             e.target.value = '';
         };
 
-        const handleLabelClick = (e) => {
+        const handleAreaClick = (e) => {
             e.preventDefault();
             if (!this.readOnly && !this.uploading) {
                 fileInput.click();
@@ -202,15 +216,15 @@ class VideoUpload {
 
         // Attach event listeners
         fileInput.addEventListener('change', handleFileChange);
-        uploadLabel.addEventListener('click', handleLabelClick);
+        uploadArea.addEventListener('click', handleAreaClick);
 
         // Store event handlers for cleanup
         this.eventHandlers = {
             handleFileChange,
-            handleLabelClick
+            handleAreaClick
         };
 
-        uploadContainer.appendChild(uploadLabel);
+        uploadContainer.appendChild(uploadArea);
         uploadContainer.appendChild(fileInput);
         wrapper.appendChild(uploadContainer);
     }
@@ -219,25 +233,67 @@ class VideoUpload {
         const videoContainer = document.createElement('div');
         videoContainer.classList.add('ce-video-upload__container');
 
-        // Create thumbnail video element (no controls, just for preview)
-        const thumbnail = document.createElement('video');
+        // Create thumbnail container with aspect ratio
+        const thumbnailContainer = document.createElement('div');
+        thumbnailContainer.classList.add('ce-video-upload__thumbnail-container');
+        
+        // Get aspect ratio from data
+        const aspectRatio = this.data.file.aspect_ratio || '16:9';
+        const [width, height] = aspectRatio.split(':');
+        const aspectRatioValue = parseFloat(width) / parseFloat(height);
+        
+        // Set container dimensions based on aspect ratio but keep consistent max size
+        const maxWidth = 200;
+        const maxHeight = 120;
+        
+        let containerWidth, containerHeight;
+        if (aspectRatioValue > maxWidth / maxHeight) {
+            // Wide video - constrain by width
+            containerWidth = maxWidth;
+            containerHeight = maxWidth / aspectRatioValue;
+        } else {
+            // Tall video - constrain by height
+            containerHeight = maxHeight;
+            containerWidth = maxHeight * aspectRatioValue;
+        }
+        
+        thumbnailContainer.style.cssText = `
+            width: ${containerWidth}px;
+            height: ${containerHeight}px;
+            position: relative;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f3f4f6;
+        `;
+
+        // Create thumbnail image element
+        const thumbnail = document.createElement('img');
         thumbnail.classList.add('ce-video-upload__thumbnail');
-        thumbnail.preload = 'metadata';
-        thumbnail.muted = true;
-        thumbnail.style.width = '200px';
-        thumbnail.style.height = '120px';
-        thumbnail.style.objectFit = 'cover';
-        thumbnail.style.cursor = 'pointer';
-        thumbnail.style.borderRadius = '8px';
+        thumbnail.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        `;
+        thumbnail.loading = 'lazy';
 
-        // Set video source
-        const source = document.createElement('source');
-        source.src = this.data.file.url;
-        source.type = this.getVideoMimeType(this.data.file.url);
-        thumbnail.appendChild(source);
-
-        // Add click handler to open modal
-        thumbnail.addEventListener('click', () => this.openModal());
+        // Use thumbnail from server or fallback to video icon
+        if (this.data.file.thumbnail) {
+            thumbnail.src = this.data.file.thumbnail;
+            thumbnail.alt = 'Video thumbnail';
+            thumbnailContainer.appendChild(thumbnail);
+        } else {
+            // Fallback: use a default video icon
+            thumbnailContainer.style.display = 'flex';
+            thumbnailContainer.style.alignItems = 'center';
+            thumbnailContainer.style.justifyContent = 'center';
+            thumbnailContainer.innerHTML = `
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke="#9ca3af" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/>
+                </svg>
+            `;
+        }
 
         // Add play icon overlay
         const playIcon = document.createElement('div');
@@ -248,19 +304,33 @@ class VideoUpload {
                 <path d="M10 8l6 4-6 4V8z" fill="white"/>
             </svg>
         `;
-        playIcon.style.position = 'absolute';
-        playIcon.style.top = '50%';
-        playIcon.style.left = '50%';
-        playIcon.style.transform = 'translate(-50%, -50%)';
-        playIcon.style.cursor = 'pointer';
-        playIcon.addEventListener('click', () => this.openModal());
+        playIcon.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            opacity: 0.9;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        `;
+        // Note: No click handler on play icon - it's just visual
 
-        // Wrapper for thumbnail and play icon
+        // Add click handler to open modal (only on container)
+        thumbnailContainer.addEventListener('click', () => this.openModal());
+
+        // Add play icon to thumbnail container
+        if (this.data.file.thumbnail) {
+            thumbnailContainer.appendChild(playIcon);
+        }
+
+        // Wrapper for thumbnail container and delete button
         const thumbnailWrapper = document.createElement('div');
-        thumbnailWrapper.style.position = 'relative';
-        thumbnailWrapper.style.display = 'inline-block';
-        thumbnailWrapper.appendChild(thumbnail);
-        thumbnailWrapper.appendChild(playIcon);
+        thumbnailWrapper.style.cssText = `
+            position: relative;
+            display: inline-block;
+        `;
+        thumbnailWrapper.appendChild(thumbnailContainer);
 
         // Add delete button if not readonly
         if (!this.readOnly) {
@@ -277,10 +347,11 @@ class VideoUpload {
 
         videoContainer.appendChild(thumbnailWrapper);
 
-        // Caption input
+        // Caption input (compact for document editing)
         const captionInput = document.createElement('input');
+        captionInput.type = 'text';
         captionInput.classList.add('ce-video-upload__caption');
-        captionInput.placeholder = this.config.captionPlaceholder || 'Enter video caption...';
+        captionInput.placeholder = this.config.captionPlaceholder || 'Add caption...';
         captionInput.value = this.data.caption || '';
         captionInput.readOnly = this.readOnly;
 
@@ -543,10 +614,18 @@ class VideoUpload {
         }
         modal.appendChild(modalContent);
 
-        // Initialize Video.js after DOM insertion
-        requestAnimationFrame(() => {
+        // Lazy load and initialize Video.js after DOM insertion
+        requestAnimationFrame(async () => {
             try {
-                const player = videojs(uniqueId, {
+                // Check if Video.js is already loaded
+                if (typeof window.videojs === 'undefined') {
+                    console.log('Lazy loading Video.js...');
+                    // Dynamically import Video.js
+                    const { default: videojs } = await import('video.js');
+                    window.videojs = videojs;
+                }
+
+                const player = window.videojs(uniqueId, {
                     responsive: true,
                     preload: 'metadata',
                     controls: true,
@@ -566,6 +645,8 @@ class VideoUpload {
                 });
             } catch (error) {
                 console.warn('Modal Video.js initialization failed:', error);
+                // Fallback: use native video controls
+                modalVideo.controls = true;
             }
         });
 
@@ -573,9 +654,11 @@ class VideoUpload {
         const closeModal = () => {
             // Dispose Video.js player before removing modal
             try {
-                const player = videojs.getPlayer(uniqueId);
-                if (player) {
-                    player.dispose();
+                if (window.videojs && window.videojs.getPlayer) {
+                    const player = window.videojs.getPlayer(uniqueId);
+                    if (player) {
+                        player.dispose();
+                    }
                 }
             } catch (error) {
                 console.warn('Error disposing Video.js player:', error);
@@ -694,10 +777,51 @@ class VideoUpload {
             return;
         }
 
+        // Client-side validation
+        const maxFileSize = this.config.maxFileSize || (100 * 1024 * 1024); // 100MB default
+        const validFiles = [];
+        const invalidFiles = [];
+
+        fileArray.forEach(file => {
+            // Check file size
+            if (file.size > maxFileSize) {
+                const sizeMB = Math.round(maxFileSize / (1024 * 1024));
+                const fileSizeMB = Math.round(file.size / (1024 * 1024));
+                invalidFiles.push({
+                    file,
+                    error: `File is too large (${fileSizeMB}MB). Maximum size allowed is ${sizeMB}MB.`
+                });
+                return;
+            }
+
+            // Check file type
+            if (!file.type.startsWith('video/')) {
+                invalidFiles.push({
+                    file,
+                    error: 'Invalid file format. Please select a video file.'
+                });
+                return;
+            }
+
+            validFiles.push(file);
+        });
+
+        // Show errors for invalid files immediately
+        if (invalidFiles.length > 0) {
+            invalidFiles.forEach(({ file, error }) => {
+                this.showErrorMessage(error, file.name);
+            });
+        }
+
+        // If no valid files, don't proceed
+        if (validFiles.length === 0) {
+            return;
+        }
+
         this.uploading = true;
 
-        // Initialize upload tracking for each file with unique IDs
-        this.uploadProgress = fileArray.map((file, index) => ({
+        // Initialize upload tracking for valid files only
+        this.uploadProgress = validFiles.map((file, index) => ({
             id: `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             file,
             name: file.name,
@@ -765,6 +889,9 @@ class VideoUpload {
             this.updateProgressItem(index);
 
             console.error(`Upload failed for file ${index}:`, error);
+            
+            // Show user-friendly error message
+            this.showErrorMessage(error.message || 'Upload failed', uploadItem.file.name);
         }
     }
 
@@ -817,6 +944,7 @@ class VideoUpload {
     addUploadedFile(response) {
         const fileData = {
             url: response.url || response.file?.url,
+            thumbnail: response.thumbnail || response.file?.thumbnail || null,
             caption: response.caption || '',
             width: response.width || null,
             height: response.height || null,
@@ -844,6 +972,7 @@ class VideoUpload {
         // Check if any uploads failed
         const hasErrors = this.uploadProgress.some(item => item.status === 'error');
         const successCount = this.uploadProgress.filter(item => item.status === 'success').length;
+        const errorItems = this.uploadProgress.filter(item => item.status === 'error');
 
         // Always render gallery if there are successful uploads
         if (successCount > 0) {
@@ -859,12 +988,8 @@ class VideoUpload {
             // Notify editor of changes only when all uploads are successful
             this.notifyEditorChange();
         } else if (hasErrors) {
-            // Only show upload container if there are no existing videos
-            if (!this.data.files || this.data.files.length === 0) {
-                this.showUploadContainer();
-            } else {
-                this.hideUploadContainer();
-            }
+            // Show error state with retry options
+            this.showErrorState(errorItems);
             // Remove only successful items from uploadProgress, keep failed ones for retry
             this.uploadProgress = this.uploadProgress.filter(item => item.status === 'error');
             // Still notify editor of any successful uploads
@@ -988,35 +1113,158 @@ class VideoUpload {
         }
 
         // Remove existing progress
-        const existingProgress = this.wrapper.querySelector('.video-upload__inline-progress');
+        const existingProgress = this.wrapper.querySelector('.ce-video-upload__uploading');
         if (existingProgress) {
             existingProgress.remove();
         }
 
-        // Create thumbnail-style progress grid
-        const progressContainer = document.createElement('div');
-        progressContainer.classList.add('video-upload__inline-progress');
+        // Create clean uploading UI
+        const uploadingContainer = document.createElement('div');
+        uploadingContainer.classList.add('ce-video-upload__uploading');
 
-        // Create thumbnail grid for progress
-        const thumbnailGrid = document.createElement('div');
-        thumbnailGrid.classList.add('video-upload__progress-grid');
+        uploadingContainer.innerHTML = `
+            <div class="ce-video-upload__uploading-spinner">
+                <svg class="ce-video-upload__spinner" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                        <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                        <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                    </svg>
+                </div>
+                <div class="ce-video-upload__uploading-text">
+                    <div class="ce-video-upload__uploading-title">Uploading video...</div>
+                    <div class="ce-video-upload__uploading-subtitle">Processing and generating thumbnail</div>
+                </div>
+            </div>
+        `;
 
-        // Create progress thumbnails
-        this.uploadProgress.forEach((item, index) => {
-            const progressThumbnail = this.createProgressThumbnail(item, index);
-            thumbnailGrid.appendChild(progressThumbnail);
-        });
-
-        progressContainer.appendChild(thumbnailGrid);
-        this.wrapper.appendChild(progressContainer);
+        this.wrapper.appendChild(uploadingContainer);
     }
 
     hideInlineProgress() {
         if (this.wrapper) {
-            const progressContainer = this.wrapper.querySelector('.video-upload__inline-progress');
-            if (progressContainer) {
-                progressContainer.remove();
+            const uploadingContainer = this.wrapper.querySelector('.ce-video-upload__uploading');
+            if (uploadingContainer) {
+                uploadingContainer.remove();
             }
+        }
+    }
+
+    showErrorMessage(message, fileName) {
+        // Create or update error notification
+        let errorContainer = this.wrapper.querySelector('.ce-video-upload__error-notification');
+        if (!errorContainer) {
+            errorContainer = document.createElement('div');
+            errorContainer.classList.add('ce-video-upload__error-notification');
+            this.wrapper.appendChild(errorContainer);
+        }
+
+        errorContainer.innerHTML = `
+            <div class="ce-video-upload__error-content">
+                <div class="ce-video-upload__error-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="ce-video-upload__error-details">
+                    <div class="ce-video-upload__error-title">Upload Failed</div>
+                    <div class="ce-video-upload__error-message">${message}</div>
+                    ${fileName ? `<div class="ce-video-upload__error-file">File: ${fileName}</div>` : ''}
+                </div>
+            </div>
+        `;
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            if (errorContainer && errorContainer.parentNode) {
+                errorContainer.remove();
+            }
+        }, 5000);
+    }
+
+    showErrorState(errorItems) {
+        this.hideInlineProgress();
+
+        const errorContainer = document.createElement('div');
+        errorContainer.classList.add('ce-video-upload__error-state');
+
+        errorContainer.innerHTML = `
+            <div class="ce-video-upload__error-header">
+                <div class="ce-video-upload__error-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="ce-video-upload__error-info">
+                    <div class="ce-video-upload__error-title">Upload Failed</div>
+                    <div class="ce-video-upload__error-subtitle">${errorItems.length} file(s) failed to upload</div>
+                </div>
+            </div>
+            <div class="ce-video-upload__error-list">
+                ${errorItems.map(item => `
+                    <div class="ce-video-upload__error-item">
+                        <div class="ce-video-upload__error-file-info">
+                            <div class="ce-video-upload__error-file-name">${item.name}</div>
+                            <div class="ce-video-upload__error-file-message">${item.error}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="ce-video-upload__error-actions">
+                <button class="ce-video-upload__retry-btn" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/>
+                        <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                    </svg>
+                    Retry Failed Uploads
+                </button>
+                <button class="ce-video-upload__dismiss-btn" type="button">Dismiss</button>
+            </div>
+        `;
+
+        this.wrapper.appendChild(errorContainer);
+
+        // Add event listeners
+        const retryBtn = errorContainer.querySelector('.ce-video-upload__retry-btn');
+        const dismissBtn = errorContainer.querySelector('.ce-video-upload__dismiss-btn');
+
+        retryBtn.addEventListener('click', () => {
+            errorContainer.remove();
+            this.retryFailedUploads();
+        });
+
+        dismissBtn.addEventListener('click', () => {
+            errorContainer.remove();
+            this.uploadProgress = [];
+            this.showUploadContainer();
+        });
+    }
+
+    async retryFailedUploads() {
+        const failedItems = this.uploadProgress.filter(item => item.status === 'error');
+        if (failedItems.length === 0) return;
+
+        // Reset failed items to pending
+        failedItems.forEach(item => {
+            item.status = 'pending';
+            item.progress = 0;
+            item.error = null;
+            item.retryCount = (item.retryCount || 0) + 1;
+        });
+
+        // Show progress and retry uploads
+        this.showInlineProgress();
+
+        try {
+            for (let i = 0; i < this.uploadProgress.length; i++) {
+                if (this.uploadProgress[i].status === 'pending') {
+                    await this.processFileUpload(i);
+                }
+            }
+            this.completeUpload();
+        } catch (error) {
+            console.error('Retry upload process error:', error);
         }
     }
 
@@ -1204,8 +1452,8 @@ class VideoUpload {
             this.fileInput.removeEventListener('change', this.eventHandlers.handleFileChange);
         }
 
-        if (this.uploadLabel && this.eventHandlers) {
-            this.uploadLabel.removeEventListener('click', this.eventHandlers.handleLabelClick);
+        if (this.uploadArea && this.eventHandlers) {
+            this.uploadArea.removeEventListener('click', this.eventHandlers.handleAreaClick);
         }
 
         // Clean up block-level drag-drop listeners
@@ -1251,9 +1499,11 @@ class VideoUpload {
         // Dispose any Video.js players
         if (this.currentVideoId) {
             try {
-                const player = videojs.getPlayer(this.currentVideoId);
-                if (player) {
-                    player.dispose();
+                if (window.videojs && window.videojs.getPlayer) {
+                    const player = window.videojs.getPlayer(this.currentVideoId);
+                    if (player) {
+                        player.dispose();
+                    }
                 }
             } catch (error) {
                 console.warn('Error disposing Video.js player:', error);
@@ -1265,7 +1515,7 @@ class VideoUpload {
 
         // Clear references
         this.fileInput = null;
-        this.uploadLabel = null;
+        this.uploadArea = null;
         this.uploadContainer = null;
         this.wrapper = null;
         this.eventHandlers = null;

@@ -162,7 +162,7 @@ Alpine.data('editorJs', ({ livewireState, uploadUrl }) => ({
                     },
                     types: 'video/*',
                     field: 'video',
-                    maxFileSize: 50 * 1024 * 1024 // 50MB
+                    maxFileSize: 100 * 1024 * 1024 // 100MB
                 }
             },
         };

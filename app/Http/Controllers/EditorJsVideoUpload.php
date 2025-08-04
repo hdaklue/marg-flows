@@ -75,6 +75,53 @@ final class EditorJsVideoUpload extends Controller
     }
 
     /**
+     * Generate video thumbnail using Laravel FFmpeg.
+     */
+    private function generateVideoThumbnail(string $videoPath, float $duration): ?string
+    {
+        try {
+            // Calculate thumbnail extraction time (1 second or 10% of duration if video is shorter than 10 seconds)
+            $extractionTime = $duration < 10 ? ($duration * 0.1) : 1.0;
+            
+            // Generate thumbnail filename based on video filename
+            $videoFilename = pathinfo($videoPath, PATHINFO_FILENAME);
+            $thumbnailFilename = $videoFilename . '_thumb.jpg';
+            $thumbnailPath = 'documents/video-thumbnails/' . $thumbnailFilename;
+            
+            // Ensure the thumbnail directory exists
+            $thumbnailDir = 'documents/video-thumbnails';
+            if (!Storage::disk('public')->exists($thumbnailDir)) {
+                Storage::disk('public')->makeDirectory($thumbnailDir);
+            }
+
+            // Extract thumbnail frame using Laravel FFmpeg
+            $media = FFMpeg::fromDisk('public')->open($videoPath);
+            
+            $frame = $media->getFrameFromSeconds($extractionTime);
+            $frame->export()
+                ->toDisk('public')
+                ->save($thumbnailPath);
+
+            Log::info('Video thumbnail generated successfully', [
+                'video_path' => $videoPath,
+                'thumbnail_path' => $thumbnailPath,
+                'extraction_time' => $extractionTime,
+            ]);
+
+            return $thumbnailPath;
+
+        } catch (Exception $e) {
+            Log::warning('Failed to generate video thumbnail', [
+                'video_path' => $videoPath,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
      * Handle the incoming video upload requests from Editor.js.
      */
     public function __invoke(Request $request): JsonResponse
@@ -85,13 +132,13 @@ final class EditorJsVideoUpload extends Controller
                     'required',
                     'mimes:mp4,webm,mov,avi,mkv,wmv,flv,m4v,3gp,ogg',
                     'mimetypes:video/mp4,video/webm,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/x-flv,video/x-m4v,video/3gpp,video/ogg',
-                    'max:51200', // 50MB max
+                    'max:102400', // 100MB max
                 ],
             ], [
                 'video.required' => 'No file selected. Please choose a video to upload.',
                 'video.mimes' => 'Invalid file format. Supported formats: MP4, WebM, MOV, AVI, MKV, WMV, FLV, M4V, 3GP, OGG',
                 'video.mimetypes' => 'File must be a valid video format.',
-                'video.max' => 'File is too large. Maximum size allowed is 50MB.',
+                'video.max' => 'File is too large. Maximum size allowed is 100MB.',
             ]);
         } catch (ValidationException $e) {
             // Get the first error message for user-friendly display
@@ -114,7 +161,18 @@ final class EditorJsVideoUpload extends Controller
             // Extract video metadata using Laravel FFmpeg
             $videoData = $this->extractVideoMetadata($path);
 
-            return response()->json([
+            // Generate thumbnail if we have video duration
+            $thumbnailUrl = null;
+            $duration = $videoData['duration'] ?? null;
+            
+            if ($duration && $duration > 0) {
+                $thumbnailPath = $this->generateVideoThumbnail($path, $duration);
+                if ($thumbnailPath) {
+                    $thumbnailUrl = Storage::url($thumbnailPath);
+                }
+            }
+
+            $response = [
                 'success' => true,
                 'url' => Storage::url($path),
                 'file' => [
@@ -127,7 +185,15 @@ final class EditorJsVideoUpload extends Controller
                 'format' => $extension,
                 'aspect_ratio' => $videoData['aspect_ratio'] ?? '16:9',
                 'aspect_ratio_data' => $videoData['aspect_ratio_data'] ?? null,
-            ]);
+            ];
+
+            // Add thumbnail URL to response if available
+            if ($thumbnailUrl) {
+                $response['thumbnail'] = $thumbnailUrl;
+                $response['file']['thumbnail'] = $thumbnailUrl;
+            }
+
+            return response()->json($response);
 
         } catch (Exception $e) {
             Log::error('Failed to upload video', [
