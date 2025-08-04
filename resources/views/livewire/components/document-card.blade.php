@@ -15,7 +15,9 @@
 
         startEdit() {
             if (!this.canEdit) return;
+            this.$refs.input.value = this.originalTitle; // Reset input value
             this.editing = true;
+
             this.$nextTick(() => this.$refs.input.focus());
         },
 
@@ -167,7 +169,7 @@
 
                 <!-- Edit Mode -->
                 <div x-show="editing" x-cloak>
-                    <textarea x-ref="input" wire:model="name" @keydown.enter.prevent="saveEdit()" @keydown.escape="cancelEdit()"
+                    <textarea x-ref="input" x-model="title" @keydown.enter.prevent="saveEdit()" @keydown.escape="cancelEdit()"
                         @dblclick.stop @blur="saveEdit()" rows="2"
                         class="w-full resize-none rounded border border-zinc-600 bg-transparent px-1 py-0.5 text-xs font-semibold focus:border-sky-500 focus:outline-none dark:text-zinc-300"></textarea>
                 </div>

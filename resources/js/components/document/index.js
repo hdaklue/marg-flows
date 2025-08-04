@@ -11,6 +11,7 @@ import CommentTune from '../editorjs/plugins/comment-tune';
 import ResizableImage from '../editorjs/plugins/resizable-image';
 import VideoEmbed from '../editorjs/plugins/video-embed';
 import VideoUpload from '../editorjs/plugins/video-upload';
+import { VIDEO_VALIDATION_CONFIG } from '../editorjs/video-validation.js';
 
 
 export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null) {
@@ -155,32 +156,33 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 defaultBlock: false, // Disable default block during initialization
                 inlineToolbar: false, // Disable during initialization
                 tools: this.getEditorTools(csrf, uploadUrl),
-                onChange: () => {
-                    // Only process changes if editor is ready
-                    if (!this.editorReady) {
+                onChange: (api, event) => {
+                    // Defensive check - ensure editor exists and is ready
+                    if (!this.editor || !this.editorReady) {
                         return;
                     }
 
-                    this.editor.save()
-                        .then((outputData) => {
-                            clearTimeout(this.debounceTimer);
-                            this.debounceTimer = setTimeout(() => {
-                                this.state = JSON.stringify(outputData);
+                    // Update state immediately without calling save()
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = setTimeout(() => {
+                        // Double-check editor still exists
+                        if (!this.editor) {
+                            return;
+                        }
 
-                                // Only update currentEditorTime if we didn't just save
-                                if (!this.justSaved) {
-                                    this.currentEditorTime = outputData.time;
-                                } else {
-                                    // Reset the flag after skipping the update
-                                    this.justSaved = false;
-                                }
+                        // Only update currentEditorTime if we didn't just save
+                        if (!this.justSaved) {
+                            this.currentEditorTime = Date.now();
+                        } else {
+                            // Reset the flag after skipping the update
+                            this.justSaved = false;
+                        }
 
-                                this.saveStatus = null; // Reset status on change
-                            }, 100); // Reduced from 300ms to 100ms for faster UI feedback
-                        })
-                        .catch((error) => {
-                            console.error('Editor save failed during onChange:', error);
-                        });
+                        this.saveStatus = null; // Reset status on change
+                        
+                        // Mark as dirty for autosave
+                        // The actual save() will be called by autosave or manual save
+                    }, 100);
                 },
 
                 onReady: () => {
@@ -318,7 +320,9 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         },
                         types: 'video/*',
                         field: 'video',
-                        maxFileSize: 100 * 1024 * 1024 // 100MB
+                        maxFileSize: VIDEO_VALIDATION_CONFIG.maxFileSize,
+                        chunkSize: VIDEO_VALIDATION_CONFIG.chunkSize,
+                        useChunkedUpload: VIDEO_VALIDATION_CONFIG.useChunkedUpload
                     },
                     tunes: ['commentTune']
                 },
@@ -427,7 +431,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         },
 
         async saveDocument(isSync = false) {
-            if (!this.saveCallback || this.isSaving || !this.editorReady) return;
+            if (!this.saveCallback || this.isSaving || !this.editorReady || !this.editor) return;
 
             // Check if document is empty
             const parsedState = this.normalizeState(this.state);

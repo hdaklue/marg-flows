@@ -6,12 +6,15 @@ namespace App\Livewire\Document;
 
 use App\Models\Document;
 use Exception;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Log;
 
 /**
  * @property-read string  $updatedAtString
+ * @property-read array $participantsArray;
  */
 final class DocumentComponent extends Component
 {
@@ -40,6 +43,35 @@ final class DocumentComponent extends Component
     public function getUpdatedAtString(): string
     {
         return $this->updatedAtString;
+    }
+
+    #[Computed(true)]
+    public function userPermissions(): array
+    {
+        return [
+            'canManageMembers' => filamentUser()->can('manageMembers', $this->page),
+            'canEdit' => filamentUser()->can('update', $this->page),
+        ];
+    }
+
+    #[Computed]
+    public function participants(): Collection
+    {
+        return $this->page->getParticipants();
+    }
+
+    #[Computed]
+    public function participantsArray(): array
+    {
+
+        return $this->participants->pluck('model')->map(fn ($item) => ['name' => $item->getAttribute('name'), 'avatar' => $item->getAttribute('avatar')])->toArray();
+    }
+
+    #[On('roleable-entity:members-updated.{page.id}')]
+    public function reloadPartipants(): void
+    {
+        unset($this->participants, $this->participantsArray);
+
     }
 
     public function saveDocument(string $content)

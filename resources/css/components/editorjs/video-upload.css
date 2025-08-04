@@ -503,6 +503,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+  position: relative;
 }
 
 .ce-video-upload__error-icon {
@@ -547,6 +548,42 @@
 
 .dark .ce-video-upload__error-file {
   color: theme('colors.red.400');
+}
+
+.ce-video-upload__error-dismiss {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  background: theme('colors.red.100');
+  color: theme('colors.red.600');
+  border: 1px solid theme('colors.red.200');
+  border-radius: theme('borderRadius.full');
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ce-video-upload__error-dismiss:hover {
+  background: theme('colors.red.200');
+  color: theme('colors.red.700');
+  transform: scale(1.05);
+}
+
+.dark .ce-video-upload__error-dismiss {
+  background: theme('colors.red.900');
+  color: theme('colors.red.300');
+  border-color: theme('colors.red.700');
+}
+
+.dark .ce-video-upload__error-dismiss:hover {
+  background: theme('colors.red.800');
+  color: theme('colors.red.200');
 }
 
 /* Error State */
@@ -684,6 +721,272 @@
 
 .dark .ce-video-upload__dismiss-btn:hover {
   background: theme('colors.zinc.700');
+}
+
+/* Conversion Notice */
+.ce-video-upload__conversion-notice {
+  background: theme('colors.sky.50');
+  border: 1px solid theme('colors.sky.200');
+  border-radius: theme('borderRadius.lg');
+  padding: 1rem;
+  margin-top: 1rem;
+  animation: slideIn 0.3s ease;
+}
+
+.dark .ce-video-upload__conversion-notice {
+  background: theme('colors.sky.950/50');
+  border-color: theme('colors.sky.800');
+}
+
+/* Conversion Progress */
+.ce-video-upload__conversion-progress {
+  background: theme('colors.blue.50');
+  border: 1px solid theme('colors.blue.200');
+  border-radius: theme('borderRadius.lg');
+  padding: 1rem;
+  margin-top: 1rem;
+  animation: slideIn 0.3s ease;
+}
+
+.dark .ce-video-upload__conversion-progress {
+  background: theme('colors.blue.950/50');
+  border-color: theme('colors.blue.800');
+}
+
+.ce-video-upload__conversion-progress-bar {
+  width: 100%;
+  height: 0.5rem;
+  background: theme('colors.blue.200');
+  border-radius: theme('borderRadius.full');
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.dark .ce-video-upload__conversion-progress-bar {
+  background: theme('colors.blue.800');
+}
+
+.ce-video-upload__conversion-progress-fill {
+  height: 100%;
+  background: theme('colors.blue.500');
+  transition: width 0.3s ease;
+  border-radius: theme('borderRadius.full');
+}
+
+.dark .ce-video-upload__conversion-progress-fill {
+  background: theme('colors.blue.400');
+}
+
+/* Conversion Error */
+.ce-video-upload__conversion-error {
+  background: theme('colors.orange.50');
+  border: 1px solid theme('colors.orange.200');
+  border-radius: theme('borderRadius.lg');
+  padding: 1rem;
+  margin-top: 1rem;
+  animation: slideIn 0.3s ease;
+}
+
+.dark .ce-video-upload__conversion-error {
+  background: theme('colors.orange.950/50');
+  border-color: theme('colors.orange.800');
+}
+
+.ce-video-upload__conversion-error-detail {
+  color: theme('colors.orange.600');
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  font-family: theme('fontFamily.mono');
+}
+
+.dark .ce-video-upload__conversion-error-detail {
+  color: theme('colors.orange.400');
+}
+
+.ce-video-upload__conversion-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.ce-video-upload__conversion-icon {
+  color: theme('colors.sky.500');
+  flex-shrink: 0;
+}
+
+.dark .ce-video-upload__conversion-icon {
+  color: theme('colors.sky.400');
+}
+
+.ce-video-upload__conversion-details {
+  flex: 1;
+}
+
+.ce-video-upload__conversion-title {
+  font-weight: 600;
+  color: theme('colors.sky.800');
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.dark .ce-video-upload__conversion-title {
+  color: theme('colors.sky.200');
+}
+
+.ce-video-upload__conversion-message {
+  color: theme('colors.sky.700');
+  font-size: 0.8125rem;
+  margin-bottom: 0.25rem;
+}
+
+.dark .ce-video-upload__conversion-message {
+  color: theme('colors.sky.300');
+}
+
+.ce-video-upload__conversion-file {
+  color: theme('colors.sky.600');
+  font-size: 0.75rem;
+  font-family: theme('fontFamily.mono');
+}
+
+.dark .ce-video-upload__conversion-file {
+  color: theme('colors.sky.400');
+}
+
+/* Conversion Success */
+.ce-video-upload__conversion-success {
+  background: theme('colors.emerald.50');
+  border: 1px solid theme('colors.emerald.200');
+  border-radius: theme('borderRadius.lg');
+  padding: 1rem;
+  margin-top: 1rem;
+  animation: slideIn 0.3s ease;
+}
+
+.dark .ce-video-upload__conversion-success {
+  background: theme('colors.emerald.950/50');
+  border-color: theme('colors.emerald.800');
+}
+
+.ce-video-upload__conversion-success-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.ce-video-upload__conversion-success-icon {
+  color: theme('colors.emerald.500');
+  flex-shrink: 0;
+}
+
+.dark .ce-video-upload__conversion-success-icon {
+  color: theme('colors.emerald.400');
+}
+
+.ce-video-upload__conversion-success-details {
+  flex: 1;
+}
+
+.ce-video-upload__conversion-success-title {
+  font-weight: 600;
+  color: theme('colors.emerald.800');
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.dark .ce-video-upload__conversion-success-title {
+  color: theme('colors.emerald.200');
+}
+
+.ce-video-upload__conversion-success-message {
+  color: theme('colors.emerald.700');
+  font-size: 0.8125rem;
+}
+
+.dark .ce-video-upload__conversion-success-message {
+  color: theme('colors.emerald.300');
+}
+
+/* Video Error State */
+.ce-video-upload__video-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: theme('colors.zinc.50');
+  border: 2px dashed theme('colors.zinc.300');
+  border-radius: theme('borderRadius.lg');
+}
+
+.dark .ce-video-upload__video-error {
+  background: theme('colors.zinc.900');
+  border-color: theme('colors.zinc.700');
+}
+
+.ce-video-upload__video-error-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 400px;
+}
+
+.ce-video-upload__video-error-icon {
+  color: theme('colors.amber.500');
+  margin-bottom: 1rem;
+}
+
+.dark .ce-video-upload__video-error-icon {
+  color: theme('colors.amber.400');
+}
+
+.ce-video-upload__video-error-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: theme('colors.zinc.800');
+  margin-bottom: 0.5rem;
+}
+
+.dark .ce-video-upload__video-error-title {
+  color: theme('colors.zinc.200');
+}
+
+.ce-video-upload__video-error-message {
+  color: theme('colors.zinc.600');
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.dark .ce-video-upload__video-error-message {
+  color: theme('colors.zinc.400');
+}
+
+.ce-video-upload__video-error-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: theme('colors.sky.600');
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: theme('borderRadius.md');
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.ce-video-upload__video-error-download:hover {
+  background: theme('colors.sky.700');
+  transform: translateY(-1px);
+}
+
+.dark .ce-video-upload__video-error-download {
+  background: theme('colors.sky.500');
+}
+
+.dark .ce-video-upload__video-error-download:hover {
+  background: theme('colors.sky.400');
 }
 
 @keyframes slideIn {

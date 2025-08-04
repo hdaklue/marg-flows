@@ -1,5 +1,4 @@
-<div wire:ignore x-load
-    x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('documentEditor') }}"
+<div x-load x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('documentEditor') }}"
     x-data="documentEditor($wire.content, '{{ route('uploader') }}', @js($canEdit), $wire.saveDocument, 25, '{{ $this->page->updated_at->toISOString() }}')" class="w-full">
     <!-- Intersection Observer Target -->
     <div x-intersect:leave.margin.-80px="isSticky = true" x-intersect:enter.margin.-80px="isSticky = false" class="h-4">
@@ -8,7 +7,7 @@
     <!-- Save Status Indicator -->
     <div x-cloak x-bind:style="isSticky ? `top: ${topbarHeight}px;` : ''"
         :class="{
-            'fixed left-0 right-0 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm py-2 border-b border-zinc-200 dark:border-zinc-700': isSticky,
+            'fixed left-0 right-0 z-40 bg-white/80 dark:bg-zinc-900  py-2 border-y border-zinc-200 dark:border-zinc-700': isSticky,
             'mb-3': !isSticky,
             'flex items-center justify-center space-x-2 text-xs transition-all duration-150 ease-out': true
         }">
@@ -68,7 +67,10 @@
                     <span>Saving...</span>
                 </span>
             </button>
+            <x-user-avatar-stack :users="$this->participantsArray" :roleableKey="$this->page->getKey()" :roleableType="$this->page->getMorphClass()" :canEdit="$this->userPermissions['canManageMembers']"
+                size='2xs' />
         </div>
+
     </div>
 
     <div id="editor-wrap" wire:ignore @keydown.window.ctrl.k.prevent="saveDoument()" @keydown.meta.k="saveDocument()"
@@ -194,6 +196,6 @@
             </div>
         </div>
     </div> --}}
-
+    <livewire:role.manage-members-modal />
     @vite(['resources/css/components/editorjs/index.css', 'resources/css/components/editorjs/comment-tune.css', 'resources/css/components/document/document.css'])
 </div>

@@ -1,9 +1,14 @@
 /**
  * VideoUpload Plugin for EditorJS
  * Mimics ResizableImage structure for video file uploads with Video.js rendering
+ * Only supports Video.js compatible formats (MP4, WebM, OGG)
  */
 
-// Video.js will be loaded dynamically when needed
+// Import validation utilities (single source of truth)
+import { 
+    VIDEO_VALIDATION_CONFIG, 
+    validateVideoFile 
+} from '../video-validation.js';
 
 // Import the plugin styles
 import '../../../../css/components/editorjs/video-upload.css';
@@ -24,6 +29,16 @@ class VideoUpload {
 
     static get enableLineBreaks() {
         return true;
+    }
+
+    static get pasteConfig() {
+        return {
+            files: {
+                mimeTypes: [
+                    'video/*'  // Accept all video types, let our validation handle the filtering
+                ]
+            }
+        };
     }
 
     static get tunes() {
@@ -50,7 +65,7 @@ class VideoUpload {
         this.eventHandlers = null;
         this.currentVideoId = null;
 
-        // Default configuration
+        // Default configuration (uses validation config as single source of truth)
         this.defaultConfig = {
             endpoints: {
                 byFile: '/upload-video',
@@ -62,13 +77,74 @@ class VideoUpload {
             captionPlaceholder: 'Enter video caption...',
             buttonContent: 'Select a video',
             uploader: null,
-            actions: []
+            actions: [],
+            // Import settings from validation config (single source of truth)
+            chunkSize: VIDEO_VALIDATION_CONFIG.chunkSize,
+            maxFileSize: VIDEO_VALIDATION_CONFIG.maxFileSize,
+            useChunkedUpload: VIDEO_VALIDATION_CONFIG.useChunkedUpload
         };
 
         this.config = Object.assign(this.defaultConfig, this.config);
 
         // Bind methods
         this.onUpload = this.onUpload.bind(this);
+        this.onPaste = this.onPaste.bind(this);
+    }
+
+
+
+    /**
+     * Handle pasted files from clipboard (EditorJS built-in paste handling)
+     */
+    onPaste(event) {
+        switch (event.type) {
+            case 'file':
+                // EditorJS passes the file in event.detail.file
+                const file = event.detail.file;
+                if (file) {
+                    return this.handlePastedFile(file);
+                }
+                break;
+        }
+        return false;
+    }
+
+    async handlePastedFile(file) {
+        if (this.readOnly) {
+            return false;
+        }
+
+        // Check if it's a video file
+        if (!file.type.startsWith('video/')) {
+            return false;
+        }
+
+        // Validate file using single source of truth
+        const validation = validateVideoFile(file);
+        if (!validation.isValid) {
+            validation.errors.forEach(error => {
+                this.showErrorMessage(error, file.name);
+            });
+            return false;
+        }
+
+        // Check if we already have a video (single video only)
+        if (this.data.file && this.data.file.url) {
+            // Show notification that video will be replaced
+            if (!confirm('This will replace the current video. Continue?')) {
+                return false;
+            }
+        }
+
+        try {
+            // Handle the pasted video file
+            await this.handleUpload([file]);
+            return true;
+        } catch (error) {
+            console.error('Paste upload failed:', error);
+            this.showErrorMessage('Failed to process pasted video file.', file.name);
+            return false;
+        }
     }
 
     render() {
@@ -80,6 +156,9 @@ class VideoUpload {
 
         // Add drag-drop functionality to the entire block wrapper
         this.setupBlockDragDrop(wrapper);
+
+        // Add paste functionality
+        this.setupPasteHandling(wrapper);
 
         // Check if we have a video
         const hasVideo = this.data.file && this.data.file.url && this.data.file.url.trim() !== '';
@@ -131,11 +210,25 @@ class VideoUpload {
             }
 
             if (!this.readOnly && !this.uploading && e.dataTransfer.files.length) {
-                const files = Array.from(e.dataTransfer.files).filter(file =>
+                const videoFiles = Array.from(e.dataTransfer.files).filter(file =>
                     file.type.startsWith('video/')
                 );
-                if (files.length > 0) {
-                    this.handleUpload(files);
+
+                // Validate files using single source of truth
+                const validFiles = [];
+                videoFiles.forEach(file => {
+                    const validation = validateVideoFile(file);
+                    if (validation.isValid) {
+                        validFiles.push(file);
+                    } else {
+                        validation.errors.forEach(error => {
+                            this.showErrorMessage(error, file.name);
+                        });
+                    }
+                });
+
+                if (validFiles.length > 0) {
+                    this.handleUpload(validFiles);
                 }
             }
         };
@@ -151,6 +244,83 @@ class VideoUpload {
             handleBlockDragLeave,
             handleBlockDrop
         };
+    }
+
+    setupPasteHandling(wrapper) {
+        if (this.readOnly) {
+            return;
+        }
+
+        const handlePaste = async (e) => {
+            // Only handle paste if this block is focused/active
+            if (!wrapper.contains(document.activeElement) &&
+                !wrapper.classList.contains('ce-block--focused')) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            const videoFiles = [];
+
+            // Check clipboard items for video files
+            Array.from(items).forEach(item => {
+                if (item.kind === 'file' && item.type.startsWith('video/')) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        videoFiles.push(file);
+                    }
+                }
+            });
+
+            if (videoFiles.length > 0) {
+                // Validate files using single source of truth (checks both format AND size)
+                const validFiles = [];
+                const invalidFiles = [];
+
+                videoFiles.forEach(file => {
+                    const validation = validateVideoFile(file);
+                    if (validation.isValid) {
+                        validFiles.push(file);
+                    } else {
+                        validation.errors.forEach(error => {
+                            invalidFiles.push({ file, error });
+                        });
+                    }
+                });
+
+                // Show errors for invalid files
+                invalidFiles.forEach(({ file, error }) => {
+                    this.showErrorMessage(error, file.name);
+                });
+
+                if (validFiles.length > 0) {
+                    // Check if we already have a video (single video only)
+                    if (this.data.file && this.data.file.url) {
+                        if (!confirm('This will replace the current video. Continue?')) {
+                            return;
+                        }
+                    }
+
+                    // Handle the first valid video file (single video plugin)
+                    await this.handleUpload([validFiles[0]]);
+                }
+            }
+        };
+
+        // Add paste event listener
+        document.addEventListener('paste', handlePaste);
+
+        // Store handler for cleanup
+        this.pasteHandler = handlePaste;
+
+        // Make wrapper focusable for better paste targeting
+        if (!wrapper.hasAttribute('tabindex')) {
+            wrapper.setAttribute('tabindex', '-1');
+        }
     }
 
     createUploadInterface(wrapper) {
@@ -176,7 +346,7 @@ class VideoUpload {
         const uploadArea = document.createElement('div');
         uploadArea.classList.add('ce-video-upload__upload-area');
         uploadArea.setAttribute('for', inputId);
-        
+
         uploadArea.innerHTML = `
             <div class="ce-video-upload__upload-content">
                 <div class="ce-video-upload__upload-icon">
@@ -186,9 +356,9 @@ class VideoUpload {
                 </div>
                 <div class="ce-video-upload__upload-text">
                     <div class="ce-video-upload__upload-title">Upload a video</div>
-                    <div class="ce-video-upload__upload-subtitle">Drag and drop or click to select</div>
+                    <div class="ce-video-upload__upload-subtitle">Drag, paste, or click to select</div>
                 </div>
-                <div class="ce-video-upload__upload-formats">MP4, WebM, MOV up to 100MB</div>
+                <div class="ce-video-upload__upload-formats">${VIDEO_VALIDATION_CONFIG.supportedExtensions.map(ext => ext.toUpperCase()).join(', ')} up to ${Math.round(VIDEO_VALIDATION_CONFIG.maxFileSize / (1024 * 1024))}MB</div>
             </div>
         `;
 
@@ -236,16 +406,16 @@ class VideoUpload {
         // Create thumbnail container with aspect ratio
         const thumbnailContainer = document.createElement('div');
         thumbnailContainer.classList.add('ce-video-upload__thumbnail-container');
-        
+
         // Get aspect ratio from data
         const aspectRatio = this.data.file.aspect_ratio || '16:9';
         const [width, height] = aspectRatio.split(':');
         const aspectRatioValue = parseFloat(width) / parseFloat(height);
-        
+
         // Set container dimensions based on aspect ratio but keep consistent max size
         const maxWidth = 200;
         const maxHeight = 120;
-        
+
         let containerWidth, containerHeight;
         if (aspectRatioValue > maxWidth / maxHeight) {
             // Wide video - constrain by width
@@ -256,7 +426,7 @@ class VideoUpload {
             containerHeight = maxHeight;
             containerWidth = maxHeight * aspectRatioValue;
         }
-        
+
         thumbnailContainer.style.cssText = `
             width: ${containerWidth}px;
             height: ${containerHeight}px;
@@ -529,11 +699,11 @@ class VideoUpload {
         const aspectRatioContainer = document.createElement('div');
         const [width, height] = aspectRatio.split(':');
         const aspectRatioValue = parseFloat(width) / parseFloat(height);
-        
+
         // Calculate responsive dimensions
         const maxWidth = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.8 * aspectRatioValue);
         const maxHeight = Math.min(window.innerHeight * 0.8, window.innerWidth * 0.9 / aspectRatioValue);
-        
+
         // Apply responsive dimensions directly via style
         aspectRatioContainer.style.cssText = `
             position: relative;
@@ -542,7 +712,7 @@ class VideoUpload {
             margin: 0 auto;
             aspect-ratio: ${width} / ${height};
         `;
-        
+
         // Fallback for browsers that don't support aspect-ratio
         if (!CSS.supports('aspect-ratio', '1')) {
             const paddingBottom = (parseFloat(height) / parseFloat(width) * 100).toFixed(2);
@@ -553,7 +723,7 @@ class VideoUpload {
         // Create Video.js video element for modal
         const modalVideo = document.createElement('video');
         modalVideo.classList.add('video-js', 'vjs-default-skin');
-        
+
         // Position video to fill the aspect ratio container
         modalVideo.style.cssText = `
             position: absolute;
@@ -605,7 +775,7 @@ class VideoUpload {
 
         // Nest video inside aspect ratio container
         aspectRatioContainer.appendChild(modalVideo);
-        
+
         // Assemble modal
         modalContent.appendChild(aspectRatioContainer);
         modalContent.appendChild(closeBtn);
@@ -629,10 +799,31 @@ class VideoUpload {
                     responsive: true,
                     preload: 'metadata',
                     controls: true,
+                    html5: {
+                        vhs: {
+                            overrideNative: !window.videojs.browser.IS_SAFARI
+                        },
+                        nativeVideoTracks: false,
+                        nativeAudioTracks: false,
+                        nativeTextTracks: false
+                    }
                 });
 
+                // Handle Video.js errors
                 player.ready(() => {
                     console.log('Modal Video.js player ready with aspect ratio:', aspectRatio);
+
+                    // Add error handler
+                    player.on('error', () => {
+                        const error = player.error();
+                        console.warn('Video.js playback error:', error);
+
+                        if (error && error.code === 4) {
+                            // Media source not supported - show helpful message
+                            this.showVideoCompatibilityError(modalVideo, aspectRatioContainer);
+                        }
+                    });
+
                     // Auto-play the video when modal opens
                     try {
                         player.play().catch(error => {
@@ -777,34 +968,21 @@ class VideoUpload {
             return;
         }
 
-        // Client-side validation
-        const maxFileSize = this.config.maxFileSize || (100 * 1024 * 1024); // 100MB default
+        // Client-side validation using single source of truth
         const validFiles = [];
         const invalidFiles = [];
 
-        fileArray.forEach(file => {
-            // Check file size
-            if (file.size > maxFileSize) {
-                const sizeMB = Math.round(maxFileSize / (1024 * 1024));
-                const fileSizeMB = Math.round(file.size / (1024 * 1024));
-                invalidFiles.push({
-                    file,
-                    error: `File is too large (${fileSizeMB}MB). Maximum size allowed is ${sizeMB}MB.`
+        // Validate files client-side using single source of truth
+        for (const file of fileArray) {
+            const validation = validateVideoFile(file);
+            if (validation.isValid) {
+                validFiles.push(file);
+            } else {
+                validation.errors.forEach(error => {
+                    invalidFiles.push({ file, error });
                 });
-                return;
             }
-
-            // Check file type
-            if (!file.type.startsWith('video/')) {
-                invalidFiles.push({
-                    file,
-                    error: 'Invalid file format. Please select a video file.'
-                });
-                return;
-            }
-
-            validFiles.push(file);
-        });
+        }
 
         // Show errors for invalid files immediately
         if (invalidFiles.length > 0) {
@@ -860,8 +1038,11 @@ class VideoUpload {
         this.updateProgressItem(index);
 
         try {
+            // No conversion needed - only Video.js compatible formats are allowed
+            const fileToUpload = uploadItem.file;
+
             // Perform the actual upload
-            const response = await this.performUpload(uploadItem.file);
+            const response = await this.performUpload(fileToUpload);
 
             // Validate response
             if (!response.url && !response.file?.url) {
@@ -889,9 +1070,9 @@ class VideoUpload {
             this.updateProgressItem(index);
 
             console.error(`Upload failed for file ${index}:`, error);
-            
-            // Show user-friendly error message
-            this.showErrorMessage(error.message || 'Upload failed', uploadItem.file.name);
+
+            // Show user-friendly error message (auto-dismiss server errors)
+            this.showErrorMessage(error.message || 'Upload failed', uploadItem.file.name, true);
         }
     }
 
@@ -900,8 +1081,109 @@ class VideoUpload {
         if (this.config.uploader && typeof this.config.uploader.uploadByFile === 'function') {
             return await this.config.uploader.uploadByFile(file);
         } else {
-            return await this.executeUploadRequest(file);
+            // Check if we should use chunked upload
+            if (this.config.useChunkedUpload && file.size > this.config.chunkSize) {
+                return await this.executeChunkedUpload(file);
+            } else {
+                return await this.executeUploadRequest(file);
+            }
         }
+    }
+
+    /**
+     * Execute chunked upload for large files
+     */
+    async executeChunkedUpload(file) {
+        const fileKey = this.generateFileKey();
+        const fileName = file.name;
+        const chunkSize = this.config.chunkSize;
+        const totalChunks = Math.ceil(file.size / chunkSize);
+
+        console.log(`Starting chunked upload: ${fileName} (${totalChunks} chunks)`);
+
+        // Signal editor is busy during upload
+        document.dispatchEvent(new CustomEvent('editor:busy'));
+
+        try {
+            // Upload each chunk sequentially
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                const start = chunkIndex * chunkSize;
+                const end = Math.min(start + chunkSize, file.size);
+                const chunk = file.slice(start, end);
+
+                console.log(`Uploading chunk ${chunkIndex + 1}/${totalChunks}`);
+
+                const chunkFile = new File([chunk], fileName, { type: file.type });
+                const response = await this.uploadChunk(chunkFile, fileKey, fileName, chunkIndex, totalChunks);
+
+                // Update progress based on chunk completion
+                const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+                this.updateUploadProgress(progress);
+
+                // If this was the last chunk and upload is complete
+                if (response.completed) {
+                    console.log('Chunked upload completed successfully');
+                    return response;
+                }
+            }
+
+            throw new Error('Chunked upload completed but no final response received');
+
+        } catch (error) {
+            console.error('Chunked upload failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Upload a single chunk
+     */
+    async uploadChunk(chunkFile, fileKey, fileName, chunkIndex, totalChunks) {
+        const formData = new FormData();
+        formData.append(this.config.field, chunkFile);
+        formData.append('fileKey', fileKey);
+        formData.append('fileName', fileName);
+        formData.append('chunk', chunkIndex.toString());
+        formData.append('chunks', totalChunks.toString());
+
+        const response = await fetch(this.config.endpoints.byFile, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                ...this.config.additionalRequestHeaders,
+                // Don't set Content-Type for FormData, let browser set it with boundary
+            }
+        });
+
+        // Parse JSON response
+        let json;
+        try {
+            json = await response.json();
+        } catch (parseError) {
+            throw new Error(`Invalid response format for chunk ${chunkIndex}: ${response.status}`);
+        }
+
+        // Validate response success
+        if (json.success === false || !response.ok) {
+            throw new Error(json.message || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        return json;
+    }
+
+    /**
+     * Generate a unique file key for chunked uploads
+     */
+    generateFileKey() {
+        return `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    /**
+     * Update upload progress (can be overridden for custom progress handling)
+     */
+    updateUploadProgress(progress) {
+        // This can be used to update progress bars or other UI elements
+        console.log(`Upload progress: ${progress}%`);
     }
 
     async executeUploadRequest(file) {
@@ -956,6 +1238,7 @@ class VideoUpload {
         };
         this.data.file = fileData;
     }
+
 
     completeUpload() {
         // Re-render the component to show the uploaded video
@@ -1131,8 +1414,8 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__uploading-text">
-                    <div class="ce-video-upload__uploading-title">Uploading video...</div>
-                    <div class="ce-video-upload__uploading-subtitle">Processing and generating thumbnail</div>
+                    <div class="ce-video-upload__uploading-title">Processing video...</div>
+                    <div class="ce-video-upload__uploading-subtitle">Converting and uploading</div>
                 </div>
             </div>
         `;
@@ -1149,7 +1432,7 @@ class VideoUpload {
         }
     }
 
-    showErrorMessage(message, fileName) {
+    showErrorMessage(message, fileName, autoDismiss = false) {
         // Create or update error notification
         let errorContainer = this.wrapper.querySelector('.ce-video-upload__error-notification');
         if (!errorContainer) {
@@ -1171,15 +1454,62 @@ class VideoUpload {
                     <div class="ce-video-upload__error-message">${message}</div>
                     ${fileName ? `<div class="ce-video-upload__error-file">File: ${fileName}</div>` : ''}
                 </div>
+                <button class="ce-video-upload__error-dismiss" type="button" title="Dismiss error">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
         `;
 
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            if (errorContainer && errorContainer.parentNode) {
-                errorContainer.remove();
-            }
-        }, 5000);
+        // Add dismiss button functionality
+        const dismissBtn = errorContainer.querySelector('.ce-video-upload__error-dismiss');
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => {
+                if (errorContainer && errorContainer.parentNode) {
+                    errorContainer.remove();
+                }
+            });
+        }
+
+        // Only auto-dismiss if explicitly requested (for server errors)
+        if (autoDismiss) {
+            setTimeout(() => {
+                if (errorContainer && errorContainer.parentNode) {
+                    errorContainer.remove();
+                }
+            }, 5000);
+        }
+    }
+
+
+    showVideoCompatibilityError(videoElement, container) {
+        // Replace video player with error message
+        const errorMessage = document.createElement('div');
+        errorMessage.classList.add('ce-video-upload__video-error');
+        errorMessage.innerHTML = `
+            <div class="ce-video-upload__video-error-content">
+                <div class="ce-video-upload__video-error-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="ce-video-upload__video-error-details">
+                    <div class="ce-video-upload__video-error-title">Video Format Not Supported</div>
+                    <div class="ce-video-upload__video-error-message">
+                        This video format cannot be played in your browser.
+                        <br>Try converting it to MP4 or WebM format for better compatibility.
+                    </div>
+                    <a href="${this.data.file.url}" download class="ce-video-upload__video-error-download">
+                        Download Original File
+                    </a>
+                </div>
+            </div>
+        `;
+
+        // Replace the video element with error message
+        container.innerHTML = '';
+        container.appendChild(errorMessage);
     }
 
     showErrorState(errorItems) {
@@ -1337,7 +1667,7 @@ class VideoUpload {
         }
 
         // Update thumbnail styling based on status
-        progressThumbnail.classList.remove('status-pending', 'status-uploading', 'status-success', 'status-error');
+        progressThumbnail.classList.remove('status-pending', 'status-converting', 'status-uploading', 'status-success', 'status-error');
         progressThumbnail.classList.add(`status-${uploadItem.status}`);
 
         // Update progress icon based on status
@@ -1352,6 +1682,10 @@ class VideoUpload {
                 return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+                </svg>`;
+            case 'converting':
+                return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
+                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
                 </svg>`;
             case 'uploading':
                 return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
@@ -1375,6 +1709,7 @@ class VideoUpload {
     getStatusText(status) {
         switch (status) {
             case 'pending': return 'Pending';
+            case 'converting': return 'Converting...';
             case 'uploading': return 'Uploading...';
             case 'success': return 'Complete';
             case 'error': return 'Failed';
@@ -1461,6 +1796,11 @@ class VideoUpload {
             this.wrapper.removeEventListener('dragover', this.blockDragHandlers.handleBlockDragOver);
             this.wrapper.removeEventListener('dragleave', this.blockDragHandlers.handleBlockDragLeave);
             this.wrapper.removeEventListener('drop', this.blockDragHandlers.handleBlockDrop);
+        }
+
+        // Clean up paste handler
+        if (this.pasteHandler) {
+            document.removeEventListener('paste', this.pasteHandler);
         }
     }
 
