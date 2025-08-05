@@ -1,5 +1,5 @@
 <div x-show="showRegionToolbar" x-cloak x-ref="regionToolbar"
-    class="absolute z-50 p-4 transition-opacity duration-200 transform -translate-x-1/2 border shadow-lg cursor-move select-none bottom-4 left-1/2 min-w-80 rounded-2xl border-zinc-200/50 bg-white/95 opacity-30 backdrop-blur-md hover:opacity-100 dark:border-zinc-700/50 dark:bg-zinc-900/95 dark:shadow-zinc-900/20"
+    class="absolute z-50 p-4 transition-opacity duration-200 transform -translate-x-1/2 border shadow-lg cursor-move select-none bottom-28 left-1/2 min-w-80 rounded-2xl border-zinc-200/50 bg-white/95 opacity-30 backdrop-blur-md hover:opacity-100 dark:border-zinc-700/50 dark:bg-zinc-900/95 dark:shadow-zinc-900/20"
     x-data="{ isDragging: false, dragStarted: false }" @touchstart="isDragging = false; dragStarted = false"
     @mousedown="isDragging = false; dragStarted = false" style="touch-action: none;" :class="{ 'opacity-70': isDragging }"
     x-init="initRegionToolbarDrag($refs.regionToolbar)" x-transition:enter="transition ease-out duration-200"

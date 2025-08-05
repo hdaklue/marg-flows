@@ -241,15 +241,10 @@
         </div>
 
         <!-- Region Bar -->
-        <div x-show="showRegionBar && config.features.enableAnnotations && !isTouchDevice()" x-cloak class="mt-2">
-            <!-- Region Creation Area (Hidden on Mobile) -->
-            <div x-ref="regionBar" @mousedown.prevent.stop="startRegionCreation($event)"
-                @mousemove.stop="isCreatingRegion && updateRegionCreation($event)"
-                @mouseup.stop="isCreatingRegion && finishRegionCreation($event)"
-                @touchstart.prevent.stop="startRegionCreation($event)"
-                @touchmove.prevent.stop="isCreatingRegion && updateRegionCreation($event)"
-                @touchend.prevent.stop="isCreatingRegion && finishRegionCreation($event)"
-                class="relative w-full h-8 overflow-hidden transition-colors border rounded-md cursor-crosshair"
+        <div x-show="showRegionBar && config.features.enableAnnotations" x-cloak class="mt-2">
+            <!-- Region Creation Area -->
+            <div x-ref="regionBar"
+                class="relative w-full h-8 overflow-hidden transition-colors border rounded-md cursor-default"
                 :class="isCreatingRegion || regions.length > 0 ?
                     'bg-zinc-200 border-zinc-400 dark:bg-zinc-800 dark:border-zinc-600' :
                     'bg-zinc-100 border-zinc-300 dark:bg-zinc-700 dark:border-zinc-500'"
@@ -260,7 +255,7 @@
                     class="absolute inset-0 z-30 rounded-md bg-gradient-to-r from-emerald-400/50 via-emerald-500/30 to-emerald-600/50"
                     :style="regionCreationStart && regionCreationEnd ?
                         `left: ${Math.min(regionCreationStart.x, regionCreationEnd.x)}px;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    width: ${Math.abs(regionCreationEnd.x - regionCreationStart.x)}px` :
+                         width: ${Math.abs(regionCreationEnd.x - regionCreationStart.x)}px` :
                         ''">
 
                     <div
@@ -268,6 +263,32 @@
                         Creating Region
                     </div>
                 </div>
+
+                <!-- Existing Regions with Draggable Edges -->
+                <template x-for="region in getVisibleRegions()" :key="region.id">
+                    <div class="absolute h-full bg-sky-500/30 border border-sky-500/50 rounded-sm group hover:bg-sky-500/40 transition-colors"
+                         :style="`left: ${region.position.left}%; width: ${region.position.width}%`">
+                        
+                        <!-- Region Content -->
+                        <div class="absolute inset-0 flex items-center justify-center text-xs font-medium text-sky-800 dark:text-sky-200 pointer-events-none">
+                            <span x-text="region.title || 'Region'"></span>
+                        </div>
+                        
+                        <!-- Left Resize Handle -->
+                        <div class="absolute left-0 top-0 w-2 h-full bg-sky-600 opacity-0 group-hover:opacity-100 cursor-w-resize transition-opacity"
+                             @mousedown.prevent.stop="startRegionResize($event, region.id, 'start')"
+                             @touchstart.prevent.stop="startRegionResize($event, region.id, 'start')"
+                             title="Resize region start">
+                        </div>
+                        
+                        <!-- Right Resize Handle -->
+                        <div class="absolute right-0 top-0 w-2 h-full bg-sky-600 opacity-0 group-hover:opacity-100 cursor-e-resize transition-opacity"
+                             @mousedown.prevent.stop="startRegionResize($event, region.id, 'end')"
+                             @touchstart.prevent.stop="startRegionResize($event, region.id, 'end')"
+                             title="Resize region end">
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
@@ -548,11 +569,8 @@
                     class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
                     :class="{ 'bg-sky-100 text-sky-600 shadow-md dark:bg-sky-900/50 dark:text-sky-400': showRegionToolbar }"
                     aria-label="Create region at current frame" title="Create Region at Current Frame">
-                    <!-- Frame Icon -->
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 4v16l4-4h6a2 2 0 002-2V6a2 2 0 00-2-2H7z" />
-                    </svg>
+                    <!-- Bracket Symbol [] -->
+                    <span class="text-sm font-bold font-mono">[ ]</span>
                 </button>
 
 

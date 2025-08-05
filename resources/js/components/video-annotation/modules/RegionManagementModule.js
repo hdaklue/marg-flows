@@ -68,6 +68,113 @@ export class RegionManagementModule {
     }
     
     /**
+     * Start region creation at specific time
+     */
+    startRegionCreationAtTime(timestamp) {
+        if (!this.config.annotations?.enableVideoAnnotations) return;
+        
+        this.creationInProgress = true;
+        this.creationStartTime = timestamp;
+        this.sharedState.touchInterface.mode = 'REGION_CREATE';
+        
+        // Create temporary region for preview
+        this.tempRegion = {
+            id: `temp-${Date.now()}`,
+            startTime: this.creationStartTime,
+            endTime: this.creationStartTime,
+            title: '',
+            description: '',
+            temporary: true
+        };
+        
+        // Seek to the specified time
+        this.core.seekTo(timestamp);
+        
+        // Pause video during region creation
+        if (this.sharedState.isPlaying) {
+            this.core.togglePlayPause();
+        }
+        
+        this.$dispatch('video-annotation:region-creation-started', {
+            startTime: this.creationStartTime
+        });
+        
+        if (this.sharedState.contextDisplay.debugMode) {
+            console.log(`[RegionManagement] Started region creation at ${this.creationStartTime}s`);
+        }
+        
+        return this.tempRegion;
+    }
+    
+    /**
+     * Start region creation at current frame (frame-aligned)
+     */
+    startRegionCreationAtCurrentFrame() {
+        if (!this.config.annotations?.enableVideoAnnotations) return;
+        
+        const currentTime = this.sharedState.currentTime;
+        const frameAlignedTime = this.sharedState.roundToNearestFrame ? 
+            this.sharedState.roundToNearestFrame(currentTime) : currentTime;
+        const frameNumber = this.sharedState.getFrameNumber ? 
+            this.sharedState.getFrameNumber(frameAlignedTime) : Math.floor(frameAlignedTime * (this.sharedState.frameRate || 30));
+        
+        this.creationInProgress = true;
+        this.creationStartTime = frameAlignedTime;
+        this.sharedState.touchInterface.mode = 'REGION_CREATE';
+        
+        // Update shared state for visual indicators
+        this.sharedState.isCreatingRegion = true;
+        this.sharedState.showRegionToolbar = true;
+        
+        // Calculate visual position for region bar overlay
+        if (this.$refs && this.$refs.regionBar) {
+            const regionBar = this.$refs.regionBar;
+            const rect = regionBar.getBoundingClientRect();
+            const percentage = (frameAlignedTime / this.sharedState.duration) * 100;
+            const x = (percentage / 100) * rect.width;
+            
+            this.sharedState.regionCreationStart = {
+                x: x,
+                time: frameAlignedTime,
+                percentage: percentage
+            };
+            this.sharedState.regionCreationEnd = { ...this.sharedState.regionCreationStart };
+        }
+        
+        // Create temporary region for preview
+        this.tempRegion = {
+            id: `temp-${Date.now()}`,
+            startTime: this.creationStartTime,
+            endTime: this.creationStartTime,
+            startFrame: frameNumber,
+            endFrame: frameNumber,
+            title: '',
+            description: '',
+            temporary: true
+        };
+        
+        // Seek to the frame-aligned time
+        this.core.seekTo(frameAlignedTime);
+        
+        // Pause video during region creation
+        if (this.sharedState.isPlaying) {
+            this.core.togglePlayPause();
+        }
+        
+        this.$dispatch('video-annotation:region-creation-started', {
+            startTime: this.creationStartTime,
+            frameNumber: frameNumber,
+            frameRate: this.sharedState.frameRate
+        });
+        
+        if (this.sharedState.contextDisplay.debugMode) {
+            console.log(`[RegionManagement] Started region creation at frame ${frameNumber} (${frameAlignedTime}s)`);
+        }
+        
+        return this.tempRegion;
+    }
+    
+    /**
      * Update region creation end time
      */
     updateRegionCreation(endTime) {
@@ -463,6 +570,8 @@ export class RegionManagementModule {
         return {
             // Region creation methods
             startRegionCreation: this.startRegionCreation.bind(this),
+            startRegionCreationAtTime: this.startRegionCreationAtTime.bind(this),
+            startRegionCreationAtCurrentFrame: this.startRegionCreationAtCurrentFrame.bind(this),
             updateRegionCreation: this.updateRegionCreation.bind(this),
             finishRegionCreation: this.finishRegionCreation.bind(this),
             cancelRegionCreation: this.cancelRegionCreation.bind(this),

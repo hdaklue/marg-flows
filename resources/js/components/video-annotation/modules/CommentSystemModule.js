@@ -363,6 +363,41 @@ export class CommentSystemModule {
     }
     
     /**
+     * Add comment at specific time
+     */
+    addCommentAtTime(timestamp) {
+        const frameRate = this.sharedState.frameRate || 30;
+        const frameNumber = Math.floor(timestamp * frameRate) + 1;
+        
+        // Generate new comment ID
+        const commentId = this.sharedState.comments.length + 1;
+        
+        const newComment = {
+            commentId: commentId,
+            avatar: 'https://ui-avatars.com/api/?name=User&background=8b5cf6&color=fff',
+            name: 'User',
+            body: `New comment at ${this.formatTimestamp(timestamp)}`,
+            timestamp: timestamp,
+            frameNumber: frameNumber,
+            frameRate: frameRate
+        };
+        
+        // Add to shared state
+        this.addComment(newComment);
+        
+        // Dispatch event for Livewire integration
+        this.$dispatch('video-annotation:add-comment', {
+            timestamp: timestamp,
+            frameNumber: frameNumber,
+            frameRate: frameRate
+        });
+        
+        console.log('[CommentSystem] Added comment at time:', timestamp, 'frame:', frameNumber);
+        
+        return newComment;
+    }
+    
+    /**
      * Remove comment from the system
      */
     removeComment(commentId) {

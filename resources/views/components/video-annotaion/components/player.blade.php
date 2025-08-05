@@ -119,12 +119,51 @@
             </div>
         </div>
     </div>
-    <div x-cloak x-show="showContextMenu && config.annotations.enableContextMenu"
-        @click.away.window="showContextMenu = false"
-        class="fixed z-50 flex flex-col rounded-lg w-36 bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-200"
-        :style="`left: ${contextMenuX}px; top: ${contextMenuY}px`">
-        <div @click="addCommentFromContextMenu()" class="p-2 text-xs rounded-lg cursor-pointer dark:hover:bg-zinc-700">
-            Add
-            comment</div>
+    <!-- Enhanced Context Menu -->
+    <div x-cloak x-show="showContextMenu"
+        @click.away="hideContextMenu()"
+        class="fixed z-50 flex flex-col rounded-lg w-44 bg-white/95 dark:bg-zinc-800/95 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 shadow-lg"
+        :style="`left: ${contextMenuX}px; top: ${contextMenuY}px`"
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="opacity-100 scale-100" 
+        x-transition:leave-end="opacity-0 scale-95">
+        
+        <!-- Context Menu Header -->
+        <div class="px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-700">
+            <span x-text="'At ' + (contextMenuTime ? formatTime(contextMenuTime) : '0:00')"></span>
+        </div>
+        
+        <!-- Add Comment Option -->
+        <div @click="handleContextMenuAction('add-comment')" 
+             class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Add Comment
+        </div>
+        
+        <!-- Create Region Option -->
+        <div @click="handleContextMenuAction('create-region')" 
+             class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+            </svg>
+            Create Region
+        </div>
+        
+        <!-- Divider -->
+        <div class="border-t border-zinc-200 dark:border-zinc-700"></div>
+        
+        <!-- Seek to Time Option -->
+        <div @click="seekTo(contextMenuTime); hideContextMenu()" 
+             class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Seek Here
+        </div>
     </div>
 </div>
