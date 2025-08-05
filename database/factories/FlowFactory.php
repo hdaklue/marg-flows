@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\FlowStatus;
+use App\Enums\FlowStage;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
@@ -29,9 +29,9 @@ final class FlowFactory extends Factory
         return [
             'title' => $this->getProjectTitle(),
             'description' => fake()->sentences(2, true),
-            'status' => $statusType,
-            'start_date' => $startDate,
-            'due_date' => $dueDate,
+            'stage' => $statusType,
+            // 'start_date' => $startDate,
+            // 'due_date' => $dueDate,
             'completed_at' => $completedAt,
             'settings' => $this->getProjectSettings(),
             'tenant_id' => Tenant::inRandomOrder()->first()->getKey(),
@@ -50,7 +50,7 @@ final class FlowFactory extends Factory
             $dueDate = $startDate->copy()->addDays(fake()->numberBetween(7, 45))->endOfDay();
 
             return [
-                'status' => FlowStatus::SCHEDULED->value,
+                'status' => FlowStage::SCHEDULED->value,
                 'start_date' => $startDate,
                 'due_date' => $dueDate,
                 'completed_at' => null,
@@ -69,7 +69,7 @@ final class FlowFactory extends Factory
             $dueDate = $now->copy()->addDays(fake()->numberBetween(7, 60))->endOfDay();
 
             return [
-                'status' => FlowStatus::ACTIVE->value,
+                'status' => FlowStage::ACTIVE->value,
                 'start_date' => $startDate,
                 'due_date' => $dueDate,
                 'completed_at' => null,
@@ -88,7 +88,7 @@ final class FlowFactory extends Factory
             $startDate = $dueDate->copy()->subDays(fake()->numberBetween(14, 60))->startOfDay();
 
             return [
-                'status' => FlowStatus::ACTIVE->value, // Active but overdue
+                'status' => FlowStage::ACTIVE->value, // Active but overdue
                 'start_date' => $startDate,
                 'due_date' => $dueDate,
                 'completed_at' => null,
@@ -107,7 +107,7 @@ final class FlowFactory extends Factory
             $dueDate = $now->copy()->addDays(fake()->numberBetween(7, 45))->endOfDay();
 
             return [
-                'status' => FlowStatus::PAUSED->value,
+                'status' => FlowStage::PAUSED->value,
                 'start_date' => $startDate,
                 'due_date' => $dueDate,
                 'completed_at' => null,
@@ -139,7 +139,7 @@ final class FlowFactory extends Factory
             $dueDate = $completedAt->copy()->addDays($dueOffset)->endOfDay();
 
             return [
-                'status' => FlowStatus::COMPLETED->value,
+                'status' => FlowStage::COMPLETED->value,
                 'start_date' => $startDate,
                 'due_date' => $dueDate,
                 'completed_at' => $completedAt,
@@ -160,25 +160,25 @@ final class FlowFactory extends Factory
                 'same_day' => [
                     'start_date' => $now->copy()->startOfDay(),
                     'due_date' => $now->copy()->endOfDay(),
-                    'status' => FlowStatus::ACTIVE->value,
+                    'status' => FlowStage::ACTIVE->value,
                 ],
                 // Very short project (3 days)
                 'short' => [
                     'start_date' => $now->copy()->subDay()->startOfDay(),
                     'due_date' => $now->copy()->addDays(2)->endOfDay(),
-                    'status' => FlowStatus::ACTIVE->value,
+                    'status' => FlowStage::ACTIVE->value,
                 ],
                 // Started today
                 'started_today' => [
                     'start_date' => $now->copy()->startOfDay(),
                     'due_date' => $now->copy()->addDays(14)->endOfDay(),
-                    'status' => FlowStatus::ACTIVE->value,
+                    'status' => FlowStage::ACTIVE->value,
                 ],
                 // Due today
                 'due_today' => [
                     'start_date' => $now->copy()->subDays(14)->startOfDay(),
                     'due_date' => $now->copy()->endOfDay(),
-                    'status' => FlowStatus::ACTIVE->value,
+                    'status' => FlowStage::ACTIVE->value,
                 ],
             ];
 
@@ -194,10 +194,10 @@ final class FlowFactory extends Factory
     private function getWeightedStatus(): int|string
     {
         $weights = [
-            FlowStatus::SCHEDULED->value => 25,  // 25%
-            FlowStatus::ACTIVE->value => 45,     // 45%
-            FlowStatus::COMPLETED->value => 20,  // 20%
-            FlowStatus::PAUSED->value => 10,     // 10%
+            FlowStage::DRAFT->value => 25,  // 25%
+            FlowStage::ACTIVE->value => 45,     // 45%
+            FlowStage::COMPLETED->value => 20,  // 20%
+            FlowStage::PAUSED->value => 10,     // 10%
         ];
 
         $rand = fake()->numberBetween(1, 100);
@@ -210,7 +210,7 @@ final class FlowFactory extends Factory
             }
         }
 
-        return FlowStatus::ACTIVE->value; // Fallback
+        return FlowStage::ACTIVE->value; // Fallback
     }
 
     /**
@@ -221,10 +221,10 @@ final class FlowFactory extends Factory
         $now = now();
 
         return match ($status) {
-            FlowStatus::SCHEDULED->value => $this->scheduledDates($now),
-            FlowStatus::ACTIVE->value => $this->activeDates($now),
-            FlowStatus::PAUSED->value => $this->pausedDates($now),
-            FlowStatus::COMPLETED->value => $this->completedDates($now),
+            FlowStage::DRAFT->value => $this->scheduledDates($now),
+            FlowStage::ACTIVE->value => $this->activeDates($now),
+            FlowStage::PAUSED->value => $this->pausedDates($now),
+            FlowStage::COMPLETED->value => $this->completedDates($now),
             default => $this->activeDates($now),
         };
     }

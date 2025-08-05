@@ -197,9 +197,9 @@ final class DatabaseSeeder extends Seeder
         $this->command->info('Creating specific test scenarios...');
 
         // Keep original test scenarios
-        Flow::factory(5)->overdue()->create();
-        Flow::factory(3)->edgeCases()->create();
-        Flow::factory(10)->scheduled()->create();
+        // Flow::factory(5)->overdue()->create();
+        // Flow::factory(3)->edgeCases()->create();
+        // Flow::factory(10)->scheduled()->create();
 
         // Test user is already assigned as ADMIN to all flows above, no need for additional assignments
 

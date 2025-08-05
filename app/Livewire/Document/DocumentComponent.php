@@ -64,7 +64,7 @@ final class DocumentComponent extends Component
     public function participantsArray(): array
     {
 
-        return $this->participants->pluck('model')->map(fn ($item) => ['name' => $item->getAttribute('name'), 'avatar' => $item->getAttribute('avatar')])->toArray();
+        return $this->participants->asDtoArray()->toArray();
     }
 
     #[On('roleable-entity:members-updated.{page.id}')]

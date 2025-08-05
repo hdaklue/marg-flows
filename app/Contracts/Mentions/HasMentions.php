@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Contracts\Mentions;
 
+use App\Facades\MentionService;
 use App\Models\Mentions\Mention;
-use App\Services\MentionService;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
@@ -18,6 +18,6 @@ trait HasMentions
 
     public function getMentionables(): Collection
     {
-        return new MentionService()->getMentionables($this);
+        return MentionService::getMentionables($this);
     }
 }

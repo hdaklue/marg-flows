@@ -8,20 +8,18 @@ use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\Document\ManagesDocuments;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
-use App\Concerns\Progress\HasTimeProgress;
 use App\Concerns\Role\ManagesParticipants;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\Document\Documentable;
 use App\Contracts\HasStaticType;
-use App\Contracts\Progress\TimeProgressable;
 use App\Contracts\Role\RoleableEntity;
 use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
-use App\Enums\FlowStatus;
-use App\Services\MentionService;
+use App\Enums\FlowStage;
+use App\Facades\MentionService;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,8 +30,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Spatie\EloquentSortable\Sortable;
-use Spatie\EloquentSortable\SortableTrait;
 
 /**
  * @property string $id
@@ -69,8 +65,8 @@ use Spatie\EloquentSortable\SortableTrait;
  * @property-read Tenant $tenant
  *
  * @method static Builder<static>|Flow assignable()
- * @method static Builder<static>|Flow byStage(\App\Enums\FlowStatus|string $status)
- * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStatus|string $status)
+ * @method static Builder<static>|Flow byStage(\App\Enums\FlowStage|string $status)
+ * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStage|string $status)
  * @method static Builder<static>|Flow byTenant(\App\Models\Tenant $tenant)
  * @method static \Database\Factories\FlowFactory factory($count = null, $state = [])
  * @method static Builder<static>|Flow forParticipant(\App\Contracts\Role\AssignableEntity $member)
@@ -108,25 +104,18 @@ use Spatie\EloquentSortable\SortableTrait;
  *
  * @mixin \Eloquent
  */
-final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable, Sortable, TimeProgressable
+final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable
 {
     use BelongsToTenant,
         HasFactory,
         HasSideNotes,
         HasStagesTrait,
         HasStaticTypeTrait ,
-        HasTimeProgress,
         HasUlids,
         LivesInOriginalDB,
         ManagesDocuments,
         ManagesParticipants,
-        SoftDeletes,
-        SortableTrait;
-
-    public $sortable = [
-        'order_column_name' => 'order_column',
-        'sort_when_creating' => true,
-    ];
+        SoftDeletes;
 
     // protected $connection = 'mysql';
 
@@ -135,13 +124,10 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     protected $fillable = [
         'title',
         'description',
-        'status',
+        'stage',
         'is_default',
-        'start_date',
-        'due_date',
         'completed_at',
         'canceled_at',
-
     ];
 
     /* The model's default values for attributes.
@@ -149,12 +135,12 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
      * @var array
      */
     protected $attributes = [
-        'status' => FlowStatus::ACTIVE->value,
+        'stage' => FlowStage::ACTIVE->value,
     ];
 
     public function getMentionables(): Collection
     {
-        return (new MentionService)->getMentionables($this);
+        return MentionService::getMentionables($this);
     }
 
     public function systemRoleByName(string $name): Role
@@ -172,25 +158,27 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
         return $this->belongsTo(User::class, 'creator_id');
     }
 
-    public function scopeAssignable(Builder $builder)
+    #[Scope]
+    public function assignable(Builder $builder)
     {
-        return $builder->where('status', '!=', FlowStatus::COMPLETED->value);
+        return $builder->where('stage', '!=', FlowStage::COMPLETED->value);
 
     }
 
-    public function scopeByStatus(Builder $builder, string|FlowStatus $status)
+    #[Scope]
+    public function byStage(Builder $builder, string|FlowStage $stage)
     {
-        if ($status instanceof BackedEnum) {
-            $status = $status->value;
+        if ($stage instanceof BackedEnum) {
+            $stage = $stage->value;
         }
 
-        return $builder->where('status', '=', $status);
+        return $builder->where('stage', '=', $stage);
     }
 
     public function setAsCompleted()
     {
         $this->update([
-            'status' => FlowStatus::COMPLETED->value,
+            'stage' => FlowStage::COMPLETED->value,
             'completed_at' => now(),
             'canceled_at' => null,
         ]);
@@ -199,17 +187,17 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     public function setAsCanceled()
     {
         $this->update([
-            'status' => FlowStatus::CANCELED->value,
+            'stage' => FlowStage::CANCELED->value,
             'completed_at' => null,
             'canceled_at' => now(),
         ]);
     }
 
-    public function setStatus(FlowStatus $status)
+    public function setStatus(FlowStage $status)
     {
 
         $this->update([
-            'status' => $status->value,
+            'stage' => $status->value,
             'completed_at' => null,
             'canceled_at' => null,
         ]);
@@ -218,22 +206,22 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     #[Scope]
     public function scopeRunning(Builder $query): Builder
     {
-        return $query->whereNotIn('status', [FlowStatus::COMPLETED->value, FlowStatus::CANCELED->value, FlowStatus::PAUSED->value]);
+        return $query->whereNotIn('stage', [FlowStage::COMPLETED->value, FlowStage::CANCELED->value, FlowStage::PAUSED->value]);
     }
 
-    public function buildSortQuery()
-    {
-        return self::query()
-            ->byStatus(FlowStatus::from($this->status))
-            ->byTenant($this->tenant);
-    }
+    // public function buildSortQuery()
+    // {
+    //     return self::query()
+    //         ->byStatus(FlowStatus::from($this->status))
+    //         ->byTenant($this->tenant);
+    // }
 
     protected function casts(): array
     {
         return [
             'settings' => 'array',
-            'due_date' => 'datetime',
-            'start_date' => 'datetime',
+            // 'due_date' => 'datetime',
+            // 'start_date' => 'datetime',
             'completed_at' => 'date',
             'canceled_at' => 'date',
         ];

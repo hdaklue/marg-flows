@@ -6,7 +6,7 @@ namespace App\Listeners\Auth;
 
 use Illuminate\Auth\Events\Login;
 
-class UpdateLastLogin
+final class UpdateLastLogin
 {
     /**
      * Create the event listener.

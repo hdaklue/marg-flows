@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Components;
 
+use App\Collections\Role\ParticipantsCollection;
 use App\Filament\Resources\DocumentResource;
 use App\Models\Document;
 use Illuminate\Support\Collection;
@@ -43,7 +44,7 @@ final class DocumentCard extends Component
     }
 
     #[Computed]
-    public function participants(): Collection
+    public function participants(): ParticipantsCollection
     {
         return $this->page->getParticipants();
     }
@@ -52,7 +53,7 @@ final class DocumentCard extends Component
     public function participantsArray(): array
     {
 
-        return $this->participants->pluck('model')->map(fn ($item) => ['name' => $item->getAttribute('name'), 'avatar' => $item->getAttribute('avatar')])->toArray();
+        return $this->participants->asDtoArray()->toArray();
     }
 
     #[Computed(true)]

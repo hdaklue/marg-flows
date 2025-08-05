@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Concerns\Role;
 
+use App\Collections\Role\ParticipantsCollection;
 use App\Contracts\Role\AssignableEntity;
 use App\Enums\Role\RoleEnum;
 use App\Facades\RoleManager;
@@ -61,7 +62,7 @@ trait ManagesParticipants
         return null;
     }
 
-    public function getParticipants(): Collection
+    public function getParticipants(): ParticipantsCollection
     {
         return RoleManager::getParticipants($this);
     }

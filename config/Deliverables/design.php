@@ -1,0 +1,76 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'video_cover' => [
+        'name' => 'Video Cover',
+        'width' => 1920,
+        'height' => 1080,
+        'aspect_ratio' => 1.7777777778,
+        'aspect_ratio_name' => '16:9',
+        'description' => 'A standard video cover format, ideal for YouTube and other video platforms.',
+        'tags' => ['video', 'cover', '16:9'],
+        'recommended_platforms' => ['YouTube', 'Vimeo', 'Facebook'],
+        'safe_area' => [
+            'top' => 100,
+            'bottom' => 100,
+            'left' => 100,
+            'right' => 100,
+        ],
+    ],
+    'square' => [
+        'name' => 'Square',
+        'width' => 1080,
+        'height' => 1080,
+        'aspect_ratio' => 1.0,
+        'aspect_ratio_name' => '1:1',
+        'description' => 'A balanced square format, perfect for social media posts and versatile content.',
+        'tags' => ['social media', 'balanced', 'versatile'],
+        'recommended_platforms' => ['Instagram', 'Facebook', 'Twitter'],
+        'safe_area' => [
+            'top' => 100,
+            'bottom' => 100,
+            'left' => 100,
+            'right' => 100,
+        ],
+    ],
+    'story' => [
+        'name' => 'Story',
+        'width' => 1080,
+        'height' => 1920,
+        'aspect_ratio' => 0.5625,
+        'aspect_ratio_name' => '9:16',
+        'description' => 'A vertical format designed for mobile stories, optimized for quick viewing on social platforms.',
+        'tags' => ['mobile', 'vertical', 'story'],
+        'recommended_platforms' => ['Instagram', 'Snapchat', 'Facebook Stories'],
+        'safe_area' => [
+            'top' => 250,
+            'top_percentage' => 0.23148,
+            'bottom_percentage' => 0.15,
+            'left_percentage' => 0.1,
+            'right_percentage' => 0.1,
+            'bottom' => 250,
+            'left' => 100,
+            'right' => 100,
+        ],
+    ],
+    'Portrait' => [
+        'name' => 'Portrait',
+        'width' => 1080,
+        'height' => 1350,
+        'aspect_ratio' => 0.8,
+        'aspect_ratio_name' => '4:5',
+        'description' => 'A tall format ideal for portraits and vertical content, commonly used in mobile applications.',
+        'tags' => ['portrait', 'vertical', 'mobile'],
+    ],
+    'land_scape' => [
+        'name' => 'Landscape',
+        'width' => 1920,
+        'height' => 1080,
+        'aspect_ratio' => 1.7777777778,
+        'aspect_ratio_name' => '16:9',
+        'description' => 'A wide landscape format, perfect for videos and presentations, providing a cinematic feel.',
+        'tags' => ['landscape', 'video', 'presentation'],
+    ],
+];

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Concerns\Stage;
 
-use App\Enums\FlowStatus;
+use App\Enums\FlowStage;
 use App\Models\Stage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -16,9 +16,9 @@ trait HasStagesTrait
         return $this->morphMany(Stage::class, 'stageable');
     }
 
-    public function scopeByStage(Builder $builder, string|FlowStatus $status): Builder
+    public function scopeByStage(Builder $builder, string|FlowStage $status): Builder
     {
-        $status = $status instanceof FlowStatus ? $status->value : $status;
+        $status = $status instanceof FlowStage ? $status->value : $status;
 
         return $builder->whereHas('stages', function ($query) use ($status) {
             $query->where('name', $status);

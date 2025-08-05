@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTOs\Flow;
 
-use App\Enums\FlowStatus;
+use App\Enums\FlowStage;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Flow\TemplateService;
@@ -18,7 +18,7 @@ final class CreateFlowDto extends ValidatedDTO
 {
     public string $title;
 
-    public ?FlowStatus $status;
+    public ?FlowStage $status;
 
     public ?FlowTemplateDto $template;
 
@@ -54,7 +54,7 @@ final class CreateFlowDto extends ValidatedDTO
 
         return [
             'title' => ['required', 'string', 'min:3', 'max:255'],
-            'status' => ['sometimes', Rule::enum(FlowStatus::class)],
+            'status' => ['sometimes', Rule::enum(FlowStage::class)],
             'description' => ['required', 'string'],
             'order_column' => ['interger'],
             'start_date' => ['date', 'required', Rule::date()->afterOrEqual(today()->startOfDay())],
@@ -80,16 +80,16 @@ final class CreateFlowDto extends ValidatedDTO
         return TemplateService::getDefault();
     }
 
-    protected function evaluateDefaultStatus(): FlowStatus
+    protected function evaluateDefaultStatus(): FlowStage
     {
 
-        return $this->start_date->isAfter(today()) ? FlowStatus::SCHEDULED : FlowStatus::ACTIVE;
+        return $this->start_date->isAfter(today()) ? FlowStage::SCHEDULED : FlowStage::ACTIVE;
     }
 
     protected function casts(): array
     {
         return [
-            'status' => new EnumCast(FlowStatus::class),
+            'status' => new EnumCast(FlowStage::class),
             'start_date' => new CarbonCast,
             'due_date' => new CarbonCast,
             'completed_at' => new CarbonCast,

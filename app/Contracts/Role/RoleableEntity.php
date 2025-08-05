@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Role;
 
+use App\Collections\Role\ParticipantsCollection;
 use App\Enums\Role\RoleEnum;
 use App\Models\Role;
 use Illuminate\Contracts\Support\Arrayable;
@@ -11,7 +12,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Support\Collection;
 
 /**
  * @method load();
@@ -28,7 +28,7 @@ interface RoleableEntity extends Arrayable
 
     public function assignedRoles(): MorphToMany;
 
-    public function getParticipants(): Collection;
+    public function getParticipants(): ParticipantsCollection;
 
     public function getParticipantRole(AssignableEntity $participant): ?Role;
 

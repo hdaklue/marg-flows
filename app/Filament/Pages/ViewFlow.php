@@ -17,7 +17,6 @@ use Filament\Notifications\Notification;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -82,7 +81,7 @@ final class ViewFlow extends KanbanBoard
     #[Computed]
     public function getParticipantsArray(): array
     {
-        return $this->flow->getParticipants()->pluck('model')->map(fn ($item) => ['name' => $item->name, 'avatar' => $item->avatar])->toArray();
+        return $this->flow->getParticipants()->asDtoArray()->toArray();
     }
 
     protected function getHeaderActions(): array
@@ -96,8 +95,6 @@ final class ViewFlow extends KanbanBoard
                 ->size(ActionSize::ExtraSmall)
                 ->fillForm(fn () => [
                     'title' => $this->flow->title,
-
-                    'due_date' => $this->flow->getProgressDueDate(),
                     'description' => $this->flow->description,
                 ])
                 ->form([
@@ -113,16 +110,16 @@ final class ViewFlow extends KanbanBoard
                             ->required(),
                         // DatePicker::make('start_date')
                         //     ->native(false),
-                        DatePicker::make('due_date')
-                            ->minDate($this->flow->getProgressStartDate())
-                            ->required()
-                            ->native(false),
+                        // DatePicker::make('due_date')
+                        //     ->minDate()
+                        //     ->required()
+                        //     ->native(false),
                     ]),
                 ])
                 ->action(function (array $data) {
                     try {
                         EditFlow::run($this->flow, $data['title'],
-                            $data['description'], Carbon::parse($data['due_date']));
+                            $data['description']);
                         Notification::make()
                             ->body('Updated successfully')
                             ->success()

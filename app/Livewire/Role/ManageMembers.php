@@ -6,7 +6,9 @@ namespace App\Livewire\Role;
 
 use App\Actions\Roleable\AddParticipant;
 use App\Actions\Roleable\RemoveParticipant;
+use App\Collections\Role\ParticipantsCollection;
 use App\Contracts\Role\RoleableEntity;
+use App\DTOs\Roles\ParticipantsDto;
 use App\Enums\Role\RoleEnum;
 use App\Facades\RoleManager;
 use App\Models\User;
@@ -29,7 +31,7 @@ use const true;
 
 /**
  * @property-read Form $form
- * @property-read Collection $manageableMembers
+ * @property-read ParticipantsCollection $manageableMembers
  * @property-read Collection $authedUserAssignableRoles
  */
 #[Lazy(true)]
@@ -90,14 +92,18 @@ final class ManageMembers extends Component implements HasActions, HasForms
     }
 
     #[Computed]
-    public function manageableMembers(): Collection
+    public function manageableMembers(): ParticipantsCollection
     {
 
         if (! $this->roleable) {
-            return collect();
+            return new ParticipantsCollection;
         }
 
-        return $this->roleable->getParticipants()->filter(fn ($item) => $item->model->getKey() !== filamentUser()->getKey());
+        return $this->roleable->getParticipants()->exceptAssignable(filamentUser())->asDtoArray();
+
+        // return ParticipantsDto::fromParticipantsCollection(
+        //     $this->roleable->getParticipants()->exceptAssignable(filamentUser()->getKey()),
+        // );
     }
 
     public function addMember()

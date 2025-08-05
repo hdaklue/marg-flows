@@ -73,7 +73,7 @@ final class InviteMember
 
     private function generatePassword(): string
     {
-        $this->password = Str::password(8);
+        $this->password = Str::password(10, true, true, false);
 
         return $this->encryptedPassword = bcrypt($this->password);
     }

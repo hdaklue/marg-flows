@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Role;
 
+use App\Collections\Role\ParticipantsCollection;
 use App\Contracts\Role\AssignableEntity;
 use App\Contracts\Role\RoleableEntity;
 use App\Contracts\Role\RoleAssignmentManagerInterface;
@@ -158,9 +159,9 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
      *
      * @return Collection<ModelHasRole>
      */
-    public function getParticipants(RoleableEntity $target): Collection
+    public function getParticipants(RoleableEntity $target): ParticipantsCollection
     {
-        return $this->getParticipantsWithRoles($target);
+        return new ParticipantsCollection($this->getParticipantsWithRoles($target));
     }
 
     public function hasRoleOn(AssignableEntity $user, RoleableEntity $target, string|RoleEnum $role): bool

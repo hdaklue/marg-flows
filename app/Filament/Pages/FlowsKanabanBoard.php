@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
-use App\Enums\FlowStatus;
+use App\Enums\FlowStage;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
 use Illuminate\Support\Collection;
@@ -15,11 +15,13 @@ final class FlowsKanabanBoard extends KanbanBoard
 {
     protected static string $model = Flow::class;
 
-    protected static string $statusEnum = FlowStatus::class;
+    protected static string $statusEnum = FlowStage::class;
 
     protected static ?string $navigationLabel = 'Overview';
 
     protected static ?string $title = 'Flows';
+
+    protected static string $recordStatusAttribute = 'stage';
 
     public string $progressService = TimeProgressService::class;
 
@@ -42,9 +44,9 @@ final class FlowsKanabanBoard extends KanbanBoard
         $record = $this->getEloquentQuery()->find($recordId);
 
         match ((int) $status) {
-            FlowStatus::COMPLETED->value => $record->setAsCompleted(),
-            FlowStatus::CANCELED->value => $record->setAsCanceled(),
-            default => $record->setStatus(FlowStatus::from((int) $status)),
+            FlowStage::COMPLETED->value => $record->setAsCompleted(),
+            FlowStage::CANCELED->value => $record->setAsCanceled(),
+            default => $record->setStatus(FlowStage::from((int) $status)),
 
         };
 
@@ -67,7 +69,7 @@ final class FlowsKanabanBoard extends KanbanBoard
 
         return Flow::unless($isAdmin, function ($query) {
             $query->forParticipant(filamentUser());
-        })->byTenant(filamentTenant())->ordered()->get();
+        })->byTenant(filamentTenant())->get();
     }
 
     protected function getProgressPercentage(Flow $record)

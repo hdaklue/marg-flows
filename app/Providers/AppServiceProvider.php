@@ -12,6 +12,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Document\DocumentService;
 use App\Services\Flow\TimeProgressService;
+use App\Services\MentionService;
 use App\Services\Role\RoleAssignmentService;
 use Filament\Actions\Action;
 use Filament\Support\Assets\AlpineComponent;
@@ -37,6 +38,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton(TimeProgressService::class);
         $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
         $this->app->singleton('document.manager', fn (): DocumentService => new DocumentService);
+        $this->app->singleton('mention.service', fn (): MentionService => new MentionService);
         $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
 
         $this->configureGate();

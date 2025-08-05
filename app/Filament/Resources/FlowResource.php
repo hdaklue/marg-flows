@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use App\Enums\FlowStatus;
+use App\Enums\FlowStage;
 use App\Filament\Resources\FlowResource\Pages;
 use App\Filament\Resources\FlowResource\Pages\CreateDocument;
 use App\Filament\Resources\FlowResource\Pages\FlowDocuments;
@@ -43,7 +43,7 @@ final class FlowResource extends Resource
                 $isAdmin = filamentTenant()->isAdmin(filamentUser());
                 $query->unless($isAdmin, function ($query) {
                     $query->forParticipant(filamentUser());
-                })->running()->with(['creator', 'participants'])->ordered();
+                })->running()->orderBy('stage')->with(['creator', 'participants']);
             })
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
@@ -52,9 +52,9 @@ final class FlowResource extends Resource
             ->columns([
                 TextColumn::make('title')
                     ->weight(FontWeight::Bold),
-                TextColumn::make('status')
-                    ->getStateUsing(fn ($record) => ucfirst(FlowStatus::from($record->status)->getLabel()))
-                    ->color(fn ($record) => FlowStatus::from($record->status)->getFilamentColor())
+                TextColumn::make('stage')
+                    ->getStateUsing(fn ($record) => ucfirst(FlowStage::from($record->stage)->getLabel()))
+                    ->color(fn ($record) => FlowStage::from($record->stage)->getFilamentColor())
                     ->badge(),
                 ImageColumn::make('creator.avatar')
                     // ->getStateUsing(fn ($record) => filament()->getUserAvatarUrl($record->creator))
@@ -66,16 +66,16 @@ final class FlowResource extends Resource
                 // SelectColumn::make('status')
                 //     ->options(FlowStatus::class),
 
-                Progress::make('time_progress')
-                    ->getStateUsing(fn ($record) => $flowProgressService->getProgressDetails($record)),
-                TextColumn::make('start_date')
-                    ->date(),
-                TextColumn::make('due_date')
-                    ->date(),
-                TextColumn::make('days_left')
-                    ->getStateUsing(fn ($record) => $flowProgressService->getDaysRemaining($record)),
-                TextColumn::make('duration')
-                    ->getStateUsing(fn ($record) => $flowProgressService->getTotalDays($record)),
+                // Progress::make('time_progress')
+                //     ->getStateUsing(fn ($record) => $flowProgressService->getProgressDetails($record)),
+                // TextColumn::make('start_date')
+                //     ->date(),
+                // TextColumn::make('due_date')
+                //     ->date(),
+                // TextColumn::make('days_left')
+                //     ->getStateUsing(fn ($record) => $flowProgressService->getDaysRemaining($record)),
+                // TextColumn::make('duration')
+                //     ->getStateUsing(fn ($record) => $flowProgressService->getTotalDays($record)),
 
                 ImageColumn::make('prticipants')
                     ->getStateUsing(fn ($record) => $record->participants->pluck('model')->pluck('avatar'))
@@ -87,7 +87,7 @@ final class FlowResource extends Resource
 
             ->filters([
                 SelectFilter::make('status')
-                    ->options(FlowStatus::class),
+                    ->options(FlowStage::class),
             ], FiltersLayout::AboveContentCollapsible)
             ->actions([
                 Tables\Actions\EditAction::make()

@@ -17,7 +17,6 @@ return new class extends Migration
 
             // Base feedback fields
             $table->string('creator_id');
-            $table->index('creator_id');
 
             $table->string('status')->default(FeedbackStatus::OPEN);
             $table->string('urgency')->default(FeedbackUrgency::NORMAL);
@@ -42,6 +41,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Base feedback indexes
+            $table->index('creator_id');
             $table->index('status');
             $table->index('urgency');
             $table->index(['urgency', 'status']);

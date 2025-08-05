@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Kanban;
 
-use App\Enums\FlowStatus;
+use App\Collections\Role\ParticipantsCollection;
+use App\Enums\FlowStage;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
 use Illuminate\Support\Collection;
@@ -40,20 +41,20 @@ final class Record extends Component
     public function refreshComputedData()
     {
         $this->color = cache()->remember(
-            "flow_color_{$this->record->status}",
+            "flow_color_{$this->record->stage}",
             3600,
-            fn () => FlowStatus::from($this->record->status)->getColor(),
+            fn (): array|string|null => FlowStage::from($this->record->stage)->getColor(),
         );
         unset($this->participants);
-        $this->shouldShowProgressDetails = in_array($this->record->status, [FlowStatus::ACTIVE->value, FlowStatus::SCHEDULED->value]);
+        // $this->shouldShowProgressDetails = in_array($this->record->status, [FlowStage::ACTIVE->value]);
 
-        if ($this->shouldShowProgressDetails) {
-            $this->progressDetails = app(TimeProgressService::class)->getProgressDetails($this->record);
-        }
+        // if ($this->shouldShowProgressDetails) {
+        //     $this->progressDetails = app(TimeProgressService::class)->getProgressDetails($this->record);
+        // }
     }
 
     #[Computed]
-    public function participants(): Collection
+    public function participants(): ParticipantsCollection
     {
         return $this->record->getParticipants();
     }
@@ -61,8 +62,9 @@ final class Record extends Component
     #[Computed]
     public function participantsArray(): array
     {
+        return $this->participants->asDtoArray()->toArray();
 
-        return $this->participants->pluck('model')->map(fn ($item) => ['name' => $item->name, 'avatar' => $item->avatar])->toArray();
+        // return $this->participants->pluck('model')->map(fn ($item) => ['name' => $item->name, 'avatar' => $item->avatar])->toArray();
     }
 
     #[Computed(true)]

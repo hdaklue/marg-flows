@@ -13,7 +13,7 @@
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $title
@@ -47,8 +47,8 @@ namespace App\Models{
  * @property-read int|null $stages_count
  * @property-read Tenant $tenant
  * @method static Builder<static>|Flow assignable()
- * @method static Builder<static>|Flow byStage(\App\Enums\FlowStatus|string $status)
- * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStatus|string $status)
+ * @method static Builder<static>|Flow byStage(\App\Enums\FlowStage|string $status)
+ * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStage|string $status)
  * @method static Builder<static>|Flow byTenant(\App\Models\Tenant $tenant)
  * @method static \Database\Factories\FlowFactory factory($count = null, $state = [])
  * @method static Builder<static>|Flow forParticipant(\App\Contracts\Role\AssignableEntity $member)
@@ -86,7 +86,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $user_id
@@ -112,7 +112,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $sender_id
@@ -140,7 +140,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $model_type
@@ -169,7 +169,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $tenant_id
@@ -196,7 +196,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $content
@@ -225,7 +225,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -258,7 +258,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -296,7 +296,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name

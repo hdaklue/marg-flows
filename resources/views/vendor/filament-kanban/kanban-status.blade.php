@@ -1,7 +1,7 @@
 @props(['status'])
-@use(App\Enums\FlowStatus)
+@use(App\Enums\FlowStage)
 @php
-    $color = FlowStatus::from($status['id'])->getColor();
+    $color = FlowStage::from($status['id'])->getColor();
 @endphp
 
 
@@ -19,7 +19,7 @@
     }
 }" wire:key='kanban-board-{{ $status['id'] }}' x-cloak x-show="show">
     @include(static::$headerView)
-    <div class="md:scrollbar-hide mb-5 flex flex-shrink-0 flex-col overflow-y-auto overscroll-y-contain rounded-xl p-2 md:w-[18rem]"
+    <div class="mb-5 flex flex-shrink-0 flex-col overflow-y-auto overscroll-y-contain rounded-xl p-2 md:w-[18rem] md:scrollbar-hide"
         x-bind:style="isMobile ? '' : 'height:' + height + 'px'">
         @unless ($status['records'])
             <div class="flex items-center justify-center py-4 border border-gray-100 rounded-xl dark:border-gray-800"

@@ -25,6 +25,48 @@
         <x-video-annotaion.components.player :qualitySources="$qualitySources" />
     </div>
 
+    <!-- Flying Comments Wrapper -->
+    <div class="absolute bottom-48 left-0 right-0 z-40 w-full flex flex-row items-center justify-center gap-2 py-2" 
+         x-data="{ comments: [] }"
+         @flying-comment-show.window="
+             const comment = $event.detail;
+             const existingIndex = comments.findIndex(c => c.commentId === comment.commentId);
+             if (existingIndex >= 0) {
+                 comments[existingIndex] = comment;
+             } else {
+                 comments.push(comment);
+             }
+             setTimeout(() => {
+                 const index = comments.findIndex(c => c.commentId === comment.commentId);
+                 if (index >= 0) comments.splice(index, 1);
+             }, 8000);
+         "
+         @showComment.window="console.log('Show comment clicked:', $event.detail.id)">
+        
+        <!-- Flying Comments -->
+        <template x-for="comment in comments" :key="comment.commentId">
+            <div x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-1"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-1"
+                 @click="console.log('Flying comment clicked:', comment.commentId); $dispatch('showComment', { id: comment.commentId })"
+                 class="flex items-center gap-2 bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm shadow-lg border border-white/20 dark:border-zinc-700/50 cursor-pointer hover:bg-white/95 dark:hover:bg-zinc-800/95 transition-colors duration-200">
+                
+                <!-- Small Avatar -->
+                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-xs font-bold"
+                     x-text="comment.name ? comment.name.charAt(0).toUpperCase() : 'T'">
+                </div>
+                
+                <!-- Comment Text -->
+                <span class="text-zinc-700 dark:text-zinc-200 font-medium max-w-xs truncate"
+                      x-text="comment.name + ' • ' + formatTime(comment.timestamp) + ' - ' + comment.body">
+                </span>
+            </div>
+        </template>
+    </div>
+
     <!-- Toolbar Area - Fixed position at bottom -->
     <div class="absolute bottom-0 left-0 right-0 z-50">
         <x-video-annotaion.components.tool-bar />
@@ -430,7 +472,7 @@
                     <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Adjust Volume</label>
                     <div class="relative">
                         <input type="range" min="0" max="1" step="0.01" :value="volume"
-                            @input="setVolume($event.target.value)"
+                            @input="setVolume(parseFloat($event.target.value))"
                             class="slider h-3 w-full cursor-pointer appearance-none rounded-lg bg-zinc-300 dark:bg-zinc-600">
                         <div class="mt-2 flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
                             <span>0%</span>
@@ -514,6 +556,28 @@
             border-color: #374151;
         }
 
+        /* Enhanced Progress Bar Styles */
+        .progress-fill {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
         /* Touch-friendly button sizing for mobile */
         @media (max-width: 640px) {
             .video-control-btn {
@@ -522,7 +586,7 @@
             }
         }
 
-        /* Mobile touch feedback */
+        /* Enhanced Mobile touch feedback */
         @media (pointer: coarse) {
             .video-control-btn:active {
                 transform: scale(0.95);
@@ -532,15 +596,107 @@
                 -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
             }
 
-            /* Make progress bar touch-friendly on mobile */
+            /* Enhanced progress bar touch area for mobile */
             div[x-ref="progressBar"] {
-                height: 20px;
+                padding: 8px 0;
+                margin: -8px 0;
             }
 
-            /* Make comment bubbles more touch-friendly */
-            .group .h-6.w-6 {
-                min-height: 32px;
-                min-width: 32px;
+            /* Enhanced comment bubbles - Modern Design System */
+            .comment-bubble-main {
+                min-height: 44px;
+                min-width: 44px;
+                transform-origin: center;
+                will-change: transform, box-shadow;
+            }
+            
+            /* Comment bubble interaction states */
+            .comment-bubble-container:hover .comment-bubble-main {
+                transform: scale(1.08);
+                box-shadow: 0 12px 24px -8px rgba(14, 165, 233, 0.3);
+            }
+            
+            .comment-bubble:active .comment-bubble-main {
+                transform: scale(0.92);
+                transition-duration: 0.1s;
+            }
+            
+            /* Comment connection line enhancement */
+            .comment-connection-line {
+                will-change: height, background;
+            }
+            
+            /* Comment tooltip improvements */
+            .comment-tooltip {
+                will-change: transform, opacity;
+                filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.15));
+            }
+            
+            .comment-tooltip-content {
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+            }
+            
+            /* Accessibility improvements */
+            .comment-bubble:focus-visible {
+                outline: 2px solid #0ea5e9;
+                outline-offset: 2px;
+            }
+            
+            /* Comment clustering and layering */
+            .comment-bubble {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .comment-bubble:hover {
+                z-index: 60 !important;
+            }
+            
+            /* Visual depth for clustered comments */
+            .comment-bubble[class*="z-30"] .comment-bubble-main {
+                opacity: 0.85;
+                transform: scale(0.9);
+            }
+            
+            .comment-bubble[class*="z-35"] .comment-bubble-main {
+                opacity: 0.9;
+                transform: scale(0.95);
+            }
+            
+            .comment-bubble:hover .comment-bubble-main {
+                opacity: 1 !important;
+                transform: scale(1.08) !important;
+            }
+            
+            /* Connection line clustering adjustments */
+            .comment-bubble[class*="z-30"] .comment-connection-line {
+                opacity: 0.6;
+                height: 3px;
+            }
+            
+            .comment-bubble[class*="z-35"] .comment-connection-line {
+                opacity: 0.75;
+                height: 3.5px;
+            }
+
+            /* Touch device optimizations */
+            @media (pointer: coarse) {
+                .comment-bubble-main {
+                    min-height: 48px;
+                    min-width: 48px;
+                }
+                
+                .comment-tooltip-content {
+                    padding: 1rem;
+                    font-size: 0.9rem;
+                }
+                
+                /* Reduce clustering on touch devices for better accessibility */
+                .comment-bubble[class*="z-30"] .comment-bubble-main,
+                .comment-bubble[class*="z-35"] .comment-bubble-main {
+                    opacity: 1;
+                    transform: scale(1);
+                }
             }
         }
 

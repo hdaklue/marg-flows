@@ -4,7 +4,6 @@ declare(strict_types=1);
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
-use Spatie\Permission\DefaultTeamResolver;
 
 return [
 
@@ -130,11 +129,6 @@ return [
      */
 
     'teams' => true,
-
-    /*
-     * The class to use to resolve the permissions team id
-     */
-    'team_resolver' => DefaultTeamResolver::class,
 
     /*
      * Passport Client Credentials Grant

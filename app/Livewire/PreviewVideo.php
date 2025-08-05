@@ -26,7 +26,7 @@ final class PreviewVideo extends Component
                 'type' => 'video/mp4',
                 'label' => '1080p',
                 'quality' => '1080',
-                'selected' => false,
+                'selected' => true,  // Default - highest quality
             ],
             [
                 'src' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
@@ -47,16 +47,17 @@ final class PreviewVideo extends Component
                 'type' => 'video/mp4',
                 'label' => '360p',
                 'quality' => '360',
-                'selected' => true,  // Default - smallest file size for Safari
+                'selected' => false,
             ],
         ];
 
         // Sample comments data - created using frame-precise timing
         $frameRate = 30.0;
 
-        $comment1Time = CommentTime::fromFrame(450, $frameRate); // Frame 450
-        $comment2Time = CommentTime::fromFrame(1350, $frameRate); // Frame 1350
-        $comment3Time = CommentTime::fromFrame(2460, $frameRate); // Frame 2460
+        $comment1Time = CommentTime::fromFrame(150, $frameRate); // Frame 150 (5 seconds)
+        $comment2Time = CommentTime::fromFrame(450, $frameRate); // Frame 450 (15 seconds)
+        $comment3Time = CommentTime::fromFrame(1350, $frameRate); // Frame 1350 (45 seconds)
+        $comment4Time = CommentTime::fromFrame(2460, $frameRate); // Frame 2460 (82 seconds)
 
         $this->comments = [
             [
@@ -84,6 +85,15 @@ final class PreviewVideo extends Component
                 'body' => 'This part needs some work on the lighting.',
                 'timestamp' => $comment3Time->asSeconds(),
                 'frameNumber' => $comment3Time->getFrame($frameRate),
+                'frameRate' => $frameRate,
+            ],
+            [
+                'commentId' => 4,
+                'avatar' => 'https://ui-avatars.com/api/?name=Alice+Cooper&background=9333ea&color=fff',
+                'name' => 'Alice Cooper',
+                'body' => 'Perfect timing for this action sequence!',
+                'timestamp' => $comment4Time->asSeconds(),
+                'frameNumber' => $comment4Time->getFrame($frameRate),
                 'frameRate' => $frameRate,
             ],
         ];

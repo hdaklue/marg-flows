@@ -1,84 +1,243 @@
 <div x-ref="tool-bar-container"
     class="flex-shrink-0 w-11/12 mx-auto mb-2 border-t rounded-md border-white/10 backdrop-blur-sm dark:bg-zinc-900/90">
-    <!-- Progress Bar
-    Layer -->
+    
+    
+    <!-- Progressive Context Display Area (Fixed Above Progress Bar) -->
+    <div x-show="contextDisplay.visible" x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-1" class="px-4 py-2">
+
+        <!-- Desktop Context Information Bar -->
+        <div x-show="!isTouchDevice()" class="flex items-center justify-center max-w-md mx-auto">
+            <div
+                class="px-4 py-2 border shadow-xl rounded-xl border-zinc-700/50 bg-zinc-900/95 backdrop-blur-md dark:border-zinc-600/50 dark:bg-zinc-800/95">
+                <div x-data="{ content: getContextDisplayContent() }" 
+                    x-effect="content = getContextDisplayContent(); if(content.secondary) console.log('Template content:', content);"
+                    x-on:video-time-updated.window="content = getContextDisplayContent()"
+                    class="flex items-center gap-3">
+
+                    <!-- Primary Time Display -->
+                    <div class="font-mono text-lg font-bold tracking-wide text-white" x-text="content.primary">
+                    </div>
+                    
+                    <!-- Secondary Context Information -->
+                    <div x-show="content.secondary" x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                        class="flex items-center gap-2">
+
+                        <!-- Separator -->
+                        <div class="w-1 h-1 rounded-full bg-zinc-400"></div>
+
+                        <!-- Comment Count or Preview -->
+                        <template x-if="content.showCommentCount">
+                            <div class="flex items-center gap-1 text-sm text-sky-300">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                <span x-text="content.secondary"></span>
+                            </div>
+                        </template>
+
+                        <!-- Comment Preview -->
+                        <template x-if="!content.showCommentCount && content.secondary">
+                            <div class="max-w-xs text-sm truncate text-zinc-300" x-text="content.secondary"></div>
+                        </template>
+
+                        <!-- Author Avatar (if comment available) -->
+                        <template x-if="content.comment">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 overflow-hidden rounded-full bg-zinc-700">
+                                    <img :src="content.comment.avatar" :alt="content.comment.name"
+                                        class="object-cover w-full h-full">
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Context Information Bar (Simplified) -->
+        <div x-show="isTouchDevice()" class="flex items-center justify-center max-w-sm mx-auto">
+            <div
+                class="rounded-lg border border-zinc-700/50 bg-zinc-900/95 px-3 py-1.5 shadow-lg backdrop-blur-md dark:border-zinc-600/50 dark:bg-zinc-800/95">
+                <div x-data="{ content: getContextDisplayContent() }" 
+                    x-effect="content = getContextDisplayContent()"
+                    x-on:video-time-updated.window="content = getContextDisplayContent()"
+                    class="flex items-center justify-center gap-2">
+
+                    <!-- Time + Comment Count Combined -->
+                    <div class="font-mono text-base font-bold tracking-wide text-white" x-text="content.primary">
+                    </div>
+
+                    <template x-if="content.showCommentCount">
+                        <div class="flex items-center gap-1 text-xs text-sky-300">
+                            <div class="w-1 h-1 rounded-full bg-zinc-400"></div>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <span x-text="contextDisplay.nearbyComments.length"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Layer (Separate from Progress Bar for independent event handling) -->
+    <div x-show="showProgressBar && showCommentsOnProgressBar && config.annotations?.showCommentsOnProgressBar" x-cloak 
+        class="absolute inset-x-0 z-20 px-4 pointer-events-none" style="bottom: 5rem;">
+        <!-- Comment Timeline Display Container -->
+        <div class="relative w-full h-16 pointer-events-none">
+            <template x-for="(comment, index) in comments" :key="comment.commentId">
+                <div x-show="config.annotations?.enableProgressBarComments && comment.timestamp"
+                    class="absolute z-10 transform -translate-x-1/2"
+                    :style="`left: ${(comment.timestamp / duration) * 100}%`">
+                    
+                    <!-- Secondary Context Display (Author • Time - Comment text format) -->
+                    <div x-show="shouldShowTimelineDisplay(comment)"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                        class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30 min-w-48 max-w-64 cursor-pointer pointer-events-auto"
+                        @click="handleTimelineCommentClick(comment)"
+                        
+                        <!-- Enhanced Comment Bubble with new format -->
+                        <div class="p-3 bg-white border rounded-lg shadow-lg border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800">
+                            <!-- Author • Time - Comment text format -->
+                            <div class="flex items-start gap-2">
+                                <!-- Avatar -->
+                                <div class="flex-shrink-0 w-6 h-6 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+                                    <img x-show="comment.avatar" :src="comment.avatar" :alt="comment.name"
+                                        class="object-cover w-full h-full">
+                                    <div x-show="!comment.avatar"
+                                        class="flex items-center justify-center w-full h-full text-xs font-bold text-white bg-gradient-to-br from-sky-400 to-sky-600"
+                                        x-text="comment.name ? comment.name.charAt(0).toUpperCase() : '?'">
+                                    </div>
+                                </div>
+                                
+                                <!-- Content -->
+                                <div class="flex-1 min-w-0">
+                                    <!-- Header: Author • Time -->
+                                    <div class="flex items-center gap-1 mb-1 text-xs text-zinc-600 dark:text-zinc-400">
+                                        <span class="font-semibold truncate" x-text="comment.name"></span>
+                                        <span class="text-zinc-400 dark:text-zinc-500">•</span>
+                                        <span class="font-mono" x-text="formatTime(comment.timestamp)"></span>
+                                    </div>
+                                    
+                                    <!-- Comment Body -->
+                                    <div class="text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2" 
+                                        x-text="comment.body">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Click hint -->
+                            <div class="mt-2 text-xs italic text-center text-zinc-400 dark:text-zinc-500">
+                                Click to seek and view full comment
+                            </div>
+                        </div>
+                        
+                        <!-- Arrow pointing to dot -->
+                        <div class="absolute left-1/2 top-full transform -translate-x-1/2">
+                            <div class="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-white dark:border-t-zinc-800"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Comment Dot (Clean, no tooltip) -->
+                    <div class="relative cursor-pointer pointer-events-auto" 
+                        @click="handleCommentClick($event, comment)"
+                        @mouseenter="showCommentContext(comment.commentId)"
+                        @mouseleave="hideCommentContext(comment.commentId)"
+                        role="button"
+                        :aria-label="`Comment by ${comment.name} at ${formatTime(comment.timestamp)}`" 
+                        tabindex="0"
+                        @keydown.enter="handleCommentClick($event, comment)"
+                        @keydown.space.prevent="handleCommentClick($event, comment)">
+                        
+                        <!-- Touch Target for Mobile -->
+                        <div class="absolute inset-0 -m-3 rounded-full"
+                            :class="isTouchDevice() ? 'pointer-events-auto' : 'pointer-events-none'">
+                        </div>
+                        
+                        <!-- Clean Marker Circle -->
+                        <div class="w-4 h-4 transition-all duration-200 ease-out rounded-full shadow-sm bg-sky-400 hover:w-5 hover:h-5 hover:bg-sky-500 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:ring-offset-1 dark:bg-sky-300 dark:hover:bg-sky-400">
+                        </div>
+                        
+                        <!-- Proximity pulse (shows when mouse is near or timeline hits) -->
+                        <div class="absolute inset-0 rounded-full animate-pulse bg-sky-400/40 dark:bg-sky-300/40"
+                            x-show="contextDisplay.nearbyComments.some(nearby => nearby.comment.commentId === comment.commentId) || 
+                                     Math.abs(comment.timestamp - currentTime) <= 2"
+                            x-transition:enter="transition-opacity duration-300"
+                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition-opacity duration-150"
+                            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+    
+    <!-- Progress Bar Layer -->
     <div x-show="showProgressBar" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-2" class="relative p-4" @click.away="showHoverAdd = false">
 
-        <!-- Comment Bubbles Above Progress Bar (only if annotations enabled) -->
-        <div x-show="showCommentsOnProgressBar && config.annotations?.showCommentsOnProgressBar" x-cloak
-            class="relative mb-3">
-            <div class="relative">
-                <template x-for="comment in comments" :key="comment.commentId">
-                    <div x-show="config.annotations?.enableProgressBarComments && comment.timestamp"
-                        class="absolute z-40 transform -translate-x-1/2"
-                        :style="`left: ${(comment.timestamp / duration) * 100}%`"
-                        @mouseenter="!isTouchDevice() && showCommentTooltip(comment.commentId)"
-                        @mouseleave="!isTouchDevice() && hideCommentTooltip()"
-                        @click="isTouchDevice() && toggleCommentTooltip(comment.commentId); $dispatch('video-annotation:seek-comment', { commentId: comment.commentId, timestamp: comment.timestamp })">
 
-                        <!-- Avatar Bubble -->
-                        <div
-                            class="w-6 h-6 overflow-hidden transition-transform duration-200 bg-white border-2 border-white rounded-full shadow-lg hover:scale-110 dark:border-zinc-800 dark:bg-zinc-800">
-                            <img :src="comment.avatar" :alt="comment.name" class="object-cover w-full h-full">
-                        </div>
-
-                        <!-- Connecting Line -->
-                        <div
-                            class="absolute left-1/2 top-full h-2 w-0.5 -translate-x-1/2 transform bg-white/80 dark:bg-zinc-200/80">
-                        </div>
-
-                        <!-- Tooltip (Desktop hover + Mobile click) -->
-                        <div class="absolute z-50 transition-opacity duration-200 pointer-events-none bottom-8"
-                            :class="[
-                                getTooltipPosition(comment.timestamp),
-                                isCommentTooltipVisible(comment) ? 'opacity-100' : 'opacity-0'
-                            ]">
-                            <div
-                                class="max-w-xs px-3 py-2 text-xs text-white border rounded-lg shadow-xl whitespace-nowrap border-zinc-700 bg-zinc-900 dark:bg-zinc-800">
-                                <div class="font-medium" x-text="'@' + comment.name"></div>
-                                <div class="mt-1 text-zinc-300 dark:text-zinc-400"
-                                    x-text="comment.body.length > 50 ? comment.body.substring(0, 50) + '...' : comment.body">
-                                </div>
-                                <div class="mt-1 text-xs text-zinc-400 dark:text-zinc-500"
-                                    x-text="formatTime(comment.timestamp)"></div>
-                                <!-- Tooltip Arrow -->
-                                <div class="absolute w-0 h-0 transform border-t-4 border-l-4 border-r-4 top-full border-l-transparent border-r-transparent border-t-zinc-900 dark:border-t-zinc-800"
-                                    :class="getArrowPosition(comment.timestamp)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <!-- Progress Bar -->
+        <!-- Enhanced Progress Bar with Progressive Context System -->
         <div x-ref="progressBar" @pointerdown.stop="handleProgressBarPointer($event, 'click')" @click.stop
             @dblclick.stop="handleProgressBarPointer($event, 'doubleclick')"
-            class="relative w-full h-2 overflow-visible transition-transform duration-150 border rounded-full cursor-pointer border-sky-400/30 bg-zinc-500/50 backdrop-blur-sm hover:scale-y-150 sm:h-3 sm:hover:scale-y-125">
-            <!-- Current Progress -->
-            <div class="h-full transition-all duration-100 rounded-l-full progress-fill bg-gradient-to-r from-sky-300 to-sky-600"
-                :style="`width: ${frameAlignedProgressPercentage}%`"
-                :class="{ 'rounded-r-full': frameAlignedProgressPercentage >= 100 }"></div>
+            @mouseenter="onProgressBarMouseEnterWithContext($event)" @mouseleave="onProgressBarMouseLeaveWithContext()"
+            @mousemove="onProgressBarMouseMoveWithContext($event)" class="relative w-full cursor-pointer group"
+            role="progressbar" :aria-valuenow="Math.round(frameAlignedProgressPercentage)" aria-valuemin="0"
+            aria-valuemax="100" :aria-label="`Video progress: ${formatTime(currentTime)} of ${formatTime(duration)}`">
 
-            <!-- Hover Tooltip -->
-            <div x-show="showTooltip"
-                class="pointer-events-none absolute bottom-6 z-[9999] hidden -translate-x-1/2 transform sm:block"
-                :style="`left: ${hoverX}px;`" x-transition:enter="transition ease-out duration-150"
-                x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-90">
-                <div class="px-2 py-1 font-mono text-xs text-white rounded shadow-lg bg-zinc-900 dark:bg-zinc-800">
-                    <span x-text="hoverTime"></span>
+            <!-- Progress Track Background -->
+            <div class="relative overflow-hidden transition-all duration-200 rounded-full bg-zinc-300/60 dark:bg-zinc-600/60"
+                :class="isTouchDevice() ? 'h-3' : 'h-2 group-hover:h-3'">
+
+                <!-- Progress Fill -->
+                <div class="h-full transition-all duration-100 ease-out progress-fill bg-sky-500 dark:bg-sky-400"
+                    :style="`width: ${frameAlignedProgressPercentage}%`"
+                    :class="frameAlignedProgressPercentage >= 100 ? 'rounded-full' : 'rounded-l-full'">
+
+                    <!-- Progress Fill Shine Effect -->
+                    <div
+                        class="absolute inset-0 rounded-inherit bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-60">
+                    </div>
                 </div>
-                <!-- Tooltip Arrow pointing down to progress bar -->
-                <div
-                    class="absolute w-0 h-0 transform -translate-x-1/2 border-t-4 border-l-4 border-r-4 left-1/2 top-full border-l-transparent border-r-transparent border-t-zinc-900 dark:border-t-zinc-800">
+
+                <!-- Buffered Progress (if available) -->
+                <div x-show="bufferedPercentage > frameAlignedProgressPercentage"
+                    class="absolute top-0 left-0 h-full transition-all duration-200 bg-zinc-400/40 dark:bg-zinc-500/40"
+                    :style="`width: ${bufferedPercentage || 0}%`"
+                    :class="bufferedPercentage >= 100 ? 'rounded-full' : 'rounded-l-full'">
+                </div>
+
+                <!-- Interactive Touch Target (invisible but larger for mobile) -->
+                <div class="absolute inset-0 -m-4 sm:-m-2" style="touch-action: manipulation;">
                 </div>
             </div>
+
+            <!-- Current Time Indicator (Scrubber) -->
+            <div class="absolute transition-opacity duration-200 -translate-x-1/2 -translate-y-1/2 opacity-0 top-1/2 group-hover:opacity-100"
+                :class="isTouchDevice() ? 'opacity-100' : ''" :style="`left: ${frameAlignedProgressPercentage}%`">
+                <div class="w-4 h-4 transition-transform duration-200 transform bg-white border-2 rounded-full shadow-lg border-sky-500 hover:scale-110 dark:border-sky-400 dark:bg-zinc-100"
+                    :class="isDragging ? 'scale-125' : ''">
+                </div>
+            </div>
+
+            <!-- Old hover tooltip removed - handled by Progressive Context System above -->
         </div>
 
         <!-- Region Bar -->
@@ -101,7 +260,7 @@
                     class="absolute inset-0 z-30 rounded-md bg-gradient-to-r from-emerald-400/50 via-emerald-500/30 to-emerald-600/50"
                     :style="regionCreationStart && regionCreationEnd ?
                         `left: ${Math.min(regionCreationStart.x, regionCreationEnd.x)}px;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                width: ${Math.abs(regionCreationEnd.x - regionCreationStart.x)}px` :
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    width: ${Math.abs(regionCreationEnd.x - regionCreationStart.x)}px` :
                         ''">
 
                     <div
@@ -118,37 +277,43 @@
         <div class="flex items-center justify-between gap-2 sm:gap-4">
             <!-- Left Controls Group -->
             <div class="flex items-center gap-1 sm:gap-3">
-                <!-- Play/Pause Button -->
+                <!-- Enhanced Play/Pause Button -->
                 <button @pointerdown="handlePointerStart($event, 'button')"
                     @pointerup="handlePointerEnd($event, 'button'); togglePlay()"
-                    class="flex items-center justify-center text-white transition-all duration-200 rounded-md shadow-md video-control-btn touch-manipulation bg-sky-600 hover:scale-105 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 active:scale-95 dark:focus:ring-offset-zinc-800"
-                    :class="isTouchDevice() ? 'w-12 h-12' : 'w-8 h-8'" style="touch-action: manipulation;"
-                    title="Play/Pause (Space Bar)">
-                    <!-- Play Icon -->
-                    <svg x-show="!isPlaying" x-cloak class="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    class="flex items-center justify-center text-white transition-all duration-200 shadow-lg video-control-btn group touch-manipulation rounded-xl bg-sky-500 hover:bg-sky-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 active:scale-95 dark:focus:ring-offset-zinc-900"
+                    :class="isTouchDevice() ? 'w-12 h-12' : 'w-10 h-10'" style="touch-action: manipulation;"
+                    :title="isPlaying ? 'Pause (Space Bar)' : 'Play (Space Bar)'"
+                    :aria-label="isPlaying ? 'Pause video' : 'Play video'">
+                    <!-- Enhanced Play Icon -->
+                    <svg x-show="!isPlaying" x-cloak
+                        class="ml-0.5 h-5 w-5 transition-transform duration-200 group-hover:scale-110"
+                        fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z" />
                     </svg>
-                    <!-- Pause Icon -->
-                    <svg x-show="isPlaying" x-cloak class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <!-- Enhanced Pause Icon -->
+                    <svg x-show="isPlaying" x-cloak
+                        class="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="currentColor"
+                        viewBox="0 0 24 24">
                         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                     </svg>
                 </button>
 
                 <!-- Frame Navigation Helper Arrows (only on desktop) -->
                 <div x-show="showFrameHelpers" x-cloak class="items-center hidden gap-1 opacity-25 sm:flex">
-                    <!-- Backward Frame Button -->
-                    <button @click="stepBackward()" @keydown.stop
-                        class="flex items-center justify-center w-8 h-8 transition-all duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white dark:focus:ring-zinc-600"
-                        title="Previous Frame (← Arrow Key)">
+                    <!-- Enhanced Backward Frame Button -->
+                    <button @click="eventHandler?.stepBackward()" @keydown.stop
+                        class="flex items-center justify-center w-8 h-8 transition-all duration-200 video-control-btn rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-300 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-200 dark:focus:ring-zinc-600"
+                        title="Previous Frame (← Arrow Key)" aria-label="Previous frame">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
 
-                    <!-- Forward Frame Button -->
-                    <button @click="stepForward()" @keydown.stop
-                        class="flex items-center justify-center w-8 h-8 transition-all duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white dark:focus:ring-zinc-600"
-                        title="Next Frame (→ Arrow Key)">
+                    <!-- Enhanced Forward Frame Button -->
+                    <button @click="eventHandler?.stepForward()" @keydown.stop
+                        class="flex items-center justify-center w-8 h-8 transition-all duration-200 video-control-btn rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-300 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-200 dark:focus:ring-zinc-600"
+                        title="Next Frame (→ Arrow Key)" aria-label="Next frame">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
@@ -163,9 +328,11 @@
 
                 <!-- Volume Controls -->
                 <div class="flex items-center gap-1 sm:gap-2">
-                    <!-- Mobile Volume Button -->
+                    <!-- Enhanced Mobile Volume Button -->
                     <button @click="showVolumeModal = !showVolumeModal"
-                        class="flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white sm:hidden">
+                        class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white sm:hidden"
+                        :aria-label="isMuted ? 'Unmute video' : 'Adjust volume'"
+                        :title="Math.round(volume * 100) + '% volume'">
                         <!-- Volume Up Icon -->
                         <svg x-show="!isMuted && volume > 0.5" x-cloak class="w-5 h-5" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -191,9 +358,11 @@
                     <!-- Desktop Volume Controls -->
                     <div class="items-center hidden gap-2 sm:flex" @mouseenter="showVolumeSlider = true"
                         @mouseleave="showVolumeSlider = false">
-                        <!-- Mute/Unmute Button -->
+                        <!-- Enhanced Mute/Unmute Button -->
                         <button @click="toggleMute()"
-                            class="flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white">
+                            class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
+                            :aria-label="isMuted ? 'Unmute video' : 'Mute video'"
+                            :title="isMuted ? 'Unmute' : 'Mute'">
                             <!-- Volume Up Icon -->
                             <svg x-show="!isMuted && volume > 0.5" x-cloak class="w-5 h-5" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -216,8 +385,9 @@
                             </svg>
                         </button>
 
-                        <!-- Volume Percentage Display (always visible) -->
-                        <div class="text-xs text-center min-w-8 text-zinc-600 dark:text-zinc-300">
+                        <!-- Enhanced Volume Percentage Display -->
+                        <div
+                            class="px-2 py-1 text-xs font-medium text-center rounded-lg min-w-12 bg-zinc-100/50 text-zinc-700 backdrop-blur-sm dark:bg-zinc-700/50 dark:text-zinc-300">
                             <span x-text="Math.round(volume * 100) + '%'"></span>
                         </div>
 
@@ -229,7 +399,7 @@
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95">
                             <input type="range" min="0" max="1" step="0.1"
-                                :value="volume" @input="setVolume($event.target.value)"
+                                :value="volume" @input="setVolume(parseFloat($event.target.value))"
                                 class="w-20 h-2 rounded-lg appearance-none cursor-pointer slider bg-zinc-300 dark:bg-zinc-600">
                         </div>
                     </div>
@@ -241,19 +411,22 @@
             <div class="flex items-center gap-1 sm:gap-2">
 
                 <!-- Resolution Selector -->
-                <div class="relative" x-show="qualitySources.length > 1 && config.features.enableResolutionSelector"
+                <div class="relative" x-show="qualitySources.length > 0 && config.features.enableResolutionSelector"
                     x-cloak>
                     <button @click="showResolutionMenu = !showResolutionMenu"
-                        class="flex items-center justify-center h-8 gap-1 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white sm:px-2"
-                        :class="{ 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-white': showResolutionMenu }">
-                        <!-- HD Icon -->
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h3a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1h3zM9 12l2 2 4-4" />
+                        class="flex items-center justify-center gap-1 transition-all duration-200 video-control-btn h-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white sm:px-3"
+                        :class="{ 'bg-zinc-100 text-zinc-800 shadow-md dark:bg-zinc-700 dark:text-white': showResolutionMenu }"
+                        :aria-label="'Video quality: ' + (currentResolution ? (currentResolution.label || currentResolution
+                            .quality) : '1080p')"
+                        title="Change video quality">
+                        <!-- HD/Quality Icon -->
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <rect x="2" y="6" width="20" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <text x="12" y="14" text-anchor="middle" class="text-[8px] font-bold fill-current">HD</text>
                         </svg>
                         <!-- Text label - hidden on mobile -->
                         <span class="hidden text-xs font-medium sm:block"
-                            x-text="currentResolution ? (currentResolution.label || currentResolution.quality || 'Auto') : 'Auto'"></span>
+                            x-text="currentResolution ? (currentResolution.label || currentResolution.quality) : '1080p'"></span>
                         <!-- Chevron - hidden on mobile -->
                         <svg class="hidden w-3 h-3 transition-transform duration-200 sm:block"
                             :class="{ 'rotate-180': showResolutionMenu }" fill="none" stroke="currentColor"
@@ -280,12 +453,12 @@
 
                             <template x-for="(source, index) in qualitySources"
                                 :key="`resolution-${index}-${source.src}`">
-                                <button @click="changeResolution(source)"
+                                <button @click="changeResolution(source); showResolutionMenu = false"
                                     class="flex items-center justify-between w-full px-3 py-2 text-sm transition-colors duration-200 rounded-md"
                                     :class="currentResolutionSrc === source.src ?
                                         'bg-sky-50 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300' :
                                         'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700'">
-                                    <span x-text="source.label || source.quality || 'Auto'"></span>
+                                    <span x-text="source.label || source.quality"></span>
                                     <!-- Check Icon for Selected -->
                                     <svg x-show="currentResolutionSrc === source.src" x-cloak
                                         class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="currentColor"
@@ -301,8 +474,9 @@
                 <!-- Settings Menu -->
                 <div class="relative" x-show="config.features.enableSettingsMenu">
                     <button @click="showSettingsMenu = !showSettingsMenu"
-                        class="flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
-                        :class="{ 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-white': showSettingsMenu }">
+                        class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
+                        :class="{ 'bg-zinc-100 text-zinc-800 shadow-md dark:bg-zinc-700 dark:text-white': showSettingsMenu }"
+                        aria-label="Video settings" title="Video settings">
                         <!-- Settings Icon -->
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -369,11 +543,11 @@
                     </div>
                 </div>
 
-                <!-- Frame Helper Toggle -->
+                <!-- Enhanced Region Creation Toggle -->
                 <button @click="startRegionCreationAtCurrentFrame()"
-                    class="flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
-                    :class="{ 'bg-sky-100 text-sky-600 dark:bg-sky-900 dark:text-sky-400': showRegionToolbar }"
-                    title="Create Region at Current Frame">
+                    class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
+                    :class="{ 'bg-sky-100 text-sky-600 shadow-md dark:bg-sky-900/50 dark:text-sky-400': showRegionToolbar }"
+                    aria-label="Create region at current frame" title="Create Region at Current Frame">
                     <!-- Frame Icon -->
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -382,9 +556,11 @@
                 </button>
 
 
-                <!-- Fullscreen Button -->
+                <!-- Enhanced Fullscreen Button -->
                 <button x-show="config.features.enableFullscreenButton" @click="toggleFullscreen()"
-                    class="flex items-center justify-center w-8 h-8 transition-colors duration-200 rounded-lg video-control-btn text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white">
+                    class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
+                    :aria-label="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+                    :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
                     <!-- Enter Fullscreen Icon -->
                     <svg x-show="!isFullscreen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">

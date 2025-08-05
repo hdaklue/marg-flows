@@ -52,24 +52,30 @@
             </div>
 
             <!-- Frame Navigation Feedback -->
-            {{-- <div x-show="frameNavigationDirection" x-cloak x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-75" x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-75" class="absolute inset-0 flex items-center pointer-events-none"
-            :class="frameNavigationDirection === 'forward' ? 'justify-end pr-8' : 'justify-start pl-8'">
-            <div class="p-3 rounded-full bg-black/70 backdrop-blur-sm">
-                <!-- Forward Arrow -->
-                <svg x-show="frameNavigationDirection === 'forward'" x-cloak class="w-8 h-8 text-white" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-                <!-- Backward Arrow -->
-                <svg x-show="frameNavigationDirection === 'backward'" x-cloak class="w-8 h-8 text-white" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+            <div x-show="frameNavigationDirection" x-cloak x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-75" x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-75" class="absolute inset-0 flex items-center pointer-events-none"
+                :class="frameNavigationDirection === 'forward' ? 'justify-end pr-8' : frameNavigationDirection === 'seek' ? 'justify-center' : 'justify-start pl-8'">
+                <div class="p-3 rounded-full bg-black/70 backdrop-blur-sm">
+                    <!-- Forward Arrow -->
+                    <svg x-show="frameNavigationDirection === 'forward'" x-cloak class="w-8 h-8 text-white" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <!-- Backward Arrow -->
+                    <svg x-show="frameNavigationDirection === 'backward'" x-cloak class="w-8 h-8 text-white" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <!-- Seek Icon for Comment Navigation -->
+                    <svg x-show="frameNavigationDirection === 'seek'" x-cloak class="w-8 h-8 text-white" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                </div>
             </div>
-        </div> --}}
 
             <!-- Region Creation Mode Overlay -->
             <div x-show="touchInterface.enabled && touchInterface.mode === 'REGION_CREATE'" x-cloak

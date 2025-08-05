@@ -1,8 +1,11 @@
-import Hammer from 'hammerjs';
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
-
-// Basic VideoJS player with custom progress bar
+import { CommentSystemModule } from './modules/CommentSystemModule.js';
+import { ContextDisplayModule } from './modules/ContextDisplayModule.js';
+import { EventHandlerModule } from './modules/EventHandlerModule.js';
+import { ProgressBarModule } from './modules/ProgressBarModule.js';
+import { RegionManagementModule } from './modules/RegionManagementModule.js';
+import { SharedState } from './modules/SharedState.js';
+import { TouchInterfaceModule } from './modules/TouchInterfaceModule.js';
+import { VideoPlayerCore } from './modules/VideoPlayerCore.js';
 
 // Deep merge utility function
 function mergeDeep(target, source) {
@@ -26,7 +29,17 @@ function isObject(item) {
     return item && typeof item === 'object' && !Array.isArray(item);
 }
 
-// accept comments as a param before config.
+/**
+ * Video Annotation Component - ES6 Modular Architecture
+ *
+ * This is the main entry point for the video annotation component.
+ * It creates and orchestrates all the individual modules to provide
+ * a unified Alpine.js interface.
+ *
+ * @param {Object} userConfig - User configuration options
+ * @param {Array} initialComments - Initial comments array
+ * @returns {Object} Alpine.js component object
+ */
 export default function videoAnnotation(userConfig = null, initialComments = []) {
     // Default configuration
     const defaultConfig = {
@@ -41,10 +54,11 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             enableSettingsMenu: true
         },
         ui: {
-            progressBarMode: 'always',
+            progressBarMode: 'always', // 'always', 'auto-hide', 'hover'
             showControls: true,
             helpTooltipLimit: 3,
-            theme: 'auto'
+            theme: 'auto',
+            enableContextMenu: true
         },
         annotations: {
             showCommentsOnProgressBar: true,
@@ -56,9 +70,25 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         timing: {
             progressBarAutoHideDelay: 2000,
             progressBarHoverHideDelay: 1000,
+            contextAutoHideDelay: 3000,
             longPressDuration: 500,
             playPauseOverlayDuration: 800,
             helpTooltipDuration: 3000
+        },
+        controls: {
+            seekAmount: 10, // seconds
+            volumeStep: 0.1,
+            enableKeyboard: true
+        },
+        behavior: {
+            pauseOnBlur: false,
+            pauseOnHidden: true,
+            autoHideControls: false
+        },
+        keyboard: {
+            shortcuts: {
+                // Additional custom shortcuts can be added here
+            }
         },
         callbacks: {
             onPlay: null,
@@ -66,3038 +96,1263 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             onSeek: null,
             onVolumeChange: null,
             onResolutionChange: null,
-            onFullscreenChange: null
+            onFullscreenChange: null,
+            onCommentAdded: null,
+            onCommentRemoved: null,
+            onRegionCreated: null,
+            onRegionDeleted: null
+        },
+        debug: {
+            contextSystem: false,
+            touchInterface: false,
+            regions: false
         }
     };
 
     // Handle config gracefully - use defaults if null/undefined
     const config = userConfig ? mergeDeep(defaultConfig, userConfig) : defaultConfig;
 
+    // Create shared state instance
+    const sharedState = new SharedState(config, initialComments);
+
+    // Module instances
+    let videoCore = null;
+    let progressBar = null;
+    let commentSystem = null;
+    let regionManagement = null;
+    let touchInterface = null;
+    let contextDisplay = null;
+    let eventHandler = null;
+
+    // Alpine.js component return object
     return {
-        player: null,
-        videoElement: null,
-        comments: initialComments || [], // Array of comment objects: {commentId, avatar, name, body, timestamp}
-        currentTime: 0,
-        duration: 0,
-        progressBarWidth: 0,
-        hoverX: 0, // Mouse hover position for add button
-        showHoverAdd: false, // Show hover add button
-        config: config, // Store config for component use
-        isPlaying: false,
-        volume: 1.0,
-        isMuted: false,
-        isFullscreen: false,
-        showPlayPauseOverlay: false,
-        videoLoaded: false,
-        showSettingsMenu: false,
-        showCommentsOnProgressBar: config.annotations.showCommentsOnProgressBar,
-        showResolutionMenu: false,
-        showVolumeSlider: false,
-        showVolumeModal: false,
-        showProgressBar: true,
-        progressBarMode: config.ui.progressBarMode,
-        progressBarTimeout: null,
-        qualitySources: [],
-        currentResolution: null,
-        currentResolutionSrc: null,
-        // Frame navigation
-        frameRate: 30, // Default, will be auto-detected
-        frameDuration: 1 / 30, // Calculated from frameRate
-        wasPlayingBeforeFrame: false, // Track if video was playing before frame nav
-        frameNavigationDirection: null, // 'forward', 'backward', or null
-        frameNavigationTimeout: null, // Timeout for hiding feedback
-        showFrameHelpers: true, // Show frame navigation helper arrows
-        currentFrameNumber: 0, // Real-time frame number for display
-        // Unified Input Handling
-        pointerState: {
-            isDown: false,
-            startTime: 0,
-            startPos: { x: 0, y: 0 },
-            currentPos: { x: 0, y: 0 },
-            hasMoved: false,
-            longPressTriggered: false,
-            ghostClickPrevention: false,
-            activePointer: null // 'mouse', 'touch', or null
-        },
-        longPressTimeout: null,
-        hasUserInteracted: false,
-        clickPreventionTimeout: null,
-        lastVideoClickTime: 0,
-        // Unified region creation toolbar
-        showRegionToolbar: false,
-        currentRegionId: null,
-        tempRegionFrame: null,
-        // Mobile comment interactions
-        activeCommentId: null,
-        // Right-click context menu
-        showContextMenu: false,
-        contextMenuX: 0,
-        contextMenuY: 0,
-        contextMenuTime: 0,
-        // Draggable seek circle
-        isDragging: false,
-        showTooltip: false,
-        dragStartX: 0,
-        dragCurrentTime: 0,
-        boundHandleDragMove: null,
-        boundEndDrag: null,
-        wasPlayingBeforeDrag: false,
+        // Shared state properties (reactive)
+        get player() { return videoCore?.player; },
+        get videoElement() { return videoCore?.videoElement; },
+        get videoLoaded() { return sharedState.videoLoaded; },
+        get durationFromState() { return sharedState.duration; }, // For debugging
+        get currentTimeFromState() { return sharedState.currentTime; }, // For debugging
+        get isPlayingFromState() { return sharedState.isPlaying; }, // For debugging
+        get volume() { return sharedState.volume; },
+        get isMuted() { return sharedState.isMuted; },
+        get isFullscreen() { return sharedState.isFullscreen; },
+        get bufferedPercentage() { return sharedState.bufferedPercentage; },
 
-        // Region creation global handlers
-        boundUpdateRegionCreation: null,
-        boundFinishRegionCreation: null,
+        // Progress bar state
+        get progressBarMode() { return sharedState.progressBarMode; },
+        get showProgressBar() { return sharedState.showProgressBar; },
+        get progressBarWidth() { return sharedState.progressBarWidth; },
+        get isDragging() { return sharedState.isDragging; },
+        get hoverX() { return sharedState.hoverX; },
+        get hoverTime() { return sharedState.hoverTime; },
+        get showHoverAdd() { return sharedState.showHoverAdd; },
+        get showSeekCircle() { return sharedState.showSeekCircle; },
 
-        // Hammer.js touch interface
-        hammer: null,
-        touchInterface: {
-            enabled: false,
-            mode: 'NORMAL', // NORMAL, REGION_CREATE, COMMENT_ADD, CONTEXT_MENU
-            contextMenuVisible: false,
-            unifiedTimelineVisible: false,
-            actionModalVisible: false,
-        },
+        // Touch interface state
+        get touchInterfaceMode() { return sharedState.touchInterface.mode; },
+        get touchInterfaceEnabled() { return sharedState.touchInterface.isEnabled; },
+        get activePointer() { return sharedState.touchInterface.activePointer; },
+        get gestureInProgress() { return sharedState.touchInterface.gestureInProgress; },
+        get isMobile() { return sharedState.isMobile; },
 
-        // Region Management
-        regions: [], // Array of region objects: {id, startTime, endTime, startFrame, endFrame, title, description}
-        maxRegions: 20,
-        isCreatingRegion: false,
-        regionCreationStart: null,
-        regionCreationEnd: null,
-        showRegionBar: true,
-        regionBarWidth: 0,
-        dragStartRegion: null,
-        isDraggingRegion: false,
-        regionDragOffset: 0,
-        showRegionTooltip: null, // ID of region showing tooltip
-        hiddenRegions: new Set(), // Set of region IDs that are hidden
+        // Comments state
+        get comments() { return sharedState.comments; },
+        get activeComments() { return sharedState.activeComments; },
+        get nearbyComments() { return sharedState.nearbyComments; },
 
-        // Getter for current video time - always references actual player time
-        get getCurrentTime() {
-            const currentTime = this.player ? this.player.currentTime() : 0;
-            return currentTime;
-        },
+        // Regions state
+        get regions() { return sharedState.regions; },
+        get activeRegion() { return sharedState.activeRegion; },
+        get regionCreationActive() { return sharedState.regionCreationActive; },
+        get hiddenRegions() { return sharedState.hiddenRegions; },
 
-        // Getter for mobile device detection
-        get isMobile() {
-            return this.isTouchDevice();
-        },
-
-        // Getter for frame-aligned progress percentage
-        get frameAlignedProgressPercentage() {
-            if (!this.duration || this.duration <= 0) return 0;
-            const frameState = this.currentFrameState;
-            const progressPercentage = frameState.progressPercentage;
-
-            // Adjust progress fill to center around the circle position
-            // The circle should be centered at the current time, not at the end of the fill
-            return progressPercentage;
-        },
-
-        // Single Source of Truth: Current Frame State
-        get currentFrameState() {
-            if (!this.player || !this.duration) {
-                return {
-                    rawTime: 0,
-                    frameAlignedTime: 0,
-                    frameNumber: 0,
-                    progressPercentage: 0,
-                    isValid: false
-                };
-            }
-
-            const rawTime = this.player.currentTime();
-            const frameAlignedTime = this.roundToNearestFrame(rawTime);
-            const frameNumber = this.getFrameNumber(frameAlignedTime);
-            const progressPercentage = (frameAlignedTime / this.duration) * 100;
-
+        // Context display state
+        get contextVisible() { return sharedState.contextDisplay?.visible || false; },
+        get contextEnabled() { return sharedState.contextDisplay?.enabled || false; },
+        get contextMode() { return sharedState.contextDisplay?.mode || 'time'; },
+        get contextContent() { return sharedState.contextDisplay?.content || null; },
+        get contextDisplay() { 
             return {
-                rawTime,
-                frameAlignedTime,
-                frameNumber,
-                progressPercentage,
-                isValid: true
+                visible: sharedState.contextDisplay?.visible || false,
+                enabled: sharedState.contextDisplay?.enabled || false,
+                mode: sharedState.contextDisplay?.mode || 'time',
+                content: sharedState.contextDisplay?.content || null,
+                nearbyComments: sharedState.contextDisplay?.nearbyComments || [],
+                autoHideTimer: sharedState.contextDisplay?.autoHideTimer || null
             };
         },
 
+        // Frame navigation state
+        get frameRate() { return sharedState.frameRate; },
+        get currentFrameState() { return sharedState.currentFrameState; },
+
+        // Configuration access
+        get config() { return config; },
+
+        // Legacy tooltip state (for backward compatibility)
+        get showTooltip() { return !sharedState.contextDisplay.enabled && sharedState.showTooltip; },
+
+        // Additional properties used in Blade template
+        get showPlayPauseOverlay() { return sharedState.showPlayPauseOverlay || false; },
+        get frameNavigationDirection() { return sharedState.frameNavigationDirection || null; },
+        get showFrameHelpers() { return sharedState.showFrameHelpers !== false; }, // Default true
+        get currentFrameNumber() { return sharedState.currentFrameNumber || 0; },
+        // Menu states - reactive properties for Alpine.js
+        showResolutionMenu: true, // Show by default
+        showSettingsMenu: false,
+        showVolumeModal: false,
+        showVolumeSlider: false,
+        showSpeedMenu: false,
+        showSpeedModal: false,
+        
+        // Video state - reactive properties for Alpine.js
+        isPlaying: false,
+        currentTime: 0,
+        duration: 0,
+        bufferedPercentage: 0,
+        volume: 1,
+        isMuted: false,
+        
+        // Test method to verify Alpine reactivity
+        testMenuToggle() {
+            console.log('[VideoAnnotation] Testing menu toggle...');
+            console.log('[VideoAnnotation] Quality sources:', this.qualitySources);
+            console.log('[VideoAnnotation] Quality sources length:', this.qualitySources.length);
+            console.log('[VideoAnnotation] Current resolution:', this.currentResolution);
+            console.log('[VideoAnnotation] Config enableResolutionSelector:', this.config.features.enableResolutionSelector);
+            this.showResolutionMenu = !this.showResolutionMenu;
+            console.log('[VideoAnnotation] showResolutionMenu is now:', this.showResolutionMenu);
+        },
+
+        // Menu control methods with debug logging
+        toggleResolutionMenu() {
+            console.log('[VideoAnnotation] Toggling resolution menu, current state:', this.showResolutionMenu);
+            this.showResolutionMenu = !this.showResolutionMenu;
+            console.log('[VideoAnnotation] Resolution menu is now:', this.showResolutionMenu);
+        },
+        
+        toggleSettingsMenu() {
+            console.log('[VideoAnnotation] Toggling settings menu, current state:', this.showSettingsMenu);
+            this.showSettingsMenu = !this.showSettingsMenu;
+            console.log('[VideoAnnotation] Settings menu is now:', this.showSettingsMenu);
+        },
+        
+        toggleVolumeModal() {
+            console.log('[VideoAnnotation] Toggling volume modal, current state:', this.showVolumeModal);
+            this.showVolumeModal = !this.showVolumeModal;
+            console.log('[VideoAnnotation] Volume modal is now:', this.showVolumeModal);
+        },
+        
+        closeAllMenus() {
+            console.log('[VideoAnnotation] Closing all menus');
+            this.showResolutionMenu = false;
+            this.showSettingsMenu = false;
+            this.showVolumeModal = false;
+            this.showVolumeSlider = false;
+            this.showSpeedMenu = false;
+            this.showSpeedModal = false;
+        },
+        
+        // Settings methods
+        toggleCommentsOnProgressBar() {
+            console.log('[VideoAnnotation] Toggling comments on progress bar');
+            if (sharedState) {
+                sharedState.showCommentsOnProgressBar = !sharedState.showCommentsOnProgressBar;
+                console.log('[VideoAnnotation] Show comments on progress bar:', sharedState.showCommentsOnProgressBar);
+            }
+        },
+        
+        toggleProgressBarMode() {
+            console.log('[VideoAnnotation] Toggling progress bar mode');
+            if (sharedState) {
+                const currentMode = sharedState.progressBarMode;
+                sharedState.progressBarMode = currentMode === 'always' ? 'auto-hide' : 'always';
+                sharedState.showProgressBar = sharedState.progressBarMode === 'always';
+                console.log('[VideoAnnotation] Progress bar mode:', sharedState.progressBarMode);
+            }
+        },
+        // Quality sources as reactive property (updated from SharedState)
+        qualitySources: [],
+        get qualitySourcesFromState() { return sharedState.qualitySources || []; },
+        get currentResolution() { return sharedState.currentResolution || null; },
+        get currentResolutionSrc() { return sharedState.currentResolutionSrc || null; },
+        get playbackRate() { return sharedState.playbackRate || 1.0; },
+        get showCommentsOnProgressBar() { return sharedState.showCommentsOnProgressBar !== false; }, // Default true
+        get showRegionBar() { return sharedState.showRegionBar !== false; }, // Default true
+        get regionBarWidth() { return sharedState.regionBarWidth || 0; },
+        get isCreatingRegion() { return sharedState.isCreatingRegion || false; },
+        get regionCreationStart() { return sharedState.regionCreationStart || null; },
+        get regionCreationEnd() { return sharedState.regionCreationEnd || null; },
+        get showRegionToolbar() { return sharedState.showRegionToolbar || false; },
+        get showRegionTooltip() { return sharedState.showRegionTooltip || null; },
+        get mobileControlsExpanded() { return sharedState.mobileControlsExpanded || false; },
+        get windowWidth() { return sharedState.windowWidth || window.innerWidth; },
+        get dragCurrentTime() { return sharedState.dragCurrentTime || 0; },
+        get wasPlayingBeforeDrag() { return sharedState.wasPlayingBeforeDrag || false; },
+        
+        // Touch interface properties
+        get touchInterface() { 
+            return {
+                enabled: sharedState.touchInterface?.enabled || false,
+                mode: sharedState.touchInterface?.mode || 'NORMAL',
+                contextMenuVisible: sharedState.touchInterface?.contextMenuVisible || false,
+                unifiedTimelineVisible: sharedState.touchInterface?.unifiedTimelineVisible || false,
+                actionModalVisible: sharedState.touchInterface?.actionModalVisible || false
+            };
+        },
+
+        // Context menu properties
+        get showContextMenu() { return sharedState.showContextMenu || false; },
+        get contextMenuX() { return sharedState.contextMenuX || 0; },
+        get contextMenuY() { return sharedState.contextMenuY || 0; },
+        get contextMenuTime() { return sharedState.contextMenuTime || 0; },
+
+        // Pointer state properties
+        get pointerState() {
+            return {
+                isDown: sharedState.pointerState?.isDown || false,
+                startTime: sharedState.pointerState?.startTime || 0,
+                startPos: sharedState.pointerState?.startPos || { x: 0, y: 0 },
+                currentPos: sharedState.pointerState?.currentPos || { x: 0, y: 0 },
+                hasMoved: sharedState.pointerState?.hasMoved || false,
+                longPressTriggered: sharedState.pointerState?.longPressTriggered || false,
+                ghostClickPrevention: sharedState.pointerState?.ghostClickPrevention || false,
+                activePointer: sharedState.pointerState?.activePointer || null
+            };
+        },
+
+        // Event handler module access
+        get eventHandler() {
+            return eventHandler?.getAlpineMethods() || {};
+        },
+
+        // Computed properties
+        get progressPercentage() {
+            return progressBar ? progressBar.getProgressPercentage() : (
+                this.duration && this.duration > 0 ? (this.currentTime / this.duration) * 100 : 0
+            );
+        },
+
+        get bufferedProgress() {
+            return progressBar ? progressBar.getBufferedPercentage() : this.bufferedPercentage;
+        },
+
+        get frameAlignedProgressPercentage() {
+            // Use reactive properties for better Alpine.js integration
+            return this.duration > 0 ? (this.currentTime / this.duration) * 100 : 0;
+        },
+
+        get isSafari() {
+            return videoCore?.isSafari || false;
+        },
+
+        /**
+         * Initialize the video annotation component
+         */
         init() {
-            // Comments are already initialized from initialComments parameter
-            // Keep window.videoComments as fallback for backward compatibility
-            if (!this.comments || this.comments.length === 0) {
-                this.comments = window.videoComments || [];
+            // Initialize shared state
+            if (!sharedState.comments || sharedState.comments.length === 0) {
+                sharedState.comments = initialComments || [];
             }
 
-            // Cross-browser compatibility checks
-            this.detectBrowser();
-
-            // Safari check - don't load player for Safari
-            if (this.isSafari) {
-                return; // Exit early, don't initialize anything for Safari
-            }
-
-            // Initialize quality sources from data attribute
-            this.initializeQualitySources();
-
-            // Wait for DOM refs to be available
-            this.$nextTick(() => {
-                this.videoElement = this.$refs.videoPlayer;
-                if (this.videoElement) {
-                    this.setupVideoJS();
-                    this.setupEventListeners();
-                    this.setupTouchInterface();
-                    this.resizeVideoWrapper(); // Initial sizing
-                }
-            });
-        },
-
-        detectBrowser() {
-            // Detect browser for specific fixes
-            this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-            this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            this.isAndroid = /Android/.test(navigator.userAgent);
-            this.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-            this.isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-        },
-
-
-        initializeQualitySources() {
-            // Wait for next tick to ensure DOM is ready
-            this.$nextTick(() => {
-                const qualitySourcesAttr = this.$refs.videoPlayer?.getAttribute('data-quality-sources');
-                if (qualitySourcesAttr) {
-                    try {
-                        this.qualitySources = JSON.parse(qualitySourcesAttr);
-                        // Find current resolution (selected or first)
-                        const selectedSource = this.qualitySources.find(source => source.selected);
-                        this.currentResolution = selectedSource || this.qualitySources[0] || null;
-                        this.currentResolutionSrc = this.currentResolution ? this.currentResolution.src : null;
-
-                    } catch (e) {
-                        console.warn('Failed to parse quality sources:', e);
-                        this.qualitySources = [];
-                        this.currentResolution = null;
-                        this.currentResolutionSrc = null;
-                    }
-                } else {
-                    this.qualitySources = [];
-                    this.currentResolution = null;
-                    this.currentResolutionSrc = null;
-                }
-            });
-        },
-
-
-        setupVideoJS() {
-            // Check if we already have a player instance or if videojs already initialized this element
-            if (this.player || this.videoElement.classList.contains('vjs-v8')) {
-                return;
-            }
-
-            // Initialize Video.js player
-            this.player = videojs(this.videoElement.id, {
-                autoplay: false,
-                controls: false,
-                muted: false,
-                preload: 'auto',
-                playsinline: true,
-                fluid: true
-            });
-
-            this.player.ready(() => {
-                // Don't auto-play on initialization to avoid conflicts with browser policies
-                // Let user interaction trigger playback instead
-                console.log("Video player ready");
-            });
-
-            this.setupPlayerEventListeners();
-        },
-
-
-        setupPlayerEventListeners() {
-            if (!this.player) return;
-
-            // Setup player event listeners
-            this.player.ready(() => {
-                this.duration = this.player.duration() || 0;
-                this.updateProgressBarWidth();
-            });
-
-            this.player.on('timeupdate', () => {
-                // Update using single source of truth
-                const frameState = this.currentFrameState;
-                this.currentTime = frameState.frameAlignedTime;
-                this.currentFrameNumber = frameState.frameNumber;
-
-            });
-
-            this.player.on('play', () => {
-                this.isPlaying = true;
-                this.showPlayPauseOverlay = true;
-                setTimeout(() => {
-                    this.showPlayPauseOverlay = false;
-                }, 800);
-
-                // Resume auto-hide behavior when playing (if in auto-hide mode)
-                if (this.progressBarMode === 'auto-hide') {
-                    this.progressBarTimeout = setTimeout(() => {
-                        this.showProgressBar = false;
-                    }, this.config.timing.progressBarAutoHideDelay);
-                }
-            });
-
-            this.player.on('pause', () => {
-                this.isPlaying = false;
-                this.showPlayPauseOverlay = true;
-                setTimeout(() => {
-                    this.showPlayPauseOverlay = false;
-                }, 800);
-
-                // Show progress bar when paused
-                this.showProgressBar = true;
-                // Clear any auto-hide timeout when paused
-                if (this.progressBarTimeout) {
-                    clearTimeout(this.progressBarTimeout);
-                    this.progressBarTimeout = null;
-                }
-            });
-
-            this.player.on('volumechange', () => {
-                this.volume = this.player.volume();
-                this.isMuted = this.player.muted();
-            });
-
-            this.player.on('fullscreenchange', () => {
-                this.isFullscreen = this.player.isFullscreen();
-            });
-
-            this.player.on('loadedmetadata', () => {
-                this.duration = this.player.duration();
-                this.updateProgressBarWidth();
-                this.detectFrameRate();
-                this.updateAspectRatio();
-            });
-
-            this.player.on('loadeddata', () => {
-                this.videoLoaded = true;
-                this.initializeProgressBarVisibility();
-            });
-
-            this.player.on('resize', () => {
-                this.updateProgressBarWidth();
-                this.updateAspectRatio();
-            });
-        },
-
-
-        setupEventListeners() {
-            // Listen for custom events to load comments
-            this.$el.addEventListener('loadComments', (event) => {
-                this.comments = event.detail.comments || [];
-                this.$nextTick(() => {
-                    this.renderCommentMarkers();
-                });
-            });
-
-            // Listen for external seek commands
-            this.$el.addEventListener('video-annotation:seek-comment', (event) => {
-                if (this.player && event.detail.timestamp) {
-                    this.hasUserInteracted = true;
-                    const seconds = event.detail.timestamp / 1000; // Convert from ms to seconds
-                    this.player.currentTime(seconds);
-                }
-            });
-
-            // Listen for external region loading
-            this.$el.addEventListener('video-annotation:load-regions', (event) => {
-                this.loadRegions(event.detail.regions || []);
-            });
-
-            // Throttled resize handler for better performance
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
+            // Set up default values for properties used in template
+            this.detectBrowser(); // Set browser detection early
+            sharedState.windowWidth = window.innerWidth;
+            sharedState.showFrameHelpers = true;
+            sharedState.showCommentsOnProgressBar = config.annotations?.showCommentsOnProgressBar !== false;
+            sharedState.showRegionBar = true;
+            
+            // Initialize menu states explicitly
+            this.showResolutionMenu = false;
+            this.showSettingsMenu = false;
+            this.showVolumeModal = false;
+            this.showVolumeSlider = false;
+            this.showSpeedMenu = false;
+            this.showSpeedModal = false;
+            
+            // Initialize context menu state
+            sharedState.showContextMenu = false;
+            sharedState.contextMenuX = 0;
+            sharedState.contextMenuY = 0;
+            sharedState.contextMenuTime = 0;
+            
+            // Initialize window resize handler
+            const handleResize = () => {
+                sharedState.windowWidth = window.innerWidth;
+                if (progressBar) {
                     this.updateProgressBarWidth();
-                    this.resizeVideoWrapper(); // Resize video wrapper on window resize
-                    // Update video container size on window resize
-                    if (this.player) {
-                        const width = this.player.videoWidth();
-                        const height = this.player.videoHeight();
-                        if (width && height) {
-                            this.updateVideoContainerSize(width, height);
-                        }
-                    }
-                }, 100);
-            });
+                }
+            };
+            window.addEventListener('resize', handleResize);
 
-            // Note: Keyboard events are handled via @keydown.window in the template
-        },
-
-        setupTouchInterface() {
-            // Only enable touch interface on touch devices
-            if (!this.isTouchDevice()) {
-                return;
-            }
-
-            this.touchInterface.enabled = true;
-            console.log('Touch interface enabled, setting up Hammer.js');
-
-            // Initialize Hammer.js on the main video container with optimized settings
+            // Use $nextTick to ensure DOM elements are ready
             this.$nextTick(() => {
-                const videoContainer = this.$el.querySelector('.relative.flex.justify-center');
-                if (videoContainer) {
-                    this.hammer = new Hammer(videoContainer, {
-                        recognizers: [
-                            // Pinch (highest priority - can interrupt others)
-                            [Hammer.Pinch, { enable: true }],
+                try {
+                    // Get video element reference with multiple fallbacks
+                    const videoElement = this.$refs.videoPlayer || 
+                                       this.$refs.video || 
+                                       this.$el.querySelector('video') ||
+                                       this.$el.querySelector('[x-ref="videoPlayer"]');
+                    
+                    if (!videoElement) {
+                        console.error('[VideoAnnotation] Video element not found. Available refs:', Object.keys(this.$refs || {}));
+                        return;
+                    }
 
-                            // Pan (works with pinch simultaneously) - optimized thresholds
-                            [Hammer.Pan, {
-                                direction: Hammer.DIRECTION_ALL,
-                                threshold: 10, // Increased for better touch recognition
-                                pointers: 1
-                            }],
+                    // Validate that DOM elements exist before creating modules
+                    const requiredRefs = {
+                        progressBar: this.$refs.progressBar,
+                        toolBar: this.$refs.toolBar || this.$refs['tool-bar-container']
+                    };
 
-                            // Tap - optimized to prevent multiple rapid detections
-                            [Hammer.Tap, {
-                                taps: 1,
-                                threshold: 20, // Higher threshold for cleaner detection
-                                time: 200,     // Shorter time window
-                                interval: 400  // Longer interval to prevent rapid duplicates
-                            }],
+                    const missingRefs = Object.entries(requiredRefs)
+                        .filter(([name, ref]) => !ref)
+                        .map(([name]) => name);
 
-                            // Double tap - properly configured
-                            [Hammer.Tap, {
-                                event: 'doubletap',
-                                taps: 2,
-                                threshold: 15,
-                                time: 250,
-                                interval: 400  // Increased interval
-                            }],
+                    if (missingRefs.length > 0) {
+                        console.warn('[VideoAnnotation] Missing DOM refs:', missingRefs, 'Available refs:', Object.keys(this.$refs || {}));
+                    }
 
-                            // Press - optimized timing
-                            [Hammer.Press, {
-                                time: 500,     // Increased from 250ms
-                                threshold: 15   // Added threshold
-                            }],
+                    // Create module instances
+                    videoCore = new VideoPlayerCore(config, sharedState);
+                    progressBar = new ProgressBarModule(videoCore, sharedState, config);
+                    commentSystem = new CommentSystemModule(videoCore, sharedState, config);
+                    regionManagement = new RegionManagementModule(videoCore, sharedState, config);
+                    touchInterface = new TouchInterfaceModule(videoCore, sharedState, config);
+                    contextDisplay = new ContextDisplayModule(videoCore, sharedState, config);
+                    eventHandler = new EventHandlerModule(videoCore, sharedState, config);
 
-                            // Swipe - optimized for better recognition
-                            [Hammer.Swipe, {
-                                direction: Hammer.DIRECTION_ALL,
-                                threshold: 30,  // Reduced threshold for easier swipes
-                                velocity: 0.2   // Reduced velocity requirement
-                            }]
-                        ]
+                    // Initialize VideoCore with the video element
+                    if (videoElement) {
+                        if (config.debug?.contextSystem) {
+                            console.log('[VideoAnnotation] Initializing VideoCore with element:', videoElement);
+                            console.log('[VideoAnnotation] Video element src:', videoElement.src || 'No src');
+                            console.log('[VideoAnnotation] Video element sources:', videoElement.querySelectorAll('source').length);
+                        }
+                        videoCore.init(videoElement);
+                    } else {
+                        console.error('[VideoAnnotation] VideoCore initialization failed - no video element');
+                    }
+
+                    // Initialize modules with error handling
+                    this.initializeModulesWithErrorHandling(videoElement);
+
+                    // Setup inter-module communication
+                    this.setupModuleCommunication();
+
+                    // Update progress bar width initially
+                    this.$nextTick(() => {
+                        this.updateProgressBarWidth();
                     });
 
-                    // Configure recognizer relationships to prevent conflicts
-                    this.hammer.get('doubletap').recognizeWith('tap');
-                    this.hammer.get('tap').requireFailure('doubletap');
-                    this.hammer.get('press').recognizeWith(['pan', 'swipe']);
-                    this.hammer.get('pan').requireFailure('swipe');
+                    if (config.debug?.contextSystem) {
+                        console.log('[VideoAnnotation] Initialized with modular architecture');
+                        console.log('[VideoAnnotation] Modules:', {
+                            videoCore: !!videoCore,
+                            progressBar: !!progressBar,
+                            commentSystem: !!commentSystem,
+                            regionManagement: !!regionManagement,
+                            touchInterface: !!touchInterface,
+                            contextDisplay: !!contextDisplay,
+                            eventHandler: !!eventHandler
+                        });
+                    }
 
-                    // Set up gesture handlers
-                    console.log('Hammer.js created successfully, setting up handlers');
-                    this.setupGestureHandlers();
+                } catch (error) {
+                    console.error('[VideoAnnotation] Initialization error:', error);
+                    console.error('[VideoAnnotation] Available $refs:', Object.keys(this.$refs || {}));
+                    console.error('[VideoAnnotation] $el:', this.$el);
                 }
             });
         },
 
-        setupGestureHandlers() {
-            if (!this.hammer) return;
+        /**
+         * Initialize modules with proper error handling
+         */
+        initializeModulesWithErrorHandling(videoElement) {
+            const modules = [
+                // VideoCore is already initialized above
+                { name: 'progressBar', instance: progressBar, initArgs: [this.$refs, this.$dispatch] },
+                { name: 'commentSystem', instance: commentSystem, initArgs: [this.$refs, this.$dispatch] },
+                { name: 'regionManagement', instance: regionManagement, initArgs: [this.$refs, this.$dispatch] },
+                { name: 'touchInterface', instance: touchInterface, initArgs: [this.$refs, this.$dispatch] },
+                { name: 'contextDisplay', instance: contextDisplay, initArgs: [this.$refs, this.$dispatch] },
+                { name: 'eventHandler', instance: eventHandler, initArgs: [this.$refs, this.$dispatch] }
+            ];
 
-            // TAP: Context-aware action with debouncing
-            this.hammer.on('tap', (event) => {
-                console.log('Hammer tap detected, mode:', this.touchInterface.mode);
-
-                // Debounce rapid taps (same as handleVideoClick)
-                const now = Date.now();
-                if (this.lastVideoClickTime && (now - this.lastVideoClickTime) < 300) {
-                    console.log('Hammer tap debounced - too rapid');
-                    return;
-                }
-                this.lastVideoClickTime = now;
-
-                if (this.touchInterface.mode === 'NORMAL') {
-                    console.log('Calling togglePlay from Hammer tap');
-                    this.togglePlay();
-                } else if (this.touchInterface.mode === 'REGION_CREATE') {
-                    this.confirmRegionCreation();
-                    this.exitRegionCreationMode();
-                }
-            });
-
-            // LONG PRESS: Direct add comment
-            this.hammer.on('press', (event) => {
-                if (this.touchInterface.mode === 'NORMAL') {
-                    this.addCommentAtCurrentFrame();
-                } else if (this.touchInterface.mode === 'REGION_CREATE') {
-                    this.exitRegionCreationMode(); // Cancel creation
-                }
-            });
-
-            // DOUBLE TAP: Quick add comment
-            this.hammer.on('doubletap', (event) => {
-                if (this.touchInterface.mode === 'NORMAL' && this.config.annotations?.enableVideoComments) {
-                    this.addCommentAtCurrentFrame();
-                }
-            });
-
-            // PAN: Context-aware dragging
-            this.hammer.on('panstart', (event) => {
-                this.handleTouchPanStart(event);
-            });
-
-            this.hammer.on('panmove', (event) => {
-                this.handleTouchPanMove(event);
-            });
-
-            this.hammer.on('panend', (event) => {
-                this.handleTouchPanEnd(event);
-            });
-
-            // SWIPE: Context-aware based on current mode
-            this.hammer.on('swipeleft', (event) => {
-                if (this.touchInterface.mode === 'NORMAL') {
-                    this.stepForward();
-                } else if (this.touchInterface.mode === 'REGION_CREATE') {
-                    this.shrinkRegionEnd();
-                }
-            });
-
-            this.hammer.on('swiperight', (event) => {
-                if (this.touchInterface.mode === 'NORMAL') {
-                    this.stepBackward();
-                } else if (this.touchInterface.mode === 'REGION_CREATE') {
-                    this.expandRegionEnd();
-                }
-            });
-
-            this.hammer.on('swipeup', (event) => {
-                if (this.touchInterface.mode === 'NORMAL') {
-                    this.toggleUnifiedTimeline();
-                } else if (this.touchInterface.mode === 'REGION_CREATE') {
-                    this.expandRegionStart();
-                }
-            });
-
-            this.hammer.on('swipedown', (event) => {
-                if (this.touchInterface.mode === 'REGION_CREATE') {
-                    this.shrinkRegionStart();
+            modules.forEach(({ name, instance, initArgs }) => {
+                try {
+                    if (instance && typeof instance.init === 'function') {
+                        instance.init(...initArgs);
+                        
+                        // Special handling for comment system
+                        if (name === 'commentSystem' && typeof instance.enableTimeUpdates === 'function') {
+                            instance.enableTimeUpdates();
+                        }
+                    } else {
+                        console.warn(`[VideoAnnotation] ${name} module not available or missing init method`);
+                    }
+                } catch (error) {
+                    console.error(`[VideoAnnotation] Failed to initialize ${name} module:`, error);
                 }
             });
         },
 
+        /**
+         * Setup inter-module communication
+         */
+        setupModuleCommunication() {
+            // Validate that $el exists and has addEventListener method
+            if (!this.$el || typeof this.$el.addEventListener !== 'function') {
+                console.error('[VideoAnnotation] $el is not a valid DOM element or missing addEventListener');
+                return;
+            }
+
+            try {
+                // Listen for custom events and route them to appropriate modules
+                this.$el.addEventListener('video-annotation:seek', (event) => {
+                    try {
+                        if (event.detail?.timestamp !== undefined && videoCore) {
+                            videoCore.seekTo(event.detail.timestamp);
+                        }
+                    } catch (error) {
+                        console.error('[VideoAnnotation] Error handling seek event:', error);
+                    }
+                });
+
+                this.$el.addEventListener('video-annotation:add-comment', (event) => {
+                    try {
+                        if (config.callbacks?.onCommentAdded) {
+                            config.callbacks.onCommentAdded(event.detail);
+                        }
+                    } catch (error) {
+                        console.error('[VideoAnnotation] Error handling add-comment event:', error);
+                    }
+                });
+
+                this.$el.addEventListener('video-annotation:region-created', (event) => {
+                    try {
+                        if (config.callbacks?.onRegionCreated) {
+                            config.callbacks.onRegionCreated(event.detail);
+                        }
+                    } catch (error) {
+                        console.error('[VideoAnnotation] Error handling region-created event:', error);
+                    }
+                });
+
+                // Listen for comment-related events
+                this.$el.addEventListener('video-annotation:view-comment', (event) => {
+                    try {
+                        if (config.callbacks?.onCommentViewed) {
+                            config.callbacks.onCommentViewed(event.detail);
+                        }
+                    } catch (error) {
+                        console.error('[VideoAnnotation] Error handling view-comment event:', error);
+                    }
+                });
+
+                // Listen for seek-comment events (when clicking comment dots)
+                this.$el.addEventListener('video-annotation:seek-comment', (event) => {
+                    try {
+                        if (event.detail?.timestamp !== undefined && videoCore) {
+                            videoCore.seekTo(event.detail.timestamp);
+                        }
+                        if (event.detail?.commentId && commentSystem) {
+                            commentSystem.showCommentContext(event.detail.commentId);
+                        }
+                    } catch (error) {
+                        console.error('[VideoAnnotation] Error handling seek-comment event:', error);
+                    }
+                });
+
+            } catch (error) {
+                console.error('[VideoAnnotation] Error setting up module communication:', error);
+            }
+            
+            // Listen for quality sources updates from VideoCore
+            document.addEventListener('quality-sources-updated', (event) => {
+                // Update the reactive property
+                this.qualitySources = event.detail.qualitySources || [];
+            });
+            
+            // Listen for play state changes from VideoCore
+            document.addEventListener('video-play-state-changed', (event) => {
+                // Update the reactive property
+                this.isPlaying = event.detail.isPlaying || false;
+            });
+            
+            // Listen for duration changes from VideoCore  
+            document.addEventListener('video-duration-changed', (event) => {
+                this.duration = event.detail.duration || 0;
+            });
+            
+            // Listen for time updates from VideoCore
+            document.addEventListener('video-time-updated', (event) => {
+                this.currentTime = event.detail.currentTime || 0;
+                // We could also store progressPercentage if needed
+                // this.progressPercentage = event.detail.progressPercentage || 0;
+            });
+            
+            // Listen for buffered updates from VideoCore
+            document.addEventListener('video-buffered-updated', (event) => {
+                this.bufferedPercentage = event.detail.bufferedPercentage || 0;
+            });
+            
+            // Listen for volume updates from VideoCore
+            document.addEventListener('video-volume-changed', (event) => {
+                // Update reactive properties to force Alpine.js template updates
+                this.volume = event.detail.volume || 0;
+                this.isMuted = event.detail.isMuted || false;
+                console.log('[VideoAnnotation] Volume changed:', this.volume, 'Muted:', this.isMuted);
+            });
+        },
+
+        /**
+         * Update progress bar width
+         */
         updateProgressBarWidth() {
-            this.$nextTick(() => {
-                const progressBar = this.$refs.progressBar;
-                if (progressBar) {
-                    this.progressBarWidth = progressBar.offsetWidth;
-                    // Circle positioning removed
-                }
-
-                // Also update region bar width
-                const regionBar = this.$refs.regionBar;
-                if (regionBar) {
-                    this.regionBarWidth = regionBar.offsetWidth;
-                }
-            });
+            if (progressBar) {
+                progressBar.updateProgressBarWidth();
+            }
         },
 
+        /**
+         * Clean up resources
+         */
+        cleanup() {
+            // Dispose of all modules
+            if (commentSystem) commentSystem.dispose();
+            if (regionManagement) regionManagement.dispose();
+            if (touchInterface) touchInterface.dispose();
+            if (contextDisplay) contextDisplay.dispose();
+            if (eventHandler) eventHandler.dispose();
+            if (videoCore) videoCore.dispose();
 
+            // Clear shared state
+            sharedState.reset();
+
+            if (config.debug?.contextSystem) {
+                console.log('[VideoAnnotation] Cleaned up resources');
+            }
+        },
+
+        // === PUBLIC API METHODS ===
+        // These methods are exposed for external use and combine functionality from multiple modules
+
+        // Video control methods
+        togglePlayPause() { return videoCore?.togglePlayPause(); },
+        togglePlay() { return videoCore?.togglePlayPause(); }, // Alias for backward compatibility
+        seekTo(time) { return videoCore?.seekTo(time); },
+        setVolume(volume) { return videoCore?.setVolume(volume); },
+        toggleMute() { return videoCore?.toggleMute(); },
+        toggleFullscreen() { return videoCore?.toggleFullscreen(); },
+        
+        // Frame navigation methods
+        stepForward() {
+            if (videoCore?.player && sharedState?.duration > 0) {
+                const currentTime = videoCore.player.currentTime() || 0;
+                const frameRate = sharedState.frameRate || 30;
+                const frameDuration = 1 / frameRate;
+                const newTime = Math.min(currentTime + frameDuration, sharedState.duration);
+                videoCore.seekTo(newTime);
+                
+                // Update frame navigation direction for visual feedback
+                sharedState.frameNavigationDirection = 'forward';
+                setTimeout(() => { sharedState.frameNavigationDirection = null; }, 500);
+            }
+        },
+        
+        stepBackward() {
+            if (videoCore?.player && sharedState) {
+                const currentTime = videoCore.player.currentTime() || 0;
+                const frameRate = sharedState.frameRate || 30;
+                const frameDuration = 1 / frameRate;
+                const newTime = Math.max(currentTime - frameDuration, 0);
+                videoCore.seekTo(newTime);
+                
+                // Update frame navigation direction for visual feedback
+                sharedState.frameNavigationDirection = 'backward';
+                setTimeout(() => { sharedState.frameNavigationDirection = null; }, 500);
+            }
+        },
+        
+        // Resolution control methods
+        changeResolution(source) {
+            console.log('[VideoAnnotation] Changing resolution to:', source);
+            if (videoCore?.changeResolution) {
+                videoCore.changeResolution(source);
+                
+                // Update the selected state in qualitySources array
+                this.qualitySources = this.qualitySources.map(s => ({
+                    ...s,
+                    selected: s.src === source.src
+                }));
+                
+                // Update SharedState to keep it in sync
+                if (sharedState) {
+                    sharedState.qualitySources = this.qualitySources;
+                    sharedState.currentResolution = source;
+                    sharedState.currentResolutionSrc = source.src;
+                }
+            }
+        },
+
+        // Progress bar methods
+        handleProgressBarClick(event, action = 'click') {
+            return progressBar?.handleProgressBarClick(event, action);
+        },
+        handleProgressBarDragStart(event) {
+            return progressBar?.handleProgressBarDragStart(event);
+        },
+        handleProgressBarHover(event) {
+            return progressBar?.handleProgressBarHover(event);
+        },
+        handleProgressBarLeave() {
+            return progressBar?.handleProgressBarLeave();
+        },
+
+        // Comment system methods
+        handleCommentClick(comment, event) {
+            return commentSystem?.handleCommentClick(comment, event);
+        },
         loadComment(commentId) {
-            // Emit event for external handling (e.g., show comment details)
-            this.$dispatch('video-annotation:view-comment', {
-                commentId: commentId
-            });
+            return commentSystem?.loadComment(commentId);
         },
-
-        getCommentPosition(timestamp) {
-            // Safety checks for invalid inputs
-            if (!timestamp || typeof timestamp !== 'number') return 0;
-            if (this.duration <= 0 || !this.progressBarWidth) return 0;
-
-            // Timestamp is already in seconds from Laravel CommentTime->asSeconds()
-            // No need to divide by 1000 like we do for milliseconds
-            const seconds = timestamp;
-            const position = (seconds / this.duration) * this.progressBarWidth;
-
-            // Ensure position is within bounds
-            return Math.max(0, Math.min(position, this.progressBarWidth));
+        addComment(comment) {
+            return commentSystem?.addComment(comment);
         },
-
-        getTooltipPosition(timestamp) {
-            const position = this.getCommentPosition(timestamp);
-            if (!this.progressBarWidth) return 'left-1/2 -translate-x-1/2';
-
-            const tooltipWidth = 200; // approximate tooltip width
-
-            // If tooltip would go off the left edge
-            if (position < tooltipWidth / 2) {
-                return 'left-0 translate-x-0';
-            }
-            // If tooltip would go off the right edge
-            else if (position > this.progressBarWidth - tooltipWidth / 2) {
-                return 'right-0 translate-x-0';
-            }
-            // Default centered position
-            else {
-                return 'left-1/2 -translate-x-1/2';
-            }
+        removeComment(commentId) {
+            return commentSystem?.removeComment(commentId);
         },
-
-        getArrowPosition(timestamp) {
-            const position = this.getCommentPosition(timestamp);
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) return 'left-1/2 -translate-x-1/2';
-
-            const containerWidth = progressBar.offsetWidth;
-            const tooltipWidth = 200; // approximate tooltip width
-
-            // If tooltip is aligned to the left edge
-            if (position < tooltipWidth / 2) {
-                // Arrow should be positioned where the comment actually is
-                const arrowLeft = Math.max(8, position); // 8px minimum from edge
-                return `left-[${arrowLeft}px] -translate-x-1/2`;
-            }
-            // If tooltip is aligned to the right edge
-            else if (position > containerWidth - tooltipWidth / 2) {
-                // Arrow should be positioned where the comment actually is
-                const arrowRight = Math.max(8, containerWidth - position); // 8px minimum from edge
-                return `right-[${arrowRight}px] translate-x-1/2`;
-            }
-            // Default centered position
-            else {
-                return 'left-1/2 -translate-x-1/2';
-            }
-        },
-
         renderCommentMarkers() {
-            // This will be called after comments are loaded
-            this.$nextTick(() => {
-                this.updateProgressBarWidth();
-            });
+            return commentSystem?.renderCommentMarkers() || [];
+        },
+        getCommentBubblePosition(comment, index) {
+            return commentSystem?.getCommentBubblePosition(comment, index) || { left: 0, zIndex: 100 };
+        },
+        calculateCommentOffset(comment, index) {
+            return commentSystem?.calculateCommentOffset(comment, index) || { left: 0, top: 0 };
+        },
+        showCommentContext(commentId) {
+            return commentSystem?.showCommentContext(commentId);
+        },
+        hideCommentContext(commentId) {
+            return commentSystem?.hideCommentContext(commentId);
+        },
+        clearActiveComments() {
+            return commentSystem?.clearActiveComments();
         },
 
+        // Region management methods
+        startRegionCreation() {
+            return regionManagement?.startRegionCreation();
+        },
+        finishRegionCreation() {
+            return regionManagement?.finishRegionCreation();
+        },
+        cancelRegionCreation() {
+            return regionManagement?.cancelRegionCreation();
+        },
+        selectRegion(regionId) {
+            return regionManagement?.selectRegion(regionId);
+        },
+        deleteRegion(regionId) {
+            return regionManagement?.deleteRegion(regionId);
+        },
+        handleRegionClick(regionId, event) {
+            return regionManagement?.handleRegionClick(regionId, event);
+        },
+        getVisibleRegions() {
+            return regionManagement?.getVisibleRegions() || [];
+        },
+        getRegionPosition(region) {
+            return regionManagement?.getRegionPosition(region) || { left: 0, width: 0 };
+        },
+
+        // Touch interface methods
+        enableTouchInterface() {
+            return touchInterface?.enable();
+        },
+        disableTouchInterface() {
+            return touchInterface?.disable();
+        },
+        isTouchDevice() {
+            return touchInterface?.isTouchDevice() || false;
+        },
+
+        // Context display methods
+        showContext(content, position, options) {
+            return contextDisplay?.show(content, position, options);
+        },
+        hideContext(immediate = false) {
+            return contextDisplay?.hide(immediate);
+        },
+        showTimeContext(time, position) {
+            return contextDisplay?.showTimeContext(time, position);
+        },
+        showCommentsContext(comments, position) {
+            return contextDisplay?.showCommentsContext(comments, position);
+        },
+        showCombinedContext(time, comments, position) {
+            return contextDisplay?.showCombinedContext(time, comments, position);
+        },
+        setContextMode(mode) {
+            return contextDisplay?.setMode(mode);
+        },
+        enableContext() {
+            return contextDisplay?.enable();
+        },
+        disableContext() {
+            return contextDisplay?.disable();
+        },
+        clearContextAutoHide() {
+            return contextDisplay?.clearAutoHideTimer();
+        },
+
+        // Event handler methods
+        enableKeyboard() {
+            return eventHandler?.enableKeyboard();
+        },
+        disableKeyboard() {
+            return eventHandler?.disableKeyboard();
+        },
+        addKeyboardShortcut(key, handler) {
+            return eventHandler?.addKeyboardShortcut(key, handler);
+        },
+        seekRelative(seconds) {
+            return eventHandler?.seekRelative(seconds);
+        },
+        seekFrame(frames) {
+            return eventHandler?.seekFrame(frames);
+        },
+
+        // Utility methods
+        formatTimestamp(seconds) {
+            return commentSystem?.formatTimestamp(seconds) || this.formatTime(seconds);
+        },
         formatTime(seconds) {
+            if (!seconds || seconds < 0) return '0:00';
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
             return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
         },
-
-        // Computed hover time based on mouse position
-        get hoverTime() {
-            if (!this.duration || !this.$refs.progressBar) {
-                return '0:00';
-            }
-
-            const rect = this.$refs.progressBar.getBoundingClientRect();
-            const percentage = this.hoverX / rect.width;
-            const timeInSeconds = percentage * this.duration;
-
-            return this.formatTime(Math.max(0, Math.min(timeInSeconds, this.duration)));
+        roundToNearestFrame(time) {
+            return sharedState.roundToNearestFrame ? sharedState.roundToNearestFrame(time) : time;
+        },
+        getFrameNumber(time) {
+            return sharedState.getFrameNumber ? sharedState.getFrameNumber(time) : Math.floor(time * (this.frameRate || 30));
+        },
+        timeToPixel(time) {
+            return sharedState.timeToPixel ? sharedState.timeToPixel(time) : 0;
+        },
+        pixelToTime(pixelX) {
+            return sharedState.pixelToTime ? sharedState.pixelToTime(pixelX) : 0;
         },
 
-        // Frame navigation methods
-        detectFrameRate() {
-            if (!this.player) {
-                return;
-            }
-
-            try {
-                // Use VideoJS API instead of direct tech access
-                let detectedRate = null;
-
-                // Try to get from video element metadata if available
-                if (this.videoElement && this.videoElement.videoTracks && this.videoElement.videoTracks.length > 0) {
-                    const track = this.videoElement.videoTracks[0];
-                    if (track.getSettings && track.getSettings().frameRate) {
-                        detectedRate = track.getSettings().frameRate;
-                    }
-                }
-
-                // Fallback to common frame rates based on duration patterns
-                if (!detectedRate && this.duration > 0) {
-                    // Use 30fps as safe default for web video
-                    detectedRate = 30;
-                }
-
-                this.frameRate = detectedRate || 30;
-                this.frameDuration = 1 / this.frameRate;
-
-            } catch (e) {
-                // Fallback to 30fps on any error
-                this.frameRate = 30;
-                this.frameDuration = 1 / this.frameRate;
-            }
-        },
-
-        stepForward() {
-            if (!this.player) return;
-
-            // If creating region, expand region end instead of normal frame step
-            if (this.isCreatingRegion) {
-                this.expandRegionEnd();
-                return;
-            }
-
-            // Store playing state and pause if needed
-            this.wasPlayingBeforeFrame = !this.player.paused();
-            if (this.wasPlayingBeforeFrame) {
-                this.player.pause();
-            }
-
-            const currentTime = this.player.currentTime();
-            const newTime = Math.min(currentTime + this.frameDuration, this.duration);
-            this.player.currentTime(newTime);
-
-            // Show visual feedback
-            this.showFrameNavigationFeedback('forward');
-        },
-
-        stepBackward() {
-            if (!this.player) return;
-
-            // If creating region, reduce region end instead of normal frame step
-            if (this.isCreatingRegion) {
-                this.reduceRegionEnd();
-                return;
-            }
-
-            // Store playing state and pause if needed
-            this.wasPlayingBeforeFrame = !this.player.paused();
-            if (this.wasPlayingBeforeFrame) {
-                this.player.pause();
-            }
-
-            const currentTime = this.player.currentTime();
-            const newTime = Math.max(currentTime - this.frameDuration, 0);
-            this.player.currentTime(newTime);
-
-            // Show visual feedback
-            this.showFrameNavigationFeedback('backward');
-        },
-
-        showFrameNavigationFeedback(direction) {
-            // Clear any existing timeout
-            if (this.frameNavigationTimeout) {
-                clearTimeout(this.frameNavigationTimeout);
-            }
-
-            // Set direction for visual feedback
-            this.frameNavigationDirection = direction;
-
-            // Hide feedback after 800ms
-            this.frameNavigationTimeout = setTimeout(() => {
-                this.frameNavigationDirection = null;
-            }, 800);
-        },
-
+        // Additional methods used in Blade template
         toggleFrameHelpers() {
-            this.showFrameHelpers = !this.showFrameHelpers;
+            sharedState.showFrameHelpers = !sharedState.showFrameHelpers;
         },
-
-        // Round timestamp to nearest frame boundary
-        roundToNearestFrame(timestamp) {
-            if (this.frameDuration <= 0) {
-                return timestamp; // Fallback if frame rate not detected
-            }
-
-            const frameNumber = Math.round(timestamp / this.frameDuration);
-            return frameNumber * this.frameDuration;
+        stepForward() {
+            return eventHandler?.stepForward() || videoCore?.stepForward();
         },
-
-        // Get current timestamp aligned to frame boundary
-        getCurrentFrameTime() {
-            return this.currentFrameState.frameAlignedTime;
+        stepBackward() {
+            return eventHandler?.stepBackward() || videoCore?.stepBackward();
         },
-
-        // Calculate frame number from timestamp
-        getFrameNumber(timestamp) {
-            if (this.frameDuration <= 0) {
-                return Math.round(timestamp * 30); // Fallback assuming 30fps
-            }
-
-            return Math.round(timestamp / this.frameDuration);
+        getSpeedOptions() {
+            return [
+                { value: 0.25, label: '0.25x' },
+                { value: 0.5, label: '0.5x' },
+                { value: 0.75, label: '0.75x' },
+                { value: 1.0, label: '1x' },
+                { value: 1.25, label: '1.25x' },
+                { value: 1.5, label: '1.5x' },
+                { value: 2.0, label: '2x' }
+            ];
         },
-
-        // Get current frame number
-        getCurrentFrameNumber() {
-            return this.currentFrameState.frameNumber;
+        setPlaybackRate(rate) {
+            return videoCore?.setPlaybackRate(rate);
         },
-
-        // Region Management Methods
-
-        startRegionCreation(event) {
-            if (this.isCreatingRegion) return;
-
-            const rect = event.currentTarget.getBoundingClientRect();
-            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-            const clickX = clientX - rect.left;
-            const percentage = clickX / rect.width;
-            const startTime = percentage * this.duration;
-
-            this.isCreatingRegion = true;
-            this.regionCreationStart = {
-                time: this.roundToNearestFrame(startTime),
-                x: clickX,
-                frame: this.getFrameNumber(this.roundToNearestFrame(startTime))
-            };
-
-            // Initialize end position to start position
-            this.regionCreationEnd = {
-                time: this.roundToNearestFrame(startTime),
-                x: clickX,
-                frame: this.getFrameNumber(this.roundToNearestFrame(startTime))
-            };
-
-            // Hide existing regions during creation
-            this.showRegionTooltip = null;
-
-            // Add global document listeners for region creation
-            this.boundUpdateRegionCreation = this.handleGlobalRegionUpdate.bind(this);
-            this.boundFinishRegionCreation = this.handleGlobalRegionFinish.bind(this);
-
-            document.addEventListener('mousemove', this.boundUpdateRegionCreation);
-            document.addEventListener('mouseup', this.boundFinishRegionCreation);
-            document.addEventListener('touchmove', this.boundUpdateRegionCreation);
-            document.addEventListener('touchend', this.boundFinishRegionCreation);
-
-            // Pause video during region creation and seek to start time
-            if (this.player) {
-                // Always pause first
-                if (this.isPlaying) {
-                    this.player.pause();
-                }
-                // Then seek to the region start time
-                this.player.currentTime(this.roundToNearestFrame(startTime));
+        toggleSpeedMenu() {
+            sharedState.showSpeedMenu = !sharedState.showSpeedMenu;
+        },
+        toggleSpeedModal() {
+            sharedState.showSpeedModal = !sharedState.showSpeedModal;
+        },
+        toggleVolumeModal() {
+            sharedState.showVolumeModal = !sharedState.showVolumeModal;
+        },
+        toggleVolumeSlider() {
+            sharedState.showVolumeSlider = !sharedState.showVolumeSlider;
+        },
+        toggleSettingsMenu() {
+            sharedState.showSettingsMenu = !sharedState.showSettingsMenu;
+        },
+        toggleResolutionMenu() {
+            sharedState.showResolutionMenu = !sharedState.showResolutionMenu;
+        },
+        toggleMobileControls() {
+            sharedState.mobileControlsExpanded = !sharedState.mobileControlsExpanded;
+        },
+        getVolumePercentage() {
+            return Math.round((this.volume || 0) * 100);
+        },
+        detectBrowser() {
+            // Browser detection (fallback if videoCore not available)
+            if (!videoCore) {
+                sharedState.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                sharedState.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                sharedState.isAndroid = /Android/.test(navigator.userAgent);
+                sharedState.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+                sharedState.isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
             }
         },
 
-        updateRegionCreation(event) {
-            if (!this.isCreatingRegion || !this.regionCreationStart) return;
-
-            const rect = event.currentTarget.getBoundingClientRect();
-            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-            const currentX = clientX - rect.left;
-            const percentage = currentX / rect.width;
-            const currentTime = percentage * this.duration;
-            const frameAlignedTime = this.roundToNearestFrame(currentTime);
-
-            // Update visual feedback for region being created
-            this.regionCreationEnd = {
-                time: frameAlignedTime,
-                x: currentX,
-                frame: this.getFrameNumber(frameAlignedTime)
-            };
-
-            // Real-time video seeking to the end edge for amazing UX
-            if (this.player && this.player.readyState() >= 1) {
-                this.player.currentTime(frameAlignedTime);
-                this.player.pause();
+        // Context menu methods
+        showContextMenu(event, time) {
+            if (!config.annotations?.enableContextMenu) return;
+            
+            sharedState.showContextMenu = true;
+            sharedState.contextMenuX = event.clientX || event.pageX || 0;
+            sharedState.contextMenuY = event.clientY || event.pageY || 0;
+            sharedState.contextMenuTime = time || this.currentTime;
+            
+            // Prevent default context menu
+            if (event.preventDefault) event.preventDefault();
+            if (event.stopPropagation) event.stopPropagation();
+        },
+        hideContextMenu() {
+            sharedState.showContextMenu = false;
+            sharedState.contextMenuX = 0;
+            sharedState.contextMenuY = 0;
+            sharedState.contextMenuTime = 0;
+        },
+        handleContextMenuAction(action) {
+            const time = sharedState.contextMenuTime;
+            this.hideContextMenu();
+            
+            switch (action) {
+                case 'add-comment':
+                    if (commentSystem) {
+                        commentSystem.addCommentAtTime(time);
+                    }
+                    break;
+                case 'create-region':
+                    if (regionManagement) {
+                        regionManagement.startRegionCreationAtTime(time);
+                    }
+                    break;
+                default:
+                    console.warn(`Unknown context menu action: ${action}`);
             }
         },
 
-        finishRegionCreation(event) {
-            if (!this.isCreatingRegion || !this.regionCreationStart || !this.regionCreationEnd) return;
-
-            // For desktop drag-based creation, use the exact end position from mouse
-            // For toolbar-based creation, update to current frame
-            if (event && event.type.includes('mouse')) {
-                // Desktop drag - keep existing end position from mouse
-                // regionCreationEnd is already set by updateRegionCreation
-            } else {
-                // Toolbar navigation - update region end to current frame
-                const frameState = this.currentFrameState;
-                const frameAlignedTime = frameState.frameAlignedTime;
-                const frameNumber = frameState.frameNumber;
-
-                this.regionCreationEnd = {
-                    x: this.regionCreationEnd.x,
-                    time: frameAlignedTime,
-                    frame: frameNumber
+        // Context display methods
+        getContextDisplayContent() {
+            if (!contextDisplay) {
+                return {
+                    primary: this.formatTime(this.currentTime),
+                    secondary: null,
+                    showCommentCount: false,
+                    comment: null
                 };
             }
-
-            // Use existing confirmRegionCreation logic
-            this.confirmRegionCreation();
-        },
-
-        // Explicit finish region creation via button
-        confirmRegionCreation() {
-            if (!this.isCreatingRegion || !this.regionCreationStart || !this.regionCreationEnd) return;
-
-            const startTime = this.regionCreationStart.time;
-            const endTime = this.regionCreationEnd.time;
-            const startFrame = this.regionCreationStart.frame;
-            const endFrame = this.regionCreationEnd.frame;
-
-            // Ensure minimum region size (at least 2 frames)
-            if (Math.abs(endTime - startTime) < this.frameDuration * 2) {
-                return; // Don't finish if too small
-            }
-
-            // Create region object
-            const region = {
-                id: `region-${Date.now()}`,
-                startTime: Math.min(startTime, endTime),
-                endTime: Math.max(startTime, endTime),
-                startFrame: Math.min(startFrame, endFrame),
-                endFrame: Math.max(startFrame, endFrame),
-                title: `Region ${this.regions.length + 1}`,
-                description: ''
-            };
-
-            // Fire event to add comment with region data
-            this.$dispatch('video-annotation:add-comment', {
-                timestamp: region.startTime,
-                currentTime: region.startTime,
-                frameNumber: region.startFrame,
-                frameRate: this.frameRate,
-                regionData: {
-                    startTime: region.startTime,
-                    endTime: region.endTime,
-                    startFrame: region.startFrame,
-                    endFrame: region.endFrame,
-                    duration: region.endTime - region.startTime
+            
+            if (contextDisplay.getDisplayContent) {
+                const content = contextDisplay.getDisplayContent();
+                // Only log when there are secondary comments to show
+                if (content.secondary) {
+                    console.log('[VideoAnnotation] Showing secondary context:', content.secondary);
                 }
-            });
-
-            // Add region to list if under limit
-            if (this.regions.length < this.maxRegions) {
-                this.regions.push(region);
-                this.autoHideOldestRegions();
-            }
-
-            this.cleanupRegionCreation();
-        },
-
-        // Arrow key controls for fine-tuning end edge
-        expandRegionEnd() {
-            if (!this.isCreatingRegion || !this.regionCreationEnd) return;
-
-            const newTime = Math.min(this.regionCreationEnd.time + this.frameDuration, this.duration);
-            const newFrame = this.getFrameNumber(newTime);
-            const rect = this.$refs.regionBar.getBoundingClientRect();
-            const newX = (newTime / this.duration) * rect.width;
-
-            this.regionCreationEnd = {
-                time: newTime,
-                x: newX,
-                frame: newFrame
-            };
-
-            // Sync video to new position and ensure it stays paused
-            if (this.player && this.player.readyState() >= 1) {
-                this.player.currentTime(newTime);
-                this.player.pause();
-            }
-        },
-
-        reduceRegionEnd() {
-            if (!this.isCreatingRegion || !this.regionCreationEnd || !this.regionCreationStart) return;
-
-            const newTime = Math.max(this.regionCreationEnd.time - this.frameDuration, this.regionCreationStart.time + this.frameDuration);
-            const newFrame = this.getFrameNumber(newTime);
-            const rect = this.$refs.regionBar.getBoundingClientRect();
-            const newX = (newTime / this.duration) * rect.width;
-
-            this.regionCreationEnd = {
-                time: newTime,
-                x: newX,
-                frame: newFrame
-            };
-
-            // Sync video to new position and ensure it stays paused
-            if (this.player && this.player.readyState() >= 1) {
-                this.player.currentTime(newTime);
-                this.player.pause();
-            }
-        },
-
-        cancelRegionCreation() {
-            this.cleanupRegionCreation();
-        },
-
-        // Global handlers for region creation (work outside region bar bounds)
-        handleGlobalRegionUpdate(event) {
-            if (!this.isCreatingRegion || !this.regionCreationStart) return;
-
-            const regionBar = this.$refs.regionBar;
-            if (!regionBar) return;
-
-            const rect = regionBar.getBoundingClientRect();
-            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-            const currentX = Math.max(0, Math.min(clientX - rect.left, rect.width)); // Constrain to region bar bounds
-            const percentage = currentX / rect.width;
-            const currentTime = percentage * this.duration;
-            const frameAlignedTime = this.roundToNearestFrame(currentTime);
-
-            // Update visual feedback for region being created
-            this.regionCreationEnd = {
-                time: frameAlignedTime,
-                x: currentX,
-                frame: this.getFrameNumber(frameAlignedTime)
-            };
-
-            // Real-time video seeking to the end edge for amazing UX
-            if (this.player && this.player.readyState() >= 1) {
-                this.player.currentTime(frameAlignedTime);
-                this.player.pause();
-            }
-        },
-
-        handleGlobalRegionFinish(event) {
-            if (!this.isCreatingRegion) return;
-
-            // Don't auto-finish on global mouse up - only via explicit finish button
-            // This prevents accidental region creation when user releases mouse outside region bar
-            return;
-        },
-
-        cleanupRegionCreation() {
-            this.isCreatingRegion = false;
-            this.regionCreationStart = null;
-            this.regionCreationEnd = null;
-
-            // Hide toolbar
-            this.showRegionToolbar = false;
-
-            // Prevent ghost clicks for a short time after region creation
-            this.pointerState.ghostClickPrevention = true;
-            setTimeout(() => {
-                this.pointerState.ghostClickPrevention = false;
-            }, 300);
-
-            // Remove global document listeners
-            if (this.boundUpdateRegionCreation) {
-                document.removeEventListener('mousemove', this.boundUpdateRegionCreation);
-                document.removeEventListener('touchmove', this.boundUpdateRegionCreation);
-                this.boundUpdateRegionCreation = null;
-            }
-            if (this.boundFinishRegionCreation) {
-                document.removeEventListener('mouseup', this.boundFinishRegionCreation);
-                document.removeEventListener('touchend', this.boundFinishRegionCreation);
-                this.boundFinishRegionCreation = null;
-            }
-        },
-
-        autoHideOldestRegions() {
-            if (this.regions.length > this.maxRegions) {
-                // Hide oldest regions that exceed the limit
-                const excessCount = this.regions.length - this.maxRegions;
-                for (let i = 0; i < excessCount; i++) {
-                    this.hiddenRegions.add(this.regions[i].id);
-                }
-            }
-        },
-
-        getRegionPosition(region) {
-            if (!this.duration || !this.regionBarWidth) return { left: 0, width: 0 };
-
-            const startPercentage = region.startTime / this.duration;
-            const endPercentage = region.endTime / this.duration;
-
-            return {
-                left: startPercentage * this.regionBarWidth,
-                width: (endPercentage - startPercentage) * this.regionBarWidth
-            };
-        },
-
-        isRegionVisible(region) {
-            return !this.hiddenRegions.has(region.id);
-        },
-
-        jumpToRegionStart(region) {
-            if (this.player) {
-                this.player.currentTime(region.startTime);
-
-                // Fire event for external handling
-                this.$dispatch('video-annotation:region-seek', {
-                    regionId: region.id,
-                    timestamp: region.startTime,
-                    frameNumber: region.startFrame
-                });
-            }
-        },
-
-        showRegionTooltipFor(regionId) {
-            this.showRegionTooltip = regionId;
-        },
-
-        hideRegionTooltips() {
-            this.showRegionTooltip = null;
-        },
-
-        deleteRegion(regionId) {
-            this.regions = this.regions.filter(r => r.id !== regionId);
-            this.hiddenRegions.delete(regionId);
-            if (this.showRegionTooltip === regionId) {
-                this.showRegionTooltip = null;
-            }
-        },
-
-        toggleRegionVisibility(regionId) {
-            if (this.hiddenRegions.has(regionId)) {
-                this.hiddenRegions.delete(regionId);
+                return content;
             } else {
-                this.hiddenRegions.add(regionId);
+                return {
+                    primary: this.formatTime(this.currentTime),
+                    secondary: null,
+                    showCommentCount: false,
+                    comment: null
+                };
             }
         },
 
-        // Load regions from external data
-        loadRegions(regionsData) {
-            this.regions = regionsData || [];
-            this.autoHideOldestRegions();
-            this.updateProgressBarWidth(); // Refresh region bar width
+        // Comment timeline display methods
+        shouldShowTimelineDisplay(comment) {
+            if (!comment || !commentSystem) return false;
+            return commentSystem.shouldShowTimelineDisplay ? commentSystem.shouldShowTimelineDisplay(comment) : false;
+        },
+        
+        // Expose commentSystem methods for template access
+        get commentSystem() {
+            return commentSystem;
+        },
+        
+        handleTimelineCommentClick(comment) {
+            if (commentSystem && comment) {
+                commentSystem.handleTimelineCommentClick(comment);
+            }
         },
 
-        // Get visible regions count
-        getVisibleRegionsCount() {
-            return this.regions.filter(r => this.isRegionVisible(r)).length;
+        handleCommentClick(event, comment) {
+            if (comment) {
+                // Seek to comment timestamp
+                if (comment.timestamp !== undefined && videoCore) {
+                    videoCore.seekTo(comment.timestamp);
+                }
+                
+                // Fire simple flying comment event
+                this.$dispatch('flying-comment-show', {
+                    commentId: comment.commentId,
+                    name: comment.name,
+                    timestamp: comment.timestamp,
+                    body: comment.body
+                });
+                
+                console.log('[VideoAnnotation] Flying comment shown:', comment.name);
+            }
         },
 
-        // Clear all regions
-        clearAllRegions() {
-            this.regions = [];
-            this.hiddenRegions.clear();
-            this.showRegionTooltip = null;
+        // Region toolbar methods
+        initRegionToolbarDrag(event) {
+            if (regionManagement) {
+                return regionManagement.initRegionToolbarDrag ? regionManagement.initRegionToolbarDrag(event) : null;
+            }
         },
 
-        // Note: Keyboard shortcuts are now handled directly in the template with Alpine.js @keydown directives
+        startRegionCreationAtCurrentFrame() {
+            if (regionManagement) {
+                return regionManagement.startRegionCreationAtCurrentFrame ? regionManagement.startRegionCreationAtCurrentFrame() : null;
+            }
+        },
 
-        addCommentAtCurrentFrame() {
-            if (!this.player || !this.config.annotations?.enableVideoComments) {
+        // Progress bar event handlers
+        onProgressBarMouseEnterWithContext(event) {
+            if (contextDisplay) {
+                return contextDisplay.onProgressBarMouseEnter ? contextDisplay.onProgressBarMouseEnter(event) : null;
+            }
+        },
+
+        onProgressBarMouseMoveWithContext(event) {
+            if (contextDisplay) {
+                return contextDisplay.onProgressBarMouseMove ? contextDisplay.onProgressBarMouseMove(event) : null;
+            }
+        },
+
+        onProgressBarMouseLeaveWithContext() {
+            if (contextDisplay) {
+                return contextDisplay.onProgressBarMouseLeave ? contextDisplay.onProgressBarMouseLeave() : null;
+            }
+        },
+
+        handleProgressBarPointer(event, action) {
+            if (progressBar) {
+                return progressBar.handleProgressBarPointer ? progressBar.handleProgressBarPointer(event, action) : null;
+            }
+        },
+
+        // Video interaction methods
+        handleVideoClick(event) {
+            if (videoCore) {
+                return videoCore.handleVideoClick ? videoCore.handleVideoClick(event) : this.togglePlayPause();
+            }
+            return this.togglePlayPause();
+        },
+
+        handleVideoHover(event) {
+            // Handle video hover events - could be used for showing controls or other interactions
+            if (touchInterface && touchInterface.handleVideoHover) {
+                return touchInterface.handleVideoHover(event);
+            }
+            // Default behavior - could show/hide controls based on hover
+            return null;
+        },
+
+        handleVideoLeave(event) {
+            // Handle video mouse leave events - could be used for hiding controls or other interactions
+            if (touchInterface && touchInterface.handleVideoLeave) {
+                return touchInterface.handleVideoLeave(event);
+            }
+            // Default behavior - could hide controls or reset hover states
+            return null;
+        },
+
+        // Comment tooltip methods
+        hideCommentTooltip() {
+            // Hide any active comment tooltips
+            if (commentSystem && commentSystem.hideCommentTooltip) {
+                return commentSystem.hideCommentTooltip();
+            }
+            // Fallback - hide any tooltip-related state
+            sharedState.showTooltip = false;
+            return null;
+        },
+
+        showCommentTooltip(commentId) {
+            // Show comment tooltip
+            if (commentSystem && commentSystem.showCommentTooltip) {
+                return commentSystem.showCommentTooltip(commentId);
+            }
+            return null;
+        },
+
+        handleVideoDoubleClick(event) {
+            if (videoCore) {
+                return videoCore.handleVideoDoubleClick ? videoCore.handleVideoDoubleClick(event) : this.toggleFullscreen();
+            }
+            return this.toggleFullscreen();
+        },
+
+        handleVideoRightClick(event) {
+            // Handle right-click context menu on video
+            if (!config.annotations?.enableContextMenu) {
                 return;
             }
 
-            this.player.pause();
-            // Get frame-aligned current time
-            const frameAlignedTime = this.getCurrentFrameTime();
-            const frameNumber = this.getCurrentFrameNumber();
+            // Prevent default browser context menu
+            if (event.preventDefault) event.preventDefault();
+            if (event.stopPropagation) event.stopPropagation();
 
-            // Emit event with frame-aligned timestamp
-            this.$dispatch('video-annotation:add-comment', {
-                timestamp: frameAlignedTime,
-                currentTime: frameAlignedTime,
-                frameNumber: frameNumber,
-                frameRate: this.frameRate
-            });
+            // Show custom context menu at current time
+            const currentTime = this.currentTime || 0;
+            
+            // Set context menu state directly
+            sharedState.showContextMenu = true;
+            sharedState.contextMenuX = event.clientX || event.pageX || 0;
+            sharedState.contextMenuY = event.clientY || event.pageY || 0;
+            sharedState.contextMenuTime = currentTime;
+
+            // Route to touch interface if available
+            if (touchInterface && touchInterface.handleVideoRightClick) {
+                return touchInterface.handleVideoRightClick(event);
+            }
+
+            return false; // Prevent default context menu
         },
 
-        // ========================================
-        // Unified Input Handling System
-        // ========================================
-
-        // Universal pointer event handler - works for both touch and mouse
-        handlePointerStart(event, context = 'video') {
-            // Prevent ghost clicks if this is a touch event after a recent touch interaction
-            if (event.type === 'mousedown' && this.pointerState.ghostClickPrevention) {
-                event.preventDefault();
-                return false;
+        // Pointer event handlers for unified touch/mouse support
+        handlePointerStart(event, target = 'default') {
+            if (touchInterface && touchInterface.handlePointerStart) {
+                return touchInterface.handlePointerStart(event, target);
             }
-
-            // Determine input type
-            const isTouch = event.type.includes('touch');
-            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
-            const clientY = isTouch ? event.touches[0].clientY : event.clientY;
-
-            // Initialize pointer state
-            this.pointerState = {
-                isDown: true,
-                startTime: Date.now(),
-                startPos: { x: clientX, y: clientY },
-                currentPos: { x: clientX, y: clientY },
-                hasMoved: false,
-                longPressTriggered: false,
-                ghostClickPrevention: isTouch,
-                activePointer: isTouch ? 'touch' : 'mouse'
+            
+            // Fallback - track pointer state
+            if (!sharedState.pointerState) {
+                sharedState.pointerState = {};
+            }
+            
+            sharedState.pointerState.isDown = true;
+            sharedState.pointerState.startTime = Date.now();
+            sharedState.pointerState.startPos = {
+                x: event.clientX || event.touches?.[0]?.clientX || 0,
+                y: event.clientY || event.touches?.[0]?.clientY || 0
             };
-
-            // Set ghost click prevention timeout for touch events
-            if (isTouch) {
-                clearTimeout(this.clickPreventionTimeout);
-                this.clickPreventionTimeout = setTimeout(() => {
-                    this.pointerState.ghostClickPrevention = false;
-                }, 400);
-            }
-
-            // Mark user interaction
-            this.hasUserInteracted = true;
-
-            // Start long press detection for annotations
-            if (context === 'video' && this.config.annotations?.enableVideoComments) {
-                this.longPressTimeout = setTimeout(() => {
-                    if (!this.pointerState.hasMoved && this.pointerState.isDown) {
-                        this.handleLongPress(event, context);
-                    }
-                }, this.config.timing.longPressDuration || 500);
-            }
-
+            sharedState.pointerState.currentPos = { ...sharedState.pointerState.startPos };
+            sharedState.pointerState.hasMoved = false;
+            sharedState.pointerState.longPressTriggered = false;
+            sharedState.pointerState.activePointer = event.pointerType || (event.touches ? 'touch' : 'mouse');
+            
             return true;
         },
 
-        handlePointerMove(event) {
-            if (!this.pointerState.isDown) return;
-
-            const isTouch = event.type.includes('touch');
-            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
-            const clientY = isTouch ? event.touches[0].clientY : event.clientY;
-
-            // Update current position
-            this.pointerState.currentPos = { x: clientX, y: clientY };
-
-            // Check if moved significantly
-            const deltaX = Math.abs(clientX - this.pointerState.startPos.x);
-            const deltaY = Math.abs(clientY - this.pointerState.startPos.y);
-            const threshold = isTouch ? 10 : 5; // Larger threshold for touch
-
-            if (deltaX > threshold || deltaY > threshold) {
-                this.pointerState.hasMoved = true;
-
-                // Cancel long press if user moves
-                if (this.longPressTimeout) {
-                    clearTimeout(this.longPressTimeout);
-                    this.longPressTimeout = null;
-                }
+        handlePointerEnd(event, target = 'default') {
+            if (touchInterface && touchInterface.handlePointerEnd) {
+                return touchInterface.handlePointerEnd(event, target);
             }
-        },
-
-        handlePointerEnd(event, context = 'video') {
-            if (!this.pointerState.isDown) return;
-
-            const duration = Date.now() - this.pointerState.startTime;
-            const wasLongPress = this.pointerState.longPressTriggered;
-            const wasMoved = this.pointerState.hasMoved;
-
-            // Clear long press timeout
-            if (this.longPressTimeout) {
-                clearTimeout(this.longPressTimeout);
-                this.longPressTimeout = null;
-            }
-
-            // Handle tap/click actions
-            if (!wasLongPress && !wasMoved && duration < 300) {
-                this.handleTap(event, context);
-            }
-
-            // Reset pointer state
-            this.pointerState.isDown = false;
-            this.pointerState.longPressTriggered = false;
-        },
-
-        handleTap(event, context) {
-            if (context === 'video') {
-                // Use the existing handleVideoClick logic to maintain consistency
-                this.handleVideoClick();
-            } else if (context === 'button') {
-                // Handled by specific button action in template
-                return;
-            }
-        },
-
-        handleLongPress(event, context) {
-            this.pointerState.longPressTriggered = true;
-
-            // Add haptic feedback
-            if (this.config.annotations?.enableHapticFeedback) {
-                this.triggerHapticFeedback(100);
-            }
-
-            if (context === 'video') {
-                if (this.touchInterface.mode === 'NORMAL') {
-                    // Directly add comment instead of showing context menu
-                    this.addCommentAtCurrentFrame();
-                } else if (this.touchInterface.mode === 'REGION_CREATE') {
-                    this.exitRegionCreationMode();
-                }
-            } else if (context === 'progressbar' && this.config.annotations?.enableProgressBarComments) {
-                // Add comment at current position
-                const rect = event.currentTarget.getBoundingClientRect();
-                const clientX = this.pointerState.activePointer === 'touch' ?
-                    event.touches?.[0]?.clientX || this.pointerState.startPos.x :
-                    this.pointerState.startPos.x;
-                const clickX = clientX - rect.left;
-                const percentage = clickX / rect.width;
-                const targetTime = percentage * this.duration;
-                const frameAlignedTime = this.roundToNearestFrame(targetTime);
-
-                this.$dispatch('video-annotation:add-comment', {
-                    timestamp: frameAlignedTime,
-                    currentTime: frameAlignedTime,
-                    frameNumber: this.getFrameNumber(frameAlignedTime),
-                    frameRate: this.frameRate
-                });
-            }
-        },
-
-        // ========================================
-        // Touch Interface Methods (Hammer.js)
-        // ========================================
-
-        showTouchContextMenu(event) {
-            if (!this.config.annotations?.enableContextMenu) return;
-
-            // Pause video and capture current time
-            if (this.player) {
-                this.player.pause();
-            }
-
-            this.touchInterface.mode = 'CONTEXT_MENU';
-            this.touchInterface.contextMenuVisible = true;
-
-            // Add haptic feedback
-            if (this.config.annotations.enableHapticFeedback) {
-                this.triggerHapticFeedback(100);
-            }
-        },
-
-        hideTouchContextMenu() {
-            this.touchInterface.mode = 'NORMAL';
-            this.touchInterface.contextMenuVisible = false;
-        },
-
-        toggleUnifiedTimeline() {
-            this.touchInterface.unifiedTimelineVisible = !this.touchInterface.unifiedTimelineVisible;
-
-            // Add haptic feedback
-            if (this.config.annotations.enableHapticFeedback) {
-                this.triggerHapticFeedback(50);
-            }
-        },
-
-        handleTouchPanStart(event) {
-            if (!this.player) return;
-
-            // Determine what we're panning based on current mode and position
-            const panY = event.deltaY;
-            const panX = event.deltaX;
-
-            if (this.touchInterface.mode === 'NORMAL') {
-                // Check if pan is primarily horizontal (timeline scrubbing)
-                if (Math.abs(panX) > Math.abs(panY)) {
-                    this.touchInterface.mode = 'SCRUBBING';
-                    // Remember if video was playing before scrubbing
-                    this.wasPlayingBeforeDrag = this.isPlaying;
-                    if (this.wasPlayingBeforeDrag) {
-                        this.player.pause();
-                    }
-                }
-            }
-        },
-
-        handleTouchPanMove(event) {
-            if (!this.player) return;
-
-            if (this.touchInterface.mode === 'SCRUBBING') {
-                // Calculate new time based on pan distance
-                const containerWidth = this.$el.offsetWidth;
-                const panPercentage = event.deltaX / containerWidth;
-                const timeChange = panPercentage * this.duration;
-
-                // Constrain to video bounds
-                const newTime = Math.max(0, Math.min(this.currentTime + timeChange, this.duration));
-
-                this.player.currentTime(newTime);
-            }
-        },
-
-        handleTouchPanEnd(event) {
-            if (this.touchInterface.mode === 'SCRUBBING') {
-                // Resume playing if it was playing before
-                if (this.wasPlayingBeforeDrag && this.player) {
-                    this.player.play().catch(e => {
-                        console.debug("Play after scrub interrupted:", e.name);
-                    });
-                }
-
-                this.touchInterface.mode = 'NORMAL';
-                this.wasPlayingBeforeDrag = false;
-            }
-        },
-
-        enterRegionCreationMode() {
-            this.touchInterface.mode = 'REGION_CREATE';
-            this.touchInterface.actionModalVisible = true;
-            this.isCreatingRegion = true;
-
-            // Pause video
-            if (this.player && this.isPlaying) {
-                this.player.pause();
-            }
-        },
-
-        exitRegionCreationMode() {
-            // Force reactivity update
-            this.touchInterface = {
-                ...this.touchInterface,
-                mode: 'NORMAL',
-                actionModalVisible: false
-            };
-            this.isCreatingRegion = false;
-            this.cleanupRegionCreation();
-
-            console.log('Region creation exited:', {
-                mode: this.touchInterface.mode,
-                modalVisible: this.touchInterface.actionModalVisible
-            });
-        },
-
-        // Touch-optimized region creation
-        createRegionAtCurrentTime() {
-            if (!this.player) return;
-
-            // Set mode first - force reactivity update
-            this.touchInterface = {
-                ...this.touchInterface,
-                mode: 'REGION_CREATE',
-                actionModalVisible: true
-            };
-            this.isCreatingRegion = true;
-
-            const currentTime = this.getCurrentFrameTime();
-            const frameNumber = this.getCurrentFrameNumber();
-
-            // Create a 2-second region centered on current time
-            const regionDuration = 2.0;
-            const startTime = Math.max(0, currentTime - regionDuration / 2);
-            const endTime = Math.min(this.duration, currentTime + regionDuration / 2);
-
-            this.regionCreationStart = {
-                time: startTime,
-                x: 0, // Not used in touch mode but needed for compatibility
-                frame: this.getFrameNumber(startTime)
-            };
-
-            this.regionCreationEnd = {
-                time: endTime,
-                x: 0, // Not used in touch mode but needed for compatibility
-                frame: this.getFrameNumber(endTime)
-            };
-
-            // Pause video
-            if (this.player && this.isPlaying) {
-                this.player.pause();
-            }
-
-            // Ensure the interface updates
-            this.$nextTick(() => {
-                console.log('Region creation started:', {
-                    start: this.regionCreationStart,
-                    end: this.regionCreationEnd,
-                    mode: this.touchInterface.mode,
-                    modalVisible: this.touchInterface.actionModalVisible
-                });
-            });
-        },
-
-        // Touch-based region adjustment methods
-        expandRegionEnd() {
-            if (!this.isCreatingRegion || !this.regionCreationEnd) return;
-
-            // Use frame-perfect duration instead of 0.5 seconds
-            const newTime = Math.min(this.duration, this.regionCreationEnd.time + this.frameDuration);
-            const newFrame = this.getFrameNumber(newTime);
-
-            // Update x position for visual alignment
-            const rect = this.$refs.regionBar?.getBoundingClientRect();
-            const newX = rect ? (newTime / this.duration) * rect.width : this.regionCreationEnd.x;
-
-            this.regionCreationEnd = {
-                time: newTime,
-                frame: newFrame,
-                x: newX
-            };
-
-            // Seek video to show the change
-            this.player.currentTime(newTime);
-            this.player.pause();
-
-            // Haptic feedback
-            if (this.config.annotations?.enableHapticFeedback) {
-                this.triggerHapticFeedback(50);
-            }
-        },
-
-        shrinkRegionEnd() {
-            if (!this.isCreatingRegion || !this.regionCreationEnd || !this.regionCreationStart) return;
-
-            // Use frame-perfect duration instead of 0.5 seconds
-            const minTime = this.regionCreationStart.time + this.frameDuration; // Keep minimum 1 frame region
-            const newTime = Math.max(minTime, this.regionCreationEnd.time - this.frameDuration);
-            const newFrame = this.getFrameNumber(newTime);
-
-            // Update x position for visual alignment
-            const rect = this.$refs.regionBar?.getBoundingClientRect();
-            const newX = rect ? (newTime / this.duration) * rect.width : this.regionCreationEnd.x;
-
-            this.regionCreationEnd = {
-                time: newTime,
-                frame: newFrame,
-                x: newX
-            };
-
-            // Seek video to show the change
-            this.player.currentTime(newTime);
-            this.player.pause();
-
-            // Haptic feedback
-            if (this.config.annotations?.enableHapticFeedback) {
-                this.triggerHapticFeedback(50);
-            }
-        },
-
-        expandRegionStart() {
-            if (!this.isCreatingRegion || !this.regionCreationStart) return;
-
-            // Use frame-perfect duration instead of 0.5 seconds
-            const newTime = Math.max(0, this.regionCreationStart.time - this.frameDuration);
-            const newFrame = this.getFrameNumber(newTime);
-
-            // Update x position for visual alignment
-            const rect = this.$refs.regionBar?.getBoundingClientRect();
-            const newX = rect ? (newTime / this.duration) * rect.width : this.regionCreationStart.x;
-
-            this.regionCreationStart = {
-                time: newTime,
-                frame: newFrame,
-                x: newX
-            };
-
-            // Seek video to show the change
-            this.player.currentTime(newTime);
-            this.player.pause();
-
-            // Haptic feedback
-            if (this.config.annotations?.enableHapticFeedback) {
-                this.triggerHapticFeedback(50);
-            }
-        },
-
-        shrinkRegionStart() {
-            if (!this.isCreatingRegion || !this.regionCreationStart || !this.regionCreationEnd) return;
-
-            // Use frame-perfect duration instead of 0.5 seconds
-            const maxTime = this.regionCreationEnd.time - this.frameDuration; // Keep minimum 1 frame region
-            const newTime = Math.min(maxTime, this.regionCreationStart.time + this.frameDuration);
-            const newFrame = this.getFrameNumber(newTime);
-
-            // Update x position for visual alignment
-            const rect = this.$refs.regionBar?.getBoundingClientRect();
-            const newX = rect ? (newTime / this.duration) * rect.width : this.regionCreationStart.x;
-
-            this.regionCreationStart = {
-                time: newTime,
-                frame: newFrame,
-                x: newX
-            };
-
-            // Seek video to show the change
-            this.player.currentTime(newTime);
-            this.player.pause();
-
-            // Haptic feedback
-            if (this.config.annotations?.enableHapticFeedback) {
-                this.triggerHapticFeedback(50);
-            }
-        },
-
-        // Simplified region creation - no modal needed!
-        startSimpleRegionCreation() {
-            if (!this.player) return;
-
-            // Set mode to region creation
-            this.touchInterface = {
-                ...this.touchInterface,
-                mode: 'REGION_CREATE'
-            };
-            this.isCreatingRegion = true;
-
-            // Reset region creation state for fresh start
-            this.regionCreationStart = null;
-            this.regionCreationEnd = null;
-
-            // Pause video for precise frame selection
-            if (this.isPlaying) {
-                this.player.pause();
-            }
-
-            // Region creation started - user will set start/end with buttons
-            console.log('Mobile region creation mode activated');
-        },
-
-        // Jump frames helper for region creation
-        jumpFrames(frameCount) {
-            if (!this.player) return;
-
-            const currentTime = this.player.currentTime();
-            const newTime = Math.max(0, Math.min(currentTime + (frameCount * this.frameDuration), this.duration));
-            this.player.currentTime(newTime);
-
-            // Add haptic feedback for frame jumps
-            if (this.config.annotations?.enableHapticFeedback) {
-                this.triggerHapticFeedback(30);
-            }
-        },
-
-        // Set region start at current frame
-        setRegionStart() {
-            if (!this.player) return;
-
-            const currentTime = this.getCurrentFrameTime();
-            const frameNumber = this.getCurrentFrameNumber();
-
-            this.regionCreationStart = {
-                time: currentTime,
-                x: 0, // Not used in mobile mode
-                frame: frameNumber
-            };
-
-            // Haptic feedback
-            if (this.config.annotations?.enableHapticFeedback) {
-                this.triggerHapticFeedback(100);
-            }
-
-            console.log('Region start set at frame:', frameNumber);
-        },
-
-        // Set region end at current frame
-        setRegionEnd() {
-            if (!this.player || !this.regionCreationStart) return;
-
-            const currentTime = this.getCurrentFrameTime();
-            const frameNumber = this.getCurrentFrameNumber();
-
-            // Ensure end is after start
-            if (frameNumber <= this.regionCreationStart.frame) {
-                // Auto-adjust to be at least 1 frame after start
-                const minEndTime = this.regionCreationStart.time + this.frameDuration;
-                this.player.currentTime(minEndTime);
-                this.regionCreationEnd = {
-                    time: minEndTime,
-                    x: 0,
-                    frame: this.regionCreationStart.frame + 1
-                };
-            } else {
-                this.regionCreationEnd = {
-                    time: currentTime,
-                    x: 0,
-                    frame: frameNumber
-                };
-            }
-
-            // Haptic feedback
-            if (this.config.annotations?.enableHapticFeedback) {
-                this.triggerHapticFeedback(100);
-            }
-
-            console.log('Region end set at frame:', this.regionCreationEnd.frame);
-        },
-
-        onProgressBarClick(event) {
-            const rect = event.currentTarget.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const percentage = clickX / rect.width;
-            const newTime = percentage * this.duration;
-
-            if (this.player) {
-                this.player.currentTime(newTime);
-            }
-        },
-
-        // Unified progress bar interaction handler
-        handleProgressBarPointer(event, action = 'click') {
-            // Prevent ghost clicks
-            if (event.type === 'mousedown' && this.pointerState.ghostClickPrevention) {
-                event.preventDefault();
-                return;
-            }
-
-            // Mark user interaction
-            this.hasUserInteracted = true;
-            this.hideContextMenu();
-
-            // Clear progress bar timeout
-            if (this.progressBarTimeout) {
-                clearTimeout(this.progressBarTimeout);
-            }
-
-            const rect = event.currentTarget.getBoundingClientRect();
-            const isTouch = event.type.includes('touch');
-            const clientX = isTouch ? event.touches?.[0]?.clientX || event.changedTouches?.[0]?.clientX : event.clientX;
-            const clickX = clientX - rect.left;
-            const percentage = clickX / rect.width;
-            const targetTime = percentage * this.duration;
-
-            if (action === 'click' || action === 'tap') {
-                // Handle single click/tap - seek to position
-                if (this.player) {
-                    this.player.currentTime(targetTime);
-                }
-
-                // Update visual position
-                this.hoverX = clickX;
-                this.dragCurrentTime = targetTime;
-            } else if (action === 'doubleclick') {
-                // Handle double click/tap - add comment
-                if (this.config.annotations?.enableProgressBarComments) {
-                    const frameAlignedTime = this.roundToNearestFrame(targetTime);
-                    const frameNumber = this.getFrameNumber(frameAlignedTime);
-                    this.$dispatch('video-annotation:add-comment', {
-                        timestamp: frameAlignedTime,
-                        currentTime: frameAlignedTime,
-                        frameNumber: frameNumber,
-                        frameRate: this.frameRate
-                    });
-                }
-            }
-        },
-
-        // Unified drag handling for progress bar seek circle
-        handleProgressBarDragStart(event) {
-            if (!this.handlePointerStart(event, 'progressbar-drag')) return;
-
-            // Remember if video was playing
-            this.wasPlayingBeforeDrag = this.isPlaying;
-
-            this.isDragging = true;
-            this.showSeekCircle = true;
-            this.showTooltip = true;
-            this.showProgressBar = true;
-
-            // Clear auto-hide timeout
-            if (this.progressBarTimeout) {
-                clearTimeout(this.progressBarTimeout);
-                this.progressBarTimeout = null;
-            }
-
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) return;
-
-            const rect = progressBar.getBoundingClientRect();
-            const isTouch = event.type.includes('touch');
-            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
-
-            this.dragStartX = clientX - rect.left;
-            // Removed circle positioning: this.seekCircleX = this.dragStartX;
-
-            const percentage = this.dragStartX / rect.width;
-            this.dragCurrentTime = percentage * this.duration;
-
-            // Add global listeners for unified drag handling
-            const moveEvent = isTouch ? 'touchmove' : 'mousemove';
-            const endEvent = isTouch ? 'touchend' : 'mouseup';
-
-            this.boundHandleDragMove = this.handleProgressBarDragMove.bind(this);
-            this.boundEndDrag = this.handleProgressBarDragEnd.bind(this);
-
-            document.addEventListener(moveEvent, this.boundHandleDragMove, { passive: false });
-            document.addEventListener(endEvent, this.boundEndDrag);
-        },
-
-        handleProgressBarDragMove(event) {
-            if (!this.isDragging) return;
-
-            this.handlePointerMove(event);
-
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) return;
-
-            const rect = progressBar.getBoundingClientRect();
-            const isTouch = event.type.includes('touch');
-            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
-            let newX = clientX - rect.left;
-
-            // Constrain to bounds
-            newX = Math.max(0, Math.min(newX, rect.width));
-
-            // Removed circle positioning: this.seekCircleX = newX;
-            this.hoverX = newX;
-            const percentage = newX / rect.width;
-            this.dragCurrentTime = percentage * this.duration;
-        },
-
-        handleProgressBarDragEnd(event) {
-            if (!this.isDragging) return;
-
-            this.handlePointerEnd(event, 'progressbar-drag');
-
-            // Seek to final position
-            if (this.player && this.player.readyState() >= 1) {
-                const targetTime = Math.max(0, Math.min(this.dragCurrentTime || 0, this.duration || 0));
-                if (isFinite(targetTime)) {
-                    this.player.currentTime(targetTime);
-                    this.currentTime = targetTime;
-                    // Circle positioning removed
-
-                    // Resume playing if was playing before
-                    if (this.wasPlayingBeforeDrag) {
-                        this.player.play().catch(e => {
-                            console.debug('Play after drag interrupted:', e.name);
-                        });
-                    }
-                }
-            }
-
-            // Clean up
-            this.isDragging = false;
-            this.wasPlayingBeforeDrag = false;
-
-            // Remove global listeners
-            const moveEvent = this.pointerState.activePointer === 'touch' ? 'touchmove' : 'mousemove';
-            const endEvent = this.pointerState.activePointer === 'touch' ? 'touchend' : 'mouseup';
-
-            document.removeEventListener(moveEvent, this.boundHandleDragMove);
-            document.removeEventListener(endEvent, this.boundEndDrag);
-            this.boundHandleDragMove = null;
-            this.boundEndDrag = null;
-
-            // Hide UI elements after a delay
-            setTimeout(() => {
-                this.showTooltip = false;
-                this.showSeekCircle = false;
-            }, 100);
-
-            // Resume auto-hide if needed
-            if (this.progressBarMode === 'auto-hide' && this.isPlaying) {
-                this.progressBarTimeout = setTimeout(() => {
-                    this.showProgressBar = false;
-                }, this.config.timing.progressBarAutoHideDelay);
-            }
-        },
-
-        updateHoverPosition(event) {
-            const rect = event.currentTarget.getBoundingClientRect();
-            this.hoverX = event.clientX - rect.left;
-
-            // Only update drag time for tooltip, don't move circle unless dragging
-            if (!this.isDragging) {
-                const percentage = this.hoverX / rect.width;
-                this.dragCurrentTime = percentage * this.duration;
-            }
-        },
-
-        onProgressBarMouseEnter(event) {
-            if (!this.isTouchDevice()) {
-                this.showSeekCircle = true;
-                this.showTooltip = true;
-                // Show circle at current progress position (aligned with progress fill)
-                // Circle positioning removed
-                // Update hover position for tooltip only
-                this.updateHoverPosition(event);
-            }
-        },
-
-        onProgressBarMouseLeave() {
-            // Always hide tooltip when leaving, regardless of mode
-            this.showTooltip = false;
-
-            // Only hide circle if not dragging and not in always-visible mode
-            if (!this.isDragging) {
-                this.showSeekCircle = false;
-            }
-        },
-
-
-
-        startDrag(event) {
-            // Only handle mousedown events for dragging, let touch events use separate handler
-            if (event.type === 'touchstart') {
-                return;
-            }
-
-            // Remember if video was playing before drag
-            this.wasPlayingBeforeDrag = this.isPlaying;
-
-            this.isDragging = true;
-            this.showSeekCircle = true;
-            this.showTooltip = true;
-            this.showProgressBar = true; // Force show progress bar while dragging
-
-            // Clear any auto-hide timeout while dragging
-            if (this.progressBarTimeout) {
-                clearTimeout(this.progressBarTimeout);
-                this.progressBarTimeout = null;
-            }
-
-            // Get the progress bar rect, not the circle rect
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) {
-                return;
-            }
-
-            const rect = progressBar.getBoundingClientRect();
-            this.dragStartX = event.clientX - rect.left;
-            // Removed circle positioning: this.seekCircleX = this.dragStartX;
-
-            // Calculate initial time
-            const percentage = this.dragStartX / rect.width;
-            this.dragCurrentTime = percentage * this.duration;
-
-            // Bind methods to this context for proper removal
-            this.boundHandleDragMove = this.handleDragMove.bind(this);
-            this.boundEndDrag = this.endDrag.bind(this);
-
-            // Add global mouse move and up listeners
-            document.addEventListener('mousemove', this.boundHandleDragMove);
-            document.addEventListener('mouseup', this.boundEndDrag);
-        },
-
-        // Simple touch start for circle
-        startCircleDrag(event) {
-
-            // Remember if video was playing before drag
-            this.wasPlayingBeforeDrag = this.isPlaying;
-
-            this.isDragging = true;
-            this.showSeekCircle = true;
-            this.showTooltip = true;
-            this.showProgressBar = true; // Force show progress bar while dragging
-
-            // Clear any auto-hide timeout while dragging
-            if (this.progressBarTimeout) {
-                clearTimeout(this.progressBarTimeout);
-                this.progressBarTimeout = null;
-            }
-
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) return;
-
-            const rect = progressBar.getBoundingClientRect();
-            const touch = event.touches[0];
-            this.dragStartX = touch.clientX - rect.left;
-            // Removed circle positioning: this.seekCircleX = this.dragStartX;
-
-            const percentage = this.dragStartX / rect.width;
-            this.dragCurrentTime = percentage * this.duration;
-        },
-
-        // Simple touch move for circle
-        handleTouchDragMove(event) {
-            if (!this.isDragging) return;
-
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) return;
-
-            const rect = progressBar.getBoundingClientRect();
-            const touch = event.touches[0];
-            let newX = touch.clientX - rect.left;
-
-            newX = Math.max(0, Math.min(newX, rect.width));
-
-
-            // Removed circle positioning: this.seekCircleX = newX;
-            this.hoverX = newX;
-            const percentage = newX / rect.width;
-            this.dragCurrentTime = percentage * (this.duration || 0);
-        },
-
-        // Simple touch end for circle
-        endTouchDrag(event) {
-            if (!this.isDragging) return;
-
-
-            // Seek to the dragged position
-            if (this.player && this.player.readyState() >= 1) {
-                // Validate that dragCurrentTime is finite and within bounds
-                const targetTime = Math.max(0, Math.min(this.dragCurrentTime || 0, this.duration || 0));
-
-                if (isFinite(targetTime)) {
-                    this.player.currentTime(targetTime);
-                    this.currentTime = targetTime;
-                    // Circle positioning removed
-
-                    // Resume playing if video was playing before drag
-                    if (this.wasPlayingBeforeDrag) {
-                        this.player.play().catch(e => {
-                            // Silently handle play failure
-                        });
-                    }
-                } else {
-                    console.warn('Invalid time value:', this.dragCurrentTime);
-                }
-            }
-
-            // Reset state
-            this.isDragging = false;
-            this.wasPlayingBeforeDrag = false;
-
-            // Hide UI elements
-            setTimeout(() => {
-                this.showTooltip = false;
-                this.showSeekCircle = false;
-            }, 100);
-
-            // Resume auto-hide behavior if in auto-hide mode and video is playing
-            if (this.progressBarMode === 'auto-hide' && this.isPlaying) {
-                this.progressBarTimeout = setTimeout(() => {
-                    this.showProgressBar = false;
-                }, this.config.timing.progressBarAutoHideDelay);
-            }
-        },
-
-        handleDragMove(event) {
-            if (!this.isDragging) return;
-
-            const progressBar = this.$refs.progressBar;
-            if (!progressBar) return;
-
-            const rect = progressBar.getBoundingClientRect();
-            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-            let newX = clientX - rect.left;
-
-            // Constrain to progress bar bounds
-            newX = Math.max(0, Math.min(newX, rect.width));
-
-            // Update both circle position and drag time during drag
-            // Removed circle positioning: this.seekCircleX = newX;
-            this.hoverX = newX; // Also update hover position for tooltip
-            const percentage = newX / rect.width;
-            this.dragCurrentTime = percentage * this.duration;
-        },
-
-        endDrag(event) {
-            if (!this.isDragging) return;
-
-
-            // Seek to the dragged position
-            if (this.player && this.player.readyState() >= 1) {
-                this.player.currentTime(this.dragCurrentTime);
-                // Force update the current time immediately for UI consistency
-                this.currentTime = this.dragCurrentTime;
-                // Update circle position to match the seek
-                // Circle positioning removed
-
-                // Resume playing if video was playing before drag
-                if (this.wasPlayingBeforeDrag) {
-                    this.player.play().catch(e => {
-                        // Silently handle play failure
-                    });
-                }
-            } else {
-                // If player isn't ready, wait a bit and try again
+            
+            // Fallback - reset pointer state
+            if (sharedState.pointerState) {
+                sharedState.pointerState.isDown = false;
+                sharedState.pointerState.hasMoved = false;
+                sharedState.pointerState.longPressTriggered = false;
+                
+                // Clear active pointer after a short delay
                 setTimeout(() => {
-                    if (this.player) {
-                        this.player.currentTime(this.dragCurrentTime);
-                        this.currentTime = this.dragCurrentTime;
-                        // Circle positioning removed
-
-                        // Resume playing if video was playing before drag
-                        if (this.wasPlayingBeforeDrag) {
-                            this.player.play().catch(e => {
-                                // Silently handle play failure
-                            });
-                        }
+                    if (sharedState.pointerState) {
+                        sharedState.pointerState.activePointer = null;
                     }
-                }, 50);
-            }
-
-            // Remove global listeners using bound references
-            if (this.boundHandleDragMove) {
-                document.removeEventListener('mousemove', this.boundHandleDragMove);
-                this.boundHandleDragMove = null;
-            }
-            if (this.boundEndDrag) {
-                document.removeEventListener('mouseup', this.boundEndDrag);
-                this.boundEndDrag = null;
-            }
-
-            // Set dragging to false after seek attempt
-            this.isDragging = false;
-            this.wasPlayingBeforeDrag = false;
-
-            // Hide tooltip and circle after drag unless mouse is still hovering
-            setTimeout(() => {
-                // Force hide tooltip and circle - let mouse enter trigger them again if still hovering
-                this.showTooltip = false;
-                this.showSeekCircle = false;
-            }, 100);
-
-            // Resume auto-hide behavior if in auto-hide mode and video is playing
-            if (this.progressBarMode === 'auto-hide' && this.isPlaying) {
-                this.progressBarTimeout = setTimeout(() => {
-                    this.showProgressBar = false;
-                }, this.config.timing.progressBarAutoHideDelay);
-            }
-        },
-
-        addCommentAtPosition() {
-            // Use the stored hover position instead of trying to parse styles
-            const progressBar = this.$refs.progressBar;
-            const rect = progressBar.getBoundingClientRect();
-            const percentage = this.hoverX / rect.width;
-            const targetTime = percentage * this.duration;
-
-            // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
-            const frameAlignedTime = this.roundToNearestFrame(targetTime);
-            const frameNumber = this.getFrameNumber(frameAlignedTime);
-            this.$dispatch('video-annotation:add-comment', {
-                timestamp: frameAlignedTime,  // Where to add comment (frame-aligned)
-                currentTime: frameAlignedTime,  // Same as timestamp for progress bar actions
-                frameNumber: frameNumber,  // Frame number for reference
-                frameRate: this.frameRate  // Include frame rate for context
-            });
-
-        },
-
-        destroy() {
-            try {
-                if (this.player && typeof this.player.dispose === 'function') {
-                    this.player.dispose();
-                }
-            } catch (e) {
-                // Silently handle disposal errors
-            } finally {
-                this.player = null;
-            }
-
-            if (window.removeEventListener) {
-                window.removeEventListener('resize', this.updateProgressBarWidth);
-            }
-
-            // Cleanup Hammer.js
-            if (this.hammer) {
-                this.hammer.destroy();
-                this.hammer = null;
-            }
-
-            // Note: Window keyboard events are automatically cleaned up by Alpine.js
-        },
-
-        // Custom control methods
-        togglePlay() {
-            if (!this.player) return;
-
-            // Mark that user has interacted with the page
-            this.hasUserInteracted = true;
-
-            if (this.isPlaying) {
-                this.player.pause();
-            } else {
-                // Handle play promise to avoid AbortError
-                const playPromise = this.player.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(e => {
-                        // Handle play interruption silently
-                        console.debug("Play interrupted:", e.name);
-                    });
-                }
-            }
-
-            // Ensure keyboard shortcuts work after interaction
-            this.ensureFocus();
-        },
-
-        ensureFocus() {
-            // Ensure the component container has focus for keyboard shortcuts
-            if (this.$el && !this.$el.contains(document.activeElement)) {
-                this.$el.focus();
-            }
-        },
-
-        setVolume(level) {
-            if (!this.player) return;
-            this.player.volume(level);
-        },
-
-        toggleMute() {
-            if (!this.player) return;
-
-            if (this.isMuted) {
-                // Unmuting - set volume to 50% and unmute
-                this.player.muted(false);
-                this.player.volume(0.5);
-                this.volume = 0.5;
-            } else {
-                // Muting - set volume to 0% and mute
-                this.player.volume(0);
-                this.player.muted(true);
-                this.volume = 0;
-            }
-        },
-
-        toggleFullscreen() {
-            if (!this.player) return;
-
-            if (this.isFullscreen) {
-                this.player.exitFullscreen();
-            } else {
-                this.player.requestFullscreen();
-            }
-        },
-
-        handleVideoClick() {
-            console.log('handleVideoClick called');
-            if (!this.player) {
-                console.log('No player available');
-                return;
-            }
-
-            // Debounce rapid clicks to prevent immediate play/pause toggling
-            const now = Date.now();
-            if (this.lastVideoClickTime && (now - this.lastVideoClickTime) < 300) {
-                console.log('Debounced - too rapid');
-                return; // Ignore rapid clicks within 300ms
-            }
-            this.lastVideoClickTime = now;
-
-            // If video hasn't loaded yet, load it first
-            if (!this.videoLoaded) {
-                this.player.load();
-                // Don't auto-play after loading - wait for explicit user interaction
-                return;
-            }
-
-            // Always toggle play/pause
-            this.togglePlay();
-
-            // On touch devices, also toggle progress bar visibility (better UX)
-            if (this.isTouchDevice() && this.progressBarMode === 'auto-hide') {
-                this.toggleProgressBarVisibility();
-            }
-
-            // Ensure focus for keyboard shortcuts
-            this.ensureFocus();
-        },
-
-        toggleCommentsOnProgressBar() {
-            this.showCommentsOnProgressBar = !this.showCommentsOnProgressBar;
-            this.showSettingsMenu = false;
-        },
-
-        changeResolution(newSource) {
-            if (!this.player || !newSource) return;
-
-            // Remember current time
-            const currentTime = this.player.currentTime();
-            const wasPlaying = this.isPlaying;
-
-            // Update current resolution immediately
-            this.currentResolution = newSource;
-            this.currentResolutionSrc = newSource.src;
-
-            // Change video source
-            this.player.src({
-                src: newSource.src,
-                type: newSource.type || 'video/mp4'
-            });
-
-            // Restore playback position and state
-            this.player.ready(() => {
-                this.player.currentTime(currentTime);
-                if (wasPlaying) {
-                    this.player.play().catch(e => {
-                        // Silently handle play failure
-                    });
-                }
-
-                // Refresh comment markers after resolution change
-                this.$nextTick(() => {
-                    this.updateProgressBarWidth();
-                    this.renderCommentMarkers();
-                });
-            });
-
-            this.showResolutionMenu = false;
-        },
-
-        isCurrentResolution(source) {
-            if (!this.currentResolutionSrc || !source) return false;
-            return this.currentResolutionSrc === source.src;
-        },
-
-        // Touch event handlers for video area (works alongside Hammer.js)
-        handleTouchStart(event) {
-            // Skip if we have a recent pointer interaction to prevent conflicts
-            if (this.pointerState.ghostClickPrevention) {
-                return;
-            }
-
-            // If Hammer.js is enabled, only handle basic touch tracking
-            if (this.touchInterface.enabled && this.hammer) {
-                // Let Hammer.js handle the gesture recognition
-                // Just track basic touch state for compatibility
-                this.touchStartTime = Date.now();
-                const touch = event.touches && event.touches[0] ? event.touches[0] : event;
-                this.touchStartPos = {
-                    x: touch.clientX || touch.pageX || 0,
-                    y: touch.clientY || touch.pageY || 0
-                };
-                this.isTouchMove = false;
-                return;
-            }
-
-            this.touchStartTime = Date.now();
-
-            // Safely get touch coordinates with fallbacks
-            const touch = event.touches && event.touches[0] ? event.touches[0] : event;
-            this.touchStartPos = {
-                x: touch.clientX || touch.pageX || 0,
-                y: touch.clientY || touch.pageY || 0
-            };
-            this.isTouchMove = false;
-
-            // Start long press timer for mobile video comment
-            if (this.isTouchDevice() && this.config.annotations.enableVideoComments) {
-                this.longPressTimeout = setTimeout(() => {
-                    if (!this.isTouchMove && this.player && !this.progressBarLongPressTriggered) {
-                        // Pause video and add comment at current time
-                        this.player.pause();
-
-
-                        // Add haptic feedback if enabled
-                        if (this.config.annotations.enableHapticFeedback) {
-                            this.triggerHapticFeedback(100);
-                        }
-
-                        // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
-                        const frameAlignedTime = this.getCurrentFrameTime();
-                        const frameNumber = this.getCurrentFrameNumber();
-                        this.$dispatch('video-annotation:add-comment', {
-                            timestamp: frameAlignedTime,
-                            currentTime: frameAlignedTime,
-                            frameNumber: frameNumber,
-                            frameRate: this.frameRate
-                        });
-
-                    }
-                }, this.config.timing.longPressDuration);
-            }
-
-            // Add touch move listener to detect movement with passive support check
-            const passiveSupported = this.isPassiveSupported();
-            document.addEventListener('touchmove', this.handleTouchMoveDetection,
-                passiveSupported ? { passive: false } : false);
-        },
-
-        isPassiveSupported() {
-            let passiveSupported = false;
-            try {
-                const options = {
-                    get passive() {
-                        passiveSupported = true;
-                        return false;
-                    }
-                };
-                window.addEventListener('test', null, options);
-                window.removeEventListener('test', null, options);
-            } catch (err) {
-                passiveSupported = false;
-            }
-            return passiveSupported;
-        },
-
-        handleTouchMoveDetection(event) {
-            if (this.touchStartPos && event.touches && event.touches[0]) {
-                const currentTouch = event.touches[0];
-                const deltaX = Math.abs(currentTouch.clientX - this.touchStartPos.x);
-                const deltaY = Math.abs(currentTouch.clientY - this.touchStartPos.y);
-
-                // If moved more than 10px, consider it a move
-                if (deltaX > 10 || deltaY > 10) {
-                    this.isTouchMove = true;
-
-                    // Cancel long press if user moves
-                    if (this.longPressTimeout) {
-                        clearTimeout(this.longPressTimeout);
-                        this.longPressTimeout = null;
-                    }
-                }
-            }
-        },
-
-        handleTouchEnd(event) {
-            const touchEndTime = Date.now();
-            const touchDuration = touchEndTime - this.touchStartTime;
-
-            // Clear long press timeout
-            if (this.longPressTimeout) {
-                clearTimeout(this.longPressTimeout);
-                this.longPressTimeout = null;
-            }
-
-            // Reset progress bar long press flag
-            this.progressBarLongPressTriggered = false;
-
-            // Remove touch move listener
-            document.removeEventListener('touchmove', this.handleTouchMoveDetection);
-
-            // If Hammer.js is enabled, let it handle the gesture
-            if (this.touchInterface.enabled && this.hammer) {
-                // Just reset touch state, Hammer.js handles the action
-                this.touchStartPos = { x: 0, y: 0 };
-                return;
-            }
-
-            // Only handle tap if it was a short touch and minimal movement
-            // Skip if unified pointer system is handling this
-            if (touchDuration < 300 && !this.isTouchMove && !this.pointerState.ghostClickPrevention) {
-                this.handleVideoClick();
-            }
-
-            // Reset touch state
-            this.touchStartPos = { x: 0, y: 0 };
-        },
-
-        // Progress bar touch handlers
-        onProgressBarTouchStart(event) {
-            // Check if touching the circle - if so, don't handle here
-            const target = event.target;
-            const circleElement = target.closest('.seek-circle, [data-seek-circle]');
-            if (circleElement || this.isDragging) {
-                return; // Let circle handle its own touch
-            }
-
-
-            // Show circle on touch for mobile progress bar area
-            this.showSeekCircle = true;
-            this.showTooltip = true;
-            // Circle positioning removed
-
-            // Update touch position for tooltip and store for progress bar
-            const touch = event.touches[0];
-            const rect = event.currentTarget.getBoundingClientRect();
-            this.hoverX = touch.clientX - rect.left;
-            const percentage = this.hoverX / rect.width;
-            this.dragCurrentTime = percentage * this.duration;
-
-            this.touchStartTime = Date.now();
-            this.isTouchMove = false;
-
-            // Clear initial hide timeout on interaction
-            if (this.progressBarTimeout) {
-                clearTimeout(this.progressBarTimeout);
-            }
-
-            // Start long press timer for mobile add comment (only if annotations enabled)
-            if (this.config.annotations.enableProgressBarComments) {
-                this.longPressActive = true;
-                this.longPressTimeout = setTimeout(() => {
-                    if (!this.isTouchMove && !this.isDragging && this.longPressActive) {
-                        // Long press detected - add comment
-                        const percentage = this.hoverX / rect.width;
-                        const targetTime = percentage * this.duration;
-
-                        // Add haptic feedback if available (cross-browser)
-                        if (this.config.annotations.enableHapticFeedback) {
-                            this.triggerHapticFeedback(100);
-                        }
-
-                        // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
-                        const frameAlignedTime = this.roundToNearestFrame(targetTime);
-                        this.$dispatch('video-annotation:add-comment', {
-                            timestamp: frameAlignedTime,  // Where to add comment (frame-aligned)
-                            currentTime: frameAlignedTime  // Same as timestamp for progress bar actions
-                        });
-
-                        // Prevent video long press from also firing
-                        this.progressBarLongPressTriggered = true;
-                    }
-                }, 500); // 500ms long press
-            }
-        },
-
-        onProgressBarTouchMove(event) {
-            // Don't handle if circle is being dragged
-            if (this.isDragging) {
-                return;
-            }
-
-            this.isTouchMove = true;
-
-            // Cancel long press since user is moving
-            if (this.longPressTimeout) {
-                clearTimeout(this.longPressTimeout);
-                this.longPressTimeout = null;
-            }
-
-            // Update hover position for touch
-            const touch = event.touches[0];
-            const rect = event.currentTarget.getBoundingClientRect();
-            this.hoverX = touch.clientX - rect.left;
-        },
-
-        onProgressBarTouchEnd(event) {
-            // Don't handle if circle dragging just ended
-            if (this.isDragging) {
-                return;
-            }
-
-            const touchEndTime = Date.now();
-            const touchDuration = touchEndTime - this.touchStartTime;
-            // Cancel long press timeout if still active
-            this.longPressActive = false;
-            if (this.longPressTimeout) {
-                clearTimeout(this.longPressTimeout);
-                this.longPressTimeout = null;
-            }
-
-            // Handle tap to seek (short touch without movement)
-            if (touchDuration < 500 && !this.isTouchMove) {
-                const touch = event.changedTouches[0];
-                const rect = event.currentTarget.getBoundingClientRect();
-                const clickX = touch.clientX - rect.left;
-                const percentage = clickX / rect.width;
-                const newTime = percentage * this.duration;
-
-                if (this.player) {
-                    this.player.currentTime(newTime);
-                }
-            }
-
-            // Hide circle and tooltip after touch interaction (unless dragging)
-            if (!this.isDragging) {
-                setTimeout(() => {
-                    this.showSeekCircle = false;
-                    this.showTooltip = false;
                 }, 100);
             }
+            
+            return true;
         },
 
-        // Comment touch handlers
-        handleCommentTouchStart(event, comment) {
-            this.touchStartTime = Date.now();
-            this.isTouchMove = false;
-
-            // Add visual feedback for touch
-            event.currentTarget.style.transform = 'translateX(-50%) scale(0.95)';
-        },
-
-        handleCommentTouchEnd(event, comment) {
-            const touchEndTime = Date.now();
-            const touchDuration = touchEndTime - this.touchStartTime;
-
-            // Reset visual feedback
-            event.currentTarget.style.transform = 'translateX(-50%) scale(1)';
-
-            // Only handle tap if it was a short touch
-            if (touchDuration < 300 && !this.isTouchMove) {
-                this.$dispatch('video-annotation:seek-comment', { commentId: comment.commentId, timestamp: comment.timestamp });
-            }
-        },
-
-        // Mobile comment interaction handlers
-        handleCommentClick(event, comment) {
-
-            // Always load the comment
-            this.loadComment(comment.commentId);
-
-            // Check if this is a touch device using enhanced detection
-            if (this.isTouchDevice()) {
-                // On mobile, toggle comment tooltip visibility
-                if (this.activeCommentId === comment.commentId) {
-                    // If already active, hide it and seek to comment
-                    this.activeCommentId = null;
-                    this.$dispatch('video-annotation:seek-comment', { commentId: comment.commentId, timestamp: comment.timestamp });
-                } else {
-                    // Show this comment's tooltip
-                    this.activeCommentId = comment.commentId;
-                }
-            } else {
-                // On desktop, just seek to comment
-                this.$dispatch('video-annotation:seek-comment', { commentId: comment.commentId, timestamp: comment.timestamp });
-            }
-        },
-
-        isCommentTooltipVisible(comment) {
-            if (this.isTouchDevice()) {
-                // On mobile, show tooltip only if this comment is active
-                return this.activeCommentId === comment.commentId;
-            } else {
-                // On desktop, use CSS hover (handled by group-hover class)
-                return false; // Let CSS handle hover
-            }
-        },
-
-        hideCommentTooltip() {
-            this.activeCommentId = null;
-        },
-
-        // Cross-browser haptic feedback
-        triggerHapticFeedback(duration = 50) {
-            try {
-                // Check if user has interacted with the page first
-                if (!this.hasUserInteracted) {
-                    return;
-                }
-
-                // Standard vibration API
-                if (navigator.vibrate) {
-                    navigator.vibrate(duration);
-                }
-                // Legacy webkit vibration
-                else if (navigator.webkitVibrate) {
-                    navigator.webkitVibrate(duration);
-                }
-                // iOS haptic feedback (if available)
-                else if (window.AudioContext || window.webkitAudioContext) {
-                    // Create a short audio feedback as fallback
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
-
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-
-                    oscillator.frequency.value = 800;
-                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.1);
-                }
-            } catch (error) {
-                // Silently fail if haptic feedback is not supported
-                console.debug('Haptic feedback not available:', error);
-            }
-        },
-
-        // Enhanced touch detection for cross-browser compatibility
-        isTouchDevice() {
-            return (('ontouchstart' in window) ||
-                (navigator.maxTouchPoints > 0) ||
-                (navigator.msMaxTouchPoints > 0));
-        },
-
-        // Progress bar visibility management
-        initializeProgressBarVisibility() {
-            // Always show progress bar initially by default
-            this.showProgressBar = true;
-
-            // Check actual player state to determine visibility behavior
-            if (this.progressBarMode === 'auto-hide') {
-                // Only start auto-hide timer if video is actually playing
-                if (this.player && this.isPlaying) {
-                    this.progressBarTimeout = setTimeout(() => {
-                        this.showProgressBar = false;
-                    }, this.config.timing.progressBarAutoHideDelay);
-                }
-                // If paused (default state), keep progress bar visible
-            }
-            // If always-visible mode, keep progress bar visible
-        },
-
-        handleVideoHover() {
-            if (this.progressBarMode === 'auto-hide' && !this.isTouchDevice()) {
-                this.showProgressBar = true;
-
-                // Clear existing timeout
-                if (this.progressBarTimeout) {
-                    clearTimeout(this.progressBarTimeout);
-                }
-            }
-        },
-
-        handleVideoLeave() {
-            if (this.progressBarMode === 'auto-hide' && !this.isTouchDevice()) {
-                // Hide progress bar after configured delay
-                this.progressBarTimeout = setTimeout(() => {
-                    this.showProgressBar = false;
-                }, this.config.timing.progressBarHoverHideDelay);
-            }
-        },
-
-        toggleProgressBarMode() {
-            this.progressBarMode = this.progressBarMode === 'auto-hide' ? 'always-visible' : 'auto-hide';
-
-            if (this.progressBarMode === 'always-visible') {
-                // Clear timeout and show progress bar
-                if (this.progressBarTimeout) {
-                    clearTimeout(this.progressBarTimeout);
-                }
-                this.showProgressBar = true;
-            } else {
-                // Start auto-hide behavior
-                this.initializeProgressBarVisibility();
-            }
-        },
-
-        toggleProgressBarVisibility() {
-            if (this.progressBarMode === 'auto-hide') {
-                // Clear any existing timeout
-                if (this.progressBarTimeout) {
-                    clearTimeout(this.progressBarTimeout);
-                }
-
-                // Toggle visibility
-                this.showProgressBar = !this.showProgressBar;
-
-                // If we just showed it, start auto-hide timer
-                if (this.showProgressBar) {
-                    this.progressBarTimeout = setTimeout(() => {
-                        this.showProgressBar = false;
-                    }, this.config.timing.progressBarAutoHideDelay);
-                }
-            }
-        },
-
-        // Right-click context menu handlers
-        handleVideoRightClick(event) {
-            if (!this.isTouchDevice() && this.player) {
-                // Only show custom context menu if annotations are enabled
-                if (this.config.annotations.enableContextMenu) {
-                    // Pause video and capture time
-                    this.player.pause();
-                    this.contextMenuTime = this.player.currentTime();
-
-                    // Position context menu
-                    this.contextMenuX = event.clientX;
-                    this.contextMenuY = event.clientY;
-                    this.showContextMenu = true;
-
-                }
-            }
-        },
-
-
-        addCommentFromContextMenu() {
-            // Emit event with frame-aligned timestamp in seconds (Laravel/VideoJS standard)
-            const frameAlignedTime = this.roundToNearestFrame(this.contextMenuTime);
-            const frameNumber = this.getFrameNumber(frameAlignedTime);
-            this.$dispatch('video-annotation:add-comment', {
-                timestamp: frameAlignedTime,
-                currentTime: frameAlignedTime,
-                frameNumber: frameNumber,
-                frameRate: this.frameRate
-            });
-
-
-            this.hideContextMenu();
-        },
-
-        hideContextMenu() {
-            this.showContextMenu = false;
-        },
-
-        // Helper method for dev tools testing - force end any stuck drag
-        forceEndDrag() {
-            if (this.isDragging) {
-                this.endTouchDrag({ preventDefault: () => { }, stopPropagation: () => { } });
-            }
-        },
-
-        // Region Creation Method for Frame Helper Button
-        startRegionCreationAtCurrentFrame() {
-            if (!this.player) return;
-
-            // Pause video
-            this.player.pause();
-
-            // Get current frame state from single source of truth
-            const frameState = this.currentFrameState;
-            const frameAlignedTime = frameState.frameAlignedTime;
-            const frameNumber = frameState.frameNumber;
-
-            // Calculate X position for region bar visualization
-            const rect = this.$refs.regionBar?.getBoundingClientRect();
-            const currentX = rect ? (frameAlignedTime / this.duration) * rect.width : 0;
-
-            // Start region creation at current frame (same as clicking region area)
-            this.isCreatingRegion = true;
-            this.regionCreationStart = {
-                x: currentX,
-                time: frameAlignedTime,
-                frame: frameNumber
-            };
-
-            // Set end to same frame initially
-            this.regionCreationEnd = {
-                x: currentX,
-                time: frameAlignedTime,
-                frame: frameNumber
-            };
-
-            // Show toolbar
-            this.showRegionToolbar = true;
-
-            console.log('Region creation started at frame:', frameNumber);
-        },
-
-        cancelRegionCreation() {
-            // Reset region creation state (same as existing cancelRegionCreation logic)
-            this.isCreatingRegion = false;
-            this.regionCreationStart = null;
-            this.regionCreationEnd = null;
-
-            // Hide toolbar
-            this.showRegionToolbar = false;
-
-            console.log('Region creation cancelled');
-        },
-
-        generateRegionId() {
-            return `region-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        },
-
-        seekToFrame(frameNumber) {
-            if (!this.player || typeof frameNumber !== 'number') return;
-
-            const targetTime = frameNumber / this.frameRate;
-            this.player.currentTime(targetTime);
-
-            console.log(`Seeked to frame ${frameNumber} (${targetTime.toFixed(3)}s)`);
-        },
-
-        // Mobile region modal navigation helpers
-        goToPreviousFrame() {
-            if (!this.player) return;
-
-            const currentTime = this.player.currentTime();
-            const currentFrame = this.getFrameNumber(currentTime);
-            const previousFrame = Math.max(0, currentFrame - 1);
-
-            this.seekToFrame(previousFrame);
-        },
-
-        goToNextFrame() {
-            if (!this.player) return;
-
-            const currentTime = this.player.currentTime();
-            const currentFrame = this.getFrameNumber(currentTime);
-            const duration = this.player.duration();
-            const maxFrame = Math.floor(duration * this.frameRate);
-            const nextFrame = Math.min(maxFrame, currentFrame + 1);
-
-            this.seekToFrame(nextFrame);
-        },
-
+        // Missing methods used in Blade template
         jumpFrames(frameCount) {
-            if (!this.player) return;
-
-            const currentTime = this.player.currentTime();
-            const currentFrame = this.getFrameNumber(currentTime);
-            const duration = this.player.duration();
-            const maxFrame = Math.floor(duration * this.frameRate);
-
-            const targetFrame = Math.max(0, Math.min(maxFrame, currentFrame + frameCount));
-            this.seekToFrame(targetFrame);
+            return eventHandler?.seekFrame ? eventHandler.seekFrame(frameCount) : videoCore?.seekFrame ? videoCore.seekFrame(frameCount) : null;
         },
-
-        // Update aspect ratio based on video dimensions
-        updateAspectRatio() {
-            if (!this.player) return;
-
-            const width = this.player.videoWidth();
-            const height = this.player.videoHeight();
-
-            if (width && height) {
-                // Assign appropriate VideoJS fluid class
-                this.assignFluidClass(width, height);
-
-                // Update container dimensions dynamically
-                this.updateVideoContainerSize(width, height);
-                console.log(`Video aspect ratio updated: ${width}x${height}`);
+        
+        // Progress bar pointer/click handlers
+        handleProgressBarPointer(event, action = 'click') {
+            if (progressBar && progressBar.handleProgressBarPointer) {
+                return progressBar.handleProgressBarPointer(event, action);
             }
+            // Fallback to standard click handler
+            return this.handleProgressBarClick(event, action);
         },
-
-        assignFluidClass(width, height) {
-            if (!this.player) return;
-
-            // Remove any existing aspect ratio classes (but keep vjs-fluid always)
-            const playerEl = this.player.el();
-            const aspectRatioClasses = ['vjs-16-9', 'vjs-4-3', 'vjs-9-16', 'vjs-1-1'];
-            aspectRatioClasses.forEach(cls => playerEl.classList.remove(cls));
-
-            // Always ensure vjs-fluid is present
-            if (!playerEl.classList.contains('vjs-fluid')) {
-                playerEl.classList.add('vjs-fluid');
+        
+        // Context menu handlers
+        addCommentAtCurrentFrame() {
+            if (commentSystem) {
+                return commentSystem.addCommentAtTime ? commentSystem.addCommentAtTime(this.currentTime) : null;
             }
-
-            // Calculate aspect ratio
-            const aspectRatio = width / height;
-
-            // Check for common aspect ratios with tolerance and add specific class
-            const tolerance = 0.05;
-            let specificClass = null;
-
-            if (Math.abs(aspectRatio - (16 / 9)) < tolerance) {
-                specificClass = 'vjs-16-9';
-            } else if (Math.abs(aspectRatio - (4 / 3)) < tolerance) {
-                specificClass = 'vjs-4-3';
-            } else if (Math.abs(aspectRatio - (9 / 16)) < tolerance) {
-                specificClass = 'vjs-9-16';
-            } else if (Math.abs(aspectRatio - 1) < tolerance) {
-                specificClass = 'vjs-1-1';
-            }
-
-            // Apply specific aspect ratio class if detected
-            if (specificClass) {
-                playerEl.classList.add(specificClass);
-                console.log(`Applied VideoJS classes: vjs-fluid + ${specificClass} (ratio: ${aspectRatio.toFixed(3)})`);
-            } else {
-                console.log(`Applied VideoJS class: vjs-fluid only (custom ratio: ${aspectRatio.toFixed(3)})`);
-            }
-        },
-
-        updateVideoContainerSize(videoWidth, videoHeight) {
-            const videoContainer = this.$refs.videoContainer;
-            if (!videoContainer) return;
-
-            // Get the main video annotation container (the one with flex flex-col)
-            const mainContainer = this.$el;
-            if (!mainContainer) return;
-
-            // Get the flex-1 parent (video area)
-            const playerParent = videoContainer.closest('.flex-1');
-            if (!playerParent) return;
-
-            // Get available space from the main container
-            const mainRect = mainContainer.getBoundingClientRect();
-            let availableWidth = mainRect.width;
-            let availableHeight = mainRect.height;
-
-            // Subtract toolbar height from available height
-            const toolbar = this.$refs('tool-bar-container')
-            if (toolbar) {
-                const toolbarHeight = toolbar.getBoundingClientRect().height;
-                console.log(toolbarHeight);
-                availableHeight;
-            }
-
-            // Add some padding for safety
-            availableHeight = Math.max(availableHeight - 20, 200); // Minimum 200px height
-
-            // Calculate aspect ratio
-            const videoAspectRatio = videoWidth / videoHeight;
-
-            // Calculate dimensions that fit within available space
-            let containerWidth = availableWidth;
-            let containerHeight = containerWidth / videoAspectRatio;
-
-            // If height exceeds available space, constrain by height
-            if (containerHeight > availableHeight) {
-                containerHeight = availableHeight;
-                containerWidth = containerHeight * videoAspectRatio;
-            }
-
-            // For flex layout, let CSS handle the dimensions naturally
-            // Remove any explicit sizing to let flex work
-            playerParent.style.width = '';
-            playerParent.style.height = '';
-            playerParent.style.flexShrink = '';
-            playerParent.style.flexGrow = '';
-
-            console.log(`Video area resized to: ${containerWidth}x${containerHeight} (available: ${availableWidth}x${availableHeight}, toolbar subtracted)`);
-        },
-
-        // Initialize Region Toolbar Drag with Hammer.js
-        initRegionToolbarDrag(element) {
-            if (!element) return;
-
-            // Create Hammer.js instance for the toolbar
-            const toolbarHammer = new Hammer(element);
-
-            // Enable pan gesture
-            toolbarHammer.get('pan').set({
-                direction: Hammer.DIRECTION_ALL,
-                threshold: 10
+            this.$dispatch('video-annotation:add-comment', { 
+                timestamp: this.currentTime,
+                frame: this.getFrameNumber(this.currentTime)
             });
-
-            let startPosition = { x: 0, y: 0 };
-            let currentPosition = { x: 0, y: 0 };
-
-            toolbarHammer.on('panstart', (event) => {
-                this.isDragging = true;
-                this.dragStarted = true;
-                startPosition.x = currentPosition.x;
-                startPosition.y = currentPosition.y;
-
-                // Add active dragging styles
-                element.style.transition = 'none';
-                element.style.transform = `translate(calc(-50% + ${currentPosition.x}px), ${currentPosition.y}px)`;
+        },
+        
+        startSimpleRegionCreation() {
+            if (regionManagement) {
+                return regionManagement.startRegionCreation();
+            }
+            return null;
+        },
+        
+        exitRegionCreationMode() {
+            if (regionManagement) {
+                return regionManagement.cancelRegionCreation();
+            }
+            return null;
+        },
+        
+        confirmRegionCreation() {
+            if (regionManagement) {
+                return regionManagement.finishRegionCreation();
+            }
+            return null;
+        },
+        
+        setRegionStart() {
+            if (regionManagement && regionManagement.setRegionStart) {
+                return regionManagement.setRegionStart(this.currentTime);
+            }
+            // Store region start state
+            sharedState.regionCreationStart = {
+                time: this.currentTime,
+                frame: this.getFrameNumber(this.currentTime)
+            };
+        },
+        
+        setRegionEnd() {
+            if (regionManagement && regionManagement.setRegionEnd) {
+                return regionManagement.setRegionEnd(this.currentTime);
+            }
+            // Store region end state
+            sharedState.regionCreationEnd = {
+                time: this.currentTime,
+                frame: this.getFrameNumber(this.currentTime)
+            };
+        },
+        
+        // Settings and UI toggles
+        toggleCommentsOnProgressBar() {
+            sharedState.showCommentsOnProgressBar = !sharedState.showCommentsOnProgressBar;
+            this.$dispatch('video-annotation:comments-visibility-toggled', {
+                visible: sharedState.showCommentsOnProgressBar
             });
-
-            toolbarHammer.on('panmove', (event) => {
-                if (!this.isDragging) return;
-
-                const newX = startPosition.x + event.deltaX;
-                const newY = startPosition.y + event.deltaY;
-
-                // Constrain to viewport bounds
-                const rect = element.getBoundingClientRect();
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-
-                const constrainedX = Math.max(
-                    -(viewportWidth / 2 - rect.width / 2),
-                    Math.min(viewportWidth / 2 - rect.width / 2, newX)
-                );
-
-                const constrainedY = Math.max(
-                    -(viewportHeight - rect.height - 20),
-                    Math.min(-20, newY)
-                );
-
-                currentPosition.x = constrainedX;
-                currentPosition.y = constrainedY;
-
-                element.style.transform = `translate(calc(-50% + ${currentPosition.x}px), ${currentPosition.y}px)`;
+        },
+        
+        toggleProgressBarMode() {
+            const modes = ['always-visible', 'auto-hide'];
+            const currentIndex = modes.indexOf(sharedState.progressBarMode || 'always-visible');
+            const nextIndex = (currentIndex + 1) % modes.length;
+            sharedState.progressBarMode = modes[nextIndex];
+            
+            // Update showProgressBar based on mode
+            sharedState.showProgressBar = sharedState.progressBarMode === 'always-visible';
+            
+            this.$dispatch('video-annotation:progress-bar-mode-changed', {
+                mode: sharedState.progressBarMode
             });
-
-            toolbarHammer.on('panend', (event) => {
-                this.isDragging = false;
-
-                // Restore transition for smooth hover effects
-                element.style.transition = 'opacity 200ms';
-
-                // Snap to edges if close enough
-                const snapThreshold = 50;
-                const rect = element.getBoundingClientRect();
-                const viewportWidth = window.innerWidth;
-
-                if (Math.abs(currentPosition.x + viewportWidth / 2 - rect.width / 2) < snapThreshold) {
-                    // Snap to left edge
-                    currentPosition.x = -(viewportWidth / 2 - rect.width / 2);
-                } else if (Math.abs(currentPosition.x - viewportWidth / 2 + rect.width / 2) < snapThreshold) {
-                    // Snap to right edge
-                    currentPosition.x = viewportWidth / 2 - rect.width / 2;
+        },
+        
+        changeResolution(source) {
+            if (videoCore && videoCore.changeResolution) {
+                return videoCore.changeResolution(source);
+            }
+            
+            // Fallback - update shared state
+            sharedState.currentResolution = source;
+            sharedState.currentResolutionSrc = source.src;
+            
+            this.$dispatch('video-annotation:resolution-changed', { 
+                resolution: source 
+            });
+        },
+        
+        // Touch interface handlers
+        hideTouchContextMenu() {
+            if (touchInterface) {
+                touchInterface.hideContextMenu();
+            }
+            sharedState.touchInterface.contextMenuVisible = false;
+        },
+        
+        handleTouchStart(event) {
+            if (touchInterface && touchInterface.handleTouchStart) {
+                return touchInterface.handleTouchStart(event);
+            }
+            
+            // Fallback touch handling
+            sharedState.touchInterface.activePointer = 'touch';
+            return true;
+        },
+        
+        handleTouchEnd(event) {
+            if (touchInterface && touchInterface.handleTouchEnd) {
+                return touchInterface.handleTouchEnd(event);
+            }
+            
+            // Fallback touch handling
+            setTimeout(() => {
+                if (sharedState.touchInterface) {
+                    sharedState.touchInterface.activePointer = null;
                 }
-
-                element.style.transform = `translate(calc(-50% + ${currentPosition.x}px), ${currentPosition.y}px)`;
-            });
+            }, 100);
+            return true;
+        },
+        
+        addCommentFromContextMenu() {
+            const currentTime = this.currentTime || 0;
+            
+            // Hide context menu
+            this.hideContextMenu();
+            
+            // Add comment at current time
+            if (commentSystem && commentSystem.addCommentAtTime) {
+                commentSystem.addCommentAtTime(currentTime);
+            } else {
+                // Fallback - dispatch event
+                this.$dispatch('video-annotation:add-comment', {
+                    timestamp: currentTime,
+                    frame: this.getFrameNumber(currentTime)
+                });
+            }
+        },
+        
+        // Test method to verify Alpine reactivity
+        testMenuToggle() {
+            console.log('Menu toggle test - current showResolutionMenu:', this.showResolutionMenu);
+            this.showResolutionMenu = !this.showResolutionMenu;
+            console.log('Menu toggle test - new showResolutionMenu:', this.showResolutionMenu);
         },
 
-        // Resize video wrapper based on available space minus actual toolbar height
-        resizeVideoWrapper() {
-            const videoWrapper = this.$refs.videoWrapper;
-            if (!videoWrapper) return;
+        // Debug methods
+        getSharedState() {
+            return config.debug ? sharedState : null;
+        },
+        getModuleStatus() {
+            if (!config.debug) return null;
 
-            const mainContainer = this.$el;
-            if (!mainContainer) return;
-
-            // Get the main container dimensions
-            const containerRect = mainContainer.getBoundingClientRect();
-            const containerWidth = containerRect.width;
-            const containerHeight = containerRect.height;
-
-            // Get actual toolbar height by measuring it (wait for render if needed)
-            const toolbar = mainContainer.querySelector('.absolute.bottom-0');
-            let toolbarHeight = 80; // fallback
-            if (toolbar) {
-                // Force layout calculation
-                toolbar.style.visibility = 'visible';
-                const rect = toolbar.getBoundingClientRect();
-                toolbarHeight = rect.height || 80;
-                console.log('Actual toolbar height measured:', toolbarHeight);
-            }
-
-            // Calculate available height for video wrapper
-            const availableHeight = containerHeight - toolbarHeight;
-
-            // Set video wrapper as flex container with strict height constraints
-            videoWrapper.style.width = '100%';
-            videoWrapper.style.height = `${availableHeight}px`;
-            videoWrapper.style.maxHeight = `${availableHeight}px`;
-            videoWrapper.style.minHeight = `${availableHeight}px`;
-            videoWrapper.style.display = 'flex';
-            videoWrapper.style.justifyContent = 'center';
-            videoWrapper.style.alignItems = 'center';
-            videoWrapper.style.overflow = 'hidden';
-            videoWrapper.style.flexShrink = '0';
-            videoWrapper.style.flexGrow = '0';
-
-            console.log(`Video wrapper resized to: ${containerWidth}x${availableHeight} (toolbar height: ${toolbarHeight}px, container: ${containerHeight}px)`);
+            return {
+                videoCore: videoCore?.publicAPI ? 'ready' : 'not initialized',
+                progressBar: progressBar?.publicAPI ? 'ready' : 'not initialized',
+                commentSystem: !!commentSystem,
+                regionManagement: !!regionManagement,
+                touchInterface: touchInterface?.getStatus() || 'not initialized',
+                contextDisplay: contextDisplay?.getStatus() || 'not initialized',
+                eventHandler: !!eventHandler,
+                sharedState: sharedState.toJSON()
+            };
         }
-
-
     };
 }

@@ -6,6 +6,8 @@ namespace App\Filament\Resources\FlowResource\Pages;
 
 use App\Actions\Flow\CreateFlow as CreateFlowAction;
 use App\DTOs\Flow\CreateFlowDto;
+use App\Enums\Feedback\FeedbackUrgency;
+use App\Enums\FlowStage;
 use App\Exceptions\Flow\FlowCreationException;
 use App\Filament\Pages\FlowsKanabanBoard;
 use App\Filament\Resources\FlowResource;
@@ -17,20 +19,26 @@ use App\Services\Flow\TemplateService;
 use Exception;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 final class CreateFlow extends CreateRecord
 {
+    use HasWizard;
+
     protected static string $resource = FlowResource::class;
 
     protected static string $view = 'filament.resources.flow-resource.pages.create-flow';
@@ -39,64 +47,85 @@ final class CreateFlow extends CreateRecord
 
     protected static ?string $title = '';
 
+    public $start = 3;
+
     public string $from;
 
-    public ?string $maxContentWidth = 'screen-2xl';
+    // public ?string $maxContentWidth = 'screen-7xl';
 
     protected ?bool $hasUnsavedDataChangesAlert = true;
 
-    public function form(Form $form): Form
+    // public function form(Form $form): Form
+    // {
+
+    //     return $form
+    //         ->schema([
+    //             Wizard::make([
+    //                 Step::make('Flow Details')
+    //                     ->description('Provide the details of the flow you want to create.')
+    //                     ->schema([
+    //                         TextInput::make('title')
+    //                             ->required()
+    //                             ->label('Flow Title'),
+    //                         Textarea::make('description')
+    //                             ->required()
+    //                             ->label('Description'),
+    //                         // ChunkedFileUpload::make('attachments')
+    //                         //     ->maxFiles(5)
+    //                         //     ->label('Attachments'),
+    //                     ]),
+    //                 Step::make('Template')
+    //                     ->description('Select a template for the flow.')
+    //                     ->schema([
+    //                     ]),
+    //             ]),
+    //             // Section::make([
+    //             //     TextInput::make('title')
+    //             //         ->required(),
+    //             //     Textarea::make('description')
+    //             //         ->required(),
+    //             //     // ChunkedFileUpload::make('attachments')
+    //             //     //     ->maxFiles(5),
+
+    //             //     // EditorJs::make('blocks')
+    //             //     //     ->required()
+    //             //     //     ->columnSpanFull(),
+    //             //     // ChunkedFileUpload::make('as')
+    //             //     //     ->video()
+    //             //     //     ->maxFiles(5),
+    //             // ])->columnSpan(3),
+    //             // Section::make([
+    //             //     Select::make('template')
+    //             //         ->options(TemplateService::toArray())
+    //             //         ->selectablePlaceholder(false),
+    //             //     DatePicker::make('start_date')
+    //             //         ->minDate(today(filamentUser()->timezone))
+    //             //         ->required()
+    //             //         ->live(onBlur: true)
+    //             //         ->native(false),
+
+    //             //     DatePicker::make('due_date')
+    //             //         ->required()
+    //             //         ->minDate(fn ($get) => $get('start_date'))
+
+    //             //         ->afterOrEqual(fn ($get) => $get('start_date'))
+    //             //         ->native(false),
+    //             //     Select::make('participants')
+    //             //         // ->options(User::assignedTo(filamentTenant())->where('id', '!=', filamentUser()->getKey())->pluck('name', 'id'))
+    //             //         ->options($this->getParticipantsSelectArray())
+    //             //         ->multiple(true)
+    //             //         ->native(false),
+    //             //     // FileUpload::make('assets')
+    //             //     //     ->multiple(),
+
+    //             // ])->columnSpan(1),
+
+    //         ]);
+    // }
+
+    public function getMaxContentWidth(): MaxWidth
     {
-
-        return $form
-            ->schema([
-                Grid::make([
-                    'lg' => 4,
-                ])->schema([
-
-                    Section::make([
-                        TextInput::make('title')
-                            ->required(),
-                        Textarea::make('description')
-                            ->required(),
-                        ChunkedFileUpload::make('attachments')
-                            ->maxFiles(5),
-
-                        // EditorJs::make('blocks')
-                        //     ->required()
-                        //     ->columnSpanFull(),
-                        // ChunkedFileUpload::make('as')
-                        //     ->video()
-                        //     ->maxFiles(5),
-                    ])->columnSpan(3),
-                    Section::make([
-                        Select::make('template')
-                            ->options(TemplateService::toArray())
-                            ->selectablePlaceholder(false),
-                        DatePicker::make('start_date')
-                            ->minDate(today(filamentUser()->timezone))
-                            ->required()
-                            ->live(onBlur: true)
-                            ->native(false),
-
-                        DatePicker::make('due_date')
-                            ->required()
-                            ->minDate(fn ($get) => $get('start_date'))
-
-                            ->afterOrEqual(fn ($get) => $get('start_date'))
-                            ->native(false),
-                        Select::make('participants')
-                            // ->options(User::assignedTo(filamentTenant())->where('id', '!=', filamentUser()->getKey())->pluck('name', 'id'))
-                            ->options($this->getParticipantsSelectArray())
-                            ->multiple(true)
-                            ->native(false),
-                        // FileUpload::make('assets')
-                        //     ->multiple(),
-
-                    ])->columnSpan(1),
-                ]),
-
-            ]);
+        return MaxWidth::SevenExtraLarge;
     }
 
     public function create(bool $another = false): void
@@ -137,9 +166,93 @@ final class CreateFlow extends CreateRecord
 
     }
 
+    // public function begin()
+    // {
+    //     while ($this->start >= 0) {
+    //         // Stream the current count to the browser...
+    //         $this->stream(
+    //             to: 'count',
+    //             content: $this->start,
+    //             replace: true,
+    //         );
+
+    //         // Pause for 1 second between numbers...
+    //         sleep(1);
+
+    //         // Decrement the counter...
+    //         $this->start = $this->start - 1;
+    //     }
+    // }
+
     public function getHeading(): string|Htmlable // @phpstan-ignore-line
     {
         return '';
+    }
+
+    protected function getSteps(): array
+    {
+        return [
+            Step::make('Flow Details')
+                ->description('Provide the details of the flow you want to create.')
+                ->schema([
+                    TextInput::make('title')
+                        ->required()
+                        ->label('Flow Title'),
+                    Textarea::make('description')
+                        ->required()
+                        ->label('Description'),
+                    Select::make('stage')
+                        ->options(FlowStage::class)
+                        ->default(FlowStage::DRAFT),
+                    // ChunkedFileUpload::make('attachments')
+                    //     ->maxFiles(5)
+                    //     ->label('Attachments'),
+                ]),
+            Step::make('deliverables')
+                ->label('Deliverables')
+                ->description(fn ($get): string => 'Add deliverables for the flow. You can add multiple deliverables.')
+                ->schema([
+                    Repeater::make('delivrables')
+                        ->schema([TextInput::make('Title'),
+                            Select::make('template')
+                                ->options([
+                                    'design' => 'Design',
+                                    'development' => 'Development',
+                                ])
+                                ->selectablePlaceholder(false)
+                                ->required(),
+                            Select::make('urgency')
+                                ->options(FeedbackUrgency::class)
+                                ->multiple(true)
+                                ->native(false),
+                            DatePicker::make('sucess_date')
+                                ->minDate(today(filamentUser()->timezone)),
+                        ])
+                        ->cloneable()
+                        ->grid(2)
+                        ->reorderable(false)
+                        ->collapsible(),
+                ]),
+            Step::make('participatns')
+                ->label('Participants')
+                ->description(fn ($get): string => 'Select participants for the flow. You can select multiple participants.')
+                ->schema([
+                    Repeater::make('participants')
+                        ->schema([
+                            Select::make('participant_id')
+                                ->options($this->getParticipantsSelectArray())
+                                ->selectablePlaceholder(false)
+                                ->required(),
+                            Select::make('role_id')
+                                ->options(filamentTenant()->getSystemRoles()->pluck('name', 'id'))
+                                ->selectablePlaceholder(false)
+                                ->required(),
+                        ])->cloneable()
+                        ->grid(2)
+                        ->reorderable(false)
+                        ->collapsible(),
+                ]),
+        ];
     }
 
     protected function getCreatedNotification(): ?Notification
@@ -149,7 +262,7 @@ final class CreateFlow extends CreateRecord
 
     private function getParticipantsSelectArray(): array
     {
-        $participants = filamentTenant()->getParticipants()->reject(fn ($modelHasRole) => $modelHasRole->model->getKey() === filamentUser()->getKey());
+        $participants = filamentTenant()->getParticipants()->exceptAssignable(filamentUser()->getKey());
 
         return $participants->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => "{$item->model->getAttribute('name')} - {$item->role->name}"])->toArray();
 

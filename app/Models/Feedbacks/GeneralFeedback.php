@@ -10,6 +10,7 @@ use App\Enums\Feedback\FeedbackUrgency;
 use App\Models\Acknowledgement;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -61,29 +62,6 @@ final class GeneralFeedback extends Model
 
     protected $with = ['creator'];
 
-    // Migration helpers for converting from old feedback system
-    public static function createFromLegacyFeedback(array $attributes): static
-    {
-        // Extract category from metadata if available
-        $category = null;
-        $metadata = $attributes['metadata'] ?? null;
-
-        if (is_array($metadata)) {
-            $category = $metadata['category'] ?? $metadata['type'] ?? null;
-        }
-
-        return self::create([
-            ...$attributes,
-            'feedback_category' => $category,
-            'metadata' => $metadata,
-        ]);
-    }
-
-    public static function getConcreteModels(): array
-    {
-        return array_values(config('feedback.concrete_models', []));
-    }
-
     // Common Relationships
     public function feedbackable(): MorphTo
     {
@@ -105,13 +83,14 @@ final class GeneralFeedback extends Model
         return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
     }
 
-    // Type-specific scopes
-    public function scopeByCategory(Builder $query, string $category): Builder
+    #[Scope]
+    public function byCategory(Builder $query, string $category): Builder
     {
         return $query->where('feedback_category', $category);
     }
 
-    public function scopeByCategories(Builder $query, array $categories): Builder
+    #[Scope]
+    public function byCategories(Builder $query, array $categories): Builder
     {
         return $query->whereIn('feedback_category', $categories);
     }

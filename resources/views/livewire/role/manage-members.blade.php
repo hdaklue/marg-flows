@@ -22,20 +22,21 @@
             Manage Members
         </header> --}}
         <div class="flex flex-col mt-2 space-y-2">
-            @if (count($this->manageableMembers))
+            @if ($this->manageableMembers->isNotEmpty())
                 @foreach ($this->manageableMembers as $member)
                     <div
                         class="flex flex-col items-start justify-start w-full p-2 rounded-lg gap-y-2 bg-zinc-200/45 dark:bg-zinc-800/40 md:flex-row md:items-center md:justify-between md:gap-y-0">
                         <div class="flex items-center w-2/3 gap-3">
-                            <x-filament::avatar size="w-8 h-8" src="{{ $member->model->avatar }}"
-                                alt="{{ $member->model->name }}" />
+                            <x-filament::avatar size="w-8 h-8" src="{{ $member['participant_avatar'] }}"
+                                alt="{{ $member['participant_name'] }}" />
 
                             <div class="flex flex-col justify-start">
                                 <p class="text-sm font-medium">
-                                    {{ $member->model->name }}
+                                    {{ $member['participant_name'] }}
+
                                 </p>
                                 <p class="text-xs capitalize text-zinc-700 dark:text-zinc-500">
-                                    {{ $member->role->name }}
+                                    {{ $member['role_name'] }}
                                 </p>
                             </div>
                         </div>
@@ -43,7 +44,7 @@
                             <div class="flex items-center justify-between w-full gap-2 mt-2 md:mt-0 md:justify-end">
                                 <div x-data="{
                                     role: '',
-                                    id: '{{ $member->model->getKey() }}',
+                                    id: '{{ $member['participant_id'] }}',
                                     {{-- init() {
                                 $watch('role', () => this.updateRole())
                             } --}}
@@ -59,7 +60,7 @@
 
                                             @foreach ($this->authedUserAssignableRoles as $role)
                                                 <option value="{{ $role['value'] }}"
-                                                    @if ($role['value'] === $member->role->name) disabled @endif>
+                                                    @if ($role['value'] === $member['role_name']) disabled @endif>
                                                     {{ $role['label'] }}
                                                 </option>
                                             @endforeach
@@ -72,7 +73,8 @@
                                 <div>
                                     <x-filament::icon-button size="xs" color="danger" icon="heroicon-o-trash"
                                         outlined tooltip="remove member"
-                                        wire:click="mountAction('removeMemberAction', { memberId: '{{ $member->model->getKey() }}'})">
+                                        wire:click="mountAction('removeMemberAction', { memberId: '{{ $member['participant_id'] }}' })">
+                                        {{-- <x-filament::icon name="heroicon-o-trash" /> --}}
                                         remove
                                     </x-filament::icon-button>
                                     {{-- {{ ($this->removeMemberAction)(['memberId' => $member->id]) }} --}}
