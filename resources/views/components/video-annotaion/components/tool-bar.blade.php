@@ -89,7 +89,7 @@
     </div>
 
     <!-- Comments Layer (Separate from Progress Bar for independent event handling) -->
-    <div x-show="showProgressBar && showCommentsOnProgressBar && config.annotations?.showCommentsOnProgressBar" x-cloak
+    <div x-show="showProgressBar && showCommentsOnProgressBar && config.annotations?.showCommentsOnProgressBar && videoLoaded && duration > 0" x-cloak
         class="absolute inset-x-0 z-20 px-4 pointer-events-none bottom-24">
         <!-- Comment Timeline Display Container -->
         <div class="relative w-full h-16 pointer-events-none">
@@ -241,7 +241,7 @@
         </div>
 
         <!-- Region Bar -->
-        <div x-show="showRegionBar && config.features.enableAnnotations" x-cloak class="mt-2">
+        <div x-show="showRegionBar && config.features.enableAnnotations && videoLoaded && duration > 0" x-cloak class="mt-2">
             <!-- Region Creation Area -->
             <div x-ref="regionBar"
                 class="relative w-full h-8 overflow-visible transition-colors border rounded-md cursor-default"
@@ -273,7 +273,7 @@
 
                 <!-- Existing Regions with Draggable Edges (hidden during region creation) -->
                 <template x-for="region in getVisibleRegions()" :key="region.id">
-                    <div x-show="!isCreatingRegion" class="absolute h-full transition-colors border rounded-sm group"
+                    <div x-show="!isCreatingRegion && videoLoaded && duration > 0" class="absolute h-full transition-colors border rounded-sm group"
                         :class="region.temporary ? 'bg-emerald-500/40 border-emerald-500/50 hover:bg-emerald-500/50' :
                             'bg-indigo-500 border-indigo-600 hover:bg-indigo-400'"
                         :style="`left: ${region.position.left}%; width: ${region.position.width}%; opacity: ${region.opacity || 0.6}`">

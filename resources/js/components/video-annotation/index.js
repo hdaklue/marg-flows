@@ -213,6 +213,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         
         // Video state - reactive properties for Alpine.js
         isPlaying: false,
+        videoLoaded: false,
         currentTime: 0,
         duration: 0,
         bufferedPercentage: 0,
@@ -609,6 +610,11 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             // Listen for duration changes from VideoCore  
             document.addEventListener('video-duration-changed', (event) => {
                 this.duration = event.detail.duration || 0;
+                // When duration is loaded, consider video loaded
+                if (this.duration > 0) {
+                    this.videoLoaded = true;
+                    console.log('[VideoAnnotation] Video loaded and ready for annotations - Duration:', this.duration, 'VideoLoaded:', this.videoLoaded);
+                }
             });
             
             // Listen for time updates from VideoCore
