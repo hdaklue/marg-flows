@@ -979,6 +979,13 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             // Don't reset coordinates - they'll be updated when menu shows again
         },
         handleContextMenuAction(action) {
+            // Check if viewOnly mode is enabled for creation actions
+            if (this.config?.mode?.viewOnly && (action === 'add-comment' || action === 'create-region')) {
+                console.log(`[VideoAnnotation] ${action} disabled in viewOnly mode`);
+                this.hideContextMenu();
+                return;
+            }
+            
             const time = sharedState.contextMenuTime;
             this.hideContextMenu();
             
@@ -1070,6 +1077,12 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         },
 
         startRegionCreationAtCurrentFrame() {
+            // Check if viewOnly mode is enabled
+            if (this.config?.mode?.viewOnly) {
+                console.log('[VideoAnnotation] Region creation disabled in viewOnly mode');
+                return;
+            }
+            
             console.log('[VideoAnnotation] startRegionCreationAtCurrentFrame button clicked');
             console.log('[VideoAnnotation] regionManagement available:', !!regionManagement);
             
@@ -1353,6 +1366,12 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         
         // Context menu handlers
         addCommentAtCurrentFrame() {
+            // Check if viewOnly mode is enabled
+            if (this.config?.mode?.viewOnly) {
+                console.log('[VideoAnnotation] Comment creation disabled in viewOnly mode');
+                return;
+            }
+            
             if (commentSystem) {
                 return commentSystem.addCommentAtTime ? commentSystem.addCommentAtTime(this.currentTime) : null;
             }

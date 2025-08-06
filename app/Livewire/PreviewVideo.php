@@ -53,7 +53,7 @@ final class PreviewVideo extends Component
             ],
         ];
 
-        // Sample comments data - created using frame-precise timing  
+        // Sample comments data - created using frame-precise timing
         $frameRate = 30.0; // Default 30fps - will be dynamically set based on actual video
 
         $comment1Time = CommentTime::fromFrame(150, $frameRate); // Frame 150 (5 seconds)
@@ -112,10 +112,10 @@ final class PreviewVideo extends Component
                 'description' => 'Character introduction and world building',
                 'color' => '#6366f1', // Indigo-500
                 'opacity' => 0.6,
-                'temporary' => false
+                'temporary' => false,
             ],
             [
-                'id' => 'region-2', 
+                'id' => 'region-2',
                 'startTime' => 35.2,
                 'endTime' => 48.7,
                 'startFrame' => $this->getFrameNumber(35.2, $frameRate),
@@ -124,7 +124,7 @@ final class PreviewVideo extends Component
                 'description' => 'Main character encounters first challenge',
                 'color' => '#6366f1', // Indigo-500
                 'opacity' => 0.6,
-                'temporary' => false
+                'temporary' => false,
             ],
             [
                 'id' => 'region-3',
@@ -136,7 +136,7 @@ final class PreviewVideo extends Component
                 'description' => 'Secondary plot development during action',
                 'color' => '#6366f1', // Indigo-500
                 'opacity' => 0.5, // Slightly more transparent for overlap
-                'temporary' => false
+                'temporary' => false,
             ],
             [
                 'id' => 'region-4',
@@ -148,7 +148,7 @@ final class PreviewVideo extends Component
                 'description' => 'Conflict resolution and character growth',
                 'color' => '#6366f1', // Indigo-500
                 'opacity' => 0.6,
-                'temporary' => false
+                'temporary' => false,
             ],
             [
                 'id' => 'region-5',
@@ -160,14 +160,17 @@ final class PreviewVideo extends Component
                 'description' => 'End sequence and credits roll',
                 'color' => '#6366f1', // Indigo-500
                 'opacity' => 0.6,
-                'temporary' => false
-            ]
+                'temporary' => false,
+            ],
         ];
 
         // Example configuration - can be customized based on use case
         $this->config = [
             'video' => [
                 'frameRate' => $frameRate,
+            ],
+            'mode' => [
+                'viewOnly' => false, // Set to true to disable comment and region creation
             ],
             'features' => [
                 'enableAnnotations' => true,
@@ -279,16 +282,16 @@ final class PreviewVideo extends Component
         $this->config['annotations']['enableContextMenu'] = $enabled;
     }
 
+    public function render()
+    {
+        return view('livewire.preview-video');
+    }
+
     /**
-     * Helper method to calculate frame number from timestamp
+     * Helper method to calculate frame number from timestamp.
      */
     private function getFrameNumber(float $timestamp, float $frameRate): int
     {
         return (int) floor($timestamp * $frameRate) + 1;
-    }
-
-    public function render()
-    {
-        return view('livewire.preview-video');
     }
 }

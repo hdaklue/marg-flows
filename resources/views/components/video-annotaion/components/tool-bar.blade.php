@@ -580,7 +580,8 @@
                 </div>
 
                 <!-- Enhanced Region Creation Toggle -->
-                <button @click="startRegionCreationAtCurrentFrame()"
+                <button @click="!config.mode?.viewOnly && startRegionCreationAtCurrentFrame()" 
+                    x-show="!config.mode?.viewOnly"
                     class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
                     :class="{ 'bg-sky-100 text-sky-600 shadow-md dark:bg-sky-900/50 dark:text-sky-400': showRegionToolbar }"
                     aria-label="Create region at current frame" title="Create Region at Current Frame">
@@ -640,7 +641,7 @@
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <!-- Add Comment -->
                 <button @click="addCommentAtCurrentFrame(); hideTouchContextMenu()"
-                    x-show="config.annotations?.enableVideoComments"
+                    x-show="config.annotations?.enableVideoComments && !config.mode?.viewOnly"
                     class="flex flex-col items-center p-4 transition-colors rounded-xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-900/20 dark:hover:bg-sky-900/40">
                     <div class="flex items-center justify-center w-12 h-12 mb-2 rounded-full bg-sky-500">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -653,7 +654,7 @@
 
                 <!-- Create Region -->
                 <button @click="startSimpleRegionCreation(); hideTouchContextMenu()"
-                    x-show="config.features?.enableAnnotations"
+                    x-show="config.features?.enableAnnotations && !config.mode?.viewOnly"
                     class="flex flex-col items-center p-4 transition-colors rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40">
                     <div class="flex items-center justify-center w-12 h-12 mb-2 rounded-full bg-emerald-500">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

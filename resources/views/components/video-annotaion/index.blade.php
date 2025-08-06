@@ -12,8 +12,8 @@
     @keydown.space.window.prevent="togglePlay()"
     @keydown.enter.window.prevent="isCreatingRegion && confirmRegionCreation()"
     @keydown.escape.window.prevent="isCreatingRegion && cancelRegionCreation()"
-    @keydown.alt.c.window.prevent="config.annotations?.enableVideoComments && addCommentAtCurrentFrame()"
-    @keydown.ctrl.c.window.prevent="config.annotations?.enableVideoComments && addCommentAtCurrentFrame()"
+    @keydown.alt.c.window.prevent="!config.mode?.viewOnly && config.annotations?.enableVideoComments && addCommentAtCurrentFrame()"
+    @keydown.ctrl.c.window.prevent="!config.mode?.viewOnly && config.annotations?.enableVideoComments && addCommentAtCurrentFrame()"
     tabindex="0">
 
     <!-- Safari Browser Notice -->
