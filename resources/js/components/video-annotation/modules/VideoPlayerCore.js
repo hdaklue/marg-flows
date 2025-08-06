@@ -134,6 +134,12 @@ export class VideoPlayerCore {
             
             this.player.on('canplay', () => {
                 console.log('[VideoCore] Video can start playing');
+                // Sync frame rate from config to SharedState
+                const configFrameRate = this.config?.video?.frameRate;
+                if (configFrameRate && this.sharedState) {
+                    this.sharedState.frameRate = configFrameRate;
+                    console.log(`[VideoCore] Frame rate set to ${configFrameRate}fps from config`);
+                }
             });
             
             this.player.on('error', (error) => {
@@ -475,8 +481,8 @@ export class VideoPlayerCore {
      * Get current frame rate
      */
     getFrameRate() {
-        // Default to 30fps, could be enhanced to detect actual frame rate
-        return 30;
+        // Use frame rate from config if available, otherwise default to 30fps
+        return this.config?.video?.frameRate || 30;
     }
 
     /**

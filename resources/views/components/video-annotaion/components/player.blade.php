@@ -87,7 +87,7 @@
                 <!-- Region Info Card -->
                 <div class="p-4 mb-4 text-center rounded-2xl bg-emerald-500/90 backdrop-blur-sm">
                     <div class="mb-2 text-white">
-                        <div class="text-lg font-bold">Creating Region</div>
+                        <div class="text-lg font-bold">Region Duration</div>
                         <div class="font-mono text-emerald-100"
                             x-text="regionCreationStart && regionCreationEnd ? formatTime(Math.abs(regionCreationEnd.time - regionCreationStart.time)) : '0:00'">
                             0:00

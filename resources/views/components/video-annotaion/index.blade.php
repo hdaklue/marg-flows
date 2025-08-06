@@ -1,10 +1,10 @@
-@props(['videoSrc' => '', 'comments' => '[]', 'qualitySources' => null, 'config' => null])
+@props(['videoSrc' => '', 'comments' => '[]', 'regions' => '[]', 'qualitySources' => null, 'config' => null])
 
 <!-- Load quality selector CSS and JS -->
 {{-- <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
 <script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script> --}}
 
-<div x-data="videoAnnotation(@js($config ?? null), @js($comments ?? []))" class="relative h-full w-full overflow-hidden bg-zinc-950" tabindex="0"
+<div x-data="videoAnnotation(@js($config ?? null), @js($comments ?? []), @js($regions ?? []))" class="relative h-full w-full overflow-hidden bg-zinc-950" tabindex="0"
     @destroy.window="destroy()" @keydown.arrow-left.window.prevent="isCreatingRegion ? shrinkRegionEnd() : stepBackward()"
     @keydown.arrow-right.window.prevent="isCreatingRegion ? expandRegionEnd() : stepForward()"
     @keydown.arrow-up.window.prevent="isCreatingRegion && expandRegionStart()"
@@ -422,17 +422,19 @@
             <div class="space-y-6">
                 <!-- Volume Level Display -->
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-zinc-900 dark:text-white">
-                        <span x-text="Math.round(volume * 100) + '%'"></span>
+                    <div class="text-2xl font-bold" :class="isMuted ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-white'">
+                        <span x-text="isMuted ? '0%' : Math.round(volume * 100) + '%'"></span>
                     </div>
-                    <div class="text-sm text-zinc-500 dark:text-zinc-400">Volume Level</div>
+                    <div class="text-sm text-zinc-500 dark:text-zinc-400" x-text="isMuted ? 'Muted' : 'Volume Level'"></div>
                 </div>
 
                 <!-- Mute Toggle -->
                 <button @click="toggleMute()"
-                    class="flex w-full items-center justify-between rounded-xl bg-zinc-50 p-4 text-left transition-colors duration-200 hover:bg-zinc-100 dark:bg-zinc-700 dark:hover:bg-zinc-600">
+                    class="flex w-full items-center justify-between rounded-xl p-4 text-left transition-colors duration-200"
+                    :class="isMuted ? 'bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40' : 'bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-700 dark:hover:bg-zinc-600'">
                     <div class="flex items-center gap-4">
-                        <div class="rounded-lg bg-sky-100 p-3 dark:bg-sky-900">
+                        <div class="rounded-lg p-3 transition-colors"
+                             :class="isMuted ? 'bg-red-100 dark:bg-red-900/40' : 'bg-sky-100 dark:bg-sky-900'">
                             <!-- Volume Up Icon -->
                             <svg x-show="!isMuted && volume > 0.5" x-cloak
                                 class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor"
@@ -449,7 +451,7 @@
                             </svg>
                             <!-- Volume Muted Icon -->
                             <svg x-show="isMuted || volume === 0" x-cloak
-                                class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor"
+                                class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
@@ -471,9 +473,10 @@
                 <div class="space-y-3">
                     <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Adjust Volume</label>
                     <div class="relative">
-                        <input type="range" min="0" max="1" step="0.01" :value="volume"
+                        <input type="range" min="0" max="1" step="0.01" :value="isMuted ? 0 : volume"
                             @input="setVolume(parseFloat($event.target.value))"
-                            class="slider h-3 w-full cursor-pointer appearance-none rounded-lg bg-zinc-300 dark:bg-zinc-600">
+                            class="slider h-3 w-full cursor-pointer appearance-none rounded-lg bg-zinc-300 dark:bg-zinc-600"
+                            :class="isMuted ? 'opacity-50' : ''">
                         <div class="mt-2 flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
                             <span>0%</span>
                             <span>50%</span>

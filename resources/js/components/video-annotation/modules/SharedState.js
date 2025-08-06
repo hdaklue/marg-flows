@@ -3,7 +3,7 @@
  * This module manages all shared data between different video annotation modules
  */
 export class SharedState {
-    constructor(config, initialComments = []) {
+    constructor(config, initialComments = [], initialRegions = []) {
         this.config = config;
         
         // Video player state
@@ -79,7 +79,8 @@ export class SharedState {
         this.commentDisplayTimers = {}; // Auto-hide timers for secondary context display
         
         // Region management state
-        this.regions = [];
+        this.regions = initialRegions || [];
+        console.log('[SharedState] Initialized with regions:', this.regions.length, this.regions);
         this.activeRegion = null;
         this.regionCreationActive = false;
         this.regionStartTime = null;
@@ -118,7 +119,7 @@ export class SharedState {
         };
         
         // Frame navigation state
-        this.frameRate = 30; // Default, can be detected
+        this.frameRate = config?.video?.frameRate || 30; // Use config frame rate or default to 30
         this.currentFrameNumber = 0;
         this.frameNavigationDirection = null; // 'forward', 'backward', 'seek', null
         this.showFrameHelpers = true;

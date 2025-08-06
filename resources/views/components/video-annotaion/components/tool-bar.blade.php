@@ -244,7 +244,7 @@
         <div x-show="showRegionBar && config.features.enableAnnotations" x-cloak class="mt-2">
             <!-- Region Creation Area -->
             <div x-ref="regionBar"
-                class="relative w-full h-8 overflow-hidden transition-colors border rounded-md cursor-default"
+                class="relative w-full h-8 overflow-visible transition-colors border rounded-md cursor-default"
                 :class="isCreatingRegion || regions.length > 0 ?
                     'bg-zinc-200 border-zinc-400 dark:bg-zinc-800 dark:border-zinc-600' :
                     'bg-zinc-100 border-zinc-300 dark:bg-zinc-700 dark:border-zinc-500'"
@@ -252,40 +252,51 @@
 
                 <!-- Region Creation Feedback -->
                 <div x-show="isCreatingRegion" x-cloak
-                    class="absolute inset-0 z-30 rounded-md bg-gradient-to-r from-emerald-400/50 via-emerald-500/30 to-emerald-600/50"
+                    class="absolute inset-0 z-30 rounded-md bg-emerald-500/40 group"
                     :style="regionCreationStart && regionCreationEnd ?
                         `left: ${Math.min(regionCreationStart.x, regionCreationEnd.x)}px;
                          width: ${Math.abs(regionCreationEnd.x - regionCreationStart.x)}px` :
                         ''">
-
-                    <div
-                        class="absolute inset-0 flex items-center justify-center text-xs font-bold pointer-events-none text-emerald-900 drop-shadow-sm dark:text-emerald-100">
-                        Creating Region
+                    
+                    <!-- Drag Handle for Expanding Region -->
+                    <div class="absolute right-0 top-0 w-3 h-full bg-emerald-600 opacity-70 hover:opacity-100 cursor-e-resize transition-opacity flex items-center justify-center"
+                         @mousedown.prevent.stop="startRegionDrag($event)"
+                         @touchstart.prevent.stop="startRegionDrag($event)"
+                         title="Drag to expand region">
+                        <!-- Drag Icon -->
+                        <div class="flex flex-col gap-0.5">
+                            <div class="w-0.5 h-1 bg-white"></div>
+                            <div class="w-0.5 h-1 bg-white"></div>
+                            <div class="w-0.5 h-1 bg-white"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Existing Regions with Draggable Edges -->
+                <!-- Existing Regions with Draggable Edges (hidden during region creation) -->
                 <template x-for="region in getVisibleRegions()" :key="region.id">
-                    <div class="absolute h-full bg-sky-500/30 border border-sky-500/50 rounded-sm group hover:bg-sky-500/40 transition-colors"
-                         :style="`left: ${region.position.left}%; width: ${region.position.width}%`">
+                    <div x-show="!isCreatingRegion" class="absolute h-full border rounded-sm group transition-colors"
+                         :class="region.temporary ? 'bg-emerald-500/40 border-emerald-500/50 hover:bg-emerald-500/50' : 'bg-indigo-500 border-indigo-600 hover:bg-indigo-400'"
+                         :style="`left: ${region.position.left}%; width: ${region.position.width}%; opacity: ${region.opacity || 0.6}`">
                         
-                        <!-- Region Content -->
-                        <div class="absolute inset-0 flex items-center justify-center text-xs font-medium text-sky-800 dark:text-sky-200 pointer-events-none">
+                        <!-- Region Content - Hidden for cleaner appearance -->
+                        <!-- <div class="absolute inset-0 flex items-center justify-center text-xs font-medium pointer-events-none"
+                             :class="region.temporary ? 'text-emerald-800 dark:text-emerald-200' : 'text-indigo-100 dark:text-indigo-100'">
                             <span x-text="region.title || 'Region'"></span>
-                        </div>
+                        </div> -->
                         
-                        <!-- Left Resize Handle -->
-                        <div class="absolute left-0 top-0 w-2 h-full bg-sky-600 opacity-0 group-hover:opacity-100 cursor-w-resize transition-opacity"
-                             @mousedown.prevent.stop="startRegionResize($event, region.id, 'start')"
-                             @touchstart.prevent.stop="startRegionResize($event, region.id, 'start')"
-                             title="Resize region start">
-                        </div>
-                        
-                        <!-- Right Resize Handle -->
-                        <div class="absolute right-0 top-0 w-2 h-full bg-sky-600 opacity-0 group-hover:opacity-100 cursor-e-resize transition-opacity"
-                             @mousedown.prevent.stop="startRegionResize($event, region.id, 'end')"
-                             @touchstart.prevent.stop="startRegionResize($event, region.id, 'end')"
-                             title="Resize region end">
+                        <!-- View Icon beneath region at left edge -->
+                        <div class="absolute -bottom-6 left-0 z-40">
+                            <button @click="showComment(region.id)" 
+                                    class="flex items-center justify-center w-5 h-5 bg-indigo-600 hover:bg-indigo-700 rounded-full text-white shadow-lg transition-all opacity-80 hover:opacity-100"
+                                    title="View region details">
+                                <!-- Eye/View Icon -->
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </template>
@@ -351,9 +362,10 @@
                 <div class="flex items-center gap-1 sm:gap-2">
                     <!-- Enhanced Mobile Volume Button -->
                     <button @click="showVolumeModal = !showVolumeModal"
-                        class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white sm:hidden"
+                        class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl hover:shadow-md sm:hidden"
+                        :class="isMuted ? 'text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:hover:text-red-300' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white'"
                         :aria-label="isMuted ? 'Unmute video' : 'Adjust volume'"
-                        :title="Math.round(volume * 100) + '% volume'">
+                        :title="isMuted ? 'Muted' : Math.round(volume * 100) + '% volume'">
                         <!-- Volume Up Icon -->
                         <svg x-show="!isMuted && volume > 0.5" x-cloak class="w-5 h-5" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -381,7 +393,8 @@
                         @mouseleave="showVolumeSlider = false">
                         <!-- Enhanced Mute/Unmute Button -->
                         <button @click="toggleMute()"
-                            class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
+                            class="flex items-center justify-center transition-all duration-200 video-control-btn h-9 w-9 rounded-xl hover:shadow-md"
+                            :class="isMuted ? 'text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:hover:text-red-300' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white'"
                             :aria-label="isMuted ? 'Unmute video' : 'Mute video'"
                             :title="isMuted ? 'Unmute' : 'Mute'">
                             <!-- Volume Up Icon -->
@@ -408,8 +421,9 @@
 
                         <!-- Enhanced Volume Percentage Display -->
                         <div
-                            class="px-2 py-1 text-xs font-medium text-center rounded-lg min-w-12 bg-zinc-100/50 text-zinc-700 backdrop-blur-sm dark:bg-zinc-700/50 dark:text-zinc-300">
-                            <span x-text="Math.round(volume * 100) + '%'"></span>
+                            class="px-2 py-1 text-xs font-medium text-center rounded-lg min-w-12 bg-zinc-100/50 text-zinc-700 backdrop-blur-sm dark:bg-zinc-700/50 dark:text-zinc-300"
+                            :class="isMuted ? 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20' : ''">
+                            <span x-text="isMuted ? '0%' : Math.round(volume * 100) + '%'"></span>
                         </div>
 
                         <!-- Volume Slider (appears on hover) -->
@@ -420,8 +434,9 @@
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95">
                             <input type="range" min="0" max="1" step="0.1"
-                                :value="volume" @input="setVolume(parseFloat($event.target.value))"
-                                class="w-20 h-2 rounded-lg appearance-none cursor-pointer slider bg-zinc-300 dark:bg-zinc-600">
+                                :value="isMuted ? 0 : volume" @input="setVolume(parseFloat($event.target.value))"
+                                class="w-20 h-2 rounded-lg appearance-none cursor-pointer slider bg-zinc-300 dark:bg-zinc-600"
+                                :class="isMuted ? 'opacity-50' : ''">
                         </div>
                     </div>
                 </div>
@@ -718,7 +733,7 @@
                         <!-- Large Touch-Friendly Timeline -->
                         <div class="relative h-16 mb-6 overflow-hidden rounded-full bg-black/30">
                             <!-- Progress Fill -->
-                            <div class="absolute inset-0 rounded-full bg-gradient-to-r from-sky-400 to-sky-600"
+                            <div class="absolute inset-0 rounded-full bg-sky-500"
                                 :style="`width: ${frameAlignedProgressPercentage}%`"></div>
 
                             <!-- Region Highlight -->

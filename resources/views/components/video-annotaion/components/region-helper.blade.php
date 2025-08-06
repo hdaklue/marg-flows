@@ -32,11 +32,19 @@
             </button>
         </div>
 
-        <!-- Center: Frame Display -->
+        <!-- Center: Frame Range Display -->
         <div class="text-center">
-            <div class="font-mono text-sm text-zinc-700 dark:text-zinc-300" x-text="'Frame ' + currentFrameNumber">
+            <div class="text-sm font-mono text-zinc-700 dark:text-zinc-300"
+                x-text="regionCreationStart && regionCreationEnd ? 
+                    'F' + getFrameNumber(regionCreationStart.time) + ' → F' + getFrameNumber(regionCreationEnd.time) : 
+                    'Frame ' + (currentFrameNumber || getFrameNumber(currentTime || 0))">
             </div>
-            <div class="text-xs text-zinc-500 dark:text-zinc-400" x-text="frameRate + ' fps'"></div>
+            <div class="text-xs text-zinc-500 dark:text-zinc-400" x-text="(frameRate || 30) + ' fps'"></div>
+            <div class="mt-1 text-xs font-mono text-zinc-400 dark:text-zinc-500"
+                x-text="regionCreationStart && regionCreationEnd ? 
+                    formatTime(regionCreationStart.time) + ' → ' + formatTime(regionCreationEnd.time) : 
+                    formatTime(currentTime || 0)">
+            </div>
         </div>
 
         <!-- Right side: Next -->

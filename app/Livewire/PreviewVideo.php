@@ -11,6 +11,8 @@ final class PreviewVideo extends Component
 {
     public $comments = [];
 
+    public $regions = [];
+
     public $videoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4';
 
     public $qualitySources = [];
@@ -51,8 +53,8 @@ final class PreviewVideo extends Component
             ],
         ];
 
-        // Sample comments data - created using frame-precise timing
-        $frameRate = 30.0;
+        // Sample comments data - created using frame-precise timing  
+        $frameRate = 30.0; // Default 30fps - will be dynamically set based on actual video
 
         $comment1Time = CommentTime::fromFrame(150, $frameRate); // Frame 150 (5 seconds)
         $comment2Time = CommentTime::fromFrame(450, $frameRate); // Frame 450 (15 seconds)
@@ -98,8 +100,75 @@ final class PreviewVideo extends Component
             ],
         ];
 
+        // Sample regions data - existing regions with indigo color and opacity for overlap
+        $this->regions = [
+            [
+                'id' => 'region-1',
+                'startTime' => 10.5,
+                'endTime' => 25.3,
+                'startFrame' => $this->getFrameNumber(10.5, $frameRate),
+                'endFrame' => $this->getFrameNumber(25.3, $frameRate),
+                'title' => 'Opening Scene',
+                'description' => 'Character introduction and world building',
+                'color' => '#6366f1', // Indigo-500
+                'opacity' => 0.6,
+                'temporary' => false
+            ],
+            [
+                'id' => 'region-2', 
+                'startTime' => 35.2,
+                'endTime' => 48.7,
+                'startFrame' => $this->getFrameNumber(35.2, $frameRate),
+                'endFrame' => $this->getFrameNumber(48.7, $frameRate),
+                'title' => 'Action Sequence',
+                'description' => 'Main character encounters first challenge',
+                'color' => '#6366f1', // Indigo-500
+                'opacity' => 0.6,
+                'temporary' => false
+            ],
+            [
+                'id' => 'region-3',
+                'startTime' => 42.1, // Intentionally overlaps with region-2
+                'endTime' => 58.9,
+                'startFrame' => $this->getFrameNumber(42.1, $frameRate),
+                'endFrame' => $this->getFrameNumber(58.9, $frameRate),
+                'title' => 'Overlapping Scene',
+                'description' => 'Secondary plot development during action',
+                'color' => '#6366f1', // Indigo-500
+                'opacity' => 0.5, // Slightly more transparent for overlap
+                'temporary' => false
+            ],
+            [
+                'id' => 'region-4',
+                'startTime' => 72.8,
+                'endTime' => 91.4,
+                'startFrame' => $this->getFrameNumber(72.8, $frameRate),
+                'endFrame' => $this->getFrameNumber(91.4, $frameRate),
+                'title' => 'Resolution',
+                'description' => 'Conflict resolution and character growth',
+                'color' => '#6366f1', // Indigo-500
+                'opacity' => 0.6,
+                'temporary' => false
+            ],
+            [
+                'id' => 'region-5',
+                'startTime' => 95.0,
+                'endTime' => 120.0,
+                'startFrame' => $this->getFrameNumber(95.0, $frameRate),
+                'endFrame' => $this->getFrameNumber(120.0, $frameRate),
+                'title' => 'Closing Credits',
+                'description' => 'End sequence and credits roll',
+                'color' => '#6366f1', // Indigo-500
+                'opacity' => 0.6,
+                'temporary' => false
+            ]
+        ];
+
         // Example configuration - can be customized based on use case
         $this->config = [
+            'video' => [
+                'frameRate' => $frameRate,
+            ],
             'features' => [
                 'enableAnnotations' => true,
                 'enableComments' => true,
@@ -208,6 +277,14 @@ final class PreviewVideo extends Component
         $this->config['annotations']['enableProgressBarComments'] = $enabled;
         $this->config['annotations']['enableVideoComments'] = $enabled;
         $this->config['annotations']['enableContextMenu'] = $enabled;
+    }
+
+    /**
+     * Helper method to calculate frame number from timestamp
+     */
+    private function getFrameNumber(float $timestamp, float $frameRate): int
+    {
+        return (int) floor($timestamp * $frameRate) + 1;
     }
 
     public function render()

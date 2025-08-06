@@ -6,7 +6,7 @@
     @endif --}}
     <!-- Video Annotation Component - Takes full screen -->
     <div wire:ignore class="w-full h-full overflow-hidden">
-        <x-video-annotaion :video-src="$videoUrl" :quality-sources="$qualitySources" :comments="$comments" :config="$config" />
+        <x-video-annotaion :video-src="$videoUrl" :quality-sources="$qualitySources" :comments="$comments" :regions="$regions" :config="$config" />
     </div>
 
     <!-- Hidden Livewire Event Handlers -->

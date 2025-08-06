@@ -133,21 +133,36 @@ export class RegionManagementModule {
             const percentage = (frameAlignedTime / this.sharedState.duration) * 100;
             const x = (percentage / 100) * rect.width;
             
+            // Calculate initial 10-second region end time
+            const defaultDuration = 10.0; // 10 seconds
+            const initialEndTime = Math.min(this.sharedState.duration, frameAlignedTime + defaultDuration);
+            const endPercentage = (initialEndTime / this.sharedState.duration) * 100;
+            const endX = (endPercentage / 100) * rect.width;
+            
             this.sharedState.regionCreationStart = {
                 x: x,
                 time: frameAlignedTime,
                 percentage: percentage
             };
-            this.sharedState.regionCreationEnd = { ...this.sharedState.regionCreationStart };
+            this.sharedState.regionCreationEnd = {
+                x: endX,
+                time: initialEndTime,
+                percentage: endPercentage
+            };
         }
         
-        // Create temporary region for preview
+        // Create temporary region for preview with 10-second default duration
+        const defaultDuration = 10.0; // 10 seconds
+        const initialEndTime = Math.min(this.sharedState.duration, frameAlignedTime + defaultDuration);
+        const endFrameNumber = this.sharedState.getFrameNumber ? 
+            this.sharedState.getFrameNumber(initialEndTime) : Math.floor(initialEndTime * (this.sharedState.frameRate || 30));
+        
         this.tempRegion = {
             id: `temp-${Date.now()}`,
             startTime: this.creationStartTime,
-            endTime: this.creationStartTime,
+            endTime: initialEndTime,
             startFrame: frameNumber,
-            endFrame: frameNumber,
+            endFrame: endFrameNumber,
             title: '',
             description: '',
             temporary: true

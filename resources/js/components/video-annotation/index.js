@@ -38,9 +38,10 @@ function isObject(item) {
  *
  * @param {Object} userConfig - User configuration options
  * @param {Array} initialComments - Initial comments array
+ * @param {Array} initialRegions - Initial regions array
  * @returns {Object} Alpine.js component object
  */
-export default function videoAnnotation(userConfig = null, initialComments = []) {
+export default function videoAnnotation(userConfig = null, initialComments = [], initialRegions = []) {
     // Default configuration
     const defaultConfig = {
         features: {
@@ -115,7 +116,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
     const config = userConfig ? mergeDeep(defaultConfig, userConfig) : defaultConfig;
 
     // Create shared state instance
-    const sharedState = new SharedState(config, initialComments);
+    const sharedState = new SharedState(config, initialComments, initialRegions);
 
     // Module instances
     let videoCore = null;
@@ -163,7 +164,10 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         get nearbyComments() { return sharedState.nearbyComments; },
 
         // Regions state
-        get regions() { return sharedState.regions; },
+        get regions() { 
+            console.log('[VideoAnnotation] Getting regions:', sharedState.regions?.length || 0);
+            return sharedState.regions; 
+        },
         get activeRegion() { return sharedState.activeRegion; },
         get regionCreationActive() { return sharedState.regionCreationActive; },
         get hiddenRegions() { return sharedState.hiddenRegions; },
@@ -314,6 +318,17 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         regionCreationStart: null,
         regionCreationEnd: null,
         showRegionToolbar: false,
+
+        // Region resize properties
+        isResizingRegion: false,
+        resizeRegionId: null,
+        resizeHandle: null, // 'start' or 'end'
+        resizeStartX: 0,
+        resizeOriginalStartTime: 0,
+        resizeOriginalEndTime: 0,
+
+        // Region creation drag properties
+        isDraggingRegionCreation: false,
 
         // Pointer state properties
         get pointerState() {
@@ -773,7 +788,33 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
             return regionManagement?.handleRegionClick(regionId, event);
         },
         getVisibleRegions() {
-            return regionManagement?.getVisibleRegions() || [];
+            if (regionManagement) {
+                return regionManagement.getVisibleRegions();
+            }
+            
+            // Fallback if regionManagement is not available yet
+            const regions = sharedState.regions || [];
+            const duration = this.duration || sharedState.duration || 100; // Use fallback duration
+            
+            return regions
+                .filter(region => !sharedState.hiddenRegions.has(region.id))
+                .map(region => {
+                    const startPercentage = (region.startTime / duration) * 100;
+                    const endPercentage = (region.endTime / duration) * 100;
+                    const widthPercentage = endPercentage - startPercentage;
+                    
+                    return {
+                        ...region,
+                        position: {
+                            left: Math.max(0, Math.min(100, startPercentage)),
+                            width: Math.max(0, Math.min(100 - startPercentage, widthPercentage))
+                        },
+                        isActive: sharedState.activeRegion?.id === region.id,
+                        isSelected: false,
+                        isEditing: false,
+                        isHovered: false
+                    };
+                });
         },
         getRegionPosition(region) {
             return regionManagement?.getRegionPosition(region) || { left: 0, width: 0 };
@@ -1050,12 +1091,22 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                     const percentage = (frameAlignedTime / this.duration) * 100;
                     const x = (percentage / 100) * rect.width;
                     
+                    // Calculate initial 10-second region end time
+                    const defaultDuration = 10.0; // 10 seconds
+                    const initialEndTime = Math.min(this.duration, frameAlignedTime + defaultDuration);
+                    const endPercentage = (initialEndTime / this.duration) * 100;
+                    const endX = (endPercentage / 100) * rect.width;
+                    
                     this.regionCreationStart = {
                         x: x,
                         time: frameAlignedTime,
                         percentage: percentage
                     };
-                    this.regionCreationEnd = { ...this.regionCreationStart };
+                    this.regionCreationEnd = {
+                        x: endX,
+                        time: initialEndTime,
+                        percentage: endPercentage
+                    };
                     
                     console.log('[VideoAnnotation] Set visual region state:', {
                         isCreatingRegion: this.isCreatingRegion,
@@ -1082,12 +1133,22 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                     const percentage = (frameAlignedTime / this.duration) * 100;
                     const x = (percentage / 100) * rect.width;
                     
+                    // Calculate initial 10-second region end time
+                    const defaultDuration = 10.0; // 10 seconds
+                    const initialEndTime = Math.min(this.duration, frameAlignedTime + defaultDuration);
+                    const endPercentage = (initialEndTime / this.duration) * 100;
+                    const endX = (endPercentage / 100) * rect.width;
+                    
                     this.regionCreationStart = {
                         x: x,
                         time: frameAlignedTime,
                         percentage: percentage
                     };
-                    this.regionCreationEnd = { ...this.regionCreationStart };
+                    this.regionCreationEnd = {
+                        x: endX,
+                        time: initialEndTime,
+                        percentage: endPercentage
+                    };
                     
                     // Update shared state
                     sharedState.isCreatingRegion = true;
@@ -1552,7 +1613,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 // Single click - create a 2-second region centered on click
                 const frameRate = this.frameRate || 30;
                 const frameDuration = 1 / frameRate;
-                const defaultDuration = 2.0; // 2 seconds
+                const defaultDuration = 10.0; // 10 seconds
                 
                 finalStartTime = Math.max(0, startTime - defaultDuration / 2);
                 finalEndTime = Math.min(this.duration, startTime + defaultDuration / 2);
@@ -1862,6 +1923,258 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
                 setTimeout(() => { sharedState.frameNavigationDirection = null; }, 500);
             }
         },
+
+        // Region Creation Drag Methods
+        startRegionDrag(event) {
+            console.log('[VideoAnnotation] Starting region creation drag');
+            
+            if (!this.isCreatingRegion || !this.regionCreationStart) {
+                console.warn('[VideoAnnotation] Not in region creation mode');
+                return;
+            }
+            
+            // Prevent default behavior
+            if (event.preventDefault) event.preventDefault();
+            if (event.stopPropagation) event.stopPropagation();
+            
+            // Set drag state
+            this.isDraggingRegionCreation = true;
+            
+            // Pause video during drag
+            if (this.isPlaying && videoCore) {
+                videoCore.togglePlayPause();
+            }
+            
+            // Set up mouse/touch move listeners
+            const handleMove = (moveEvent) => {
+                this.updateRegionDrag(moveEvent);
+            };
+            
+            const handleEnd = (endEvent) => {
+                this.finishRegionDrag(endEvent);
+                document.removeEventListener('mousemove', handleMove);
+                document.removeEventListener('mouseup', handleEnd);
+                document.removeEventListener('touchmove', handleMove);
+                document.removeEventListener('touchend', handleEnd);
+            };
+            
+            // Add global listeners for mouse/touch movement
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+            document.addEventListener('touchmove', handleMove);
+            document.addEventListener('touchend', handleEnd);
+            
+            console.log('[VideoAnnotation] Region creation drag started');
+        },
+
+        updateRegionDrag(event) {
+            if (!this.isDraggingRegionCreation || !this.isCreatingRegion || !this.regionCreationStart) return;
+            
+            // Get current mouse/touch position
+            const currentX = event.clientX || event.touches?.[0]?.clientX || 0;
+            
+            // Get region bar for calculations
+            const regionBar = this.$refs.regionBar;
+            if (!regionBar) return;
+            
+            const rect = regionBar.getBoundingClientRect();
+            
+            // Calculate the current time position based on mouse X relative to region bar
+            const relativeX = currentX - rect.left;
+            const percentage = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
+            const newEndTime = (percentage / 100) * this.duration;
+            
+            // Apply constraints
+            const constrainedEndTime = Math.min(this.duration, Math.max(this.regionCreationStart.time + 0.1, newEndTime));
+            
+            // Update region end position
+            const constrainedPercentage = (constrainedEndTime / this.duration) * 100;
+            const constrainedX = (constrainedPercentage / 100) * rect.width;
+            
+            this.regionCreationEnd = {
+                x: constrainedX,
+                time: constrainedEndTime,
+                percentage: constrainedPercentage
+            };
+            
+            // Update shared state for consistency
+            sharedState.regionCreationEnd = this.regionCreationEnd;
+            
+            // Seek to the new end position for visual feedback
+            if (videoCore) {
+                videoCore.seekTo(constrainedEndTime);
+            }
+            
+            console.log('[VideoAnnotation] Region drag updated:', {
+                mouseX: currentX,
+                relativeX: relativeX,
+                newEndTime: constrainedEndTime,
+                duration: constrainedEndTime - this.regionCreationStart.time
+            });
+        },
+
+        finishRegionDrag(event) {
+            if (!this.isDraggingRegionCreation) return;
+            
+            console.log('[VideoAnnotation] Finishing region creation drag');
+            
+            // Clean up drag state
+            this.isDraggingRegionCreation = false;
+            
+            console.log('[VideoAnnotation] Region creation drag finished');
+        },
+
+        // Region Resize Methods
+        startRegionResize(event, regionId, handle) {
+            console.log('[VideoAnnotation] Starting region resize:', regionId, handle);
+            
+            if (!regionId || !handle) {
+                console.warn('[VideoAnnotation] Missing regionId or handle for resize');
+                return;
+            }
+            
+            // Prevent default behavior
+            if (event.preventDefault) event.preventDefault();
+            if (event.stopPropagation) event.stopPropagation();
+            
+            // Get the region to resize
+            const region = regionManagement ? regionManagement.sharedState.getRegion(regionId) : 
+                          sharedState.regions.find(r => r.id === regionId);
+            
+            if (!region) {
+                console.warn('[VideoAnnotation] Region not found for resize:', regionId);
+                return;
+            }
+            
+            // Set resize state
+            this.isResizingRegion = true;
+            this.resizeRegionId = regionId;
+            this.resizeHandle = handle; // 'start' or 'end'
+            this.resizeStartX = event.clientX || event.touches?.[0]?.clientX || 0;
+            this.resizeOriginalStartTime = region.startTime;
+            this.resizeOriginalEndTime = region.endTime;
+            
+            // Pause video during resize
+            if (this.isPlaying && videoCore) {
+                videoCore.togglePlayPause();
+            }
+            
+            // Set up mouse/touch move listeners
+            const handleMove = (moveEvent) => {
+                this.updateRegionResize(moveEvent);
+            };
+            
+            const handleEnd = (endEvent) => {
+                this.finishRegionResize(endEvent);
+                document.removeEventListener('mousemove', handleMove);
+                document.removeEventListener('mouseup', handleEnd);
+                document.removeEventListener('touchmove', handleMove);
+                document.removeEventListener('touchend', handleEnd);
+            };
+            
+            // Add global listeners for mouse/touch movement
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+            document.addEventListener('touchmove', handleMove);
+            document.addEventListener('touchend', handleEnd);
+            
+            console.log('[VideoAnnotation] Region resize started:', {
+                regionId,
+                handle,
+                originalStart: this.resizeOriginalStartTime,
+                originalEnd: this.resizeOriginalEndTime
+            });
+        },
+
+        updateRegionResize(event) {
+            if (!this.isResizingRegion || !this.resizeRegionId || !this.resizeHandle) return;
+            
+            // Get current mouse/touch position
+            const currentX = event.clientX || event.touches?.[0]?.clientX || 0;
+            const deltaX = currentX - this.resizeStartX;
+            
+            // Get region bar for calculations
+            const regionBar = this.$refs.regionBar;
+            if (!regionBar) return;
+            
+            const rect = regionBar.getBoundingClientRect();
+            const deltaPercentage = (deltaX / rect.width) * 100;
+            const deltaTime = (deltaPercentage / 100) * this.duration;
+            
+            // Get the region to update
+            const region = regionManagement ? regionManagement.sharedState.getRegion(this.resizeRegionId) : 
+                          sharedState.regions.find(r => r.id === this.resizeRegionId);
+            
+            if (!region) return;
+            
+            // Calculate new times based on which handle is being dragged
+            let newStartTime = this.resizeOriginalStartTime;
+            let newEndTime = this.resizeOriginalEndTime;
+            
+            if (this.resizeHandle === 'start') {
+                // Dragging the start handle
+                newStartTime = this.resizeOriginalStartTime + deltaTime;
+                
+                // Apply constraints
+                newStartTime = Math.max(0, newStartTime); // Can't go before video start
+                newStartTime = Math.min(region.endTime - 0.1, newStartTime); // Must be at least 0.1s before end
+            } else if (this.resizeHandle === 'end') {
+                // Dragging the end handle
+                newEndTime = this.resizeOriginalEndTime + deltaTime;
+                
+                // Apply constraints
+                newEndTime = Math.min(this.duration, newEndTime); // Can't go past video end
+                newEndTime = Math.max(region.startTime + 0.1, newEndTime); // Must be at least 0.1s after start
+            }
+            
+            // Update the region
+            region.startTime = newStartTime;
+            region.endTime = newEndTime;
+            
+            // Update frame numbers if available
+            if (this.getFrameNumber) {
+                region.startFrame = this.getFrameNumber(newStartTime);
+                region.endFrame = this.getFrameNumber(newEndTime);
+            }
+            
+            // Seek to the current resize position for visual feedback
+            const seekTime = this.resizeHandle === 'start' ? newStartTime : newEndTime;
+            if (videoCore) {
+                videoCore.seekTo(seekTime);
+            }
+            
+            console.log('[VideoAnnotation] Region resize updated:', {
+                handle: this.resizeHandle,
+                startTime: newStartTime,
+                endTime: newEndTime,
+                deltaTime: deltaTime
+            });
+        },
+
+        finishRegionResize(event) {
+            if (!this.isResizingRegion) return;
+            
+            console.log('[VideoAnnotation] Finishing region resize');
+            
+            // Get the final region state
+            const region = regionManagement ? regionManagement.sharedState.getRegion(this.resizeRegionId) : 
+                          sharedState.regions.find(r => r.id === this.resizeRegionId);
+            
+            if (region && regionManagement) {
+                // Notify the region management module
+                regionManagement.$dispatch('video-annotation:region-updated', { region });
+            }
+            
+            // Clean up resize state
+            this.isResizingRegion = false;
+            this.resizeRegionId = null;
+            this.resizeHandle = null;
+            this.resizeStartX = 0;
+            this.resizeOriginalStartTime = 0;
+            this.resizeOriginalEndTime = 0;
+            
+            console.log('[VideoAnnotation] Region resize finished');
+        },
         
         // Test method to verify Alpine reactivity
         testMenuToggle() {
@@ -1894,6 +2207,62 @@ export default function videoAnnotation(userConfig = null, initialComments = [])
         // Debug methods
         getSharedState() {
             return config.debug ? sharedState : null;
+        },
+        
+        debugRegions() {
+            console.log('[VideoAnnotation] Debug Regions:', {
+                regionsFromSharedState: sharedState.regions,
+                regionsLength: sharedState.regions?.length,
+                duration: this.duration,
+                sharedStateDuration: sharedState.duration,
+                hiddenRegions: Array.from(sharedState.hiddenRegions),
+                regionManagementAvailable: !!regionManagement,
+                visibleRegions: this.getVisibleRegions()
+            });
+        },
+
+        // Region interaction methods
+        showComment(regionId) {
+            console.log('[VideoAnnotation] Show comment for region:', regionId);
+            
+            // Get the region data
+            const region = sharedState.regions.find(r => r.id === regionId);
+            if (!region) {
+                console.warn('[VideoAnnotation] Region not found:', regionId);
+                return;
+            }
+            
+            // Seek to region start time
+            if (videoCore && region.startTime !== undefined) {
+                videoCore.seekTo(region.startTime);
+            }
+            
+            // Dispatch event for external handling
+            this.$dispatch('video-annotation:region-view', {
+                regionId: regionId,
+                region: region,
+                startTime: region.startTime,
+                endTime: region.endTime,
+                title: region.title,
+                description: region.description
+            });
+            
+            // Show region details in console for now (can be replaced with modal/sidebar)
+            console.log('[VideoAnnotation] Region Details:', {
+                id: region.id,
+                title: region.title,
+                description: region.description,
+                startTime: region.startTime,
+                endTime: region.endTime,
+                duration: (region.endTime - region.startTime).toFixed(2) + 's'
+            });
+            
+            // Optional: Show a temporary toast/notification
+            // This could be replaced with a proper modal or sidebar
+            if (region.title || region.description) {
+                const message = `${region.title || 'Region'}: ${region.description || 'No description'}`;
+                console.log('[VideoAnnotation] Region Info:', message);
+            }
         },
         getModuleStatus() {
             if (!config.debug) return null;
