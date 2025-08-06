@@ -51,7 +51,9 @@ export class VideoPlayerCore {
             if (qualitySourcesAttr) {
                 try {
                     this.qualitySources = JSON.parse(qualitySourcesAttr);
-                    console.log('[VideoCore] Loaded', this.qualitySources.length, 'quality sources');
+                    if (localStorage.getItem('videoAnnotationDebug') === 'true') {
+                        console.log('[VideoCore] Loaded', this.qualitySources.length, 'quality sources');
+                    }
                 } catch (e) {
                     console.warn('[VideoCore] Failed to parse quality sources:', e);
                     this.qualitySources = [];

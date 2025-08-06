@@ -80,7 +80,9 @@ export class SharedState {
         
         // Region management state
         this.regions = initialRegions || [];
-        console.log('[SharedState] Initialized with regions:', this.regions.length, this.regions);
+        if (localStorage.getItem('videoAnnotationDebug') === 'true') {
+            console.log('[SharedState] Initialized with regions:', this.regions.length, this.regions);
+        }
         this.activeRegion = null;
         this.regionCreationActive = false;
         this.regionStartTime = null;

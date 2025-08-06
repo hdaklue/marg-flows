@@ -7,6 +7,26 @@ import { SharedState } from './modules/SharedState.js';
 import { TouchInterfaceModule } from './modules/TouchInterfaceModule.js';
 import { VideoPlayerCore } from './modules/VideoPlayerCore.js';
 
+// Debug utility function
+const debug = {
+    isEnabled: () => localStorage.getItem('videoAnnotationDebug') === 'true',
+    log: (module, message, ...args) => {
+        if (debug.isEnabled()) {
+            console.log(`[${module}]`, message, ...args);
+        }
+    },
+    warn: (module, message, ...args) => {
+        if (debug.isEnabled()) {
+            console.warn(`[${module}]`, message, ...args);
+        }
+    },
+    error: (module, message, ...args) => {
+        if (debug.isEnabled()) {
+            console.error(`[${module}]`, message, ...args);
+        }
+    }
+};
+
 // Deep merge utility function
 function mergeDeep(target, source) {
     const output = Object.assign({}, target);
@@ -165,7 +185,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
 
         // Regions state
         get regions() { 
-            console.log('[VideoAnnotation] Getting regions:', sharedState.regions?.length || 0);
+            debug.log('VideoAnnotation', 'Getting regions:', sharedState.regions?.length || 0);
             return sharedState.regions; 
         },
         get activeRegion() { return sharedState.activeRegion; },
@@ -222,36 +242,36 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         
         // Test method to verify Alpine reactivity
         testMenuToggle() {
-            console.log('[VideoAnnotation] Testing menu toggle...');
-            console.log('[VideoAnnotation] Quality sources:', this.qualitySources);
-            console.log('[VideoAnnotation] Quality sources length:', this.qualitySources.length);
-            console.log('[VideoAnnotation] Current resolution:', this.currentResolution);
-            console.log('[VideoAnnotation] Config enableResolutionSelector:', this.config.features.enableResolutionSelector);
+            debug.log('VideoAnnotation', 'Testing menu toggle...');
+            debug.log('VideoAnnotation', 'Quality sources:', this.qualitySources);
+            debug.log('VideoAnnotation', 'Quality sources length:', this.qualitySources.length);
+            debug.log('VideoAnnotation', 'Current resolution:', this.currentResolution);
+            debug.log('VideoAnnotation', 'Config enableResolutionSelector:', this.config.features.enableResolutionSelector);
             this.showResolutionMenu = !this.showResolutionMenu;
-            console.log('[VideoAnnotation] showResolutionMenu is now:', this.showResolutionMenu);
+            debug.log('VideoAnnotation', 'showResolutionMenu is now:', this.showResolutionMenu);
         },
 
         // Menu control methods with debug logging
         toggleResolutionMenu() {
-            console.log('[VideoAnnotation] Toggling resolution menu, current state:', this.showResolutionMenu);
+            debug.log('VideoAnnotation', 'Toggling resolution menu, current state:', this.showResolutionMenu);
             this.showResolutionMenu = !this.showResolutionMenu;
-            console.log('[VideoAnnotation] Resolution menu is now:', this.showResolutionMenu);
+            debug.log('VideoAnnotation', 'Resolution menu is now:', this.showResolutionMenu);
         },
         
         toggleSettingsMenu() {
-            console.log('[VideoAnnotation] Toggling settings menu, current state:', this.showSettingsMenu);
+            debug.log('VideoAnnotation', 'Toggling settings menu, current state:', this.showSettingsMenu);
             this.showSettingsMenu = !this.showSettingsMenu;
-            console.log('[VideoAnnotation] Settings menu is now:', this.showSettingsMenu);
+            debug.log('VideoAnnotation', 'Settings menu is now:', this.showSettingsMenu);
         },
         
         toggleVolumeModal() {
-            console.log('[VideoAnnotation] Toggling volume modal, current state:', this.showVolumeModal);
+            debug.log('VideoAnnotation', 'Toggling volume modal, current state:', this.showVolumeModal);
             this.showVolumeModal = !this.showVolumeModal;
-            console.log('[VideoAnnotation] Volume modal is now:', this.showVolumeModal);
+            debug.log('VideoAnnotation', 'Volume modal is now:', this.showVolumeModal);
         },
         
         closeAllMenus() {
-            console.log('[VideoAnnotation] Closing all menus');
+            debug.log('VideoAnnotation', 'Closing all menus');
             this.showResolutionMenu = false;
             this.showSettingsMenu = false;
             this.showVolumeModal = false;
@@ -262,20 +282,20 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         
         // Settings methods
         toggleCommentsOnProgressBar() {
-            console.log('[VideoAnnotation] Toggling comments on progress bar');
+            debug.log('VideoAnnotation', 'Toggling comments on progress bar');
             if (sharedState) {
                 sharedState.showCommentsOnProgressBar = !sharedState.showCommentsOnProgressBar;
-                console.log('[VideoAnnotation] Show comments on progress bar:', sharedState.showCommentsOnProgressBar);
+                debug.log('VideoAnnotation', 'Show comments on progress bar:', sharedState.showCommentsOnProgressBar);
             }
         },
         
         toggleProgressBarMode() {
-            console.log('[VideoAnnotation] Toggling progress bar mode');
+            debug.log('VideoAnnotation', 'Toggling progress bar mode');
             if (sharedState) {
                 const currentMode = sharedState.progressBarMode;
                 sharedState.progressBarMode = currentMode === 'always' ? 'auto-hide' : 'always';
                 sharedState.showProgressBar = sharedState.progressBarMode === 'always';
-                console.log('[VideoAnnotation] Progress bar mode:', sharedState.progressBarMode);
+                debug.log('VideoAnnotation', 'Progress bar mode:', sharedState.progressBarMode);
             }
         },
         // Quality sources as reactive property (updated from SharedState)
@@ -451,9 +471,9 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     // Initialize VideoCore with the video element
                     if (videoElement) {
                         if (config.debug?.contextSystem) {
-                            console.log('[VideoAnnotation] Initializing VideoCore with element:', videoElement);
-                            console.log('[VideoAnnotation] Video element src:', videoElement.src || 'No src');
-                            console.log('[VideoAnnotation] Video element sources:', videoElement.querySelectorAll('source').length);
+                            debug.log('VideoAnnotation', 'Initializing VideoCore with element:', videoElement);
+                            debug.log('VideoAnnotation', 'Video element src:', videoElement.src || 'No src');
+                            debug.log('VideoAnnotation', 'Video element sources:', videoElement.querySelectorAll('source').length);
                         }
                         videoCore.init(videoElement);
                     } else {
@@ -472,8 +492,8 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     });
 
                     if (config.debug?.contextSystem) {
-                        console.log('[VideoAnnotation] Initialized with modular architecture');
-                        console.log('[VideoAnnotation] Modules:', {
+                        debug.log('VideoAnnotation', 'Initialized with modular architecture');
+                        debug.log('VideoAnnotation', 'Modules:', {
                             videoCore: !!videoCore,
                             progressBar: !!progressBar,
                             commentSystem: !!commentSystem,
@@ -613,7 +633,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 // When duration is loaded, consider video loaded
                 if (this.duration > 0) {
                     this.videoLoaded = true;
-                    console.log('[VideoAnnotation] Video loaded and ready for annotations - Duration:', this.duration, 'VideoLoaded:', this.videoLoaded);
+                    debug.log('VideoAnnotation', 'Video loaded and ready for annotations - Duration:', this.duration, 'VideoLoaded:', this.videoLoaded);
                 }
             });
             
@@ -634,7 +654,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 // Update reactive properties to force Alpine.js template updates
                 this.volume = event.detail.volume || 0;
                 this.isMuted = event.detail.isMuted || false;
-                console.log('[VideoAnnotation] Volume changed:', this.volume, 'Muted:', this.isMuted);
+                debug.log('VideoAnnotation', 'Volume changed:', this.volume, 'Muted:', this.isMuted);
             });
         },
 
@@ -663,7 +683,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             sharedState.reset();
 
             if (config.debug?.contextSystem) {
-                console.log('[VideoAnnotation] Cleaned up resources');
+                debug.log('VideoAnnotation', 'Cleaned up resources');
             }
         },
 
@@ -709,7 +729,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         
         // Resolution control methods
         changeResolution(source) {
-            console.log('[VideoAnnotation] Changing resolution to:', source);
+            debug.log('VideoAnnotation', 'Changing resolution to:', source);
             if (videoCore?.changeResolution) {
                 videoCore.changeResolution(source);
                 
@@ -1026,7 +1046,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 const content = contextDisplay.getDisplayContent();
                 // Only log when there are secondary comments to show
                 if (content.secondary) {
-                    console.log('[VideoAnnotation] Showing secondary context:', content.secondary);
+                    debug.log('VideoAnnotation', 'Showing secondary context:', content.secondary);
                 }
                 return content;
             } else {
@@ -1071,7 +1091,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     body: comment.body
                 });
                 
-                console.log('[VideoAnnotation] Flying comment shown:', comment.name);
+                debug.log('VideoAnnotation', 'Flying comment shown:', comment.name);
             }
         },
 
@@ -1085,15 +1105,15 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         startRegionCreationAtCurrentFrame() {
             // Check if viewOnly mode is enabled
             if (this.config?.mode?.viewOnly) {
-                console.log('[VideoAnnotation] Region creation disabled in viewOnly mode');
+                debug.log('VideoAnnotation', 'Region creation disabled in viewOnly mode');
                 return;
             }
             
-            console.log('[VideoAnnotation] startRegionCreationAtCurrentFrame button clicked');
-            console.log('[VideoAnnotation] regionManagement available:', !!regionManagement);
+            debug.log('VideoAnnotation', 'startRegionCreationAtCurrentFrame button clicked');
+            debug.log('VideoAnnotation', 'regionManagement available:', !!regionManagement);
             
             if (regionManagement && regionManagement.startRegionCreationAtCurrentFrame) {
-                console.log('[VideoAnnotation] Calling regionManagement.startRegionCreationAtCurrentFrame');
+                debug.log('VideoAnnotation', 'Calling regionManagement.startRegionCreationAtCurrentFrame');
                 const result = regionManagement.startRegionCreationAtCurrentFrame();
                 
                 // Ensure visual state is updated for Alpine.js reactivity
@@ -1127,7 +1147,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                         percentage: endPercentage
                     };
                     
-                    console.log('[VideoAnnotation] Set visual region state:', {
+                    debug.log('VideoAnnotation', 'Set visual region state:', {
                         isCreatingRegion: this.isCreatingRegion,
                         showRegionToolbar: this.showRegionToolbar,
                         time: frameAlignedTime,
@@ -1138,7 +1158,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 return result;
             } else {
                 // Fallback - start region creation directly
-                console.log('[VideoAnnotation] Using fallback region creation');
+                debug.log('VideoAnnotation', 'Using fallback region creation');
                 const currentTime = this.currentTime || 0;
                 const frameAlignedTime = this.roundToNearestFrame ? this.roundToNearestFrame(currentTime) : currentTime;
                 
@@ -1183,7 +1203,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                         videoCore.seekTo(frameAlignedTime);
                     }
                     
-                    console.log('[VideoAnnotation] Started region creation at frame:', frameAlignedTime);
+                    debug.log('VideoAnnotation', 'Started region creation at frame:', frameAlignedTime);
                 }
             }
         },
@@ -1298,9 +1318,9 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             this.contextMenuY = menuY;
             this.contextMenuTime = currentTime;
 
-            console.log('[VideoAnnotation] Context menu shown at time:', currentTime);
-            console.log('[VideoAnnotation] Context menu position:', menuX, menuY);
-            console.log('[VideoAnnotation] Enable context menu config:', config.annotations?.enableContextMenu);
+            debug.log('VideoAnnotation', 'Context menu shown at time:', currentTime);
+            debug.log('VideoAnnotation', 'Context menu position:', menuX, menuY);
+            debug.log('VideoAnnotation', 'Enable context menu config:', config.annotations?.enableContextMenu);
 
             // Route to touch interface if available
             if (touchInterface && touchInterface.handleVideoRightClick) {
@@ -1374,7 +1394,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         addCommentAtCurrentFrame() {
             // Check if viewOnly mode is enabled
             if (this.config?.mode?.viewOnly) {
-                console.log('[VideoAnnotation] Comment creation disabled in viewOnly mode');
+                debug.log('VideoAnnotation', 'Comment creation disabled in viewOnly mode');
                 return;
             }
             
@@ -1518,19 +1538,19 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
 
         // Region Bar Event Handlers
         startRegionCreation(event) {
-            console.log('[VideoAnnotation] startRegionCreation called with event:', event.type);
+            debug.log('VideoAnnotation', 'startRegionCreation called with event:', event.type);
             
             if (!config.features?.enableAnnotations) {
-                console.log('[VideoAnnotation] Video annotations not enabled');
-                console.log('[VideoAnnotation] config.features.enableAnnotations:', config.features?.enableAnnotations);
+                debug.log('VideoAnnotation', 'Video annotations not enabled');
+                debug.log('VideoAnnotation', 'config.features.enableAnnotations:', config.features?.enableAnnotations);
                 return;
             }
             
             // Get region bar dimensions
             const regionBar = this.$refs.regionBar;
-            console.log('[VideoAnnotation] regionBar element:', regionBar);
+            debug.log('VideoAnnotation', 'regionBar element:', regionBar);
             if (!regionBar) {
-                console.log('[VideoAnnotation] No regionBar ref found');
+                debug.log('VideoAnnotation', 'No regionBar ref found');
                 return;
             }
             
@@ -1539,7 +1559,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
             const timestamp = (percentage / 100) * this.duration;
             
-            console.log('[VideoAnnotation] Click position:', { x, percentage, timestamp });
+            debug.log('VideoAnnotation', 'Click position:', { x, percentage, timestamp });
             
             // Set region creation state
             this.isCreatingRegion = true;
@@ -1567,7 +1587,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 videoCore.seekTo(timestamp);
             }
             
-            console.log('[VideoAnnotation] Region creation started:', {
+            debug.log('VideoAnnotation', 'Region creation started:', {
                 isCreatingRegion: this.isCreatingRegion,
                 showRegionToolbar: this.showRegionToolbar,
                 regionCreationStart: this.regionCreationStart
@@ -1613,7 +1633,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 videoCore.seekTo(constrainedEndTime);
             }
             
-            console.log('[VideoAnnotation] Region updated (constrained):', {
+            debug.log('VideoAnnotation', 'Region updated (constrained):', {
                 rawTime: timestamp,
                 constrainedTime: constrainedEndTime,
                 startTime: startTime,
@@ -1628,7 +1648,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             const endTime = Math.max(this.regionCreationStart.time, this.regionCreationEnd.time);
             const duration = endTime - startTime;
             
-            console.log('[VideoAnnotation] Finishing region creation - duration:', duration);
+            debug.log('VideoAnnotation', 'Finishing region creation - duration:', duration);
             
             // If it's a single click (very small duration), create a default 2-second region
             let finalStartTime = startTime;
@@ -1649,7 +1669,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     finalStartTime = Math.max(0, finalEndTime - defaultDuration);
                 }
                 
-                console.log('[VideoAnnotation] Single click detected - creating default region:', finalStartTime, '-', finalEndTime);
+                debug.log('VideoAnnotation', 'Single click detected - creating default region:', finalStartTime, '-', finalEndTime);
             }
             
             // Only create region if there's a meaningful duration (> 0.1 seconds)
@@ -1675,7 +1695,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     });
                 }
                 
-                console.log('[VideoAnnotation] Created region:', finalStartTime, '-', finalEndTime);
+                debug.log('VideoAnnotation', 'Created region:', finalStartTime, '-', finalEndTime);
             }
             
             // Reset creation state
@@ -1699,12 +1719,12 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 regionManagement.cancelRegionCreation();
             }
             
-            console.log('[VideoAnnotation] Cancelled region creation');
+            debug.log('VideoAnnotation', 'Cancelled region creation');
         },
 
         // Alias for keyboard shortcut compatibility
         confirmRegionCreation() {
-            console.log('[VideoAnnotation] Enter key pressed - confirming region creation');
+            debug.log('VideoAnnotation', 'Enter key pressed - confirming region creation');
             this.finishRegionCreation();
         },
 
@@ -1740,7 +1760,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     videoCore.seekTo(newEndTime);
                 }
                 
-                console.log('[VideoAnnotation] Expanded region end to:', newEndTime);
+                debug.log('VideoAnnotation', 'Expanded region end to:', newEndTime);
             }
         },
 
@@ -1775,7 +1795,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     videoCore.seekTo(newEndTime);
                 }
                 
-                console.log('[VideoAnnotation] Shrunk region end to:', newEndTime);
+                debug.log('VideoAnnotation', 'Shrunk region end to:', newEndTime);
             }
         },
 
@@ -1810,7 +1830,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     videoCore.seekTo(newStartTime);
                 }
                 
-                console.log('[VideoAnnotation] Expanded region start to:', newStartTime);
+                debug.log('VideoAnnotation', 'Expanded region start to:', newStartTime);
             }
         },
 
@@ -1845,7 +1865,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                     videoCore.seekTo(newStartTime);
                 }
                 
-                console.log('[VideoAnnotation] Shrunk region start to:', newStartTime);
+                debug.log('VideoAnnotation', 'Shrunk region start to:', newStartTime);
             }
         },
 
@@ -1951,7 +1971,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
 
         // Region Creation Drag Methods
         startRegionDrag(event) {
-            console.log('[VideoAnnotation] Starting region creation drag');
+            debug.log('VideoAnnotation', 'Starting region creation drag');
             
             if (!this.isCreatingRegion || !this.regionCreationStart) {
                 console.warn('[VideoAnnotation] Not in region creation mode');
@@ -1989,7 +2009,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             document.addEventListener('touchmove', handleMove);
             document.addEventListener('touchend', handleEnd);
             
-            console.log('[VideoAnnotation] Region creation drag started');
+            debug.log('VideoAnnotation', 'Region creation drag started');
         },
 
         updateRegionDrag(event) {
@@ -2030,7 +2050,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 videoCore.seekTo(constrainedEndTime);
             }
             
-            console.log('[VideoAnnotation] Region drag updated:', {
+            debug.log('VideoAnnotation', 'Region drag updated:', {
                 mouseX: currentX,
                 relativeX: relativeX,
                 newEndTime: constrainedEndTime,
@@ -2041,17 +2061,17 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         finishRegionDrag(event) {
             if (!this.isDraggingRegionCreation) return;
             
-            console.log('[VideoAnnotation] Finishing region creation drag');
+            debug.log('VideoAnnotation', 'Finishing region creation drag');
             
             // Clean up drag state
             this.isDraggingRegionCreation = false;
             
-            console.log('[VideoAnnotation] Region creation drag finished');
+            debug.log('VideoAnnotation', 'Region creation drag finished');
         },
 
         // Region Resize Methods
         startRegionResize(event, regionId, handle) {
-            console.log('[VideoAnnotation] Starting region resize:', regionId, handle);
+            debug.log('VideoAnnotation', 'Starting region resize:', regionId, handle);
             
             if (!regionId || !handle) {
                 console.warn('[VideoAnnotation] Missing regionId or handle for resize');
@@ -2103,7 +2123,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             document.addEventListener('touchmove', handleMove);
             document.addEventListener('touchend', handleEnd);
             
-            console.log('[VideoAnnotation] Region resize started:', {
+            debug.log('VideoAnnotation', 'Region resize started:', {
                 regionId,
                 handle,
                 originalStart: this.resizeOriginalStartTime,
@@ -2168,7 +2188,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
                 videoCore.seekTo(seekTime);
             }
             
-            console.log('[VideoAnnotation] Region resize updated:', {
+            debug.log('VideoAnnotation', 'Region resize updated:', {
                 handle: this.resizeHandle,
                 startTime: newStartTime,
                 endTime: newEndTime,
@@ -2179,7 +2199,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         finishRegionResize(event) {
             if (!this.isResizingRegion) return;
             
-            console.log('[VideoAnnotation] Finishing region resize');
+            debug.log('VideoAnnotation', 'Finishing region resize');
             
             // Get the final region state
             const region = regionManagement ? regionManagement.sharedState.getRegion(this.resizeRegionId) : 
@@ -2198,7 +2218,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             this.resizeOriginalStartTime = 0;
             this.resizeOriginalEndTime = 0;
             
-            console.log('[VideoAnnotation] Region resize finished');
+            debug.log('VideoAnnotation', 'Region resize finished');
         },
         
         // Test method to verify Alpine reactivity
@@ -2210,13 +2230,13 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
 
         // Debug method to test region functionality
         testRegionBar() {
-            console.log('[VideoAnnotation] Testing region bar');
-            console.log('[VideoAnnotation] showRegionBar:', this.showRegionBar);
-            console.log('[VideoAnnotation] showRegionToolbar:', this.showRegionToolbar);
-            console.log('[VideoAnnotation] isCreatingRegion:', this.isCreatingRegion);
-            console.log('[VideoAnnotation] config.features.enableAnnotations:', config.features?.enableAnnotations);
-            console.log('[VideoAnnotation] config.annotations.enableVideoAnnotations:', config.annotations?.enableVideoAnnotations);
-            console.log('[VideoAnnotation] isTouchDevice():', this.isTouchDevice());
+            debug.log('VideoAnnotation', 'Testing region bar');
+            debug.log('VideoAnnotation', 'showRegionBar:', this.showRegionBar);
+            debug.log('VideoAnnotation', 'showRegionToolbar:', this.showRegionToolbar);
+            debug.log('VideoAnnotation', 'isCreatingRegion:', this.isCreatingRegion);
+            debug.log('VideoAnnotation', 'config.features.enableAnnotations:', config.features?.enableAnnotations);
+            debug.log('VideoAnnotation', 'config.annotations.enableVideoAnnotations:', config.annotations?.enableVideoAnnotations);
+            debug.log('VideoAnnotation', 'isTouchDevice():', this.isTouchDevice());
             
             // Force show region bar
             sharedState.showRegionBar = true;
@@ -2225,8 +2245,8 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             this.isCreatingRegion = true;
             this.showRegionToolbar = true;
             
-            console.log('[VideoAnnotation] Forced region state - isCreatingRegion:', this.isCreatingRegion);
-            console.log('[VideoAnnotation] Forced region state - showRegionToolbar:', this.showRegionToolbar);
+            debug.log('VideoAnnotation', 'Forced region state - isCreatingRegion:', this.isCreatingRegion);
+            debug.log('VideoAnnotation', 'Forced region state - showRegionToolbar:', this.showRegionToolbar);
         },
 
         // Debug methods
@@ -2235,7 +2255,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
         },
         
         debugRegions() {
-            console.log('[VideoAnnotation] Debug Regions:', {
+            debug.log('VideoAnnotation', 'Debug Regions:', {
                 regionsFromSharedState: sharedState.regions,
                 regionsLength: sharedState.regions?.length,
                 duration: this.duration,
@@ -2248,7 +2268,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
 
         // Region interaction methods
         showComment(regionId) {
-            console.log('[VideoAnnotation] Show comment for region:', regionId);
+            debug.log('VideoAnnotation', 'Show comment for region:', regionId);
             
             // Get the region data
             const region = sharedState.regions.find(r => r.id === regionId);
@@ -2273,7 +2293,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             });
             
             // Show region details in console for now (can be replaced with modal/sidebar)
-            console.log('[VideoAnnotation] Region Details:', {
+            debug.log('VideoAnnotation', 'Region Details:', {
                 id: region.id,
                 title: region.title,
                 description: region.description,
@@ -2286,7 +2306,7 @@ export default function videoAnnotation(userConfig = null, initialComments = [],
             // This could be replaced with a proper modal or sidebar
             if (region.title || region.description) {
                 const message = `${region.title || 'Region'}: ${region.description || 'No description'}`;
-                console.log('[VideoAnnotation] Region Info:', message);
+                debug.log('VideoAnnotation', 'Region Info:', message);
             }
         },
         getModuleStatus() {
