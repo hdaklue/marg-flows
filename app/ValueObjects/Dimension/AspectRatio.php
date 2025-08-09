@@ -2,15 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\ValueObjects\Image;
+namespace App\ValueObjects\Dimension;
 
 use InvalidArgumentException;
 use JsonSerializable;
 
 /**
  * Immutable value object representing image aspect ratios with resolution support.
- * 
- * @phpstan-type ResolutionData array{name: string, width: int, height: int, label: string, ratio: float}
  */
 final class AspectRatio implements JsonSerializable
 {
@@ -18,7 +16,7 @@ final class AspectRatio implements JsonSerializable
 
     /**
      * Standard aspect ratio mappings.
-     * 
+     *
      * @var array<string, float>
      */
     private static array $map = [
@@ -43,7 +41,7 @@ final class AspectRatio implements JsonSerializable
 
     /**
      * Common screen resolutions with their aspect ratios.
-     * 
+     *
      * @var array<ResolutionData>
      */
     private static array $resolutions = [
@@ -71,8 +69,6 @@ final class AspectRatio implements JsonSerializable
 
     /**
      * Cache for resolution lookups to improve performance.
-     * 
-     * @var array<string, ResolutionData>
      */
     private static array $resolutionCache = [];
 
@@ -86,7 +82,7 @@ final class AspectRatio implements JsonSerializable
         if ($this->width < 0 || $this->height < 0) {
             throw new InvalidArgumentException('Width and height cannot be negative.');
         }
-        
+
         if ($this->ratio <= 0) {
             throw new InvalidArgumentException('Ratio must be positive.');
         }
@@ -108,6 +104,7 @@ final class AspectRatio implements JsonSerializable
         // Check resolution cache first
         if (isset(self::$resolutionCache[$cacheKey])) {
             $res = self::$resolutionCache[$cacheKey];
+
             return new self($res['label'], $res['ratio'], $res['name'], $intWidth, $intHeight);
         }
 
@@ -115,6 +112,7 @@ final class AspectRatio implements JsonSerializable
         foreach (self::$resolutions as $res) {
             if ($res['width'] === $intWidth && $res['height'] === $intHeight) {
                 self::$resolutionCache[$cacheKey] = $res;
+
                 return new self($res['label'], $res['ratio'], $res['name'], $intWidth, $intHeight);
             }
         }
@@ -130,19 +128,19 @@ final class AspectRatio implements JsonSerializable
 
         return null;
     }
-    
+
     /**
      * Create an AspectRatio instance from a ratio string (e.g., "16:9").
      */
     public static function fromString(string $ratioString): ?self
     {
-        if (!isset(self::$map[$ratioString])) {
+        if (! isset(self::$map[$ratioString])) {
             return null;
         }
 
         return new self($ratioString, self::$map[$ratioString]);
     }
-    
+
     /**
      * Create an AspectRatio instance from a decimal ratio value.
      */
@@ -195,29 +193,21 @@ final class AspectRatio implements JsonSerializable
     {
         return $this->width >= $this->height;
     }
-    
+
     public function isSquare(): bool
     {
         return $this->width === $this->height;
     }
-    
+
     /**
      * Check if this aspect ratio equals another.
      */
     public function equals(self $other): bool
     {
-        return $this->label === $other->label && 
+        return $this->label === $other->label &&
                abs($this->ratio - $other->ratio) < 1e-10;
     }
-    
-    /**
-     * Get string representation of the aspect ratio.
-     */
-    public function __toString(): string
-    {
-        return $this->label;
-    }
-    
+
     /**
      * Calculate scaled dimensions maintaining aspect ratio.
      */
@@ -228,7 +218,7 @@ final class AspectRatio implements JsonSerializable
         }
 
         $targetRatio = $targetWidth / $targetHeight;
-        
+
         if ($this->ratio > $targetRatio) {
             // Constrained by width
             $scaledWidth = $targetWidth;
@@ -238,7 +228,7 @@ final class AspectRatio implements JsonSerializable
             $scaledHeight = $targetHeight;
             $scaledWidth = (int) round($targetHeight * $this->ratio);
         }
-        
+
         return [
             'width' => $scaledWidth,
             'height' => $scaledHeight,
@@ -247,7 +237,7 @@ final class AspectRatio implements JsonSerializable
 
     /**
      * Convert to array representation.
-     * 
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array
@@ -269,7 +259,7 @@ final class AspectRatio implements JsonSerializable
     {
         return $this->toArray();
     }
-    
+
     /**
      * Get the orientation as a string.
      */
@@ -278,7 +268,15 @@ final class AspectRatio implements JsonSerializable
         if ($this->isSquare()) {
             return 'square';
         }
-        
+
         return $this->isPortrait() ? 'portrait' : 'landscape';
+    }
+
+    /**
+     * Get string representation of the aspect ratio.
+     */
+    public function __toString(): string
+    {
+        return $this->label;
     }
 }

@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -158,6 +159,26 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    public function deliverables(): HasMany
+    {
+        return $this->hasMany(Deliverable::class);
+    }
+
+    public function activeDeliverables(): HasMany
+    {
+        return $this->deliverables()->active();
+    }
+
+    public function completedDeliverables(): HasMany
+    {
+        return $this->deliverables()->where('status', 'completed');
+    }
+
+    public function overdueDeliverables(): HasMany
+    {
+        return $this->deliverables()->overdue();
+    }
+
     #[Scope]
     public function assignable(Builder $builder)
     {
@@ -215,6 +236,55 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     //         ->byStatus(FlowStatus::from($this->status))
     //         ->byTenant($this->tenant);
     // }
+
+    // Deliverable Helper Methods
+    public function getDeliverablesCount(): int
+    {
+        return $this->deliverables()->count();
+    }
+
+    public function getActiveDeliverablesCount(): int
+    {
+        return $this->activeDeliverables()->count();
+    }
+
+    public function getCompletedDeliverablesCount(): int
+    {
+        return $this->completedDeliverables()->count();
+    }
+
+    public function getOverdueDeliverablesCount(): int
+    {
+        return $this->overdueDeliverables()->count();
+    }
+
+    public function getDeliverablesProgress(): float
+    {
+        $total = $this->getDeliverablesCount();
+        
+        if ($total === 0) {
+            return 0.0;
+        }
+
+        $completed = $this->getCompletedDeliverablesCount();
+        return round(($completed / $total) * 100, 1);
+    }
+
+    public function hasOverdueDeliverables(): bool
+    {
+        return $this->getOverdueDeliverablesCount() > 0;
+    }
+
+    public function hasActiveDeliverables(): bool
+    {
+        return $this->getActiveDeliverablesCount() > 0;
+    }
+
+    public function canBeCompleted(): bool
+    {
+        // Flow can only be completed if all deliverables are completed
+        return $this->getActiveDeliverablesCount() === 0;
+    }
 
     protected function casts(): array
     {

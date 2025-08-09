@@ -40,6 +40,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         isSticky: false,
         cachedTopbarHeight: 80,
         editorReady: false,
+        isInitializing: false,
 
         // Event listener references for cleanup
         editorBusyHandler: null,
@@ -77,15 +78,14 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
 
         init() {
-
             // Initialize timing from current state - both start the same
             try {
-                const parsedState = JSON.parse(this.state);
-                const initialStateTime = parsedState.time;
+                const normalizedState = this.normalizeState(this.state);
+                const initialStateTime = normalizedState.time;
                 this.lastSavedTime = initialStateTime;
                 this.currentEditorTime = initialStateTime;
             } catch (e) {
-                console.error('Failed to parse initial state:', e.message);
+                console.error('Failed to parse initial state:', e.message, 'State:', this.state);
                 const now = Date.now();
                 this.lastSavedTime = now;
                 this.currentEditorTime = now;
@@ -122,16 +122,20 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             };
 
             this.editorFreeHandler = () => {
+                const wasBusy = this.isEditorBusy;
                 this.isEditorBusy = false;
+                console.log('Editor free event received - wasBusy:', wasBusy, 'isDirty:', this.isDirty, 'isSaving:', this.isSaving);
 
-                // Safety save after editor operations complete, then restart autosave timer
-                if (this.isDirty && this.saveCallback && !this.isSaving) {
+                // If editor was busy (plugin operation), force a save to persist plugin changes
+                // Otherwise, only save if the editor is actually dirty
+                if (wasBusy && this.saveCallback && !this.isSaving) {
+                    console.log('Editor free - forcing save after plugin operation');
+                    this.saveDocument();
+                } else if (this.isDirty && this.saveCallback && !this.isSaving) {
+                    console.log('Editor free - triggering save due to dirty state');
                     this.saveDocument();
                 } else {
-                    // Extra safety save to ensure state is persisted
-                    if (this.saveCallback && !this.isSaving) {
-                        this.saveDocument();
-                    }
+                    console.log('Editor free - no save needed, restarting autosave');
                     this.startAutosave();
                 }
             };
@@ -145,8 +149,9 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             const initialData = this.normalizeState(this.state);
 
-            // Track editor readiness
+            // Track editor readiness and initialization state
             this.editorReady = false;
+            this.isInitializing = true;
 
             this.editor = new EditorJS({
                 holder: 'editor-wrap',
@@ -158,24 +163,35 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 tools: this.getEditorTools(csrf, uploadUrl),
                 onChange: (api, event) => {
                     // Defensive check - ensure editor exists and is ready
-                    if (!this.editor || !this.editorReady) {
+                    if (!this.editor || !this.editorReady || this.isInitializing) {
+                        console.log('Editor onChange fired but editor not ready yet, ignoring');
                         return;
                     }
+
+                    // Skip onChange during plugin operations (like image uploads)
+                    if (this.isEditorBusy) {
+                        console.log('Editor onChange fired during plugin operation, ignoring');
+                        return;
+                    }
+
+                    console.log('Editor onChange triggered');
 
                     // Update state immediately without calling save()
                     clearTimeout(this.debounceTimer);
                     this.debounceTimer = setTimeout(() => {
-                        // Double-check editor still exists
-                        if (!this.editor) {
+                        // Double-check editor still exists and is not busy
+                        if (!this.editor || this.isInitializing || this.isEditorBusy) {
                             return;
                         }
 
                         // Only update currentEditorTime if we didn't just save
                         if (!this.justSaved) {
                             this.currentEditorTime = Date.now();
+                            console.log('Editor onChange - Updated currentEditorTime:', this.currentEditorTime);
                         } else {
                             // Reset the flag after skipping the update
                             this.justSaved = false;
+                            console.log('Editor onChange - Skipped update due to justSaved flag');
                         }
 
                         this.saveStatus = null; // Reset status on change
@@ -204,8 +220,14 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         const undo = new Undo({ editor: this.editor });
                         new DragDrop(this.editor);
                         undo.initialize(initialData);
+
+                        // Set initialization complete after a short delay to ensure all initial rendering is done
+                        setTimeout(() => {
+                            this.isInitializing = false;
+                        }, 100);
                     }).catch((e) => {
                         console.error('Editor.js failed to initialize:', e);
+                        this.isInitializing = false; // Ensure we don't get stuck in initializing state
                     });
                 }
             });
@@ -334,18 +356,39 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
         normalizeState(state) {
             try {
-                const parsed = typeof state === 'string' ? JSON.parse(state) : state;
+                // Handle different input formats
+                let parsed;
+                if (typeof state === 'string') {
+                    parsed = JSON.parse(state);
+                } else if (typeof state === 'object' && state !== null) {
+                    parsed = state;
+                } else {
+                    throw new Error('Invalid state format');
+                }
 
+                // If we have valid blocks array, return normalized state
                 if (parsed && Array.isArray(parsed.blocks)) {
                     return {
-                        ...parsed,
-                        blocks: [...parsed.blocks] // Shallow clone sufficient
+                        time: parsed.time || Date.now(),
+                        blocks: [...parsed.blocks], // Shallow clone sufficient
+                        version: parsed.version || '2.31.0-rc.7'
                     };
                 }
+
+                // If we have blocks but no time, add time
+                if (parsed && parsed.blocks && !parsed.time) {
+                    return {
+                        ...parsed,
+                        time: Date.now(),
+                        version: parsed.version || '2.31.0-rc.7'
+                    };
+                }
+
             } catch (e) {
-                console.warn('Invalid EditorJS state', e);
+                console.warn('Invalid EditorJS state', e, 'State:', state);
             }
 
+            // Fallback to empty state
             return {
                 time: Date.now(),
                 blocks: [],
@@ -521,6 +564,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         },
 
         destroy() {
+            // Reset initialization state
+            this.isInitializing = false;
+            this.editorReady = false;
+            
             // Cleanup timers
             if (this.autosaveTimer) {
                 clearInterval(this.autosaveTimer);

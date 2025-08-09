@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Document;
 
+use App\DTOs\EditorJS\EditorJSDocumentDto;
+use App\DTOs\Document\DocumentWithBlocksDto;
+use App\Facades\DocumentManager;
 use App\Models\Document;
 use Exception;
 use Illuminate\Support\Collection;
@@ -20,24 +23,26 @@ final class DocumentComponent extends Component
 {
     public $canEdit = true;
 
-    public Document $page;
+    public DocumentWithBlocksDto $page;
 
     public string $content;
 
     public function mount(string $pageId, $canEdit = true)
     {
+        // Get the document model for authorization
+        $document = DocumentManager::getDocument($pageId);
+        $this->authorize('view', $document);
 
-        $this->page = Document::where('id', $pageId)->firstOrFail();
-        $this->content = is_array($this->page->blocks)
-            ? json_encode($this->page->blocks)
-            : $this->page->blocks;
+        // Get the DTO with blocks for editing
+        $this->page = DocumentManager::getDocumentWithBlocks($pageId);
+        $this->content = $this->page->getBlocksJson();
         $this->canEdit = $canEdit;
     }
 
     #[Computed]
     public function updatedAtString(): string
     {
-        return $this->page->updated_at->diffForHumans();
+        return $this->page->getUpdatedAtString();
     }
 
     public function getUpdatedAtString(): string
@@ -76,16 +81,19 @@ final class DocumentComponent extends Component
 
     public function saveDocument(string $content)
     {
-        $this->authorize('update', $this->page);
+        // Get the underlying Document model for authorization and updates
+        $document = DocumentManager::getDocument($this->page->id);
+        $this->authorize('update', $document);
 
         try {
             // Parse the JSON content
-            $blocks = json_decode($content, true);
+            $editorData = json_decode($content, true);
 
-            // Update the page (JSON cast handles the conversion)
-            $this->page->update(['blocks' => $blocks]);
+            // Use DocumentManager to update the document
+            DocumentManager::update($document, ['blocks' => $editorData]);
 
-            // Update local content
+            // Update the DTO with new content
+            $this->page->updateBlocksFromJson($content);
             $this->content = $content;
 
             unset($this->updatedAtString);

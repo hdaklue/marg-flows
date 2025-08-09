@@ -14,9 +14,9 @@
             @js($getEditable()),
         )">
 
-        <div id="editor-wrap" class="mx-auto max-w-6xl"></div>
+        <div id="editor-wrap" class="max-w-6xl mx-auto"></div>
     </div>
 
-    @vite(['resources/css/components/editorjs/index.css', 'resources/css/components/editorjs/resizable-image.css', 'resources/css/components/editorjs/video-embed.css'])
+    @vite(['resources/css/components/editorjs/index.css', 'resources/css/components/editorjs/resizable-image.css'])
 
 </x-dynamic-component>

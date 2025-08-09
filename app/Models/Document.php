@@ -26,7 +26,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property string $id
  * @property string $name
- * @property string|array<array-key, mixed> $blocks
+ * @property EditorJSDocumentDto|null $blocks
  * @property string $creator_id
  * @property string $tenant_id
  * @property string $documentable_type

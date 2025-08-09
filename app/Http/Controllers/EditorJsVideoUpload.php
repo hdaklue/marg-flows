@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\ValueObjects\Image\AspectRatio;
+use App\ValueObjects\Dimension\AspectRatio;
 use Exception;
 use FFMpeg\Format\Video\X264;
 use Illuminate\Http\JsonResponse;
@@ -522,7 +522,7 @@ final class EditorJsVideoUpload extends Controller
 
         $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         $allowedExtensions = config('video-upload.validation.allowed_mimes', [
-            'mp4', 'webm', 'ogg'
+            'mp4', 'webm', 'ogg',
         ]);
 
         return in_array($extension, $allowedExtensions);
@@ -568,7 +568,7 @@ final class EditorJsVideoUpload extends Controller
         } else {
             // For chunked uploads, validate the fileName extension and chunk size
             $fileName = $request->input('fileName', '');
-            if (!$this->isValidVideoFileName($fileName)) {
+            if (! $this->isValidVideoFileName($fileName)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid video file format. Supported formats: MP4, WebM, OGG',

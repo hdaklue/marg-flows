@@ -59,19 +59,19 @@ final class SingleParticipantDto extends SimpleDTO
         return $this->role_id;
     }
 
-    protected function rules(): array
-    {
-        return [
-            'participant_id' => ['required', 'string'],
-            'participant_name' => ['required', 'string'],
-            'participant_email' => ['required', 'email'],
-            'participant_avatar' => ['nullable', 'string'],
-            'role_id' => ['required', 'string'],
-            'role_name' => ['required', 'string'],
-            'role_label' => ['required', 'string'],
-            'role_description' => ['required', 'string'],
-        ];
-    }
+    // protected function rules(): array
+    // {
+    //     return [
+    //         'participant_id' => ['required', 'string'],
+    //         'participant_name' => ['required', 'string'],
+    //         'participant_email' => ['required', 'email'],
+    //         'participant_avatar' => ['nullable', 'string'],
+    //         'role_id' => ['required', 'string'],
+    //         'role_name' => ['required', 'string'],
+    //         'role_label' => ['required', 'string'],
+    //         'role_description' => ['required', 'string'],
+    //     ];
+    // }
 
     protected function defaults(): array
     {

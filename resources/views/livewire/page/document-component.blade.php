@@ -1,5 +1,5 @@
 <div x-load x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('documentEditor') }}"
-    x-data="documentEditor($wire.content, '{{ route('uploader') }}', @js($canEdit), $wire.saveDocument, 25, '{{ $this->page->updated_at->toISOString() }}')" class="w-full">
+    x-data="documentEditor(@js($content), '{{ route('uploader') }}', @js($canEdit), $wire.saveDocument, 25, '{{ $this->page->updated_at->toISOString() }}')" class="w-full">
     <!-- Intersection Observer Target -->
     <div x-intersect:leave.margin.-80px="isSticky = true" x-intersect:enter.margin.-80px="isSticky = false" class="h-4">
     </div>

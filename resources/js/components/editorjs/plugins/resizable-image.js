@@ -525,9 +525,14 @@ class ResizableImage {
     }
 
     notifyEditorChange() {
+        console.log('ResizableImage - upload completed, triggering save to persist image data');
+        
+        // Use the standard EditorJS change notification
         if (this.blockAPI && this.blockAPI.dispatchChange) {
             this.blockAPI.dispatchChange();
         }
+        
+        // Signal that plugin operations are complete
         setTimeout(() => {
             document.dispatchEvent(new CustomEvent('editor:free'));
         }, 0);

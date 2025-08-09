@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Contracts\Document\DocumentManagerInterface;
+use App\Facades\DeliverableBuilder;
 use App\Listeners\TenantEventSubscriber;
 use App\Models\Document;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\Deliverable\DeliverablesManager;
 use App\Services\Document\DocumentService;
 use App\Services\Flow\TimeProgressService;
 use App\Services\MentionService;
@@ -39,6 +41,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
         $this->app->singleton('document.manager', fn (): DocumentService => new DocumentService);
         $this->app->singleton('mention.service', fn (): MentionService => new MentionService);
+        $this->app->singleton(DeliverableBuilder::class, fn (): DeliverablesManager => new DeliverablesManager($this->app));
         $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
 
         $this->configureGate();
