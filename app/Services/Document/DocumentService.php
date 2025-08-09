@@ -9,6 +9,8 @@ use App\Contracts\Document\DocumentManagerInterface;
 use App\Contracts\Role\AssignableEntity;
 use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
+use App\DTOs\Document\DocumentWithBlocksDto;
+use App\Enums\Role\RoleEnum;
 use App\Facades\RoleManager;
 use App\Models\Document;
 use App\Models\User;
@@ -29,19 +31,20 @@ final class DocumentService implements DocumentManagerInterface
      */
     public function create(CreateDocumentDto $data, Documentable $documentable, User $creator): Document
     {
-        $page = new Document([
+        $document = new Document([
             'name' => $data->name,
             'blocks' => $data->toEditorJSFormat(),
         ]);
 
         assert($documentable instanceof Model);
-        $page->documentable()->associate($documentable);
-        $page->creator()->associate($creator);
-        $page->save();
+        $document->documentable()->associate($documentable);
+        $document->creator()->associate($creator);
+        $document->save();
+        $document->addParticipant($creator, RoleEnum::ADMIN);
 
         $this->clearCache($documentable);
 
-        return $page;
+        return $document;
     }
 
     /**
@@ -137,11 +140,8 @@ final class DocumentService implements DocumentManagerInterface
 
     public function getDocument(string $documentId): ?Document
     {
-        $page = Document::with(['creator', 'documentable'])->find($documentId);
-
-        if (! $page) {
-            return null;
-        }
+        $page = Document::where('id', $documentId)
+            ->with(['creator', 'documentable'])->firstOrFail();
 
         if (config('document.should_cache', true)) {
             $cacheKey = $this->generateDocumentCacheKey($page);
@@ -150,6 +150,16 @@ final class DocumentService implements DocumentManagerInterface
         }
 
         return $page;
+    }
+
+    /**
+     * Get document with full blocks data as DTO for editing
+     */
+    public function getDocumentWithBlocks(string $documentId): DocumentWithBlocksDto
+    {
+        $document = $this->getDocument($documentId);
+        
+        return DocumentWithBlocksDto::fromDocument($document);
     }
 
     public function getDocumentsByCreator(User $creator): Collection

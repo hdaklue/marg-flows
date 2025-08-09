@@ -34,7 +34,7 @@ Route::get('invitation/accept/{token}', AcceptInvitation::class)
 
 Route::post('uploader/editorjs', EditorJsUpload::class)
     ->middleware(['auth'])
-    ->name('uploader');
+    ->name('editorjs.uploade-image');
 Route::delete('delete-image', EditorJsImageDelete::class)
     ->middleware(['auth'])
     ->name('editorjs.delete-image');
