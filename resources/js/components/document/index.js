@@ -14,7 +14,7 @@ import VideoUpload from '../editorjs/plugins/video-upload';
 import { VIDEO_VALIDATION_CONFIG } from '../editorjs/video-validation.js';
 
 
-export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null, toolsConfig = null) {
+export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null, toolsConfig = null, allowedTools = null) {
     return {
         editor: null,
         state: livewireState,
@@ -243,7 +243,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         getEditorTools(csrf, uploadUrl) {
             // If toolsConfig is provided, use it to build the tools dynamically
             if (toolsConfig && typeof toolsConfig === 'object') {
-                return this.buildToolsFromConfig(toolsConfig, csrf, uploadUrl);
+                return this.buildToolsFromConfig(toolsConfig, csrf, uploadUrl, allowedTools);
             }
 
             // Fallback to hardcoded tools for backward compatibility
@@ -365,10 +365,11 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             };
         },
 
-        buildToolsFromConfig(toolsConfig, csrf, uploadUrl) {
+        buildToolsFromConfig(toolsConfig, csrf, uploadUrl, allowedTools = null) {
             const tools = {};
             
             console.log('Building tools from config:', toolsConfig);
+            console.log('Allowed tools for toolbox:', allowedTools);
             
             // Class name mapping from PHP to JavaScript imports
             const classMap = {
@@ -398,6 +399,13 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     class: jsClass,
                     config: { ...toolConfig.config }
                 };
+
+                // Plan-based toolbox filtering: hide tool from toolbox if not in allowed list
+                // but keep it available for rendering existing blocks
+                if (allowedTools && !allowedTools.includes(toolName)) {
+                    tool.toolbox = false; // Hide from toolbox but keep for rendering
+                    console.log(`Tool ${toolName} hidden from toolbox (not in allowed tools for current plan)`);
+                }
                 
                 console.log(`Built tool config for ${toolName}:`, tool);
 
@@ -556,7 +564,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             this.startAutosave();
         },
 
-        async saveDocument(isSync = false) {
+        async saveDocument() {
             if (!this.saveCallback || this.isSaving || !this.editorReady || !this.editor) return;
 
             // Check if document is empty

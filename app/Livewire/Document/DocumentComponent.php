@@ -26,7 +26,7 @@ final class DocumentComponent extends Component
 
     public array $content;
 
-    public string $userPlan = 'advanced'; // Default plan
+    public string $userPlan = 'simple'; // Default plan - testing restrictions
 
     public function mount(string $pageId, $canEdit = true)
     {
@@ -46,7 +46,28 @@ final class DocumentComponent extends Component
         return match ($this->userPlan) {
             'simple' => DocumentBuilder::simple()->build(),
             'advanced' => DocumentBuilder::advanced()->build(),
+            'base' => DocumentBuilder::base()->build(),
+            default => throw new Exception('Unable to resolve user plan'),
         };
+    }
+
+    /**
+     * Get full tools config for rendering all existing blocks regardless of plan.
+     * This ensures backward compatibility with blocks created on higher plans.
+     */
+    public function getFullToolsConfig()
+    {
+        // Always return the base configuration which includes all available tools
+        // This ensures all existing blocks can be rendered properly
+        return DocumentBuilder::base()->build();
+    }
+
+    /**
+     * Get allowed tools for current plan - used to filter toolbox display.
+     */
+    public function getAllowedTools()
+    {
+        return array_keys($this->getToolsConfig());
     }
 
     #[Computed]
