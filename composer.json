@@ -11,13 +11,12 @@
     "require": {
         "php": "^8.3",
         "bumpcore/editor.php": "^1.2",
-        "filament/filament": "^3.3",
+        "filament/filament": "^4.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.1.1",
         "livewire/volt": "^1.7.0",
         "lorisleiva/laravel-actions": "^2.9",
-        "mokhosh/filament-kanban": "^2.10",
         "pbmedia/laravel-ffmpeg": "^8.7",
         "predis/predis": "^3.0",
         "rinvex/countries": "^9.0",
@@ -107,6 +106,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true
 }

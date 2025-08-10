@@ -1,7 +1,16 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
+@plugin "@tailwindcss/typography";
+@source '../../../../app/Filament';
+@source '../../../../resources/views/filament';
+@source '../../../views/';
 
-@config 'tailwind.config.js';
 
+@theme{
+     --text-2xs:0.625rem;
+     --text-2xs--line-height:0.75rem;
+     --text-3xs: 0.5rem;
+     --text-3xs-line-height: 0.625rem;
+}
 
 .draggable-item {
     @apply border border-gray-500 shadow-md;

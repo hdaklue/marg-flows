@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications\Participant;
 
+use Filament\Actions\Action;
 use App\Contracts\HasStaticType;
 use App\Contracts\Role\RoleableEntity;
 use App\Filament\Pages\FlowsKanabanBoard;
@@ -11,7 +12,6 @@ use App\Filament\Resources\FlowResource;
 use App\Models\Flow;
 use App\Models\Tenant;
 use Exception;
-use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 
 use function get_class;

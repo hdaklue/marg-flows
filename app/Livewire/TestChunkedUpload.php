@@ -2,16 +2,16 @@
 
 namespace App\Livewire;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use App\Forms\Components\ChunkedFileUpload;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Livewire\Component;
 
 /**
- * @property-read Form $form
+ * @property-read Schema $form
  */
 class TestChunkedUpload extends Component implements HasForms
 {
@@ -24,10 +24,10 @@ class TestChunkedUpload extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Test Chunked Upload')
                     ->description('Upload files using chunked upload for large files')
                     ->schema([

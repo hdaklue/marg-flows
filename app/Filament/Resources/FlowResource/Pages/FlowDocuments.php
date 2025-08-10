@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\FlowResource\Pages;
 
+use Filament\Support\Enums\Width;
+use Filament\Support\Enums\Size;
+use Filament\Schemas\Schema;
 use App\Facades\DocumentManager;
 use App\Filament\Resources\FlowResource;
 use App\Forms\Components\EditorJs;
@@ -12,16 +15,14 @@ use App\Models\Flow;
 use Filament\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
-use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Locked;
 
 /**
- * @property-read Form $form
+ * @property-read Schema $form
  * @property-read Flow $flow
  */
 final class FlowDocuments extends Page implements HasForms
@@ -30,12 +31,12 @@ final class FlowDocuments extends Page implements HasForms
 
     protected static string $resource = FlowResource::class;
 
-    protected static string $view = 'filament.resources.flow-resource.pages.flow-documents';
+    protected string $view = 'filament.resources.flow-resource.pages.flow-documents';
 
     #[Locked]
     public Flow $flow;
 
-    protected ?string $maxContentWidth = 'full';
+    protected Width|string|null $maxContentWidth = 'full';
 
     public function mount(string $record)
     {
@@ -61,7 +62,7 @@ final class FlowDocuments extends Page implements HasForms
                 ->outlined()
                 ->color('primary')
                 ->icon('heroicon-o-document-plus')
-                ->size(ActionSize::ExtraSmall),
+                ->size(Size::ExtraSmall),
         ];
     }
 

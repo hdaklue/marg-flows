@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\DocumentResource\Pages;
 
+use Filament\Support\Enums\Width;
+use Filament\Schemas\Schema;
 use App\Facades\DocumentManager;
 use App\Filament\Resources\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
@@ -21,11 +22,11 @@ final class ViewDocument extends ViewRecord
 {
     protected static string $resource = DocumentResource::class;
 
-    protected static string $view = 'filament.resources.document-resource.pages.view';
+    protected string $view = 'filament.resources.document-resource.pages.view';
 
     public ?array $data = [];
 
-    public ?string $maxContentWidth = 'full';
+    public Width|string|null $maxContentWidth = 'full';
 
     public function getTitle(): string|Htmlable
     {
@@ -53,10 +54,10 @@ final class ViewDocument extends ViewRecord
         return DocumentManager::getDocumentsForUser($documentable, filamentUser())->reject(fn ($doc) => $doc->getKey() === $this->record->getKey() && $doc->getMorphClass() === $this->record->getMorphClass());
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 PlaceholderInput::make('title')
                     ->editable($this->canEdit)
                     ->required()

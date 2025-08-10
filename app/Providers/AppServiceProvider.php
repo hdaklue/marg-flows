@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Filament\Support\Enums\Size;
 use App\Contracts\Document\DocumentManagerInterface;
 use App\Facades\DeliverableBuilder;
 use App\Listeners\TenantEventSubscriber;
@@ -20,7 +21,6 @@ use Filament\Actions\Action;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
-use Filament\Support\Enums\ActionSize;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
@@ -55,7 +55,7 @@ final class AppServiceProvider extends ServiceProvider
 
         Action::configureUsing(function (Action $action): void {
 
-            $action->size(ActionSize::ExtraSmall);
+            $action->size(Size::ExtraSmall);
         });
     }
 

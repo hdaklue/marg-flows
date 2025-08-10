@@ -21,7 +21,7 @@ final class ViewFlow extends ViewRecord
 
     protected static string $resource = FlowResource::class;
 
-    protected static string $view = 'filament.resources.flow-resource.pages.view-flow';
+    protected string $view = 'filament.resources.flow-resource.pages.view-flow';
 
     public $todos = [
         ['id' => '1', 'title' => 'Design user interface', 'status' => 'todo'],

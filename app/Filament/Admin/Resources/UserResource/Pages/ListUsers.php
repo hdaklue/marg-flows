@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\UserResource\Pages;
 
+use Filament\Actions\CreateAction;
+use Filament\Schemas\Components\Utilities\Get;
 use App\Actions\Invitation\InviteMember;
 use App\DTOs\Invitation\InvitationDTO;
 use App\Filament\Admin\Resources\UserResource;
@@ -15,7 +17,6 @@ use Filament\Actions;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Log;
@@ -27,13 +28,13 @@ class ListUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->label('Invite Member')
                 ->modal()
                 ->modalAutofocus()
                 ->modalHeading('Invite new member')
                 ->createAnother(false)
-                ->form([
+                ->schema([
                     TextInput::make('name')
                         ->required(),
                     TextInput::make('email')

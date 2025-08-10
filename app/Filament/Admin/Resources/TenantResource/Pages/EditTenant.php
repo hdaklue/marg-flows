@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\TenantResource\Pages;
 
+use Filament\Schemas\Schema;
 use App\Filament\Admin\Resources\TenantResource;
 use Filament\Actions;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTenant extends EditRecord
 {
     protected static string $resource = TenantResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required(),
             ]);

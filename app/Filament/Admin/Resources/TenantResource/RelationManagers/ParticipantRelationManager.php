@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\TenantResource\RelationManagers;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\AttachAction;
+use Filament\Support\Enums\Width;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
 use App\Actions\Tenant\AddMember;
 use App\Actions\Tenant\RemoveMember;
 use App\Enums\Role\RoleEnum;
@@ -11,10 +16,8 @@ use App\Filament\Admin\Resources\TenantResource;
 use App\Models\Tenant;
 use App\Models\User;
 use Exception;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -24,10 +27,10 @@ final class ParticipantRelationManager extends RelationManager
 {
     protected static string $relationship = 'participants';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
 
             ]);
     }
@@ -50,12 +53,12 @@ final class ParticipantRelationManager extends RelationManager
             ->headerActions([
                 // @php-stan-ignore-next
                 // Tables\Actions\CreateAction::make(),
-                Tables\Actions\AttachAction::make()
-                    ->modalWidth(MaxWidth::SixExtraLarge)
+                AttachAction::make()
+                    ->modalWidth(Width::SixExtraLarge)
                     ->attachAnother(false)
                     ->label('Add Member')
                     ->icon('heroicon-s-user-plus')
-                    ->form(function (RelationManager $livewire) {
+                    ->schema(function (RelationManager $livewire) {
                         /** @var Tenant */
                         $record = $livewire->getOwnerRecord();
                         TenantResource::getAddMemberSchema($record);
@@ -78,9 +81,9 @@ final class ParticipantRelationManager extends RelationManager
                         }
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
-                Tables\Actions\DetachAction::make()
+                DetachAction::make()
                     ->modalContent(new HtmlString('<span class="text-sm text-gray-300 dark:text-gray-500">CAUTION: this will remove user from all flows and tasks related to this Team</span>'))
                     ->label('Remove')
                     ->action(fn (RelationManager $livewire, $record) => RemoveMember::run($livewire->getOwnerRecord(),
@@ -90,8 +93,8 @@ final class ParticipantRelationManager extends RelationManager
                 // ->after(fn (RelationManager $livewire, $record) => $livewire->getOwnerRecord()->removeParticipant($record)),
                 // Tables\Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\DetachBulkAction::make(),
+            ->toolbarActions([
+                DetachBulkAction::make(),
                 // Tables\Actions\BulkActionGroup::make([
 
                 //     // Tables\Actions\DeleteBulkAction::make(),

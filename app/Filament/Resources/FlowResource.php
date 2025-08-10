@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use Filament\Support\Enums\Size;
+use Filament\Actions\Action;
+use App\Filament\Resources\FlowResource\Pages\ListFlows;
+use App\Filament\Resources\FlowResource\Pages\CreateFlow;
+use App\Filament\Resources\FlowResource\Pages\ViewFlow;
 use App\Enums\FlowStage;
 use App\Filament\Resources\FlowResource\Pages;
 use App\Filament\Resources\FlowResource\Pages\CreateDocument;
@@ -11,12 +16,11 @@ use App\Filament\Resources\FlowResource\Pages\FlowDocuments;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
 use App\Tables\Columns\Progress;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -32,7 +36,7 @@ final class FlowResource extends Resource
 
     protected static ?string $slug = 'f';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function table(Table $table): Table
     {
@@ -89,18 +93,18 @@ final class FlowResource extends Resource
                 SelectFilter::make('status')
                     ->options(FlowStage::class),
             ], FiltersLayout::AboveContentCollapsible)
-            ->actions([
-                Tables\Actions\EditAction::make()
-                    ->size(ActionSize::ExtraSmall),
+            ->recordActions([
+                EditAction::make()
+                    ->size(Size::ExtraSmall),
                 Action::make('view')
                     ->label('Pages')
                     ->color('gray')
-                    ->size(ActionSize::ExtraSmall)
+                    ->size(Size::ExtraSmall)
                     ->icon('heroicon-o-document-text')
                     ->outlined()
                     ->url(fn ($record) => FlowResource::getUrl('pages', ['record' => $record])),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // Tables\Actions\BulkActionGroup::make([
                 //     // Tables\Actions\DeleteBulkAction::make(),
                 // ]),
@@ -124,9 +128,9 @@ final class FlowResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListFlows::route('/'),
-            'create' => Pages\CreateFlow::route('/create'),
-            'view' => Pages\ViewFlow::route('/{record}'),
+            'index' => ListFlows::route('/'),
+            'create' => CreateFlow::route('/create'),
+            'view' => ViewFlow::route('/{record}'),
             'pages' => FlowDocuments::route('{record}/ps'),
             'createDocument' => CreateDocument::route('{flow}/p/c'),
         ];

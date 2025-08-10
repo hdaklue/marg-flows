@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\TenantResource\Pages;
 
+use Filament\Actions\CreateAction;
+use Exception;
 use App\Actions\Tenant\CreateTenant;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\TenantResource;
@@ -22,9 +24,9 @@ class ListTenants extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make('create')
+            CreateAction::make('create')
                 ->createAnother(false)
-                ->form([
+                ->schema([
                     TextInput::make('name')
                         ->required(),
                     Repeater::make('members')
@@ -48,7 +50,7 @@ class ListTenants extends ListRecords
 
                     try {
                         CreateTenant::run($data, filament()->auth()->user());
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         throw_unless(app()->isProduction(), $e);
                         Notification::make()
                             ->body('Something went wrong')

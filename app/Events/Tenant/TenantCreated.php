@@ -2,6 +2,7 @@
 
 namespace App\Events\Tenant;
 
+use Illuminate\Broadcasting\Channel;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -22,7 +23,7 @@ class TenantCreated
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {

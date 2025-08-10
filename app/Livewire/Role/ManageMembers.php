@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Role;
 
+use Filament\Schemas\Schema;
 use App\Actions\Roleable\AddParticipant;
 use App\Actions\Roleable\RemoveParticipant;
 use App\Collections\Role\ParticipantsCollection;
@@ -18,7 +19,6 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -30,7 +30,7 @@ use Livewire\Component;
 use const true;
 
 /**
- * @property-read Form $form
+ * @property-read Schema $form
  * @property-read ParticipantsCollection $manageableMembers
  * @property-read Collection $authedUserAssignableRoles
  */
@@ -59,11 +59,11 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('member')
                     ->options(function () {
                         if (! $this->roleable) {

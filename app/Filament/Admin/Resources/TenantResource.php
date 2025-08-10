@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources;
 
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Grid;
+use App\Filament\Admin\Resources\TenantResource\Pages\ListTenants;
+use App\Filament\Admin\Resources\TenantResource\Pages\EditTenant;
 use App\Actions\Tenant\AddMember;
 use App\Enums\Account\AccountType;
 use App\Enums\Role\RoleEnum;
@@ -14,13 +19,11 @@ use App\Models\Tenant;
 use App\Models\User;
 use Exception;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -30,7 +33,7 @@ final class TenantResource extends Resource
 {
     protected static ?string $model = Tenant::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     // public static function form(Form $form): Form
     // {
@@ -56,12 +59,12 @@ final class TenantResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
                 Action::make('add')
                     ->label('Add Member')
                     ->icon('heroicon-s-user-plus')
-                    ->form(
+                    ->schema(
                         fn ($record) => TenantResource::getAddMemberSchema($record),
                     )->action(function (array $data, Tenant $record): void {
                         try {
@@ -82,7 +85,7 @@ final class TenantResource extends Resource
                         }
                     }),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // Tables\Actions\BulkActionGroup::make([
                 //     Tables\Actions\DeleteBulkAction::make(),
                 // ]),
@@ -134,10 +137,10 @@ final class TenantResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTenants::route('/'),
+            'index' => ListTenants::route('/'),
             // 'create' => Pages\CreateTenant::route('/create'),
 
-            'edit' => Pages\EditTenant::route('/{record}/edit'),
+            'edit' => EditTenant::route('/{record}/edit'),
         ];
     }
 }

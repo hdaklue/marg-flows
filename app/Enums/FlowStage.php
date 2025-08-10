@@ -6,12 +6,9 @@ namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
-use Mokhosh\FilamentKanban\Concerns\IsKanbanStatus;
 
 enum FlowStage: int implements HasColor, HasLabel
 {
-    use IsKanbanStatus;
-
     case DRAFT = 1;
     case ACTIVE = 2;
     case PAUSED = 3;

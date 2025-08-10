@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\FlowResource\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Actions;
+use Filament\Actions\Action;
 use App\DTOs\Document\CreateDocumentDto;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Resources\FlowResource;
@@ -11,20 +15,16 @@ use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
 use App\Models\Flow;
 use App\Models\ModelHasRole;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action as FormAction;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Validation\ValidationException;
 use Log;
 
 /**
- * @property-read Form $form
+ * @property-read Schema $form
  */
 final class CreateDocument extends Page implements HasForms
 {
@@ -32,7 +32,7 @@ final class CreateDocument extends Page implements HasForms
 
     protected static string $resource = FlowResource::class;
 
-    protected static string $view = 'filament.resources.flow-resource.pages.create-document';
+    protected string $view = 'filament.resources.flow-resource.pages.create-document';
 
     public ?array $data = [];
 
@@ -45,9 +45,9 @@ final class CreateDocument extends Page implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Select::make('participants')
                 ->hint('Assign to specific Users or leave it for all users')
                 ->native(false)
@@ -69,7 +69,7 @@ final class CreateDocument extends Page implements HasForms
                     ->columnSpanFull(),
             ])->columns(3),
             Actions::make([
-                FormAction::make('save')
+                Action::make('save')
                     ->color('primary')
                     ->action(fn () => $this->createDocument()),
             ]),

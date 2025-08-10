@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\FlowResource\Pages;
 
+use Filament\Support\Enums\Width;
+use Filament\Schemas\Components\Wizard\Step;
 use App\Actions\Flow\CreateFlow as CreateFlowAction;
 use App\DTOs\Flow\CreateFlowDto;
 use App\Enums\Feedback\FeedbackUrgency;
@@ -25,12 +27,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard;
-use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
-use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -41,7 +41,7 @@ final class CreateFlow extends CreateRecord
 
     protected static string $resource = FlowResource::class;
 
-    protected static string $view = 'filament.resources.flow-resource.pages.create-flow';
+    protected string $view = 'filament.resources.flow-resource.pages.create-flow';
 
     protected static bool $canCreateAnother = false;
 
@@ -123,9 +123,9 @@ final class CreateFlow extends CreateRecord
     //         ]);
     // }
 
-    public function getMaxContentWidth(): MaxWidth
+    public function getMaxContentWidth(): Width
     {
-        return MaxWidth::SevenExtraLarge;
+        return Width::SevenExtraLarge;
     }
 
     public function create(bool $another = false): void

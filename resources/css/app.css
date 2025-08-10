@@ -1,6 +1,7 @@
 /* Video Annotation Comment Bubbles */
-@import './video-annotation-bubbles.css';
+/* @import './video-annotation-bubbles.css';
 
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
+@import "tailwindcss";

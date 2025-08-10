@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Events\Tenant;
 
+use Illuminate\Broadcasting\Channel;
 use App\Enums\Role\RoleEnum;
 use App\Models\Tenant;
 use App\Models\User;
@@ -24,7 +25,7 @@ class TanantMemberAdded
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {

@@ -36,7 +36,6 @@ final class PortalPanelProvider extends PanelProvider
             ->tenant(Tenant::class, ownershipRelationship: 'tenant')
             ->colors([
                 'primary' => Color::Sky,
-
             ])
             ->topNavigation(true)
             ->viteTheme('resources/css/filament/portal/theme.css')

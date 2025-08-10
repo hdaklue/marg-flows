@@ -1,7 +1,6 @@
+@reference "tailwindcss";
 @import '../editorjs/video-embed.css';
 @import '../editorjs/video-upload.css';
-
-@tailwind components;
 
 .resizable-image {
     @apply relative mt-5 outline-none;

@@ -1,5 +1,5 @@
 /* VideoEmbed Plugin Styles */
-
+ @reference "tailwindcss";
 /* Import Video.js CSS */
 @import 'video.js/dist/video-js.css';
 
@@ -9,7 +9,7 @@
 
 /* Input Container */
 .video-embed__input-container {
-    @apply flex flex-col gap-3 p-4 border border-zinc-200 rounded-lg bg-zinc-50;
+    @apply flex flex-col gap-3 p-4 border rounded-lg border-zinc-200 bg-zinc-50;
 }
 
 .dark .video-embed__input-container {
@@ -17,7 +17,7 @@
 }
 
 .video-embed__url-input {
-    @apply w-full px-4 py-3 border border-zinc-200 rounded-lg bg-white text-zinc-900 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-colors;
+    @apply w-full px-4 py-3 transition-colors bg-white border rounded-lg border-zinc-200 text-zinc-900 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent;
 }
 
 .dark .video-embed__url-input {
@@ -33,7 +33,7 @@
 }
 
 .video-embed__submit-btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2;
 }
 
 .dark .video-embed__submit-btn {
@@ -41,7 +41,7 @@
 }
 
 .video-embed__input-error {
-    @apply text-sm text-red-600 mt-1;
+    @apply mt-1 text-sm text-red-600;
 }
 
 .dark .video-embed__input-error {
@@ -54,7 +54,7 @@
 }
 
 .video-embed__video-wrapper {
-    @apply relative w-full bg-zinc-900 rounded-lg overflow-hidden;
+    @apply relative w-full overflow-hidden rounded-lg bg-zinc-900;
     aspect-ratio: 16/9;
 }
 
@@ -74,7 +74,7 @@
 
 /* Caption */
 .video-embed__caption {
-    @apply w-full mt-3 px-3 py-2 border border-zinc-200 rounded-lg bg-white text-zinc-900 placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-colors;
+    @apply w-full px-3 py-2 mt-3 text-sm transition-colors bg-white border rounded-lg border-zinc-200 text-zinc-900 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent;
 }
 
 .dark .video-embed__caption {
@@ -82,7 +82,7 @@
 }
 
 .video-embed__caption--readonly {
-    @apply border-none bg-transparent px-0 py-1 text-zinc-600 italic;
+    @apply px-0 py-1 italic bg-transparent border-none text-zinc-600;
 }
 
 .dark .video-embed__caption--readonly {
@@ -91,7 +91,7 @@
 
 /* Edit Button */
 .video-embed__edit-btn {
-    @apply inline-flex items-center gap-2 mt-3 px-3 py-2 text-sm text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors;
+    @apply inline-flex items-center gap-2 px-3 py-2 mt-3 text-sm transition-colors rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100;
 }
 
 .dark .video-embed__edit-btn {
@@ -121,11 +121,11 @@
 
 /* Error State */
 .video-embed__error {
-    @apply flex flex-col items-center justify-center gap-3 p-8 bg-red-50 border border-red-200 rounded-lg;
+    @apply flex flex-col items-center justify-center gap-3 p-8 border border-red-200 rounded-lg bg-red-50;
 }
 
 .dark .video-embed__error {
-    @apply bg-red-900/20 border-red-800;
+    @apply border-red-800 bg-red-900/20;
 }
 
 .video-embed__error-icon {
@@ -137,7 +137,7 @@
 }
 
 .video-embed__error-message {
-    @apply text-sm font-medium text-red-800 text-center;
+    @apply text-sm font-medium text-center text-red-800;
 }
 
 .dark .video-embed__error-message {
@@ -145,7 +145,7 @@
 }
 
 .video-embed__retry-btn {
-    @apply px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors;
+    @apply px-4 py-2 text-sm font-medium text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
 }
 
 .dark .video-embed__retry-btn {
@@ -155,17 +155,17 @@
 /* Responsive Design */
 @media (max-width: 640px) {
     .video-embed__input-container {
-        @apply p-3 gap-2;
+        @apply gap-2 p-3;
     }
-    
+
     .video-embed__url-input {
         @apply py-2 text-sm;
     }
-    
+
     .video-embed__submit-btn {
         @apply text-xs;
     }
-    
+
     .video-embed__caption {
         @apply text-xs;
     }
@@ -199,11 +199,11 @@
     .video-embed__url-input {
         @apply border-2;
     }
-    
+
     .video-embed__submit-btn {
         @apply border-2 border-sky-800;
     }
-    
+
     .video-embed__error {
         @apply border-2;
     }
@@ -214,7 +214,7 @@
     .video-embed__loading-spinner {
         animation: none;
     }
-    
+
     .animate-spin {
         animation: none;
     }
@@ -227,11 +227,11 @@
     .video-embed__retry-btn {
         @apply hidden;
     }
-    
+
     .video-embed__video-wrapper {
         @apply border border-zinc-400;
     }
-    
+
     .video-embed__video-wrapper::after {
         content: "Video content (not printable)";
         @apply absolute inset-0 flex items-center justify-center text-zinc-600 bg-zinc-100;
