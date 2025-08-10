@@ -2,10 +2,10 @@
     'fi-resource-create-record-page',
     'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
 ])>
-    <x-filament-panels::form wire:submit="create">
+    <div wire:submit="create">
         {{ $this->form }}
-        <x-filament-panels::form.actions :actions="$this->getCachedFormActions()" :full-width="$this->hasFullWidthFormActions()" />
-    </x-filament-panels::form>
+        {{-- <x-filament-panels::form.actions :actions="$this->getCachedFormActions()" :full-width="$this->hasFullWidthFormActions()" /> --}}
+    </div>
     {{-- <div>
         <button wire:click="begin">Start count-down</button>
 
@@ -19,5 +19,5 @@
         <x-filament-panels::form.actions :actions="$this->getCachedFormActions()" :full-width="$this->hasFullWidthFormActions()" />
     </x-filament-panels::form> --}}
 
-    <x-filament-panels::page.unsaved-data-changes-alert />
+    {{-- <x-filament-panels::page.unsaved-data-changes-alert /> --}}
 </x-filament-panels::page>

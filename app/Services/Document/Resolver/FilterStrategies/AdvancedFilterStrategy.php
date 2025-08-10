@@ -20,7 +20,7 @@ final class AdvancedFilterStrategy implements DocumentBlockFilterStrategy
         'table',
         'nestedList',
         'alert',
-        'hyperlink',
+        'linkTool',
         'videoEmbed',
         'videoUpload',
     ];

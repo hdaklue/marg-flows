@@ -8,6 +8,7 @@ use App\Http\Controllers\EditorJsImageDelete;
 use App\Http\Controllers\EditorJsUpload;
 use App\Http\Controllers\EditorJsVideoDelete;
 use App\Http\Controllers\EditorJsVideoUpload;
+use App\Http\Controllers\UrlFetchController;
 use App\Livewire\PreviewAudio;
 use App\Livewire\PreviewImage;
 use App\Livewire\PreviewVideo;
@@ -46,6 +47,11 @@ Route::post('upload-video', EditorJsVideoUpload::class)
 Route::delete('delete-video', EditorJsVideoDelete::class)
     ->middleware(['auth'])
     ->name('editorjs.delete-video');
+
+// URL fetch route for EditorJS LinkTool
+Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])
+    ->middleware(['auth'])
+    ->name('editorjs.fetch-url');
 
 // Chunked upload routes
 Route::post('chunked-upload', [ChunkedUploadController::class, 'store'])

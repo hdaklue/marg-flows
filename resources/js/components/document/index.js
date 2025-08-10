@@ -5,7 +5,7 @@ import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
 import Alert from 'editorjs-alert';
 import DragDrop from 'editorjs-drag-drop';
-import HyperLink from 'editorjs-hyperlink';
+import LinkTool from '../editorjs/plugins/link-tool';
 import Undo from 'editorjs-undo';
 import CommentTune from '../editorjs/plugins/comment-tune';
 import ResizableImage from '../editorjs/plugins/resizable-image';
@@ -323,15 +323,13 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     },
                     tunes: ['commentTune']
                 },
-                hyperlink: {
-                    class: HyperLink,
+                linkTool: {
+                    class: LinkTool,
                     config: {
-                        shortcut: 'CMD+L',
-                        target: '_blank',
-                        rel: 'nofollow',
-                        availableTargets: ['_blank', '_self'],
-                        availableRels: ['author', 'noreferrer'],
-                        validate: false,
+                        endpoint: '/editor/fetch-url',
+                        headers: {
+                            'X-CSRF-TOKEN': csrf,
+                        },
                     },
                     tunes: ['commentTune']
                 },
@@ -379,7 +377,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 'Table': Table,
                 'EditorJsList': EditorJsList,
                 'Alert': Alert,
-                'HyperLink': HyperLink,
+                'LinkTool': LinkTool,
                 'VideoEmbed': VideoEmbed,
                 'VideoUpload': VideoUpload
             };
@@ -417,6 +415,14 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 // Handle tools that need CSRF token injection
                 if (tool.config.additionalRequestHeaders && csrf) {
                     tool.config.additionalRequestHeaders['X-CSRF-TOKEN'] = csrf;
+                }
+
+                // Handle LinkTool CSRF token
+                if (toolConfig.class === 'LinkTool' && csrf) {
+                    if (!tool.config.headers) {
+                        tool.config.headers = {};
+                    }
+                    tool.config.headers['X-CSRF-TOKEN'] = csrf;
                 }
 
                 // Handle tools that need upload URL configuration

@@ -8,6 +8,7 @@ use App\Services\Document\ConfigBuilder\Blocks\Alert;
 use App\Services\Document\ConfigBuilder\Blocks\Header;
 use App\Services\Document\ConfigBuilder\Blocks\Hyperlink;
 use App\Services\Document\ConfigBuilder\Blocks\Images;
+use App\Services\Document\ConfigBuilder\Blocks\LinkTool;
 use App\Services\Document\ConfigBuilder\Blocks\NestedList;
 use App\Services\Document\ConfigBuilder\Blocks\Paragraph;
 use App\Services\Document\ConfigBuilder\Blocks\Table;
@@ -67,5 +68,10 @@ final class ConfigManager extends Manager
     public function videoUpload(): DocumentBlockConfigContract
     {
         return new VideoUpload;
+    }
+
+    public function linkTool(): DocumentBlockConfigContract
+    {
+        return new LinkTool;
     }
 }

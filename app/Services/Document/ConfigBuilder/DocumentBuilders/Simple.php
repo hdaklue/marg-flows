@@ -16,7 +16,8 @@ final class Simple
             'table' => ConfigBuilder::table()->toArray(),
             'nestedList' => ConfigBuilder::nestedList()->toArray(),
             'alert' => ConfigBuilder::alert()->toArray(),
-            'hyperlink' => ConfigBuilder::hyperlink()->toArray(),
+            'linkTool' => ConfigBuilder::linkTool()
+                ->enablePreview(false)->toArray(),
             'videoEmbed' => ConfigBuilder::videoEmbed()->toArray(),
         ];
     }

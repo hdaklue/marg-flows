@@ -22,7 +22,7 @@ final class Ultimate
                 ->maxLevel(10)
                 ->toArray(),
             'alert' => ConfigBuilder::alert()->toArray(),
-            'hyperlink' => ConfigBuilder::hyperlink()->toArray(),
+            'linkTool' => ConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => ConfigBuilder::videoEmbed()->toArray(),
             'videoUpload' => ConfigBuilder::videoUpload()
                 ->maxFileSize(1073741824) // 1GB

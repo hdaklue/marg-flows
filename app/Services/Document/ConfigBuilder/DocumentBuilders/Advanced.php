@@ -17,7 +17,7 @@ final class Advanced
             'table' => ConfigBuilder::table()->toArray(),
             'nestedList' => ConfigBuilder::nestedList()->toArray(),
             'alert' => ConfigBuilder::alert()->toArray(),
-            'hyperlink' => ConfigBuilder::hyperlink()->toArray(),
+            'linkTool' => ConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => ConfigBuilder::videoEmbed()->toArray(),
             'videoUpload' => ConfigBuilder::videoUpload()->toArray(),
         ];

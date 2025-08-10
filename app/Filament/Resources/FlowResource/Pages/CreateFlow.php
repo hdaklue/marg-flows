@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\FlowResource\Pages;
 
-use Filament\Support\Enums\Width;
-use Filament\Schemas\Components\Wizard\Step;
 use App\Actions\Flow\CreateFlow as CreateFlowAction;
 use App\DTOs\Flow\CreateFlowDto;
 use App\Enums\Feedback\FeedbackUrgency;
@@ -31,6 +29,9 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -41,8 +42,6 @@ final class CreateFlow extends CreateRecord
 
     protected static string $resource = FlowResource::class;
 
-    protected string $view = 'filament.resources.flow-resource.pages.create-flow';
-
     protected static bool $canCreateAnother = false;
 
     protected static ?string $title = '';
@@ -50,6 +49,8 @@ final class CreateFlow extends CreateRecord
     public $start = 3;
 
     public string $from;
+
+    protected string $view = 'filament.resources.flow-resource.pages.create-flow';
 
     // public ?string $maxContentWidth = 'screen-7xl';
 
@@ -213,23 +214,26 @@ final class CreateFlow extends CreateRecord
                 ->description(fn ($get): string => 'Add deliverables for the flow. You can add multiple deliverables.')
                 ->schema([
                     Repeater::make('delivrables')
-                        ->schema([TextInput::make('Title'),
-                            Select::make('template')
-                                ->options([
-                                    'design' => 'Design',
-                                    'development' => 'Development',
-                                ])
-                                ->selectablePlaceholder(false)
-                                ->required(),
-                            Select::make('urgency')
-                                ->options(FeedbackUrgency::class)
-                                ->multiple(true)
-                                ->native(false),
-                            DatePicker::make('sucess_date')
-                                ->minDate(today(filamentUser()->timezone)),
+                        ->schema([
+                            Grid::make(4)
+                                ->schema([TextInput::make('Title'),
+                                    Select::make('template')
+                                        ->options([
+                                            'design' => 'Design',
+                                            'development' => 'Development',
+                                        ])
+                                        ->selectablePlaceholder(false)
+                                        ->required(),
+                                    Select::make('urgency')
+                                        ->options(FeedbackUrgency::class)
+                                        ->multiple(true)
+                                        ->native(false),
+                                    DatePicker::make('sucess_date')
+                                        ->native(false)
+                                        ->minDate(today(filamentUser()->timezone)), ]),
                         ])
                         ->cloneable()
-                        ->grid(2)
+                        ->grid(1)
                         ->reorderable(false)
                         ->collapsible(),
                 ]),
