@@ -13,8 +13,10 @@ use App\Contracts\HasStaticType;
 use App\Contracts\Role\RoleableEntity;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Tenant\BelongsToTenantContract;
+use App\Services\Document\Collections\DocumentBlocksCollection;
 use Eloquent;
 use Exception;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,11 +28,11 @@ use Illuminate\Support\Carbon;
 /**
  * @property string $id
  * @property string $name
- * @property EditorJSDocumentDto|null $blocks
  * @property string $creator_id
  * @property string $tenant_id
  * @property string $documentable_type
  * @property string $documentable_id
+ * @property DocumentBlocksCollection $blockCollection
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection<int, Role> $assignedRoles
@@ -84,6 +86,13 @@ final class Document extends Model implements BelongsToTenantContract, HasStatic
         return $this->creator;
     }
 
+    public function casts(): array
+    {
+        return [
+            'blocks' => 'json',
+        ];
+    }
+
     // public function getTenant(): Tenant
     // {
     //     if ($this->Documentable instanceof BelongsToTenantContract) {
@@ -92,10 +101,13 @@ final class Document extends Model implements BelongsToTenantContract, HasStatic
     //     throw new Exception("Can't resolve tenant of {static::class}");
     // }
 
-    public function casts(): array
+    /**
+     * Get the user's first name.
+     */
+    protected function blockCollection(): Attribute
     {
-        return [
-            'blocks' => 'json',
-        ];
+        return Attribute::make(
+            get: fn () => DocumentBlocksCollection::fromEditorJS($this->getAttribute('blocks')),
+        );
     }
 }

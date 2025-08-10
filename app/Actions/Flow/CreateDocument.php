@@ -18,6 +18,7 @@ final class CreateDocument
 
     public function handle(User $creator, Flow $flow, CreateDocumentDto $dto)
     {
+
         $document = DocumentManager::create(
             documentable: $flow,
             creator: $creator,

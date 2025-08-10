@@ -1,5 +1,5 @@
 <div x-load x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('documentEditor') }}"
-    x-data="documentEditor(@js($content), '{{ route('uploader') }}', @js($canEdit), $wire.saveDocument, 25, '{{ $this->page->updated_at->toISOString() }}')" class="w-full">
+    x-data="documentEditor(@js($content), '{{ route('editorjs.uploade-image') }}', @js($canEdit), $wire.saveDocument, 25, '{{ $this->page->updated_at->toISOString() }}')" class="w-full">
     <!-- Intersection Observer Target -->
     <div x-intersect:leave.margin.-80px="isSticky = true" x-intersect:enter.margin.-80px="isSticky = false" class="h-4">
     </div>
@@ -31,7 +31,7 @@
                         'bg-zinc-400': !currentStatus.isDirty && !currentStatus.isSaving && !currentStatus.saveStatus
                     }">
                 </div>
-                <span class="text-left w-28 text-zinc-600 dark:text-zinc-400" x-text="currentStatus.statusText"></span>
+                <span class="w-28 text-left text-zinc-600 dark:text-zinc-400" x-text="currentStatus.statusText"></span>
             </div>
 
             <!-- Last saved time -->
@@ -49,7 +49,7 @@
                 }"
                 class="ml-3 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors">
                 <span x-show="!isSaving" class="flex items-center space-x-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12">
                         </path>
@@ -57,7 +57,7 @@
                     <span>Save</span>
                 </span>
                 <span x-show="isSaving" class="flex items-center space-x-1">
-                    <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg class="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                             stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor"
@@ -74,7 +74,7 @@
     </div>
 
     <div id="editor-wrap" wire:ignore @keydown.window.ctrl.k.prevent="saveDoument()" @keydown.meta.k="saveDocument()"
-        class="w-full mx-auto prose-sm prose prose:img:my-0 prose-zinc min-h-96 dark:prose-invert lg:prose-xl prose-table:w-full">
+        class="prose:img:my-0 prose prose-sm prose-zinc mx-auto min-h-96 w-full dark:prose-invert lg:prose-xl prose-table:w-full">
     </div>
 
     <!-- Navigation Modal -->

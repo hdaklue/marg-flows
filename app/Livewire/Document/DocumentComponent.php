@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Document;
 
-use App\DTOs\EditorJS\EditorJSDocumentDto;
-use App\DTOs\Document\DocumentWithBlocksDto;
 use App\Facades\DocumentManager;
 use App\Models\Document;
+use App\Services\Document\Facades\DocumentBuilder;
 use Exception;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -23,19 +22,23 @@ final class DocumentComponent extends Component
 {
     public $canEdit = true;
 
-    public DocumentWithBlocksDto $page;
+    public Document $page;
 
-    public string $content;
+    public array $content;
+
+    public string $userPlan = 'simple'; // Default plan
 
     public function mount(string $pageId, $canEdit = true)
     {
-        // Get the document model for authorization
-        $document = DocumentManager::getDocument($pageId);
-        $this->authorize('view', $document);
 
-        // Get the DTO with blocks for editing
-        $this->page = DocumentManager::getDocumentWithBlocks($pageId);
-        $this->content = $this->page->getBlocksJson();
+        $config = DocumentBuilder::advanced()->build();
+        $document = DocumentManager::getDocument($pageId);
+
+        // Set the page property
+        $this->page = $document;
+
+        // Initialize resolver using facade
+        $this->content = $document->getAttribute('blocks');
         $this->canEdit = $canEdit;
     }
 
@@ -93,8 +96,6 @@ final class DocumentComponent extends Component
             DocumentManager::update($document, ['blocks' => $editorData]);
 
             // Update the DTO with new content
-            $this->page->updateBlocksFromJson($content);
-            $this->content = $content;
 
             unset($this->updatedAtString);
 
@@ -108,8 +109,54 @@ final class DocumentComponent extends Component
         }
     }
 
+    /**
+     * Get allowed block types for frontend editor configuration.
+     */
+    #[Computed]
+    public function allowedBlockTypes(): array
+    {
+        return $this->documentResolver->getAllowedBlockTypes(
+            strtolower($this->userPlan),
+        );
+    }
+
+    /**
+     * Check if user can use specific block type.
+     */
+    public function canUseBlockType(string $blockType): bool
+    {
+        return $this->documentResolver->isBlockTypeAllowed(
+            $blockType,
+            strtolower($this->userPlan),
+        );
+    }
+
     public function render()
     {
         return view('livewire.page.document-component');
+    }
+
+    /**
+     * Get user's plan - implement based on your auth/tenant system.
+     */
+    private function getUserPlan(): string
+    {
+        // Example implementation - adjust based on your system
+        return auth()->user()?->currentTenant?->plan ?? 'simple';
+    }
+
+    /**
+     * Get filtered blocks as JSON based on user plan.
+     */
+    private function getFilteredBlocksJson(): string
+    {
+        // Filter blocks based on user plan (blocks is now guaranteed to be DocumentBlocksCollection)
+        $filteredBlocks = $this->documentResolver->filter(
+            $this->page->blocks,
+            strtolower($this->userPlan),
+        );
+
+        // Return as EditorJS JSON format
+        return $filteredBlocks->toEditorJson();
     }
 }

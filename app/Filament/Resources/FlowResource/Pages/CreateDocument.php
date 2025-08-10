@@ -84,8 +84,7 @@ final class CreateDocument extends Page implements HasForms
             // Create DTO without validation first
             $dto = CreateDocumentDto::fromArray([
                 'name' => $data['name'],
-                'blocks' => json_decode($data['blocks'], true),
-            ]);
+                'blocks' => json_decode($data['blocks'])]);
 
             \App\Actions\Flow\CreateDocument::run(filamentUser(), $this->flow, $dto);
 

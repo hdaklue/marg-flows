@@ -9,11 +9,11 @@ use App\Contracts\Document\DocumentManagerInterface;
 use App\Contracts\Role\AssignableEntity;
 use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
-use App\DTOs\Document\DocumentWithBlocksDto;
 use App\Enums\Role\RoleEnum;
 use App\Facades\RoleManager;
 use App\Models\Document;
 use App\Models\User;
+use App\Services\Document\DTOs\DocumentWithBlocksDto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -56,18 +56,14 @@ final class DocumentService implements DocumentManagerInterface
      */
     public function update(Document $document, array $data): Document
     {
+
         if (isset($data['name'])) {
             $document->name = $data['name'];
         }
 
         if (isset($data['blocks'])) {
-            $document->blocks = [
-                'time' => now()->timestamp,
-                'blocks' => $data['blocks'],
-                'version' => '2.28.2',
-            ];
+            $document->blocks = $data['blocks'];
         }
-
         $document->save();
 
         assert($document->documentable instanceof Documentable);
@@ -153,12 +149,12 @@ final class DocumentService implements DocumentManagerInterface
     }
 
     /**
-     * Get document with full blocks data as DTO for editing
+     * Get document with full blocks data as DTO for editing.
      */
     public function getDocumentWithBlocks(string $documentId): DocumentWithBlocksDto
     {
         $document = $this->getDocument($documentId);
-        
+
         return DocumentWithBlocksDto::fromDocument($document);
     }
 

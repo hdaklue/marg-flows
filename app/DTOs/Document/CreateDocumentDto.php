@@ -14,11 +14,7 @@ final class CreateDocumentDto extends ValidatedDTO
 
     public function toEditorJSFormat(): array
     {
-        return [
-            'time' => now()->timestamp,
-            'blocks' => $this->blocks,
-            'version' => config('document.editorjs.version', '2.28.2'),
-        ];
+        return $this->blocks;
     }
 
     protected function rules(): array

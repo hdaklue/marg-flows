@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Services\Document\BlockManager;
-use App\Services\Document\ConfigManager;
-use App\Services\Document\Facades\BlockBuilder;
+use App\Services\Document\ConfigBuilder\ConfigManager;
+use App\Services\Document\ConfigBuilder\DocumentManager;
 use App\Services\Document\Facades\ConfigBuilder;
+use App\Services\Document\Facades\DocumentBuilder;
+use App\Services\Document\Facades\DocumentResolver;
+use App\Services\Document\Resolver\DocumentStrategyResolver;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -20,12 +22,11 @@ final class DocumentServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(BlockBuilder::class, function ($app) {
-            return new BlockManager($app);
-        });
-        $this->app->singleton(ConfigBuilder::class, function ($app) {
-            return new ConfigManager($app);
-        });
+
+        $this->app->singleton(ConfigBuilder::class, fn ($app) => new ConfigManager($app));
+
+        $this->app->singleton(DocumentBuilder::class, fn ($app) => new DocumentManager($app));
+        $this->app->singleton(DocumentResolver::class, fn ($app) => new DocumentStrategyResolver);
     }
 
     /**
