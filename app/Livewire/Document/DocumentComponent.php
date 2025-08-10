@@ -26,12 +26,11 @@ final class DocumentComponent extends Component
 
     public array $content;
 
-    public string $userPlan = 'simple'; // Default plan
+    public string $userPlan = 'advanced'; // Default plan
 
     public function mount(string $pageId, $canEdit = true)
     {
 
-        $config = DocumentBuilder::advanced()->build();
         $document = DocumentManager::getDocument($pageId);
 
         // Set the page property
@@ -40,6 +39,14 @@ final class DocumentComponent extends Component
         // Initialize resolver using facade
         $this->content = $document->getAttribute('blocks');
         $this->canEdit = $canEdit;
+    }
+
+    public function getToolsConfig()
+    {
+        return match ($this->userPlan) {
+            'simple' => DocumentBuilder::simple()->build(),
+            'advanced' => DocumentBuilder::advanced()->build(),
+        };
     }
 
     #[Computed]
@@ -109,54 +116,54 @@ final class DocumentComponent extends Component
         }
     }
 
-    /**
-     * Get allowed block types for frontend editor configuration.
-     */
-    #[Computed]
-    public function allowedBlockTypes(): array
-    {
-        return $this->documentResolver->getAllowedBlockTypes(
-            strtolower($this->userPlan),
-        );
-    }
+    // /**
+    //  * Get allowed block types for frontend editor configuration.
+    //  */
+    // #[Computed]
+    // public function allowedBlockTypes(): array
+    // {
+    //     return $this->documentResolver->getAllowedBlockTypes(
+    //         strtolower($this->userPlan),
+    //     );
+    // }
 
-    /**
-     * Check if user can use specific block type.
-     */
-    public function canUseBlockType(string $blockType): bool
-    {
-        return $this->documentResolver->isBlockTypeAllowed(
-            $blockType,
-            strtolower($this->userPlan),
-        );
-    }
+    // /**
+    //  * Check if user can use specific block type.
+    //  */
+    // public function canUseBlockType(string $blockType): bool
+    // {
+    //     return $this->documentResolver->isBlockTypeAllowed(
+    //         $blockType,
+    //         strtolower($this->userPlan),
+    //     );
+    // }
 
     public function render()
     {
         return view('livewire.page.document-component');
     }
 
-    /**
-     * Get user's plan - implement based on your auth/tenant system.
-     */
-    private function getUserPlan(): string
-    {
-        // Example implementation - adjust based on your system
-        return auth()->user()?->currentTenant?->plan ?? 'simple';
-    }
+    // /**
+    //  * Get user's plan - implement based on your auth/tenant system.
+    //  */
+    // private function getUserPlan(): string
+    // {
+    //     // Example implementation - adjust based on your system
+    //     return auth()->user()?->currentTenant?->plan ?? 'simple';
+    // }
 
-    /**
-     * Get filtered blocks as JSON based on user plan.
-     */
-    private function getFilteredBlocksJson(): string
-    {
-        // Filter blocks based on user plan (blocks is now guaranteed to be DocumentBlocksCollection)
-        $filteredBlocks = $this->documentResolver->filter(
-            $this->page->blocks,
-            strtolower($this->userPlan),
-        );
+    // /**
+    //  * Get filtered blocks as JSON based on user plan.
+    //  */
+    // private function getFilteredBlocksJson(): string
+    // {
+    //     // Filter blocks based on user plan (blocks is now guaranteed to be DocumentBlocksCollection)
+    //     $filteredBlocks = $this->documentResolver->filter(
+    //         $this->page->blocks,
+    //         strtolower($this->userPlan),
+    //     );
 
-        // Return as EditorJS JSON format
-        return $filteredBlocks->toEditorJson();
-    }
+    //     // Return as EditorJS JSON format
+    //     return $filteredBlocks->toEditorJson();
+    // }
 }

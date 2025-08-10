@@ -14,7 +14,7 @@ import VideoUpload from '../editorjs/plugins/video-upload';
 import { VIDEO_VALIDATION_CONFIG } from '../editorjs/video-validation.js';
 
 
-export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null) {
+export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null, toolsConfig = null) {
     return {
         editor: null,
         state: livewireState,
@@ -126,10 +126,17 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 this.isEditorBusy = false;
                 console.log('Editor free event received - wasBusy:', wasBusy, 'isDirty:', this.isDirty, 'isSaving:', this.isSaving);
 
-                // If editor was busy (plugin operation), force a save to persist plugin changes
-                // Otherwise, only save if the editor is actually dirty
-                if (wasBusy && this.saveCallback && !this.isSaving) {
-                    console.log('Editor free - forcing save after plugin operation');
+                // Don't auto-save on editor:free if we just saved (justSaved flag indicates recent save)
+                if (this.justSaved) {
+                    console.log('Editor free - skipping save due to recent save, restarting autosave');
+                    this.startAutosave();
+                    return;
+                }
+
+                // If editor was busy (plugin operation), only save if actually dirty
+                // Plugin should have already triggered its own save via blockAPI.dispatchChange()
+                if (wasBusy && this.isDirty && this.saveCallback && !this.isSaving) {
+                    console.log('Editor free - saving due to dirty state after plugin operation');
                     this.saveDocument();
                 } else if (this.isDirty && this.saveCallback && !this.isSaving) {
                     console.log('Editor free - triggering save due to dirty state');
@@ -234,6 +241,12 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         },
 
         getEditorTools(csrf, uploadUrl) {
+            // If toolsConfig is provided, use it to build the tools dynamically
+            if (toolsConfig && typeof toolsConfig === 'object') {
+                return this.buildToolsFromConfig(toolsConfig, csrf, uploadUrl);
+            }
+
+            // Fallback to hardcoded tools for backward compatibility
             return {
                 paragraph: {
                     class: Paragraph,
@@ -352,7 +365,77 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             };
         },
 
+        buildToolsFromConfig(toolsConfig, csrf, uploadUrl) {
+            const tools = {};
+            
+            console.log('Building tools from config:', toolsConfig);
+            
+            // Class name mapping from PHP to JavaScript imports
+            const classMap = {
+                'paragraph': Paragraph,
+                'header': Header,
+                'ResizableImage': ResizableImage,
+                'Table': Table,
+                'EditorJsList': EditorJsList,
+                'Alert': Alert,
+                'HyperLink': HyperLink,
+                'VideoEmbed': VideoEmbed,
+                'VideoUpload': VideoUpload
+            };
 
+            // Process each tool from the config
+            Object.entries(toolsConfig).forEach(([toolName, toolConfig]) => {
+                console.log(`Processing tool: ${toolName}`, toolConfig);
+                
+                const jsClass = classMap[toolConfig.class];
+                if (!jsClass) {
+                    console.warn(`Unknown tool class: ${toolConfig.class}`);
+                    return;
+                }
+
+                // Build the tool configuration
+                const tool = {
+                    class: jsClass,
+                    config: { ...toolConfig.config }
+                };
+                
+                console.log(`Built tool config for ${toolName}:`, tool);
+
+                // Add tunes if specified
+                if (toolConfig.tunes && toolConfig.tunes.length > 0) {
+                    tool.tunes = toolConfig.tunes;
+                }
+
+                // Handle tools that need CSRF token injection
+                if (tool.config.additionalRequestHeaders && csrf) {
+                    tool.config.additionalRequestHeaders['X-CSRF-TOKEN'] = csrf;
+                }
+
+                // Handle tools that need upload URL configuration
+                // Only override if the endpoints are not already set from PHP config
+                if (tool.config.endpoints && uploadUrl) {
+                    // For ResizableImage tool, use the uploadUrl parameter
+                    if (toolConfig.class === 'ResizableImage') {
+                        if (tool.config.endpoints.byFile) {
+                            tool.config.endpoints.byFile = uploadUrl;
+                        }
+                        if (tool.config.endpoints.byUrl) {
+                            tool.config.endpoints.byUrl = uploadUrl;
+                        }
+                    }
+                    // For other tools like VideoUpload, preserve the endpoints from PHP config
+                    // They already have the correct routes set
+                }
+
+                tools[toolName] = tool;
+            });
+
+            // Always add commentTune
+            tools.commentTune = CommentTune;
+
+            console.log('Final tools configuration:', tools);
+            return tools;
+        },
 
         normalizeState(state) {
             try {

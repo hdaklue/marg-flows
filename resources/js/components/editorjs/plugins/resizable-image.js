@@ -389,6 +389,9 @@ class ResizableImage {
 
         this.uploading = true;
 
+        // Clean up any existing progress state before starting new upload
+        this.cleanupUploadState();
+
         // Initialize upload tracking for each file with unique IDs
         this.uploadProgress = fileArray.map((file, index) => ({
             id: `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -527,15 +530,18 @@ class ResizableImage {
     notifyEditorChange() {
         console.log('ResizableImage - upload completed, triggering save to persist image data');
         
-        // Use the standard EditorJS change notification
-        if (this.blockAPI && this.blockAPI.dispatchChange) {
-            this.blockAPI.dispatchChange();
-        }
-        
-        // Signal that plugin operations are complete
-        setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('editor:free'));
-        }, 0);
+        // Ensure DOM is fully updated before triggering editor change
+        requestAnimationFrame(() => {
+            // Use the standard EditorJS change notification
+            if (this.blockAPI && this.blockAPI.dispatchChange) {
+                this.blockAPI.dispatchChange();
+            }
+            
+            // Signal that plugin operations are complete
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent('editor:free'));
+            }, 0);
+        });
     }
 
     // Legacy method support
@@ -1381,6 +1387,20 @@ class ResizableImage {
     // Legacy method support
     deleteFromServer(url) {
         return this.executeDeleteRequest(url);
+    }
+
+    cleanupUploadState() {
+        // Clear any existing progress state
+        if (this.uploadProgress && this.uploadProgress.length > 0) {
+            console.log('Cleaning up existing upload progress state');
+            this.uploadProgress = [];
+        }
+        
+        // Remove any existing progress UI
+        this.hideInlineProgress();
+        
+        // Don't reset uploading flag here - it's managed by handleUpload
+        // this.uploading = false;
     }
 
     cleanupEventListeners() {
