@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\DTOs\Document;
 
+use App\DTOs\Cast\MorphCast;
 use App\DTOs\User\UserDto;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use WendellAdriel\ValidatedDTO\Casting\CarbonCast;
 use WendellAdriel\ValidatedDTO\Casting\DTOCast;
-use WendellAdriel\ValidatedDTO\Casting\ObjectCast;
 use WendellAdriel\ValidatedDTO\Concerns\Wireable;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
@@ -20,13 +21,17 @@ final class DocumentDto extends ValidatedDTO
 
     public string $name;
 
-    public $pageable;
+    public array $blocks;
+
+    public Model $documentable;
+
+    public UserDto $creator;
 
     public Carbon $created_at;
 
     public Carbon $updated_at;
 
-    public UserDto $creator;
+    // public array $creator;
 
     // public function toEditorJSFormat(): array
     // {
@@ -50,8 +55,9 @@ final class DocumentDto extends ValidatedDTO
 
     protected function casts(): array
     {
+
         return [
-            'pageable' => new ObjectCast,
+            'documentable' => new MorphCast,
             'creator' => new DTOCast(UserDto::class),
             'created_at' => new CarbonCast,
             'updated_at' => new CarbonCast,
@@ -63,9 +69,11 @@ final class DocumentDto extends ValidatedDTO
         return [
             'name' => ['required', 'string', 'min:1', 'max:255'],
             'id' => ['required'],
-            'pageable' => ['required'],
+            'documentable' => ['required', 'array'],
+            'blocks' => ['array'],
             'creator' => ['required'],
             'created_at' => ['required'],
+            'updated_at' => ['required'],
         ];
     }
 

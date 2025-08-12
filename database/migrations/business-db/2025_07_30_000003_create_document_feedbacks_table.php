@@ -61,18 +61,11 @@ return new class extends Migration
             $table->index('block_version');
             
             // Document and block combination queries
-            $table->index(['feedbackable_type', 'feedbackable_id', 'block_id']);
-            $table->index(['feedbackable_type', 'feedbackable_id', 'element_type']);
+            $table->index(['feedbackable_type', 'feedbackable_id', 'block_id'], 'df_feedbackable_block');
+            $table->index(['feedbackable_type', 'feedbackable_id', 'element_type'], 'df_feedbackable_element');
             
             // Text selection queries
             $table->index(['block_id', 'created_at']);
-            
-            // Block-level vs text-level feedback
-            // Use functional index for checking if selection_data exists and is not empty
-            $table->rawIndex(
-                '(CASE WHEN selection_data IS NOT NULL AND JSON_LENGTH(selection_data) > 0 THEN 1 ELSE 0 END)',
-                'document_feedbacks_has_selection_idx'
-            );
         });
     }
 

@@ -314,6 +314,13 @@ export class VideoPlayerCore {
         }));
         this.sharedState.qualitySources = this.qualitySources;
         
+        // Dispatch resolution change event
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('resolution-changed', {
+                detail: { source, currentResolutionSrc: source.src }
+            }));
+        }
+        
         // Dispatch event to update Alpine.js component
         if (typeof window !== 'undefined') {
             const event = new CustomEvent('quality-sources-updated', {

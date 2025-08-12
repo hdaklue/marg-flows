@@ -16,7 +16,7 @@ final class ParticipantsCollection extends Collection
      *
      * @return self<array{participant_id: int, participant_name: string, participant_email: string, participant_avatar: string, role_id: int, role_name: string, role_label: string, role_description: string}>
      */
-    public function asDtoArray()
+    public function asDtoArray(): self
     {
         return $this->map(function ($item) {
             return [
@@ -34,6 +34,15 @@ final class ParticipantsCollection extends Collection
     }
 
     /**
+     * @return Collection<int|string, mixed>
+     */
+    public function avatars(): Collection
+    {
+
+        return $this->pluck('model.avatar');
+    }
+
+    /**
      * Convert the collection to a collection of SingleParticipantDto.
      *
      * @return self<SingleParticipantDto>
@@ -45,14 +54,29 @@ final class ParticipantsCollection extends Collection
         );
     }
 
-    public function exceptAssignable(string|AssignableEntity $userId): self
+    public function getParticipantIds(): Collection
+    {
+        return collect($this->pluck('model.id'));
+    }
+
+    public function getParticipantsAsSelectArray(): array
+    {
+        return $this->pluck('model')->mapWithKeys(fn ($model) => [$model->getKey() => $model->getAttribute('name')])->toArray();
+    }
+
+    public function exceptAssignable(AssignableEntity|string|array $userId): self
     {
         if ($userId instanceof AssignableEntity) {
-            $userId = $userId->getKey();
+            $userId = [$userId->getKey()];
+        }
+
+        if (is_string($userId)) {
+            $userId = [$userId];
         }
 
         return $this->filter(function ($item) use ($userId) {
-            return $item->model->getKey() !== $userId;
+            return ! in_array($item->model->getKey(), $userId);
+
         });
     }
 }

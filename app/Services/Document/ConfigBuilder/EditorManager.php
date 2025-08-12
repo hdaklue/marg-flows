@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\Document\ConfigBuilder;
 
-use App\Services\Document\ConfigBuilder\DocumentBuilders\Advanced;
-use App\Services\Document\ConfigBuilder\DocumentBuilders\Base;
-use App\Services\Document\ConfigBuilder\DocumentBuilders\Simple;
-use App\Services\Document\ConfigBuilder\DocumentBuilders\Ultimate;
+use App\Services\Document\ConfigBuilder\Builders\Advanced;
+use App\Services\Document\ConfigBuilder\Builders\Base;
+use App\Services\Document\ConfigBuilder\Builders\Simple;
+use App\Services\Document\ConfigBuilder\Builders\Ultimate;
 use Illuminate\Support\Manager;
 
-final class DocumentManager extends Manager
+final class EditorManager extends Manager
 {
     public function getDefaultDriver(): string
     {

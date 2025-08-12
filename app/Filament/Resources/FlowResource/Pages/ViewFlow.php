@@ -8,6 +8,7 @@ use App\Concerns\Livewire\WithSortable;
 use App\Filament\Resources\FlowResource;
 use Exception;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -20,8 +21,6 @@ final class ViewFlow extends ViewRecord
     use WithSortable;
 
     protected static string $resource = FlowResource::class;
-
-    protected string $view = 'filament.resources.flow-resource.pages.view-flow';
 
     public $todos = [
         ['id' => '1', 'title' => 'Design user interface', 'status' => 'todo'],
@@ -39,6 +38,8 @@ final class ViewFlow extends ViewRecord
         ['id' => '7', 'title' => 'Setup project structure', 'status' => 'done'],
         ['id' => '8', 'title' => 'Create database migrations', 'status' => 'done'],
     ];
+
+    protected string $view = 'filament.resources.flow-resource.pages.view-flow';
 
     protected array $sortableRules = [
         'items' => ['required', 'array', 'max:50'],
@@ -79,5 +80,10 @@ final class ViewFlow extends ViewRecord
             ]);
             $this->addError('sort', 'Failed to update sort order: ' . $e->getMessage());
         }
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return $this->record->title;
     }
 }

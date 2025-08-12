@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('deliverable_versions', function (Blueprint $table) {
+        Schema::connection('business_db')->create('deliverable_versions', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->ulid('deliverable_id');
             $table->integer('version_number');
@@ -21,8 +21,7 @@ return new class extends Migration
             $table->timestamp('submitted_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('deliverable_id')->references('id')->on('deliverables')->onDelete('cascade');
-            $table->foreign('created_by')->references('id')->on('users');
+            // Foreign keys: deliverable_id references deliverables table, created_by references main DB users
             
             $table->unique(['deliverable_id', 'version_number']);
             $table->index(['deliverable_id', 'status']);
@@ -32,6 +31,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('deliverable_versions');
+        Schema::connection('business_db')->dropIfExists('deliverable_versions');
     }
 };

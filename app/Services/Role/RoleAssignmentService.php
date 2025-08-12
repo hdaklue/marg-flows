@@ -135,6 +135,7 @@ final class RoleAssignmentService implements RoleAssignmentManagerInterface
      */
     public function getParticipantsWithRoles(RoleableEntity $target): Collection
     {
+
         if (config('role.should_cache')) {
             return Cache::remember($this->generateParticipantsCacheKey($target), now()->addHour(), function () use ($target) {
                 return ModelHasRole::where([

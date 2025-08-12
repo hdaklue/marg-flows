@@ -63,31 +63,14 @@ return new class extends Migration
 
             // Design-specific indexes
             $table->index(['x_coordinate', 'y_coordinate']);
-            $table->index('annotation_type');
-            $table->index(['annotation_type', 'status']);
             $table->index('color');
             $table->index('zoom_level');
 
             // Coordinate-based queries
-            $table->index(['feedbackable_type', 'feedbackable_id', 'x_coordinate', 'y_coordinate']);
-
-            // Spatial queries for finding nearby annotations
-            $table->index(['x_coordinate', 'y_coordinate', 'annotation_type']);
-
-            // Area-based annotations
-            $table->rawIndex(
-                '(CASE WHEN area_bounds IS NOT NULL AND JSON_LENGTH(area_bounds) > 0 THEN 1 ELSE 0 END)',
-                'design_feedbacks_has_area_bounds_idx',
-            );
-
-            // Type-specific queries
-            $table->index(['annotation_type', 'feedbackable_type', 'feedbackable_id']);
+            $table->index(['feedbackable_type', 'feedbackable_id', 'x_coordinate', 'y_coordinate'], 'dgf_feedbackable_coords');
 
             // Color-based grouping
-            $table->index(['feedbackable_type', 'feedbackable_id', 'color']);
-
-            // Zoom level analysis
-            $table->index(['zoom_level', 'annotation_type']);
+            $table->index(['feedbackable_type', 'feedbackable_id', 'color'], 'dgf_feedbackable_color');
         });
     }
 

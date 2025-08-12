@@ -3,6 +3,7 @@
 @reference "tailwindcss";
 @import '../editorjs/video-embed.css';
 @import '../editorjs/video-upload.css';
+@import '../editorjs/resizable-image.css';
 
 
 

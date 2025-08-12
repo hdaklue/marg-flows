@@ -59,17 +59,16 @@ return new class extends Migration
             $table->index('end_time');
             
             // Duration-based queries (computed on-the-fly)
-            $table->index(['feedbackable_type', 'feedbackable_id', 'start_time']);
+            $table->index(['feedbackable_type', 'feedbackable_id', 'start_time'], 'af_feedbackable_start_time');
             
             // Amplitude-based queries
             $table->index('peak_amplitude');
             $table->index(['peak_amplitude', 'status']);
             
             // Overlapping audio regions
-            $table->index(['feedbackable_type', 'feedbackable_id', 'start_time', 'end_time']);
+            $table->index(['feedbackable_type', 'feedbackable_id', 'start_time', 'end_time'], 'af_feedbackable_time_range');
             
-            // Add constraint to ensure end_time > start_time
-            $table->rawIndex('start_time < end_time', 'audio_feedbacks_time_order_check');
+            // Note: Time order validation should be handled at application level
         });
     }
 

@@ -20,16 +20,17 @@ use Exception;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
@@ -199,6 +200,7 @@ final class CreateFlow extends CreateRecord
                     TextInput::make('title')
                         ->required()
                         ->label('Flow Title'),
+
                     Textarea::make('description')
                         ->required()
                         ->label('Description'),
@@ -214,24 +216,39 @@ final class CreateFlow extends CreateRecord
                 ->description(fn ($get): string => 'Add deliverables for the flow. You can add multiple deliverables.')
                 ->schema([
                     Repeater::make('delivrables')
-                        ->schema([
-                            Grid::make(4)
-                                ->schema([TextInput::make('Title'),
-                                    Select::make('template')
-                                        ->options([
-                                            'design' => 'Design',
-                                            'development' => 'Development',
-                                        ])
-                                        ->selectablePlaceholder(false)
-                                        ->required(),
-                                    Select::make('urgency')
-                                        ->options(FeedbackUrgency::class)
-                                        ->multiple(true)
-                                        ->native(false),
-                                    DatePicker::make('sucess_date')
-                                        ->native(false)
-                                        ->minDate(today(filamentUser()->timezone)), ]),
+                        ->table([
+                            TableColumn::make('title'),
+                            TableColumn::make('format'),
+                            TableColumn::make('type'),
+                            TableColumn::make('# of Options'),
+                            TableColumn::make('success_date'),
                         ])
+                        ->schema(
+                            [
+
+                                TextInput::make('Title'),
+                                Select::make('template')
+                                    ->options([
+                                        'design' => 'Design',
+                                        'development' => 'Development',
+                                    ])
+                                    ->selectablePlaceholder(false)
+                                    ->required(),
+                                Select::make('urgency')
+                                    ->options(FeedbackUrgency::class)
+                                    ->multiple(true)
+                                    ->native(false),
+                                TextInput::make('options')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->minValue(1)
+                                    ->maxValue(5),
+                                DatePicker::make('sucess_date')
+                                    ->closeOnDateSelection()
+                                    ->native(false)
+                                    ->minDate(today(filamentUser()->timezone)),
+                            ],
+                        )
                         ->cloneable()
                         ->grid(1)
                         ->reorderable(false)
@@ -241,6 +258,7 @@ final class CreateFlow extends CreateRecord
                 ->label('Participants')
                 ->description(fn ($get): string => 'Select participants for the flow. You can select multiple participants.')
                 ->schema([
+                    Toggle::make('custom_members'),
                     Repeater::make('participants')
                         ->schema([
                             Select::make('participant_id')
@@ -251,7 +269,10 @@ final class CreateFlow extends CreateRecord
                                 ->options(filamentTenant()->getSystemRoles()->pluck('name', 'id'))
                                 ->selectablePlaceholder(false)
                                 ->required(),
-                        ])->cloneable()
+                        ])
+                        ->visibleJs(<<<'JS'
+                                 $get('custom_members')
+                                JS)
                         ->grid(2)
                         ->reorderable(false)
                         ->collapsible(),

@@ -37,7 +37,7 @@ final class DocumentCard extends Component
 
     public function mount(string $pageId, string $pageableId): void
     {
-        $this->page = Document::where('id', $pageId)->firstOrFail();
+        $this->page = Document::where('id', $pageId)->with('documentable')->firstOrFail();
         $this->createdAt = toUserDateTime($this->page->created_at, filamentUser());
         $this->updatedAt = toUserDateTime($this->page->updated_at, filamentUser());
 

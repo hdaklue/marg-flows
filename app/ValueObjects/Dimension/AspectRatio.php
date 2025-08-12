@@ -42,7 +42,7 @@ final class AspectRatio implements JsonSerializable
     /**
      * Common screen resolutions with their aspect ratios.
      *
-     * @var array<ResolutionData>
+     * @var array<array{name: string, width: int, height: int, label: string, ratio: float}>
      */
     private static array $resolutions = [
         ['name' => 'HD', 'width' => 1280, 'height' => 720,  'label' => '16:9', 'ratio' => 1.7778],

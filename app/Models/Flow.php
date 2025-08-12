@@ -35,74 +35,56 @@ use Illuminate\Support\Collection;
 /**
  * @property string $id
  * @property string $title
- * @property int $status
- * @property int $is_default
- * @property int $order_column
- * @property Carbon|null $start_date
- * @property Carbon|null $due_date
+ * @property string|null $description
+ * @property int $stage
+ * @property string|null $started_at
  * @property Carbon|null $completed_at
  * @property Carbon|null $canceled_at
  * @property array<array-key, mixed>|null $settings
- * @property mixed $blocks
  * @property string $tenant_id
  * @property string $creator_id
  * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $assignedRoles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
- * @property-read User $creator
- * @property-read string $progress_completed_date
- * @property-read string $progress_due_date
- * @property-read string $progress_start_date
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $participants
+ * @property-read \App\Models\User $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Document> $documents
+ * @property-read int|null $documents_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $participants
  * @property-read int|null $participants_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $roleAssignments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, SideNote> $sideNotes
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SideNote> $sideNotes
  * @property-read int|null $side_notes_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Stage> $stages
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stage> $stages
  * @property-read int|null $stages_count
- * @property-read Tenant $tenant
- *
+ * @property-read \App\Models\Tenant $tenant
  * @method static Builder<static>|Flow assignable()
- * @method static Builder<static>|Flow byStage(\App\Enums\FlowStage|string $status)
- * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStage|string $status)
- * @method static Builder<static>|Flow byTenant(\App\Models\Tenant $tenant)
+ * @method static Builder<static>|Flow byStage(\App\Enums\FlowStage|string $stage)
  * @method static \Database\Factories\FlowFactory factory($count = null, $state = [])
  * @method static Builder<static>|Flow forParticipant(\App\Contracts\Role\AssignableEntity $member)
  * @method static Builder<static>|Flow newModelQuery()
  * @method static Builder<static>|Flow newQuery()
  * @method static Builder<static>|Flow onlyTrashed()
- * @method static Builder<static>|Flow ordered(string $direction = 'asc')
  * @method static Builder<static>|Flow query()
- * @method static Builder<static>|Flow running()
- * @method static Builder<static>|Flow whereBlocks($value)
+ * @method static Builder<static>|Flow scopeByTenant(\App\Models\Tenant $tenant)
+ * @method static Builder<static>|Flow scopeRunning()
  * @method static Builder<static>|Flow whereCanceledAt($value)
  * @method static Builder<static>|Flow whereCompletedAt($value)
  * @method static Builder<static>|Flow whereCreatedAt($value)
  * @method static Builder<static>|Flow whereCreatorId($value)
  * @method static Builder<static>|Flow whereDeletedAt($value)
- * @method static Builder<static>|Flow whereDueDate($value)
+ * @method static Builder<static>|Flow whereDescription($value)
  * @method static Builder<static>|Flow whereId($value)
- * @method static Builder<static>|Flow whereIsDefault($value)
- * @method static Builder<static>|Flow whereOrderColumn($value)
  * @method static Builder<static>|Flow whereSettings($value)
- * @method static Builder<static>|Flow whereStartDate($value)
- * @method static Builder<static>|Flow whereStatus($value)
+ * @method static Builder<static>|Flow whereStage($value)
+ * @method static Builder<static>|Flow whereStartedAt($value)
  * @method static Builder<static>|Flow whereTenantId($value)
  * @method static Builder<static>|Flow whereTitle($value)
  * @method static Builder<static>|Flow whereUpdatedAt($value)
- * @method static Builder<static>|Flow withTrashed()
+ * @method static Builder<static>|Flow withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|Flow withoutTrashed()
- *
- * @property string|null $description
- *
- * @method static Builder<static>|Flow whereDescription($value)
- *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Document> $pages
- * @property-read int|null $pages_count
- *
  * @mixin \Eloquent
  */
 final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable

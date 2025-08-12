@@ -52,31 +52,31 @@ use function ucwords;
  * @property string|null $active_tenant_id
  * @property AccountType $accout_type
  * @property-read mixed $avatar
- * @property-read Collection<int, Tenant> $createdTenants
+ * @property-read Collection<int, \App\Models\Tenant> $createdTenants
  * @property-read int|null $created_tenants_count
- * @property-read Collection<int, Flow> $flows
+ * @property-read Collection<int, \App\Models\Flow> $flows
  * @property-read int|null $flows_count
- * @property-read Collection<int, MemberInvitation> $invitations
+ * @property-read Collection<int, \App\Models\MemberInvitation> $invitations
  * @property-read int|null $invitations_count
  * @property-read mixed $inviter_name
- * @property-read LoginLog|null $latestLogin
- * @property-read Collection<int, LoginLog> $logins
+ * @property-read \App\Models\LoginLog|null $latestLogin
+ * @property-read Collection<int, \App\Models\LoginLog> $logins
  * @property-read int|null $logins_count
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read MemberInvitation|null $receivedInvitation
- * @property-read Collection<int, ModelHasRole> $roleAssignments
+ * @property-read \App\Models\MemberInvitation|null $receivedInvitation
+ * @property-read Collection<int, \App\Models\ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- *
- * @method static Builder<static>|User appAdmin()
- * @method static Builder<static>|User assignedTo(\App\Contracts\Role\RoleableEntity $entity)
+ * @method static Builder<static>|User appUser()
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
- * @method static Builder<static>|User memberOf(\App\Models\Tenant $tenant)
  * @method static Builder<static>|User newModelQuery()
  * @method static Builder<static>|User newQuery()
- * @method static Builder<static>|User notAssignedTo(\App\Contracts\Role\RoleableEntity $entity)
- * @method static Builder<static>|User notMemberOf(\App\Models\Tenant $tenant)
  * @method static Builder<static>|User query()
+ * @method static Builder<static>|User scopeAppAdmin()
+ * @method static Builder<static>|User scopeAssignedTo(\App\Contracts\Role\RoleableEntity $entity)
+ * @method static Builder<static>|User scopeMemberOf(\App\Models\Tenant $tenant)
+ * @method static Builder<static>|User scopeNotAssignedTo(\App\Contracts\Role\RoleableEntity $entity)
+ * @method static Builder<static>|User scopeNotMemberOf(\App\Models\Tenant $tenant)
  * @method static Builder<static>|User whereAccountType($value)
  * @method static Builder<static>|User whereActiveTenantId($value)
  * @method static Builder<static>|User whereCreatedAt($value)
@@ -88,7 +88,6 @@ use function ucwords;
  * @method static Builder<static>|User whereRememberToken($value)
  * @method static Builder<static>|User whereTimezone($value)
  * @method static Builder<static>|User whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 final class User extends Authenticatable implements AssignableEntity, FilamentUser, HasAvatar, HasDefaultTenant, HasTenants

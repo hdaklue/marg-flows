@@ -23,9 +23,9 @@ use Illuminate\Support\Carbon;
  * @property string $owner_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read User $creator
- * @property-read Model|Eloquent $sidenoteable
- *
+ * @property-read \App\Models\User $creator
+ * @property-read Model|\Eloquent $sidenoteable
+ * @method static Builder<static>|SideNote for(\App\Contracts\Sidenoteable $entity, \App\Models\User $owner)
  * @method static Builder<static>|SideNote newModelQuery()
  * @method static Builder<static>|SideNote newQuery()
  * @method static Builder<static>|SideNote query()
@@ -36,8 +36,6 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|SideNote whereSidenoteableId($value)
  * @method static Builder<static>|SideNote whereSidenoteableType($value)
  * @method static Builder<static>|SideNote whereUpdatedAt($value)
- *
- * @mixin \Eloquent
  * @mixin Eloquent
  */
 final class SideNote extends Model

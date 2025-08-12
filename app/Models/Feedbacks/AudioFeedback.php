@@ -24,21 +24,50 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @property string $id
  * @property string $creator_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
  * @property string $content
  * @property string $feedbackable_type
  * @property string $feedbackable_id
- * @property FeedbackStatus $status
- * @property FeedbackUrgency $urgency
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property Carbon|null $resolved_at
+ * @property \Illuminate\Support\Carbon|null $resolved_at
  * @property float $start_time Start time in seconds
  * @property float $end_time End time in seconds
- * @property array|null $waveform_data Waveform visualization data
- * @property float|null $peak_amplitude Peak amplitude in the selection
- * @property array|null $frequency_data Frequency analysis data
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property array<array-key, mixed>|null $waveform_data Waveform visualization data
+ * @property float|null $peak_amplitude Peak amplitude in the selection (0.0-1.0)
+ * @property array<array-key, mixed>|null $frequency_data Frequency analysis data
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $feedbackable
+ * @method static Builder<static>|AudioFeedback atTimestamp(float $timestamp)
+ * @method static Builder<static>|AudioFeedback byDuration(float $minDuration, ?float $maxDuration = null)
+ * @method static Builder<static>|AudioFeedback inTimeRange(float $startTime, float $endTime)
+ * @method static Builder<static>|AudioFeedback longClips(float $minDuration = 30)
+ * @method static Builder<static>|AudioFeedback newModelQuery()
+ * @method static Builder<static>|AudioFeedback newQuery()
+ * @method static Builder<static>|AudioFeedback overlapping(float $startTime, float $endTime)
+ * @method static Builder<static>|AudioFeedback query()
+ * @method static Builder<static>|AudioFeedback shortClips(float $maxDuration = 5)
+ * @method static Builder<static>|AudioFeedback whereContent($value)
+ * @method static Builder<static>|AudioFeedback whereCreatedAt($value)
+ * @method static Builder<static>|AudioFeedback whereCreatorId($value)
+ * @method static Builder<static>|AudioFeedback whereEndTime($value)
+ * @method static Builder<static>|AudioFeedback whereFeedbackableId($value)
+ * @method static Builder<static>|AudioFeedback whereFeedbackableType($value)
+ * @method static Builder<static>|AudioFeedback whereFrequencyData($value)
+ * @method static Builder<static>|AudioFeedback whereId($value)
+ * @method static Builder<static>|AudioFeedback wherePeakAmplitude($value)
+ * @method static Builder<static>|AudioFeedback whereResolution($value)
+ * @method static Builder<static>|AudioFeedback whereResolvedAt($value)
+ * @method static Builder<static>|AudioFeedback whereResolvedBy($value)
+ * @method static Builder<static>|AudioFeedback whereStartTime($value)
+ * @method static Builder<static>|AudioFeedback whereStatus($value)
+ * @method static Builder<static>|AudioFeedback whereUpdatedAt($value)
+ * @method static Builder<static>|AudioFeedback whereUrgency($value)
+ * @method static Builder<static>|AudioFeedback whereWaveformData($value)
+ * @method static Builder<static>|AudioFeedback withHighAmplitude(float $minAmplitude = 0.7)
+ * @mixin \Eloquent
  */
 final class AudioFeedback extends Model implements HasMentionsContract
 {
@@ -47,6 +76,7 @@ final class AudioFeedback extends Model implements HasMentionsContract
     protected $table = 'audio_feedbacks';
 
     protected $fillable = [
+        'id',
         'creator_id',
         'content',
         'feedbackable_type',

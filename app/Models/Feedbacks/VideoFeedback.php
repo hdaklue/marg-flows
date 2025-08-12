@@ -25,23 +25,55 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @property string $id
  * @property string $creator_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
  * @property string $content
  * @property string $feedbackable_type
  * @property string $feedbackable_id
- * @property FeedbackStatus $status
- * @property FeedbackUrgency $urgency
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property Carbon|null $resolved_at
- * @property string $feedback_type 'frame' or 'region'
+ * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property string $feedback_type
  * @property float|null $timestamp Frame timestamp in seconds (for frame feedback)
  * @property float|null $start_time Start time in seconds (for region feedback)
  * @property float|null $end_time End time in seconds (for region feedback)
  * @property int|null $x_coordinate X coordinate on video frame
  * @property int|null $y_coordinate Y coordinate on video frame
- * @property array|null $region_data Additional region metadata (bounds, shape, etc.)
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property array<array-key, mixed>|null $region_data Additional region metadata
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read User|null $creator
+ * @property-read Model|\Eloquent $feedbackable
+ * @property-read User|null $resolver
+ * @method static Builder<static>|VideoFeedback atCoordinates(int $x, int $y, int $tolerance = 20)
+ * @method static Builder<static>|VideoFeedback atTimestamp(float $timestamp, float $tolerance = 0.1)
+ * @method static Builder<static>|VideoFeedback frameComments()
+ * @method static Builder<static>|VideoFeedback inTimeRange(float $startTime, float $endTime)
+ * @method static Builder<static>|VideoFeedback nearCoordinates(int $x, int $y, int $radius = 50)
+ * @method static Builder<static>|VideoFeedback newModelQuery()
+ * @method static Builder<static>|VideoFeedback newQuery()
+ * @method static Builder<static>|VideoFeedback query()
+ * @method static Builder<static>|VideoFeedback regionComments()
+ * @method static Builder<static>|VideoFeedback whereContent($value)
+ * @method static Builder<static>|VideoFeedback whereCreatedAt($value)
+ * @method static Builder<static>|VideoFeedback whereCreatorId($value)
+ * @method static Builder<static>|VideoFeedback whereEndTime($value)
+ * @method static Builder<static>|VideoFeedback whereFeedbackType($value)
+ * @method static Builder<static>|VideoFeedback whereFeedbackableId($value)
+ * @method static Builder<static>|VideoFeedback whereFeedbackableType($value)
+ * @method static Builder<static>|VideoFeedback whereId($value)
+ * @method static Builder<static>|VideoFeedback whereRegionData($value)
+ * @method static Builder<static>|VideoFeedback whereResolution($value)
+ * @method static Builder<static>|VideoFeedback whereResolvedAt($value)
+ * @method static Builder<static>|VideoFeedback whereResolvedBy($value)
+ * @method static Builder<static>|VideoFeedback whereStartTime($value)
+ * @method static Builder<static>|VideoFeedback whereStatus($value)
+ * @method static Builder<static>|VideoFeedback whereTimestamp($value)
+ * @method static Builder<static>|VideoFeedback whereUpdatedAt($value)
+ * @method static Builder<static>|VideoFeedback whereUrgency($value)
+ * @method static Builder<static>|VideoFeedback whereXCoordinate($value)
+ * @method static Builder<static>|VideoFeedback whereYCoordinate($value)
+ * @mixin \Eloquent
  */
 final class VideoFeedback extends Model
 {
@@ -50,6 +82,7 @@ final class VideoFeedback extends Model
     protected $table = 'video_feedbacks';
 
     protected $fillable = [
+        'id',
         'creator_id',
         'content',
         'feedbackable_type',

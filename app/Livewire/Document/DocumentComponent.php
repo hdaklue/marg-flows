@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Document;
 
+use App\DTOs\Document\DocumentDto;
 use App\Facades\DocumentManager;
 use App\Models\Document;
-use App\Services\Document\Facades\DocumentBuilder;
+use App\Services\Document\Facades\EditorBuilder;
 use Exception;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -22,33 +23,50 @@ final class DocumentComponent extends Component
 {
     public $canEdit = true;
 
-    public Document $page;
-
     public array $content;
 
     public string $userPlan = 'ultimate'; // Default plan - testing restrictions
 
-    public function mount(string $pageId, $canEdit = true)
+    public string $documentId;
+
+    private DocumentDto $documentDto;
+
+    public function mount(string $documentId, $canEdit = true)
     {
+        $this->documentDto = DocumentManager::getDocumentDto($documentId);
 
-        $document = DocumentManager::getDocument($pageId);
-
+        $this->documentId = $documentId;
         // Set the page property
-        $this->page = $document;
 
         // Initialize resolver using facade
-        $this->content = $document->getAttribute('blocks');
+        $this->content = $this->documentDto->blocks;
         $this->canEdit = $canEdit;
+    }
+
+    #[Computed]
+    public function document(): Document
+    {
+        return DocumentManager::getDocument($this->documentId);
     }
 
     public function getToolsConfig()
     {
         return match ($this->userPlan) {
-            'simple' => DocumentBuilder::simple()->build(),
-            'advanced' => DocumentBuilder::advanced()->build(),
-            'ultimate' => DocumentBuilder::ultimate()->build(),
+            'simple' => EditorBuilder::simple()->build(),
+            'advanced' => EditorBuilder::advanced()->build(),
+            'ultimate' => EditorBuilder::ultimate()->build(),
             default => throw new Exception('Unable to resolve user plan'),
         };
+    }
+
+    public function getDocumentableKey(): string
+    {
+        return $this->document->documentable->getKey();
+    }
+
+    public function getDocumentableType(): string
+    {
+        return $this->document->documentable->getMorphClass();
     }
 
     /**
@@ -58,7 +76,7 @@ final class DocumentComponent extends Component
     public function getFullToolsConfig()
     {
         // Start with base configuration to render all existing blocks
-        $baseConfig = DocumentBuilder::base()->build();
+        $baseConfig = EditorBuilder::base()->build();
 
         // Override with current plan-specific configurations
         $currentPlanConfig = $this->getToolsConfig();
@@ -78,27 +96,22 @@ final class DocumentComponent extends Component
     #[Computed]
     public function updatedAtString(): string
     {
-        return $this->page->getUpdatedAtString();
-    }
-
-    public function getUpdatedAtString(): string
-    {
-        return $this->updatedAtString;
+        return toUserIsoString($this->document->updated_at, filamentUser());
     }
 
     #[Computed(true)]
     public function userPermissions(): array
     {
         return [
-            'canManageMembers' => filamentUser()->can('manageMembers', $this->page),
-            'canEdit' => filamentUser()->can('update', $this->page),
+            'canManageMembers' => filamentUser()->can('manageMembers', $this->document),
+            'canEdit' => filamentUser()->can('update', $this->document),
         ];
     }
 
     #[Computed]
     public function participants(): Collection
     {
-        return $this->page->getParticipants();
+        return $this->document->getParticipants();
     }
 
     #[Computed]
@@ -108,7 +121,7 @@ final class DocumentComponent extends Component
         return $this->participants->asDtoArray()->toArray();
     }
 
-    #[On('roleable-entity:members-updated.{page.id}')]
+    #[On('roleable-entity:members-updated.{documentId}')]
     public function reloadPartipants(): void
     {
         unset($this->participants, $this->participantsArray);
@@ -118,23 +131,22 @@ final class DocumentComponent extends Component
     public function saveDocument(string $content)
     {
         // Get the underlying Document model for authorization and updates
-        $document = DocumentManager::getDocument($this->page->id);
-        $this->authorize('update', $document);
+
+        $this->authorize('update', $this->document);
 
         try {
             // Parse the JSON content
             $editorData = json_decode($content, true);
 
             // Use DocumentManager to update the document
-            DocumentManager::update($document, ['blocks' => $editorData]);
+            DocumentManager::updateBlocks($this->document, $editorData);
 
             // Update the DTO with new content
-
-            unset($this->updatedAtString);
+            unset($this->updatedAtString,$this->document);
 
         } catch (Exception $e) {
             Log::error('Document save failed', [
-                'page_id' => $this->page->id,
+                'page_id' => $this->page['id'],
                 'error' => $e->getMessage(),
             ]);
 
@@ -168,28 +180,4 @@ final class DocumentComponent extends Component
     {
         return view('livewire.page.document-component');
     }
-
-    // /**
-    //  * Get user's plan - implement based on your auth/tenant system.
-    //  */
-    // private function getUserPlan(): string
-    // {
-    //     // Example implementation - adjust based on your system
-    //     return auth()->user()?->currentTenant?->plan ?? 'simple';
-    // }
-
-    // /**
-    //  * Get filtered blocks as JSON based on user plan.
-    //  */
-    // private function getFilteredBlocksJson(): string
-    // {
-    //     // Filter blocks based on user plan (blocks is now guaranteed to be DocumentBlocksCollection)
-    //     $filteredBlocks = $this->documentResolver->filter(
-    //         $this->page->blocks,
-    //         strtolower($this->userPlan),
-    //     );
-
-    //     // Return as EditorJS JSON format
-    //     return $filteredBlocks->toEditorJson();
-    // }
 }

@@ -342,8 +342,8 @@ final class DocumentSpecification
         return [
             'min_minutes' => $minTime,
             'max_minutes' => $maxTime,
-            'min_formatted' => $minTime ? $this->formatReadingTime($minTime) : null,
-            'max_formatted' => $maxTime ? $this->formatReadingTime($maxTime) : null,
+            'min_formatted' => $minTime ? $this->formatReadingTime((int) $minTime) : null,
+            'max_formatted' => $maxTime ? $this->formatReadingTime((int) $maxTime) : null,
         ];
     }
 

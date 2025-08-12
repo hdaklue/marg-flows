@@ -25,19 +25,48 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @property string $id
  * @property string $creator_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
  * @property string $content
  * @property string $feedbackable_type
  * @property string $feedbackable_id
- * @property FeedbackStatus $status
- * @property FeedbackUrgency $urgency
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property Carbon|null $resolved_at
- * @property array|null $metadata Flexible metadata storage for various feedback types
+ * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property array<array-key, mixed>|null $metadata Flexible metadata storage for various feedback types
  * @property string|null $feedback_category Optional category for organization
- * @property array|null $custom_data Additional custom data as needed
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property array<array-key, mixed>|null $custom_data Additional custom data as needed
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read User|null $creator
+ * @property-read Model|\Eloquent $feedbackable
+ * @property-read User|null $resolver
+ * @method static Builder<static>|GeneralFeedback byCategories(array $categories)
+ * @method static Builder<static>|GeneralFeedback byCategory(string $category)
+ * @method static Builder<static>|GeneralFeedback hasMetadataKey(string $key)
+ * @method static Builder<static>|GeneralFeedback metadataEquals(string $key, ?mixed $value)
+ * @method static Builder<static>|GeneralFeedback newModelQuery()
+ * @method static Builder<static>|GeneralFeedback newQuery()
+ * @method static Builder<static>|GeneralFeedback query()
+ * @method static Builder<static>|GeneralFeedback whereContent($value)
+ * @method static Builder<static>|GeneralFeedback whereCreatedAt($value)
+ * @method static Builder<static>|GeneralFeedback whereCreatorId($value)
+ * @method static Builder<static>|GeneralFeedback whereCustomData($value)
+ * @method static Builder<static>|GeneralFeedback whereFeedbackCategory($value)
+ * @method static Builder<static>|GeneralFeedback whereFeedbackableId($value)
+ * @method static Builder<static>|GeneralFeedback whereFeedbackableType($value)
+ * @method static Builder<static>|GeneralFeedback whereId($value)
+ * @method static Builder<static>|GeneralFeedback whereMetadata($value)
+ * @method static Builder<static>|GeneralFeedback whereResolution($value)
+ * @method static Builder<static>|GeneralFeedback whereResolvedAt($value)
+ * @method static Builder<static>|GeneralFeedback whereResolvedBy($value)
+ * @method static Builder<static>|GeneralFeedback whereStatus($value)
+ * @method static Builder<static>|GeneralFeedback whereUpdatedAt($value)
+ * @method static Builder<static>|GeneralFeedback whereUrgency($value)
+ * @method static Builder<static>|GeneralFeedback withCustomData()
+ * @method static Builder<static>|GeneralFeedback withMetadata()
+ * @method static Builder<static>|GeneralFeedback withoutMetadata()
+ * @mixin \Eloquent
  */
 final class GeneralFeedback extends Model
 {

@@ -292,6 +292,18 @@ final class AudioSpecification implements DeliverableSpecification
         return 'Unknown';
     }
 
+    public function getAspectRatio(): float
+    {
+        // Audio doesn't have aspect ratio, return 1:1 as default
+        return 1.0;
+    }
+
+    public function getAspectRatioName(): string
+    {
+        // Audio doesn't have aspect ratio
+        return 'N/A';
+    }
+
     public function toArray(): array
     {
         return [

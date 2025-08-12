@@ -13,7 +13,6 @@ use App\Enums\Role\RoleEnum;
 use App\Facades\RoleManager;
 use App\Models\Document;
 use App\Models\User;
-use App\Services\Document\DTOs\DocumentWithBlocksDto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -71,6 +70,14 @@ final class DocumentService implements DocumentManagerInterface
         $this->clearDocumentsCache($document);
 
         return $document->refresh();
+    }
+
+    public function updateBlocks(Document $document, array|string $blocks)
+    {
+
+        $document->updateBlocks($blocks);
+        $this->clearCache($document->documentable);
+        $this->clearDocumentsCache($document);
     }
 
     /**
@@ -148,14 +155,9 @@ final class DocumentService implements DocumentManagerInterface
         return $page;
     }
 
-    /**
-     * Get document with full blocks data as DTO for editing.
-     */
-    public function getDocumentWithBlocks(string $documentId): DocumentWithBlocksDto
+    public function getDocumentDto(string $documentId): ?DocumentDto
     {
-        $document = $this->getDocument($documentId);
-
-        return DocumentWithBlocksDto::fromDocument($document);
+        return DocumentDto::fromModel($this->getDocument($documentId));
     }
 
     public function getDocumentsByCreator(User $creator): Collection

@@ -57,30 +57,7 @@ return new class extends Migration
             $table->index(['feedback_category', 'status']);
 
             // Category-based queries
-            $table->index(['feedbackable_type', 'feedbackable_id', 'feedback_category']);
-
-            // Metadata queries - JSON indexes for common patterns
-            $table->rawIndex(
-                '(JSON_UNQUOTE(JSON_EXTRACT(metadata, "$.type")))',
-                'general_feedbacks_metadata_type_idx',
-            );
-
-            $table->rawIndex(
-                '(JSON_UNQUOTE(JSON_EXTRACT(metadata, "$.priority")))',
-                'general_feedbacks_metadata_priority_idx',
-            );
-
-            // Check for metadata existence
-            $table->rawIndex(
-                '(CASE WHEN metadata IS NOT NULL AND JSON_LENGTH(metadata) > 0 THEN 1 ELSE 0 END)',
-                'general_feedbacks_has_metadata_idx',
-            );
-
-            // Check for custom data existence
-            $table->rawIndex(
-                '(CASE WHEN custom_data IS NOT NULL AND JSON_LENGTH(custom_data) > 0 THEN 1 ELSE 0 END)',
-                'general_feedbacks_has_custom_data_idx',
-            );
+            $table->index(['feedbackable_type', 'feedbackable_id', 'feedback_category'], 'gf_feedbackable_category');
 
             // Category distribution analysis
             $table->index(['feedback_category', 'urgency', 'status']);

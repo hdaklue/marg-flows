@@ -17,13 +17,33 @@ use Illuminate\Support\Carbon;
  * @property int $version_number
  * @property DeliverableVersionStatus $status
  * @property string|null $notes
- * @property array|null $files
+ * @property array<array-key, mixed>|null $files
  * @property string $created_by
  * @property Carbon|null $submitted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Deliverable $deliverable
- * @property-read User $creator
+ * @property-read \App\Models\User|null $creator
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion byStatus(\App\Enums\Deliverable\DeliverableVersionStatus $status)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion drafts()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion latestVersions()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion needingRevision()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion orderByVersion(string $direction = 'desc')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion submitted()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereDeliverableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereFiles($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereSubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereVersionNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion withFiles()
+ * @mixin \Eloquent
  */
 final class DeliverableVersion extends Model
 {

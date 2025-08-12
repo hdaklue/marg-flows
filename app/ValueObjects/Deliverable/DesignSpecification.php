@@ -40,6 +40,11 @@ final class DesignSpecification implements DeliverableSpecification
         );
     }
 
+    public function getType(): string
+    {
+        return self::TYPE;
+    }
+
     public function getWidth(): int
     {
         return $this->width;

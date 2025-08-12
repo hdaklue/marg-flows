@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Role;
 
-use Filament\Schemas\Schema;
 use App\Actions\Roleable\AddParticipant;
 use App\Actions\Roleable\RemoveParticipant;
 use App\Collections\Role\ParticipantsCollection;
@@ -20,6 +19,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
@@ -41,19 +42,25 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
     // public ?Collection $manageableMembers;
 
-    public ?RoleableEntity $roleable = null;
+    public ?RoleableEntity $roleableEntity = null;
+
+    public ?RoleableEntity $scopeTo = null;
 
     public ?array $data = [];
 
     #[Locked]
     public bool $canEdit = false;
 
-    public function mount(?RoleableEntity $roleable)
+    public function mount(?RoleableEntity $roleableEntity, ?RoleableEntity $scopeToEntity)
     {
-        if ($roleable) {
-            $this->canEdit = $this->authorize('manageMembers', $roleable)->allowed();
+
+        if ($roleableEntity) {
+            $this->canEdit = $this->authorize('manageMembers', $roleableEntity)->allowed();
             $this->form->fill();
-            $this->roleable = $roleable;
+            $this->roleableEntity = $roleableEntity;
+        }
+        if ($scopeToEntity) {
+            $this->scopeTo = $scopeToEntity;
         }
         // $this->manageableMembers = $this->loadManageableMembers();
 
@@ -65,23 +72,16 @@ final class ManageMembers extends Component implements HasActions, HasForms
         return $schema
             ->components([
                 Select::make('member')
-                    ->options(function () {
-                        if (! $this->roleable) {
-                            return [];
-                        }
-
-                        return User::assignedTo(filamentTenant())->notAssignedTo($this->roleable)
-                            ->get()->pluck('name', 'id');
-                    })
+                    ->options($this->resolveAssignableEntities())
                     ->required(),
                 Select::make('role')
                     ->required()
                     ->native(false)
                     ->options(function () {
-                        if (! $this->roleable) {
+                        if (! $this->roleableEntity) {
                             return [];
                         }
-                        $userRole = filamentUser()->getAssignmentOn($this->roleable);
+                        $userRole = filamentUser()->getAssignmentOn($this->roleableEntity);
 
                         return RoleEnum::whereLowerThanOrEqual(RoleEnum::from($userRole->name))->toArray();
                     }),
@@ -95,11 +95,11 @@ final class ManageMembers extends Component implements HasActions, HasForms
     public function manageableMembers(): ParticipantsCollection
     {
 
-        if (! $this->roleable) {
+        if (! $this->roleableEntity) {
             return new ParticipantsCollection;
         }
 
-        return $this->roleable->getParticipants()->exceptAssignable(filamentUser())->asDtoArray();
+        return $this->roleableEntity->getParticipants()->exceptAssignable(filamentUser())->asDtoArray();
 
         // return ParticipantsDto::fromParticipantsCollection(
         //     $this->roleable->getParticipants()->exceptAssignable(filamentUser()->getKey()),
@@ -108,12 +108,12 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
     public function addMember()
     {
-        $this->authorize('manageMembers', $this->roleable);
+        $this->authorize('manageMembers', $this->roleableEntity);
         $state = $this->form->getState();
 
         $user = User::where('id', '=', $state['member'])->firstOrFail();
         $role = RoleEnum::from($state['role']);
-        AddParticipant::run($this->roleable, $user, $role);
+        AddParticipant::run($this->roleableEntity, $user, $role);
         $this->reloadData();
 
     }
@@ -121,23 +121,23 @@ final class ManageMembers extends Component implements HasActions, HasForms
     #[Computed]
     public function authedUserAssignableRoles(): Collection
     {
-        if (! $this->roleable) {
+        if (! $this->roleableEntity) {
             return collect();
         }
-        $role = filamentUser()->getAssignmentOn($this->roleable);
+        $role = filamentUser()->getAssignmentOn($this->roleableEntity);
 
         return RoleEnum::getRolesLowerThanOrEqual(RoleEnum::from($role->name));
     }
 
     public function changeRole(string $role, string|int $target_id)
     {
-        $this->authorize('manageMembers', $this->roleable);
-        $targetModel = $this->roleable->getParticipant($target_id);
+        $this->authorize('manageMembers', $this->roleableEntity);
+        $targetModel = $this->roleableEntity->getParticipant($target_id);
         if (! $targetModel) {
             return;
         }
 
-        RoleManager::changeRoleOn($targetModel, $this->roleable, $role);
+        RoleManager::changeRoleOn($targetModel, $this->roleableEntity, $role);
         $this->reloadData();
         Notification::make()
             ->body('Role updated successfully')
@@ -151,7 +151,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
         return Action::make('Remove Member')
             ->action(function (array $arguments) {
                 $user = User::where('id', '=', $arguments['memberId'])->firstOrFail();
-                RemoveParticipant::run($this->roleable, $user);
+                RemoveParticipant::run($this->roleableEntity, $user);
                 $this->reloadData();
             })->requiresConfirmation()
             ->iconButton()
@@ -165,11 +165,28 @@ final class ManageMembers extends Component implements HasActions, HasForms
         return view('livewire.role.manage-members');
     }
 
+    protected function resolveAssignableEntities(): array
+    {
+
+        if (! $this->roleableEntity) {
+            return [];
+        }
+
+        if ($this->scopeTo && $this->roleableEntity) {
+            $assignedIds = $this->roleableEntity->getParticipants()->getParticipantIds()->toArray();
+
+            return $this->scopeTo->getParticipants()->exceptAssignable(Arr::prepend($assignedIds, filamentUser()->getKey()))->getParticipantsAsSelectArray();
+        }
+
+        return filamentTenant()->getParticipants()->exceptAssignable(filamentUser())->getParticipantsAsSelectArray();
+
+    }
+
     private function reloadData()
     {
         unset($this->manageableMembers);
         $this->form->fill();
-        $this->dispatch("board-item-updated.{$this->roleable->getKey()}");
-        $this->dispatch("roleable-entity:members-updated.{$this->roleable->getKey()}");
+        $this->dispatch("board-item-updated.{$this->roleableEntity->getKey()}");
+        $this->dispatch("roleable-entity:members-updated.{$this->roleableEntity->getKey()}");
     }
 }

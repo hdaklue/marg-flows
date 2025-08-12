@@ -17,7 +17,7 @@ use App\Services\Document\ConfigBuilder\Blocks\VideoUpload;
 use App\Services\Document\Contratcs\DocumentBlockConfigContract;
 use Illuminate\Support\Manager;
 
-final class ConfigManager extends Manager
+final class EditorConfigManager extends Manager
 {
     public function getDefaultDriver(): string
     {

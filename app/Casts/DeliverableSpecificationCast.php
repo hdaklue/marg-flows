@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Casts;
 
 use App\Enums\Deliverable\DeliverableFormat;
+use App\Contracts\Deliverables\DeliverableSpecification;
 use App\ValueObjects\Deliverable\AudioSpecification;
-use App\ValueObjects\Deliverable\DeliverableSpecification;
 use App\ValueObjects\Deliverable\DesignSpecification;
 use App\ValueObjects\Deliverable\DocumentSpecification;
 use App\ValueObjects\Deliverable\VideoSpecification;

@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('deliverables', function (Blueprint $table) {
+        Schema::connection('business_db')->create('deliverables', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('title');
             $table->text('description')->nullable();
@@ -34,10 +34,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('flow_id')->references('id')->on('flows')->onDelete('cascade');
-            $table->foreign('stage_id')->references('id')->on('stages')->onDelete('set null');
-            $table->foreign('creator_id')->references('id')->on('users');
-            $table->foreign('tenant_id')->references('id')->on('tenants');
+            // Foreign keys reference tables in main database, stored as ULIDs only
             
             $table->index(['flow_id', 'status']);
             $table->index(['tenant_id', 'status']);
@@ -48,6 +45,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('deliverables');
+        Schema::connection('business_db')->dropIfExists('deliverables');
     }
 };

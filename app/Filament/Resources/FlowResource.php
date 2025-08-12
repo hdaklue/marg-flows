@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use Filament\Support\Enums\Size;
-use Filament\Actions\Action;
-use App\Filament\Resources\FlowResource\Pages\ListFlows;
-use App\Filament\Resources\FlowResource\Pages\CreateFlow;
-use App\Filament\Resources\FlowResource\Pages\ViewFlow;
 use App\Enums\FlowStage;
-use App\Filament\Resources\FlowResource\Pages;
 use App\Filament\Resources\FlowResource\Pages\CreateDocument;
+use App\Filament\Resources\FlowResource\Pages\CreateFlow;
 use App\Filament\Resources\FlowResource\Pages\FlowDocuments;
+use App\Filament\Resources\FlowResource\Pages\ListFlows;
+use App\Filament\Resources\FlowResource\Pages\ViewFlow;
 use App\Models\Flow;
 use App\Services\Flow\TimeProgressService;
 use App\Tables\Columns\Progress;
+use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\Size;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
@@ -36,7 +36,7 @@ final class FlowResource extends Resource
 
     protected static ?string $slug = 'f';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function table(Table $table): Table
     {
@@ -51,7 +51,6 @@ final class FlowResource extends Resource
             })
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
-            ->reorderable('order_column')
             ->recordUrl(fn (Model $record) => FlowResource::getUrl('view', ['record' => $record->getKey()]))
             ->columns([
                 TextColumn::make('title')
@@ -81,11 +80,13 @@ final class FlowResource extends Resource
                 // TextColumn::make('duration')
                 //     ->getStateUsing(fn ($record) => $flowProgressService->getTotalDays($record)),
 
-                ImageColumn::make('prticipants')
-                    ->getStateUsing(fn ($record) => $record->participants->pluck('model')->pluck('avatar'))
+                ImageColumn::make('participant_stack')
+                    ->getStateUsing(fn ($record) => $record->getParticipants()->avatars()->toArray())
+                    ->imageHeight(40)
                     ->circular()
                     ->stacked()
                     ->limit(3)
+                    ->ring(5)
                     ->limitedRemainingText(),
             ])
 
@@ -95,13 +96,15 @@ final class FlowResource extends Resource
             ], FiltersLayout::AboveContentCollapsible)
             ->recordActions([
                 EditAction::make()
+                    ->iconButton()
                     ->size(Size::ExtraSmall),
                 Action::make('view')
-                    ->label('Pages')
+                    ->label('Documents')
                     ->color('gray')
                     ->size(Size::ExtraSmall)
                     ->icon('heroicon-o-document-text')
                     ->outlined()
+                    ->iconButton()
                     ->url(fn ($record) => FlowResource::getUrl('pages', ['record' => $record])),
             ])
             ->toolbarActions([

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\DocumentResource\Pages;
 
-use Filament\Support\Enums\Width;
-use Filament\Schemas\Schema;
 use App\Facades\DocumentManager;
 use App\Filament\Resources\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -22,11 +22,11 @@ final class ViewDocument extends ViewRecord
 {
     protected static string $resource = DocumentResource::class;
 
-    protected string $view = 'filament.resources.document-resource.pages.view';
-
     public ?array $data = [];
 
     public Width|string|null $maxContentWidth = 'full';
+
+    protected string $view = 'filament.resources.document-resource.pages.view';
 
     public function getTitle(): string|Htmlable
     {
@@ -56,6 +56,7 @@ final class ViewDocument extends ViewRecord
 
     public function form(Schema $schema): Schema
     {
+
         return $schema
             ->components([
                 PlaceholderInput::make('title')

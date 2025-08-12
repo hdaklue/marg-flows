@@ -456,8 +456,7 @@
                     <button @click="showResolutionMenu = !showResolutionMenu"
                         class="flex items-center justify-center gap-1 transition-all duration-200 video-control-btn h-9 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 hover:shadow-md dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white sm:px-3"
                         :class="{ 'bg-zinc-100 text-zinc-800 shadow-md dark:bg-zinc-700 dark:text-white': showResolutionMenu }"
-                        :aria-label="'Video quality: ' + (currentResolution ? (currentResolution.label || currentResolution
-                            .quality) : '1080p')"
+                        :aria-label="'Video quality: ' + (qualitySources.find(s => s.src === currentResolutionSrc)?.label || qualitySources.find(s => s.src === currentResolutionSrc)?.quality || currentResolution?.label || currentResolution?.quality || '1080p')"
                         title="Change video quality">
                         <!-- HD/Quality Icon -->
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -468,7 +467,8 @@
                         </svg>
                         <!-- Text label - hidden on mobile -->
                         <span class="hidden text-xs font-medium sm:block"
-                            x-text="currentResolution ? (currentResolution.label || currentResolution.quality) : '1080p'"></span>
+                            x-text="qualitySources.find(s => s.src === currentResolutionSrc)?.label || qualitySources.find(s => s.src === currentResolutionSrc)?.quality || currentResolution?.label || currentResolution?.quality || '1080p'"
+                            @resolution-changed.window="$nextTick(() => $el.textContent = qualitySources.find(s => s.src === currentResolutionSrc)?.label || qualitySources.find(s => s.src === currentResolutionSrc)?.quality || currentResolution?.label || currentResolution?.quality || '1080p')"></span>
                         <!-- Chevron - hidden on mobile -->
                         <svg class="hidden w-3 h-3 transition-transform duration-200 sm:block"
                             :class="{ 'rotate-180': showResolutionMenu }" fill="none" stroke="currentColor"

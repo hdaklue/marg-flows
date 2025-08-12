@@ -27,18 +27,17 @@ use Illuminate\Support\Carbon;
  * @property string $creator_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Collection<int, Role> $assignedRoles
+ * @property-read Collection<int, \App\Models\Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
- * @property-read User $creator
- * @property-read Collection<int, Flow> $flows
+ * @property-read \App\Models\User $creator
+ * @property-read Collection<int, \App\Models\Flow> $flows
  * @property-read int|null $flows_count
- * @property-read Collection<int, ModelHasRole> $participants
+ * @property-read Collection<int, \App\Models\ModelHasRole> $participants
  * @property-read int|null $participants_count
- * @property-read Collection<int, ModelHasRole> $roleAssignments
+ * @property-read Collection<int, \App\Models\ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- * @property-read Collection<int, Role> $systemRoles
+ * @property-read Collection<int, \App\Models\Role> $systemRoles
  * @property-read int|null $system_roles_count
- *
  * @method static \Database\Factories\TenantFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant forParticipant(\App\Contracts\Role\AssignableEntity $member)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant newModelQuery()
@@ -50,7 +49,6 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 final class Tenant extends Model implements HasStaticType, HasSystemRoleContract, RoleableEntity

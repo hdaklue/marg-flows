@@ -357,7 +357,7 @@
 }
 
 .resizable-image__thumbnail-grid {
-  @apply grid grid-cols-4 gap-3 mb-4;
+  @apply grid grid-cols-4 gap-3 mb-4 md:grid-cols-6;
 }
 
 .resizable-image__thumbnail {
@@ -494,7 +494,7 @@
 }
 
 .resizable-image__progress-grid {
-  @apply grid grid-cols-4 gap-3;
+  @apply grid grid-cols-4 gap-3 md:grid-cols-6;
 }
 
 .resizable-image__progress-thumbnail {
