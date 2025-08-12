@@ -1,6 +1,6 @@
 <div wire:ignore x-load
     x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('documentEditor') }}"
-    x-data="documentEditor(@js($content), '{{ route('editorjs.uploade-image') }}', @js($canEdit), $wire.saveDocument, 25, '{{ $this->updatedAtString }}', @js($this->getFullToolsConfig()), @js($this->getAllowedTools()))" class="w-full">
+    x-data="documentEditor(@js($content), '{{ route('editorjs.uploade-image') }}', @js($canEdit), $wire.saveDocument, 0, '{{ $this->updatedAtString }}', @js($this->getFullToolsConfig()), @js($this->getAllowedTools()))" class="w-full">
 
     <!-- Intersection Observer Target -->
     <div x-intersect:leave.margin.-80px="isSticky = true" x-intersect:enter.margin.-80px="isSticky = false" class="h-4">
@@ -69,6 +69,114 @@
                     <span>Saving...</span>
                 </span>
             </button>
+
+            <!-- Auto-save Toggle -->
+            <div class="ml-3 flex items-center space-x-2" 
+                 x-data="{ 
+                     autoSaveEnabled: false,
+                     autoSaveInterval: null,
+                     
+                     init() {
+                         // Disable the document editor's automatic autosave initially
+                         this.$nextTick(() => {
+                             if (this.autosaveTimer) {
+                                 clearInterval(this.autosaveTimer);
+                                 this.autosaveTimer = null;
+                                 console.log('Initial document editor autosave disabled');
+                             }
+                         });
+                     },
+                     
+                     toggleAutoSave() {
+                         this.autoSaveEnabled = !this.autoSaveEnabled;
+                         console.log('Auto-save toggled:', this.autoSaveEnabled);
+                         
+                         if (this.autoSaveEnabled) {
+                             this.startAutoSave();
+                         } else {
+                             this.stopAutoSave();
+                         }
+                     },
+                     
+                     startAutoSave() {
+                         // Always clear existing interval first
+                         this.stopAutoSave();
+                         
+                         console.log('Starting auto-save interval');
+                         this.autoSaveInterval = setInterval(() => {
+                             console.log('Auto-save interval fired, checking conditions...');
+                             // Only auto-save if conditions are met
+                             if (isDirty && !isSaving && !isEditorBusy) {
+                                 console.log('Auto-saving document');
+                                 saveDocument();
+                             } else {
+                                 console.log('Auto-save skipped - conditions not met');
+                             }
+                         }, 30000); // 30 seconds
+                         
+                         // Also enable the document editor's autosave
+                         if (this.startAutosave) {
+                             this.autosaveInterval = 30000; // 30 seconds
+                             this.startAutosave();
+                         }
+                         
+                         console.log('Auto-save interval ID:', this.autoSaveInterval);
+                     },
+                     
+                     stopAutoSave() {
+                         console.log('Stopping auto-save, current interval ID:', this.autoSaveInterval);
+                         if (this.autoSaveInterval) {
+                             clearInterval(this.autoSaveInterval);
+                             this.autoSaveInterval = null;
+                             console.log('Auto-save interval cleared');
+                         } else {
+                             console.log('No interval to clear');
+                         }
+                         
+                         // Also disable the document editor's autosave
+                         if (this.autosaveTimer) {
+                             clearInterval(this.autosaveTimer);
+                             this.autosaveTimer = null;
+                             console.log('Document editor autosave timer cleared');
+                         }
+                     }
+                 }"
+                 x-tooltip="'Auto-save every 30 seconds when enabled'">
+                
+                <!-- Toggle Switch -->
+                <button @click="toggleAutoSave()"
+                        :aria-pressed="autoSaveEnabled.toString()"
+                        :aria-label="'Auto-save ' + (autoSaveEnabled ? 'enabled' : 'disabled')"
+                        class="relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900"
+                        :class="autoSaveEnabled ? 'bg-sky-600' : 'bg-zinc-300 dark:bg-zinc-600'">
+                    <span class="sr-only">Toggle auto-save</span>
+                    <span aria-hidden="true"
+                          class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                          :class="autoSaveEnabled ? 'translate-x-3' : 'translate-x-0'">
+                    </span>
+                </button>
+                
+                <!-- Toggle Label -->
+                <span class="text-xs font-medium text-zinc-600 dark:text-zinc-400"
+                      :class="autoSaveEnabled ? 'text-sky-600 dark:text-sky-400' : ''">
+                    Auto-save
+                </span>
+                
+                <!-- Auto-save Status Indicator -->
+                <div x-show="autoSaveEnabled" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="flex items-center">
+                    <svg class="h-3 w-3 text-sky-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+
             <x-user-avatar-stack :users="$this->participantsArray" :roleableKey="$this->document->getKey()" :roleableType="$this->document->getMorphClass()" :scopeToKey="$this->getDocumentableKey()"
                 :scopeToType="$this->getDocumentableType()" :canEdit="$this->userPermissions['canManageMembers']" size='2xs' />
         </div>
