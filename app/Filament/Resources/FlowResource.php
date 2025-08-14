@@ -11,8 +11,6 @@ use App\Filament\Resources\FlowResource\Pages\FlowDocuments;
 use App\Filament\Resources\FlowResource\Pages\ListFlows;
 use App\Filament\Resources\FlowResource\Pages\ViewFlow;
 use App\Models\Flow;
-use App\Services\Flow\TimeProgressService;
-use App\Tables\Columns\Progress;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -22,7 +20,6 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Size;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
@@ -38,9 +35,13 @@ final class FlowResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getNavigationSort(): int
+    {
+        return 2;
+    }
+
     public static function table(Table $table): Table
     {
-        $flowProgressService = app(TimeProgressService::class);
 
         return $table
             ->modifyQueryUsing(function (Builder $query) {
@@ -66,20 +67,6 @@ final class FlowResource extends Resource
                     ->limit(3)
                     ->limitedRemainingText(),
 
-                // SelectColumn::make('status')
-                //     ->options(FlowStatus::class),
-
-                // Progress::make('time_progress')
-                //     ->getStateUsing(fn ($record) => $flowProgressService->getProgressDetails($record)),
-                // TextColumn::make('start_date')
-                //     ->date(),
-                // TextColumn::make('due_date')
-                //     ->date(),
-                // TextColumn::make('days_left')
-                //     ->getStateUsing(fn ($record) => $flowProgressService->getDaysRemaining($record)),
-                // TextColumn::make('duration')
-                //     ->getStateUsing(fn ($record) => $flowProgressService->getTotalDays($record)),
-
                 ImageColumn::make('participant_stack')
                     ->getStateUsing(fn ($record) => $record->getParticipants()->avatars()->toArray())
                     ->imageHeight(40)
@@ -91,7 +78,7 @@ final class FlowResource extends Resource
             ])
 
             ->filters([
-                SelectFilter::make('status')
+                SelectFilter::make('stage')
                     ->options(FlowStage::class),
             ], FiltersLayout::AboveContentCollapsible)
             ->recordActions([
@@ -108,6 +95,7 @@ final class FlowResource extends Resource
                     ->url(fn ($record) => FlowResource::getUrl('pages', ['record' => $record])),
             ])
             ->toolbarActions([
+
                 // Tables\Actions\BulkActionGroup::make([
                 //     // Tables\Actions\DeleteBulkAction::make(),
                 // ]),

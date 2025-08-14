@@ -6,7 +6,6 @@ namespace App\Filament\Resources\FlowResource\Pages;
 
 use App\Actions\Flow\CreateFlow as CreateFlowAction;
 use App\DTOs\Flow\CreateFlowDto;
-use App\Enums\Feedback\FeedbackUrgency;
 use App\Enums\FlowStage;
 use App\Exceptions\Flow\FlowCreationException;
 use App\Filament\Pages\FlowsKanabanBoard;
@@ -15,7 +14,9 @@ use App\Forms\Components\ChunkedFileUpload;
 use App\Forms\Components\EditorJs;
 use App\Models\ModelHasRole;
 use App\Models\User;
+use App\Services\Deliverable\DeliverableSpecResolver;
 use App\Services\Flow\TemplateService;
+use App\ValueObjects\Deliverable\DeliverableFormat;
 use Exception;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -151,7 +152,7 @@ final class CreateFlow extends CreateRecord
                 ->body('Created Successfully')
                 ->success()
                 ->send();
-            $this->redirect(FlowsKanabanBoard::getUrl(['tenant' => filamentTenant()]));
+            // $this->redirect(FlowsKanabanBoard::getUrl(['tenant' => filamentTenant()]));
 
         } catch (FlowCreationException $e) {
             Notification::make()
@@ -228,15 +229,14 @@ final class CreateFlow extends CreateRecord
 
                                 TextInput::make('Title'),
                                 Select::make('template')
-                                    ->options([
-                                        'design' => 'Design',
-                                        'development' => 'Development',
-                                    ])
+                                    ->options(DeliverableSpecResolver::getSupportedFormats())
+                                    ->live()
+                                    ->native(false)
                                     ->selectablePlaceholder(false)
                                     ->required(),
                                 Select::make('urgency')
-                                    ->options(FeedbackUrgency::class)
-                                    ->multiple(true)
+                                    ->options(fn ($get) => $get('template') ? (new DeliverableFormat($get('template')))->typesAsSelectArray() : [],
+                                    )
                                     ->native(false),
                                 TextInput::make('options')
                                     ->numeric()

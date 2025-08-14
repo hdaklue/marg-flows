@@ -3,6 +3,14 @@ import ui from '@alpinejs/ui';
 import Autosize from '@marcreichel/alpine-autosize';
 import Tooltip from '@ryangjchandler/alpine-tooltip';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
+
+// Import TOAST UI Calendar CSS and make it globally available
+import '@toast-ui/calendar/dist/toastui-calendar.min.css';
+import Calendar from '@toast-ui/calendar';
+
+// Make TOAST UI Calendar available globally
+window.ToastUICalendar = Calendar;
+
 import audioAnnotation from "./components/audio-annotation";
 
 import designAnnotationApp from "./components/design-annotation";

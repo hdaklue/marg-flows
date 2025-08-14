@@ -5,3 +5,9 @@
 @tailwind components;
 @tailwind utilities; */
 @import "tailwindcss";
+
+/* Safelist amber colors for dynamic usage with @source inline */
+@source inline("{hover:,focus:,dark:,dark:hover:,dark:focus:}bg-amber-{50,500,900/20}");
+@source inline("{hover:,focus:,dark:,dark:hover:,dark:focus:}text-amber-{300,400,700}");
+@source inline("{hover:,focus:,dark:,dark:hover:,dark:focus:}border-amber-{200,300,400,500,600,700}");
+@source inline("focus:ring-amber-500/20");

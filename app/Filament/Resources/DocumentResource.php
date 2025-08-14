@@ -20,6 +20,11 @@ final class DocumentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getNavigationSort(): int
+    {
+        return 3;
+    }
+
     public static function table(Table $table): Table
     {
         return $table

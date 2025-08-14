@@ -18,12 +18,15 @@ use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use App\Livewire\SortableDemo;
 use App\Livewire\TestChunkedUpload;
+use App\Livewire\CalendarTest;
+use App\Livewire\ToastCalendarTest;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/imagePreview', action: PreviewImage::class)->name('home');
 
 Route::get('/', SortableDemo::class);
+
 Route::get('/annotation', fn () => view('annotation'));
 Route::get('/videoPreview', PreviewVideo::class)->name('video.preview');
 Route::get('/audioPreview', PreviewAudio::class)->name('audio.preview');
@@ -76,6 +79,14 @@ Route::get('test-chunked-upload', TestChunkedUpload::class)
 // Demo route for sortable
 Route::get('sortable-demo', SortableDemo::class)
     ->name('sortable-demo');
+
+// Calendar test route
+Route::get('calendar-test', CalendarTest::class)
+    ->name('calendar-test');
+
+// TOAST UI Calendar test route
+Route::get('toast-calendar-test', ToastCalendarTest::class)
+    ->name('toast-calendar-test');
 
 // Route::view('dashboard', 'dashboard')
 //     ->middleware(['auth', 'verified'])
