@@ -534,6 +534,7 @@ final class EditorJsVideoUpload extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
+        logger()->debug($request);
         $validator = Validator::make($request->all(), [
             'video' => 'required|file',
             'fileKey' => 'sometimes|string',

@@ -287,10 +287,11 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         additionalRequestHeaders: {
                             'X-CSRF-TOKEN': csrf,
                         },
-                        types: 'image/*',
+                        types: 'image/*', // This will be overridden by config from PHP if available
                         field: 'image',
                         captionPlaceholder: 'Enter image caption...',
                         buttonContent: 'Select an image',
+                        maxFileSize: 10485760, // 10MB default - will be overridden by config from PHP if available
                     },
                     tunes: ['commentTune']
 

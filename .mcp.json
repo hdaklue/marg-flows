@@ -1,27 +1,37 @@
 {
-  "mcpServers": {
-    "context7": {
-      "command": "npx",
-      "args": [
-        "context7-mcp-server",
-        "--libraries",
-        "/lorisleiva/laravel-actions-docs",
-        "/lucasdotvin/laravel-soulbscription",
-        "laravel-validated-dto-docs.md",
-        "/context7/v3_tailwindcss",
-        "/alpinejs/alpine",
-        "/context7/filamentphp",
-        "/context7/livewire_laravel_com-docs"
-      ],
-      "env": {
-        "CONTEXT7_PROJECT_ROOT": "/Users/home/Code/klueportal",
-        "CONTEXT7_CACHE_DIR": "/Users/home/Code/klueportal/.context7-cache"
-      }
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-filesystem", "/Users/home/Code/klueportal"],
-      "env": {}
+    "mcpServers": {
+        "context7": {
+            "command": "npx",
+            "args": [
+                "context7-mcp-server",
+                "--libraries",
+                "/lorisleiva/laravel-actions-docs",
+                "/lucasdotvin/laravel-soulbscription",
+                "laravel-validated-dto-docs.md",
+                "/context7/v3_tailwindcss",
+                "/alpinejs/alpine",
+                "/context7/filamentphp",
+                "/context7/livewire_laravel_com-docs"
+            ],
+            "env": {
+                "CONTEXT7_PROJECT_ROOT": "/Users/home/Code/klueportal",
+                "CONTEXT7_CACHE_DIR": "/Users/home/Code/klueportal/.context7-cache"
+            }
+        },
+        "filesystem": {
+            "command": "npx",
+            "args": [
+                "@modelcontextprotocol/server-filesystem",
+                "/Users/home/Code/klueportal"
+            ],
+            "env": []
+        },
+        "laravel-boost": {
+            "command": "php",
+            "args": [
+                "./artisan",
+                "boost:mcp"
+            ]
+        }
     }
-  }
 }

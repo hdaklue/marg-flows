@@ -52,9 +52,9 @@ final class DocumentComponent extends Component
     public function getToolsConfig()
     {
         return match ($this->userPlan) {
-            'simple' => EditorBuilder::simple()->build(),
-            'advanced' => EditorBuilder::advanced()->build(),
-            'ultimate' => EditorBuilder::ultimate()->build(),
+            'simple' => EditorBuilder::simple()->build($this->documentId),
+            'advanced' => EditorBuilder::advanced()->build($this->documentId),
+            'ultimate' => EditorBuilder::ultimate()->build($this->documentId),
             default => throw new Exception('Unable to resolve user plan'),
         };
     }

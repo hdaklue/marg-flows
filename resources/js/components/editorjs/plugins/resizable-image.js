@@ -68,8 +68,10 @@ class ResizableImage {
             types: 'image/*',
             captionPlaceholder: 'Enter image caption...',
             buttonContent: 'Select an image',
+            maxFileSize: 10485760, // 10MB default
             uploader: null,
-            actions: []
+            actions: [],
+            baseDirectory: null // Base directory for image resolution
         };
 
         this.config = Object.assign(this.defaultConfig, this.config);
@@ -140,9 +142,18 @@ class ResizableImage {
             wrapper.classList.remove('resizable-image--dragover');
 
             if (!this.readOnly && !this.uploading && e.dataTransfer.files.length) {
-                const files = Array.from(e.dataTransfer.files).filter(file =>
-                    file.type.startsWith('image/')
-                );
+                const files = Array.from(e.dataTransfer.files).filter(file => {
+                    // Check file type
+                    if (!file.type.startsWith('image/')) {
+                        return false;
+                    }
+                    // Check file size if maxFileSize is configured
+                    if (this.config.maxFileSize && file.size > this.config.maxFileSize) {
+                        console.warn(`File ${file.name} (${this.formatFileSize(file.size)}) exceeds max size (${this.formatFileSize(this.config.maxFileSize)})`);
+                        return false;
+                    }
+                    return true;
+                });
                 if (files.length > 0) {
                     this.handleUpload(files);
                 }
@@ -201,7 +212,15 @@ class ResizableImage {
 
         const handleFileChange = (e) => {
             e.preventDefault();
-            const files = Array.from(e.target.files);
+            const files = Array.from(e.target.files).filter(file => {
+                // Check file size if maxFileSize is configured
+                if (this.config.maxFileSize && file.size > this.config.maxFileSize) {
+                    console.warn(`File ${file.name} (${this.formatFileSize(file.size)}) exceeds max size (${this.formatFileSize(this.config.maxFileSize)})`);
+                    return false;
+                }
+                return true;
+            });
+            
             if (files.length > 0 && !this.uploading) {
                 this.handleUpload(files);
             }
@@ -237,7 +256,7 @@ class ResizableImage {
 
         const image = document.createElement('img');
         image.classList.add('resizable-image__img');
-        image.src = this.data.file.url;
+        image.src = this.resolveImageUrl(this.data.file.url);
         image.alt = this.data.caption || '';
         image.style.margin = '0';
 
@@ -474,13 +493,72 @@ class ResizableImage {
     }
 
     addUploadedFile(response) {
+        const fullUrl = response.url || response.file?.url;
         const fileData = {
-            url: response.url || response.file?.url,
+            url: this.extractRelativePath(fullUrl),
             caption: response.caption || '',
             width: response.width || null,
             height: response.height || null
         };
         this.data.files.push(fileData);
+    }
+
+    /**
+     * Extract relative path from full URL for storage
+     */
+    extractRelativePath(fullUrl) {
+        if (!fullUrl || !this.config.baseDirectory) {
+            return fullUrl; // Fallback to full URL if no baseDirectory
+        }
+
+        // If URL starts with baseDirectory, extract relative path
+        const normalizedBaseDir = this.config.baseDirectory.endsWith('/') 
+            ? this.config.baseDirectory 
+            : this.config.baseDirectory + '/';
+            
+        if (fullUrl.startsWith(normalizedBaseDir)) {
+            return fullUrl.substring(normalizedBaseDir.length);
+        }
+
+        // If URL starts with just a slash and contains only filename, it's already relative
+        if (fullUrl.startsWith('/') && !fullUrl.includes('/storage/') && !fullUrl.substring(1).includes('/')) {
+            return fullUrl.substring(1); // Remove leading slash
+        }
+
+        // If URL starts with /storage/, extract path relative to baseDirectory
+        if (fullUrl.startsWith('/storage/') && this.config.baseDirectory.includes('/storage/')) {
+            const baseWithoutSlash = this.config.baseDirectory.replace(/\/$/, '');
+            if (fullUrl.startsWith(baseWithoutSlash)) {
+                const relativePath = fullUrl.substring(baseWithoutSlash.length);
+                return relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
+            }
+        }
+
+        return fullUrl; // Return as-is if doesn't match any pattern
+    }
+
+    /**
+     * Resolve relative path to full URL for display
+     */
+    resolveImageUrl(relativePath) {
+        if (!relativePath) return '';
+        
+        // If no baseDirectory configured, return as-is
+        if (!this.config.baseDirectory) {
+            return relativePath;
+        }
+
+        // If already a full URL (legacy data), return as-is
+        if (relativePath.startsWith('http') || relativePath.startsWith('/storage/')) {
+            return relativePath;
+        }
+
+        // Combine baseDirectory with relative path
+        const baseDir = this.config.baseDirectory.endsWith('/') 
+            ? this.config.baseDirectory 
+            : this.config.baseDirectory + '/';
+        
+        return baseDir + relativePath;
     }
 
     completeUpload() {
@@ -617,7 +695,7 @@ class ResizableImage {
         thumbnail.classList.add('resizable-image__thumbnail');
 
         const img = document.createElement('img');
-        img.src = fileData.url;
+        img.src = this.resolveImageUrl(fileData.url);
         img.alt = fileData.caption || `Image ${index + 1}`;
         img.classList.add('resizable-image__thumbnail-image');
         img.style.margin = '0';
@@ -709,7 +787,8 @@ class ResizableImage {
         try {
             // Delete from server if URL exists
             if (file.url) {
-                await this.executeDeleteRequest(file.url);
+                const fullUrl = this.resolveImageUrl(file.url);
+                await this.executeDeleteRequest(fullUrl);
             }
 
             // Remove from data array
@@ -770,7 +849,7 @@ class ResizableImage {
         // Create image element
         const modalImage = document.createElement('img');
         modalImage.classList.add('resizable-image__modal-image');
-        modalImage.src = this.data.files[this.currentModalIndex].url;
+        modalImage.src = this.resolveImageUrl(this.data.files[this.currentModalIndex].url);
         modalImage.alt = this.data.files[this.currentModalIndex].caption || `Image ${this.currentModalIndex + 1}`;
         modalImage.style.margin = '0';
 
@@ -840,7 +919,7 @@ class ResizableImage {
         };
 
         const updateModalImage = () => {
-            modalImage.src = this.data.files[this.currentModalIndex].url;
+            modalImage.src = this.resolveImageUrl(this.data.files[this.currentModalIndex].url);
             modalImage.alt = this.data.files[this.currentModalIndex].caption || `Image ${this.currentModalIndex + 1}`;
             if (counter) {
                 counter.textContent = `${this.currentModalIndex + 1} / ${this.data.files.length}`;
@@ -958,9 +1037,10 @@ class ResizableImage {
     }
 
     onUploadSuccess(response) {
+        const fullUrl = response.url || response.file?.url;
         this.data = {
             file: {
-                url: response.url || response.file?.url
+                url: this.extractRelativePath(fullUrl)
             },
             caption: response.caption || this.data.caption || '',
             width: response.width || null,
@@ -1439,7 +1519,8 @@ class ResizableImage {
                 // Delete all images from server
                 const deletePromises = this.data.files.map(file => {
                     if (file.url) {
-                        return this.executeDeleteRequest(file.url);
+                        const fullUrl = this.resolveImageUrl(file.url);
+                        return this.executeDeleteRequest(fullUrl);
                     }
                     return Promise.resolve();
                 });

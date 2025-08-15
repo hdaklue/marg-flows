@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder\Blocks\DTO;
 
 use App\Services\Document\Contratcs\BlockConfigContract;
+use App\Support\FileSize;
+use App\Support\FileTypes;
 use WendellAdriel\ValidatedDTO\SimpleDTO;
 
 final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContract
@@ -19,6 +21,10 @@ final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContra
 
     protected function defaults(): array
     {
+        $maxFileSize = FileSize::fromMB(250);
+        $chunkSize = FileSize::fromMB(5);
+        $supportedTypes = FileTypes::getStreamVideoFormatsAsValidationString();
+
         return [
             'class' => 'VideoUpload',
             'tunes' => ['commentTune'],
@@ -31,10 +37,10 @@ final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContra
                 'additionalRequestHeaders' => [
                     'X-CSRF-TOKEN' => '',
                 ],
-                'types' => 'video/*',
+                'types' => $supportedTypes,
                 'field' => 'video',
-                'maxFileSize' => 262144000, // 250MB
-                'chunkSize' => 10485760, // 10MB
+                'maxFileSize' => $maxFileSize,
+                'chunkSize' => $chunkSize,
                 'useChunkedUpload' => true,
             ],
         ];
@@ -42,8 +48,6 @@ final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContra
 
     protected function casts(): array
     {
-        return [
-
-        ];
+        return [];
     }
 }

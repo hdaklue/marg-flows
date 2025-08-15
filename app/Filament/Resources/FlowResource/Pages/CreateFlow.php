@@ -198,6 +198,7 @@ final class CreateFlow extends CreateRecord
             Step::make('Flow Details')
                 ->description('Provide the details of the flow you want to create.')
                 ->schema([
+                    ChunkedFileUpload::make('files'),
                     TextInput::make('title')
                         ->required()
                         ->label('Flow Title'),

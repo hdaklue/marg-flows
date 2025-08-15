@@ -15,18 +15,11 @@ use Log;
 final class ChunkedUploadController extends Controller
 {
     /**
-     * Get the chunk directory path for a given file key.
-     */
-    protected function getChunkDirectory(string $fileKey): string
-    {
-        $chunkDir = config('chunked-upload.storage.chunk_directory', 'chunk-uploads');
-        return storage_path("app/{$chunkDir}/{$fileKey}");
-    }
-    /**
      * Handle chunked file upload.
      */
     public function store(Request $request): JsonResponse
     {
+
         $validator = Validator::make($request->all(), [
             'file' => 'required|file',
             'fileKey' => 'required|string',
@@ -210,6 +203,16 @@ final class ChunkedUploadController extends Controller
             'success' => true,
             'message' => "Cleaned up {$cleanedCount} old chunk directories",
         ]);
+    }
+
+    /**
+     * Get the chunk directory path for a given file key.
+     */
+    protected function getChunkDirectory(string $fileKey): string
+    {
+        $chunkDir = config('chunked-upload.storage.chunk_directory', 'chunk-uploads');
+
+        return storage_path("app/{$chunkDir}/{$fileKey}");
     }
 
     /**
