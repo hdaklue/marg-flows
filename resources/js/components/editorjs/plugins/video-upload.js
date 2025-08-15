@@ -4,10 +4,10 @@
  * Only supports Video.js compatible formats (MP4, WebM, OGG)
  */
 
-// Import validation utilities (single source of truth)
+// Import validation utilities (for format validation and display)
 import { 
     VIDEO_VALIDATION_CONFIG, 
-    validateVideoFile 
+    isVideoFormatSupported 
 } from '../video-validation.js';
 
 // Import the plugin styles
@@ -65,7 +65,7 @@ class VideoUpload {
         this.eventHandlers = null;
         this.currentVideoId = null;
 
-        // Default configuration (uses validation config as single source of truth)
+        // Default configuration (fallback values, will be overridden by server config)
         this.defaultConfig = {
             endpoints: {
                 byFile: '/upload-video',
@@ -78,10 +78,10 @@ class VideoUpload {
             buttonContent: 'Select a video',
             uploader: null,
             actions: [],
-            // Import settings from validation config (single source of truth)
-            chunkSize: VIDEO_VALIDATION_CONFIG.chunkSize,
-            maxFileSize: VIDEO_VALIDATION_CONFIG.maxFileSize,
-            useChunkedUpload: VIDEO_VALIDATION_CONFIG.useChunkedUpload
+            // Fallback chunk settings (will be overridden by server config)
+            chunkSize: 5 * 1024 * 1024,     // 5MB default chunk size
+            maxFileSize: 100 * 1024 * 1024, // 100MB default max file size  
+            useChunkedUpload: true
         };
 
         this.config = Object.assign(this.defaultConfig, this.config);
@@ -89,6 +89,35 @@ class VideoUpload {
         // Bind methods
         this.onUpload = this.onUpload.bind(this);
         this.onPaste = this.onPaste.bind(this);
+    }
+
+    /**
+     * Validate video file using dynamic configuration from server
+     */
+    validateVideoFile(file) {
+        const errors = [];
+
+        // Check if it's a video file
+        if (!file.type.startsWith('video/')) {
+            errors.push('Invalid file format. Please select a video file.');
+            return { isValid: false, errors };
+        }
+
+        // Check format compatibility (use static config for supported formats)
+        if (!isVideoFormatSupported(file)) {
+            errors.push('Unsupported video format. Please use MP4, WebM, or OGV format for best compatibility.');
+            return { isValid: false, errors };
+        }
+
+        // Check file size using dynamic config from server
+        if (file.size > this.config.maxFileSize) {
+            const fileSizeMB = Math.round(file.size / (1024 * 1024));
+            const maxSizeMB = Math.round(this.config.maxFileSize / (1024 * 1024));
+            errors.push(`File is too large (${fileSizeMB}MB). Maximum size allowed is ${maxSizeMB}MB.`);
+            return { isValid: false, errors };
+        }
+
+        return { isValid: true, errors: [] };
     }
 
 
@@ -119,8 +148,8 @@ class VideoUpload {
             return false;
         }
 
-        // Validate file using single source of truth
-        const validation = validateVideoFile(file);
+        // Validate file using dynamic config from server
+        const validation = this.validateVideoFile(file);
         if (!validation.isValid) {
             validation.errors.forEach(error => {
                 this.showErrorMessage(error, file.name);
@@ -214,10 +243,10 @@ class VideoUpload {
                     file.type.startsWith('video/')
                 );
 
-                // Validate files using single source of truth
+                // Validate files using dynamic config from server
                 const validFiles = [];
                 videoFiles.forEach(file => {
-                    const validation = validateVideoFile(file);
+                    const validation = this.validateVideoFile(file);
                     if (validation.isValid) {
                         validFiles.push(file);
                     } else {
@@ -282,7 +311,7 @@ class VideoUpload {
                 const invalidFiles = [];
 
                 videoFiles.forEach(file => {
-                    const validation = validateVideoFile(file);
+                    const validation = this.validateVideoFile(file);
                     if (validation.isValid) {
                         validFiles.push(file);
                     } else {
@@ -358,7 +387,7 @@ class VideoUpload {
                     <div class="ce-video-upload__upload-title">Upload a video</div>
                     <div class="ce-video-upload__upload-subtitle">Drag, paste, or click to select</div>
                 </div>
-                <div class="ce-video-upload__upload-formats">${VIDEO_VALIDATION_CONFIG.supportedExtensions.map(ext => ext.toUpperCase()).join(', ')} up to ${Math.round(VIDEO_VALIDATION_CONFIG.maxFileSize / (1024 * 1024))}MB</div>
+                <div class="ce-video-upload__upload-formats">${VIDEO_VALIDATION_CONFIG.supportedExtensions.map(ext => ext.toUpperCase()).join(', ')} up to ${Math.round(this.config.maxFileSize / (1024 * 1024))}MB</div>
             </div>
         `;
 
@@ -972,9 +1001,9 @@ class VideoUpload {
         const validFiles = [];
         const invalidFiles = [];
 
-        // Validate files client-side using single source of truth
+        // Validate files client-side using dynamic config from server
         for (const file of fileArray) {
-            const validation = validateVideoFile(file);
+            const validation = this.validateVideoFile(file);
             if (validation.isValid) {
                 validFiles.push(file);
             } else {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder\Builders;
 
 use App\Services\Document\Facades\EditorConfigBuilder;
+use App\Services\Upload\ChunkConfigManager;
 
 final class Ultimate
 {
@@ -33,7 +34,7 @@ final class Ultimate
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
             'videoUpload' => EditorConfigBuilder::videoUpload()
-                ->forPlan('ultimate')
+                ->withChunkConfig(ChunkConfigManager::forVideos('ultimate'))
                 ->toArray(),
         ];
     }

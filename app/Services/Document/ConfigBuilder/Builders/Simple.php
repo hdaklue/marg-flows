@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder\Builders;
 
 use App\Services\Document\Facades\EditorConfigBuilder;
+use App\Services\Upload\ChunkConfigManager;
 use App\Support\FileSize;
 
 final class Simple
@@ -30,6 +31,9 @@ final class Simple
                 ->enablePreview(false)->toArray(),
             'images' => $imagesConfig->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
+            'videoUpload' => EditorConfigBuilder::videoUpload()
+                ->withChunkConfig(ChunkConfigManager::forVideos('simple'))
+                ->toArray(),
         ];
     }
 }

@@ -21,8 +21,6 @@ final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContra
 
     protected function defaults(): array
     {
-        $maxFileSize = FileSize::fromMB(250);
-        $chunkSize = FileSize::fromMB(5);
         $supportedTypes = FileTypes::getStreamVideoFormatsAsValidationString();
 
         return [
@@ -39,8 +37,8 @@ final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContra
                 ],
                 'types' => $supportedTypes,
                 'field' => 'video',
-                'maxFileSize' => $maxFileSize,
-                'chunkSize' => $chunkSize,
+                'maxFileSize' => null,
+                'chunkSize' => null,
                 'useChunkedUpload' => true,
             ],
         ];

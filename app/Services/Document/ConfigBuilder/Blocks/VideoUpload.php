@@ -7,8 +7,7 @@ namespace App\Services\Document\ConfigBuilder\Blocks;
 use App\Services\Document\ConfigBuilder\Blocks\DTO\VideoUploadConfigData;
 use App\Services\Document\Contratcs\BlockConfigContract;
 use App\Services\Document\Contratcs\DocumentBlockConfigContract;
-use App\Services\Upload\ChunkConfigManager;
-use App\Support\FileSize;
+use App\Services\Upload\DTOs\ChunkConfig;
 
 final class VideoUpload implements DocumentBlockConfigContract
 {
@@ -32,21 +31,10 @@ final class VideoUpload implements DocumentBlockConfigContract
     private array $tunes = ['commentTune'];
 
     public function __construct(
-        private bool $inlineToolBar = false,
-        private string $plan = 'simple'
+        private bool $inlineToolBar = false
     ) {
-        // Get chunk configuration from ChunkConfigManager
-        $chunkConfig = ChunkConfigManager::forVideos($this->plan);
-        
         $this->config['endpoints']['byFile'] = route('editorjs.upload-video');
         $this->config['endpoints']['delete'] = route('editorjs.delete-video');
-        $this->config['maxFileSize'] = $chunkConfig->maxFileSize;
-        $this->config['chunkSize'] = $chunkConfig->chunkSize;
-        $this->config['useChunkedUpload'] = $chunkConfig->useChunkedUpload;
-        // Note: types/allowedTypes should be handled by FileTypes service
-        
-        // Add chunk configuration for frontend
-        $this->config['chunkConfig'] = $chunkConfig->toArrayForFrontend();
     }
 
     public function endpoints(array $endpoints): self
@@ -119,12 +107,8 @@ final class VideoUpload implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function forPlan(string $plan): self
+    public function withChunkConfig(ChunkConfig $chunkConfig): self
     {
-        $this->plan = $plan;
-        
-        // Reconfigure with new plan
-        $chunkConfig = ChunkConfigManager::forVideos($this->plan);
         $this->config['maxFileSize'] = $chunkConfig->maxFileSize;
         $this->config['chunkSize'] = $chunkConfig->chunkSize;
         $this->config['useChunkedUpload'] = $chunkConfig->useChunkedUpload;

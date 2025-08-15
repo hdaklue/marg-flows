@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder\Builders;
 
 use App\Services\Document\Facades\EditorConfigBuilder;
+use App\Services\Upload\ChunkConfigManager;
 
 final class Base
 {
@@ -25,7 +26,7 @@ final class Base
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
             'videoUpload' => EditorConfigBuilder::videoUpload()
-                ->maxFileSize(1073741824) // 1GB
+                ->withChunkConfig(ChunkConfigManager::forVideos('simple'))
                 ->toArray(),
         ];
     }

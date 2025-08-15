@@ -442,6 +442,13 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     // They already have the correct routes set
                 }
 
+                // Handle VideoUpload chunk configuration from server
+                if (toolConfig.class === 'VideoUpload' && toolConfig.config.chunkConfig) {
+                    // Merge chunk configuration from server
+                    Object.assign(tool.config, toolConfig.config.chunkConfig);
+                    console.log(`VideoUpload chunk config applied:`, toolConfig.config.chunkConfig);
+                }
+
                 tools[toolName] = tool;
             });
 
