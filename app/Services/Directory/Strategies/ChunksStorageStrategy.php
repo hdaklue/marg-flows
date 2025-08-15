@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Assets\Strategies;
+namespace App\Services\Directory\Strategies;
 
-use App\Services\Assets\Contracts\ChunksStorageStrategyContract;
+use App\Services\Directory\Contracts\ChunksStorageStrategyContract;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;

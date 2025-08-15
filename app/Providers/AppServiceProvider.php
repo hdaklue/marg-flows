@@ -18,6 +18,7 @@ use App\Services\Flow\TimeProgressService;
 use App\Services\MentionService;
 use App\Services\Role\RoleAssignmentService;
 use App\Services\Upload\UploadManager;
+use App\Services\Upload\UploadSessionManager;
 use Filament\Actions\Action;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Css;
@@ -45,6 +46,9 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton(DeliverableBuilder::class, fn (): DeliverablesManager => new DeliverablesManager($this->app));
         $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
         $this->app->singleton(UploadManager::class);
+        $this->app->singleton(UploadSessionManager::class, function ($app) {
+            return new UploadSessionManager($app);
+        });
 
         $this->configureGate();
         $this->configureModel();

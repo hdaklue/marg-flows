@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Document\ConfigBuilder\Blocks;
 
+use App\Services\Directory\Facades\DirectoryManager;
 use App\Services\Document\ConfigBuilder\Blocks\DTO\VideoUploadConfigData;
 use App\Services\Document\Contratcs\BlockConfigContract;
 use App\Services\Document\Contratcs\DocumentBlockConfigContract;
+use App\Services\Upload\ChunkConfigManager;
 use App\Services\Upload\DTOs\ChunkConfig;
+use App\Support\FileTypes;
+use Illuminate\Support\Facades\Storage;
 
 final class VideoUpload implements DocumentBlockConfigContract
 {
@@ -31,10 +35,21 @@ final class VideoUpload implements DocumentBlockConfigContract
     private array $tunes = ['commentTune'];
 
     public function __construct(
-        private bool $inlineToolBar = false
+        private bool $inlineToolBar = false,
+        private string $plan = 'simple',
     ) {
-        $this->config['endpoints']['byFile'] = route('editorjs.upload-video');
-        $this->config['endpoints']['delete'] = route('editorjs.delete-video');
+        // Get chunk configuration from ChunkConfigManager for videos
+        $chunkConfig = ChunkConfigManager::forVideos($this->plan);
+
+        // Default endpoints - will be overridden by forDocument() method
+        $this->config['endpoints']['byFile'] = null;
+        $this->config['endpoints']['delete'] = null;
+        $this->config['types'] = FileTypes::getStreamVideoFormatsAsValidationString();
+        $this->config['maxFileSize'] = $chunkConfig->maxFileSize;
+        $this->config['chunkSize'] = $chunkConfig->chunkSize;
+
+        // Add chunk configuration for frontend
+        $this->config['chunkConfig'] = $chunkConfig->toArrayForFrontend();
     }
 
     public function endpoints(array $endpoints): self
@@ -103,6 +118,42 @@ final class VideoUpload implements DocumentBlockConfigContract
     public function inlineToolBar(bool $enabled = true): self
     {
         $this->inlineToolBar = $enabled;
+
+        return $this;
+    }
+
+    public function forDocument(string $documentId): self
+    {
+        $this->config['endpoints']['byFile'] = route('editorjs.upload-video', ['document' => $documentId]);
+        $this->config['endpoints']['delete'] = route('editorjs.document.delete-video', ['document' => $documentId]);
+
+        return $this;
+    }
+
+    public function baseDirectory(string $tenantId, string $documentId): self
+    {
+        $baseDirectory = DirectoryManager::document()
+            ->forTenant($tenantId)
+            ->forDocument($documentId)
+            ->videos()
+            ->getDirectory();
+
+        $this->config['baseDirectory'] = Storage::url($baseDirectory);
+
+        return $this;
+    }
+
+    public function forPlan(string $plan): self
+    {
+        $this->plan = $plan;
+
+        // Reconfigure with new plan if ChunkConfigManager supports it
+        if (method_exists(ChunkConfigManager::class, 'forVideos')) {
+            $chunkConfig = ChunkConfigManager::forVideos($this->plan);
+            $this->config['maxFileSize'] = $chunkConfig->maxFileSize;
+            $this->config['chunkSize'] = $chunkConfig->chunkSize;
+            $this->config['chunkConfig'] = $chunkConfig->toArrayForFrontend();
+        }
 
         return $this;
     }

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Services\Directory\Facades\DirectoryManager;
+use App\Services\Document\Requests\DocumentVideoUploadRequest;
+use App\Services\Upload\Facades\UploadManager;
+use App\Services\Upload\Facades\UploadSessionManager;
 use App\ValueObjects\Dimension\AspectRatio;
 use Exception;
 use FFMpeg\Format\Video\X264;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Log;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
@@ -18,83 +20,107 @@ use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 final class EditorJsVideoUpload extends Controller
 {
     /**
-     * Get the chunk directory path for a given file key.
+     * Handle chunked video upload using UploadManager and DirectoryManager.
      */
-    protected function getChunkDirectory(string $fileKey): string
+    protected function handleChunkedUpload(DocumentVideoUploadRequest $request, string $document): JsonResponse
     {
-        $chunkDir = config('video-upload.storage.chunk_directory', 'video-chunk-uploads');
+        // Get tenant and session info
+        $tenantId = auth()->user()->getActiveTenantId();
+        $sessionId = $request->getFileKey();
+        $chunkIndex = $request->getChunkIndex();
+        $totalChunks = $request->getTotalChunks();
+        $file = $request->file('video');
 
-        return storage_path("app/{$chunkDir}/{$fileKey}");
+        try {
+            // Configure session manager for this tenant and document-specific storage
+            $sessionManager = UploadSessionManager::driver('http')
+                ->forTenant($tenantId)
+                ->storeIn(DirectoryManager::document()
+                    ->forTenant($tenantId)
+                    ->forDocument($document)
+                    ->videos()
+                    ->getDirectory());
+
+            // Store the chunk
+            $sessionManager->storeChunk($sessionId, $file, $chunkIndex);
+
+            Log::info('Chunk uploaded successfully', [
+                'sessionId' => $sessionId,
+                'chunk' => $chunkIndex,
+                'totalChunks' => $totalChunks,
+            ]);
+
+            // Check if all chunks are uploaded
+            if ($sessionManager->isComplete($sessionId, $totalChunks)) {
+                // Assemble all chunks into final file
+                $finalPath = $sessionManager->assembleFile($sessionId, $request->getFileName(), $totalChunks);
+
+                // Clean up chunk files
+                $sessionManager->cleanupSession($sessionId);
+
+                // Process the completed video file
+                return $this->processVideoFile($finalPath, $sessionId);
+            }
+
+            // Return chunk upload success response
+            return response()->json([
+                'success' => true,
+                'completed' => false,
+                'chunk' => $chunkIndex,
+                'totalChunks' => $totalChunks,
+                'message' => 'Chunk uploaded successfully',
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('Chunked upload failed', [
+                'sessionId' => $sessionId,
+                'chunk' => $chunkIndex,
+                'totalChunks' => $totalChunks,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 
     /**
-     * Handle chunked video upload.
+     * Handle direct video upload (for small files) using UploadManager and DirectoryManager.
      */
-    protected function handleChunkedUpload(Request $request, string $fileKey, string $fileName, int $chunkIndex, int $totalChunks): JsonResponse
+    protected function handleDirectUpload(DocumentVideoUploadRequest $request, string $document): JsonResponse
     {
-        $chunkFile = $request->file('video');
-        $chunkDir = $this->getChunkDirectory($fileKey);
+        // Get tenant and directory configuration for direct upload
+        $tenantId = auth()->user()->getActiveTenantId();
+        $directory = DirectoryManager::document()
+            ->forTenant($tenantId)
+            ->forDocument($document)
+            ->videos()
+            ->getDirectory();
 
-        // Create chunk directory if it doesn't exist
-        if (! is_dir($chunkDir)) {
-            mkdir($chunkDir, 0755, true);
+        try {
+            // Use UploadManager with simple strategy
+            $path = UploadManager::simple()
+                ->forTenant($tenantId)
+                ->storeIn($directory)
+                ->upload($request->file('video'));
+
+            Log::info('Video uploaded directly', [
+                'fileKey' => $request->getFileKey(),
+                'fileName' => $request->getFileName(),
+                'path' => $path,
+            ]);
+
+            // Process the uploaded video file
+            return $this->processVideoFile($path, $request->getFileKey());
+
+        } catch (Exception $e) {
+            Log::error('Direct upload failed', [
+                'fileKey' => $request->getFileKey(),
+                'fileName' => $request->getFileName(),
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
         }
-
-        // Store the chunk
-        $chunkPath = "{$chunkDir}/chunk_{$chunkIndex}";
-        $chunkFile->move($chunkDir, "chunk_{$chunkIndex}");
-
-        Log::info('Video chunk uploaded', [
-            'fileKey' => $fileKey,
-            'fileName' => $fileName,
-            'chunk' => $chunkIndex,
-            'totalChunks' => $totalChunks,
-        ]);
-
-        // Check if all chunks are uploaded
-        if ($this->allChunksUploaded($fileKey, $totalChunks)) {
-            // Assemble the file
-            $finalPath = $this->assembleChunkedVideoFile($fileKey, $fileName, $totalChunks);
-
-            // Clean up chunks
-            $this->cleanupChunks($fileKey);
-
-            // Process the assembled video file
-            return $this->processVideoFile($finalPath, $fileKey);
-        }
-
-        return response()->json([
-            'success' => true,
-            'completed' => false,
-            'chunk' => $chunkIndex,
-            'totalChunks' => $totalChunks,
-            'message' => 'Chunk uploaded successfully',
-        ]);
-    }
-
-    /**
-     * Handle direct video upload (for small files).
-     */
-    protected function handleDirectUpload(Request $request, string $fileKey, string $fileName): JsonResponse
-    {
-        $uploadedFile = $request->file('video');
-        $extension = $uploadedFile->getClientOriginalExtension();
-
-        // Generate unique filename
-        $uniqueFileName = uniqid() . '_' . time() . '.' . $extension;
-        $videoDir = config('video-upload.storage.video_directory', 'documents/videos');
-
-        // Store the file directly
-        $path = $uploadedFile->storeAs($videoDir, $uniqueFileName, config('video-upload.storage.disk', 'public'));
-
-        Log::info('Video uploaded directly', [
-            'fileKey' => $fileKey,
-            'fileName' => $fileName,
-            'path' => $path,
-        ]);
-
-        // Process the uploaded video file
-        return $this->processVideoFile($path, $fileKey);
     }
 
     /**
@@ -176,111 +202,6 @@ final class EditorJsVideoUpload extends Controller
                 'success' => false,
                 'message' => 'Failed to process video file. Please try again.',
             ], 500);
-        }
-    }
-
-    /**
-     * Check if all chunks are uploaded.
-     */
-    protected function allChunksUploaded(string $fileKey, int $totalChunks): bool
-    {
-        $chunkDir = $this->getChunkDirectory($fileKey);
-
-        if (! is_dir($chunkDir)) {
-            return false;
-        }
-
-        for ($i = 0; $i < $totalChunks; $i++) {
-            $chunkPath = "{$chunkDir}/chunk_{$i}";
-            if (! file_exists($chunkPath)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Assemble chunked file into final video file.
-     */
-    protected function assembleChunkedVideoFile(string $fileKey, string $fileName, int $totalChunks): string
-    {
-        $chunkDir = $this->getChunkDirectory($fileKey);
-
-        // Generate unique filename
-        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-        $uniqueFileName = uniqid() . '_' . time() . '.' . $extension;
-
-        // Create final file path
-        $videoDir = config('video-upload.storage.video_directory', 'documents/videos');
-        $finalPath = $videoDir . '/' . $uniqueFileName;
-        $diskName = config('video-upload.storage.disk', 'public');
-        $fullFinalPath = Storage::disk($diskName)->path($finalPath);
-
-        // Ensure directory exists
-        $finalDir = dirname($fullFinalPath);
-        if (! is_dir($finalDir)) {
-            mkdir($finalDir, 0755, true);
-        }
-
-        // Open final file for writing
-        $finalHandle = fopen($fullFinalPath, 'wb');
-        throw_unless($finalHandle, new Exception('Could not create final video file'));
-
-        try {
-            // Append all chunks to final file
-            for ($i = 0; $i < $totalChunks; $i++) {
-                $chunkPath = "{$chunkDir}/chunk_{$i}";
-
-                if (! file_exists($chunkPath)) {
-                    throw new Exception("Video chunk {$i} not found");
-                }
-
-                $chunkHandle = fopen($chunkPath, 'rb');
-                if (! $chunkHandle) {
-                    throw new Exception("Could not read video chunk {$i}");
-                }
-
-                // Copy chunk to final file
-                while (! feof($chunkHandle)) {
-                    $data = fread($chunkHandle, 8192);
-                    fwrite($finalHandle, $data);
-                }
-
-                fclose($chunkHandle);
-            }
-        } finally {
-            fclose($finalHandle);
-        }
-
-        Log::info('Video chunks assembled successfully', [
-            'fileKey' => $fileKey,
-            'fileName' => $fileName,
-            'finalPath' => $finalPath,
-            'totalChunks' => $totalChunks,
-        ]);
-
-        return $finalPath;
-    }
-
-    /**
-     * Clean up chunk files.
-     */
-    protected function cleanupChunks(string $fileKey): void
-    {
-        $chunkDir = $this->getChunkDirectory($fileKey);
-
-        if (is_dir($chunkDir)) {
-            // Remove all files in the directory
-            $files = glob("{$chunkDir}/*");
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    unlink($file);
-                }
-            }
-
-            // Remove the directory
-            rmdir($chunkDir);
         }
     }
 
@@ -530,75 +451,16 @@ final class EditorJsVideoUpload extends Controller
 
     /**
      * Handle the incoming video upload requests from Editor.js.
-     * Supports both chunked and direct uploads.
+     * Supports both chunked and direct uploads using new architecture.
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(DocumentVideoUploadRequest $request, string $document): JsonResponse
     {
-        logger()->debug($request);
-        $validator = Validator::make($request->all(), [
-            'video' => 'required|file',
-            'fileKey' => 'sometimes|string',
-            'fileName' => 'sometimes|string',
-            'chunk' => 'sometimes|integer|min:0',
-            'chunks' => 'sometimes|integer|min:1',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        // Validate video file type and size (skip detailed validation for chunks)
-        $totalChunks = (int) $request->input('chunks', 1);
-        if ($totalChunks === 1) {
-            // Only validate for direct uploads, not for chunks
-            try {
-                $this->validateVideoFile($request->file('video'));
-            } catch (ValidationException $e) {
-                $firstError = collect($e->errors())->flatten()->first();
-
-                return response()->json([
-                    'success' => false,
-                    'message' => $firstError,
-                    'errors' => $e->errors(),
-                ], 422);
-            }
-        } else {
-            // For chunked uploads, validate the fileName extension and chunk size
-            $fileName = $request->input('fileName', '');
-            if (! $this->isValidVideoFileName($fileName)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid video file format. Supported formats: MP4, WebM, OGG',
-                ], 422);
-            }
-
-            // Validate chunk size (should be reasonable, max 50MB per chunk)
-            $chunkFile = $request->file('video');
-            if ($chunkFile && $chunkFile->getSize() > 50 * 1024 * 1024) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Chunk size too large. Maximum chunk size is 50MB.',
-                ], 422);
-            }
-        }
-
         try {
-            $fileKey = $request->input('fileKey', uniqid() . '_' . time());
-            $fileName = $request->input('fileName', $request->file('video')->getClientOriginalName());
-            $chunkIndex = (int) $request->input('chunk', 0);
-            $totalChunks = (int) $request->input('chunks', 1);
-
-            if ($totalChunks > 1) {
-                // Handle chunked upload
-                return $this->handleChunkedUpload($request, $fileKey, $fileName, $chunkIndex, $totalChunks);
+            if ($request->isChunkedUpload()) {
+                return $this->handleChunkedUpload($request, $document);
             }
 
-            // Handle direct upload (small files)
-            return $this->handleDirectUpload($request, $fileKey, $fileName);
+            return $this->handleDirectUpload($request, $document);
 
         } catch (Exception $e) {
             Log::error('Failed to upload video', [

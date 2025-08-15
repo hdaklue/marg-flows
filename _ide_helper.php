@@ -23564,6 +23564,64 @@ namespace Barryvdh\Debugbar\Facades {
             }
     }
 
+namespace Laravel\Mcp\Server\Facades {
+    /**
+     */
+    class Mcp {
+        /**
+         * Register an web-based MCP server running over HTTP.
+         *
+         * @static
+         */
+        public static function web($handle, $serverClass)
+        {
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->web($handle, $serverClass);
+        }
+
+        /**
+         * Register a local MCP server running over STDIO.
+         *
+         * @static
+         */
+        public static function local($handle, $serverClass)
+        {
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->local($handle, $serverClass);
+        }
+
+        /**
+         * Get the server class for a local MCP.
+         *
+         * @static
+         */
+        public static function getLocalServer($handle)
+        {
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->getLocalServer($handle);
+        }
+
+        /**
+         * @static
+         */
+        public static function getWebServer($handle)
+        {
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->getWebServer($handle);
+        }
+
+        /**
+         * @static
+         */
+        public static function oauthRoutes($oauthPrefix = 'oauth')
+        {
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->oauthRoutes($oauthPrefix);
+        }
+
+            }
+    }
+
 namespace Flux {
     /**
      * @see \Flux\FluxManager
@@ -27738,6 +27796,13 @@ namespace App\Filament\Resources\FlowResource\Pages {
             }
     }
 
+namespace App\Filament\Pages {
+    /**
+     */
+    class Dashboard extends \Filament\Pages\Page {
+            }
+    }
+
 namespace Illuminate\Database\Eloquent {
     /**
      * @template TKey of array-key
@@ -27967,6 +28032,14 @@ namespace App\Livewire {
      * @property-read Schema $form
      */
     class TestChunkedUpload extends \Livewire\Component {
+            }
+    /**
+     */
+    class CalendarTest extends \Livewire\Component {
+            }
+    /**
+     */
+    class ToastCalendarTest extends \Livewire\Component {
             }
     }
 
@@ -33264,6 +33337,7 @@ namespace  {
     class Vite extends \Illuminate\Support\Facades\Vite {}
     class EloquentSerialize extends \AnourValar\EloquentSerialize\Facades\EloquentSerializeFacade {}
     class Debugbar extends \Barryvdh\Debugbar\Facades\Debugbar {}
+    class Mcp extends \Laravel\Mcp\Server\Facades\Mcp {}
     class Flux extends \Flux\Flux {}
     class Livewire extends \Livewire\Livewire {}
     class Action extends \Lorisleiva\Actions\Facades\Actions {}

@@ -5,28 +5,20 @@ declare(strict_types=1);
 namespace App\Services\Upload\Strategies\Upload;
 
 use App\Services\Upload\Contracts\ProgressStrategyContract;
-use App\Services\Upload\Contracts\UploadStrategyContract;
-use App\Services\Upload\DTOs\ChunkData;
+use App\Services\Upload\Contracts\SimpleUploadStrategyContract;
 use App\Services\Upload\DTOs\ProgressData;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use InvalidArgumentException;
 
-final class SimpleUploadStrategy implements UploadStrategyContract
+final class SimpleUploadStrategy implements SimpleUploadStrategyContract
 {
     private ?ProgressStrategyContract $progressStrategy = null;
     private ?string $tenantId = null;
     private ?string $directory = null;
 
-    public function upload(UploadedFile|ChunkData $data): string
+    public function upload(UploadedFile $data): string
     {
-        if ($data instanceof ChunkData) {
-            throw new InvalidArgumentException('ChunkData not supported in SimpleUploadStrategy. Use ChunkedUploadStrategy instead.');
-        }
-
-        if (!$data instanceof UploadedFile) {
-            throw new InvalidArgumentException('SimpleUploadStrategy expects an UploadedFile instance.');
-        }
 
         $this->validateConfiguration();
 

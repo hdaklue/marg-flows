@@ -1,18 +1,20 @@
 {
-    "permissions": {
-        "allow": [
-            "WebFetch(domain:wendell-adriel.gitbook.io)",
-            "mcp__filesystem__read_multiple_files",
-            "Bash(php artisan view:clear:*)",
-            "Bash(php artisan tinker:*)",
-            "mcp__filesystem__read_text_file",
-            "mcp__filesystem__directory_tree",
-            "context7__read_file"
-        ],
-        "deny": []
-    },
-    "enabledMcpjsonServers": [
-        "context7",
-        "filesystem"
-    ]
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:wendell-adriel.gitbook.io)",
+      "mcp__filesystem__read_multiple_files",
+      "Bash(php artisan view:clear:*)",
+      "Bash(php artisan tinker:*)",
+      "mcp__filesystem__read_text_file",
+      "mcp__filesystem__directory_tree",
+      "context7__read_file"
+    ],
+    "deny": []
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "filesystem",
+    "laravel-boost"
+  ],
+  "enableAllProjectMcpServers": true
 }

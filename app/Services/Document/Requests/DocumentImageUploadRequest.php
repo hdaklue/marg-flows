@@ -94,6 +94,7 @@ final class DocumentImageUploadRequest extends FormRequest
         return (int) FileSize::toKB($bytes);
     }
 
+    // Should be Centralized Later
     private function getMaxFileSizeMBForPlan(string $plan): float
     {
         return match ($plan) {

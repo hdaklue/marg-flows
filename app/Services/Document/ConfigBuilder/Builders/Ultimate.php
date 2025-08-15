@@ -33,9 +33,21 @@ final class Ultimate
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' => EditorConfigBuilder::videoUpload()
-                ->withChunkConfig(ChunkConfigManager::forVideos('ultimate'))
-                ->toArray(),
+            'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
+    }
+
+    private function buildVideoUploadConfig(?string $documentId)
+    {
+        $videoUploadConfig = EditorConfigBuilder::videoUpload()
+            ->forPlan('ultimate');
+
+        if ($documentId) {
+            $videoUploadConfig
+                ->forDocument($documentId)
+                ->baseDirectory(auth()->user()->getActiveTenantId(), $documentId);
+        }
+
+        return $videoUploadConfig;
     }
 }

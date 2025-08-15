@@ -9,11 +9,10 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \App\Services\Upload\UploadManager simple()
- * @method static \App\Services\Upload\UploadManager chunked(\App\Services\Upload\DTOs\ChunkData $chunkData)
  * @method static \App\Services\Upload\UploadManager progressStrategy(\App\Services\Upload\Contracts\ProgressStrategyContract $progressStrategy)
  * @method static \App\Services\Upload\UploadManager forTenant(string $tenantId)
  * @method static \App\Services\Upload\UploadManager storeIn(string $directory)
- * @method static string upload(\Illuminate\Http\UploadedFile|\App\Services\Upload\DTOs\ChunkData $data)
+ * @method static string upload(\Illuminate\Http\UploadedFile $data)
  *
  * @see \App\Services\Upload\UploadManager
  */

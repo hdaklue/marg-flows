@@ -31,9 +31,21 @@ final class Simple
                 ->enablePreview(false)->toArray(),
             'images' => $imagesConfig->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' => EditorConfigBuilder::videoUpload()
-                ->withChunkConfig(ChunkConfigManager::forVideos('simple'))
-                ->toArray(),
+            'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
+    }
+
+    private function buildVideoUploadConfig(?string $documentId)
+    {
+        $videoUploadConfig = EditorConfigBuilder::videoUpload()
+            ->forPlan('simple');
+
+        if ($documentId) {
+            $videoUploadConfig
+                ->forDocument($documentId)
+                ->baseDirectory(auth()->user()->getActiveTenantId(), $documentId);
+        }
+
+        return $videoUploadConfig;
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Assets\Contracts;
+namespace App\Services\Directory\Contracts;
 
 interface ChunksStorageStrategyContract extends StorageStrategyContract
 {

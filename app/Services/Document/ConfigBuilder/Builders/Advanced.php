@@ -28,9 +28,21 @@ final class Advanced
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' => EditorConfigBuilder::videoUpload()
-                ->withChunkConfig(ChunkConfigManager::forVideos('advanced'))
-                ->toArray(),
+            'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
+    }
+
+    private function buildVideoUploadConfig(?string $documentId)
+    {
+        $videoUploadConfig = EditorConfigBuilder::videoUpload()
+            ->forPlan('advanced');
+
+        if ($documentId) {
+            $videoUploadConfig
+                ->forDocument($documentId)
+                ->baseDirectory(auth()->user()->getActiveTenantId(), $documentId);
+        }
+
+        return $videoUploadConfig;
     }
 }

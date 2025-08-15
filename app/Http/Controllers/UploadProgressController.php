@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\Upload\UploadProgressManager;
+use App\Services\Upload\Facades\UploadSessionManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,8 +15,7 @@ final class UploadProgressController extends Controller
      */
     public function show(Request $request, string $sessionId): JsonResponse
     {
-        $progressStrategy = UploadProgressManager::simple();
-        $progress = $progressStrategy->getProgress($sessionId);
+        $progress = UploadSessionManager::driver('redis')->getProgress($sessionId);
 
         if (!$progress) {
             return response()->json([
@@ -36,8 +35,7 @@ final class UploadProgressController extends Controller
      */
     public function destroy(Request $request, string $sessionId): JsonResponse
     {
-        $progressStrategy = UploadProgressManager::simple();
-        $progressStrategy->cleanup($sessionId);
+        UploadSessionManager::driver('redis')->cleanupSession($sessionId);
 
         return response()->json([
             'success' => true,

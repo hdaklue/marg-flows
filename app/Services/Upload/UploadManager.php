@@ -6,8 +6,6 @@ namespace App\Services\Upload;
 
 use App\Services\Upload\Contracts\ProgressStrategyContract;
 use App\Services\Upload\Contracts\UploadStrategyContract;
-use App\Services\Upload\DTOs\ChunkData;
-use App\Services\Upload\Strategies\Upload\ChunkedUploadStrategy;
 use App\Services\Upload\Strategies\Upload\SimpleUploadStrategy;
 use Illuminate\Http\UploadedFile;
 use InvalidArgumentException;
@@ -28,14 +26,6 @@ final class UploadManager
         return $this;
     }
 
-    /**
-     * Use chunked upload strategy for large file uploads
-     */
-    public function chunked(ChunkData $chunkData): self
-    {
-        $this->uploadStrategy = new ChunkedUploadStrategy();
-        return $this;
-    }
 
     /**
      * Set the progress tracking strategy
@@ -67,7 +57,7 @@ final class UploadManager
     /**
      * Execute the upload with the configured strategy
      */
-    public function upload(UploadedFile|ChunkData $data): string
+    public function upload(UploadedFile $data): string
     {
         $this->validateConfiguration();
 
@@ -88,7 +78,7 @@ final class UploadManager
     private function validateConfiguration(): void
     {
         if (!$this->uploadStrategy) {
-            throw new InvalidArgumentException('Upload strategy is required. Call simple() or chunked() first.');
+            throw new InvalidArgumentException('Upload strategy is required. Call simple() first.');
         }
 
         if (!$this->tenantId) {

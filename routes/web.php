@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AcceptInvitation;
 use App\Http\Controllers\ChunkedUploadController;
-use App\Http\Controllers\EditorJsImageDelete;
 use App\Http\Controllers\DocumentImageUploadController;
+use App\Http\Controllers\EditorJsImageDelete;
 use App\Http\Controllers\EditorJsVideoDelete;
 use App\Http\Controllers\EditorJsVideoUpload;
 use App\Http\Controllers\UploadProgressController;
@@ -48,12 +48,15 @@ Route::delete('documents/{document}/delete-image', EditorJsImageDelete::class)
     ->name('editorjs.document.delete-image');
 
 // Video upload routes for EditorJS
-Route::post('upload-video', EditorJsVideoUpload::class)
+Route::post('documents/{document}/upload-video', EditorJsVideoUpload::class)
     ->middleware(['auth'])
     ->name('editorjs.upload-video');
 Route::delete('delete-video', EditorJsVideoDelete::class)
     ->middleware(['auth'])
     ->name('editorjs.delete-video');
+Route::delete('documents/{document}/delete-video', EditorJsVideoDelete::class)
+    ->middleware(['auth'])
+    ->name('editorjs.document.delete-video');
 
 // URL fetch route for EditorJS LinkTool
 Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])

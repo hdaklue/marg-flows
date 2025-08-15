@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Document\ConfigBuilder\Blocks;
 
-use App\Services\Assets\Facades\AssetsManager;
+use App\Services\Directory\Facades\DirectoryManager;
 use App\Services\Document\ConfigBuilder\Blocks\DTO\ImagesConfigData;
 use App\Services\Document\Contratcs\BlockConfigContract;
 use App\Services\Document\Contratcs\DocumentBlockConfigContract;
@@ -142,7 +142,7 @@ final class Images implements DocumentBlockConfigContract
 
     public function baseDirectory(string $tenantId, string $documentId): self
     {
-        $baseDirectory = AssetsManager::document()
+        $baseDirectory = DirectoryManager::document()
             ->forTenant($tenantId)
             ->forDocument($documentId)
             ->images()
