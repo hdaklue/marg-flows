@@ -158,7 +158,7 @@ class VideoUpload {
         }
 
         // Check if we already have a video (single video only)
-        if (this.data.file && this.data.file.url) {
+        if (this.data.file && (this.data.file.url || this.data.file.filename)) {
             // Show notification that video will be replaced
             if (!confirm('This will replace the current video. Continue?')) {
                 return false;
@@ -189,8 +189,8 @@ class VideoUpload {
         // Add paste functionality
         this.setupPasteHandling(wrapper);
 
-        // Check if we have a video
-        const hasVideo = this.data.file && this.data.file.url && this.data.file.url.trim() !== '';
+        // Check if we have a video (check for filename since we now store filenames)
+        const hasVideo = this.data.file && (this.data.file.url || this.data.file.filename);
 
         if (hasVideo) {
             // Show the video player
@@ -328,7 +328,7 @@ class VideoUpload {
 
                 if (validFiles.length > 0) {
                     // Check if we already have a video (single video only)
-                    if (this.data.file && this.data.file.url) {
+                    if (this.data.file && (this.data.file.url || this.data.file.filename)) {
                         if (!confirm('This will replace the current video. Continue?')) {
                             return;
                         }
@@ -566,8 +566,9 @@ class VideoUpload {
         if (this.readOnly) return;
 
         // Delete from server if needed
-        if (this.data.file && this.data.file.url) {
-            this.handleDeleteFile(this.data.file.url);
+        if (this.data.file && (this.data.file.url || this.data.file.filename)) {
+            const videoUrl = this.data.file.url || this.resolveVideoUrl(this.data.file.filename);
+            this.handleDeleteFile(videoUrl);
         }
 
         // Clear the data
@@ -709,7 +710,11 @@ class VideoUpload {
     }
 
     openModal() {
-        if (!this.data.file || !this.data.file.url) return;
+        if (!this.data.file || (!this.data.file.url && !this.data.file.filename)) return;
+        
+        // Get the video URL (resolve from filename if needed)
+        const videoUrl = this.data.file.url || this.resolveVideoUrl(this.data.file.filename);
+        if (!videoUrl) return;
 
         // Create modal overlay
         const modal = document.createElement('div');
@@ -775,8 +780,8 @@ class VideoUpload {
 
         // Set video source
         const source = document.createElement('source');
-        source.src = this.data.file.url;
-        source.type = this.getVideoMimeType(this.data.file.url);
+        source.src = videoUrl;
+        source.type = this.getVideoMimeType(videoUrl);
         modalVideo.appendChild(source);
 
         // Create close button
@@ -1252,9 +1257,57 @@ class VideoUpload {
         }
     }
 
+    extractFilenameFromUrl(url) {
+        if (!url) return null;
+        
+        // Handle both full URLs and paths
+        let path = url;
+        
+        // If it's a full URL, extract the path part
+        if (url.includes('://')) {
+            try {
+                const urlObj = new URL(url);
+                path = urlObj.pathname;
+            } catch (e) {
+                // If URL parsing fails, use the original string
+                path = url;
+            }
+        }
+        
+        // Remove leading slash if present
+        if (path.startsWith('/')) {
+            path = path.substring(1);
+        }
+        
+        // Extract just the filename from paths like 'storage/documents/videos/tenant_id/document_id/filename.mp4'
+        const segments = path.split('/');
+        return segments[segments.length - 1];
+    }
+    
+    resolveVideoUrl(filename) {
+        if (!filename) return null;
+        
+        // If it's already a full URL (backward compatibility), return as-is
+        if (filename.includes('://') || filename.startsWith('/')) {
+            return filename;
+        }
+        
+        // Build URL using config baseDirectory
+        if (this.config.baseDirectory) {
+            return `${this.config.baseDirectory}/${filename}`;
+        }
+        
+        // Fallback to default pattern
+        return `/storage/documents/videos/${filename}`;
+    }
+
     addUploadedFile(response) {
+        // Extract filename from the full URL for storage
+        const fullUrl = response.url || response.file?.url;
+        const filename = this.extractFilenameFromUrl(fullUrl);
+        
         const fileData = {
-            url: response.url || response.file?.url,
+            filename: filename,  // Store only filename
             thumbnail: response.thumbnail || response.file?.thumbnail || null,
             caption: response.caption || '',
             width: response.width || null,
@@ -1273,8 +1326,8 @@ class VideoUpload {
         // Re-render the component to show the uploaded video
         this.wrapper.innerHTML = '';
 
-        // Check if we have a video and render accordingly
-        const hasVideo = this.data.file && this.data.file.url && this.data.file.url.trim() !== '';
+        // Check if we have a video and render accordingly (check for filename since we now store filenames)
+        const hasVideo = this.data.file && (this.data.file.url || this.data.file.filename);
         if (hasVideo) {
             this.createVideoElement(this.wrapper);
         } else {
@@ -1330,8 +1383,9 @@ class VideoUpload {
 
         try {
             // Delete from server if URL exists
-            if (file.url) {
-                await this.executeDeleteRequest(file.url);
+            const fileUrl = file.url || this.resolveVideoUrl(file.filename);
+            if (fileUrl) {
+                await this.executeDeleteRequest(fileUrl);
             }
 
             // Remove from data array
@@ -1529,7 +1583,7 @@ class VideoUpload {
                         This video format cannot be played in your browser.
                         <br>Try converting it to MP4 or WebM format for better compatibility.
                     </div>
-                    <a href="${this.data.file.url}" download class="ce-video-upload__video-error-download">
+                    <a href="${videoUrl}" download class="ce-video-upload__video-error-download">
                         Download Original File
                     </a>
                 </div>
@@ -1784,7 +1838,7 @@ class VideoUpload {
         if (Object.keys(savedData).length === 0) return true;
 
         // Check if we have a valid file or empty data
-        if (savedData.file && savedData.file.url) {
+        if (savedData.file && (savedData.file.url || savedData.file.filename)) {
             return true; // Valid file
         }
 
@@ -1841,8 +1895,9 @@ class VideoUpload {
             try {
                 // Delete all videos from server
                 const deletePromises = this.data.files.map(file => {
-                    if (file.url) {
-                        return this.executeDeleteRequest(file.url);
+                    const fileUrl = file.url || this.resolveVideoUrl(file.filename);
+                    if (fileUrl) {
+                        return this.executeDeleteRequest(fileUrl);
                     }
                     return Promise.resolve();
                 });
