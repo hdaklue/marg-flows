@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Actions\User\GenerateUserAvatar;
 use App\Enums\Account\AccountType;
 use App\Enums\Role\RoleEnum;
 use App\Models\Flow;
@@ -29,6 +30,15 @@ final class DatabaseSeeder extends Seeder
             'account_type' => AccountType::ADMIN->value,
             'timezone' => 'Africa/Cairo',
         ]);
+
+        // Generate and save avatar for test user
+        $this->command->info('Generating avatar for test user...');
+        try {
+            $avatarFileName = GenerateUserAvatar::run($testUser);
+            $testUser->update(['avatar' => $avatarFileName]);
+        } catch (Exception $e) {
+            $this->command->warn('Could not generate avatar for test user: ' . $e->getMessage());
+        }
 
         $this->command->info('Creating tenants...');
 

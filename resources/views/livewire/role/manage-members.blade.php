@@ -73,7 +73,8 @@
                                 <div>
                                     <x-filament::icon-button size="xs" color="danger" icon="heroicon-o-trash"
                                         outlined tooltip="remove member"
-                                        wire:click="mountAction('removeMemberAction', { memberId: '{{ $member['participant_id'] }}' })">
+                                        wire:click="removeMember('{{ $member['participant_id'] }}')"
+                                        wire:confirm="Are you sure you want to remove this member? This action cannot be undone.">
                                         {{-- <x-filament::icon name="heroicon-o-trash" /> --}}
                                         remove
                                     </x-filament::icon-button>
@@ -91,10 +92,10 @@
                 </div>
             @endif
         </div>
+
     </div>
     {{-- <x-filament::button size="xs" color="danger" icon="heroicon-o-trash" outlined tooltip="remove member"
         wire:click="">
         Leave Flow
     </x-filament::button> --}}
-    <x-filament-actions::modals />
 </div>

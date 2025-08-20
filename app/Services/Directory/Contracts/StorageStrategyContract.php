@@ -8,8 +8,6 @@ use Illuminate\Http\UploadedFile;
 
 interface StorageStrategyContract
 {
-    public function forTenant(string $tenantId): self;
-
     public function store(UploadedFile $file): string;
 
     public function getUrl(): string;

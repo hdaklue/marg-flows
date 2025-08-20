@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\DocumentResource\Pages;
+namespace App\Filament\Resources\Documents\Pages;
 
 use App\Facades\DocumentManager;
-use App\Filament\Resources\DocumentResource;
+use App\Filament\Resources\Documents\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;

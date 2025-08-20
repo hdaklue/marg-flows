@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\FlowResource\Pages;
+declare(strict_types=1);
 
+namespace App\Filament\Resources\Flows\Pages;
+
+use App\Filament\Resources\Flows\FlowResource;
 use Filament\Actions\DeleteAction;
-use App\Filament\Resources\FlowResource;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditFlow extends EditRecord
+final class EditFlow extends EditRecord
 {
     protected static string $resource = FlowResource::class;
 

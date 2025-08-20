@@ -48,10 +48,7 @@ final class DeliverablePolicy
         return $user->hasAssignmentOn($deliverable, RoleEnum::ADMIN) ||
             $user->hasAssignmentOn($deliverable, RoleEnum::MANAGER) ||
             $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN) ||
-            $user->hasAssignmentOn($deliverable->flow, RoleEnum::MANAGER))
-
-
-
+            $user->hasAssignmentOn($deliverable->flow, RoleEnum::MANAGER);
 
     }
 

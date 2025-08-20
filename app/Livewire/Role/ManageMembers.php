@@ -12,7 +12,6 @@ use App\DTOs\Roles\ParticipantsDto;
 use App\Enums\Role\RoleEnum;
 use App\Facades\RoleManager;
 use App\Models\User;
-use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
@@ -34,6 +33,7 @@ use const true;
  * @property-read Schema $form
  * @property-read ParticipantsCollection $manageableMembers
  * @property-read Collection $authedUserAssignableRoles
+ * @property-read array $assignableEntities
  */
 #[Lazy(true)]
 final class ManageMembers extends Component implements HasActions, HasForms
@@ -56,12 +56,15 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
         if ($roleableEntity) {
             $this->canEdit = $this->authorize('manageMembers', $roleableEntity)->allowed();
-            $this->form->fill();
+
             $this->roleableEntity = $roleableEntity;
         }
+
         if ($scopeToEntity) {
+
             $this->scopeTo = $scopeToEntity;
         }
+        $this->form->fill();
         // $this->manageableMembers = $this->loadManageableMembers();
 
     }
@@ -72,7 +75,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
         return $schema
             ->components([
                 Select::make('member')
-                    ->options($this->resolveAssignableEntities())
+                    ->options(fn () => $this->assignableEntities)
                     ->required(),
                 Select::make('role')
                     ->required()
@@ -114,8 +117,14 @@ final class ManageMembers extends Component implements HasActions, HasForms
         $user = User::where('id', '=', $state['member'])->firstOrFail();
         $role = RoleEnum::from($state['role']);
         AddParticipant::run($this->roleableEntity, $user, $role);
+
+        $this->form->fill();
         $this->reloadData();
 
+        Notification::make()
+            ->body('Member added successfully')
+            ->success()
+            ->send();
     }
 
     #[Computed]
@@ -145,18 +154,25 @@ final class ManageMembers extends Component implements HasActions, HasForms
             ->send();
     }
 
-    public function removeMemberAction(): Action
+    public function removeMember(string $memberId)
+    {
+        $this->authorize('manageMembers', $this->roleableEntity);
+
+        $user = User::where('id', '=', $memberId)->firstOrFail();
+        RemoveParticipant::run($this->roleableEntity, $user);
+        $this->reloadData();
+
+        Notification::make()
+            ->body('Member removed successfully')
+            ->success()
+            ->send();
+    }
+
+    #[Computed]
+    public function assignableEntities(): array
     {
 
-        return Action::make('Remove Member')
-            ->action(function (array $arguments) {
-                $user = User::where('id', '=', $arguments['memberId'])->firstOrFail();
-                RemoveParticipant::run($this->roleableEntity, $user);
-                $this->reloadData();
-            })->requiresConfirmation()
-            ->iconButton()
-            ->color('danger');
-
+        return $this->resolveAssignableEntities();
     }
 
     // #[On('members-updated')]
@@ -184,8 +200,8 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
     private function reloadData()
     {
-        unset($this->manageableMembers);
-        $this->form->fill();
+        unset($this->manageableMembers, $this->assignableEntities);
+
         $this->dispatch("board-item-updated.{$this->roleableEntity->getKey()}");
         $this->dispatch("roleable-entity:members-updated.{$this->roleableEntity->getKey()}");
     }

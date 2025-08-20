@@ -5,7 +5,7 @@
 
 /**
  * A helper file for Laravel, to provide autocomplete information to your IDE
- * Generated for Laravel 12.22.1.
+ * Generated for Laravel 12.24.0.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -13526,7 +13526,7 @@ namespace Illuminate\Support\Facades {
          * Reset the number of attempts for the given key.
          *
          * @param string $key
-         * @return mixed
+         * @return bool
          * @static
          */
         public static function resetAttempts($key)
@@ -22548,15 +22548,6 @@ namespace Illuminate\Support\Facades {
             return $instance->renderTranslation();
         }
 
-        /**
-         * @see \Flux\FluxServiceProvider::bootMacros()
-         * @static
-         */
-        public static function getCurrentComponentData()
-        {
-            return \Illuminate\View\Factory::getCurrentComponentData();
-        }
-
             }
     /**
      * @see \Illuminate\Foundation\Vite
@@ -23566,6 +23557,7 @@ namespace Barryvdh\Debugbar\Facades {
 
 namespace Laravel\Mcp\Server\Facades {
     /**
+     * @see \Laravel\Mcp\Server\Registrar
      */
     class Mcp {
         /**
@@ -23617,203 +23609,6 @@ namespace Laravel\Mcp\Server\Facades {
         {
             /** @var \Laravel\Mcp\Server\Registrar $instance */
             return $instance->oauthRoutes($oauthPrefix);
-        }
-
-            }
-    }
-
-namespace Flux {
-    /**
-     * @see \Flux\FluxManager
-     */
-    class Flux {
-        /**
-         * @static
-         */
-        public static function boot()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->boot();
-        }
-
-        /**
-         * @static
-         */
-        public static function ensurePro()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->ensurePro();
-        }
-
-        /**
-         * @static
-         */
-        public static function pro()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->pro();
-        }
-
-        /**
-         * @static
-         */
-        public static function markAssetsRendered()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->markAssetsRendered();
-        }
-
-        /**
-         * @static
-         */
-        public static function scripts($options = [])
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->scripts($options);
-        }
-
-        /**
-         * @static
-         */
-        public static function fluxAppearance($options = [])
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->fluxAppearance($options);
-        }
-
-        /**
-         * @static
-         */
-        public static function editorStyles()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->editorStyles();
-        }
-
-        /**
-         * @static
-         */
-        public static function editorScripts()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->editorScripts();
-        }
-
-        /**
-         * @static
-         */
-        public static function classes($styles = null)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->classes($styles);
-        }
-
-        /**
-         * @static
-         */
-        public static function disallowWireModel($attributes, $componentName)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->disallowWireModel($attributes, $componentName);
-        }
-
-        /**
-         * @static
-         */
-        public static function splitAttributes($attributes, $by = [], $strict = false)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->splitAttributes($attributes, $by, $strict);
-        }
-
-        /**
-         * @static
-         */
-        public static function restorePassThroughProps($attributes, $passThroughProps)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->restorePassThroughProps($attributes, $passThroughProps);
-        }
-
-        /**
-         * @static
-         */
-        public static function forwardedAttributes($attributes, $propKeys)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->forwardedAttributes($attributes, $propKeys);
-        }
-
-        /**
-         * @static
-         */
-        public static function attributesAfter($prefix, $attributes, $default = [])
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->attributesAfter($prefix, $attributes, $default);
-        }
-
-        /**
-         * @static
-         */
-        public static function applyInset($inset, $top, $right, $bottom, $left)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->applyInset($inset, $top, $right, $bottom, $left);
-        }
-
-        /**
-         * @static
-         */
-        public static function componentExists($name)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->componentExists($name);
-        }
-
-        /**
-         * @static
-         */
-        public static function bootComponents()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->bootComponents();
-        }
-
-        /**
-         * @static
-         */
-        public static function bootModal()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->bootModal();
-        }
-
-        /**
-         * @static
-         */
-        public static function modal($name)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->modal($name);
-        }
-
-        /**
-         * @static
-         */
-        public static function modals()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->modals();
-        }
-
-        /**
-         * @static
-         */
-        public static function toast($text, $heading = null, $duration = 5000, $variant = null, $position = null)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->toast($text, $heading, $duration, $variant, $position);
         }
 
             }
@@ -24244,20 +24039,6 @@ namespace Livewire {
             //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->originalMethod();
-        }
-
-            }
-    /**
-     */
-    class Component {
-        /**
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Livewire\Component::modal($name);
         }
 
             }
@@ -27611,198 +27392,6 @@ namespace Livewire\Features\SupportTesting {
             }
     }
 
-namespace App\Filament\Admin\Resources\TenantResource\Pages {
-    /**
-     */
-    class CreateTenant extends \Filament\Resources\Pages\CreateRecord {
-            }
-    /**
-     */
-    class EditTenant extends \Filament\Resources\Pages\EditRecord {
-            }
-    /**
-     */
-    class ListTenants extends \Filament\Resources\Pages\ListRecords {
-            }
-    }
-
-namespace Filament\Resources\Pages {
-    /**
-     * @property-read Schema $form
-     */
-    class CreateRecord extends \Filament\Resources\Pages\Page {
-            }
-    /**
-     */
-    class Page extends \Filament\Pages\Page {
-            }
-    /**
-     * @property-read Schema $form
-     */
-    class EditRecord extends \Filament\Resources\Pages\Page {
-            }
-    /**
-     */
-    class ListRecords extends \Filament\Resources\Pages\Page {
-            }
-    /**
-     * @property-read Schema $form
-     */
-    class ViewRecord extends \Filament\Resources\Pages\Page {
-            }
-    }
-
-namespace Filament\Pages {
-    /**
-     */
-    class Page extends \Filament\Pages\BasePage {
-            }
-    /**
-     */
-    class BasePage extends \Livewire\Component {
-            }
-    /**
-     */
-    class Dashboard extends \Filament\Pages\Page {
-            }
-    /**
-     */
-    class SimplePage extends \Filament\Pages\BasePage {
-            }
-    }
-
-namespace App\Filament\Admin\Resources\TenantResource\RelationManagers {
-    /**
-     */
-    class ParticipantRelationManager extends \Filament\Resources\RelationManagers\RelationManager {
-            }
-    }
-
-namespace Filament\Resources\RelationManagers {
-    /**
-     */
-    class RelationManager extends \Livewire\Component {
-            }
-    }
-
-namespace App\Filament\Admin\Resources\UserResource\Pages {
-    /**
-     */
-    class CreateUser extends \Filament\Resources\Pages\CreateRecord {
-            }
-    /**
-     */
-    class EditUser extends \Filament\Resources\Pages\EditRecord {
-            }
-    /**
-     */
-    class ListUsers extends \Filament\Resources\Pages\ListRecords {
-            }
-    }
-
-namespace Filament\Livewire {
-    /**
-     */
-    class DatabaseNotifications extends \Filament\Notifications\Livewire\DatabaseNotifications {
-            }
-    /**
-     */
-    class GlobalSearch extends \Livewire\Component {
-            }
-    /**
-     */
-    class Notifications extends \Filament\Notifications\Livewire\Notifications {
-            }
-    /**
-     */
-    class Sidebar extends \Livewire\Component {
-            }
-    /**
-     */
-    class SimpleUserMenu extends \Livewire\Component {
-            }
-    /**
-     */
-    class Topbar extends \Livewire\Component {
-            }
-    }
-
-namespace Filament\Notifications\Livewire {
-    /**
-     */
-    class DatabaseNotifications extends \Livewire\Component {
-            }
-    /**
-     */
-    class Notifications extends \Livewire\Component {
-            }
-    }
-
-namespace Filament\Auth\Pages {
-    /**
-     * @property-read Schema $form
-     */
-    class EditProfile extends \Filament\Pages\Page {
-            }
-    /**
-     * @property-read Action $registerAction
-     * @property-read Schema $form
-     * @property-read Schema $multiFactorChallengeForm
-     */
-    class Login extends \Filament\Pages\SimplePage {
-            }
-    }
-
-namespace App\Filament\Resources\DocumentResource\Pages {
-    /**
-     */
-    class ListDocuments extends \Filament\Resources\Pages\ListRecords {
-            }
-    /**
-     * @property-read bool $canEdit
-     */
-    class ViewDocument extends \Filament\Resources\Pages\ViewRecord {
-            }
-    }
-
-namespace App\Filament\Resources\FlowResource\Pages {
-    /**
-     * @property-read Schema $form
-     */
-    class CreateDocument extends \Filament\Resources\Pages\Page {
-            }
-    /**
-     */
-    class CreateFlow extends \Filament\Resources\Pages\CreateRecord {
-            }
-    /**
-     */
-    class EditFlow extends \Filament\Resources\Pages\EditRecord {
-            }
-    /**
-     * @property-read Schema $form
-     * @property-read Flow $flow
-     */
-    class FlowDocuments extends \Filament\Resources\Pages\Page {
-            }
-    /**
-     */
-    class ListFlows extends \Filament\Resources\Pages\ListRecords {
-            }
-    /**
-     * @property-read Collection $stages
-     */
-    class ViewFlow extends \Filament\Resources\Pages\ViewRecord {
-            }
-    }
-
-namespace App\Filament\Pages {
-    /**
-     */
-    class Dashboard extends \Filament\Pages\Page {
-            }
-    }
-
 namespace Illuminate\Database\Eloquent {
     /**
      * @template TKey of array-key
@@ -27810,20 +27399,6 @@ namespace Illuminate\Database\Eloquent {
      * @extends \Illuminate\Support\Collection<TKey, TModel>
      */
     class Collection extends \Illuminate\Support\Collection {
-            }
-    }
-
-namespace Filament\Auth\Pages\PasswordReset {
-    /**
-     * @property-read Action $loginAction
-     * @property-read Schema $form
-     */
-    class RequestPasswordReset extends \Filament\Pages\SimplePage {
-            }
-    /**
-     * @property-read Schema $form
-     */
-    class ResetPassword extends \Filament\Pages\SimplePage {
             }
     }
 
@@ -27870,17 +27445,6 @@ namespace Illuminate\View {
         }
 
         /**
-         * @see \Flux\FluxServiceProvider::bootMacros()
-         * @param mixed $key
-         * @param mixed $default
-         * @static
-         */
-        public static function pluck($key, $default = null)
-        {
-            return \Illuminate\View\ComponentAttributeBag::pluck($key, $default);
-        }
-
-        /**
          * @see \Livewire\Features\SupportBladeAttributes\SupportBladeAttributes::provide()
          * @param mixed $name
          * @static
@@ -27888,19 +27452,6 @@ namespace Illuminate\View {
         public static function wire($name)
         {
             return \Illuminate\View\ComponentAttributeBag::wire($name);
-        }
-
-            }
-    /**
-     */
-    class Factory {
-        /**
-         * @see \Flux\FluxServiceProvider::bootMacros()
-         * @static
-         */
-        public static function getCurrentComponentData()
-        {
-            return \Illuminate\View\Factory::getCurrentComponentData();
         }
 
             }
@@ -28011,53 +27562,13 @@ namespace Illuminate\Testing {
             }
     }
 
-namespace App\Livewire {
-    /**
-     */
-    class PreviewImage extends \Livewire\Component {
-            }
-    /**
-     */
-    class SortableDemo extends \Livewire\Component {
-            }
-    /**
-     */
-    class PreviewVideo extends \Livewire\Component {
-            }
-    /**
-     */
-    class PreviewAudio extends \Livewire\Component {
-            }
-    /**
-     * @property-read Schema $form
-     */
-    class TestChunkedUpload extends \Livewire\Component {
-            }
-    /**
-     */
-    class CalendarTest extends \Livewire\Component {
-            }
-    /**
-     */
-    class ToastCalendarTest extends \Livewire\Component {
-            }
-    }
-
-namespace App\Livewire\Reusable {
-    /**
-     * @property-read bool $canAcceptVideos
-     * @property-read array $videoUrls
-     */
-    class VideoRecorder extends \Livewire\Component {
-            }
-    }
-
 
 namespace  {
     class App extends \Illuminate\Support\Facades\App {}
     class Arr extends \Illuminate\Support\Arr {}
     class Artisan extends \Illuminate\Support\Facades\Artisan {}
     class Auth extends \Illuminate\Support\Facades\Auth {}
+    class Benchmark extends \Illuminate\Support\Benchmark {}
     class Blade extends \Illuminate\Support\Facades\Blade {}
     class Broadcast extends \Illuminate\Support\Facades\Broadcast {}
     class Bus extends \Illuminate\Support\Facades\Bus {}
@@ -33338,7 +32849,6 @@ namespace  {
     class EloquentSerialize extends \AnourValar\EloquentSerialize\Facades\EloquentSerializeFacade {}
     class Debugbar extends \Barryvdh\Debugbar\Facades\Debugbar {}
     class Mcp extends \Laravel\Mcp\Server\Facades\Mcp {}
-    class Flux extends \Flux\Flux {}
     class Livewire extends \Livewire\Livewire {}
     class Action extends \Lorisleiva\Actions\Facades\Actions {}
     class Lody extends \Lorisleiva\Lody\Lody {}

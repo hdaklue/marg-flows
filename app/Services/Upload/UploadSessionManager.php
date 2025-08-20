@@ -16,6 +16,16 @@ use Illuminate\Support\Manager;
 final class UploadSessionManager extends Manager
 {
     /**
+     * Factory method to create and configure an upload session.
+     */
+    public static function start(string $strategy, string $tenantId): UploadSessionService
+    {
+        /** @var UploadSessionManager $manager */
+        $manager = app(UploadSessionManager::class);
+        
+        return $manager->driver($strategy)->forTenant($tenantId);
+    }
+    /**
      * Get the default driver name.
      */
     public function getDefaultDriver(): string

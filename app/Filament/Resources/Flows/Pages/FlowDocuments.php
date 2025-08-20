@@ -2,21 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\FlowResource\Pages;
+namespace App\Filament\Resources\Flows\Pages;
 
-use Filament\Support\Enums\Width;
-use Filament\Support\Enums\Size;
-use Filament\Schemas\Schema;
 use App\Facades\DocumentManager;
-use App\Filament\Resources\FlowResource;
+use App\Filament\Resources\Flows\FlowResource;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
 use App\Models\Flow;
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Size;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Locked;
@@ -31,10 +32,10 @@ final class FlowDocuments extends Page implements HasForms
 
     protected static string $resource = FlowResource::class;
 
-    protected string $view = 'filament.resources.flow-resource.pages.flow-documents';
-
     #[Locked]
     public Flow $flow;
+
+    protected string $view = 'filament.resources.flow-resource.pages.flow-documents';
 
     protected Width|string|null $maxContentWidth = 'full';
 
@@ -50,7 +51,9 @@ final class FlowDocuments extends Page implements HasForms
     {
         return [
             Action::make('Create')
-                ->url(FlowResource::getUrl('createDocument', ['flow' => $this->flow->getKey()]))
+                ->form([
+                    TextInput::make('title'),
+                ])
                 // ->form([
                 //     PlaceholderInput::make('title')
                 //         ->placeholder('Title'),

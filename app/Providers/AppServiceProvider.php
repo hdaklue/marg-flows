@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use Filament\Support\Enums\Size;
 use App\Contracts\Document\DocumentManagerInterface;
 use App\Facades\DeliverableBuilder;
 use App\Listeners\TenantEventSubscriber;
@@ -17,12 +16,12 @@ use App\Services\Document\DocumentService;
 use App\Services\Flow\TimeProgressService;
 use App\Services\MentionService;
 use App\Services\Role\RoleAssignmentService;
-use App\Services\Upload\UploadManager;
 use App\Services\Upload\UploadSessionManager;
 use Filament\Actions\Action;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
+use Filament\Support\Enums\Size;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
@@ -45,10 +44,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton('mention.service', fn (): MentionService => new MentionService);
         $this->app->singleton(DeliverableBuilder::class, fn (): DeliverablesManager => new DeliverablesManager($this->app));
         $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
-        $this->app->singleton(UploadManager::class);
-        $this->app->singleton(UploadSessionManager::class, function ($app) {
-            return new UploadSessionManager($app);
-        });
+        $this->app->singleton(UploadSessionManager::class, fn ($app) => new UploadSessionManager($app));
 
         $this->configureGate();
         $this->configureModel();

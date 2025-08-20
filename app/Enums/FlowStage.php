@@ -16,6 +16,13 @@ enum FlowStage: int implements HasColor, HasLabel
     case COMPLETED = 5;
     case CANCELED = 6;
 
+    public static function asFilamentHtmlArray(): array
+    {
+        return collect(self::cases())
+            ->mapWithKeys(fn ($case) => [$case->value => "<div class='flex items-center gap-2'><div class='w-3 h-3 rounded bg-{$case->getColor()}-500 dark:bg-{$case->getColor()}-700'></div><span>{$case->getLabel()}</span></div>"])
+            ->toArray();
+    }
+
     public function getLabel(): string
     {
         return match ($this) {
@@ -33,11 +40,11 @@ enum FlowStage: int implements HasColor, HasLabel
     {
         return match ($this) {
             self::ACTIVE => 'sky',
-            self::PAUSED => 'yellow',
+            self::PAUSED => 'amber',
             self::BLOCKED => 'red',
             self::COMPLETED => 'green',
             self::DRAFT => 'indigo',
-            default => 'slate',
+            default => 'zinc',
 
         };
     }

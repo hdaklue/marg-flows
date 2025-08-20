@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\Directory\Facades\DirectoryManager;
+use App\Services\Directory\DirectoryManager;
 use App\Services\Document\Requests\DocumentVideoUploadRequest;
-use App\Services\Upload\Facades\UploadManager;
-use App\Services\Upload\Facades\UploadSessionManager;
+use App\Services\Upload\UploadSessionManager;
 use App\ValueObjects\Dimension\AspectRatio;
 use Exception;
 use FFMpeg\Format\Video\X264;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Log;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
@@ -33,10 +33,8 @@ final class EditorJsVideoUpload extends Controller
 
         try {
             // Configure session manager for this tenant and document-specific storage
-            $sessionManager = UploadSessionManager::driver('http')
-                ->forTenant($tenantId)
-                ->storeIn(DirectoryManager::document()
-                    ->forTenant($tenantId)
+            $sessionManager = UploadSessionManager::start('http', $tenantId)
+                ->storeIn(DirectoryManager::document($tenantId)
                     ->forDocument($document)
                     ->videos()
                     ->getDirectory());
@@ -90,16 +88,14 @@ final class EditorJsVideoUpload extends Controller
     {
         // Get tenant and directory configuration for direct upload
         $tenantId = auth()->user()->getActiveTenantId();
-        $directory = DirectoryManager::document()
-            ->forTenant($tenantId)
+        $directory = DirectoryManager::document($tenantId)
             ->forDocument($document)
             ->videos()
             ->getDirectory();
 
         try {
-            // Use UploadManager with simple strategy
-            $path = UploadManager::simple()
-                ->forTenant($tenantId)
+            // Use UploadSessionManager with http strategy
+            $path = UploadSessionManager::start('http', $tenantId)
                 ->storeIn($directory)
                 ->upload($request->file('video'));
 

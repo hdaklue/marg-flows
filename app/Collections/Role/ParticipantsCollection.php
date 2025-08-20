@@ -18,19 +18,17 @@ final class ParticipantsCollection extends Collection
      */
     public function asDtoArray(): self
     {
-        return $this->map(function ($item) {
-            return [
-                'participant_id' => $item->model->getKey(),
-                'participant_name' => $item->model->getAttribute('name'),
-                'participant_email' => $item->model->getAttribute('email'),
-                'participant_avatar' => $item->model->getAttribute('avatar'),
-                'role_id' => $item->role->getKey(),
-                'role_name' => $item->role->getAttribute('name'),
-                'role_label' => RoleEnum::from($item->role->getAttribute('name'))->getLabel(),
-                'role_description' => RoleEnum::from($item->role->getAttribute('name'))->getDescription(),
+        return $this->map(fn ($item) => [
+            'participant_id' => $item->model->getKey(),
+            'participant_name' => $item->model->getAttribute('name'),
+            'participant_email' => $item->model->getAttribute('email'),
+            'participant_avatar' => $item->model->getAvatarUrl(),
+            'role_id' => $item->role->getKey(),
+            'role_name' => $item->role->getAttribute('name'),
+            'role_label' => RoleEnum::from($item->role->getAttribute('name'))->getLabel(),
+            'role_description' => RoleEnum::from($item->role->getAttribute('name'))->getDescription(),
 
-            ];
-        });
+        ]);
     }
 
     /**
@@ -39,7 +37,7 @@ final class ParticipantsCollection extends Collection
     public function avatars(): Collection
     {
 
-        return $this->pluck('model.avatar');
+        return $this->pluck('model')->map(fn ($item) => $item->getAvatarUrl());
     }
 
     /**
@@ -74,9 +72,6 @@ final class ParticipantsCollection extends Collection
             $userId = [$userId];
         }
 
-        return $this->filter(function ($item) use ($userId) {
-            return ! in_array($item->model->getKey(), $userId);
-
-        });
+        return $this->filter(fn ($item) => ! in_array($item->model->getKey(), $userId));
     }
 }

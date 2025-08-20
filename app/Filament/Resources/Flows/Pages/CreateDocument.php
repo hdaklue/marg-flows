@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\FlowResource\Pages;
+namespace App\Filament\Resources\Flows\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Actions;
-use Filament\Actions\Action;
 use App\DTOs\Document\CreateDocumentDto;
 use App\Enums\Role\RoleEnum;
-use App\Filament\Resources\FlowResource;
+use App\Filament\Resources\Flows\FlowResource;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
 use App\Models\Flow;
 use App\Models\ModelHasRole;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Validation\ValidationException;
 use Log;
 
@@ -32,11 +32,11 @@ final class CreateDocument extends Page implements HasForms
 
     protected static string $resource = FlowResource::class;
 
-    protected string $view = 'filament.resources.flow-resource.pages.create-document';
-
     public ?array $data = [];
 
     public Flow $flow;
+
+    protected string $view = 'filament.resources.flow-resource.pages.create-document';
 
     public function mount(string $flow)
     {

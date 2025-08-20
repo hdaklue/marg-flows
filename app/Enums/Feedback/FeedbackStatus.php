@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums\Feedback;
 
-use App\Traits\EnumSelectArrays;
+use App\Concerns\Enums\EnumSelectArrays;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 

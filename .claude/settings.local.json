@@ -12,7 +12,6 @@
     "deny": []
   },
   "enabledMcpjsonServers": [
-    "context7",
     "filesystem",
     "laravel-boost"
   ],

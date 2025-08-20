@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Support\Number;
+
 final class FileSize
 {
     public static function fromMB(float $megabytes): int
@@ -36,20 +38,9 @@ final class FileSize
         return $bytes / 1024;
     }
 
-    public static function format(int $bytes): string
+    public static function format(int $bytes, int $precision = 2): string
     {
-        if ($bytes >= 1024 * 1024 * 1024) {
-            return number_format($bytes / (1024 * 1024 * 1024), 2) . ' GB';
-        }
+        return Number::fileSize($bytes, $precision);
 
-        if ($bytes >= 1024 * 1024) {
-            return number_format($bytes / (1024 * 1024), 2) . ' MB';
-        }
-
-        if ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
-        }
-
-        return $bytes . ' bytes';
     }
 }

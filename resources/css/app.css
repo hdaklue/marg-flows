@@ -6,6 +6,16 @@
 @tailwind utilities; */
 @import "tailwindcss";
 
+/* Source content paths for Tailwind v4 */
+@source "./app/Filament/**/*.php";
+@source "./resources/views/**/*.blade.php";
+@source "./resources/views/livewire/**/*.blade.php";
+@source "./resources/views/components/**/*.blade.php";
+@source "./resources/views/livewire/preview-audio.blade.php";
+@source "./resources/js/**/*.js";
+@source "./resources/css/**/*.css";
+@source "./vendor/filament/**/*.blade.php";
+
 /* Safelist amber colors for dynamic usage with @source inline */
 @source inline("{hover:,focus:,dark:,dark:hover:,dark:focus:}bg-amber-{50,500,900/20}");
 @source inline("{hover:,focus:,dark:,dark:hover:,dark:focus:}text-amber-{300,400,700}");

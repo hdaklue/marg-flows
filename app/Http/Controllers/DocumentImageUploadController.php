@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\EditorJs\OptimizeEditorJsImage;
-use App\Services\Directory\Facades\DirectoryManager;
+use App\Services\Directory\DirectoryManager;
 use App\Services\Document\Requests\DocumentImageUploadRequest;
-use App\Services\Upload\Facades\UploadManager;
+use App\Services\Upload\UploadSessionManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -24,15 +24,13 @@ final class DocumentImageUploadController extends Controller
             $file = $request->getValidatedFile();
 
             // Get organized directory from DirectoryManager
-            $storageDirectory = DirectoryManager::document()
-                ->forTenant(auth()->user()->getActiveTenantId())
+            $storageDirectory = DirectoryManager::document(auth()->user()->getActiveTenantId())
                 ->forDocument($document)
                 ->images()
                 ->getDirectory();
 
-            // Use UploadManager with simple strategy for single file uploads
-            $path = UploadManager::simple()
-                ->forTenant(auth()->user()->getActiveTenantId())
+            // Use UploadSessionManager with http strategy for single file uploads
+            $path = UploadSessionManager::start('http', auth()->user()->getActiveTenantId())
                 ->storeIn($storageDirectory)
                 ->upload($file);
 

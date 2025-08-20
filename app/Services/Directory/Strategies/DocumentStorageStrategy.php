@@ -12,8 +12,6 @@ use InvalidArgumentException;
 
 final class DocumentStorageStrategy implements DocumentStorageStrategyContract
 {
-    private ?string $tenantId = null;
-
     private ?string $documentId = null;
 
     private ?UploadedFile $file = null;
@@ -22,12 +20,7 @@ final class DocumentStorageStrategy implements DocumentStorageStrategyContract
 
     private ?string $storedPath = null;
 
-    public function forTenant(string $tenantId): self
-    {
-        $this->tenantId = $tenantId;
-
-        return $this;
-    }
+    public function __construct(private readonly string $tenantId) {}
 
     public function forDocument(string $documentId): self
     {
@@ -35,7 +28,6 @@ final class DocumentStorageStrategy implements DocumentStorageStrategyContract
 
         return $this;
     }
-
 
     public function images(): self
     {
@@ -59,9 +51,6 @@ final class DocumentStorageStrategy implements DocumentStorageStrategyContract
 
     public function documents(): self
     {
-        if (! $this->tenantId) {
-            throw new Exception('Cannot access documents directory: Tenant ID is required. Call forTenant($tenantId) first.');
-        }
         $this->subdirectory = 'documents';
 
         return $this;
@@ -90,25 +79,37 @@ final class DocumentStorageStrategy implements DocumentStorageStrategyContract
 
     public function getDirectory(): string
     {
-        if (! $this->tenantId) {
-            throw new Exception('Cannot build directory path: Tenant ID is required. Call forTenant($tenantId) first.');
-        }
-
         return $this->buildDirectory();
     }
 
-
-    public function delete(string $path): bool
+    public function delete(string $fileName): bool
     {
-        return Storage::delete($path);
+        return Storage::delete($this->getDirectory() . "/{$fileName}");
+    }
+
+    public function get(string $fileName): ?string
+    {
+        return Storage::get($this->getDirectory() . "/{$fileName}");
+    }
+
+    public function getPath(string $fileName): ?string
+    {
+        $fullPath = $this->getDirectory() . "/{$fileName}";
+
+        if (Storage::getDefaultDriver() === 'local') {
+            return Storage::path($fullPath);
+        }
+
+        return $fullPath;
+    }
+
+    public function getFileUrl(string $fileName): string
+    {
+        return Storage::url($this->getDirectory() . "/{$fileName}");
     }
 
     private function buildDirectory(): string
     {
-        if (! $this->tenantId) {
-            throw new Exception('Cannot build directory path: Tenant ID is required. Call forTenant($tenantId) first.');
-        }
-
         $parts = [$this->tenantId];
 
         if ($this->documentId) {

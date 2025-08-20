@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\Documents;
 
 use App\Filament\Resources\DocumentResource\Pages;
-use App\Filament\Resources\DocumentResource\Pages\ListDocuments;
-use App\Filament\Resources\DocumentResource\Pages\ViewDocument;
+use App\Filament\Resources\Documents\Pages\ListDocuments;
+use App\Filament\Resources\Documents\Pages\ViewDocument;
 use App\Models\Document;
 use BackedEnum;
 use Filament\Resources\Resource;

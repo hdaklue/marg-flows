@@ -38,7 +38,7 @@ final class EditorJs extends Field
 
     public function getUploadUrl(): string
     {
-        return $this->evaluate($this->uploadUrl) ?? route('editorjs.uploade-image');
+        return $this->evaluate($this->uploadUrl) ?? route('editorjs.upload-image');
     }
 
     public function getHolderId(): string

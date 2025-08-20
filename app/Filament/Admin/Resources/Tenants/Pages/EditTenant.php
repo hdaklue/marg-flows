@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Admin\Resources\TenantResource\Pages;
+namespace App\Filament\Admin\Resources\Tenants\Pages;
 
-use Filament\Schemas\Schema;
-use App\Filament\Admin\Resources\TenantResource;
+use App\Filament\Admin\Resources\Tenants\TenantResource;
 use Filament\Actions;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
-class EditTenant extends EditRecord
+final class EditTenant extends EditRecord
 {
     protected static string $resource = TenantResource::class;
 

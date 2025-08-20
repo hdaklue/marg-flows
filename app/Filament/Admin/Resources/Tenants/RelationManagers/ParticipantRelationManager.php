@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Admin\Resources\TenantResource\RelationManagers;
+namespace App\Filament\Admin\Resources\Tenants\RelationManagers;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\AttachAction;
-use Filament\Support\Enums\Width;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
 use App\Actions\Tenant\AddMember;
 use App\Actions\Tenant\RemoveMember;
 use App\Enums\Role\RoleEnum;
-use App\Filament\Admin\Resources\TenantResource;
+use App\Filament\Admin\Resources\Tenants\TenantResource;
 use App\Models\Tenant;
 use App\Models\User;
 use Exception;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

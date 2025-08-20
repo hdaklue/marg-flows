@@ -10,7 +10,7 @@ use App\Concerns\Tenant\HasActiveTenant;
 use App\Contracts\Role\AssignableEntity;
 use App\Enums\Account\AccountType;
 use App\Facades\RoleManager;
-use Filament\Facades\Filament;
+use App\Services\Avatar\AvatarService;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasDefaultTenant;
@@ -52,21 +52,22 @@ use function ucwords;
  * @property string|null $active_tenant_id
  * @property AccountType $accout_type
  * @property-read mixed $avatar
- * @property-read Collection<int, \App\Models\Tenant> $createdTenants
+ * @property-read Collection<int, Tenant> $createdTenants
  * @property-read int|null $created_tenants_count
- * @property-read Collection<int, \App\Models\Flow> $flows
+ * @property-read Collection<int, Flow> $flows
  * @property-read int|null $flows_count
- * @property-read Collection<int, \App\Models\MemberInvitation> $invitations
+ * @property-read Collection<int, MemberInvitation> $invitations
  * @property-read int|null $invitations_count
  * @property-read mixed $inviter_name
- * @property-read \App\Models\LoginLog|null $latestLogin
- * @property-read Collection<int, \App\Models\LoginLog> $logins
+ * @property-read LoginLog|null $latestLogin
+ * @property-read Collection<int, LoginLog> $logins
  * @property-read int|null $logins_count
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read \App\Models\MemberInvitation|null $receivedInvitation
- * @property-read Collection<int, \App\Models\ModelHasRole> $roleAssignments
+ * @property-read MemberInvitation|null $receivedInvitation
+ * @property-read Collection<int, ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
+ *
  * @method static Builder<static>|User appUser()
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static Builder<static>|User newModelQuery()
@@ -88,6 +89,7 @@ use function ucwords;
  * @method static Builder<static>|User whereRememberToken($value)
  * @method static Builder<static>|User whereTimezone($value)
  * @method static Builder<static>|User whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 final class User extends Authenticatable implements AssignableEntity, FilamentUser, HasAvatar, HasDefaultTenant, HasTenants
@@ -112,6 +114,7 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         'account_type',
         'timezone',
         'active_tenant_id',
+        'avatar',
     ];
 
     /**
@@ -123,8 +126,6 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         'password',
         'remember_token',
     ];
-
-    protected $appends = ['avatar'];
 
     public function canAccessPanel(Panel $panel): bool
     {
@@ -267,15 +268,9 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $builder->where('account_type', AccountType::USER->value);
     }
 
-    // public function getTenants(Panel $panel): Collection
-    // {
-    //     return $this->tenants;
-    // }
-
     public function getFilamentAvatarUrl(): ?string
     {
-
-        return null;
+        return AvatarService::generateAvatarUrl($this);
     }
 
     public function canAccessAdmin(): bool
@@ -294,43 +289,19 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $this->isAssignedTo($tenant);
     }
 
-    protected function avatar(): Attribute
-    {
-
-        return Attribute::make(
-            get: fn () => Filament::getUserAvatarUrl($this),
-        );
-    }
-
-    protected function inviterName(): Attribute
-    {
-
-        return Attribute::make(
-            get: fn () => $this->load('receivedInvitation')->receivedInvitation->sender->name ?? null,
-        );
-
-    }
-
-    protected function name(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => ucwords($value),
-        );
-    }
-
     /**
      * Check if user has any of the specified roles.
      */
     public function hasRole(array|string $roles): bool
     {
         $rolesToCheck = is_array($roles) ? $roles : [$roles];
-        
+
         foreach ($rolesToCheck as $role) {
             if ($this->hasAssignmentOn($this->activeTenant(), $role)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -348,6 +319,32 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
     public function hasRoleOnFlow(Flow $flow, string $role): bool
     {
         return $this->hasAssignmentOn($flow, $role);
+    }
+
+    public function getAvatarUrl(): string
+    {
+        return AvatarService::generateAvatarUrl($this);
+    }
+
+    public function getAvatarFileName(): ?string
+    {
+        return $this->avatar;
+    }
+
+    protected function inviterName(): Attribute
+    {
+
+        return Attribute::make(
+            get: fn () => $this->load('receivedInvitation')->receivedInvitation->sender->name ?? null,
+        );
+
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ucwords($value),
+        );
     }
 
     /**

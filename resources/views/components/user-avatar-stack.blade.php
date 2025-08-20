@@ -83,7 +83,7 @@
             @if ($showTooltip)
                 <!-- CSS-only tooltip -->
                 <div
-                    class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:bg-gray-700">
+                    class="absolute z-50 px-2 py-1 mb-2 text-xs text-white transition-opacity duration-200 transform -translate-x-1/2 bg-gray-900 rounded shadow-lg opacity-0 pointer-events-none bottom-full left-1/2 whitespace-nowrap group-hover:opacity-100 dark:bg-gray-700">
                     {{ $user['participant_name'] }}
                 </div>
             @endif
@@ -98,13 +98,13 @@
                 @if ($remainingCount > 0)
                     +{{ $remainingCount }}
                 @else
-                    <x-heroicon-o-users class="h-3 w-3" />
+                    <x-heroicon-o-users class="w-3 h-3" />
                 @endif
             </div>
             @if ($showTooltip)
                 <!-- CSS-only tooltip -->
                 <div
-                    class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:bg-gray-700">
+                    class="absolute z-50 px-2 py-1 mb-2 text-xs text-white transition-opacity duration-200 transform -translate-x-1/2 bg-gray-900 rounded shadow-lg opacity-0 pointer-events-none bottom-full left-1/2 whitespace-nowrap group-hover:opacity-100 dark:bg-gray-700">
                     @if ($remainingCount > 0)
                         {{ $remainingCount }} more user{{ $remainingCount > 1 ? 's' : '' }}
                     @else

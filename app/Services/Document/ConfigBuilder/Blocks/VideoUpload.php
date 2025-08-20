@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Document\ConfigBuilder\Blocks;
 
-use App\Services\Directory\Facades\DirectoryManager;
 use App\Services\Document\ConfigBuilder\Blocks\DTO\VideoUploadConfigData;
 use App\Services\Document\Contratcs\BlockConfigContract;
 use App\Services\Document\Contratcs\DocumentBlockConfigContract;
@@ -130,13 +129,8 @@ final class VideoUpload implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function baseDirectory(string $tenantId, string $documentId): self
+    public function baseDirectory(string $baseDirectory): self
     {
-        $baseDirectory = DirectoryManager::document()
-            ->forTenant($tenantId)
-            ->forDocument($documentId)
-            ->videos()
-            ->getDirectory();
 
         $this->config['baseDirectory'] = Storage::url($baseDirectory);
 

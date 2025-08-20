@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\FlowResource\Pages;
+namespace App\Filament\Resources\Flows\Pages;
 
 use App\Actions\Flow\CreateFlow as CreateFlowAction;
 use App\DTOs\Flow\CreateFlowDto;
 use App\Enums\FlowStage;
 use App\Exceptions\Flow\FlowCreationException;
 use App\Filament\Pages\FlowsKanabanBoard;
-use App\Filament\Resources\FlowResource;
+use App\Filament\Resources\Flows\FlowResource;
 use App\Forms\Components\ChunkedFileUpload;
 use App\Forms\Components\EditorJs;
 use App\Models\ModelHasRole;
@@ -32,6 +32,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
@@ -233,11 +234,13 @@ final class CreateFlow extends CreateRecord
                                     ->options(DeliverableSpecResolver::getSupportedFormats())
                                     ->live()
                                     ->native(false)
+                                    ->partiallyRenderComponentsAfterStateUpdated(['urgency'])
                                     ->selectablePlaceholder(false)
                                     ->required(),
                                 Select::make('urgency')
-                                    ->options(fn ($get) => $get('template') ? (new DeliverableFormat($get('template')))->typesAsSelectArray() : [],
-                                    )
+                                    ->multiple(false)
+                                    ->disabled(fn (Get $get) => empty($get('template')))
+                                    ->options(fn ($get) => $get('template') ? (new DeliverableFormat($get('template')))->typesAsSelectArray() : [])
                                     ->native(false),
                                 TextInput::make('options')
                                     ->numeric()

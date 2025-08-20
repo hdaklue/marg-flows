@@ -2,26 +2,25 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Admin\Resources\UserResource\Pages;
+namespace App\Filament\Admin\Resources\Users\Pages;
 
-use Filament\Actions\CreateAction;
-use Filament\Schemas\Components\Utilities\Get;
 use App\Actions\Invitation\InviteMember;
 use App\DTOs\Invitation\InvitationDTO;
-use App\Filament\Admin\Resources\UserResource;
+use App\Filament\Admin\Resources\Users\UserResource;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Services\Timezone;
 use Exception;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Facades\Log;
 
-class ListUsers extends ListRecords
+final class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 

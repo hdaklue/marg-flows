@@ -2,23 +2,26 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Admin\Resources;
+namespace App\Filament\Admin\Resources\Users;
 
-use Filament\Schemas\Schema;
-use App\Filament\Admin\Resources\UserResource\Pages\ListUsers;
 use App\Enums\Account\AccountType;
 use App\Filament\Admin\Resources\UserResource\Pages;
+use App\Filament\Admin\Resources\Users\Pages\ListUsers;
 use App\Models\User;
+use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class UserResource extends Resource
+use function ucwords;
+
+final class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $label = 'Member';
 
@@ -40,7 +43,7 @@ class UserResource extends Resource
                 TextColumn::make('account_type')
                     ->color(fn ($state) => AccountType::from($state)->getColor())
                     ->label('Account Type')
-                    ->formatStateUsing(fn ($state) => \ucwords($state))
+                    ->formatStateUsing(fn ($state) => ucwords($state))
                     ->badge(),
                 TextColumn::make('latestLogin.created_at')
                     ->dateTime('j F Y g:i A')

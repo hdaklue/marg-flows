@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\FlowResource\Pages;
+namespace App\Filament\Resources\Flows\Pages;
 
 use App\Concerns\Livewire\WithSortable;
-use App\Filament\Resources\FlowResource;
+use App\Filament\Resources\Flows\FlowResource;
+use App\Livewire\SortableDemo;
 use Exception;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -39,12 +42,19 @@ final class ViewFlow extends ViewRecord
         ['id' => '8', 'title' => 'Create database migrations', 'status' => 'done'],
     ];
 
-    protected string $view = 'filament.resources.flow-resource.pages.view-flow';
+    // protected string $view = 'filament.resources.flow-resource.pages.view-flow';
 
     protected array $sortableRules = [
         'items' => ['required', 'array', 'max:50'],
         'items.*' => ['required', 'string'],
     ];
+
+    public function getHeaderActions(): array
+    {
+        return [
+
+        ];
+    }
 
     #[Computed]
     public function getStages(): Collection
@@ -55,6 +65,15 @@ final class ViewFlow extends ViewRecord
     public function onSort(array $itemIds, ?string $from = null, ?string $to = null): mixed
     {
         return true;
+    }
+
+    public function content(Schema $schema): Schema
+    {
+
+        return $schema->components([
+            Livewire::make(SortableDemo::class),
+
+        ]);
     }
 
     #[On('sortable:sort')]
@@ -84,6 +103,7 @@ final class ViewFlow extends ViewRecord
 
     public function getTitle(): string|Htmlable
     {
+
         return $this->record->title;
     }
 }

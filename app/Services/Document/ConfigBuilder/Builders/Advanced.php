@@ -4,19 +4,26 @@ declare(strict_types=1);
 
 namespace App\Services\Document\ConfigBuilder\Builders;
 
+use App\Services\Directory\DirectoryManager;
 use App\Services\Document\Facades\EditorConfigBuilder;
-use App\Services\Upload\ChunkConfigManager;
 
 final class Advanced
 {
+    private string $tenantId;
+
     public function build(?string $documentId = null): array
     {
+        $this->tenantId = auth()->user()->getActiveTenantId();
         $imagesConfig = EditorConfigBuilder::images()
             ->forPlan('advanced');
+        $baseDirectory = DirectoryManager::document($this->tenantId)
+            ->forDocument($documentId)
+            ->images()
+            ->getDirectory();
         if ($documentId) {
             $imagesConfig
                 ->forDocument($documentId)
-                ->baseDirectory(auth()->user()->getActiveTenantId(), $documentId);
+                ->baseDirectory($baseDirectory);
         }
 
         return [
@@ -37,10 +44,15 @@ final class Advanced
         $videoUploadConfig = EditorConfigBuilder::videoUpload()
             ->forPlan('advanced');
 
+        $baseDirectory = DirectoryManager::document($this->tenantId)
+            ->forDocument($documentId)
+            ->videos()
+            ->getDirectory();
+
         if ($documentId) {
             $videoUploadConfig
                 ->forDocument($documentId)
-                ->baseDirectory(auth()->user()->getActiveTenantId(), $documentId);
+                ->baseDirectory($baseDirectory);
         }
 
         return $videoUploadConfig;

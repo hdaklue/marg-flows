@@ -12,21 +12,16 @@ use InvalidArgumentException;
 
 final class ChunksStorageStrategy implements ChunksStorageStrategyContract
 {
-    private ?string $tenantId = null;
     private ?string $sessionId = null;
 
-    public function forTenant(string $tenantId): self
-    {
-        $this->tenantId = $tenantId;
-        return $this;
-    }
+    public function __construct(private readonly string $tenantId) {}
 
     public function forSession(string $sessionId): self
     {
         $this->sessionId = $sessionId;
+
         return $this;
     }
-
 
     public function store(UploadedFile $file): string
     {
@@ -46,29 +41,47 @@ final class ChunksStorageStrategy implements ChunksStorageStrategyContract
     public function getDirectory(): string
     {
         $this->validateConfiguration();
+
         return $this->buildDirectory();
     }
 
-
-    public function delete(string $path): bool
+    public function delete(string $fileName): bool
     {
-        return Storage::delete($path);
+        return Storage::delete($this->getDirectory() . "/{$fileName}");
+    }
+
+    public function get(string $fileName): ?string
+    {
+        return Storage::get($this->getDirectory() . "/{$fileName}");
+    }
+
+    public function getPath(string $fileName): ?string
+    {
+        $fullPath = $this->getDirectory() . "/{$fileName}";
+
+        if (Storage::getDefaultDriver() === 'local') {
+            return Storage::path($fullPath);
+        }
+
+        return $fullPath;
+    }
+
+    public function getFileUrl(string $fileName): string
+    {
+        return Storage::url($this->getDirectory() . "/{$fileName}");
     }
 
     public function deleteSession(): bool
     {
         $this->validateConfiguration();
         $directory = $this->buildDirectory();
+
         return Storage::deleteDirectory($directory);
     }
 
     private function buildDirectory(): string
     {
-        if (!$this->tenantId) {
-            throw new Exception('Cannot build directory path: Tenant ID is required. Call forTenant($tenantId) first.');
-        }
-
-        if (!$this->sessionId) {
+        if (! $this->sessionId) {
             throw new Exception('Cannot build directory path: Session ID is required. Call forSession($sessionId) first.');
         }
 
@@ -79,16 +92,13 @@ final class ChunksStorageStrategy implements ChunksStorageStrategyContract
     {
         $timestamp = time();
         $unique = uniqid();
+
         return "chunk_{$unique}_{$timestamp}";
     }
 
     private function validateConfiguration(): void
     {
-        if (!$this->tenantId) {
-            throw new Exception('Tenant ID is required. Call forTenant($tenantId) first.');
-        }
-
-        if (!$this->sessionId) {
+        if (! $this->sessionId) {
             throw new Exception('Session ID is required. Call forSession($sessionId) first.');
         }
     }

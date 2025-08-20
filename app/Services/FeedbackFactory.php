@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Feedbacks\AudioFeedback;
-use App\Models\Feedbacks\BaseFeedback;
 use App\Models\Feedbacks\DesignFeedback;
 use App\Models\Feedbacks\DocumentFeedback;
 use App\Models\Feedbacks\GeneralFeedback;
@@ -23,7 +22,7 @@ final class FeedbackFactory
     /**
      * Create feedback using the most appropriate specialized model.
      */
-    public static function create(array $attributes)
+    public static function create(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback
     {
         $feedbackType = self::determineFeedbackType($attributes);
 
@@ -197,7 +196,7 @@ final class FeedbackFactory
     /**
      * Create feedback with automatic type detection and validation.
      */
-    public static function createSmart(array $attributes): BaseFeedback
+    public static function createSmart(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback
     {
         // Automatically clean and validate attributes
         $cleanAttributes = self::cleanAttributes($attributes);
@@ -332,63 +331,6 @@ final class FeedbackFactory
         return true;
     }
 
-    /**
-     * Convert legacy metadata format to new specialized model attributes.
-     */
-    private static function convertLegacyAttributes(array $attributes, string $legacyType, array $data): array
-    {
-        $baseAttributes = [
-            'creator_id' => $attributes['creator_id'],
-            'content' => $attributes['content'],
-            'feedbackable_type' => $attributes['feedbackable_type'],
-            'feedbackable_id' => $attributes['feedbackable_id'],
-            'status' => $attributes['status'] ?? null,
-            'urgency' => $attributes['urgency'] ?? null,
-        ];
-
-        return match ($legacyType) {
-            'video_frame' => array_merge($baseAttributes, [
-                'feedback_type' => 'frame',
-                'timestamp' => $data['timestamp'] ?? null,
-                'x_coordinate' => $data['x_coordinate'] ?? null,
-                'y_coordinate' => $data['y_coordinate'] ?? null,
-            ]),
-            'video_region' => array_merge($baseAttributes, [
-                'feedback_type' => 'region',
-                'start_time' => $data['start_time'] ?? null,
-                'end_time' => $data['end_time'] ?? null,
-                'x_coordinate' => $data['x_coordinate'] ?? null,
-                'y_coordinate' => $data['y_coordinate'] ?? null,
-                'region_data' => $data['region_data'] ?? null,
-            ]),
-            'audio_region' => array_merge($baseAttributes, [
-                'start_time' => $data['start_time'],
-                'end_time' => $data['end_time'],
-                'waveform_data' => $data['waveform_data'] ?? null,
-                'peak_amplitude' => $data['peak_amplitude'] ?? null,
-                'frequency_data' => $data['frequency_data'] ?? null,
-            ]),
-            'document_block' => array_merge($baseAttributes, [
-                'block_id' => $data['block_id'],
-                'element_type' => $data['element_type'] ?? null,
-                'position_data' => $data['position_data'] ?? null,
-                'selection_data' => $data['selection_data'] ?? null,
-            ]),
-            'image_annotation', 'design_annotation' => array_merge($baseAttributes, [
-                'x_coordinate' => $data['x_coordinate'],
-                'y_coordinate' => $data['y_coordinate'],
-                'annotation_type' => $data['annotation_type'] ?? 'point',
-                'annotation_data' => $data['annotation_data'] ?? null,
-                'area_bounds' => $data['area_bounds'] ?? null,
-                'color' => $data['color'] ?? null,
-                'zoom_level' => $data['zoom_level'] ?? null,
-            ]),
-            default => array_merge($baseAttributes, [
-                'metadata' => $attributes['metadata'],
-                'feedback_category' => $data['category'] ?? 'other',
-            ]),
-        };
-    }
 
     /**
      * Validate that required fields are present in attributes.

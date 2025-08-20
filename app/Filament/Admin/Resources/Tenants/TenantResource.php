@@ -2,27 +2,28 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Admin\Resources;
+namespace App\Filament\Admin\Resources\Tenants;
 
-use Filament\Actions\EditAction;
-use Filament\Actions\Action;
-use Filament\Schemas\Components\Grid;
-use App\Filament\Admin\Resources\TenantResource\Pages\ListTenants;
-use App\Filament\Admin\Resources\TenantResource\Pages\EditTenant;
 use App\Actions\Tenant\AddMember;
 use App\Enums\Account\AccountType;
 use App\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\TenantResource\Pages;
-use App\Filament\Admin\Resources\TenantResource\RelationManagers\ParticipantRelationManager;
+use App\Filament\Admin\Resources\Tenants\Pages\EditTenant;
+use App\Filament\Admin\Resources\Tenants\Pages\ListTenants;
+use App\Filament\Admin\Resources\Tenants\RelationManagers\ParticipantRelationManager;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\Directory\DirectoryManager;
 use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -51,8 +52,8 @@ final class TenantResource extends Resource
                 ToggleColumn::make('active')
                     ->label('Status'),
                 TextColumn::make('name'),
-                ImageColumn::make('model.avatar')
-                    ->getStateUsing(fn ($record) => $record->participants->pluck('model.avatar'))
+                ImageColumn::make('avatar')
+                    ->getStateUsing(fn ($record) => $record->participants->pluck('model')->map(fn ($model) => $model->avatar ? DirectoryManager::avatars()->getFileUrl($model->avatar) : '')->toArray())
                     ->circular()
                     ->stacked(),
             ])

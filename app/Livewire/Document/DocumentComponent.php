@@ -10,6 +10,7 @@ use App\Models\Document;
 use App\Services\Document\Facades\EditorBuilder;
 use Exception;
 use Illuminate\Support\Collection;
+use LaraDumps\LaraDumps\Livewire\Attributes\Ds;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -19,6 +20,7 @@ use Log;
  * @property-read string  $updatedAtString
  * @property-read array $participantsArray;
  */
+#[Ds]
 final class DocumentComponent extends Component
 {
     public $canEdit = true;

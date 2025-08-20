@@ -23,6 +23,8 @@ return new class extends Migration
 
             $table->string('timezone')->nullable();
 
+            $table->string('avatar')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
 
