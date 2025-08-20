@@ -160,4 +160,71 @@ return [
         'viewer' => 'وصول للقراءة فقط للمحتوى',
         'guest' => 'وصول محدود للمحتوى العام',
     ],
+    
+    // EditorJS tool titles
+    'editor_tools' => [
+        'paragraph' => 'نص',
+        'header' => 'عنوان',
+        'images' => 'صورة',
+        'table' => 'جدول',
+        'nestedList' => 'قائمة',
+        'alert' => 'تنبيه',
+        'linkTool' => 'رابط',
+        'videoEmbed' => 'تضمين فيديو',
+        'videoUpload' => 'رفع فيديو',
+        'commentTune' => 'إضافة تعليق',
+    ],
+    
+    // EditorJS interface translations (EditorJS format)
+    'editor_ui' => [
+        'ui' => [
+            'blockTunes' => [
+                'toggler' => [
+                    'Click to tune' => 'انقر للضبط',
+                    'or drag to move' => 'أو اسحب للتحريك',
+                ],
+            ],
+            'inlineToolbar' => [
+                'converter' => [
+                    'Convert to' => 'تحويل إلى',
+                ],
+            ],
+            'toolbar' => [
+                'toolbox' => [
+                    'Add' => 'إضافة',
+                    'Filter' => 'تصفية',
+                    'Nothing found' => 'لا يوجد شيء',
+                ],
+            ],
+            'popover' => [
+                'Filter' => 'تصفية',
+                'Nothing found' => 'لا يوجد شيء',
+            ],
+        ],
+        'toolNames' => [
+            'Text' => 'نص',
+            'Heading' => 'عنوان',
+            'List' => 'قائمة',
+            'Table' => 'جدول',
+            'Link' => 'رابط',
+            'Bold' => 'عريض',
+            'Italic' => 'مائل',
+        ],
+        'blockTunes' => [
+            'delete' => [
+                'Delete' => 'حذف',
+            ],
+            'moveUp' => [
+                'Move up' => 'تحريك لأعلى',
+            ],
+            'moveDown' => [
+                'Move down' => 'تحريك لأسفل',
+            ],
+            'commentTune' => [
+                'Add Comment' => 'إضافة تعليق',
+                'Comment' => 'تعليق',
+                'Add a comment' => 'إضافة تعليق',
+            ],
+        ],
+    ],
 ];

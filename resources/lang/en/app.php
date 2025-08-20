@@ -160,4 +160,71 @@ return [
         'viewer' => 'Read-only access to content',
         'guest' => 'Limited access to public content',
     ],
+    
+    // EditorJS tool titles
+    'editor_tools' => [
+        'paragraph' => 'Text',
+        'header' => 'Heading',
+        'images' => 'Image',
+        'table' => 'Table',
+        'nestedList' => 'List',
+        'alert' => 'Alert',
+        'linkTool' => 'Link',
+        'videoEmbed' => 'Video Embed',
+        'videoUpload' => 'Video Upload',
+        'commentTune' => 'Add Comment',
+    ],
+    
+    // EditorJS interface translations (EditorJS format)
+    'editor_ui' => [
+        'ui' => [
+            'blockTunes' => [
+                'toggler' => [
+                    'Click to tune' => 'Click to tune',
+                    'or drag to move' => 'or drag to move',
+                ],
+            ],
+            'inlineToolbar' => [
+                'converter' => [
+                    'Convert to' => 'Convert to',
+                ],
+            ],
+            'toolbar' => [
+                'toolbox' => [
+                    'Add' => 'Add',
+                    'Filter' => 'Filter',
+                    'Nothing found' => 'Nothing found',
+                ],
+            ],
+            'popover' => [
+                'Filter' => 'Filter',
+                'Nothing found' => 'Nothing found',
+            ],
+        ],
+        'toolNames' => [
+            'Text' => 'Text',
+            'Heading' => 'Heading',
+            'List' => 'List',
+            'Table' => 'Table',
+            'Link' => 'Link',
+            'Bold' => 'Bold',
+            'Italic' => 'Italic',
+        ],
+        'blockTunes' => [
+            'delete' => [
+                'Delete' => 'Delete',
+            ],
+            'moveUp' => [
+                'Move up' => 'Move up',
+            ],
+            'moveDown' => [
+                'Move down' => 'Move down',
+            ],
+            'commentTune' => [
+                'Add Comment' => 'Add Comment',
+                'Comment' => 'Comment',
+                'Add a comment' => 'Add a comment',
+            ],
+        ],
+    ],
 ];
