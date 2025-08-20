@@ -22,7 +22,7 @@ final class VideoUploadBlock extends RichContentCustomBlock
 
     public static function getLabel(): string
     {
-        return 'Video Upload';
+        return __('app.file_upload.video_upload');
     }
 
     public static function getIcon(): string
@@ -47,7 +47,7 @@ final class VideoUploadBlock extends RichContentCustomBlock
             ->modalWidth('2xl')
             ->schema([
                 FileUpload::make('video')
-                    ->label('Video File')
+                    ->label(__('app.file_upload.video_file'))
                     ->acceptedFileTypes([
                         'video/mp4',
                         'video/webm',
@@ -60,14 +60,14 @@ final class VideoUploadBlock extends RichContentCustomBlock
                     ->visibility('public')
                     ->preserveFilenames()
                     ->required()
-                    ->helperText('Supported formats: MP4, WebM, OGG, MOV, AVI. Maximum size: 50MB.')
+                    ->helperText(__('app.file_upload.supported_formats', ['formats' => 'MP4, WebM, OGG, MOV, AVI']) . ' ' . __('app.file_upload.max_size', ['size' => '50MB']))
                     ->extraAttributes([
                         'accept' => 'video/*',
                     ]),
 
                 TextInput::make('caption')
-                    ->label('Caption')
-                    ->placeholder('Enter video caption...')
+                    ->label(__('app.title'))
+                    ->placeholder(__('app.enter_description'))
                     ->maxLength(255),
 
                 TextInput::make('width')

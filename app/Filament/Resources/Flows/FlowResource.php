@@ -27,6 +27,21 @@ final class FlowResource extends Resource
         return 2;
     }
 
+    public static function getModelLabel(): string
+    {
+        return __('app.flows');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('app.flows');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.flows');
+    }
+
     public static function getRelations(): array
     {
         return [

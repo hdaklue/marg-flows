@@ -14,7 +14,6 @@ use App\Filament\Admin\Resources\Tenants\RelationManagers\ParticipantRelationMan
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Services\Directory\DirectoryManager;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -36,6 +35,21 @@ final class TenantResource extends Resource
 
     // protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getModelLabel(): string
+    {
+        return __('app.tenants');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('app.tenants');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.tenants');
+    }
+
     // public static function form(Form $form): Form
     // {
     //     return $form
@@ -50,10 +64,11 @@ final class TenantResource extends Resource
             ->modifyQueryUsing(fn ($query) => $query->with('participants'))
             ->columns([
                 ToggleColumn::make('active')
-                    ->label('Status'),
-                TextColumn::make('name'),
+                    ->label(__('app.status')),
+                TextColumn::make('name')
+                    ->label(__('app.name')),
                 ImageColumn::make('avatar')
-                    ->getStateUsing(fn ($record) => $record->participants->pluck('model')->map(fn ($model) => $model->avatar ? DirectoryManager::avatars()->getFileUrl($model->avatar) : '')->toArray())
+                    ->getStateUsing(fn ($record) => $record->participants->pluck('model')->map(fn ($model) => $model->getAvatarUrl())->toArray())
                     ->circular()
                     ->stacked(),
             ])
@@ -63,7 +78,7 @@ final class TenantResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 Action::make('add')
-                    ->label('Add Member')
+                    ->label(__('app.invite'))
                     ->icon('heroicon-s-user-plus')
                     ->schema(
                         fn ($record) => TenantResource::getAddMemberSchema($record),

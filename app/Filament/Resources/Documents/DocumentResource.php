@@ -25,11 +25,27 @@ final class DocumentResource extends Resource
         return 3;
     }
 
+    public static function getModelLabel(): string
+    {
+        return __('app.documents');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('app.documents');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.documents');
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->label(__('app.name')),
             ])
             ->filters([
                 //

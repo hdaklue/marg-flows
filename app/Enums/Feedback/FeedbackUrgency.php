@@ -20,9 +20,9 @@ enum FeedbackUrgency: int implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::NORMAL => 'Normal',
-            self::SUGGESTION => 'Suggestion',
-            self::URGENT => 'Urgent',
+            self::NORMAL => __('app.feedback_urgency.normal'),
+            self::SUGGESTION => __('app.feedback_urgency.suggestion'),
+            self::URGENT => __('app.feedback_urgency.urgent'),
         };
     }
 

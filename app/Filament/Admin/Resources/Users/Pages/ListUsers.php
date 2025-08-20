@@ -28,15 +28,17 @@ final class ListUsers extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Invite Member')
+                ->label(__('app.invite'))
                 ->modal()
                 ->modalAutofocus()
-                ->modalHeading('Invite new member')
+                ->modalHeading(__('app.invite'))
                 ->createAnother(false)
                 ->schema([
                     TextInput::make('name')
+                        ->label(__('app.name'))
                         ->required(),
                     TextInput::make('email')
+                        ->label(__('app.email'))
                         ->required()
                         ->live(onBlur: true)
                         ->validationMessages([
@@ -59,11 +61,11 @@ final class ListUsers extends ListRecords
                                 ->options(fn () => Tenant::pluck('name', 'id'))
                                 ->native(false)
                                 ->required()
-                                ->label('Assign to')
+                                ->label(__('app.assign'))
                                 ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                                 ->live(onBlur: true),
                             Select::make('role_id')
-                                ->label('Role')
+                                ->label(__('app.role'))
                                 ->required()
                                 ->options(fn (Get $get) => Role::where('tenant_id', $get('tenant_id'))->pluck('name', 'id'),
                                 )

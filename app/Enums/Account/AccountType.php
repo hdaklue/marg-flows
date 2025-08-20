@@ -16,9 +16,9 @@ enum AccountType: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::ADMIN => 'Admin',
-            self::MANAGER => 'Manager',
-            self::USER => 'User',
+            self::ADMIN => __('app.account_types.admin'),
+            self::MANAGER => __('app.account_types.manager'),
+            self::USER => __('app.account_types.user'),
         };
     }
 

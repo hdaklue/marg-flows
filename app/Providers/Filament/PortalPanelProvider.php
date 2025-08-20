@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\Filament\ConfigureDateTimePickers;
 use App\Models\Tenant;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
+// Language switch plugin removed - using custom solution
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -41,6 +45,13 @@ final class PortalPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/portal/theme.css')
             ->databaseNotifications()
             ->unsavedChangesAlerts(false)
+            ->plugins([
+                // Custom language switching will be added via render hooks
+            ])
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn (): string => Blade::render('<x-language-switch />')
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -61,7 +72,7 @@ final class PortalPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-
+                SetLocale::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

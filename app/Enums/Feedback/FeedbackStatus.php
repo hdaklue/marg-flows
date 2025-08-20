@@ -29,10 +29,10 @@ enum FeedbackStatus: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::OPEN => 'Open',
-            self::RUNNING => 'Running',
-            self::RESOLVED => 'Resolved',
-            self::REJECTED => 'Rejected',
+            self::OPEN => __('app.feedback_status.open'),
+            self::RUNNING => __('app.feedback_status.running'),
+            self::RESOLVED => __('app.feedback_status.resolved'),
+            self::REJECTED => __('app.feedback_status.rejected'),
         };
     }
 

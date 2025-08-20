@@ -26,13 +26,12 @@ enum FlowStage: int implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::ACTIVE => 'Active',
-            self::PAUSED => 'Pased',
-            self::BLOCKED => 'Blocked',
-            self::COMPLETED => 'Completed',
-            self::CANCELED => 'Canceled',
-            self::DRAFT => 'Drafted',
-
+            self::ACTIVE => __('app.flow_stages.active'),
+            self::PAUSED => __('app.flow_stages.paused'),
+            self::BLOCKED => __('app.flow_stages.blocked'),
+            self::COMPLETED => __('app.flow_stages.completed'),
+            self::CANCELED => __('app.flow_stages.canceled'),
+            self::DRAFT => __('app.flow_stages.draft'),
         };
     }
 

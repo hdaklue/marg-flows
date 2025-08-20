@@ -20,6 +20,7 @@ use App\Livewire\TestChunkedUpload;
 use App\Livewire\ToastCalendarTest;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 Route::get('/imagePreview', action: PreviewImage::class)->name('home');
 
@@ -99,6 +100,17 @@ Route::get('calendar-test', CalendarTest::class)
 // TOAST UI Calendar test route
 Route::get('toast-calendar-test', ToastCalendarTest::class)
     ->name('toast-calendar-test');
+
+// Language switching route
+Route::get('/language/{locale}', function (string $locale) {
+    if (!array_key_exists($locale, config('app.available_locales'))) {
+        abort(400);
+    }
+    
+    Session::put('locale', $locale);
+    
+    return redirect()->back();
+})->name('language.switch');
 
 // Route::view('dashboard', 'dashboard')
 //     ->middleware(['auth', 'verified'])

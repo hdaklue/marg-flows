@@ -97,14 +97,14 @@ enum RoleEnum: string implements HasDescription, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            // self::SUPER_ADMIN => 'Super Administrator',
-            // self::TENANT_ADMIN => 'Tenant Administrator',
-            self::ADMIN => 'Administrator',
-            self::MANAGER => 'Manager',
-            self::EDITOR => 'Editor',
-            self::CONTRIBUTOR => 'Contributor',
-            self::VIEWER => 'Viewer',
-            self::GUEST => 'Guest',
+            // self::SUPER_ADMIN => __('app.system_roles.super_admin'),
+            // self::TENANT_ADMIN => __('app.system_roles.tenant_admin'),
+            self::ADMIN => __('app.system_roles.admin'),
+            self::MANAGER => __('app.system_roles.manager'),
+            self::EDITOR => __('app.system_roles.editor'),
+            self::CONTRIBUTOR => __('app.system_roles.contributor'),
+            self::VIEWER => __('app.system_roles.viewer'),
+            self::GUEST => __('app.system_roles.guest'),
         };
     }
 
@@ -114,14 +114,14 @@ enum RoleEnum: string implements HasDescription, HasLabel
     public function getDescription(): string
     {
         return match ($this) {
-            // self::SUPER_ADMIN => 'Full system access including tenant management',
-            // self::TENANT_ADMIN => 'Complete control within tenant boundaries',
-            self::ADMIN => 'Full administrative access to assigned entities',
-            self::MANAGER => 'Manage content and assign roles within entities',
-            self::EDITOR => 'Create, edit, and delete content',
-            self::CONTRIBUTOR => 'Create and edit own content',
-            self::VIEWER => 'Read-only access to content',
-            self::GUEST => 'Limited access to public content',
+            // self::SUPER_ADMIN => __('app.system_role_descriptions.super_admin'),
+            // self::TENANT_ADMIN => __('app.system_role_descriptions.tenant_admin'),
+            self::ADMIN => __('app.system_role_descriptions.admin'),
+            self::MANAGER => __('app.system_role_descriptions.manager'),
+            self::EDITOR => __('app.system_role_descriptions.editor'),
+            self::CONTRIBUTOR => __('app.system_role_descriptions.contributor'),
+            self::VIEWER => __('app.system_role_descriptions.viewer'),
+            self::GUEST => __('app.system_role_descriptions.guest'),
         };
     }
 

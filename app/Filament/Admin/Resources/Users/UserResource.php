@@ -25,6 +25,21 @@ final class UserResource extends Resource
 
     protected static ?string $label = 'Member';
 
+    public static function getModelLabel(): string
+    {
+        return __('app.users');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('app.users');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.users');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -38,19 +53,20 @@ final class UserResource extends Resource
         return $table
             ->modifyQueryUsing(fn ($query) => $query->with(['latestLogin', 'receivedInvitation.sender']))
             ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('email'),
+                TextColumn::make('name')
+                    ->label(__('app.name')),
+                TextColumn::make('email')
+                    ->label(__('app.email')),
                 TextColumn::make('account_type')
                     ->color(fn ($state) => AccountType::from($state)->getColor())
-                    ->label('Account Type')
+                    ->label(__('app.account_type'))
                     ->formatStateUsing(fn ($state) => ucwords($state))
                     ->badge(),
                 TextColumn::make('latestLogin.created_at')
                     ->dateTime('j F Y g:i A')
-
-                    ->label('Last Login'),
+                    ->label(__('app.last_login')),
                 TextColumn::make('receivedInvitation.sender.name')
-                    ->label('Invited By'),
+                    ->label(__('app.invited_by')),
             ])
             ->filters([
                 //

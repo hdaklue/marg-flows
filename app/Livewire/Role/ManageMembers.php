@@ -75,9 +75,11 @@ final class ManageMembers extends Component implements HasActions, HasForms
         return $schema
             ->components([
                 Select::make('member')
+                    ->label(__('app.users'))
                     ->options(fn () => $this->assignableEntities)
                     ->required(),
                 Select::make('role')
+                    ->label(__('app.role'))
                     ->required()
                     ->native(false)
                     ->options(function () {
@@ -122,7 +124,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
         $this->reloadData();
 
         Notification::make()
-            ->body('Member added successfully')
+            ->body(__('app.created_successfully'))
             ->success()
             ->send();
     }
@@ -149,7 +151,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
         RoleManager::changeRoleOn($targetModel, $this->roleableEntity, $role);
         $this->reloadData();
         Notification::make()
-            ->body('Role updated successfully')
+            ->body(__('app.updated_successfully'))
             ->success()
             ->send();
     }
@@ -163,7 +165,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
         $this->reloadData();
 
         Notification::make()
-            ->body('Member removed successfully')
+            ->body(__('app.deleted_successfully'))
             ->success()
             ->send();
     }
