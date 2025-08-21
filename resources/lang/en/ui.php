@@ -58,6 +58,13 @@ return [
             'delete' => 'Delete',
             'view' => 'View',
         ],
+        
+        'side_notes' => [
+            'tooltip' => 'Sidenotes [Alt + S]',
+            'title' => 'Side Notes',
+            'subtitle' => 'Only you can see this notes',
+            'placeholder' => 'write your note .. and hit Enter',
+        ],
     ],
     
     'panels' => [

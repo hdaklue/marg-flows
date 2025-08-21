@@ -7,7 +7,7 @@
             this.content = '';
         }
     },
-}" class="fixed bottom-4 right-4 z-50" @keydown.window.alt.s.prevent="show = true"
+}" class="fixed bottom-4 end-4 z-50" @keydown.window.alt.s.prevent="show = true"
     @keydown.window.ctrl.s.prevent="show = true">
     <div class="relative">
         <div class="relative cursor-pointer rounded-full bg-zinc-300 p-2 transition-all hover:bg-zinc-300 dark:bg-zinc-600 dark:hover:bg-zinc-500"x-show="!show"
@@ -15,15 +15,15 @@
             x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-50" x-transition:leave-start="opacity-0 scale-100"
             x-transition:leave-end="opacity-100 scale-90">
-            <a x-tooltip.arrowless.raw="Sidenotes [Alt + S]" class="relative h-5 w-5">
+            <a x-tooltip.arrowless.raw="{{ __('ui.components.side_notes.tooltip') }}" class="relative h-5 w-5">
                 <div
-                    class="text-2xs absolute -right-2/3 -top-1/2 h-4 w-4 rounded-full bg-amber-200 p-0.5 text-center text-amber-800 dark:bg-amber-200 dark:text-amber-700">
+                    class="text-2xs absolute -end-2/3 -top-1/2 h-4 w-4 rounded-full bg-amber-200 p-0.5 text-center text-amber-800 dark:bg-amber-200 dark:text-amber-700">
                     {{ $this->notes->count() }}
                 </div>
                 <x-heroicon-o-clipboard-document-check class="h-5 w-5" />
             </a>
         </div>
-        <div class="absolute bottom-0 right-0 h-[350px] w-[300px] rounded-lg border border-zinc-200 bg-zinc-50 p-2 shadow dark:border-zinc-700 dark:bg-zinc-800"
+        <div class="absolute bottom-0 end-0 h-[350px] w-[300px] rounded-lg border border-zinc-200 bg-zinc-50 p-2 shadow dark:border-zinc-700 dark:bg-zinc-800"
             x-show="show" x-cloak x-tansition x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 scale-100"
@@ -34,8 +34,8 @@
                 <header
                     class="flex items-center justify-between p-1 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                     <div>
-                        <p> Side Notes</p>
-                        <p class="text-2xs font-normal">Only you can see this notes</p>
+                        <p>{{ __('ui.components.side_notes.title') }}</p>
+                        <p class="text-2xs font-normal">{{ __('ui.components.side_notes.subtitle') }}</p>
                     </div>
                     <div class="flex">
 
@@ -49,7 +49,7 @@
                     @foreach ($this->notes as $note)
                         <div
                             class="relative flex w-full flex-col gap-y-1 rounded-lg border border-zinc-100 bg-zinc-100 px-2 py-1 dark:border-zinc-800 dark:bg-zinc-900/50">
-                            <p class="prose prose-sm text-zinc-800 dark:prose-invert dark:text-zinc-200">
+                            <p class="prose-sm prose dark:prose-invert text-zinc-800 dark:text-zinc-200">
                                 {!! $note->content !!}
                             </p>
                             <div class="flex items-center justify-between">
@@ -71,7 +71,7 @@
                     <x-filament::input.wrapper class="w-full !text-sm">
                         <x-filament::input x-ref="noteInput" type="text" @keydown.enter="addNote() "
                             x-model="content" class="!py-1.5 !pe-6 !ps-2 !text-sm"
-                            placeholder="write your note .. and hit Enter" />
+                            placeholder="{{ __('ui.components.side_notes.placeholder') }}" />
                     </x-filament::input.wrapper>
                 </div>
             </div>
