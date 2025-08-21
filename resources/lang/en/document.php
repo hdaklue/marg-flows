@@ -67,6 +67,15 @@ return [
         'status' => 'Status',
         'tags' => 'Tags',
         'category' => 'Category',
+        'last_update' => 'Last Update',
+    ],
+
+    'context_menu' => [
+        'page_options' => 'Page Options',
+        'rename' => 'Rename',
+        'open' => 'Open',
+        'duplicate' => 'Duplicate',
+        'delete' => 'Delete',
     ],
 
     // EditorJS specific translations migrated from app.php

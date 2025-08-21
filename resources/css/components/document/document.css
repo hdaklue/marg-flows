@@ -716,3 +716,87 @@
 .codex-editor--narrow .link-tool__image {
   @apply hidden;
 }
+
+/* RTL support for EditorJS - using EditorJS built-in RTL classes */
+.codex-editor--rtl .ce-toolbar__content {
+  @apply justify-start;
+}
+
+/* RTL block content - always apply text direction */
+.codex-editor--rtl .ce-block__content {
+  @apply text-right;
+}
+
+/* Desktop RTL toolbar positioning (md+) - move from end to start */
+@media (min-width: 768px) {
+  .codex-editor--rtl .ce-toolbar {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  .codex-editor--rtl .ce-toolbar__plus {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  .codex-editor--rtl .ce-toolbar__settings-btn {
+    left: auto !important;
+    right: 32px !important;
+  }
+
+  /* RTL inline toolbar */
+  .ce-inline-toolbar--rtl {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  /* RTL popover positioning */
+  .codex-editor--rtl .ce-popover {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  /* RTL block settings */
+  .codex-editor--rtl .ce-settings {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  /* RTL conversion toolbar */
+  .codex-editor--rtl .ce-conversion-toolbar {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  /* RTL block toolbar positioning */
+  .codex-editor--rtl .ce-block:hover .ce-toolbar {
+    left: auto !important;
+    right: 0 !important;
+  }
+}
+
+/* Mobile RTL - keep same position as LTR (left side) */
+@media (max-width: 767px) {
+  .codex-editor--rtl .ce-toolbar,
+  .codex-editor--rtl .ce-toolbar__plus,
+  .ce-inline-toolbar--rtl,
+  .codex-editor--rtl .ce-popover,
+  .codex-editor--rtl .ce-settings,
+  .codex-editor--rtl .ce-conversion-toolbar,
+  .codex-editor--rtl .ce-block:hover .ce-toolbar {
+    /* Reset to LTR positioning on mobile */
+    left: initial !important;
+    right: initial !important;
+  }
+
+  .codex-editor--rtl .ce-toolbar__settings-btn {
+    /* Reset to LTR positioning on mobile */
+    left: initial !important;
+    right: initial !important;
+  }
+}
+
+/* RTL popover content alignment - always apply */
+.codex-editor--rtl .ce-popover__items {
+  @apply text-right;
+}

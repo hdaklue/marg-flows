@@ -26,7 +26,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         editor: null,
         state: livewireState,
         currentLocale: null,
-        editorLocale: null,
+        direction: 'ltr',
         canEdit: canEdit,
         saveCallback: saveCallback,
         autosaveInterval: autosaveIntervalSeconds * 1000, // Convert to milliseconds
@@ -126,10 +126,8 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             const rtlLocales = ['ar', 'he', 'fa', 'ur', 'ku', 'dv'];
             const isRtl = rtlLocales.includes(this.currentLocale.split('-')[0]);
             
-            // Set editor locale for RTL support and UI translations
-            this.editorLocale = {
-                direction: isRtl ? 'rtl' : 'ltr'
-            };
+            // Set direction for RTL support
+            this.direction = isRtl ? 'rtl' : 'ltr';
             
             // Get tool translations from Laravel's translation data
             this.toolTranslations = this.getToolTranslations();
@@ -142,7 +140,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             // console.log('EditorJS Localization Debug:');
             // console.log('- HTML lang attribute:', htmlElement.lang);
             // console.log('- Detected locale:', this.currentLocale);
-            // console.log('- Direction:', this.editorLocale.direction);
+            // console.log('- Direction:', this.direction);
             // console.log('- Tool translations:', this.toolTranslations);
             // console.log('- UI translations:', this.uiTranslations);
         },
@@ -398,7 +396,13 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 inlineToolbar: false, // Disable during initialization
                 tools: this.getEditorTools(csrf, uploadUrl),
                 i18n: {
-                    direction: this.editorLocale.direction,
+                    /**
+                     * Text direction
+                     */
+                    direction: this.direction,
+                    /**
+                     * UI translations 
+                     */
                     messages: this.uiTranslations
                 }, // Add RTL support and UI translations based on detected locale
                 onChange: (api, event) => {
@@ -444,6 +448,8 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     this.editor.isReady?.then(() => {
                         // Mark editor as ready
                         this.editorReady = true;
+
+                        // EditorJS automatically adds --rtl classes when direction: 'rtl' is set in i18n config
 
                         // Enable inline toolbar now that editor is ready
                         if (this.editor.configuration) {

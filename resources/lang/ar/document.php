@@ -67,6 +67,15 @@ return [
         'status' => 'الحالة',
         'tags' => 'الوسوم',
         'category' => 'الفئة',
+        'last_update' => 'آخر تحديث',
+    ],
+
+    'context_menu' => [
+        'page_options' => 'خيارات الصفحة',
+        'rename' => 'إعادة تسمية',
+        'open' => 'فتح',
+        'duplicate' => 'تكرار',
+        'delete' => 'حذف',
     ],
 
     'tools' => [
