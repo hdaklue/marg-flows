@@ -182,12 +182,7 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
     public function getAssignedTenants()
     {
         return RoleManager::getAssignedEntitiesByType($this, Relation::getMorphAlias(Tenant::class));
-        // return $this->roleAssignments()
-        //     ->where('roleable_type', Relation::getMorphAlias(Tenant::class))
-        //     ->where('model_type', $this->getMorphClass())
-        //     ->where('model_id', $this->getKey())
-        //     ->with('roleable')
-        //     ->get()->pluck('roleable');
+
     }
 
     public function logins(): HasMany

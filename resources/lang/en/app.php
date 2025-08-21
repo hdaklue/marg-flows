@@ -1,7 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
+// DEPRECATED: This file contains legacy translations that have been migrated to feature-specific files.
+// Please use the new feature-based language files for better organization:
+//
+// - auth.php - Authentication related translations
+// - document.php - Document editor and management (including EditorJS)
+// - flow.php - Flow management and workflows
+// - feedback.php - Feedback system
+// - roles.php - Role and member management
+// - common.php - Shared translations across features
+// - ui.php - UI components and interface elements
+//
+// For new translations, use the appropriate feature-specific file.
+// This file is kept for backward compatibility.
+
 return [
-    // Navigation
+    // Legacy support - gradually migrate these to feature-specific files
+    // Most of these translations have been moved to common.php, document.php, flow.php, etc.
+    
+    // Navigation - use common.navigation instead
     'dashboard' => 'Dashboard',
     'flows' => 'Flows',
     'documents' => 'Documents',
@@ -10,7 +29,7 @@ return [
     'settings' => 'Settings',
     'profile' => 'Profile',
     
-    // Actions
+    // Actions - use common.actions instead
     'create' => 'Create',
     'edit' => 'Edit',
     'delete' => 'Delete',
@@ -29,7 +48,7 @@ return [
     'publish' => 'Publish',
     'draft' => 'Draft',
     
-    // Labels
+    // Labels - use common.labels instead
     'name' => 'Name',
     'email' => 'Email',
     'password' => 'Password',
@@ -46,7 +65,7 @@ return [
     'last_login' => 'Last Login',
     'invited_by' => 'Invited By',
     
-    // Status
+    // Status - use common.status instead
     'active' => 'Active',
     'inactive' => 'Inactive',
     'pending' => 'Pending',
@@ -57,7 +76,7 @@ return [
     'draft' => 'Draft',
     'published' => 'Published',
     
-    // Messages
+    // Messages - use common.messages instead
     'success' => 'Success',
     'error' => 'Error',
     'warning' => 'Warning',
@@ -69,7 +88,7 @@ return [
     'no_records_found' => 'No records found',
     'confirm_delete' => 'Are you sure you want to delete this item?',
     
-    // Form placeholders
+    // Form placeholders - use common.placeholders instead
     'enter_name' => 'Enter name',
     'enter_email' => 'Enter email address',
     'enter_title' => 'Enter title',
@@ -77,7 +96,7 @@ return [
     'search_placeholder' => 'Search...',
     'select_option' => 'Select an option',
     
-    // Flow stages
+    // Flow stages - use flow.stages instead
     'flow_stages' => [
         'draft' => 'Draft',
         'active' => 'Active',
@@ -91,7 +110,7 @@ return [
         'archived' => 'Archived',
     ],
     
-    // Roles
+    // Roles - use roles.types instead
     'roles' => [
         'assignee' => 'Assignee',
         'approver' => 'Approver',
@@ -99,7 +118,7 @@ return [
         'observer' => 'Observer',
     ],
     
-    // File upload
+    // File upload - use ui.components.file_upload instead
     'file_upload' => [
         'drag_drop' => 'Drag and drop files here or click to browse',
         'max_size' => 'Maximum file size: :size',
@@ -111,14 +130,14 @@ return [
         'video_file' => 'Video File',
     ],
     
-    // Account types
+    // Account types - use roles.account_types instead
     'account_types' => [
         'admin' => 'Admin',
         'manager' => 'Manager',
         'user' => 'User',
     ],
     
-    // Role descriptions
+    // Role descriptions - use roles.descriptions instead
     'role_descriptions' => [
         'assignee' => 'Responsible for completing the task',
         'approver' => 'Reviews and approves task completion',
@@ -126,7 +145,7 @@ return [
         'observer' => 'Monitors progress without direct involvement',
     ],
     
-    // Feedback status
+    // Feedback status - use feedback.status instead
     'feedback_status' => [
         'open' => 'Open',
         'running' => 'Running',
@@ -134,14 +153,14 @@ return [
         'rejected' => 'Rejected',
     ],
     
-    // Feedback urgency
+    // Feedback urgency - use feedback.urgency instead
     'feedback_urgency' => [
         'normal' => 'Normal',
         'suggestion' => 'Suggestion',
         'urgent' => 'Urgent',
     ],
     
-    // System roles
+    // System roles - use roles.system_roles instead
     'system_roles' => [
         'admin' => 'Administrator',
         'manager' => 'Manager',
@@ -151,7 +170,7 @@ return [
         'guest' => 'Guest',
     ],
     
-    // System role descriptions
+    // System role descriptions - use roles.system_descriptions instead
     'system_role_descriptions' => [
         'admin' => 'Full administrative access to assigned entities',
         'manager' => 'Manage content and assign roles within entities',
@@ -161,7 +180,7 @@ return [
         'guest' => 'Limited access to public content',
     ],
     
-    // EditorJS tool titles
+    // EditorJS tool titles - use document.tools instead
     'editor_tools' => [
         'paragraph' => 'Text',
         'header' => 'Heading',
@@ -175,7 +194,7 @@ return [
         'commentTune' => 'Add Comment',
     ],
     
-    // EditorJS interface translations (EditorJS format)
+    // EditorJS interface translations - use document.ui, document.toolNames, document.blockTunes instead
     'editor_ui' => [
         'ui' => [
             'blockTunes' => [

@@ -178,6 +178,41 @@ final class DocumentComponent extends Component
     //     );
     // }
 
+    /**
+     * Get JavaScript translations for the document editor.
+     */
+    public function getJavaScriptTranslations(): array
+    {
+        return [
+            'document' => [
+                'editor' => [
+                    'saving' => __('document.editor.saving'),
+                    'saved' => __('document.editor.saved'),
+                    'save_failed' => __('document.editor.error'),
+                    'unsaved_changes' => __('document.editor.unsaved_changes'),
+                    'no_changes' => __('document.editor.no_changes'),
+                ]
+            ],
+            'editor_tools' => [
+                'paragraph' => __('document.tools.paragraph'),
+                'header' => __('document.tools.header'),
+                'images' => __('document.tools.images'),
+                'table' => __('document.tools.table'),
+                'nestedList' => __('document.tools.nestedList'),
+                'alert' => __('document.tools.alert'),
+                'linkTool' => __('document.tools.linkTool'),
+                'videoEmbed' => __('document.tools.videoEmbed'),
+                'videoUpload' => __('document.tools.videoUpload'),
+                'commentTune' => __('document.tools.commentTune'),
+            ],
+            'editor_ui' => [
+                'ui' => __('document.ui'),
+                'toolNames' => __('document.toolNames'),
+                'blockTunes' => __('document.blockTunes'),
+            ],
+        ];
+    }
+
     public function render()
     {
         return view('livewire.page.document-component');

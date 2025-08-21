@@ -30,6 +30,7 @@
         "alpinejs": "^3.14.9",
         "axios": "^1.7.4",
         "concurrently": "^9.0.1",
+        "dayjs": "^1.11.13",
         "draggabilly": "^3.0.0",
         "editorjs-alert": "^1.1.4",
         "hammerjs": "^2.0.8",

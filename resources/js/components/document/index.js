@@ -12,6 +12,13 @@ import ResizableImage from '../editorjs/plugins/resizable-image';
 import VideoEmbed from '../editorjs/plugins/video-embed';
 import VideoUpload from '../editorjs/plugins/video-upload';
 import { VIDEO_VALIDATION_CONFIG } from '../editorjs/video-validation.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ar';
+import 'dayjs/locale/en';
+
+// Initialize Day.js with plugins
+dayjs.extend(relativeTime);
 
 
 export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null, toolsConfig = null, allowedTools = null) {
@@ -60,10 +67,11 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 isDirty: this.isDirty,
                 isSaving: this.isSaving,
                 saveStatus: this.saveStatus,
-                statusText: this.isSaving ? 'Saving...' :
-                    this.saveStatus === 'success' ? 'Saved' :
-                        this.saveStatus === 'error' ? 'Save failed' :
-                            this.isDirty ? 'Unsaved changes' : 'No changes'
+                statusText: this.isSaving ? this.statusTranslations?.saving || 'Saving...' :
+                    this.saveStatus === 'success' ? this.statusTranslations?.saved || 'Saved' :
+                        this.saveStatus === 'error' ? this.statusTranslations?.save_failed || 'Save failed' :
+                            this.isDirty ? this.statusTranslations?.unsaved_changes || 'Unsaved changes' : 
+                            this.statusTranslations?.no_changes || 'No changes'
             };
         },
 
@@ -126,6 +134,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             // Get tool translations from Laravel's translation data
             this.toolTranslations = this.getToolTranslations();
             this.uiTranslations = this.getUITranslations();
+            this.statusTranslations = this.getStatusTranslations();
+            
+            // Set Day.js locale
+            dayjs.locale(this.currentLocale.split('-')[0]);
             
             // console.log('EditorJS Localization Debug:');
             // console.log('- HTML lang attribute:', htmlElement.lang);
@@ -288,6 +300,34 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             
             const locale = this.currentLocale.split('-')[0];
             return uiTranslations[locale] || uiTranslations['en'];
+        },
+
+        getStatusTranslations() {
+            // Try to get status translations from Laravel's localization data
+            if (typeof window.Laravel !== 'undefined' && window.Laravel.translations) {
+                return window.Laravel.translations.document?.editor || {};
+            }
+            
+            // Fallback status translations based on detected locale
+            const statusTranslations = {
+                'en': {
+                    'saving': 'Saving...',
+                    'saved': 'Saved',
+                    'save_failed': 'Save failed',
+                    'unsaved_changes': 'Unsaved changes',
+                    'no_changes': 'No changes'
+                },
+                'ar': {
+                    'saving': 'جاري الحفظ...',
+                    'saved': 'محفوظ',
+                    'save_failed': 'فشل الحفظ',
+                    'unsaved_changes': 'تغييرات غير محفوظة',
+                    'no_changes': 'لا توجد تغييرات'
+                }
+            };
+            
+            const locale = this.currentLocale.split('-')[0];
+            return statusTranslations[locale] || statusTranslations['en'];
         },
 
         watchStateChanges() {
@@ -873,16 +913,9 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
         formatLastSaved() {
             if (!this.lastSaved) return '';
-
-            const diff = this.currentTime - this.lastSaved;
-            const seconds = Math.max(0, Math.floor(diff / 1000)); // Ensure non-negative
-            const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-
-            if (seconds < 60) return `${seconds}s ago`;
-            if (minutes < 60) return `${minutes}m ago`;
-            if (hours < 24) return `${hours}h ago`;
-            return this.lastSaved.toLocaleDateString();
+            
+            // Use Day.js for proper internationalization
+            return dayjs(this.lastSaved).fromNow();
         },
 
         startUpdateTimer() {
