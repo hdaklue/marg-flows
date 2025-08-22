@@ -60,4 +60,20 @@ return [
         'verified' => 'Your email has been verified.',
         'verification_sent' => 'A fresh verification link has been sent to your email address.',
     ],
+
+    'profile' => [
+        'title' => 'Profile',
+        'sections' => [
+            'general' => 'General',
+            'teams' => 'Teams',
+        ],
+        'actions' => [
+            'edit' => 'Edit',
+        ],
+        'fields' => [
+            'email' => 'Email',
+            'avatar' => 'Avatar',
+            'timezone' => 'Timezone',
+        ],
+    ],
 ];

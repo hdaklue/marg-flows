@@ -57,6 +57,7 @@ return [
         'video' => 'فيديو',
         'audio' => 'صوت',
         'document' => 'مستند',
+        'timezone_format' => ':timezone (UTC:offset)',
     ],
 
     'status' => [

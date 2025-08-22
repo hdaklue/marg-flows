@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\User;
 
 use App\Models\User;
+use App\Services\Avatar\AvatarService;
 use App\Services\Directory\DirectoryManager;
 use Exception;
 use Illuminate\Http\UploadedFile;
@@ -31,7 +32,7 @@ final class GenerateUserAvatar
 
         // Detect file extension from content type or URL
         $extension = $this->detectExtension($response, $url);
-        $fileName = $this->generateFileName($user->getKey(), $extension);
+        $fileName = $this->generateFileName($user, $extension);
 
         // Validate that we got image content
         if (empty($response->body())) {
@@ -52,9 +53,9 @@ final class GenerateUserAvatar
 
     }
 
-    private function generateFileName(string|int $key, string $extension = 'svg'): string
+    private function generateFileName(User $user, string $extension = 'svg'): string
     {
-        return md5($key) . '.' . $extension;
+        return AvatarService::generateFileName($user) . '.' . $extension;
     }
 
     private function detectExtension($response, string $url): string

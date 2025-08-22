@@ -59,6 +59,7 @@ return [
         'video' => 'Video',
         'audio' => 'Audio',
         'document' => 'Document',
+        'timezone_format' => ':timezone (UTC:offset)',
     ],
 
     // Migrated from app.php - common status

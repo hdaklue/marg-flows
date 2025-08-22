@@ -6,7 +6,7 @@
                 "@modelcontextprotocol/server-filesystem",
                 "/Users/home/Code/klueportal"
             ],
-            "env": []
+            "env": {}
         },
         "laravel-boost": {
             "command": "php",

@@ -33,7 +33,7 @@ final class UserDto extends ValidatedDTO
         return [
             'id' => ['required'],
             'name' => ['required'],
-            'email' => ['required'],
+            'email' => ['required', 'email'],
             'avatar' => ['required'],
             'timezone' => ['required'],
         ];
