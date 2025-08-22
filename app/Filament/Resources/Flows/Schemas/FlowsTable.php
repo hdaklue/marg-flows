@@ -37,12 +37,11 @@ final class FlowsTable
             ->recordUrl(fn (Model $record) => FlowResource::getUrl('view', ['record' => $record->getKey()]))
             ->columns([
                 TextColumn::make('title')
+                    ->label(__('flow.table.columns.title'))
                     ->weight(FontWeight::Bold),
-                TextColumn::make('stage')
-                    ->getStateUsing(fn ($record) => ucfirst(FlowStage::from($record->stage)->getLabel()))
-                    ->color(fn ($record) => FlowStage::from($record->stage)->getFilamentColor())
-                    ->badge(),
+
                 SelectColumn::make('stage')
+                    ->label(__('flow.table.columns.stage'))
                     ->grow(false)
                     ->options(options: FlowStage::asFilamentHtmlArray())
                     ->afterStateUpdated(function ($record, $state, $livewire) {
@@ -53,11 +52,12 @@ final class FlowsTable
                     ->selectablePlaceholder(false)
                     ->native(false),
                 ImageColumn::make('creator_avatar')
+                    ->label(__('flow.table.columns.creator_avatar'))
                     ->getStateUsing(fn ($record) => avatarUrlFromUser($record->creator))
                     ->imageSize(30)
                     ->circular(),
                 ImageColumn::make('participant_stack')
-                    ->label('Members')
+                    ->label(__('flow.table.columns.participant_stack'))
                     ->getStateUsing(fn ($record) => $record->getParticipants()->avatars()->toArray())
                     ->imageHeight(30)
                     ->circular()
@@ -74,7 +74,7 @@ final class FlowsTable
                     ->iconButton()
                     ->size(Size::Small),
                 Action::make('view')
-                    ->label('Documents')
+                    ->label(__('flow.table.actions.view'))
                     ->color('gray')
                     ->size(Size::ExtraSmall)
                     ->icon('heroicon-o-document-text')

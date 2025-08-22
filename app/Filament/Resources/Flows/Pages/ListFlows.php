@@ -34,10 +34,13 @@ final class ListFlows extends ListRecords
     {
         return [
             'active' => Tab::make()
+                ->label(__('flow.tabs.active'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->running()),
             'draft' => Tab::make()
+                ->label(__('flow.tabs.draft'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('stage', FlowStage::DRAFT->value)),
-            'all' => Tab::make(),
+            'all' => Tab::make()
+                ->label(__('flow.tabs.all')),
         ];
     }
 

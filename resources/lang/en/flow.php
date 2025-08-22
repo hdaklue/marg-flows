@@ -81,4 +81,22 @@ return [
         'no_documents' => 'No documents found for this flow',
         'document_count' => '{0} No documents|{1} 1 document|[2,*] :count documents',
     ],
+
+    'tabs' => [
+        'active' => 'Active',
+        'draft' => 'Draft',
+        'all' => 'All',
+    ],
+
+    'table' => [
+        'columns' => [
+            'title' => 'Title',
+            'stage' => 'Stage',
+            'creator_avatar' => 'Creator',
+            'participant_stack' => 'Members',
+        ],
+        'actions' => [
+            'view' => 'Documents',
+        ],
+    ],
 ];
