@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
-final class ChunksStorageStrategy implements ChunksStorageStrategyContract
+final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksStorageStrategyContract
 {
     private ?string $sessionId = null;
 
@@ -45,31 +45,6 @@ final class ChunksStorageStrategy implements ChunksStorageStrategyContract
         return $this->buildDirectory();
     }
 
-    public function delete(string $fileName): bool
-    {
-        return Storage::delete($this->getDirectory() . "/{$fileName}");
-    }
-
-    public function get(string $fileName): ?string
-    {
-        return Storage::get($this->getDirectory() . "/{$fileName}");
-    }
-
-    public function getPath(string $fileName): ?string
-    {
-        $fullPath = $this->getDirectory() . "/{$fileName}";
-
-        if (Storage::getDefaultDriver() === 'local') {
-            return Storage::path($fullPath);
-        }
-
-        return $fullPath;
-    }
-
-    public function getFileUrl(string $fileName): string
-    {
-        return Storage::url($this->getDirectory() . "/{$fileName}");
-    }
 
     public function deleteSession(): bool
     {

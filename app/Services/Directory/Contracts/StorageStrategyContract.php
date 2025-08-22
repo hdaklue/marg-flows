@@ -15,4 +15,6 @@ interface StorageStrategyContract
     public function getDirectory(): string;
 
     public function delete(string $path): bool;
+
+    public function getRelativePath(string $fileName): string;
 }

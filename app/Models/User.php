@@ -7,10 +7,11 @@ namespace App\Models;
 use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\Role\CanBeAssignedToEntity;
 use App\Concerns\Tenant\HasActiveTenant;
+use App\Concerns\User\ManagesAvatar;
 use App\Contracts\Role\AssignableEntity;
 use App\Enums\Account\AccountType;
 use App\Facades\RoleManager;
-use App\Services\Avatar\AvatarService;
+use App\Services\Timezone;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasDefaultTenant;
@@ -97,6 +98,7 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use CanBeAssignedToEntity,
         HasActiveTenant,
+        ManagesAvatar,
         HasFactory,
         HasUlids,
         LivesInOriginalDB,
@@ -263,10 +265,6 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $builder->where('account_type', AccountType::USER->value);
     }
 
-    public function getFilamentAvatarUrl(): ?string
-    {
-        return AvatarService::generateAvatarUrl($this);
-    }
 
     public function canAccessAdmin(): bool
     {
@@ -316,15 +314,11 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $this->hasAssignmentOn($flow, $role);
     }
 
-    public function getAvatarUrl(): string
+    public function displayTimeZone(): string
     {
-        return AvatarService::generateAvatarUrl($this);
+        return Timezone::displayTimezone($this->timezone);
     }
 
-    public function getAvatarFileName(): ?string
-    {
-        return $this->avatar;
-    }
 
     protected function inviterName(): Attribute
     {

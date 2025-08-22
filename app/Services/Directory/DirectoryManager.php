@@ -13,34 +13,76 @@ use App\Services\Directory\Strategies\DocumentStorageStrategy;
 use App\Services\Directory\Strategies\TempStorageStrategy;
 use Storage;
 
+/**
+ * Directory Manager Facade
+ * 
+ * Provides centralized access to storage strategies for different file types
+ * in a multi-tenant environment. Handles documents, chunks, avatars, and temporary files.
+ */
 final class DirectoryManager
 {
+    /**
+     * Get document storage strategy for a specific tenant.
+     *
+     * @param string $tenantId The tenant identifier
+     * @return DocumentStorageStrategyContract Configured document storage strategy
+     */
     public static function document(string $tenantId): DocumentStorageStrategyContract
     {
         return new DocumentStorageStrategy($tenantId);
     }
 
+    /**
+     * Get chunks storage strategy for file upload sessions.
+     *
+     * @param string $tenantId The tenant identifier
+     * @return ChunksStorageStrategyContract Configured chunks storage strategy
+     */
     public static function chunks(string $tenantId): ChunksStorageStrategyContract
     {
         return new ChunksStorageStrategy($tenantId);
     }
 
+    /**
+     * Get avatar storage strategy for user profile images.
+     * 
+     * Avatar storage is system-wide and not tenant-specific.
+     *
+     * @return StorageStrategyContract Configured avatar storage strategy
+     */
     public static function avatars(): StorageStrategyContract
     {
         return new AvatarStorageStrategy;
     }
 
+    /**
+     * Get temporary storage strategy for transient files.
+     *
+     * @return StorageStrategyContract Configured temporary storage strategy
+     */
     public static function temp(): StorageStrategyContract
     {
         return new TempStorageStrategy;
     }
 
+    /**
+     * Get base directory path for a tenant.
+     *
+     * @param string $tenantId The tenant identifier
+     * @return string Base directory path (tenant ID)
+     */
     public static function baseDirectiry(string $tenantId): string
     {
         return $tenantId;
     }
 
-    public static function getAllFiles(string $tenantId)
+    /**
+     * Get all files for a specific tenant.
+     *
+     * @param string $tenantId The tenant identifier
+     * @return array<string> Array of file paths within the tenant directory
+     */
+    public static function getAllFiles(string $tenantId): array
     {
         return Storage::allFiles(self::baseDirectiry($tenantId));
     }
