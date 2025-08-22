@@ -37,6 +37,9 @@ class ResizableImage {
         // Support both old single image format and new multiple images format
         this.data = data || {};
 
+        // Initialize localization
+        this.t = this.initializeLocalization();
+
         // Convert old single image format to new array format
         if (this.data.file && !Array.isArray(this.data.files)) {
             this.data.files = [this.data.file];
@@ -66,8 +69,8 @@ class ResizableImage {
             additionalRequestHeaders: {},
             field: 'image',
             types: 'image/*',
-            captionPlaceholder: 'Enter image caption...',
-            buttonContent: 'Select an image',
+            captionPlaceholder: this.t.captionPlaceholder,
+            buttonContent: this.t.buttonContent,
             maxFileSize: 10485760, // 10MB default
             uploader: null,
             actions: [],
@@ -79,6 +82,59 @@ class ResizableImage {
 
         // Bind methods
         this.onUpload = this.onUpload.bind(this);
+    }
+
+    initializeLocalization() {
+        // Detect current locale from HTML lang attribute or other sources
+        const htmlElement = document.documentElement;
+        const currentLocale = htmlElement.lang || 'en';
+        const locale = currentLocale.split('-')[0]; // Get base locale (e.g., 'en' from 'en-US')
+        
+        // Define translations for ResizableImage plugin
+        const translations = {
+            'en': {
+                captionPlaceholder: 'Enter image caption...',
+                buttonContent: 'Select an image',
+                galleryCaptionPlaceholder: 'Add a caption for this gallery...',
+                addMore: 'Add more',
+                uploading: 'Uploading...',
+                status: {
+                    pending: 'Pending',
+                    uploading: 'Uploading...',
+                    complete: 'Complete',
+                    failed: 'Failed',
+                    unknown: 'Unknown'
+                },
+                fileSize: {
+                    bytes: 'Bytes',
+                    kb: 'KB',
+                    mb: 'MB',
+                    gb: 'GB'
+                }
+            },
+            'ar': {
+                captionPlaceholder: 'أدخل تسمية توضيحية للصورة...',
+                buttonContent: 'اختر صورة',
+                galleryCaptionPlaceholder: 'أضف تسمية توضيحية لهذا المعرض...',
+                addMore: 'إضافة المزيد',
+                uploading: 'جاري الرفع...',
+                status: {
+                    pending: 'في الانتظار',
+                    uploading: 'جاري الرفع...',
+                    complete: 'مكتمل',
+                    failed: 'فشل',
+                    unknown: 'غير معروف'
+                },
+                fileSize: {
+                    bytes: 'بايت',
+                    kb: 'كيلوبايت',
+                    mb: 'ميغابايت',
+                    gb: 'جيجابايت'
+                }
+            }
+        };
+        
+        return translations[locale] || translations['en'];
     }
 
     render() {
@@ -202,7 +258,7 @@ class ResizableImage {
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/>
         </svg>
       </div>
-      <div class="resizable-image__upload-text">${this.config.buttonContent}</div>
+      <div class="resizable-image__upload-text">${this.t.buttonContent}</div>
     `;
 
         // Store references for cleanup
@@ -269,7 +325,7 @@ class ResizableImage {
         // Caption input
         const captionInput = document.createElement('input');
         captionInput.classList.add('resizable-image__caption');
-        captionInput.placeholder = this.config.captionPlaceholder;
+        captionInput.placeholder = this.t.captionPlaceholder;
         captionInput.value = this.data.caption || '';
         captionInput.readOnly = this.readOnly;
 
@@ -738,7 +794,7 @@ class ResizableImage {
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
             </div>
-            <span class="resizable-image__add-more-text">Add more</span>
+            <span class="resizable-image__add-more-text">${this.t.addMore}</span>
         `;
 
         addButton.addEventListener('click', () => this.openFileSelection());
@@ -760,7 +816,7 @@ class ResizableImage {
 
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
-        captionInput.placeholder = 'Add a caption for this gallery...';
+        captionInput.placeholder = this.t.galleryCaptionPlaceholder;
         captionInput.classList.add('resizable-image__caption');
         captionInput.value = this.data.caption || '';
 
@@ -1086,7 +1142,7 @@ class ResizableImage {
                 <div class="resizable-image__progress-bar">
                     <div class="resizable-image__progress-fill"></div>
                 </div>
-                <div class="resizable-image__progress-text">Uploading...</div>
+                <div class="resizable-image__progress-text">${this.t.uploading}</div>
             `;
 
             // Hide upload container if it exists
@@ -1376,18 +1432,18 @@ class ResizableImage {
 
     getStatusText(status) {
         switch (status) {
-            case 'pending': return 'Pending';
-            case 'uploading': return 'Uploading...';
-            case 'success': return 'Complete';
-            case 'error': return 'Failed';
-            default: return 'Unknown';
+            case 'pending': return this.t.status.pending;
+            case 'uploading': return this.t.status.uploading;
+            case 'success': return this.t.status.complete;
+            case 'error': return this.t.status.failed;
+            default: return this.t.status.unknown;
         }
     }
 
     formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return `0 ${this.t.fileSize.bytes}`;
         const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const sizes = [this.t.fileSize.bytes, this.t.fileSize.kb, this.t.fileSize.mb, this.t.fileSize.gb];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }

@@ -52,6 +52,9 @@ class VideoUpload {
         this.config = config || {};
         this.data = data || {};
 
+        // Initialize localization
+        this.t = this.initializeLocalization();
+
         // Initialize single file data
         if (!this.data.file) {
             this.data.file = null;
@@ -74,8 +77,8 @@ class VideoUpload {
             additionalRequestHeaders: {},
             field: 'video',
             types: 'video/*',
-            captionPlaceholder: 'Enter video caption...',
-            buttonContent: 'Select a video',
+            captionPlaceholder: this.t.captionPlaceholder,
+            buttonContent: this.t.buttonContent,
             uploader: null,
             actions: [],
             // Fallback chunk settings (will be overridden by server config)
@@ -91,6 +94,95 @@ class VideoUpload {
         this.onPaste = this.onPaste.bind(this);
     }
 
+    initializeLocalization() {
+        // Detect current locale from HTML lang attribute or other sources
+        const htmlElement = document.documentElement;
+        const currentLocale = htmlElement.lang || 'en';
+        const locale = currentLocale.split('-')[0]; // Get base locale (e.g., 'en' from 'en-US')
+        
+        // Define translations for VideoUpload plugin
+        const translations = {
+            'en': {
+                captionPlaceholder: 'Enter video caption...',
+                buttonContent: 'Select a video',
+                uploadTitle: 'Upload a video',
+                uploadSubtitle: 'Drag, paste, or click to select',
+                addCaption: 'Add caption...',
+                galleryCaptionPlaceholder: 'Add a caption for this video gallery...',
+                addMore: 'Add more',
+                processingTitle: 'Processing video...',
+                processingSubtitle: 'Converting and uploading',
+                replacementConfirm: 'This will replace the current video. Continue?',
+                status: {
+                    pending: 'Pending',
+                    converting: 'Converting...',
+                    uploading: 'Uploading...',
+                    complete: 'Complete',
+                    failed: 'Failed',
+                    unknown: 'Unknown'
+                },
+                errors: {
+                    invalidFormat: 'Invalid file format. Please select a video file.',
+                    unsupportedFormat: 'Unsupported video format. Please use MP4, WebM, or OGV format for best compatibility.',
+                    fileTooLarge: 'File is too large ({fileSize}MB). Maximum size allowed is {maxSize}MB.',
+                    uploadFailed: 'Upload failed',
+                    pasteProcessFailed: 'Failed to process pasted video file.',
+                    unknownError: 'Upload failed',
+                    videoNotSupported: 'Video Format Not Supported',
+                    browserCompatibility: 'This video format cannot be played in your browser.',
+                    formatSuggestion: 'Try converting it to MP4 or WebM format for better compatibility.',
+                    downloadOriginal: 'Download Original File'
+                },
+                ui: {
+                    uploadFailed: 'Upload Failed',
+                    filesFailed: '{count} file(s) failed to upload',
+                    retryFailedUploads: 'Retry Failed Uploads',
+                    dismiss: 'Dismiss'
+                }
+            },
+            'ar': {
+                captionPlaceholder: 'أدخل تسمية توضيحية للفيديو...',
+                buttonContent: 'اختر فيديو',
+                uploadTitle: 'رفع فيديو',
+                uploadSubtitle: 'اسحب أو الصق أو انقر للاختيار',
+                addCaption: 'إضافة تسمية توضيحية...',
+                galleryCaptionPlaceholder: 'أضف تسمية توضيحية لمعرض الفيديو...',
+                addMore: 'إضافة المزيد',
+                processingTitle: 'معالجة الفيديو...',
+                processingSubtitle: 'التحويل والرفع',
+                replacementConfirm: 'سيؤدي هذا إلى استبدال الفيديو الحالي. الاستمرار؟',
+                status: {
+                    pending: 'في الانتظار',
+                    converting: 'جاري التحويل...',
+                    uploading: 'جاري الرفع...',
+                    complete: 'مكتمل',
+                    failed: 'فشل',
+                    unknown: 'غير معروف'
+                },
+                errors: {
+                    invalidFormat: 'تنسيق ملف غير صالح. يرجى اختيار ملف فيديو.',
+                    unsupportedFormat: 'تنسيق فيديو غير مدعوم. يرجى استخدام تنسيق MP4 أو WebM أو OGV للحصول على أفضل توافق.',
+                    fileTooLarge: 'الملف كبير جداً ({fileSize} ميغابايت). الحد الأقصى المسموح هو {maxSize} ميغابايت.',
+                    uploadFailed: 'فشل الرفع',
+                    pasteProcessFailed: 'فشل في معالجة ملف الفيديو المُلصق.',
+                    unknownError: 'فشل الرفع',
+                    videoNotSupported: 'تنسيق الفيديو غير مدعوم',
+                    browserCompatibility: 'لا يمكن تشغيل هذا التنسيق من الفيديو في متصفحك.',
+                    formatSuggestion: 'جرب تحويله إلى تنسيق MP4 أو WebM للحصول على توافق أفضل.',
+                    downloadOriginal: 'تحميل الملف الأصلي'
+                },
+                ui: {
+                    uploadFailed: 'فشل الرفع',
+                    filesFailed: 'فشل رفع {count} ملف',
+                    retryFailedUploads: 'إعادة محاولة الملفات الفاشلة',
+                    dismiss: 'إغلاق'
+                }
+            }
+        };
+        
+        return translations[locale] || translations['en'];
+    }
+
     /**
      * Validate video file using dynamic configuration from server
      */
@@ -99,13 +191,13 @@ class VideoUpload {
 
         // Check if it's a video file
         if (!file.type.startsWith('video/')) {
-            errors.push('Invalid file format. Please select a video file.');
+            errors.push(this.t.errors.invalidFormat);
             return { isValid: false, errors };
         }
 
         // Check format compatibility (use static config for supported formats)
         if (!isVideoFormatSupported(file)) {
-            errors.push('Unsupported video format. Please use MP4, WebM, or OGV format for best compatibility.');
+            errors.push(this.t.errors.unsupportedFormat);
             return { isValid: false, errors };
         }
 
@@ -113,7 +205,10 @@ class VideoUpload {
         if (file.size > this.config.maxFileSize) {
             const fileSizeMB = Math.round(file.size / (1024 * 1024));
             const maxSizeMB = Math.round(this.config.maxFileSize / (1024 * 1024));
-            errors.push(`File is too large (${fileSizeMB}MB). Maximum size allowed is ${maxSizeMB}MB.`);
+            const errorMessage = this.t.errors.fileTooLarge
+                .replace('{fileSize}', fileSizeMB)
+                .replace('{maxSize}', maxSizeMB);
+            errors.push(errorMessage);
             return { isValid: false, errors };
         }
 
@@ -160,7 +255,7 @@ class VideoUpload {
         // Check if we already have a video (single video only)
         if (this.data.file && (this.data.file.url || this.data.file.filename)) {
             // Show notification that video will be replaced
-            if (!confirm('This will replace the current video. Continue?')) {
+            if (!confirm(this.t.replacementConfirm)) {
                 return false;
             }
         }
@@ -171,7 +266,7 @@ class VideoUpload {
             return true;
         } catch (error) {
             console.error('Paste upload failed:', error);
-            this.showErrorMessage('Failed to process pasted video file.', file.name);
+            this.showErrorMessage(this.t.errors.pasteProcessFailed, file.name);
             return false;
         }
     }
@@ -329,7 +424,7 @@ class VideoUpload {
                 if (validFiles.length > 0) {
                     // Check if we already have a video (single video only)
                     if (this.data.file && (this.data.file.url || this.data.file.filename)) {
-                        if (!confirm('This will replace the current video. Continue?')) {
+                        if (!confirm(this.t.replacementConfirm)) {
                             return;
                         }
                     }
@@ -384,8 +479,8 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__upload-text">
-                    <div class="ce-video-upload__upload-title">Upload a video</div>
-                    <div class="ce-video-upload__upload-subtitle">Drag, paste, or click to select</div>
+                    <div class="ce-video-upload__upload-title">${this.t.uploadTitle}</div>
+                    <div class="ce-video-upload__upload-subtitle">${this.t.uploadSubtitle}</div>
                 </div>
                 <div class="ce-video-upload__upload-formats">${VIDEO_VALIDATION_CONFIG.supportedExtensions.map(ext => ext.toUpperCase()).join(', ')} up to ${Math.round(this.config.maxFileSize / (1024 * 1024))}MB</div>
             </div>
@@ -550,7 +645,7 @@ class VideoUpload {
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
         captionInput.classList.add('ce-video-upload__caption');
-        captionInput.placeholder = this.config.captionPlaceholder || 'Add caption...';
+        captionInput.placeholder = this.t.addCaption;
         captionInput.value = this.data.caption || '';
         captionInput.readOnly = this.readOnly;
 
@@ -676,7 +771,7 @@ class VideoUpload {
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
             </div>
-            <span class="video-upload__add-more-text">Add more</span>
+            <span class="video-upload__add-more-text">${this.t.addMore}</span>
         `;
 
         addButton.addEventListener('click', () => this.openFileSelection());
@@ -698,7 +793,7 @@ class VideoUpload {
 
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
-        captionInput.placeholder = 'Add a caption for this video gallery...';
+        captionInput.placeholder = this.t.galleryCaptionPlaceholder;
         captionInput.classList.add('video-upload__caption');
         captionInput.value = this.data.caption || '';
 
@@ -1106,7 +1201,7 @@ class VideoUpload {
             console.error(`Upload failed for file ${index}:`, error);
 
             // Show user-friendly error message (auto-dismiss server errors)
-            this.showErrorMessage(error.message || 'Upload failed', uploadItem.file.name, true);
+            this.showErrorMessage(error.message || this.t.errors.uploadFailed, uploadItem.file.name, true);
         }
     }
 
@@ -1497,8 +1592,8 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__uploading-text">
-                    <div class="ce-video-upload__uploading-title">Processing video...</div>
-                    <div class="ce-video-upload__uploading-subtitle">Converting and uploading</div>
+                    <div class="ce-video-upload__uploading-title">${this.t.processingTitle}</div>
+                    <div class="ce-video-upload__uploading-subtitle">${this.t.processingSubtitle}</div>
                 </div>
             </div>
         `;
@@ -1533,7 +1628,7 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__error-details">
-                    <div class="ce-video-upload__error-title">Upload Failed</div>
+                    <div class="ce-video-upload__error-title">${this.t.ui.uploadFailed}</div>
                     <div class="ce-video-upload__error-message">${message}</div>
                     ${fileName ? `<div class="ce-video-upload__error-file">File: ${fileName}</div>` : ''}
                 </div>
@@ -1578,13 +1673,13 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__video-error-details">
-                    <div class="ce-video-upload__video-error-title">Video Format Not Supported</div>
+                    <div class="ce-video-upload__video-error-title">${this.t.errors.videoNotSupported}</div>
                     <div class="ce-video-upload__video-error-message">
-                        This video format cannot be played in your browser.
-                        <br>Try converting it to MP4 or WebM format for better compatibility.
+                        ${this.t.errors.browserCompatibility}
+                        <br>${this.t.errors.formatSuggestion}
                     </div>
                     <a href="${videoUrl}" download class="ce-video-upload__video-error-download">
-                        Download Original File
+                        ${this.t.errors.downloadOriginal}
                     </a>
                 </div>
             </div>
@@ -1610,8 +1705,8 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__error-info">
-                    <div class="ce-video-upload__error-title">Upload Failed</div>
-                    <div class="ce-video-upload__error-subtitle">${errorItems.length} file(s) failed to upload</div>
+                    <div class="ce-video-upload__error-title">${this.t.ui.uploadFailed}</div>
+                    <div class="ce-video-upload__error-subtitle">${this.t.ui.filesFailed.replace('{count}', errorItems.length)}</div>
                 </div>
             </div>
             <div class="ce-video-upload__error-list">
@@ -1630,9 +1725,9 @@ class VideoUpload {
                         <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/>
                         <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
                     </svg>
-                    Retry Failed Uploads
+                    ${this.t.ui.retryFailedUploads}
                 </button>
-                <button class="ce-video-upload__dismiss-btn" type="button">Dismiss</button>
+                <button class="ce-video-upload__dismiss-btn" type="button">${this.t.ui.dismiss}</button>
             </div>
         `;
 
@@ -1791,12 +1886,12 @@ class VideoUpload {
 
     getStatusText(status) {
         switch (status) {
-            case 'pending': return 'Pending';
-            case 'converting': return 'Converting...';
-            case 'uploading': return 'Uploading...';
-            case 'success': return 'Complete';
-            case 'error': return 'Failed';
-            default: return 'Unknown';
+            case 'pending': return this.t.status.pending;
+            case 'converting': return this.t.status.converting;
+            case 'uploading': return this.t.status.uploading;
+            case 'success': return this.t.status.complete;
+            case 'error': return this.t.status.failed;
+            default: return this.t.status.unknown;
         }
     }
 
