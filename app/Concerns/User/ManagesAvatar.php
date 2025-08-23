@@ -20,6 +20,7 @@ trait ManagesAvatar
 
     public function getAvatarPath()
     {
+
         return AvatarService::getAvatarPath($this);
     }
 

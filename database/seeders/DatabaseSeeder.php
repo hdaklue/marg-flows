@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Actions\User\GenerateUserAvatar;
+use App\Services\Avatar\AvatarService;
 use App\Enums\Account\AccountType;
 use App\Enums\Role\RoleEnum;
 use App\Models\Flow;
@@ -34,8 +35,8 @@ final class DatabaseSeeder extends Seeder
         // Generate and save avatar for test user
         $this->command->info('Generating avatar for test user...');
         try {
-            $avatarFileName = GenerateUserAvatar::run($testUser);
-            $testUser->update(['avatar' => $avatarFileName]);
+            $avatarUrl = AvatarService::generateAvatarUrl($testUser);
+            $this->command->info('Avatar generated for test user');
         } catch (Exception $e) {
             $this->command->warn('Could not generate avatar for test user: ' . $e->getMessage());
         }

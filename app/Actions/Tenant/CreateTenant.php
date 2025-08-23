@@ -37,7 +37,7 @@ final class CreateTenant
 
                 $participants = $this->getParticipants(array_column($data['members'], 'name'));
 
-                $systemRoles = $this->getSysyemRoles();
+                $systemRoles = $this->getSystemRoles();
 
                 $tenant->systemRoles()->createMany($systemRoles);
 
@@ -69,7 +69,7 @@ final class CreateTenant
         return User::whereIn('id', $ids)->get();
     }
 
-    protected function getSysyemRoles(): array
+    protected function getSystemRoles(): array
     {
         return collect(RoleEnum::cases())->map(fn ($case) => [
             'name' => $case->value,

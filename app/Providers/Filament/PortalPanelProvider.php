@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login;
+use App\Filament\Auth\Register;
 use App\Filament\Pages\UserSettings;
 use App\Http\Middleware\Filament\ConfigureDateTimePickers;
 use App\Http\Middleware\SetLocale;
@@ -37,9 +39,9 @@ final class PortalPanelProvider extends PanelProvider
             ->default()
             ->id('portal')
             ->path('/portal')
-            ->login()
+            ->login(Login::class)
             ->passwordReset()
-            ->registration()
+            ->registration(Register::class)
             ->databaseNotificationsPolling(fn () => app()->isProduction() ? '60s' : '90s')
             ->tenant(Tenant::class, ownershipRelationship: 'tenant')
             ->colors([
@@ -56,6 +58,16 @@ final class PortalPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
                 fn (): string => Blade::render('<x-language-switch />'),
+            )
+            // ->renderHook(
+            //     PanelsRenderHook::SIMPLE_LAYOUT_START,
+            //     fn (): string => '<div class="w-full min-h-screen lg:grid lg:grid-cols-2"><div class="flex flex-col justify-center flex-1 px-4 py-12 sm:px-6 lg:px-8"><div class="w-full max-w-sm mx-auto">',
+            //     scopes: [Login::class, Register::class],
+            // )
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_LAYOUT_START,
+                fn (): string => Blade::render('<x-language-switch />'),
+                scopes: [Login::class, Register::class],
             )
             ->userMenuItems([
                 Action::make('settings')
