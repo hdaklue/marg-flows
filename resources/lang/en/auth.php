@@ -5,21 +5,36 @@ declare(strict_types=1);
 return [
     'login' => [
         'title' => 'Sign In',
+        'page_title' => 'Sign in to your account',
+        'heading' => 'Sign in to your account',
+        'subheading' => 'Welcome back! Please enter your details.',
         'email' => 'Email',
         'password' => 'Password',
         'remember' => 'Remember me',
         'submit' => 'Sign In',
         'forgot_password' => 'Forgot your password?',
+        'no_account' => 'Don\'t have an account?',
+        'sign_up' => 'Sign up',
     ],
 
     'register' => [
         'title' => 'Register',
+        'page_title' => 'Create your account',
+        'heading' => 'Create your account',
+        'subheading' => 'Get started with your free account today',
         'name' => 'Name',
+        'full_name' => 'Full Name',
+        'full_name_placeholder' => 'Enter your full name',
         'email' => 'Email',
+        'email_address' => 'Email Address',
+        'email_placeholder' => 'Enter your email',
         'password' => 'Password',
+        'password_placeholder' => 'Create a strong password',
         'password_confirmation' => 'Confirm Password',
         'submit' => 'Register',
         'already_registered' => 'Already registered?',
+        'already_have_account' => 'Already have an account?',
+        'sign_in' => 'Sign in',
     ],
 
     'forgot_password' => [

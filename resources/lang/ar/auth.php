@@ -5,21 +5,36 @@ declare(strict_types=1);
 return [
     'login' => [
         'title' => 'تسجيل الدخول',
+        'page_title' => 'تسجيل الدخول إلى حسابك',
+        'heading' => 'تسجيل الدخول إلى حسابك',
+        'subheading' => 'مرحباً بك مجدداً! يرجى إدخال بياناتك.',
         'email' => 'البريد الإلكتروني',
         'password' => 'كلمة المرور',
         'remember' => 'تذكرني',
         'submit' => 'تسجيل الدخول',
         'forgot_password' => 'نسيت كلمة المرور؟',
+        'no_account' => 'ليس لديك حساب؟',
+        'sign_up' => 'إنشاء حساب',
     ],
 
     'register' => [
         'title' => 'التسجيل',
+        'page_title' => 'إنشاء حسابك',
+        'heading' => 'إنشاء حسابك',
+        'subheading' => 'ابدأ مع حسابك المجاني اليوم',
         'name' => 'الاسم',
+        'full_name' => 'الاسم الكامل',
+        'full_name_placeholder' => 'أدخل اسمك الكامل',
         'email' => 'البريد الإلكتروني',
+        'email_address' => 'عنوان البريد الإلكتروني',
+        'email_placeholder' => 'أدخل بريدك الإلكتروني',
         'password' => 'كلمة المرور',
+        'password_placeholder' => 'أنشئ كلمة مرور قوية',
         'password_confirmation' => 'تأكيد كلمة المرور',
         'submit' => 'التسجيل',
         'already_registered' => 'مسجل بالفعل؟',
+        'already_have_account' => 'لديك حساب بالفعل؟',
+        'sign_in' => 'تسجيل الدخول',
     ],
 
     'forgot_password' => [
