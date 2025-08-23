@@ -4,15 +4,9 @@
         @click.outside="open = false"
         class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-colors"
     >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
-        </svg>
-        <span class="hidden sm:inline">
-            {{ config('app.available_locales')[app()->getLocale()] ?? app()->getLocale() }}
+        <span class="w-6 h-6 bg-zinc-100 dark:bg-zinc-800 rounded flex items-center justify-center text-xs font-semibold">
+            {{ app()->getLocale() === 'ar' ? 'ع' : strtoupper(substr(app()->getLocale(), 0, 2)) }}
         </span>
-        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
     </button>
 
     <div 
@@ -36,9 +30,7 @@
                     <div class="flex items-center justify-between w-full">
                         <span>{{ $label }}</span>
                         @if(app()->getLocale() === $locale)
-                            <svg class="w-4 h-4 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                            </svg>
+                            <div class="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full"></div>
                         @endif
                     </div>
                 </a>

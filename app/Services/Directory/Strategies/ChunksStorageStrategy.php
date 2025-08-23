@@ -10,11 +10,22 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
+/**
+ * Chunks Storage Strategy
+ * 
+ * Handles temporary chunk storage for file upload sessions with tenant isolation.
+ * Each upload session creates its own subdirectory for chunk management.
+ */
 final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksStorageStrategyContract
 {
     private ?string $sessionId = null;
 
-    public function __construct(private readonly string $tenantId) {}
+    /**
+     * Constructor receives the hashed tenant base directory from DirectoryManager.
+     *
+     * @param string $tenantBaseDirectory The MD5-hashed tenant base directory
+     */
+    public function __construct(private readonly string $tenantBaseDirectory) {}
 
     public function forSession(string $sessionId): self
     {
@@ -60,7 +71,7 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
             throw new Exception('Cannot build directory path: Session ID is required. Call forSession($sessionId) first.');
         }
 
-        return "{$this->tenantId}/chunks/{$this->sessionId}";
+        return "{$this->tenantBaseDirectory}/chunks/{$this->sessionId}";
     }
 
     private function generateChunkFilename(): string

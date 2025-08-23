@@ -29,7 +29,7 @@ final class DirectoryManager
      */
     public static function document(string $tenantId): DocumentStorageStrategyContract
     {
-        return new DocumentStorageStrategy($tenantId);
+        return new DocumentStorageStrategy(self::baseDirectiry($tenantId));
     }
 
     /**
@@ -40,7 +40,7 @@ final class DirectoryManager
      */
     public static function chunks(string $tenantId): ChunksStorageStrategyContract
     {
-        return new ChunksStorageStrategy($tenantId);
+        return new ChunksStorageStrategy(self::baseDirectiry($tenantId));
     }
 
     /**
@@ -67,13 +67,15 @@ final class DirectoryManager
 
     /**
      * Get base directory path for a tenant.
+     * 
+     * Uses MD5 hash of tenant ID for security and consistency.
      *
      * @param string $tenantId The tenant identifier
-     * @return string Base directory path (tenant ID)
+     * @return string Base directory path (MD5 hashed tenant ID)
      */
     public static function baseDirectiry(string $tenantId): string
     {
-        return $tenantId;
+        return md5($tenantId);
     }
 
     /**

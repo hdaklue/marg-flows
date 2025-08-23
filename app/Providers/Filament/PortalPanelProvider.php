@@ -18,6 +18,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -38,6 +39,7 @@ final class PortalPanelProvider extends PanelProvider
             ->path('/portal')
             ->login()
             ->passwordReset()
+            ->registration()
             ->databaseNotificationsPolling(fn () => app()->isProduction() ? '60s' : '90s')
             ->tenant(Tenant::class, ownershipRelationship: 'tenant')
             ->colors([
@@ -50,6 +52,7 @@ final class PortalPanelProvider extends PanelProvider
             ->plugins([
                 // Custom language switching will be added via render hooks
             ])
+            ->maxContentWidth(Width::Full)
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
                 fn (): string => Blade::render('<x-language-switch />'),

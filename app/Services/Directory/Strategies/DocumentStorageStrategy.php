@@ -10,6 +10,13 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
+/**
+ * Document Storage Strategy
+ * 
+ * Handles document storage with tenant isolation, subdirectory organization,
+ * and support for images, videos, and document types. Both tenant IDs and 
+ * document IDs are MD5 hashed for security and privacy.
+ */
 final class DocumentStorageStrategy extends BaseStorageStrategy implements DocumentStorageStrategyContract
 {
     private ?string $documentId = null;
@@ -20,11 +27,24 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
 
     private ?string $storedPath = null;
 
-    public function __construct(private readonly string $tenantId) {}
+    /**
+     * Constructor receives the hashed tenant base directory from DirectoryManager.
+     *
+     * @param string $tenantBaseDirectory The MD5-hashed tenant base directory
+     */
+    public function __construct(private readonly string $tenantBaseDirectory) {}
 
+    /**
+     * Set the document ID for this storage session.
+     * 
+     * Document ID is MD5 hashed for security and privacy.
+     *
+     * @param string $documentId The document identifier
+     * @return self For method chaining
+     */
     public function forDocument(string $documentId): self
     {
-        $this->documentId = $documentId;
+        $this->documentId = md5($documentId);
 
         return $this;
     }
@@ -85,7 +105,7 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
 
     private function buildDirectory(): string
     {
-        $parts = [$this->tenantId];
+        $parts = [$this->tenantBaseDirectory];
 
         if ($this->documentId) {
             $parts[] = "documents/{$this->documentId}";
