@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Directory\Strategies;
 
-use App\Services\Directory\Contracts\StorageStrategyContract;
 use Exception;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 final class TempStorageStrategy extends BaseStorageStrategy
 {

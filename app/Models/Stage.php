@@ -23,7 +23,8 @@ use Illuminate\Support\Carbon;
  * @property int $order
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Model|\Eloquent $stageable
+ * @property-read Model|Eloquent $stageable
+ *
  * @method static Builder<static>|Stage by(\App\Contracts\Stage\HasStages $entity)
  * @method static Builder<static>|Stage newModelQuery()
  * @method static Builder<static>|Stage newQuery()
@@ -37,6 +38,7 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|Stage whereStageableId($value)
  * @method static Builder<static>|Stage whereStageableType($value)
  * @method static Builder<static>|Stage whereUpdatedAt($value)
+ *
  * @mixin Eloquent
  */
 final class Stage extends Model
@@ -56,7 +58,7 @@ final class Stage extends Model
         return $this->morphTo();
     }
 
-    public function scopeBy(Builder $builder, HasStages $entity)
+    protected function scopeBy(Builder $builder, HasStages $entity)
     {
         return $builder->whereHas('stageable', function ($query) use ($entity) {
             $query->where('stageable_id', $entity->getKey())

@@ -38,18 +38,19 @@ use Illuminate\Support\Carbon;
  * @property string|null $archived_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Collection<int, \App\Models\Role> $assignedRoles
+ * @property-read Collection<int, Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
  * @property-read mixed $block_collection
- * @property-read \App\Models\User|null $creator
- * @property-read Model|\Eloquent $documentable
- * @property-read Collection<int, \App\Models\ModelHasRole> $participants
+ * @property-read User|null $creator
+ * @property-read Model|Eloquent $documentable
+ * @property-read Collection<int, ModelHasRole> $participants
  * @property-read int|null $participants_count
- * @property-read Collection<int, \App\Models\ModelHasRole> $roleAssignments
+ * @property-read Collection<int, ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- * @property-read Collection<int, \App\Models\SideNote> $sideNotes
+ * @property-read Collection<int, SideNote> $sideNotes
  * @property-read int|null $side_notes_count
- * @property-read \App\Models\Tenant|null $tenant
+ * @property-read Tenant|null $tenant
+ *
  * @method static Builder<static>|Document active()
  * @method static Builder<static>|Document archived()
  * @method static \Database\Factories\DocumentFactory factory($count = null, $state = [])
@@ -68,6 +69,7 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|Document whereName($value)
  * @method static Builder<static>|Document whereTenantId($value)
  * @method static Builder<static>|Document whereUpdatedAt($value)
+ *
  * @mixin Eloquent
  */
 final class Document extends Model implements BelongsToTenantContract, HasStaticType, RoleableEntity, Sidenoteable
@@ -108,23 +110,23 @@ final class Document extends Model implements BelongsToTenantContract, HasStatic
         return ! empty($this->getAttribute('archived_at'));
     }
 
-    #[Scope]
-    public function archived(Builder $builder): Builder
-    {
-        return $builder->whereNotNull('archived_at');
-    }
-
-    #[Scope]
-    public function active(Builder $builder): Builder
-    {
-        return $builder->whereNull('archived_at');
-    }
-
     public function casts(): array
     {
         return [
             'blocks' => 'json',
         ];
+    }
+
+    #[Scope]
+    protected function archived(Builder $builder): Builder
+    {
+        return $builder->whereNotNull('archived_at');
+    }
+
+    #[Scope]
+    protected function active(Builder $builder): Builder
+    {
+        return $builder->whereNull('archived_at');
     }
 
     // public function getTenant(): Tenant

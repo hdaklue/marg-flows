@@ -57,7 +57,7 @@ trait CanBeAssignedToEntity
     }
 
     #[Scope]
-    public function scopeAssignedTo(Builder $builder, RoleableEntity $entity): Builder
+    protected function scopeAssignedTo(Builder $builder, RoleableEntity $entity): Builder
     {
         return $builder->whereHas('roleAssignments', function ($query) use ($entity) {
             $query->where('roleable_type', $entity->getMorphClass())
@@ -66,7 +66,7 @@ trait CanBeAssignedToEntity
     }
 
     #[Scope]
-    public function scopeNotAssignedTo(Builder $builder, RoleableEntity $entity): Builder
+    protected function scopeNotAssignedTo(Builder $builder, RoleableEntity $entity): Builder
     {
         return $builder->whereDoesntHave('roleAssignments', function ($query) use ($entity) {
             $query->where('roleable_type', $entity->getMorphClass())

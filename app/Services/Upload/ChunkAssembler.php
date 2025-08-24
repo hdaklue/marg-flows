@@ -12,7 +12,6 @@ final class ChunkAssembler
 {
     private const int BUFFER_SIZE = 65536; // 64KB for optimal performance
 
-
     public static function assemble(
         string $sessionId,
         string $fileName,
@@ -21,9 +20,7 @@ final class ChunkAssembler
         string $storeDirectory,
     ): string {
         // Validate inputs
-        if ($totalChunks <= 0) {
-            throw new RuntimeException('Total chunks must be greater than 0');
-        }
+        throw_if($totalChunks <= 0, new RuntimeException('Total chunks must be greater than 0'));
 
         // Pre-validate all chunks exist
         self::validateAllChunksExist($chunkDirectory, $totalChunks);
@@ -40,9 +37,7 @@ final class ChunkAssembler
         $finalFullPath = Storage::path($finalPath);
         $finalHandle = fopen($finalFullPath, 'wb');
 
-        if (! $finalHandle) {
-            throw new RuntimeException('Cannot create final file: ' . $finalPath);
-        }
+        throw_unless($finalHandle, new RuntimeException('Cannot create final file: ' . $finalPath));
 
         try {
             self::streamChunksToFile($finalHandle, $chunkDirectory, $totalChunks);
@@ -70,9 +65,7 @@ final class ChunkAssembler
             }
         }
 
-        if (! empty($missingChunks)) {
-            throw new RuntimeException('Missing chunks: ' . implode(', ', $missingChunks));
-        }
+        throw_unless(empty($missingChunks), new RuntimeException('Missing chunks: ' . implode(', ', $missingChunks)));
     }
 
     private static function streamChunksToFile($finalHandle, string $chunkDirectory, int $totalChunks): void
@@ -89,24 +82,18 @@ final class ChunkAssembler
     {
         $chunkHandle = fopen($chunkFullPath, 'rb');
 
-        if (! $chunkHandle) {
-            throw new RuntimeException("Cannot read chunk {$chunkIndex}: {$chunkFullPath}");
-        }
+        throw_unless($chunkHandle, new RuntimeException("Cannot read chunk {$chunkIndex}: {$chunkFullPath}"));
 
         try {
             // Use optimized buffer size for better I/O performance
             while (! feof($chunkHandle)) {
                 $data = fread($chunkHandle, self::BUFFER_SIZE);
 
-                if ($data === false) {
-                    throw new RuntimeException("Failed to read from chunk {$chunkIndex}");
-                }
+                throw_if($data === false, new RuntimeException("Failed to read from chunk {$chunkIndex}"));
 
                 $bytesWritten = fwrite($finalHandle, $data);
 
-                if ($bytesWritten === false || $bytesWritten !== strlen($data)) {
-                    throw new RuntimeException("Failed to write chunk {$chunkIndex} data");
-                }
+                throw_if($bytesWritten === false || $bytesWritten !== strlen($data), new RuntimeException("Failed to write chunk {$chunkIndex} data"));
             }
         } finally {
             fclose($chunkHandle);

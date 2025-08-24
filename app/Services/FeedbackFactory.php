@@ -71,9 +71,7 @@ final class FeedbackFactory
         ]);
 
         // Validate time range
-        if ($attributes['start_time'] >= $attributes['end_time']) {
-            throw new InvalidArgumentException('Audio feedback end_time must be greater than start_time');
-        }
+        throw_if($attributes['start_time'] >= $attributes['end_time'], new InvalidArgumentException('Audio feedback end_time must be greater than start_time'));
 
         return AudioFeedback::create($attributes);
     }
@@ -153,9 +151,7 @@ final class FeedbackFactory
     {
         $modelClass = FeedbackConfigService::getModelClass($type);
 
-        if (! $modelClass) {
-            throw new InvalidArgumentException("Unknown feedback type: {$type}");
-        }
+        throw_unless($modelClass, new InvalidArgumentException("Unknown feedback type: {$type}"));
 
         return $modelClass;
     }
@@ -331,7 +327,6 @@ final class FeedbackFactory
         return true;
     }
 
-
     /**
      * Validate that required fields are present in attributes.
      */
@@ -345,11 +340,9 @@ final class FeedbackFactory
             }
         }
 
-        if (! empty($missingFields)) {
-            throw new InvalidArgumentException(
-                'Missing required fields: ' . implode(', ', $missingFields),
-            );
-        }
+        throw_unless(empty($missingFields), new InvalidArgumentException(
+            'Missing required fields: ' . implode(', ', $missingFields),
+        ));
     }
 
     /**

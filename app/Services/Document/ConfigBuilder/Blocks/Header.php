@@ -75,9 +75,7 @@ final class Header implements DocumentBlockConfigContract
 
     public function defaultLevel(int $level): self
     {
-        if ($level <= 0 || ! in_array($level, $this->levels)) {
-            throw new InvalidArgumentException("{$level} in an invalid Header level");
-        }
+        throw_if($level <= 0 || ! in_array($level, $this->levels), new InvalidArgumentException("{$level} in an invalid Header level"));
 
         $this->defaultLevel = $level;
 

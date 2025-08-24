@@ -20,7 +20,6 @@ use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\FlowStage;
 use App\Facades\MentionService;
-use BackedEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -46,20 +45,21 @@ use Illuminate\Support\Collection;
  * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $assignedRoles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
- * @property-read \App\Models\User $creator
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Document> $documents
+ * @property-read User $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Document> $documents
  * @property-read int|null $documents_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $participants
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $participants
  * @property-read int|null $participants_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ModelHasRole> $roleAssignments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $roleAssignments
  * @property-read int|null $role_assignments_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SideNote> $sideNotes
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, SideNote> $sideNotes
  * @property-read int|null $side_notes_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stage> $stages
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Stage> $stages
  * @property-read int|null $stages_count
- * @property-read \App\Models\Tenant $tenant
+ * @property-read Tenant $tenant
+ *
  * @method static Builder<static>|Flow assignable()
  * @method static Builder<static>|Flow byStage(\App\Enums\FlowStage|string $stage)
  * @method static \Database\Factories\FlowFactory factory($count = null, $state = [])
@@ -85,6 +85,7 @@ use Illuminate\Support\Collection;
  * @method static Builder<static>|Flow whereUpdatedAt($value)
  * @method static Builder<static>|Flow withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|Flow withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable
@@ -161,23 +162,6 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
         return $this->deliverables()->overdue();
     }
 
-    #[Scope]
-    public function assignable(Builder $builder)
-    {
-        return $builder->where('stage', '!=', FlowStage::COMPLETED->value);
-
-    }
-
-    #[Scope]
-    public function byStage(Builder $builder, string|FlowStage $stage)
-    {
-        if ($stage instanceof BackedEnum) {
-            $stage = $stage->value;
-        }
-
-        return $builder->where('stage', '=', $stage);
-    }
-
     public function setAsCompleted()
     {
         $this->update([
@@ -204,12 +188,6 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
             'completed_at' => null,
             'canceled_at' => null,
         ]);
-    }
-
-    #[Scope]
-    public function scopeRunning(Builder $query): Builder
-    {
-        return $query->whereNotIn('stage', [FlowStage::COMPLETED->value, FlowStage::CANCELED->value, FlowStage::PAUSED->value]);
     }
 
     // public function buildSortQuery()
@@ -243,12 +221,13 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     public function getDeliverablesProgress(): float
     {
         $total = $this->getDeliverablesCount();
-        
+
         if ($total === 0) {
             return 0.0;
         }
 
         $completed = $this->getCompletedDeliverablesCount();
+
         return round(($completed / $total) * 100, 1);
     }
 
@@ -266,6 +245,19 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     {
         // Flow can only be completed if all deliverables are completed
         return $this->getActiveDeliverablesCount() === 0;
+    }
+
+    #[Scope]
+    protected function assignable(Builder $builder)
+    {
+        return $builder->where('stage', '!=', FlowStage::COMPLETED->value);
+
+    }
+
+    #[Scope]
+    protected function scopeRunning(Builder $query): Builder
+    {
+        return $query->whereNotIn('stage', [FlowStage::COMPLETED->value, FlowStage::CANCELED->value, FlowStage::PAUSED->value]);
     }
 
     protected function casts(): array

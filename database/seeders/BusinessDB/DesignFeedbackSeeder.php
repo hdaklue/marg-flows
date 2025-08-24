@@ -19,8 +19,9 @@ final class DesignFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (!$testUser) {
+        if (! $testUser) {
             $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
+
             return;
         }
 
@@ -28,6 +29,7 @@ final class DesignFeedbackSeeder extends Seeder
         $documents = Document::limit(5)->get();
         if ($documents->isEmpty()) {
             $this->command->warn('No documents found in business database. Please run DocumentSeeder first.');
+
             return;
         }
 
@@ -46,25 +48,25 @@ final class DesignFeedbackSeeder extends Seeder
         ];
 
         $annotationTypes = [
-            'point', 'rectangle', 'circle', 'arrow', 
-            'text', 'polygon', 'area', 'line', 'freehand'
+            'point', 'rectangle', 'circle', 'arrow',
+            'text', 'polygon', 'area', 'line', 'freehand',
         ];
 
         $colors = [
-            'red', 'blue', 'green', 'yellow', 'orange', 
-            'purple', 'pink', 'black', 'white', 'gray'
+            'red', 'blue', 'green', 'yellow', 'orange',
+            'purple', 'pink', 'black', 'white', 'gray',
         ];
 
         // Create design feedback for each document
         foreach ($documents as $document) {
             // Create 8-12 design feedback entries per document
             $feedbackCount = rand(8, 12);
-            
+
             for ($i = 1; $i <= $feedbackCount; $i++) {
                 $annotationType = fake()->randomElement($annotationTypes);
                 $x = rand(50, 1870); // Assuming 1920px canvas width
                 $y = rand(50, 1030); // Assuming 1080px canvas height
-                
+
                 DesignFeedback::create([
                     'creator_id' => $testUser->id,
                     'content' => $this->generateDesignComment($annotationType),
@@ -163,7 +165,7 @@ final class DesignFeedbackSeeder extends Seeder
 
     private function generateAnnotationData(string $annotationType, int $x, int $y): ?array
     {
-        if (!fake()->boolean(70)) { // 70% chance of having annotation data
+        if (! fake()->boolean(70)) { // 70% chance of having annotation data
             return null;
         }
 
@@ -224,8 +226,8 @@ final class DesignFeedbackSeeder extends Seeder
     private function generateAreaBounds(string $annotationType): ?array
     {
         $areaTypes = ['rectangle', 'circle', 'polygon', 'area'];
-        
-        if (!in_array($annotationType, $areaTypes) || !fake()->boolean(80)) {
+
+        if (! in_array($annotationType, $areaTypes) || ! fake()->boolean(80)) {
             return null;
         }
 
@@ -254,19 +256,19 @@ final class DesignFeedbackSeeder extends Seeder
     {
         $pointCount = rand(10, 30);
         $points = [];
-        
+
         for ($i = 0; $i < $pointCount; $i++) {
             $angle = ($i / $pointCount) * 2 * pi();
             $radius = rand(20, 80);
             $noise = rand(-10, 10);
-            
+
             $points[] = [
                 'x' => $centerX + ($radius + $noise) * cos($angle),
                 'y' => $centerY + ($radius + $noise) * sin($angle),
                 'pressure' => fake()->randomFloat(2, 0.3, 1.0),
             ];
         }
-        
+
         return $points;
     }
 
@@ -274,14 +276,14 @@ final class DesignFeedbackSeeder extends Seeder
     {
         $vertexCount = rand(3, 8);
         $vertices = [];
-        
+
         for ($i = 0; $i < $vertexCount; $i++) {
             $vertices[] = [
                 'x' => rand(-100, 100),
                 'y' => rand(-100, 100),
             ];
         }
-        
+
         return $vertices;
     }
 
@@ -363,11 +365,11 @@ final class DesignFeedbackSeeder extends Seeder
         // Multiple overlapping annotations (cluster)
         $baseX = 800;
         $baseY = 400;
-        
+
         for ($i = 0; $i < 5; $i++) {
             DesignFeedback::create([
                 'creator_id' => $user->id,
-                'content' => "Multiple issues in this area - concern #{$i + 1}.",
+                'content' => 'Multiple issues in this area - concern #' . ($i + 1) . '.',
                 'feedbackable_type' => $document->getMorphClass(),
                 'feedbackable_id' => $document->id,
                 'status' => fake()->randomElement([FeedbackStatus::OPEN, FeedbackStatus::IN_PROGRESS]),

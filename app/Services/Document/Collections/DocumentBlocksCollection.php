@@ -29,7 +29,7 @@ final class DocumentBlocksCollection extends Collection
 
     public function filterBlocks(array $allowedBlocks): self
     {
-        $this->filter(fn ($item) => ! in_array($item['type'], $allowedBlocks));
+        $this->reject(fn ($item): bool => in_array($item['type'], $allowedBlocks));
 
         return $this;
 
@@ -78,7 +78,7 @@ final class DocumentBlocksCollection extends Collection
      */
     public function hasNonEmptyBlocks(): bool
     {
-        return $this->some(function ($block) {
+        return $this->contains(function ($block) {
             if (! is_array($block) || ! isset($block['type'], $block['data'])) {
                 return false;
             }

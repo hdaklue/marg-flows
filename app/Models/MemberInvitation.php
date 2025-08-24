@@ -19,8 +19,9 @@ use Illuminate\Support\Carbon;
  * @property array<array-key, mixed> $role_data
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \App\Models\User $receiver
- * @property-read \App\Models\User $sender
+ * @property-read User $receiver
+ * @property-read User $sender
+ *
  * @method static Builder<static>|MemberInvitation newModelQuery()
  * @method static Builder<static>|MemberInvitation newQuery()
  * @method static Builder<static>|MemberInvitation query()
@@ -31,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|MemberInvitation whereRoleData($value)
  * @method static Builder<static>|MemberInvitation whereSenderId($value)
  * @method static Builder<static>|MemberInvitation whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 final class MemberInvitation extends Model
@@ -51,7 +53,7 @@ final class MemberInvitation extends Model
         return $this->belongsTo(User::class, 'receiver_id');
     }
 
-    public function scopeSentBy(Builder $query, User $user): Builder
+    protected function scopeSentBy(Builder $query, User $user): Builder
     {
         return $query->where('sender_id', '=', $user->id);
     }

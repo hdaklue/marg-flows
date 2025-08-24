@@ -98,10 +98,10 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use CanBeAssignedToEntity,
         HasActiveTenant,
-        ManagesAvatar,
         HasFactory,
         HasUlids,
         LivesInOriginalDB,
+        ManagesAvatar,
         Notifiable;
 
     /**
@@ -212,22 +212,6 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $this;
     }
 
-    #[Scope]
-    public function scopeNotMemberOf(Builder $builder, Tenant $tenant): Builder
-    {
-        return $builder->whereDoesntHave('tenants', function ($query) use ($tenant) {
-            $query->where('tenants.id', '=', $tenant->id);
-        });
-    }
-
-    #[Scope]
-    public function scopeMemberOf(Builder $builder, Tenant $tenant): Builder
-    {
-        return $builder->whereHas('tenants', function ($query) use ($tenant) {
-            $query->where('tenants.id', '=', $tenant->id);
-        });
-    }
-
     public function invitations(): HasMany
     {
         return $this->hasMany(MemberInvitation::class, 'sender_id');
@@ -252,19 +236,6 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
     {
         return $this->hasMany(Tenant::class, 'creator_id');
     }
-
-    #[Scope]
-    public function scopeAppAdmin(Builder $builder): Builder
-    {
-        return $builder->where('account_type', AccountType::ADMIN->value);
-    }
-
-    #[Scope]
-    public function appUser(Builder $builder): Builder
-    {
-        return $builder->where('account_type', AccountType::USER->value);
-    }
-
 
     public function canAccessAdmin(): bool
     {
@@ -319,6 +290,33 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return Timezone::displayTimezone($this->timezone);
     }
 
+    #[Scope]
+    protected function scopeNotMemberOf(Builder $builder, Tenant $tenant): Builder
+    {
+        return $builder->whereDoesntHave('tenants', function ($query) use ($tenant) {
+            $query->where('tenants.id', '=', $tenant->id);
+        });
+    }
+
+    #[Scope]
+    protected function scopeMemberOf(Builder $builder, Tenant $tenant): Builder
+    {
+        return $builder->whereHas('tenants', function ($query) use ($tenant) {
+            $query->where('tenants.id', '=', $tenant->id);
+        });
+    }
+
+    #[Scope]
+    protected function scopeAppAdmin(Builder $builder): Builder
+    {
+        return $builder->where('account_type', AccountType::ADMIN->value);
+    }
+
+    #[Scope]
+    protected function appUser(Builder $builder): Builder
+    {
+        return $builder->where('account_type', AccountType::USER->value);
+    }
 
     protected function inviterName(): Attribute
     {

@@ -26,18 +26,14 @@ final class GenerateUserAvatar
         // Download image using Laravel's HTTP client with timeout
         $response = Http::timeout(30)->get($url);
 
-        if ($response->failed()) {
-            throw new Exception("Failed to download image from URL: {$url}");
-        }
+        throw_if($response->failed(), new Exception("Failed to download image from URL: {$url}"));
 
         // Detect file extension from content type or URL
         $extension = $this->detectExtension($response, $url);
         $fileName = $this->generateFileName($user, $extension);
 
         // Validate that we got image content
-        if (empty($response->body())) {
-            throw new Exception("Empty response body from URL: {$url}");
-        }
+        throw_if(empty($response->body()), new Exception("Empty response body from URL: {$url}"));
 
         // Process content based on file type
         $content = $response->body();
@@ -99,9 +95,7 @@ final class GenerateUserAvatar
         }
 
         // Basic SVG validation - should start with XML declaration or <svg tag
-        if (! str_starts_with($content, '<?xml') && ! str_starts_with($content, '<svg')) {
-            throw new Exception('Invalid SVG content: does not start with XML declaration or <svg> tag');
-        }
+        throw_if(! str_starts_with($content, '<?xml') && ! str_starts_with($content, '<svg'), new Exception('Invalid SVG content: does not start with XML declaration or <svg> tag'));
 
         // Try to load as XML to validate structure
         libxml_use_internal_errors(true);

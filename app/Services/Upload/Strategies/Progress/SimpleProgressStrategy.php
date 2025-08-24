@@ -12,6 +12,7 @@ use InvalidArgumentException;
 final class SimpleProgressStrategy implements ProgressStrategyContract
 {
     private const string REDIS_PREFIX = 'upload_progress:';
+
     private const int TTL = 3600; // 1 hour
 
     public function init(string $sessionId, array $metadata): void
@@ -24,7 +25,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
             bytesUploaded: 0,
             totalBytes: $metadata['totalBytes'] ?? 0,
             percentage: 0.0,
-            status: 'initialized'
+            status: 'initialized',
         );
 
         $this->storeProgress($sessionId, $initialProgress);
@@ -41,9 +42,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->validateSessionId($sessionId);
 
         $currentProgress = $this->getProgress($sessionId);
-        if (!$currentProgress) {
-            throw new InvalidArgumentException("Progress session '{$sessionId}' not found.");
-        }
+        throw_unless($currentProgress, new InvalidArgumentException("Progress session '{$sessionId}' not found."));
 
         $completedProgress = new ProgressData(
             completedChunks: $currentProgress->totalChunks,
@@ -51,7 +50,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
             bytesUploaded: $currentProgress->totalBytes,
             totalBytes: $currentProgress->totalBytes,
             percentage: 100.0,
-            status: 'completed'
+            status: 'completed',
         );
 
         $this->storeProgress($sessionId, $completedProgress);
@@ -62,7 +61,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->validateSessionId($sessionId);
 
         $currentProgress = $this->getProgress($sessionId);
-        if (!$currentProgress) {
+        if (! $currentProgress) {
             // Create error progress if session doesn't exist
             $errorProgress = new ProgressData(
                 completedChunks: 0,
@@ -71,7 +70,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
                 totalBytes: 0,
                 percentage: 0.0,
                 status: 'error',
-                error: $error
+                error: $error,
             );
         } else {
             $errorProgress = new ProgressData(
@@ -81,7 +80,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
                 totalBytes: $currentProgress->totalBytes,
                 percentage: $currentProgress->percentage,
                 status: 'error',
-                error: $error
+                error: $error,
             );
         }
 
@@ -93,12 +92,12 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->validateSessionId($sessionId);
 
         $data = Redis::get($this->getRedisKey($sessionId));
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
         $decoded = json_decode($data, true);
-        if (!$decoded) {
+        if (! $decoded) {
             return null;
         }
 
@@ -116,7 +115,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         Redis::setex(
             $this->getRedisKey($sessionId),
             self::TTL,
-            json_encode($progress->toArray())
+            json_encode($progress->toArray()),
         );
     }
 
@@ -127,8 +126,6 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
 
     private function validateSessionId(string $sessionId): void
     {
-        if (empty($sessionId)) {
-            throw new InvalidArgumentException('Session ID cannot be empty.');
-        }
+        throw_if(empty($sessionId), new InvalidArgumentException('Session ID cannot be empty.'));
     }
 }

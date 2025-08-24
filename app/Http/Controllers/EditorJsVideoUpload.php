@@ -423,9 +423,7 @@ final class EditorJsVideoUpload extends Controller
             'video.max' => 'File is too large. Maximum size allowed is ' . round($maxSize / 1024) . 'MB.',
         ]);
 
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
+        throw_if($validator->fails(), new ValidationException($validator));
     }
 
     /**

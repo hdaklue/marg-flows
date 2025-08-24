@@ -18,11 +18,9 @@ final class MorphCast implements Castable
     {
         $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
 
-        if (!is_array($trace[1]['object']->dtoData ?? null)) {
-            throw new InvalidArgumentException(
-                'MorphCast: Calling DTO instance does not have accessible dtoData array.',
-            );
-        }
+        throw_unless(is_array($trace[1]['object']->dtoData ?? null), new InvalidArgumentException(
+            'MorphCast: Calling DTO instance does not have accessible dtoData array.',
+        ));
 
         $this->resolvedDto = $trace[1]['object']->dtoData;
     }
@@ -31,24 +29,20 @@ final class MorphCast implements Castable
     {
         [$morphTypeKey, $morphIdKey] = $this->resolveMorphKeys($property);
 
-        if (!isset($this->resolvedDto[$morphTypeKey])) {
-            throw new InvalidArgumentException("MorphCast: Missing morph type key [{$morphTypeKey}] in DTO data.");
-        }
+        throw_unless(isset($this->resolvedDto[$morphTypeKey]), new InvalidArgumentException("MorphCast: Missing morph type key [{$morphTypeKey}] in DTO data."));
 
         $morphClassAlias = $this->resolvedDto[$morphTypeKey];
 
         $modelClass = Relation::getMorphedModel($morphClassAlias) ?? $morphClassAlias;
 
-        if (!class_exists($modelClass) || !is_subclass_of($modelClass, Model::class)) {
-            throw new InvalidArgumentException("MorphCast: Invalid model class [{$modelClass}].");
-        }
+        throw_if(! class_exists($modelClass) || ! is_subclass_of($modelClass, Model::class), new InvalidArgumentException("MorphCast: Invalid model class [{$modelClass}]."));
 
         /** @var Model $modelInstance */
         $modelInstance = new $modelClass;
-        
+
         // forceFill is correct here - we're in a DTO casting context with trusted data
         // and need to preserve all attributes (fillable + non-fillable like id, timestamps)
-        if (is_array($value) && !empty($value)) {
+        if (is_array($value) && ! empty($value)) {
             $modelInstance->forceFill($value);
         }
 

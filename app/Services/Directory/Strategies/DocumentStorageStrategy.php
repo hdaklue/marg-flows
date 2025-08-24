@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
 /**
- * Document Storage Strategy
- * 
+ * Document Storage Strategy.
+ *
  * Handles document storage with tenant isolation, subdirectory organization,
- * and support for images, videos, and document types. Both tenant IDs and 
+ * and support for images, videos, and document types. Both tenant IDs and
  * document IDs are MD5 hashed for security and privacy.
  */
 final class DocumentStorageStrategy extends BaseStorageStrategy implements DocumentStorageStrategyContract
@@ -30,16 +30,16 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
     /**
      * Constructor receives the hashed tenant base directory from DirectoryManager.
      *
-     * @param string $tenantBaseDirectory The MD5-hashed tenant base directory
+     * @param  string  $tenantBaseDirectory  The MD5-hashed tenant base directory
      */
     public function __construct(private readonly string $tenantBaseDirectory) {}
 
     /**
      * Set the document ID for this storage session.
-     * 
+     *
      * Document ID is MD5 hashed for security and privacy.
      *
-     * @param string $documentId The document identifier
+     * @param  string  $documentId  The document identifier
      * @return self For method chaining
      */
     public function forDocument(string $documentId): self
@@ -49,24 +49,22 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
         return $this;
     }
 
-    public function images(): self
+    public function images(): ImageStorageStrategy
     {
-        if (! $this->documentId) {
-            throw new Exception('Cannot access images directory: Document ID is required. Call forDocument($documentId) first.');
-        }
-        $this->subdirectory = 'images';
+        throw_unless($this->documentId, new Exception('Cannot access images directory: Document ID is required. Call forDocument($documentId) first.'));
 
-        return $this;
+        $baseDirectory = $this->buildDirectoryPath('images');
+
+        return new ImageStorageStrategy($baseDirectory);
     }
 
-    public function videos(): self
+    public function videos(): VideoStorageStrategy
     {
-        if (! $this->documentId) {
-            throw new Exception('Cannot access videos directory: Document ID is required. Call forDocument($documentId) first.');
-        }
-        $this->subdirectory = 'videos';
+        throw_unless($this->documentId, new Exception('Cannot access videos directory: Document ID is required. Call forDocument($documentId) first.'));
 
-        return $this;
+        $baseDirectory = $this->buildDirectoryPath('videos');
+
+        return new VideoStorageStrategy($baseDirectory);
     }
 
     public function documents(): self
@@ -90,9 +88,7 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
 
     public function getUrl(): string
     {
-        if (! $this->storedPath) {
-            throw new InvalidArgumentException('Cannot generate URL: File must be stored first. Call store($file) before getUrl().');
-        }
+        throw_unless($this->storedPath, new InvalidArgumentException('Cannot generate URL: File must be stored first. Call store($file) before getUrl().'));
 
         return Storage::url($this->storedPath);
     }
@@ -101,7 +97,6 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
     {
         return $this->buildDirectory();
     }
-
 
     private function buildDirectory(): string
     {
@@ -116,6 +111,21 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
         if ($this->subdirectory) {
             $parts[] = $this->subdirectory;
         }
+
+        return implode('/', $parts);
+    }
+
+    private function buildDirectoryPath(string $subdirectory): string
+    {
+        $parts = [$this->tenantBaseDirectory];
+
+        if ($this->documentId) {
+            $parts[] = "documents/{$this->documentId}";
+        } else {
+            $parts[] = 'documents';
+        }
+
+        $parts[] = $subdirectory;
 
         return implode('/', $parts);
     }

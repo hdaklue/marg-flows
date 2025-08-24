@@ -11,6 +11,7 @@ use App\Facades\RoleManager;
 use App\Models\ModelHasRole;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -98,7 +99,8 @@ trait ManagesParticipants
         return RoleManager::getRoleOn($entity, $this);
     }
 
-    public function scopeForParticipant(Builder $query, AssignableEntity $member): Builder
+    #[Scope]
+    protected function forParticipant(Builder $query, AssignableEntity $member): Builder
     {
         return $query->whereHas('roleAssignments', function ($q) use ($member) {
             $q->where('model_type', $member->getMorphClass())

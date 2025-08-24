@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Casts;
 
-use App\Enums\Deliverable\DeliverableFormat;
 use App\Contracts\Deliverables\DeliverableSpecification;
+use App\Enums\Deliverable\DeliverableFormat;
 use App\ValueObjects\Deliverable\AudioSpecification;
 use App\ValueObjects\Deliverable\DesignSpecification;
 use App\ValueObjects\Deliverable\DocumentSpecification;
@@ -14,7 +14,7 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
-class DeliverableSpecificationCast implements CastsAttributes
+final class DeliverableSpecificationCast implements CastsAttributes
 {
     public function get(Model $model, string $key, mixed $value, array $attributes): ?DeliverableSpecification
     {
@@ -23,22 +23,20 @@ class DeliverableSpecificationCast implements CastsAttributes
         }
 
         $data = is_string($value) ? json_decode($value, true) : $value;
-        
-        if (!is_array($data) || empty($data)) {
+
+        if (! is_array($data) || empty($data)) {
             return null;
         }
 
         // Get the format from the model to determine which specification class to use
         $format = $model->getAttribute('format');
-        
-        if (!$format instanceof DeliverableFormat) {
+
+        if (! $format instanceof DeliverableFormat) {
             // Try to cast it if it's a string
             $format = is_string($format) ? DeliverableFormat::tryFrom($format) : null;
         }
 
-        if (!$format) {
-            throw new InvalidArgumentException('Cannot determine deliverable format for specification casting');
-        }
+        throw_unless($format, new InvalidArgumentException('Cannot determine deliverable format for specification casting'));
 
         return match ($format) {
             DeliverableFormat::DESIGN => DesignSpecification::fromConfig($data),

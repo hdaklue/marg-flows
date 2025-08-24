@@ -16,16 +16,10 @@ final class DeliverableFormat
 
     public function __construct(private string $key)
     {
-        if (! config('deliverables.formats')) {
-            throw new InvalidArgumentException("Deliverable format '{$key}' does not exist.");
-        }
+        throw_unless(config('deliverables.formats'), new InvalidArgumentException("Deliverable format '{$key}' does not exist."));
 
-        if (! array_key_exists($key, config('deliverables.formats'))) {
-            throw new InvalidArgumentException("Deliverable format '{$key}' is not defined in the configuration.");
-        }
-        if (! config("deliverables.{$key}")) {
-            throw new InvalidArgumentException("Deliverable format '{$key}' configuration path does not exist.");
-        }
+        throw_unless(array_key_exists($key, config('deliverables.formats')), new InvalidArgumentException("Deliverable format '{$key}' is not defined in the configuration."));
+        throw_unless(config("deliverables.{$key}"), new InvalidArgumentException("Deliverable format '{$key}' configuration path does not exist."));
         $config = config('deliverables.formats')[$key];
 
         $this->name = $key;

@@ -103,12 +103,10 @@ Route::get('toast-calendar-test', ToastCalendarTest::class)
 
 // Language switching route
 Route::get('/language/{locale}', function (string $locale) {
-    if (!array_key_exists($locale, config('app.available_locales'))) {
-        abort(400);
-    }
-    
+    abort_unless(array_key_exists($locale, config('app.available_locales')), 400);
+
     Session::put('locale', $locale);
-    
+
     return redirect()->back();
 })->name('language.switch');
 

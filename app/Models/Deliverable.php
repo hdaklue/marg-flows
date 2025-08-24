@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\DeliverableSpecificationCast;
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Concerns\HasSideNotes;
 use App\Concerns\Role\ManagesParticipants;
@@ -14,11 +15,11 @@ use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
+use App\Enums\AssigneeRole;
 use App\Enums\Deliverable\DeliverableFormat;
 use App\Enums\Deliverable\DeliverableStatus;
-use App\Enums\AssigneeRole;
-use App\Casts\DeliverableSpecificationCast;
 use App\ValueObjects\Deliverable\DeliverableSpecification;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -62,12 +63,7 @@ use Illuminate\Support\Collection;
  *
  * @method static \Database\Factories\DeliverableFactory factory($count = null, $state = [])
  */
-final class Deliverable extends Model implements 
-    BelongsToTenantContract, 
-    RoleableEntity, 
-    ScopedToTenant, 
-    Sidenoteable,
-    HasStages
+final class Deliverable extends Model implements BelongsToTenantContract, HasStages, RoleableEntity, ScopedToTenant, Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DeliverableFactory> */
     use BelongsToTenant,
@@ -102,19 +98,6 @@ final class Deliverable extends Model implements
         'order_column' => 0,
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'format_specifications' => DeliverableSpecificationCast::class,
-            'settings' => 'array',
-            'start_date' => 'datetime',
-            'success_date' => 'datetime',
-            'completed_at' => 'datetime',
-            'format' => DeliverableFormat::class,
-            'status' => DeliverableStatus::class,
-        ];
-    }
-
     // Relationships
     public function flow(): BelongsTo
     {
@@ -139,13 +122,13 @@ final class Deliverable extends Model implements
     public function currentVersion(): HasOne
     {
         return $this->hasOne(DeliverableVersion::class)
-                   ->latest('version_number');
+            ->latest('version_number');
     }
 
     public function latestVersion(): HasOne
     {
         return $this->hasOne(DeliverableVersion::class)
-                   ->orderByDesc('version_number');
+            ->orderByDesc('version_number');
     }
 
     // Status Management
@@ -186,7 +169,7 @@ final class Deliverable extends Model implements
 
     public function transitionTo(DeliverableStatus $newStatus): bool
     {
-        if (!$this->canTransitionTo($newStatus)) {
+        if (! $this->canTransitionTo($newStatus)) {
             return false;
         }
 
@@ -208,7 +191,7 @@ final class Deliverable extends Model implements
     public function setFormatSpecificationsFromConfig(): void
     {
         $config = config("deliverables.{$this->format->value}.{$this->type}");
-        
+
         if (empty($config)) {
             return;
         }
@@ -220,7 +203,7 @@ final class Deliverable extends Model implements
 
     public function getSpecification(string $key, mixed $default = null): mixed
     {
-        if (!$this->format_specifications) {
+        if (! $this->format_specifications) {
             return $default;
         }
 
@@ -229,7 +212,7 @@ final class Deliverable extends Model implements
 
     public function validateFile(array $fileData): bool
     {
-        if (!$this->format_specifications) {
+        if (! $this->format_specifications) {
             return true; // No specifications to validate against
         }
 
@@ -259,14 +242,14 @@ final class Deliverable extends Model implements
     // Progress & Status Helpers
     public function isOverdue(): bool
     {
-        return $this->success_date && 
-               $this->success_date->isPast() && 
-               !$this->status->isComplete();
+        return $this->success_date &&
+               $this->success_date->isPast() &&
+               ! $this->status->isComplete();
     }
 
     public function isDue(): bool
     {
-        if (!$this->success_date) {
+        if (! $this->success_date) {
             return false;
         }
 
@@ -275,7 +258,7 @@ final class Deliverable extends Model implements
 
     public function getDaysUntilDue(): ?int
     {
-        if (!$this->success_date) {
+        if (! $this->success_date) {
             return null;
         }
 
@@ -353,72 +336,17 @@ final class Deliverable extends Model implements
     public function isAssignedTo(string|User $user): bool
     {
         $userId = $user instanceof User ? $user->id : $user;
+
         return $this->hasParticipantWithRole($userId, AssigneeRole::ASSIGNEE);
     }
 
     public function canBeEditedBy(string|User $user): bool
     {
         $userId = $user instanceof User ? $user->id : $user;
-        
-        return $this->isAssignedTo($userId) || 
+
+        return $this->isAssignedTo($userId) ||
                $this->creator_id === $userId ||
                $this->flow->hasParticipantWithRole($userId, AssigneeRole::ASSIGNEE);
-    }
-
-    // Scopes
-    public function scopeForUser($query, string|User $user)
-    {
-        $userId = $user instanceof User ? $user->id : $user;
-        
-        return $query->whereHas('participants', function ($q) use ($userId) {
-            $q->where('model_id', $userId);
-        });
-    }
-
-    public function scopeByStatus($query, DeliverableStatus $status)
-    {
-        return $query->where('status', $status);
-    }
-
-    public function scopeByFormat($query, DeliverableFormat $format)
-    {
-        return $query->where('format', $format);
-    }
-
-    public function scopeByPriority($query, int $priority)
-    {
-        return $query->where('priority', $priority);
-    }
-
-    public function scopeHighPriority($query)
-    {
-        return $query->where('priority', '>=', 4);
-    }
-
-    public function scopeOverdue($query)
-    {
-        return $query->where('success_date', '<', now())
-                    ->whereNotIn('status', [DeliverableStatus::COMPLETED]);
-    }
-
-    public function scopeDueToday($query)
-    {
-        return $query->whereDate('success_date', today())
-                    ->whereNotIn('status', [DeliverableStatus::COMPLETED]);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->whereIn('status', [
-            DeliverableStatus::IN_PROGRESS,
-            DeliverableStatus::REVIEW,
-            DeliverableStatus::REVISION_REQUESTED,
-        ]);
-    }
-
-    public function scopeOrdered($query, string $direction = 'asc')
-    {
-        return $query->orderBy('order_column', $direction);
     }
 
     // RoleableEntity Implementation
@@ -430,5 +358,83 @@ final class Deliverable extends Model implements
     public function getTenantId(): string|int
     {
         return $this->tenant_id;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'format_specifications' => DeliverableSpecificationCast::class,
+            'settings' => 'array',
+            'start_date' => 'datetime',
+            'success_date' => 'datetime',
+            'completed_at' => 'datetime',
+            'format' => DeliverableFormat::class,
+            'status' => DeliverableStatus::class,
+        ];
+    }
+
+    // Scopes
+    #[Scope]
+    protected function forUser($query, string|User $user)
+    {
+        $userId = $user instanceof User ? $user->id : $user;
+
+        return $query->whereHas('participants', function ($q) use ($userId) {
+            $q->where('model_id', $userId);
+        });
+    }
+
+    #[Scope]
+    protected function byStatus($query, DeliverableStatus $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    #[Scope]
+    protected function byFormat($query, DeliverableFormat $format)
+    {
+        return $query->where('format', $format);
+    }
+
+    #[Scope]
+    protected function byPriority($query, int $priority)
+    {
+        return $query->where('priority', $priority);
+    }
+
+    #[Scope]
+    protected function highPriority($query)
+    {
+        return $query->where('priority', '>=', 4);
+    }
+
+    #[Scope]
+    protected function overdue($query)
+    {
+        return $query->where('success_date', '<', now())
+            ->whereNotIn('status', [DeliverableStatus::COMPLETED]);
+    }
+
+    #[Scope]
+    protected function dueToday($query)
+    {
+        return $query->whereDate('success_date', today())
+            ->whereNotIn('status', [DeliverableStatus::COMPLETED]);
+    }
+
+    #[Scope]
+    protected function active($query)
+    {
+        return $query->whereIn('status', [
+            DeliverableStatus::IN_PROGRESS,
+            DeliverableStatus::REVIEW,
+            DeliverableStatus::REVISION_REQUESTED,
+        ]);
+    }
+
+    #[Scope]
+    protected function ordered($query, string $direction = 'asc')
+    {
+        return $query->orderBy('order_column', $direction);
     }
 }

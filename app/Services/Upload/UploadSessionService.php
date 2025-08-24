@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Upload;
 
 use App\Services\Directory\DirectoryManager;
-use App\Services\Upload\ChunkAssembler;
 use App\Services\Upload\Contracts\ProgressStrategyContract;
 use App\Services\Upload\DTOs\ChunkData;
 use App\Services\Upload\DTOs\ProgressData;
@@ -326,12 +325,8 @@ final class UploadSessionService
 
     private function validateConfiguration(): void
     {
-        if (! $this->tenantId) {
-            throw new InvalidArgumentException('Tenant ID is required. Call forTenant($tenantId) first.');
-        }
+        throw_unless($this->tenantId, new InvalidArgumentException('Tenant ID is required. Call forTenant($tenantId) first.'));
 
-        if (! $this->storeDirectory) {
-            throw new InvalidArgumentException('Storage directory is required. Call storeIn($directory) first.');
-        }
+        throw_unless($this->storeDirectory, new InvalidArgumentException('Storage directory is required. Call storeIn($directory) first.'));
     }
 }

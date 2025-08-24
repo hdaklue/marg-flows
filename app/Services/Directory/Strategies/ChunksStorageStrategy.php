@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
 /**
- * Chunks Storage Strategy
- * 
+ * Chunks Storage Strategy.
+ *
  * Handles temporary chunk storage for file upload sessions with tenant isolation.
  * Each upload session creates its own subdirectory for chunk management.
  */
@@ -23,7 +23,7 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
     /**
      * Constructor receives the hashed tenant base directory from DirectoryManager.
      *
-     * @param string $tenantBaseDirectory The MD5-hashed tenant base directory
+     * @param  string  $tenantBaseDirectory  The MD5-hashed tenant base directory
      */
     public function __construct(private readonly string $tenantBaseDirectory) {}
 
@@ -56,7 +56,6 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
         return $this->buildDirectory();
     }
 
-
     public function deleteSession(): bool
     {
         $this->validateConfiguration();
@@ -67,9 +66,7 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
 
     private function buildDirectory(): string
     {
-        if (! $this->sessionId) {
-            throw new Exception('Cannot build directory path: Session ID is required. Call forSession($sessionId) first.');
-        }
+        throw_unless($this->sessionId, new Exception('Cannot build directory path: Session ID is required. Call forSession($sessionId) first.'));
 
         return "{$this->tenantBaseDirectory}/chunks/{$this->sessionId}";
     }
@@ -84,8 +81,6 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
 
     private function validateConfiguration(): void
     {
-        if (! $this->sessionId) {
-            throw new Exception('Session ID is required. Call forSession($sessionId) first.');
-        }
+        throw_unless($this->sessionId, new Exception('Session ID is required. Call forSession($sessionId) first.'));
     }
 }

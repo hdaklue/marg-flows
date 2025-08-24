@@ -29,13 +29,9 @@ final class VideoSpecification
         private readonly ?int $frameRate = null,
 
     ) {
-        if ($this->durationMin < 0 || $this->durationMax < 0) {
-            throw new InvalidArgumentException('Duration values must be non-negative.');
-        }
+        throw_if($this->durationMin < 0 || $this->durationMax < 0, new InvalidArgumentException('Duration values must be non-negative.'));
 
-        if ($this->durationMin > $this->durationMax) {
-            throw new InvalidArgumentException('Minimum duration cannot exceed maximum duration.');
-        }
+        throw_if($this->durationMin > $this->durationMax, new InvalidArgumentException('Minimum duration cannot exceed maximum duration.'));
     }
 
     public static function fromConfig(array $config): self

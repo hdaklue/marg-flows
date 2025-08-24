@@ -7,7 +7,7 @@ namespace App\Models\Feedbacks;
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
-use Carbon\Carbon;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,7 +37,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property array<array-key, mixed>|null $selection_data Text selection data (start, end, selected text)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read Model|\Eloquent $feedbackable
+ * @property-read Model|Eloquent $feedbackable
+ *
  * @method static Builder<static>|DocumentFeedback byElementTypes(array $elementTypes)
  * @method static Builder<static>|DocumentFeedback forBlock(string $blockId)
  * @method static Builder<static>|DocumentFeedback forBlockType(string $elementType)
@@ -65,6 +66,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static Builder<static>|DocumentFeedback whereUrgency($value)
  * @method static Builder<static>|DocumentFeedback withTextSelection()
  * @method static Builder<static>|DocumentFeedback withoutTextSelection()
+ *
  * @mixin \Eloquent
  */
 final class DocumentFeedback extends Model
@@ -146,45 +148,6 @@ final class DocumentFeedback extends Model
     public function acknowledgments(): MorphMany
     {
         return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
-    }
-
-    // Type-specific scopes
-    public function scopeForBlock(Builder $query, string $blockId): Builder
-    {
-        return $query->where('block_id', $blockId);
-    }
-
-    public function scopeForBlockType(Builder $query, string $elementType): Builder
-    {
-        return $query->where('element_type', $elementType);
-    }
-
-    public function scopeWithTextSelection(Builder $query): Builder
-    {
-        return $query->whereNotNull('selection_data')
-            ->whereJsonLength('selection_data', '>', 0);
-    }
-
-    public function scopeWithoutTextSelection(Builder $query): Builder
-    {
-        return $query->whereNull('selection_data')
-            ->orWhereJsonLength('selection_data', '=', 0);
-    }
-
-    public function scopeForBlocks(Builder $query, array $blockIds): Builder
-    {
-        return $query->whereIn('block_id', $blockIds);
-    }
-
-    public function scopeByElementTypes(Builder $query, array $elementTypes): Builder
-    {
-        return $query->whereIn('element_type', $elementTypes);
-    }
-
-    public function scopeOrderByBlockPosition(Builder $query): Builder
-    {
-        // Assuming position_data contains block index or order
-        return $query->orderByRaw('JSON_EXTRACT(position_data, "$.blockIndex") ASC');
     }
 
     // Type-specific methods
@@ -356,6 +319,45 @@ final class DocumentFeedback extends Model
     public function getModelType(): string
     {
         return $this->getFeedbackType();
+    }
+
+    // Type-specific scopes
+    protected function scopeForBlock(Builder $query, string $blockId): Builder
+    {
+        return $query->where('block_id', $blockId);
+    }
+
+    protected function scopeForBlockType(Builder $query, string $elementType): Builder
+    {
+        return $query->where('element_type', $elementType);
+    }
+
+    protected function scopeWithTextSelection(Builder $query): Builder
+    {
+        return $query->whereNotNull('selection_data')
+            ->whereJsonLength('selection_data', '>', 0);
+    }
+
+    protected function scopeWithoutTextSelection(Builder $query): Builder
+    {
+        return $query->whereNull('selection_data')
+            ->orWhereJsonLength('selection_data', '=', 0);
+    }
+
+    protected function scopeForBlocks(Builder $query, array $blockIds): Builder
+    {
+        return $query->whereIn('block_id', $blockIds);
+    }
+
+    protected function scopeByElementTypes(Builder $query, array $elementTypes): Builder
+    {
+        return $query->whereIn('element_type', $elementTypes);
+    }
+
+    protected function scopeOrderByBlockPosition(Builder $query): Builder
+    {
+        // Assuming position_data contains block index or order
+        return $query->orderByRaw('JSON_EXTRACT(position_data, "$.blockIndex") ASC');
     }
 
     protected function casts(): array

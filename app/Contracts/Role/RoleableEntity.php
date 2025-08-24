@@ -8,7 +8,6 @@ use App\Collections\Role\ParticipantsCollection;
 use App\Enums\Role\RoleEnum;
 use App\Models\Role;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -45,11 +44,6 @@ interface RoleableEntity extends Arrayable
      * Remove a participant's specific role(s).
      */
     public function removeParticipant(AssignableEntity $user, ?bool $silently = false);
-
-    /**
-     * Get scoped participants query builder for additional filtering.
-     */
-    public function scopeForParticipant(Builder $query, AssignableEntity $member): Builder;
 
     /**
      * Get the morph class (used in roleable_type).

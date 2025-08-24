@@ -9,7 +9,7 @@ use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
 use App\Models\Acknowledgement;
 use App\Models\User;
-use Carbon\Carbon;
+use Eloquent;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -39,8 +39,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read User|null $creator
- * @property-read Model|\Eloquent $feedbackable
+ * @property-read Model|Eloquent $feedbackable
  * @property-read User|null $resolver
+ *
  * @method static Builder<static>|GeneralFeedback byCategories(array $categories)
  * @method static Builder<static>|GeneralFeedback byCategory(string $category)
  * @method static Builder<static>|GeneralFeedback hasMetadataKey(string $key)
@@ -66,6 +67,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static Builder<static>|GeneralFeedback withCustomData()
  * @method static Builder<static>|GeneralFeedback withMetadata()
  * @method static Builder<static>|GeneralFeedback withoutMetadata()
+ *
  * @mixin \Eloquent
  */
 final class GeneralFeedback extends Model
@@ -110,47 +112,6 @@ final class GeneralFeedback extends Model
     public function acknowledgments(): MorphMany
     {
         return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
-    }
-
-    #[Scope]
-    public function byCategory(Builder $query, string $category): Builder
-    {
-        return $query->where('feedback_category', $category);
-    }
-
-    #[Scope]
-    public function byCategories(Builder $query, array $categories): Builder
-    {
-        return $query->whereIn('feedback_category', $categories);
-    }
-
-    public function scopeWithMetadata(Builder $query): Builder
-    {
-        return $query->whereNotNull('metadata')
-            ->whereJsonLength('metadata', '>', 0);
-    }
-
-    public function scopeWithoutMetadata(Builder $query): Builder
-    {
-        return $query->whereNull('metadata')
-            ->orWhereJsonLength('metadata', '=', 0);
-    }
-
-    public function scopeWithCustomData(Builder $query): Builder
-    {
-        return $query->whereNotNull('custom_data')
-            ->whereJsonLength('custom_data', '>', 0);
-    }
-
-    public function scopeHasMetadataKey(Builder $query, string $key): Builder
-    {
-        return $query->whereJsonContains('metadata->' . $key, true)
-            ->orWhereNotNull('metadata->' . $key);
-    }
-
-    public function scopeMetadataEquals(Builder $query, string $key, mixed $value): Builder
-    {
-        return $query->whereJson('metadata->' . $key, $value);
     }
 
     // Type-specific methods
@@ -311,6 +272,47 @@ final class GeneralFeedback extends Model
     public function getModelType(): string
     {
         return $this->getFeedbackType();
+    }
+
+    #[Scope]
+    protected function byCategory(Builder $query, string $category): Builder
+    {
+        return $query->where('feedback_category', $category);
+    }
+
+    #[Scope]
+    protected function byCategories(Builder $query, array $categories): Builder
+    {
+        return $query->whereIn('feedback_category', $categories);
+    }
+
+    protected function scopeWithMetadata(Builder $query): Builder
+    {
+        return $query->whereNotNull('metadata')
+            ->whereJsonLength('metadata', '>', 0);
+    }
+
+    protected function scopeWithoutMetadata(Builder $query): Builder
+    {
+        return $query->whereNull('metadata')
+            ->orWhereJsonLength('metadata', '=', 0);
+    }
+
+    protected function scopeWithCustomData(Builder $query): Builder
+    {
+        return $query->whereNotNull('custom_data')
+            ->whereJsonLength('custom_data', '>', 0);
+    }
+
+    protected function scopeHasMetadataKey(Builder $query, string $key): Builder
+    {
+        return $query->whereJsonContains('metadata->' . $key, true)
+            ->orWhereNotNull('metadata->' . $key);
+    }
+
+    protected function scopeMetadataEquals(Builder $query, string $key, mixed $value): Builder
+    {
+        return $query->whereJson('metadata->' . $key, $value);
     }
 
     protected function casts(): array

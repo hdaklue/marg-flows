@@ -72,6 +72,6 @@ final class ParticipantsCollection extends Collection
             $userId = [$userId];
         }
 
-        return $this->filter(fn ($item) => ! in_array($item->model->getKey(), $userId));
+        return $this->reject(fn ($item): bool => in_array($item->model->getKey(), $userId));
     }
 }

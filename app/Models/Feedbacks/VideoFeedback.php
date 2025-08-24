@@ -9,7 +9,7 @@ use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
 use App\Models\Acknowledgement;
 use App\Models\User;
-use Carbon\Carbon;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -43,8 +43,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read User|null $creator
- * @property-read Model|\Eloquent $feedbackable
+ * @property-read Model|Eloquent $feedbackable
  * @property-read User|null $resolver
+ *
  * @method static Builder<static>|VideoFeedback atCoordinates(int $x, int $y, int $tolerance = 20)
  * @method static Builder<static>|VideoFeedback atTimestamp(float $timestamp, float $tolerance = 0.1)
  * @method static Builder<static>|VideoFeedback frameComments()
@@ -73,6 +74,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static Builder<static>|VideoFeedback whereUrgency($value)
  * @method static Builder<static>|VideoFeedback whereXCoordinate($value)
  * @method static Builder<static>|VideoFeedback whereYCoordinate($value)
+ *
  * @mixin \Eloquent
  */
 final class VideoFeedback extends Model
@@ -144,71 +146,6 @@ final class VideoFeedback extends Model
     public function acknowledgments(): MorphMany
     {
         return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
-    }
-
-    // Type-specific scopes
-    public function scopeFrameComments(Builder $query): Builder
-    {
-        return $query->where('feedback_type', 'frame');
-    }
-
-    public function scopeRegionComments(Builder $query): Builder
-    {
-        return $query->where('feedback_type', 'region');
-    }
-
-    public function scopeAtTimestamp(Builder $query, float $timestamp, float $tolerance = 0.1): Builder
-    {
-        return $query->where(function ($q) use ($timestamp, $tolerance) {
-            // Frame comments: exact timestamp match (with tolerance)
-            $q->where(function ($frameQuery) use ($timestamp, $tolerance) {
-                $frameQuery->where('feedback_type', 'frame')
-                    ->whereBetween('timestamp', [$timestamp - $tolerance, $timestamp + $tolerance]);
-            })
-            // Region comments: timestamp falls within range
-                ->orWhere(function ($regionQuery) use ($timestamp) {
-                    $regionQuery->where('feedback_type', 'region')
-                        ->where('start_time', '<=', $timestamp)
-                        ->where('end_time', '>=', $timestamp);
-                });
-        });
-    }
-
-    public function scopeInTimeRange(Builder $query, float $startTime, float $endTime): Builder
-    {
-        return $query->where(function ($q) use ($startTime, $endTime) {
-            // Frame comments within the range
-            $q->where(function ($frameQuery) use ($startTime, $endTime) {
-                $frameQuery->where('feedback_type', 'frame')
-                    ->whereBetween('timestamp', [$startTime, $endTime]);
-            })
-            // Region comments that overlap with the range
-                ->orWhere(function ($regionQuery) use ($startTime, $endTime) {
-                    $regionQuery->where('feedback_type', 'region')
-                        ->where(function ($overlap) use ($startTime, $endTime) {
-                            $overlap->whereBetween('start_time', [$startTime, $endTime])
-                                ->orWhereBetween('end_time', [$startTime, $endTime])
-                                ->orWhere(function ($contains) use ($startTime, $endTime) {
-                                    $contains->where('start_time', '<=', $startTime)
-                                        ->where('end_time', '>=', $endTime);
-                                });
-                        });
-                });
-        });
-    }
-
-    public function scopeAtCoordinates(Builder $query, int $x, int $y, int $tolerance = 20): Builder
-    {
-        return $query->whereBetween('x_coordinate', [$x - $tolerance, $x + $tolerance])
-            ->whereBetween('y_coordinate', [$y - $tolerance, $y + $tolerance]);
-    }
-
-    public function scopeNearCoordinates(Builder $query, int $x, int $y, int $radius = 50): Builder
-    {
-        return $query->whereRaw(
-            'SQRT(POW(x_coordinate - ?, 2) + POW(y_coordinate - ?, 2)) <= ?',
-            [$x, $y, $radius],
-        );
     }
 
     // Type-specific methods
@@ -286,6 +223,71 @@ final class VideoFeedback extends Model
     public function getModelType(): string
     {
         return $this->getFeedbackType();
+    }
+
+    // Type-specific scopes
+    protected function scopeFrameComments(Builder $query): Builder
+    {
+        return $query->where('feedback_type', 'frame');
+    }
+
+    protected function scopeRegionComments(Builder $query): Builder
+    {
+        return $query->where('feedback_type', 'region');
+    }
+
+    protected function scopeAtTimestamp(Builder $query, float $timestamp, float $tolerance = 0.1): Builder
+    {
+        return $query->where(function ($q) use ($timestamp, $tolerance) {
+            // Frame comments: exact timestamp match (with tolerance)
+            $q->where(function ($frameQuery) use ($timestamp, $tolerance) {
+                $frameQuery->where('feedback_type', 'frame')
+                    ->whereBetween('timestamp', [$timestamp - $tolerance, $timestamp + $tolerance]);
+            })
+            // Region comments: timestamp falls within range
+                ->orWhere(function ($regionQuery) use ($timestamp) {
+                    $regionQuery->where('feedback_type', 'region')
+                        ->where('start_time', '<=', $timestamp)
+                        ->where('end_time', '>=', $timestamp);
+                });
+        });
+    }
+
+    protected function scopeInTimeRange(Builder $query, float $startTime, float $endTime): Builder
+    {
+        return $query->where(function ($q) use ($startTime, $endTime) {
+            // Frame comments within the range
+            $q->where(function ($frameQuery) use ($startTime, $endTime) {
+                $frameQuery->where('feedback_type', 'frame')
+                    ->whereBetween('timestamp', [$startTime, $endTime]);
+            })
+            // Region comments that overlap with the range
+                ->orWhere(function ($regionQuery) use ($startTime, $endTime) {
+                    $regionQuery->where('feedback_type', 'region')
+                        ->where(function ($overlap) use ($startTime, $endTime) {
+                            $overlap->whereBetween('start_time', [$startTime, $endTime])
+                                ->orWhereBetween('end_time', [$startTime, $endTime])
+                                ->orWhere(function ($contains) use ($startTime, $endTime) {
+                                    $contains->where('start_time', '<=', $startTime)
+                                        ->where('end_time', '>=', $endTime);
+                                });
+                        });
+                });
+        });
+    }
+
+    protected function scopeAtCoordinates(Builder $query, int $x, int $y, int $tolerance = 20): Builder
+    {
+        return $query->whereBetween('x_coordinate', [$x - $tolerance, $x + $tolerance])
+            ->whereBetween('y_coordinate', [$y - $tolerance, $y + $tolerance]);
+    }
+
+    protected function scopeNearCoordinates(Builder $query, int $x, int $y, int $radius = 50): Builder
+    {
+        return $query->whereRaw(
+            'SQRT(POW(x_coordinate - ?, 2) + POW(y_coordinate - ?, 2)) <= ?',
+            [$x, $y, $radius],
+        );
     }
 
     protected function casts(): array

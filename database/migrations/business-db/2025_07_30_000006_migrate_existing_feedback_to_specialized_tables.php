@@ -7,7 +7,6 @@ use App\Models\DesignFeedback;
 use App\Models\DocumentFeedback;
 use App\Models\GeneralFeedback;
 use App\Models\VideoFeedback;
-use App\ValueObjects\FeedbackMetadata;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -41,11 +40,12 @@ return new class extends Migration
         foreach ($existingFeedback as $feedback) {
             try {
                 $metadata = json_decode($feedback->metadata, true);
-                
-                if (!$metadata || !isset($metadata['type'])) {
+
+                if (! $metadata || ! isset($metadata['type'])) {
                     // No metadata or type - move to general feedback
                     $this->migrateToGeneralFeedback($feedback, null);
                     $migrationStats['general']++;
+
                     continue;
                 }
 
@@ -114,7 +114,7 @@ return new class extends Migration
     {
         // Restore the original feedbacks table if it was renamed
         $tables = DB::connection('business_db')->select("SHOW TABLES LIKE 'feedbacks_legacy'");
-        if (!empty($tables)) {
+        if (! empty($tables)) {
             DB::connection('business_db')->statement('RENAME TABLE feedbacks_legacy TO feedbacks');
         }
 
@@ -159,9 +159,7 @@ return new class extends Migration
         $data = $metadata['data'] ?? [];
 
         // Ensure we have required time data
-        if (empty($data['start_time']) || empty($data['end_time'])) {
-            throw new \InvalidArgumentException('Audio feedback requires start_time and end_time');
-        }
+        throw_if(empty($data['start_time']) || empty($data['end_time']), new \InvalidArgumentException('Audio feedback requires start_time and end_time'));
 
         AudioFeedback::create([
             'id' => $feedback->id,
@@ -189,9 +187,7 @@ return new class extends Migration
         $data = $metadata['data'] ?? [];
 
         // Ensure we have required block_id
-        if (empty($data['block_id'])) {
-            throw new \InvalidArgumentException('Document feedback requires block_id');
-        }
+        throw_if(empty($data['block_id']), new \InvalidArgumentException('Document feedback requires block_id'));
 
         DocumentFeedback::create([
             'id' => $feedback->id,
@@ -219,9 +215,7 @@ return new class extends Migration
         $data = $metadata['data'] ?? [];
 
         // Ensure we have required coordinates
-        if (!isset($data['x_coordinate']) || !isset($data['y_coordinate'])) {
-            throw new \InvalidArgumentException('Design feedback requires x_coordinate and y_coordinate');
-        }
+        throw_if(! isset($data['x_coordinate']) || ! isset($data['y_coordinate']), new \InvalidArgumentException('Design feedback requires x_coordinate and y_coordinate'));
 
         DesignFeedback::create([
             'id' => $feedback->id,
@@ -253,12 +247,12 @@ return new class extends Migration
         $category = null;
         if ($metadata) {
             $category = $metadata['category'] ?? $metadata['type'] ?? null;
-            
+
             // Clean up category to match enum values
-            if ($category && !in_array($category, [
-                'ui', 'ux', 'content', 'functionality', 'performance', 
-                'accessibility', 'security', 'bug', 'feature', 
-                'improvement', 'question', 'other'
+            if ($category && ! in_array($category, [
+                'ui', 'ux', 'content', 'functionality', 'performance',
+                'accessibility', 'security', 'bug', 'feature',
+                'improvement', 'question', 'other',
             ])) {
                 $category = 'other';
             }
