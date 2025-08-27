@@ -15,6 +15,7 @@ enum NamingPattern: string
     case Timestamped = '{basename}_{timestamp}.{ext}';
     case Simple = '{basename}_converted.{ext}';
     case Resolution = '{basename}_{resolution_name}.{ext}';
+    case ResolutionLabel = '{basename}_{resolution_label}.{ext}';
     case AspectRatio = '{basename}_{aspect_ratio}.{ext}';
 
     public function getDescription(): string
@@ -28,7 +29,8 @@ enum NamingPattern: string
             self::Detailed => 'Detailed with bitrate (e.g., video_1920x1080_high_5000kbps.mp4)',
             self::Timestamped => 'Filename with timestamp (e.g., video_20241224123456.mp4)',
             self::Simple => 'Simple converted suffix (e.g., video_converted.mp4)',
-            self::Resolution => 'Filename with resolution name (e.g., video_Full_HD.mp4)',
+            self::Resolution => 'Filename with resolution name (e.g., video_full_hd.mp4)',
+            self::ResolutionLabel => 'Filename with resolution label (e.g., video_720p.mp4)',
             self::AspectRatio => 'Filename with aspect ratio (e.g., video_16-9.mp4)',
         };
     }

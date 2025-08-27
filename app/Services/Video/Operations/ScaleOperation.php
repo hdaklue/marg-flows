@@ -43,4 +43,38 @@ class ScaleOperation extends AbstractVideoOperation
     {
         return 'scale';
     }
+
+    public function applyToBuilder(MediaExporter $builder): MediaExporter
+    {
+        $finalDimension = $this->strategy->apply($this->currentDimension, $this->currentDimension);
+        
+        $this->metadata['final_dimension'] = $finalDimension->toArray();
+        
+        return $builder->addFilter(function ($filters) use ($finalDimension) {
+            $filters->resize(
+                new \FFMpeg\Coordinate\Dimension(
+                    $finalDimension->getWidth(),
+                    $finalDimension->getHeight()
+                ),
+                'fit'
+            );
+        });
+    }
+
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
+    {
+        $finalDimension = $this->strategy->apply($this->currentDimension, $this->currentDimension);
+        
+        $this->metadata['final_dimension'] = $finalDimension->toArray();
+        
+        return $media->addFilter(function ($filters) use ($finalDimension) {
+            $filters->resize(
+                new \FFMpeg\Coordinate\Dimension(
+                    $finalDimension->getWidth(),
+                    $finalDimension->getHeight()
+                ),
+                'fit'
+            );
+        });
+    }
 }

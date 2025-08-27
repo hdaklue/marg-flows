@@ -6,6 +6,7 @@ namespace App\Services\Video\Facades;
 
 use App\Services\Video\Services\ResolutionManager as ResolutionManagerService;
 use App\Services\Video\Enums\NamingPattern;
+use App\Services\Video\Video;
 
 /**
  * @method static ResolutionManagerService from(string $sourcePath, string $disk = 'local', ?\App\Services\Video\Enums\NamingPattern $namingStrategy = null)

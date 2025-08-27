@@ -38,4 +38,20 @@ class TrimOperation extends AbstractVideoOperation
     {
         return $this->start >= 0 && $this->duration > 0;
     }
+
+    public function applyToBuilder(MediaExporter $builder): MediaExporter
+    {
+        return $builder->addFilter(function ($filters) {
+            $filters->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($this->start), 
+                          \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration));
+        });
+    }
+
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
+    {
+        return $media->addFilter(function ($filters) {
+            $filters->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($this->start), 
+                          \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration));
+        });
+    }
 }

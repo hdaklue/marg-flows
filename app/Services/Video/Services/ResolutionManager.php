@@ -7,26 +7,96 @@ namespace App\Services\Video\Services;
 use App\Services\Video\Contracts\ConversionContract;
 use App\Services\Video\DTOs\ResolutionData;
 use App\Services\Video\Enums\NamingPattern;
-use App\Services\Video\Facades\Video;
+use App\Services\Video\Video;
+use App\Services\Video\Resolutions\Resolution1080p;
+use App\Services\Video\Resolutions\Resolution1440p;
+use App\Services\Video\Resolutions\Resolution144p;
+use App\Services\Video\Resolutions\Resolution240p;
+use App\Services\Video\Resolutions\Resolution2K;
+use App\Services\Video\Resolutions\Resolution360p;
+use App\Services\Video\Resolutions\Resolution480p;
+use App\Services\Video\Resolutions\Resolution4K;
+use App\Services\Video\Resolutions\Resolution720p;
+use Closure;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
-class ResolutionManager
+final class ResolutionManager
 {
-    private string $sourcePath;
-    private string $disk;
     private ?NamingPattern $namingStrategy;
-    private array $conversions = [];
-    private array $results = [];
-    private ?\Closure $onStepSuccess = null;
-    private ?\Closure $onStepFailure = null;
 
-    public function __construct(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null)
+    private array $conversions = [];
+
+    private array $results = [];
+
+    private ?Closure $onStepSuccess = null;
+
+    private ?Closure $onStepFailure = null;
+
+    public function __construct(
+        private readonly Video $video,
+        ?NamingPattern $namingStrategy = null
+    ) {
+        $this->namingStrategy = $namingStrategy ?? NamingPattern::ResolutionLabel;
+    }
+
+    /**
+     * Static factory method for fluent API.
+     */
+    public static function from(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null): self
     {
-        $this->sourcePath = $sourcePath;
-        $this->disk = $disk;
-        $this->namingStrategy = $namingStrategy ?? NamingPattern::Conversion;
+        $video = Video::fromPath($sourcePath, $disk);
+        return new self($video, $namingStrategy);
+    }
+
+    /**
+     * Static factory method from disk.
+     */
+    public static function fromDisk(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null): self
+    {
+        $video = Video::fromPath($sourcePath, $disk);
+        return new self($video, $namingStrategy);
+    }
+
+    /**
+     * Static factory method from Video object.
+     */
+    public static function fromVideo(Video $video, ?NamingPattern $namingStrategy = null): self
+    {
+        return new self($video, $namingStrategy);
+    }
+
+    /**
+     * Add 1440p conversion to the batch.
+     */
+    public function to1440p(): self
+    {
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution1440p($orientation);
+
+        return $this;
+    }
+
+    /**
+     * Add 2K conversion to the batch.
+     */
+    public function to2K(): self
+    {
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution2K($orientation);
+
+        return $this;
+    }
+
+    /**
+     * Add 4K conversion to the batch.
+     */
+    public function to4K(): self
+    {
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution4K($orientation);
+
+        return $this;
     }
 
     /**
@@ -34,7 +104,9 @@ class ResolutionManager
      */
     public function to1080p(): self
     {
-        $this->conversions[] = app()->make(\App\Services\Video\Conversions\Conversion1080p::class);
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution1080p($orientation);
+
         return $this;
     }
 
@@ -43,7 +115,9 @@ class ResolutionManager
      */
     public function to720p(): self
     {
-        $this->conversions[] = app()->make(\App\Services\Video\Conversions\Conversion720p::class);
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution720p($orientation);
+
         return $this;
     }
 
@@ -52,7 +126,9 @@ class ResolutionManager
      */
     public function to480p(): self
     {
-        $this->conversions[] = app()->make(\App\Services\Video\Conversions\Conversion480p::class);
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution480p($orientation);
+
         return $this;
     }
 
@@ -61,7 +137,9 @@ class ResolutionManager
      */
     public function to360p(): self
     {
-        $this->conversions[] = app()->make(\App\Services\Video\Conversions\Conversion360p::class);
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution360p($orientation);
+
         return $this;
     }
 
@@ -70,7 +148,9 @@ class ResolutionManager
      */
     public function to240p(): self
     {
-        $this->conversions[] = app()->make(\App\Services\Video\Conversions\Conversion240p::class);
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution240p($orientation);
+
         return $this;
     }
 
@@ -79,7 +159,9 @@ class ResolutionManager
      */
     public function to144p(): self
     {
-        $this->conversions[] = app()->make(\App\Services\Video\Conversions\Conversion144p::class);
+        $orientation = $this->video->getOrientation();
+        $this->conversions[] = new Resolution144p($orientation);
+
         return $this;
     }
 
@@ -89,6 +171,7 @@ class ResolutionManager
     public function addConversion(ConversionContract $conversion): self
     {
         $this->conversions[] = $conversion;
+
         return $this;
     }
 
@@ -98,11 +181,12 @@ class ResolutionManager
     public function addConversions(array $conversions): self
     {
         foreach ($conversions as $conversion) {
-            if (!$conversion instanceof ConversionContract) {
+            if (! $conversion instanceof ConversionContract) {
                 throw new InvalidArgumentException('All conversions must implement ConversionContract');
             }
             $this->addConversion($conversion);
         }
+
         return $this;
     }
 
@@ -112,34 +196,37 @@ class ResolutionManager
     public function withNamingStrategy(NamingPattern $strategy): self
     {
         $this->namingStrategy = $strategy;
+
         return $this;
     }
 
     /**
      * Set closure to execute on each successful conversion step.
-     * 
-     * @param \Closure(ResolutionData): void $closure
+     *
+     * @param  Closure(ResolutionData): void  $closure
      */
-    public function onStepSuccess(\Closure $closure): self
+    public function onStepSuccess(Closure $closure): self
     {
         $this->onStepSuccess = $closure;
+
         return $this;
     }
 
     /**
      * Set closure to execute on each failed conversion step.
-     * 
-     * @param \Closure(ResolutionData): void $closure
+     *
+     * @param  Closure(ResolutionData): void  $closure
      */
-    public function onStepFailure(\Closure $closure): self
+    public function onStepFailure(Closure $closure): self
     {
         $this->onStepFailure = $closure;
+
         return $this;
     }
 
     /**
      * Execute all conversions and save to specified directory.
-     * 
+     *
      * @return ResolutionData[]
      */
     public function saveTo(string $directory = ''): array
@@ -148,47 +235,21 @@ class ResolutionManager
 
         $this->results = [];
         // If no directory specified, use same directory as source file
-        // But avoid './' prefix for files in current directory
-        $sourceDir = File::dirname($this->sourcePath);
-        $outputDirectory = $directory ?: ($sourceDir === '.' ? '' : $sourceDir);
+        $outputDirectory = $directory ?: $this->video->getDirectory();
+
+        $exporter = ResolutionExporter::start($this->video->getPath(), $this->video->getDisk());
 
         foreach ($this->conversions as $conversion) {
-            try {
-                $outputPath = $this->generateOutputPath($outputDirectory, $conversion);
-                
-                Video::fromDisk($this->sourcePath, $this->disk)
-                    ->convert($conversion)
-                    ->save($outputPath);
-                
-                // Get file size using Storage disk path
-                $fullStoragePath = Storage::disk($this->disk)->path($outputPath);
-                $fileSize = File::exists($fullStoragePath) ? File::size($fullStoragePath) : 0;
-                
-                $step = ResolutionData::success(
-                    get_class($conversion),
-                    $outputPath,
-                    $fileSize
-                );
-                
-                $this->results[] = $step;
-                
-                // Execute success callback with current step DTO
-                if ($this->onStepSuccess) {
-                    ($this->onStepSuccess)($step);
-                }
-                
-            } catch (\Exception $e) {
-                $step = ResolutionData::failed(
-                    get_class($conversion),
-                    $e->getMessage()
-                );
-                
-                $this->results[] = $step;
-                
-                // Execute failure callback with current step DTO
-                if ($this->onStepFailure) {
-                    ($this->onStepFailure)($step);
-                }
+            $outputPath = $this->generateOutputPath($outputDirectory, $conversion);
+            $result = $exporter->export($conversion, $outputPath);
+
+            $this->results[] = $result;
+
+            // Execute success/failure callbacks
+            if ($result->isSuccessful() && $this->onStepSuccess) {
+                ($this->onStepSuccess)($result);
+            } elseif ($result->isFailed() && $this->onStepFailure) {
+                ($this->onStepFailure)($result);
             }
         }
 
@@ -201,28 +262,6 @@ class ResolutionManager
     public function convert(string $directory = ''): array
     {
         return $this->saveTo($directory);
-    }
-
-    /**
-     * Execute conversions and return only successful results.
-     * 
-     * @return ResolutionData[]
-     */
-    public function saveSuccessful(string $directory = ''): array
-    {
-        $results = $this->saveTo($directory);
-        return array_filter($results, fn(ResolutionData $result) => $result->isSuccessful());
-    }
-
-    /**
-     * Execute conversions and return only failed results.
-     * 
-     * @return ResolutionData[]
-     */
-    public function saveFailed(string $directory = ''): array
-    {
-        $results = $this->saveTo($directory);
-        return array_filter($results, fn(ResolutionData $result) => $result->isFailed());
     }
 
     /**
@@ -248,7 +287,16 @@ class ResolutionManager
     {
         $this->conversions = [];
         $this->results = [];
+
         return $this;
+    }
+
+    /**
+     * Get video object.
+     */
+    public function getVideo(): Video
+    {
+        return $this->video;
     }
 
     /**
@@ -256,7 +304,7 @@ class ResolutionManager
      */
     public function getSourcePath(): string
     {
-        return $this->sourcePath;
+        return $this->video->getPath();
     }
 
     /**
@@ -265,30 +313,13 @@ class ResolutionManager
     private function generateOutputPath(string $directory, ConversionContract $conversion): string
     {
         $namingService = new VideoNamingService($this->namingStrategy);
-        $filename = $namingService->generateName($this->sourcePath, $conversion);
-        
+        $filename = $namingService->generateName($this->video, $conversion);
+
         // If directory is empty (current directory), return just filename
         if (empty($directory)) {
             return $filename;
         }
-        
+
         return rtrim($directory, '/') . '/' . $filename;
-    }
-
-
-    /**
-     * Static factory method for fluent API.
-     */
-    public static function from(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null): self
-    {
-        return new self($sourcePath, $disk, $namingStrategy);
-    }
-
-    /**
-     * Static factory method from disk.
-     */
-    public static function fromDisk(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null): self
-    {
-        return new self($sourcePath, $disk, $namingStrategy);
     }
 }

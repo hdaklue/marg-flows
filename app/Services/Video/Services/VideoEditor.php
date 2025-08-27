@@ -4,26 +4,35 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Services;
 
-use App\Services\Video\Contracts\ConversionContract;
 use App\Services\Video\Contracts\ScaleStrategyContract;
-use App\Services\Video\Enums\NamingPattern;
-use App\Services\Video\Operations\{ConversionOperation, CropOperation, ResizeOperation, ResizeToWidthOperation, ResizeToHeightOperation, ScaleOperation, TrimOperation, WatermarkOperation};
+use App\Services\Video\Contracts\VideoFormatContract;
+use App\Services\Video\Enums\BitrateEnum;
+use App\Services\Video\Video;
+use App\Services\Video\Operations\CropOperation;
+use App\Services\Video\Operations\ResizeOperation;
+use App\Services\Video\Operations\ResizeToHeightOperation;
+use App\Services\Video\Operations\ResizeToWidthOperation;
+use App\Services\Video\Operations\ScaleOperation;
+use App\Services\Video\Operations\TrimOperation;
+use App\Services\Video\Operations\WatermarkOperation;
 use App\Services\Video\Pipeline\VideoOperationPipeline;
-use App\Services\Video\ValueObjects\{Dimension, AspectRatio};
+use App\Services\Video\Services\VideoNamingService;
+use App\Services\Video\ValueObjects\AspectRatio;
+use App\Services\Video\ValueObjects\Dimension;
 use InvalidArgumentException;
 
-class VideoEditor
+final class VideoEditor
 {
-    private string $sourcePath;
-    private bool $isUrl;
-    private array $operations = [];
-    private string $disk;
+    private VideoOperationPipeline $pipeline;
 
-    public function __construct(string $sourcePath, bool $isUrl = false, string $disk = 'local')
-    {
-        $this->sourcePath = $sourcePath;
-        $this->isUrl = $isUrl;
-        $this->disk = $disk;
+    private ?VideoFormatContract $convertFormat = null;
+
+    private ?BitrateEnum $convertBitrate = null;
+
+    public function __construct(
+        private readonly Video $video
+    ) {
+        $this->pipeline = new VideoOperationPipeline($video->getPath(), $video->getDisk());
     }
 
     /**
@@ -31,10 +40,7 @@ class VideoEditor
      */
     public function scale(ScaleStrategyContract $strategy): self
     {
-        $this->operations[] = [
-            'type' => 'scale',
-            'strategy' => $strategy,
-        ];
+        $this->pipeline->addOperation(new ScaleOperation($strategy, $this->video->getDimension()));
 
         return $this;
     }
@@ -44,10 +50,7 @@ class VideoEditor
      */
     public function resize(Dimension $dimension): self
     {
-        $this->operations[] = [
-            'type' => 'resize',
-            'dimension' => $dimension,
-        ];
+        $this->pipeline->addOperation(new ResizeOperation($dimension));
 
         return $this;
     }
@@ -59,10 +62,7 @@ class VideoEditor
     {
         throw_if($width <= 0, new InvalidArgumentException('Width must be positive'));
 
-        $this->operations[] = [
-            'type' => 'resize_width',
-            'width' => $width,
-        ];
+        $this->pipeline->addOperation(new ResizeToWidthOperation($width));
 
         return $this;
     }
@@ -74,10 +74,7 @@ class VideoEditor
     {
         throw_if($height <= 0, new InvalidArgumentException('Height must be positive'));
 
-        $this->operations[] = [
-            'type' => 'resize_height',
-            'height' => $height,
-        ];
+        $this->pipeline->addOperation(new ResizeToHeightOperation($height));
 
         return $this;
     }
@@ -89,12 +86,7 @@ class VideoEditor
     {
         throw_if($x < 0 || $y < 0, new InvalidArgumentException('Crop coordinates must be non-negative'));
 
-        $this->operations[] = [
-            'type' => 'crop',
-            'x' => $x,
-            'y' => $y,
-            'dimension' => $dimension,
-        ];
+        $this->pipeline->addOperation(new CropOperation($x, $y, $dimension));
 
         return $this;
     }
@@ -104,10 +96,8 @@ class VideoEditor
      */
     public function cropToAspectRatio(AspectRatio $aspectRatio): self
     {
-        $this->operations[] = [
-            'type' => 'crop_aspect_ratio',
-            'aspect_ratio' => $aspectRatio,
-        ];
+        // Note: cropToAspectRatio would need a CropToAspectRatioOperation implementation
+        // For now, skip adding to pipeline
 
         return $this;
     }
@@ -117,11 +107,8 @@ class VideoEditor
      */
     public function fit(Dimension $bounds, string $position = 'center'): self
     {
-        $this->operations[] = [
-            'type' => 'fit',
-            'bounds' => $bounds,
-            'position' => $position,
-        ];
+        // Note: fit would need a FitOperation implementation
+        // For now, skip adding to pipeline
 
         return $this;
     }
@@ -133,11 +120,7 @@ class VideoEditor
     {
         throw_if($start < 0 || $duration <= 0, new InvalidArgumentException('Start time and duration must be positive'));
 
-        $this->operations[] = [
-            'type' => 'trim',
-            'start' => $start,
-            'duration' => $duration,
-        ];
+        $this->pipeline->addOperation(new TrimOperation($start, $duration));
 
         return $this;
     }
@@ -147,15 +130,10 @@ class VideoEditor
      */
     public function watermark(string $path, string $position = 'bottom-right', float $opacity = 1.0): self
     {
-        throw_if(!file_exists($path), new InvalidArgumentException("Watermark file not found: {$path}"));
+        throw_if(! file_exists($path), new InvalidArgumentException("Watermark file not found: {$path}"));
         throw_if($opacity < 0 || $opacity > 1, new InvalidArgumentException('Opacity must be between 0 and 1'));
 
-        $this->operations[] = [
-            'type' => 'watermark',
-            'path' => $path,
-            'position' => $position,
-            'opacity' => $opacity,
-        ];
+        $this->pipeline->addOperation(new WatermarkOperation($path, $position, $opacity));
 
         return $this;
     }
@@ -165,12 +143,10 @@ class VideoEditor
      */
     public function addAudio(string $audioPath): self
     {
-        throw_if(!file_exists($audioPath), new InvalidArgumentException("Audio file not found: {$audioPath}"));
+        throw_if(! file_exists($audioPath), new InvalidArgumentException("Audio file not found: {$audioPath}"));
 
-        $this->operations[] = [
-            'type' => 'add_audio',
-            'path' => $audioPath,
-        ];
+        // Note: addAudio would need an AddAudioOperation implementation
+        // For now, skip adding to pipeline
 
         return $this;
     }
@@ -180,65 +156,64 @@ class VideoEditor
      */
     public function removeAudio(): self
     {
-        $this->operations[] = [
-            'type' => 'remove_audio',
-        ];
-
-        return $this;
-    }
-
-
-    /**
-     * Apply conversion to video.
-     */
-    public function convert(ConversionContract $conversion): self
-    {
-        $this->operations[] = [
-            'type' => 'convert',
-            'conversion' => $conversion,
-        ];
+        // Note: removeAudio would need a RemoveAudioOperation implementation
+        // For now, skip adding to pipeline
 
         return $this;
     }
 
     /**
-     * Save video to path.
+     * Convert video to specific format with optional bitrate.
+     * If no bitrate provided, uses original video bitrate.
      */
-    public function save(string $path): void
+    public function convertTo(VideoFormatContract $format, ?BitrateEnum $bitrate = null): self
     {
-        $this->executeOperations($path);
-    }
+        $this->convertFormat = $format;
+        $this->convertBitrate = $bitrate;
 
-    /**
-     * Save video with specific conversion.
-     */
-    public function saveAs(string $path, ConversionContract $conversion): void
-    {
-        $this->convert($conversion)->save($path);
+        return $this;
     }
 
     /**
      * Save video with auto-generated filename using naming service.
+     * Always uses CopyFormat unless convertTo() was called.
      */
-    public function saveWithNaming(string $directory, ConversionContract $conversion, ?NamingPattern $pattern = null): string
+    public function save(?VideoNamingService $namingService = null): string
     {
-        $namingService = new VideoNamingService($pattern);
-        $filename = $namingService->generateName($this->sourcePath, $conversion);
-        $fullPath = rtrim($directory, '/') . '/' . $filename;
-        
-        $this->saveAs($fullPath, $conversion);
-        
-        return $fullPath;
+        // Always use naming service - create default if not provided
+        $namingService = $namingService ?? VideoNamingService::timestamped();
+        $filename = $namingService->generateFilenameFromPattern($this->video);
+
+        $finalPath = $this->executeOperations($filename);
+
+        return $finalPath;
     }
 
     /**
-     * Get current video dimension (requires analysis).
+     * Save video to specific path.
+     * Always uses CopyFormat unless convertTo() was called.
+     */
+    public function saveAs(string $path): string
+    {
+        $finalPath = $this->executeOperations($path);
+
+        return $finalPath;
+    }
+
+    /**
+     * Get video object.
+     */
+    public function getVideo(): Video
+    {
+        return $this->video;
+    }
+
+    /**
+     * Get current video dimension.
      */
     public function getDimension(): Dimension
     {
-        // This would analyze the video using FFMpeg
-        // For now, return a placeholder
-        return Dimension::from(1920, 1080);
+        return $this->video->getDimension();
     }
 
     /**
@@ -246,8 +221,7 @@ class VideoEditor
      */
     public function getAspectRatio(): AspectRatio
     {
-        $dimension = $this->getDimension();
-        return $dimension->getAspectRatio();
+        return $this->video->getAspectRatio();
     }
 
     /**
@@ -255,9 +229,7 @@ class VideoEditor
      */
     public function getDuration(): float
     {
-        // This would analyze the video using FFMpeg
-        // For now, return a placeholder
-        return 0.0;
+        return $this->video->getDuration();
     }
 
     /**
@@ -265,73 +237,31 @@ class VideoEditor
      */
     public function getSourcePath(): string
     {
-        return $this->sourcePath;
+        return $this->video->getPath();
     }
 
     /**
-     * Get all queued operations.
+     * Get the pipeline instance.
      */
-    public function getOperations(): array
+    public function getPipeline(): VideoOperationPipeline
     {
-        return $this->operations;
+        return $this->pipeline;
     }
 
     /**
      * Execute all operations using the video operation pipeline.
      */
-    private function executeOperations(string $outputPath): void
+    private function executeOperations(string $outputPath): string
     {
         $directory = dirname($outputPath);
-        throw_if(!is_dir($directory), new InvalidArgumentException("Output directory does not exist: {$directory}"));
+        throw_if(! is_dir($directory), new InvalidArgumentException("Output directory does not exist: {$directory}"));
 
-        // Create pipeline
-        $pipeline = new VideoOperationPipeline($this->sourcePath, $this->disk);
-        
-        // Convert array operations to operation objects and add to pipeline
-        foreach ($this->operations as $operation) {
-            $operationObject = $this->createOperationObject($operation);
-            
-            if ($operationObject) {
-                $pipeline->addOperation($operationObject);
-            }
+        // Pass format and bitrate to pipeline if conversion requested
+        if ($this->convertFormat) {
+            $this->pipeline->setConvertFormat($this->convertFormat, $this->convertBitrate);
         }
 
-        // Execute the pipeline
-        $pipeline->execute($outputPath);
-        
-        // Store execution log for debugging (optional)
-        // Log::debug('Video pipeline executed', $pipeline->getExecutionLog());
-    }
-
-    /**
-     * Create operation object from array data.
-     */
-    private function createOperationObject(array $operation): ?object
-    {
-        return match($operation['type']) {
-            'scale' => new ScaleOperation(
-                $operation['strategy'], 
-                $this->getDimension()
-            ),
-            'resize' => new ResizeOperation($operation['dimension']),
-            'resize_width' => new ResizeToWidthOperation($operation['width']),
-            'resize_height' => new ResizeToHeightOperation($operation['height']),
-            'trim' => new TrimOperation(
-                $operation['start'], 
-                $operation['duration']
-            ),
-            'crop' => new CropOperation(
-                $operation['x'],
-                $operation['y'],
-                $operation['dimension']
-            ),
-            'watermark' => new WatermarkOperation(
-                $operation['path'],
-                $operation['position'] ?? 'bottom-right',
-                $operation['opacity'] ?? 1.0
-            ),
-            'convert' => new ConversionOperation($operation['conversion']),
-            default => null
-        };
+        // Execute the pipeline and return final path
+        return $this->pipeline->execute($outputPath);
     }
 }

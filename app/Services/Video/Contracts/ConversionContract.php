@@ -36,4 +36,9 @@ interface ConversionContract
     public function calculateFinalDimension(Dimension $currentDimension): ?Dimension;
     
     public function wouldScaleUp(Dimension $currentDimension): bool;
+    
+    /**
+     * Get the filter for this conversion.
+     */
+    public function getFilter();
 }

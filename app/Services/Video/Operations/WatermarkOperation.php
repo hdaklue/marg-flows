@@ -49,4 +49,24 @@ class WatermarkOperation extends AbstractVideoOperation
 
         return true;
     }
+
+    public function applyToBuilder(MediaExporter $builder): MediaExporter
+    {
+        return $builder->addFilter(function ($filters) {
+            $filters->watermark($this->watermarkPath, [
+                'position' => $this->position,
+                'opacity' => $this->opacity
+            ]);
+        });
+    }
+
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
+    {
+        return $media->addFilter(function ($filters) {
+            $filters->watermark($this->watermarkPath, [
+                'position' => $this->position,
+                'opacity' => $this->opacity
+            ]);
+        });
+    }
 }

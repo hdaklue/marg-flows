@@ -2,94 +2,94 @@
 
 declare(strict_types=1);
 
-use App\Services\Video\Conversions\Conversion144p;
-use App\Services\Video\Conversions\Conversion240p;
-use App\Services\Video\Conversions\Conversion360p;
-use App\Services\Video\Conversions\Conversion480p;
-use App\Services\Video\Conversions\Conversion720p;
-use App\Services\Video\Conversions\Conversion1080p;
-use App\Services\Video\Conversions\Conversion1440p;
-use App\Services\Video\Conversions\Conversion4K;
+use App\Services\Video\Resolutions\Resolution144p;
+use App\Services\Video\Resolutions\Resolution240p;
+use App\Services\Video\Resolutions\Resolution360p;
+use App\Services\Video\Resolutions\Resolution480p;
+use App\Services\Video\Resolutions\Resolution720p;
+use App\Services\Video\Resolutions\Resolution1080p;
+use App\Services\Video\Resolutions\Resolution1440p;
+use App\Services\Video\Resolutions\Resolution4K;
 use App\Services\Video\ValueObjects\Dimension;
 
 it('creates 144p conversion with correct dimensions', function () {
-    $conversion = new Conversion144p();
+    $resolution = new Resolution144p();
     
-    expect($conversion->getDimension())->toBeInstanceOf(Dimension::class)
-        ->and($conversion->getDimension()->getWidth())->toBe(256)
-        ->and($conversion->getDimension()->getHeight())->toBe(144)
-        ->and($conversion->getName())->toBe('144p')
-        ->and($conversion->getTargetBitrate())->toBe(200);
+    expect($resolution->getDimension())->toBeInstanceOf(Dimension::class)
+        ->and($resolution->getDimension()->getWidth())->toBe(256)
+        ->and($resolution->getDimension()->getHeight())->toBe(144)
+        ->and($resolution->getName())->toBe('144p')
+        ->and($resolution->getTargetBitrate())->toBe(150);
 });
 
 it('creates 240p conversion with correct dimensions', function () {
-    $conversion = new Conversion240p();
+    $resolution = new Resolution240p();
     
-    expect($conversion->getDimension())->toBeInstanceOf(Dimension::class)
-        ->and($conversion->getDimension()->getWidth())->toBe(426)
-        ->and($conversion->getDimension()->getHeight())->toBe(240)
-        ->and($conversion->getName())->toBe('240p')
-        ->and($conversion->getTargetBitrate())->toBe(400);
+    expect($resolution->getDimension())->toBeInstanceOf(Dimension::class)
+        ->and($resolution->getDimension()->getWidth())->toBe(426)
+        ->and($resolution->getDimension()->getHeight())->toBe(240)
+        ->and($resolution->getName())->toBe('240p')
+        ->and($resolution->getTargetBitrate())->toBe(300);
 });
 
 it('creates 360p conversion with correct dimensions', function () {
-    $conversion = new Conversion360p();
+    $resolution = new Resolution360p();
     
-    expect($conversion->getDimension())->toBeInstanceOf(Dimension::class)
-        ->and($conversion->getDimension()->getWidth())->toBe(640)
-        ->and($conversion->getDimension()->getHeight())->toBe(360)
-        ->and($conversion->getName())->toBe('360p')
-        ->and($conversion->getTargetBitrate())->toBe(800);
+    expect($resolution->getDimension())->toBeInstanceOf(Dimension::class)
+        ->and($resolution->getDimension()->getWidth())->toBe(640)
+        ->and($resolution->getDimension()->getHeight())->toBe(360)
+        ->and($resolution->getName())->toBe('360p')
+        ->and($resolution->getTargetBitrate())->toBe(600);
 });
 
 it('creates 480p conversion with correct dimensions', function () {
-    $conversion = new Conversion480p();
+    $resolution = new Resolution480p();
     
-    expect($conversion->getDimension())->toBeInstanceOf(Dimension::class)
-        ->and($conversion->getDimension()->getWidth())->toBe(854)
-        ->and($conversion->getDimension()->getHeight())->toBe(480)
-        ->and($conversion->getName())->toBe('480p')
-        ->and($conversion->getTargetBitrate())->toBe(1200);
+    expect($resolution->getDimension())->toBeInstanceOf(Dimension::class)
+        ->and($resolution->getDimension()->getWidth())->toBe(854)
+        ->and($resolution->getDimension()->getHeight())->toBe(480)
+        ->and($resolution->getName())->toBe('480p')
+        ->and($resolution->getTargetBitrate())->toBe(1000);
 });
 
 it('creates 720p conversion with correct dimensions', function () {
-    $conversion = new Conversion720p();
+    $resolution = new Resolution720p();
     
-    expect($conversion->getDimension())->toBeInstanceOf(Dimension::class)
-        ->and($conversion->getDimension()->getWidth())->toBe(1280)
-        ->and($conversion->getDimension()->getHeight())->toBe(720)
-        ->and($conversion->getName())->toBe('720p')
-        ->and($conversion->getTargetBitrate())->toBe(2500);
+    expect($resolution->getDimension())->toBeInstanceOf(Dimension::class)
+        ->and($resolution->getDimension()->getWidth())->toBe(1280)
+        ->and($resolution->getDimension()->getHeight())->toBe(720)
+        ->and($resolution->getName())->toBe('720p')
+        ->and($resolution->getTargetBitrate())->toBe(2500);
 });
 
 it('creates 1080p conversion with correct dimensions', function () {
-    $conversion = new Conversion1080p();
+    $resolution = new Resolution1080p();
     
-    expect($conversion->getDimension())->toBeInstanceOf(Dimension::class)
-        ->and($conversion->getDimension()->getWidth())->toBe(1920)
-        ->and($conversion->getDimension()->getHeight())->toBe(1080)
-        ->and($conversion->getName())->toBe('1080p')
-        ->and($conversion->getTargetBitrate())->toBe(5000);
+    expect($resolution->getDimension())->toBeInstanceOf(Dimension::class)
+        ->and($resolution->getDimension()->getWidth())->toBe(1920)
+        ->and($resolution->getDimension()->getHeight())->toBe(1080)
+        ->and($resolution->getName())->toBe('1080p')
+        ->and($resolution->getTargetBitrate())->toBe(4500);
 });
 
 it('creates 1440p conversion with correct dimensions', function () {
-    $conversion = new Conversion1440p();
+    $resolution = new Resolution1440p();
     
-    expect($conversion->getDimension())->toBeInstanceOf(Dimension::class)
-        ->and($conversion->getDimension()->getWidth())->toBe(2560)
-        ->and($conversion->getDimension()->getHeight())->toBe(1440)
-        ->and($conversion->getName())->toBe('1440p')
-        ->and($conversion->getTargetBitrate())->toBe(6000);
+    expect($resolution->getDimension())->toBeInstanceOf(Dimension::class)
+        ->and($resolution->getDimension()->getWidth())->toBe(2560)
+        ->and($resolution->getDimension()->getHeight())->toBe(1440)
+        ->and($resolution->getName())->toBe('1440p')
+        ->and($resolution->getTargetBitrate())->toBe(8000);
 });
 
 it('creates 4K conversion with correct dimensions', function () {
-    $conversion = new Conversion4K();
+    $resolution = new Resolution4K();
     
-    expect($conversion->getDimension())->toBeInstanceOf(Dimension::class)
-        ->and($conversion->getDimension()->getWidth())->toBe(3840)
-        ->and($conversion->getDimension()->getHeight())->toBe(2160)
-        ->and($conversion->getName())->toBe('4K')
-        ->and($conversion->getTargetBitrate())->toBe(8000);
+    expect($resolution->getDimension())->toBeInstanceOf(Dimension::class)
+        ->and($resolution->getDimension()->getWidth())->toBe(3840)
+        ->and($resolution->getDimension()->getHeight())->toBe(2160)
+        ->and($resolution->getName())->toBe('4K')
+        ->and($resolution->getTargetBitrate())->toBe(15000);
 });
 
 it('conversion respects scale-up constraints', function () {
@@ -97,53 +97,53 @@ it('conversion respects scale-up constraints', function () {
     $sourceDimension = new Dimension(640, 360); // 360p source
     
     // Try to apply 4K conversion (should be constrained)
-    $conversion4K = new Conversion4K();
-    $targetDimension = $conversion4K->getDimension();
+    $resolution4K = new Resolution4K();
+    $targetDimension = $resolution4K->getDimension();
     
     // The conversion dimension should be valid
     expect($targetDimension->getWidth())->toBe(3840)
         ->and($targetDimension->getHeight())->toBe(2160);
     
     // Check if it would scale up
-    expect($conversion4K->wouldScaleUp($sourceDimension))->toBeTrue();
+    expect($resolution4K->wouldScaleUp($sourceDimension))->toBeTrue();
 });
 
 it('all conversions have proper bitrate settings', function () {
-    $conversions = [
-        new Conversion144p(),
-        new Conversion240p(),
-        new Conversion360p(),
-        new Conversion480p(),
-        new Conversion720p(),
-        new Conversion1080p(),
-        new Conversion1440p(),
-        new Conversion4K(),
+    $resolutions = [
+        new Resolution144p(),
+        new Resolution240p(),
+        new Resolution360p(),
+        new Resolution480p(),
+        new Resolution720p(),
+        new Resolution1080p(),
+        new Resolution1440p(),
+        new Resolution4K(),
     ];
     
-    foreach ($conversions as $conversion) {
-        expect($conversion->getTargetBitrate())->toBeInt()
-            ->and($conversion->getTargetBitrate())->toBeGreaterThan(0)
-            ->and($conversion->getName())->toBeString()
-            ->and($conversion->getDimension())->toBeInstanceOf(Dimension::class);
+    foreach ($resolutions as $resolution) {
+        expect($resolution->getTargetBitrate())->toBeInt()
+            ->and($resolution->getTargetBitrate())->toBeGreaterThan(0)
+            ->and($resolution->getName())->toBeString()
+            ->and($resolution->getDimension())->toBeInstanceOf(Dimension::class);
     }
 });
 
 it('conversions are properly ordered by quality', function () {
-    $conversions = [
-        new Conversion144p(),
-        new Conversion240p(), 
-        new Conversion360p(),
-        new Conversion480p(),
-        new Conversion720p(),
-        new Conversion1080p(),
-        new Conversion1440p(),
-        new Conversion4K(),
+    $resolutions = [
+        new Resolution144p(),
+        new Resolution240p(), 
+        new Resolution360p(),
+        new Resolution480p(),
+        new Resolution720p(),
+        new Resolution1080p(),
+        new Resolution1440p(),
+        new Resolution4K(),
     ];
     
     $previousPixelCount = 0;
     
-    foreach ($conversions as $conversion) {
-        $currentPixelCount = $conversion->getDimension()->getPixelCount();
+    foreach ($resolutions as $resolution) {
+        $currentPixelCount = $resolution->getDimension()->getPixelCount();
         
         expect($currentPixelCount)->toBeGreaterThan($previousPixelCount);
         

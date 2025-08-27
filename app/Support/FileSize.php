@@ -38,7 +38,24 @@ final class FileSize
         return $bytes / 1024;
     }
 
-    public static function format(int $bytes, int $precision = 2): string
+    // Decimal (base 10) conversions - matches Finder/Windows Explorer
+    public static function toMBDecimal(int $bytes): float
+    {
+        return $bytes / (1000 * 1000);
+    }
+
+    public static function toGBDecimal(int $bytes): float
+    {
+        return $bytes / (1000 * 1000 * 1000);
+
+    }
+
+    public static function toKBDecimal(int $bytes): float
+    {
+        return $bytes / 1000;
+    }
+
+    public static function format(int $bytes, int $precision = 3): string
     {
         return Number::fileSize($bytes, $precision);
 

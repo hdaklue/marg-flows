@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Contracts;
 
+use Closure;
 use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
+use ProtoneMedia\LaravelFFMpeg\MediaOpener;
 
 interface VideoOperationContract
 {
     /**
      * Handle the video operation (Laravel Pipeline pattern).
      */
-    public function handle(MediaExporter $mediaExporter, \Closure $next): MediaExporter;
+    public function handle(MediaExporter $mediaExporter, Closure $next): MediaExporter;
 
     /**
      * Execute the video operation.
@@ -42,4 +44,14 @@ interface VideoOperationContract
      * Set the execution index (order) for this operation.
      */
     public function setExecutionIndex(int $index): void;
+
+    /**
+     * Apply operation to Laravel FFMpeg builder pattern.
+     */
+    public function applyToBuilder(MediaExporter $builder): MediaExporter;
+
+    /**
+     * Apply filters to Media instance before export.
+     */
+    public function applyToMedia(MediaOpener $media);
 }

@@ -125,6 +125,14 @@ final class AspectRatio implements JsonSerializable
     }
 
     /**
+     * Create an AspectRatio instance from a Dimension object.
+     */
+    public static function fromDimension(Dimension $dimension, float $tolerance = self::DEFAULT_TOLERANCE): ?self
+    {
+        return self::from($dimension->getWidth(), $dimension->getHeight(), $tolerance);
+    }
+
+    /**
      * Create an AspectRatio instance from a ratio string (e.g., "16:9").
      */
     public static function fromString(string $ratioString): ?self
@@ -263,6 +271,74 @@ final class AspectRatio implements JsonSerializable
             'width' => $maxWidth,
             'height' => $height,
         ];
+    }
+
+    /**
+     * Get all available resolutions for this aspect ratio.
+     *
+     * @return array<array{name: string, width: int, height: int, label: string, ratio: float}>
+     */
+    public function getResolutions(): array
+    {
+        return array_filter(self::$resolutions, fn($res) => 
+            abs($res['ratio'] - $this->ratio) < self::DEFAULT_TOLERANCE
+        );
+    }
+
+    /**
+     * Get all video resolutions grouped by aspect ratio.
+     *
+     * @return array<string, array<array{name: string, width: int, height: int, label: string, ratio: float}>>
+     */
+    public static function getAllResolutions(): array
+    {
+        $grouped = [];
+        foreach (self::$resolutions as $resolution) {
+            $label = $resolution['label'];
+            if (!isset($grouped[$label])) {
+                $grouped[$label] = [];
+            }
+            $grouped[$label][] = $resolution;
+        }
+        return $grouped;
+    }
+
+    /**
+     * Get standard video quality resolutions (HD, Full HD, 4K, etc.).
+     *
+     * @return array<array{name: string, width: int, height: int, label: string, ratio: float}>
+     */
+    public static function getStandardVideoResolutions(): array
+    {
+        return array_filter(self::$resolutions, fn($res) => 
+            in_array($res['name'], ['HD', 'Full HD', 'QHD', '4K UHD', '8K UHD'])
+        );
+    }
+
+    /**
+     * Get mobile/social media optimized resolutions.
+     *
+     * @return array<array{name: string, width: int, height: int, label: string, ratio: float}>
+     */
+    public static function getMobileResolutions(): array
+    {
+        return array_filter(self::$resolutions, fn($res) => 
+            str_contains($res['name'], 'Mobile') || 
+            str_contains($res['name'], 'Instagram')
+        );
+    }
+
+    /**
+     * Get cinema/film industry resolutions.
+     *
+     * @return array<array{name: string, width: int, height: int, label: string, ratio: float}>
+     */
+    public static function getCinemaResolutions(): array
+    {
+        return array_filter(self::$resolutions, fn($res) => 
+            str_contains($res['name'], 'Cinema') || 
+            str_contains($res['name'], 'DCI')
+        );
     }
 
     /**

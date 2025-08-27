@@ -38,4 +38,24 @@ class ResizeToWidthOperation extends AbstractVideoOperation
     {
         return $this->width > 0;
     }
+
+    public function applyToBuilder(MediaExporter $builder): MediaExporter
+    {
+        return $builder->addFilter(function ($filters) {
+            $filters->resize(
+                new \FFMpeg\Coordinate\Dimension($this->width, -1), // -1 means maintain aspect ratio
+                'fit'
+            );
+        });
+    }
+
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
+    {
+        return $media->addFilter(function ($filters) {
+            $filters->resize(
+                new \FFMpeg\Coordinate\Dimension($this->width, -1), // -1 means maintain aspect ratio
+                'fit'
+            );
+        });
+    }
 }

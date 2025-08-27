@@ -38,4 +38,24 @@ class ResizeToHeightOperation extends AbstractVideoOperation
     {
         return $this->height > 0;
     }
+
+    public function applyToBuilder(MediaExporter $builder): MediaExporter
+    {
+        return $builder->addFilter(function ($filters) {
+            $filters->resize(
+                new \FFMpeg\Coordinate\Dimension(-1, $this->height), // -1 means maintain aspect ratio
+                'fit'
+            );
+        });
+    }
+
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
+    {
+        return $media->addFilter(function ($filters) {
+            $filters->resize(
+                new \FFMpeg\Coordinate\Dimension(-1, $this->height), // -1 means maintain aspect ratio
+                'fit'
+            );
+        });
+    }
 }

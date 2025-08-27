@@ -1,6 +1,6 @@
 # 🎬 Video Service
 
-A comprehensive Laravel video processing ecosystem with fluent APIs, batch conversions, tenant isolation, and real-time monitoring.
+A comprehensive Laravel video processing ecosystem with fluent APIs, batch conversions, resolution-specific constraints, and real-time monitoring.
 
 ## 🚀 Quick Start
 
@@ -21,13 +21,14 @@ $results = ResolutionManager::fromDisk('input.mp4')
 
 1. **Video Service** - Individual video operations (resize, crop, trim, watermark)
 2. **ResolutionManager** - Batch conversion orchestrator with event callbacks  
-3. **DirectoryManager** - Tenant/document-specific storage paths
-4. **VideoStorageStrategy** - File storage with variants (original, conversions, thumbnails)
+3. **Resolution Classes** - Smart resolution definitions with constraints and quality tiers
+4. **DirectoryManager** - Tenant/document-specific storage paths
+5. **VideoStorageStrategy** - File storage with variants (original, conversions, thumbnails)
 
 ### Service Flow
 ```
-DirectoryManager → ResolutionManager → Video Service → FFmpeg Processing
-     (paths)           (orchestration)      (operations)        (encoding)
+DirectoryManager → ResolutionManager → Resolution Classes → Video Operations → FFmpeg Processing
+     (paths)           (orchestration)      (constraints)        (operations)        (encoding)
 ```
 
 ## 📚 API Reference
@@ -39,13 +40,16 @@ DirectoryManager → ResolutionManager → Video Service → FFmpeg Processing
 ResolutionManager::fromDisk(string $path, string $disk = 'local')
 ResolutionManager::from(string $path, string $disk = 'local')
 
-// Conversion Methods  
-->to1080p()     // Full HD (1920x1080)
-->to720p()      // HD (1280x720)
-->to480p()      // SD (854x480)
-->to360p()      // Low (640x360)
-->to240p()      // Very low (426x240)
-->to144p()      // Minimal (256x144)
+// Resolution Methods  
+->to1080p()     // Full HD (1920x1080) - High quality, 4.5Mbps
+->to720p()      // HD (1280x720) - High quality, 2.5Mbps
+->to480p()      // SD (854x480) - Medium quality, 1Mbps
+->to360p()      // Low (640x360) - Low quality, 600kbps
+->to240p()      // Very low (426x240) - Low quality, 300kbps
+->to144p()      // Minimal (256x144) - Ultra low, 150kbps
+->to1440p()     // QHD (2560x1440) - Very high, 8Mbps
+->to2K()        // 2K (2048x1080) - Very high, 12Mbps
+->to4K()        // 4K UHD (3840x2160) - Ultra high, 15Mbps
 ->addConversion(ConversionContract $conversion)
 
 // Configuration
@@ -70,7 +74,7 @@ Video::fromDisk('input.mp4')
     ->crop(0, 0, Dimension::from(800, 600))
     ->trim(10.0, 30.0)
     ->watermark('/path/to/logo.png', 'bottom-right', 0.8)
-    ->convert(new Conversion720p())
+    ->convert(new Resolution720p())
     ->save('output.mp4');
 ```
 
@@ -173,20 +177,36 @@ foreach ($results as $result) {
 }
 ```
 
-### Custom Conversions
+### Custom Resolutions
 
 ```php
-class Custom4KConversion implements ConversionContract
+use App\Services\Video\Resolutions\AbstractResolution;
+use App\Services\Video\ValueObjects\Dimension;
+use App\Services\Video\Enums\BitrateEnum;
+
+class CustomUltraHDResolution extends AbstractResolution
 {
-    public function getFormat(): string { return 'mp4'; }
-    public function getQuality(): string { return 'ultra'; }
-    public function getDimension(): Dimension { return Dimension::from(3840, 2160); }
-    public function getTargetBitrate(): int { return 15000; }
-    // ... implement remaining methods
+    protected string $format = 'mp4';
+    protected string $quality = 'ultra';
+    protected ?Dimension $dimension;
+    protected ?int $bitrate;
+
+    public function __construct()
+    {
+        $this->dimension = Dimension::from(3840, 2160);
+        $this->bitrate = BitrateEnum::ULTRA_HIGH_4K->value;
+        $this->allowScaleUp = false;
+        $this->maintainAspectRatio = true;
+    }
+
+    public function getFilter()
+    {
+        return ['scale', $this->dimension->getWidth() . ':' . $this->dimension->getHeight()];
+    }
 }
 
 ResolutionManager::fromDisk('input.mp4')
-    ->addConversion(new Custom4KConversion())
+    ->addConversion(new CustomUltraHDResolution())
     ->to1080p()
     ->saveTo();
 ```
@@ -197,7 +217,7 @@ Each conversion returns a structured DTO:
 
 ```php
 ResolutionData {
-    +conversion: "App\Services\Video\Conversions\Conversion720p"
+    +conversion: "App\Services\Video\Resolutions\Resolution720p"
     +output_path: "sample-video_720p.mp4"
     +status: "success"
     +size: 13123998
@@ -208,7 +228,7 @@ ResolutionData {
 $result->isSuccessful()         // bool
 $result->isFailed()             // bool  
 $result->getHumanFileSize()     // "12.5 MB"
-$result->getConversionName()    // "Conversion720p"
+$result->getConversionName()    // "Resolution720p"
 $result->getOutputFilename()    // "sample-video_720p.mp4"
 $result->toJson()               // JSON string
 ```
@@ -222,20 +242,81 @@ use App\Services\Video\Enums\NamingPattern;
 
 NamingPattern::Quality       // video_720p.mp4
 NamingPattern::Dimension     // video_1280x720.mp4
-NamingPattern::Conversion    // video_Conversion720p.mp4
-NamingPattern::Detailed      // video_1280x720_high_5000kbps.mp4
+NamingPattern::Conversion    // video_Resolution720p.mp4
+NamingPattern::Detailed      // video_1280x720_high_2500kbps.mp4
 NamingPattern::Timestamped   // video_20241224123456.mp4
 NamingPattern::Simple        // video_converted.mp4
+```
+
+### Bitrate Management
+
+```php
+use App\Services\Video\Enums\BitrateEnum;
+
+// Predefined quality tiers
+BitrateEnum::ULTRA_LOW_144P->getKbps()    // 150 kbps
+BitrateEnum::HIGH_720P->getMbps()         // 2.5 Mbps
+BitrateEnum::ULTRA_HIGH_4K->getKbps()     // 15000 kbps
+
+// Dynamic bitrate calculation
+$bitrate = BitrateEnum::calculateForPixels(1920 * 1080, 'high'); // ~4500 kbps
+$enum = BitrateEnum::forResolution('1080p'); // BitrateEnum::HIGH_1080P
 ```
 
 ### Available Scaling Strategies
 
 ```php
-use App\Services\Video\Strategies\{ScaleProportional, ScaleToFit, ScaleToFill};
+use App\Services\Video\Strategies\{ScaleProportional, ScaleToFit, ScaleToFill, ScaleExact, ScaleToAspectRatio};
 
-new ScaleProportional(0.5)    // 50% of original size
-new ScaleToFit($maxDimension) // Fit within bounds
-new ScaleToFill($dimension)   // Fill dimensions (may crop)
+new ScaleProportional(0.5)              // 50% of original size
+new ScaleToFit($maxDimension)           // Fit within bounds
+new ScaleToFill($dimension)             // Fill dimensions (may crop)
+new ScaleExact(1920, 1080)              // Exact dimensions (no aspect ratio preservation)
+new ScaleToAspectRatio(AspectRatio::WIDESCREEN_16_9)  // Scale to specific aspect ratio
+```
+
+### Resolution Constraints
+
+Each resolution class includes smart constraints to prevent unnecessary processing:
+
+```php
+// Resolution classes automatically handle constraints
+$resolution720p = new Resolution720p();
+
+// Check constraints before processing
+if ($resolution720p->wouldScaleUp($currentDimension)) {
+    logger()->info('720p conversion would scale up - consider skipping');
+}
+
+// Get calculated final dimensions considering constraints
+$finalDimension = $resolution720p->calculateFinalDimension($currentDimension);
+
+// Access constraint settings
+$constraints = $resolution720p->getConstraints();
+// [
+//     'allow_scale_up' => false,
+//     'max_dimension' => ['width' => 1920, 'height' => 1080],
+//     'min_dimension' => null,
+//     'maintain_aspect_ratio' => true
+// ]
+```
+
+### Resolution Value Object
+
+The new Resolution value object provides orientation-aware dimensions:
+
+```php
+use App\Services\Video\ValueObjects\Resolution;
+
+// Create resolutions for different orientations
+$landscape144p = Resolution::create144p('landscape'); // 256x144
+$portrait144p = Resolution::create144p('portrait');   // 144x256
+$square144p = Resolution::create144p('square');       // 144x144
+
+// Access properties
+$landscape144p->dimension->getWidth();    // 256
+$landscape144p->bitrate->getKbps();       // 150
+$landscape144p->qualityTier;              // 'ultra_low'
 ```
 
 ## 🚨 Error Handling
@@ -438,25 +519,31 @@ test('resolution data dto provides correct helper methods', function() {
 app/Services/Video/
 ├── README.md                           # This file
 ├── VideoServiceProvider.php            # Service registration
-├── Contracts/                          # Interface definitions
+├── Video.php                          # Main video service class
+├── VideoManager.php                   # Legacy video manager
+├── config/                            # Configuration files
+│   └── video.php
+├── Examples/                          # Usage examples
+│   └── VideoProcessingExample.php
+├── Contracts/                         # Interface definitions
 │   ├── ConversionContract.php
 │   ├── ScaleStrategyContract.php
 │   └── VideoOperationContract.php
-├── DTOs/                               # Data transfer objects
+├── DTOs/                              # Data transfer objects
 │   └── ResolutionData.php
-├── Enums/                              # Enumeration classes
-│   └── NamingPattern.php
-├── Facades/                            # Laravel facades
+├── Enums/                             # Enumeration classes
+│   ├── NamingPattern.php
+│   └── BitrateEnum.php
+├── Facades/                           # Laravel facades
 │   ├── Video.php
 │   └── ResolutionManager.php
-├── Services/                           # Core service classes
+├── Services/                          # Core service classes
 │   ├── VideoEditor.php
-│   ├── VideoManager.php
 │   ├── VideoNamingService.php
 │   └── ResolutionManager.php
-├── Operations/                         # Video operation classes
+├── Operations/                        # Video operation classes
 │   ├── AbstractVideoOperation.php
-│   ├── ConversionOperation.php
+│   ├── ResolutionOperation.php
 │   ├── ResizeOperation.php
 │   ├── ResizeToWidthOperation.php
 │   ├── ResizeToHeightOperation.php
@@ -464,22 +551,30 @@ app/Services/Video/
 │   ├── TrimOperation.php
 │   ├── CropOperation.php
 │   └── WatermarkOperation.php
-├── Pipeline/                           # Operation pipeline
+├── Pipeline/                          # Operation pipeline
 │   └── VideoOperationPipeline.php
-├── Strategies/                         # Scaling strategies
+├── Strategies/                        # Scaling strategies
 │   ├── ScaleProportional.php
 │   ├── ScaleToFit.php
-│   └── ScaleToFill.php
-├── Conversions/                        # Predefined conversions
-│   ├── Conversion1080p.php
-│   ├── Conversion720p.php
-│   ├── Conversion480p.php
-│   ├── Conversion360p.php
-│   ├── Conversion240p.php
-│   └── Conversion144p.php
-└── ValueObjects/                       # Value object classes
+│   ├── ScaleToFill.php
+│   ├── ScaleExact.php
+│   └── ScaleToAspectRatio.php
+├── Resolutions/                       # Resolution definitions with constraints
+│   ├── AbstractResolution.php
+│   ├── Resolution144p.php
+│   ├── Resolution240p.php
+│   ├── Resolution360p.php
+│   ├── Resolution480p.php
+│   ├── Resolution720p.php
+│   ├── Resolution1080p.php
+│   ├── Resolution1440p.php
+│   ├── Resolution2K.php
+│   ├── Resolution4K.php
+│   └── ResolutionMobile.php
+└── ValueObjects/                      # Value object classes
     ├── Dimension.php
-    └── AspectRatio.php
+    ├── AspectRatio.php
+    └── Resolution.php
 ```
 
 ---

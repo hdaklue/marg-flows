@@ -44,4 +44,30 @@ class ResizeOperation extends AbstractVideoOperation
     {
         return $this->dimension->getWidth() > 0 && $this->dimension->getHeight() > 0;
     }
+
+    public function applyToBuilder(\ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter $builder): \ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter
+    {
+        return $builder->addFilter(function ($filters) {
+            $filters->resize(
+                new \FFMpeg\Coordinate\Dimension(
+                    $this->dimension->getWidth(),
+                    $this->dimension->getHeight()
+                ),
+                $this->mode
+            );
+        });
+    }
+
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
+    {
+        return $media->addFilter(function ($filters) {
+            $filters->resize(
+                new \FFMpeg\Coordinate\Dimension(
+                    $this->dimension->getWidth(),
+                    $this->dimension->getHeight()
+                ),
+                $this->mode
+            );
+        });
+    }
 }

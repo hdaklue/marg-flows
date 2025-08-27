@@ -11,6 +11,7 @@ use InvalidArgumentException;
 final class Dimension implements Arrayable, Jsonable
 {
     private int $width;
+
     private int $height;
 
     public function __construct(int $width, int $height)
@@ -60,7 +61,7 @@ final class Dimension implements Arrayable, Jsonable
     {
         throw_if($targetWidth <= 0 || $targetHeight <= 0, new InvalidArgumentException('Target dimensions must be positive'));
 
-        if (!$maintainAspectRatio) {
+        if (! $maintainAspectRatio) {
             return new self($targetWidth, $targetHeight);
         }
 
@@ -86,7 +87,7 @@ final class Dimension implements Arrayable, Jsonable
 
         return new self(
             (int) round($this->width * $factor),
-            (int) round($this->height * $factor)
+            (int) round($this->height * $factor),
         );
     }
 
@@ -117,7 +118,7 @@ final class Dimension implements Arrayable, Jsonable
         return $this->width === $other->width && $this->height === $other->height;
     }
 
-    private function getOrientation(): string
+    public function getOrientation(): string
     {
         if ($this->isSquare()) {
             return 'square';

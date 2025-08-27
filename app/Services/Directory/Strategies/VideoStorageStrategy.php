@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Directory\Strategies;
 
 use App\Services\Directory\Contracts\StorageStrategyContract;
+use App\Services\Directory\Utils\PathBuilder;
+use App\Services\Video\Video;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -18,76 +20,68 @@ use InvalidArgumentException;
  */
 final class VideoStorageStrategy implements StorageStrategyContract
 {
-    // Obfuscated directory names - don't expose actual purpose
-    private const array VARIANT_DIRECTORIES = [
-        'original' => 'src',         // source files
-        'conversions' => 'proc',     // processed/converted files
-        'thumbnails' => 'prev',      // preview files
-        'previews' => 'temp',        // temporary/preview files
-        'clips' => 'seg',            // segments/clips
-    ];
+    private const string ROOT_DIRECTORY = 'videos';
 
     private ?UploadedFile $file = null;
 
     private ?string $storedPath = null;
 
-    private ?string $variant = null;
+    private PathBuilder $pathBuilder;
 
     /**
-     * Constructor receives the full base directory path for videos.
+     * Constructor receives a base directory path for flexible path building.
      *
-     * @param  string  $baseDirectory  The full path to the video storage directory
+     * @param  PathBuilder|string  $basePath  PathBuilder instance or base directory string
      */
-    public function __construct(private readonly string $baseDirectory) {}
+    public function __construct(PathBuilder|string $basePath)
+    {
+        if ($basePath instanceof PathBuilder) {
+            $this->pathBuilder = $basePath;
+        } else {
+            $this->pathBuilder = PathBuilder::base($basePath)
+                ->add(self::ROOT_DIRECTORY)
+                ->validate();
+        }
+    }
 
     /**
-     * Set variant for original/source video files.
+     * Create a new instance with 'src' directory for original/source video files.
      */
     public function asOriginal(): self
     {
-        $this->variant = 'original';
-
-        return $this;
+        return new self($this->pathBuilder->add('src'));
     }
 
     /**
-     * Set variant for converted video files (different resolutions, formats, etc.).
+     * Create a new instance with 'proc' directory for converted video files.
      */
     public function asConversions(): self
     {
-        $this->variant = 'conversions';
-
-        return $this;
+        return new self($this->pathBuilder->add('proc'));
     }
 
     /**
-     * Set variant for video thumbnails.
+     * Create a new instance with 'prev' directory for video thumbnails.
      */
     public function asThumbnails(): self
     {
-        $this->variant = 'thumbnails';
-
-        return $this;
+        return new self($this->pathBuilder->add('prev'));
     }
 
     /**
-     * Set variant for video previews/clips.
+     * Create a new instance with 'temp' directory for video previews/clips.
      */
     public function asPreviews(): self
     {
-        $this->variant = 'previews';
-
-        return $this;
+        return new self($this->pathBuilder->add('temp'));
     }
 
     /**
-     * Set variant for video clips/segments.
+     * Create a new instance with 'seg' directory for video clips/segments.
      */
     public function asClips(): self
     {
-        $this->variant = 'clips';
-
-        return $this;
+        return new self($this->pathBuilder->add('seg'));
     }
 
     /**
@@ -101,7 +95,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
         $this->file = $file;
 
         $filename = $this->generateFilename();
-        $directory = $this->variant ? $this->buildVariantDirectory() : $this->baseDirectory;
+        $directory = $this->pathBuilder->toString();
         $this->storedPath = $file->storeAs($directory, $filename);
 
         return $this->storedPath;
@@ -119,7 +113,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     {
         throw_unless(file_exists($filePath), new InvalidArgumentException("Thumbnail file does not exist: {$filePath}"));
 
-        $thumbnailDirectory = $this->baseDirectory . '/thumbnail';
+        $thumbnailDirectory = $this->pathBuilder->toString();
         $filename = $this->generateThumbnailFilename($filePath);
 
         $this->storedPath = Storage::putFileAs($thumbnailDirectory, new File($filePath), $filename);
@@ -148,7 +142,14 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getDirectory(): string
     {
-        return $this->buildVariantDirectory();
+        return $this->pathBuilder->toString();
+    }
+
+    public function getDirectoryForVideo(Video $video): string
+    {
+        return $this->pathBuilder
+            ->add($video->getFileNameWithoutExt())
+            ->toString();
     }
 
     /**
@@ -159,7 +160,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getRelativePath(string $fileName): string
     {
-        return $this->baseDirectory . "/{$fileName}";
+        return $this->pathBuilder->add($fileName)->toString();
     }
 
     /**
@@ -170,7 +171,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getVariantRelativePath(string $fileName): string
     {
-        return $this->buildVariantDirectory() . "/{$fileName}";
+        return (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
     }
 
     /**
@@ -181,7 +184,11 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function get(string $fileName): ?string
     {
-        return Storage::get($this->baseDirectory . "/{$fileName}");
+        $path = (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
+
+        return Storage::get($path);
     }
 
     /**
@@ -192,7 +199,11 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getVariant(string $fileName): ?string
     {
-        return Storage::get($this->buildVariantDirectory() . "/{$fileName}");
+        $path = (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
+
+        return Storage::get($path);
     }
 
     /**
@@ -203,7 +214,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getPath(string $fileName): ?string
     {
-        $fullPath = $this->baseDirectory . "/{$fileName}";
+        $fullPath = (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
 
         if (Storage::getDefaultDriver() === 'local') {
             return Storage::path($fullPath);
@@ -220,7 +233,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getVariantPath(string $fileName): ?string
     {
-        $fullPath = $this->buildVariantDirectory() . "/{$fileName}";
+        $fullPath = (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
 
         if (Storage::getDefaultDriver() === 'local') {
             return Storage::path($fullPath);
@@ -237,7 +252,11 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function delete(string $fileName): bool
     {
-        return Storage::delete($this->baseDirectory . "/{$fileName}");
+        $path = (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
+
+        return Storage::delete($path);
     }
 
     /**
@@ -248,7 +267,11 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function deleteVariant(string $fileName): bool
     {
-        return Storage::delete($this->buildVariantDirectory() . "/{$fileName}");
+        $path = (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
+
+        return Storage::delete($path);
     }
 
     /**
@@ -259,7 +282,11 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getFileUrl(string $fileName): string
     {
-        return Storage::url($this->baseDirectory . "/{$fileName}");
+        $path = (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
+
+        return Storage::url($path);
     }
 
     /**
@@ -270,23 +297,11 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getVariantFileUrl(string $fileName): string
     {
-        return Storage::url($this->buildVariantDirectory() . "/{$fileName}");
-    }
+        $path = (clone $this->pathBuilder)
+            ->add($fileName)
+            ->toString();
 
-    /**
-     * Build directory path including variant subdirectory.
-     *
-     * @return string The complete directory path with variant
-     */
-    private function buildVariantDirectory(): string
-    {
-        $directory = $this->baseDirectory;
-
-        if ($this->variant && isset(self::VARIANT_DIRECTORIES[$this->variant])) {
-            $directory .= '/' . self::VARIANT_DIRECTORIES[$this->variant];
-        }
-
-        return $directory;
+        return Storage::url($path);
     }
 
     /**
@@ -311,7 +326,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     private function generateThumbnailFilename(string $filePath): string
     {
-        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+        $extension = PathBuilder::getFileExtension($filePath);
         $timestamp = time();
         $unique = uniqid();
 

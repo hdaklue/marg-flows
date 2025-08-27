@@ -5,24 +5,32 @@ declare(strict_types=1);
 namespace App\Services\Video\Pipeline;
 
 use App\Services\Video\Contracts\VideoOperationContract;
-use Illuminate\Pipeline\Pipeline;
+use App\Services\Video\Contracts\VideoFormatContract;
+use App\Services\Video\Enums\BitrateEnum;
+use App\Services\Video\Services\VideoPipelineExporter;
+use Exception;
 use InvalidArgumentException;
-use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
-use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
-use ProtoneMedia\LaravelFFMpeg\FFMpeg\CopyFormat;
 
-class VideoOperationPipeline
+final class VideoOperationPipeline
 {
     /**
      * @var VideoOperationContract[]
      */
     private array $operations = [];
-    
+
     private array $executionLog = [];
+
+    private bool $forceTranscoding = false;
+
+    private ?VideoFormatContract $convertFormat = null;
+
+    private ?BitrateEnum $convertBitrate = null;
+
+    private ?int $forcedBitrate = null;
 
     public function __construct(
         private readonly string $sourcePath,
-        private readonly string $disk = 'local'
+        private readonly string $disk = 'local',
     ) {}
 
     /**
@@ -32,9 +40,9 @@ class VideoOperationPipeline
     {
         // Set execution index based on current position
         $operation->setExecutionIndex(count($this->operations));
-        
+
         $this->operations[] = $operation;
-        
+
         return $this;
     }
 
@@ -44,10 +52,10 @@ class VideoOperationPipeline
     public function addOperations(array $operations): self
     {
         foreach ($operations as $operation) {
-            if (!$operation instanceof VideoOperationContract) {
+            if (! $operation instanceof VideoOperationContract) {
                 throw new InvalidArgumentException('All operations must implement VideoOperationContract');
             }
-            
+
             $this->addOperation($operation);
         }
 
@@ -55,36 +63,30 @@ class VideoOperationPipeline
     }
 
     /**
-     * Execute all operations using Laravel's Pipeline.
+     * Set conversion format and bitrate for the pipeline.
      */
-    public function execute(string $outputPath): void
+    public function setConvertFormat(VideoFormatContract $format, ?BitrateEnum $bitrate = null): self
+    {
+        $this->convertFormat = $format;
+        $this->convertBitrate = $bitrate;
+
+        return $this;
+    }
+
+    /**
+     * Execute all operations using Laravel FFMpeg builder pattern.
+     * Returns the final output path (may be different if format changes extension).
+     */
+    public function execute(string $outputPath): string
     {
         $this->executionLog = [];
+
+        $exporter = new VideoPipelineExporter($this, $this->sourcePath, $this->disk);
+        $finalPath = $exporter->export($outputPath, $this->convertFormat, $this->convertBitrate);
         
-        // Create initial media object (not exporter yet)
-        try {
-            $media = FFMpeg::fromDisk($this->disk)->open($this->sourcePath);
-        } catch (\Exception $e) {
-            throw new InvalidArgumentException("Could not open source video: {$this->sourcePath}. Error: " . $e->getMessage());
-        }
+        $this->logPipelineCompletion($finalPath);
         
-        // Apply all filters to the media object first
-        $mediaExporter = $media->export();
-        
-        // Execute operations through Laravel Pipeline
-        app(Pipeline::class)
-            ->send($mediaExporter)
-            ->through($this->operations)
-            ->then(function ($mediaExporter) use ($outputPath) {
-                // Set format based on output file extension before save
-                $mediaExporter = $this->setFormatFromExtension($mediaExporter, $outputPath);
-                
-                // Save the final result
-                $mediaExporter->save($outputPath);
-                $this->logPipelineCompletion($outputPath);
-                
-                return $mediaExporter;
-            });
+        return $finalPath;
     }
 
     /**
@@ -93,6 +95,14 @@ class VideoOperationPipeline
     public function getExecutionLog(): array
     {
         return $this->executionLog;
+    }
+
+    /**
+     * Get all operations.
+     */
+    public function getOperations(): array
+    {
+        return $this->operations;
     }
 
     /**
@@ -108,7 +118,20 @@ class VideoOperationPipeline
      */
     public function getOperationsMetadata(): array
     {
-        return array_map(fn($op) => $op->getMetadata(), $this->operations);
+        return array_map(fn ($op) => $op->getMetadata(), $this->operations);
+    }
+
+    /**
+     * Force transcoding even if operations might not require it.
+     */
+    public function forceTranscoding(?int $bitrate = null): self
+    {
+        $this->forceTranscoding = true;
+        if ($bitrate) {
+            $this->forcedBitrate = $bitrate;
+        }
+
+        return $this;
     }
 
     /**
@@ -128,7 +151,7 @@ class VideoOperationPipeline
     /**
      * Log failed operation execution.
      */
-    private function logFailedOperation(VideoOperationContract $operation, \Exception $e, float $startTime): void
+    private function logFailedOperation(VideoOperationContract $operation, Exception $e, float $startTime): void
     {
         $this->executionLog[] = [
             'operation' => $operation->getName(),
@@ -167,56 +190,4 @@ class VideoOperationPipeline
         ];
     }
 
-    /**
-     * Set format based on file extension.
-     * Uses CopyFormat only for operations that don't require transcoding.
-     */
-    private function setFormatFromExtension(MediaExporter $mediaExporter, string $outputPath): MediaExporter
-    {
-        $extension = strtolower(pathinfo($outputPath, PATHINFO_EXTENSION));
-        $sourceExtension = strtolower(pathinfo($this->sourcePath, PATHINFO_EXTENSION));
-        
-        // If same extension and ONLY simple operations that don't require transcoding, use CopyFormat
-        if ($extension === $sourceExtension && !$this->hasConversionOperations() && !$this->hasFilterOperations()) {
-            return $mediaExporter->inFormat(new CopyFormat());
-        }
-        
-        // Otherwise, use appropriate format for transcoding
-        return match ($extension) {
-            'mp4', 'mov' => $mediaExporter->inFormat(new \FFMpeg\Format\Video\X264()),
-            'avi', 'wmv' => $mediaExporter->inFormat(new \FFMpeg\Format\Video\WMV()),
-            'webm' => $mediaExporter->inFormat(new \FFMpeg\Format\Video\WebM()),
-            'ogg' => $mediaExporter->inFormat(new \FFMpeg\Format\Video\Ogg()),
-            default => $mediaExporter->inFormat(new \FFMpeg\Format\Video\X264()), // Default to X264
-        };
-    }
-
-    /**
-     * Check if pipeline has conversion operations that require transcoding.
-     */
-    private function hasConversionOperations(): bool
-    {
-        foreach ($this->operations as $operation) {
-            if ($operation->getName() === 'conversion') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if pipeline has filter operations that require transcoding.
-     * Operations like resize, scale, crop, watermark require transcoding.
-     */
-    private function hasFilterOperations(): bool
-    {
-        $filterOperations = ['resize', 'resize_to_width', 'resize_to_height', 'scale', 'crop', 'watermark'];
-        
-        foreach ($this->operations as $operation) {
-            if (in_array($operation->getName(), $filterOperations, true)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

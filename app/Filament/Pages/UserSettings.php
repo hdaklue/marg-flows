@@ -8,10 +8,12 @@ use App\Actions\User\UpdateBasicInfo;
 use App\DTOs\User\UserDto;
 use App\Filament\Tables\UserTenant;
 use App\Services\Timezone;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\EmbeddedTable;
 use Filament\Schemas\Components\Grid;
@@ -112,7 +114,19 @@ final class UserSettings extends Page implements HasTable
             'email' => $data['email'],
             'timezone' => $data['timezone'],
         ]);
+        try {
+            UpdateBasicInfo::run($dto, filamentUser());
+            Notification::make()
+                ->body('Setting updated successfully')
+                ->success()
+                ->send();
+        } catch (Exception $e) {
+            Logger()->error(($e->getMessage()));
+            Notification::make()
+                ->body('Something went wrong')
+                ->danger()
+                ->send();
+        }
 
-        UpdateBasicInfo::run($dto, filamentUser());
     }
 }
