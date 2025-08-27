@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\DTOs\User;
 
+use App\DTOs\BaseDto;
 use WendellAdriel\ValidatedDTO\Concerns\Wireable;
-use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-final class UserDto extends ValidatedDTO
+final class UserDto extends BaseDto
 {
     use Wireable;
 
@@ -34,7 +34,7 @@ final class UserDto extends ValidatedDTO
             'id' => ['required'],
             'name' => ['required'],
             'email' => ['required', 'email'],
-            'avatar' => ['required'],
+            'avatar' => ['sometimes', 'nullable'],
             'timezone' => ['required'],
         ];
     }

@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Directory\Strategies;
 
 use App\Services\Directory\Contracts\StorageStrategyContract;
-use App\Services\Directory\Utils\PathBuilder;
 use App\Services\Video\Video;
+use Hdaklue\PathBuilder\Facades\LaraPath;
+use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -38,7 +39,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
         if ($basePath instanceof PathBuilder) {
             $this->pathBuilder = $basePath;
         } else {
-            $this->pathBuilder = PathBuilder::base($basePath)
+            $this->pathBuilder = LaraPath::base($basePath)
                 ->add(self::ROOT_DIRECTORY)
                 ->validate();
         }
@@ -326,7 +327,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     private function generateThumbnailFilename(string $filePath): string
     {
-        $extension = PathBuilder::getFileExtension($filePath);
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
         $timestamp = time();
         $unique = uniqid();
 

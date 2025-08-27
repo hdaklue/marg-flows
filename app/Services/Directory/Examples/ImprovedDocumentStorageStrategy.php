@@ -10,7 +10,7 @@ use App\Services\Directory\Strategies\BaseStorageStrategy;
 use App\Services\Directory\Strategies\ImageStorageStrategy;
 use App\Services\Directory\Strategies\VideoStorageStrategy;
 use App\Services\Directory\Utils\FilenameGenerator;
-use App\Services\Directory\Utils\PathBuilder;
+use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -38,7 +38,7 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
      */
     public function forDocument(string $documentId): self
     {
-        $this->documentId = PathBuilder::createSecureDirectoryName($documentId);
+        $this->documentId = hash('md5', $documentId);
         return $this;
     }
 
@@ -118,7 +118,9 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
             $segments[] = $this->subdirectory;
         }
 
-        return PathBuilder::build($segments);
+        return PathBuilder::base($segments[0])
+            ->add(...array_slice($segments, 1))
+            ->toString();
     }
 
     /**
@@ -137,6 +139,8 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
 
         $segments[] = $subdirectory;
 
-        return PathBuilder::build($segments);
+        return PathBuilder::base($segments[0])
+            ->add(...array_slice($segments, 1))
+            ->toString();
     }
 }

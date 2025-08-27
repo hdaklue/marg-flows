@@ -13,8 +13,8 @@ use App\Services\Directory\Strategies\ChunksStorageStrategy;
 use App\Services\Directory\Strategies\DocumentStorageStrategy;
 use App\Services\Directory\Strategies\TempStorageStrategy;
 use App\Services\Directory\Strategies\VideoStorageStrategy;
-use App\Services\Directory\Utils\Enums\SanitizationStrategy;
-use App\Services\Directory\Utils\PathBuilder;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\Facades\LaraPath;
 use Storage;
 
 /**
@@ -73,7 +73,7 @@ final class DirectoryManager
     {
         // $rootDirectory = self::baseDirectiry($tenantId);
 
-        $rootDirectory = PathBuilder::base($tenantId, SanitizationStrategy::HASHED)->add($baseDirectory);
+        $rootDirectory = LaraPath::base($tenantId, SanitizationStrategy::HASHED)->add($baseDirectory);
 
         return new VideoStorageStrategy($rootDirectory);
     }

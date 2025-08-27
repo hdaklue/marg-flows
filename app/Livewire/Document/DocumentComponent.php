@@ -38,9 +38,8 @@ final class DocumentComponent extends Component
         $this->documentDto = DocumentManager::getDocumentDto($documentId);
 
         $this->documentId = $documentId;
-        // Set the page property
 
-        // Initialize resolver using facade
+        // Initialize resolver using facade - blocks already contains full EditorJS format
         $this->content = $this->documentDto->blocks;
         $this->canEdit = $canEdit;
     }
@@ -132,13 +131,15 @@ final class DocumentComponent extends Component
 
     public function saveDocument(string $content)
     {
-        // Get the underlying Document model for authorization and updates
-
         $this->authorize('update', $this->document);
 
         try {
             // Parse the JSON content
             $editorData = json_decode($content, true);
+
+            if ($editorData === null) {
+                throw new Exception('Invalid JSON content provided');
+            }
 
             // Use DocumentManager to update the document
             DocumentManager::updateBlocks($this->document, $editorData);
@@ -148,7 +149,7 @@ final class DocumentComponent extends Component
 
         } catch (Exception $e) {
             Log::error('Document save failed', [
-                'page_id' => $this->page['id'],
+                'document_id' => $this->documentId,
                 'error' => $e->getMessage(),
             ]);
 
