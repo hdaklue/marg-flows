@@ -13,6 +13,7 @@
         "bumpcore/editor.php": "^1.2",
         "filament/filament": "^4.0",
         "hdaklue/larapath": "^2.0",
+        "hdaklue/laravel-dto-morph-cast": "^1.1",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",

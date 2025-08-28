@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\DTOs\Document;
 
-use App\DTOs\Cast\MorphCast;
 use App\DTOs\User\UserDto;
 use Carbon\Carbon;
+use HDaklue\LaravelDTOMorphCast\MorphCast;
 use Illuminate\Database\Eloquent\Model;
 use WendellAdriel\ValidatedDTO\Casting\CarbonCast;
 use WendellAdriel\ValidatedDTO\Casting\DTOCast;

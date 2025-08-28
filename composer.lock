@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ae0fc85b1e6249f75183a7f3d86efd0b",
+    "content-hash": "a48be95964db57222a066af5d9acfac3",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2209,6 +2209,62 @@
                 "source": "https://github.com/hdaklue/LaraPath/tree/v2.1.0"
             },
             "time": "2025-08-27T21:07:00+00:00"
+        },
+        {
+            "name": "hdaklue/laravel-dto-morph-cast",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hdaklue/laravel-dto-morph-cast.git",
+                "reference": "9c2ab7fe7a2376030da3c34c66bb0752521435f4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hdaklue/laravel-dto-morph-cast/zipball/9c2ab7fe7a2376030da3c34c66bb0752521435f4",
+                "reference": "9c2ab7fe7a2376030da3c34c66bb0752521435f4",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^11.0|^12.0",
+                "php": "^8.2",
+                "wendelladriel/laravel-validated-dto": "^4.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.21",
+                "orchestra/testbench": "^9.0|^10.0",
+                "pestphp/pest": "^2.0|^3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "HDaklue\\LaravelDTOMorphCast\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hassan Ibrahim",
+                    "email": "hassan@daklue.com"
+                }
+            ],
+            "description": "MorphCast for Laravel Validated DTO - Dynamic polymorphic casting for Eloquent models",
+            "keywords": [
+                "Data Transfer Object",
+                "casting",
+                "dto",
+                "eloquent",
+                "laravel",
+                "morph",
+                "polymorphic"
+            ],
+            "support": {
+                "issues": "https://github.com/hdaklue/laravel-dto-morph-cast/issues",
+                "source": "https://github.com/hdaklue/laravel-dto-morph-cast"
+            },
+            "time": "2025-08-28T17:58:59+00:00"
         },
         {
             "name": "jaybizzle/crawler-detect",
