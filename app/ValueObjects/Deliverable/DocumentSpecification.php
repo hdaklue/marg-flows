@@ -29,13 +29,9 @@ final class DocumentSpecification
         private readonly ?array $styles = null,
 
     ) {
-        if ($this->maxPages < 0) {
-            throw new InvalidArgumentException('Max pages must be non-negative.');
-        }
+        throw_if($this->maxPages < 0, new InvalidArgumentException('Max pages must be non-negative.'));
 
-        if ($this->minWords !== null && $this->maxWords !== null && $this->minWords > $this->maxWords) {
-            throw new InvalidArgumentException('Minimum words cannot exceed maximum words.');
-        }
+        throw_if($this->minWords !== null && $this->maxWords !== null && $this->minWords > $this->maxWords, new InvalidArgumentException('Minimum words cannot exceed maximum words.'));
     }
 
     public static function fromConfig(array $config): self
@@ -342,8 +338,8 @@ final class DocumentSpecification
         return [
             'min_minutes' => $minTime,
             'max_minutes' => $maxTime,
-            'min_formatted' => $minTime ? $this->formatReadingTime($minTime) : null,
-            'max_formatted' => $maxTime ? $this->formatReadingTime($maxTime) : null,
+            'min_formatted' => $minTime ? $this->formatReadingTime((int) $minTime) : null,
+            'max_formatted' => $maxTime ? $this->formatReadingTime((int) $maxTime) : null,
         ];
     }
 

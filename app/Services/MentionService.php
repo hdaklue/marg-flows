@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use Illuminate\Support\Collection;
 
 final class MentionService

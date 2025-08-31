@@ -1,11 +1,11 @@
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
+import LinkTool from './plugins/link-tool';
 import EditorJsList from "@editorjs/list";
 import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
 import Alert from 'editorjs-alert';
 import DragDrop from 'editorjs-drag-drop';
-import HyperLink from 'editorjs-hyperlink';
 import Undo from 'editorjs-undo';
 import ResizableImage from './plugins/resizable-image';
 
@@ -143,15 +143,13 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                         messagePlaceholder: 'Enter something',
                     },
                 },
-                hyperlink: {
-                    class: HyperLink,
+                linkTool: {
+                    class: LinkTool,
                     config: {
-                        shortcut: 'CMD+L',
-                        target: '_blank',
-                        rel: 'nofollow',
-                        availableTargets: ['_blank', '_self'],
-                        availableRels: ['author', 'noreferrer'],
-                        validate: false,
+                        endpoint: '/editor/fetch-url',
+                        headers: {
+                            'X-CSRF-TOKEN': csrf,
+                        },
                     }
                 },
             };

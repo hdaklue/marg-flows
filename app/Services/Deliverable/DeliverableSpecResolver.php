@@ -33,7 +33,7 @@ final class DeliverableSpecResolver
 
     public static function getSupportedFormats(): array
     {
-        return array_keys(config(self::CONFIG_PATH . '.' . self::SUPPORTED_FORMATS, []));
+        return collect(array_keys(config(self::CONFIG_PATH . '.' . self::SUPPORTED_FORMATS, [])))->mapWithKeys((fn ($item) => [$item => str($item)->title()->toString()]))->toArray();
     }
 
     protected static function handelDesignType(DeliverableFormat $format, DeliverableType $type): DesignSpecification

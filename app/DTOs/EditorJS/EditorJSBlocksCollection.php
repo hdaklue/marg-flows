@@ -10,79 +10,71 @@ use InvalidArgumentException;
 final class EditorJSBlocksCollection extends Collection
 {
     /**
-     * Create collection from array of block data
+     * Create collection from array of block data.
      */
     public static function fromArray(array $blocks): self
     {
         $blockDtos = [];
-        
+
         foreach ($blocks as $blockData) {
-            if (!is_array($blockData)) {
-                throw new InvalidArgumentException('Each block must be an array');
-            }
-            
+            throw_unless(is_array($blockData), new InvalidArgumentException('Each block must be an array'));
+
             $blockDtos[] = EditorJSBlockDto::fromArray($blockData);
         }
 
-        return new static($blockDtos);
+        return new self($blockDtos);
     }
 
     /**
-     * Create empty collection
+     * Create empty collection.
      */
     public static function empty(): self
     {
-        return new static([]);
+        return new self([]);
     }
 
     /**
-     * Add item to collection with validation
+     * Add item to collection with validation.
      */
     public function add($item)
     {
-        if (!$item instanceof EditorJSBlockDto) {
-            throw new InvalidArgumentException('Item must be an instance of EditorJSBlockDto');
-        }
+        throw_unless($item instanceof EditorJSBlockDto, new InvalidArgumentException('Item must be an instance of EditorJSBlockDto'));
 
         return parent::add($item);
     }
 
     /**
-     * Push item to collection with validation
+     * Push item to collection with validation.
      */
     public function push(...$values)
     {
         foreach ($values as $value) {
-            if (!$value instanceof EditorJSBlockDto) {
-                throw new InvalidArgumentException('All items must be instances of EditorJSBlockDto');
-            }
+            throw_unless($value instanceof EditorJSBlockDto, new InvalidArgumentException('All items must be instances of EditorJSBlockDto'));
         }
 
         return parent::push(...$values);
     }
 
     /**
-     * Put item in collection with validation
+     * Put item in collection with validation.
      */
     public function put($key, $value)
     {
-        if (!$value instanceof EditorJSBlockDto) {
-            throw new InvalidArgumentException('Value must be an instance of EditorJSBlockDto');
-        }
+        throw_unless($value instanceof EditorJSBlockDto, new InvalidArgumentException('Value must be an instance of EditorJSBlockDto'));
 
         return parent::put($key, $value);
     }
 
     /**
-     * Get blocks by type
+     * Get blocks by type.
      */
     public function byType(string $type): self
     {
-        return $this->filter(fn(EditorJSBlockDto $block) => $block->isType($type));
+        return $this->filter(fn (EditorJSBlockDto $block) => $block->isType($type));
     }
 
     /**
-     * Check if collection has blocks of specific type
+     * Check if collection has blocks of specific type.
      */
     public function hasType(string $type): bool
     {
@@ -90,108 +82,112 @@ final class EditorJSBlocksCollection extends Collection
     }
 
     /**
-     * Get all block types present in collection
+     * Get all block types present in collection.
      */
     public function getTypes(): array
     {
-        return $this->map(fn(EditorJSBlockDto $block) => $block->type)
-                   ->unique()
-                   ->values()
-                   ->toArray();
+        return $this->map(fn (EditorJSBlockDto $block) => $block->type)
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     /**
-     * Check if collection has any non-empty blocks
+     * Check if collection has any non-empty blocks.
      */
     public function hasNonEmptyBlocks(): bool
     {
-        return $this->filter(function($block) {
+        return $this->filter(function ($block) {
             if ($block instanceof EditorJSBlockDto) {
-                return !$block->isEmpty();
+                return ! $block->isEmpty();
             }
             // If somehow we get arrays, convert them
             if (is_array($block)) {
                 $blockDto = EditorJSBlockDto::fromArray($block);
-                return !$blockDto->isEmpty();
+
+                return ! $blockDto->isEmpty();
             }
+
             return false;
         })->isNotEmpty();
     }
 
     /**
-     * Get only non-empty blocks
+     * Get only non-empty blocks.
      */
     public function nonEmpty(): self
     {
-        return $this->reject(fn(EditorJSBlockDto $block) => $block->isEmpty());
+        return $this->reject(fn (EditorJSBlockDto $block) => $block->isEmpty());
     }
 
     /**
-     * Get blocks with text content
+     * Get blocks with text content.
      */
     public function withText(): self
     {
-        return $this->filter(fn(EditorJSBlockDto $block) => $block->hasText());
+        return $this->filter(fn (EditorJSBlockDto $block) => $block->hasText());
     }
 
     /**
-     * Get all text content from blocks
+     * Get all text content from blocks.
      */
     public function extractText(): array
     {
-        return $this->map(fn(EditorJSBlockDto $block) => $block->getText())
-                   ->filter()
-                   ->values()
-                   ->toArray();
+        return $this->map(fn (EditorJSBlockDto $block) => $block->getText())
+            ->filter()
+            ->values()
+            ->toArray();
     }
 
     /**
-     * Find block by ID
+     * Find block by ID.
      */
     public function findById(string $id): ?EditorJSBlockDto
     {
-        return $this->first(fn(EditorJSBlockDto $block) => $block->id === $id);
+        return $this->first(fn (EditorJSBlockDto $block) => $block->id === $id);
     }
 
     /**
-     * Remove block by ID
+     * Remove block by ID.
      */
     public function removeById(string $id): self
     {
-        return $this->reject(fn(EditorJSBlockDto $block) => $block->id === $id);
+        return $this->reject(fn (EditorJSBlockDto $block) => $block->id === $id);
     }
 
     /**
-     * Replace block by ID
+     * Replace block by ID.
      */
     public function replaceById(string $id, EditorJSBlockDto $newBlock): self
     {
-        return $this->map(fn(EditorJSBlockDto $block) => $block->id === $id ? $newBlock : $block);
+        return $this->map(fn (EditorJSBlockDto $block) => $block->id === $id ? $newBlock : $block);
     }
 
     /**
-     * Get blocks as array for JSON serialization
+     * Get blocks as array for JSON serialization.
      */
     public function toArray(): array
     {
-        return $this->map(function($block) {
+        return $this->map(function ($block) {
             if ($block instanceof EditorJSBlockDto) {
                 return $block->toArray();
             }
             // If it's already an array, ensure it has the required structure
             if (is_array($block)) {
-                if (!isset($block['id'])) {
+                if (! isset($block['id'])) {
                     $block['id'] = bin2hex(random_bytes(5));
                 }
+
                 return $block;
             }
+
             // Fallback - should not happen
             return [];
         })->toArray();
     }
 
     /**
-     * Get blocks as JSON string
+     * Get blocks as JSON string.
      */
     public function toJson($options = 0): string
     {
@@ -199,59 +195,59 @@ final class EditorJSBlocksCollection extends Collection
     }
 
     /**
-     * Group blocks by type
+     * Group blocks by type.
      */
     public function groupByType(): Collection
     {
-        return $this->groupBy(fn(EditorJSBlockDto $block) => $block->type);
+        return $this->groupBy(fn (EditorJSBlockDto $block) => $block->type);
     }
 
     /**
-     * Count blocks by type
+     * Count blocks by type.
      */
     public function countByType(): Collection
     {
-        return $this->groupByType()->map(fn($blocks) => $blocks->count());
+        return $this->groupByType()->map(fn ($blocks) => $blocks->count());
     }
 
     /**
-     * Sort blocks by type
+     * Sort blocks by type.
      */
     public function sortByType(): self
     {
-        return $this->sortBy(fn(EditorJSBlockDto $block) => $block->type);
+        return $this->sortBy(fn (EditorJSBlockDto $block) => $block->type);
     }
 
     /**
-     * Get first block of specific type
+     * Get first block of specific type.
      */
     public function firstOfType(string $type): ?EditorJSBlockDto
     {
-        return $this->first(fn(EditorJSBlockDto $block) => $block->isType($type));
+        return $this->first(fn (EditorJSBlockDto $block) => $block->isType($type));
     }
 
     /**
-     * Get last block of specific type
+     * Get last block of specific type.
      */
     public function lastOfType(string $type): ?EditorJSBlockDto
     {
-        return $this->last(fn(EditorJSBlockDto $block) => $block->isType($type));
+        return $this->last(fn (EditorJSBlockDto $block) => $block->isType($type));
     }
 
     /**
-     * Check if all blocks are of specific type
+     * Check if all blocks are of specific type.
      */
     public function allOfType(string $type): bool
     {
-        return $this->every(fn(EditorJSBlockDto $block) => $block->isType($type));
+        return $this->every(fn (EditorJSBlockDto $block) => $block->isType($type));
     }
 
     /**
-     * Apply callback to blocks of specific type
+     * Apply callback to blocks of specific type.
      */
     public function transformType(string $type, callable $callback): self
     {
-        return $this->map(function(EditorJSBlockDto $block) use ($type, $callback) {
+        return $this->map(function (EditorJSBlockDto $block) use ($type, $callback) {
             return $block->isType($type) ? $callback($block) : $block;
         });
     }

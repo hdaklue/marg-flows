@@ -22,11 +22,11 @@ final class FeedbackFactory extends Factory
     {
         return [
             'creator_id' => User::factory(),
-            'content' => $this->faker->paragraph(),
+            'content' => fake()->paragraph(),
             'metadata' => $this->createDocumentBlockMetadata(),
             'feedbackable_type' => Relation::getMorphAlias(Document::class),
             'feedbackable_id' => fn () => Document::inRandomOrder()->first()?->id ?? Document::factory()->create()->id,
-            'status' => $this->faker->randomElement(FeedbackStatus::cases()),
+            'status' => fake()->randomElement(FeedbackStatus::cases()),
             'resolution' => null,
             'resolved_by' => null,
             'resolved_at' => null,
@@ -75,9 +75,9 @@ final class FeedbackFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => FeedbackStatus::RESOLVED,
-            'resolution' => $this->faker->sentence(),
+            'resolution' => fake()->sentence(),
             'resolved_by' => User::factory(),
-            'resolved_at' => $this->faker->dateTimeBetween('-1 week', 'now'),
+            'resolved_at' => fake()->dateTimeBetween('-1 week', 'now'),
         ]);
     }
 
@@ -99,9 +99,9 @@ final class FeedbackFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => FeedbackStatus::REJECTED,
-            'resolution' => 'Feedback was rejected: ' . $this->faker->sentence(),
+            'resolution' => 'Feedback was rejected: ' . fake()->sentence(),
             'resolved_by' => User::factory(),
-            'resolved_at' => $this->faker->dateTimeBetween('-1 week', 'now'),
+            'resolved_at' => fake()->dateTimeBetween('-1 week', 'now'),
         ]);
     }
 
@@ -125,21 +125,21 @@ final class FeedbackFactory extends Factory
         return [
             'type' => 'document_block',
             'data' => [
-                'block_id' => 'block_' . $this->faker->uuid(),
-                'block_type' => $this->faker->randomElement(['paragraph', 'header', 'nestedList', 'table', 'alert']),
-                'block_index' => $this->faker->numberBetween(0, 20),
+                'block_id' => 'block_' . fake()->uuid(),
+                'block_type' => fake()->randomElement(['paragraph', 'header', 'nestedList', 'table', 'alert']),
+                'block_index' => fake()->numberBetween(0, 20),
             ],
             'searchable' => [
-                'block_type' => $this->faker->randomElement(['paragraph', 'header', 'nestedList', 'table', 'alert']),
-                'block_index' => $this->faker->numberBetween(0, 20),
+                'block_type' => fake()->randomElement(['paragraph', 'header', 'nestedList', 'table', 'alert']),
+                'block_index' => fake()->numberBetween(0, 20),
             ],
         ];
     }
 
     private function createAudioRegionMetadata(): array
     {
-        $startTime = $this->faker->randomFloat(2, 0, 300);
-        $endTime = $startTime + $this->faker->randomFloat(2, 1, 30);
+        $startTime = fake()->randomFloat(2, 0, 300);
+        $endTime = $startTime + fake()->randomFloat(2, 1, 30);
 
         return [
             'type' => 'audio_region',
@@ -168,9 +168,9 @@ final class FeedbackFactory extends Factory
 
     private function createVideoRegionMetadata(): array
     {
-        $startTime = $this->faker->randomFloat(2, 0, 300);
-        $endTime = $startTime + $this->faker->randomFloat(2, 1, 30);
-        $frameRate = $this->faker->randomElement([24.0, 25.0, 30.0, 60.0]);
+        $startTime = fake()->randomFloat(2, 0, 300);
+        $endTime = $startTime + fake()->randomFloat(2, 1, 30);
+        $frameRate = fake()->randomElement([24.0, 25.0, 30.0, 60.0]);
 
         return [
             'type' => 'video_region',
@@ -180,10 +180,10 @@ final class FeedbackFactory extends Factory
                 'duration' => $endTime - $startTime,
                 'frame_rate' => $frameRate,
                 'bounds' => [
-                    'x' => $this->faker->numberBetween(0, 1000),
-                    'y' => $this->faker->numberBetween(0, 1000),
-                    'width' => $this->faker->numberBetween(100, 500),
-                    'height' => $this->faker->numberBetween(100, 500),
+                    'x' => fake()->numberBetween(0, 1000),
+                    'y' => fake()->numberBetween(0, 1000),
+                    'width' => fake()->numberBetween(100, 500),
+                    'height' => fake()->numberBetween(100, 500),
                 ],
                 'timing' => [
                     'start' => [
@@ -209,8 +209,8 @@ final class FeedbackFactory extends Factory
 
     private function createVideoFrameMetadata(): array
     {
-        $frameRate = $this->faker->randomElement([24.0, 25.0, 30.0, 60.0]);
-        $frameNumber = $this->faker->numberBetween(0, 7200); // Up to 5 minutes at 24fps
+        $frameRate = fake()->randomElement([24.0, 25.0, 30.0, 60.0]);
+        $frameNumber = fake()->numberBetween(0, 7200); // Up to 5 minutes at 24fps
         $time = $frameNumber / $frameRate;
 
         return [

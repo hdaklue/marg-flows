@@ -6,6 +6,7 @@ namespace App\Concerns\Stage;
 
 use App\Enums\FlowStage;
 use App\Models\Stage;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -16,7 +17,8 @@ trait HasStagesTrait
         return $this->morphMany(Stage::class, 'stageable');
     }
 
-    public function scopeByStage(Builder $builder, string|FlowStage $status): Builder
+    #[Scope]
+    protected function byStage(Builder $builder, string|FlowStage $status): Builder
     {
         $status = $status instanceof FlowStage ? $status->value : $status;
 

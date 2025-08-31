@@ -5,7 +5,7 @@
 
 /**
  * A helper file for Laravel, to provide autocomplete information to your IDE
- * Generated for Laravel 12.17.0.
+ * Generated for Laravel 12.24.0.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -14,8 +14,6 @@
  */
 namespace Illuminate\Support\Facades {
     /**
-     *
-     *
      * @see \Illuminate\Foundation\Application
      */
     class App {
@@ -355,7 +353,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Get the path to the views directory.
-         *
+         * 
          * This method returns the first configured path in the array of view paths.
          *
          * @param string $path
@@ -1211,7 +1209,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function when($concrete)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->when($concrete);
         }
@@ -1226,16 +1224,16 @@ namespace Illuminate\Support\Facades {
          */
         public static function whenHasAttribute($attribute, $handler)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->whenHasAttribute($attribute, $handler);
         }
 
         /**
          * Returns true if the container can return an entry for the given identifier.
-         *
+         * 
          * Returns false otherwise.
-         *
+         * 
          * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
          * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
          *
@@ -1246,7 +1244,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function has($id)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->has($id);
         }
@@ -1260,7 +1258,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function resolved($abstract)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->resolved($abstract);
         }
@@ -1274,7 +1272,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function isShared($abstract)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->isShared($abstract);
         }
@@ -1288,7 +1286,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function isAlias($name)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->isAlias($name);
         }
@@ -1306,7 +1304,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function bind($abstract, $concrete = null, $shared = false)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->bind($abstract, $concrete, $shared);
         }
@@ -1320,7 +1318,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasMethodBinding($method)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->hasMethodBinding($method);
         }
@@ -1335,7 +1333,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function bindMethod($method, $callback)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->bindMethod($method, $callback);
         }
@@ -1350,7 +1348,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function callMethodBinding($method, $instance)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->callMethodBinding($method, $instance);
         }
@@ -1366,7 +1364,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function addContextualBinding($concrete, $abstract, $implementation)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->addContextualBinding($concrete, $abstract, $implementation);
         }
@@ -1382,7 +1380,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function bindIf($abstract, $concrete = null, $shared = false)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->bindIf($abstract, $concrete, $shared);
         }
@@ -1397,7 +1395,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function singleton($abstract, $concrete = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->singleton($abstract, $concrete);
         }
@@ -1412,7 +1410,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function singletonIf($abstract, $concrete = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->singletonIf($abstract, $concrete);
         }
@@ -1427,7 +1425,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function scoped($abstract, $concrete = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->scoped($abstract, $concrete);
         }
@@ -1442,7 +1440,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function scopedIf($abstract, $concrete = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->scopedIf($abstract, $concrete);
         }
@@ -1458,7 +1456,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function extend($abstract, $closure)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->extend($abstract, $closure);
         }
@@ -1474,7 +1472,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function instance($abstract, $instance)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->instance($abstract, $instance);
         }
@@ -1489,7 +1487,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function tag($abstracts, $tags)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->tag($abstracts, $tags);
         }
@@ -1503,7 +1501,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function tagged($tag)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->tagged($tag);
         }
@@ -1519,7 +1517,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function alias($abstract, $alias)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->alias($abstract, $alias);
         }
@@ -1534,7 +1532,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function rebinding($abstract, $callback)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->rebinding($abstract, $callback);
         }
@@ -1550,7 +1548,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function refresh($abstract, $target, $method)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->refresh($abstract, $target, $method);
         }
@@ -1565,7 +1563,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function wrap($callback, $parameters = [])
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->wrap($callback, $parameters);
         }
@@ -1582,7 +1580,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function call($callback, $parameters = [], $defaultMethod = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->call($callback, $parameters, $defaultMethod);
         }
@@ -1597,7 +1595,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function factory($abstract)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->factory($abstract);
         }
@@ -1614,7 +1612,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function makeWith($abstract, $parameters = [])
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->makeWith($abstract, $parameters);
         }
@@ -1629,7 +1627,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function get($id)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->get($id);
         }
@@ -1646,7 +1644,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function build($concrete)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->build($concrete);
         }
@@ -1660,7 +1658,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function resolveFromAttribute($attribute)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->resolveFromAttribute($attribute);
         }
@@ -1675,7 +1673,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function beforeResolving($abstract, $callback = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->beforeResolving($abstract, $callback);
         }
@@ -1690,7 +1688,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function resolving($abstract, $callback = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->resolving($abstract, $callback);
         }
@@ -1705,7 +1703,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function afterResolving($abstract, $callback = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->afterResolving($abstract, $callback);
         }
@@ -1720,7 +1718,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function afterResolvingAttribute($attribute, $callback)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->afterResolvingAttribute($attribute, $callback);
         }
@@ -1735,7 +1733,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function fireAfterResolvingAttributeCallbacks($attributes, $object)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->fireAfterResolvingAttributeCallbacks($attributes, $object);
         }
@@ -1748,7 +1746,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function currentlyResolving()
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->currentlyResolving();
         }
@@ -1761,7 +1759,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getBindings()
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->getBindings();
         }
@@ -1775,7 +1773,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getAlias($abstract)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->getAlias($abstract);
         }
@@ -1789,7 +1787,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetExtenders($abstract)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->forgetExtenders($abstract);
         }
@@ -1803,7 +1801,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetInstance($abstract)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->forgetInstance($abstract);
         }
@@ -1816,7 +1814,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetInstances()
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->forgetInstances();
         }
@@ -1829,9 +1827,37 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetScopedInstances()
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->forgetScopedInstances();
+        }
+
+        /**
+         * Set the callback which determines the current container environment.
+         *
+         * @param (callable(array<int, string>|string): bool|string)|null $callback
+         * @return void
+         * @static
+         */
+        public static function resolveEnvironmentUsing($callback)
+        {
+            //Method inherited from \Illuminate\Container\Container 
+            /** @var \Illuminate\Foundation\Application $instance */
+            $instance->resolveEnvironmentUsing($callback);
+        }
+
+        /**
+         * Determine the environment for the container.
+         *
+         * @param array<int, string>|string $environments
+         * @return bool
+         * @static
+         */
+        public static function currentEnvironmentIs($environments)
+        {
+            //Method inherited from \Illuminate\Container\Container 
+            /** @var \Illuminate\Foundation\Application $instance */
+            return $instance->currentEnvironmentIs($environments);
         }
 
         /**
@@ -1842,7 +1868,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getInstance()
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             return \Illuminate\Foundation\Application::getInstance();
         }
 
@@ -1855,7 +1881,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setInstance($container = null)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             return \Illuminate\Foundation\Application::setInstance($container);
         }
 
@@ -1868,7 +1894,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function offsetExists($key)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->offsetExists($key);
         }
@@ -1882,7 +1908,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function offsetGet($key)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             return $instance->offsetGet($key);
         }
@@ -1897,7 +1923,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function offsetSet($key, $value)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->offsetSet($key, $value);
         }
@@ -1911,7 +1937,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function offsetUnset($key)
         {
-            //Method inherited from \Illuminate\Container\Container
+            //Method inherited from \Illuminate\Container\Container 
             /** @var \Illuminate\Foundation\Application $instance */
             $instance->offsetUnset($key);
         }
@@ -1969,8 +1995,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Foundation\Console\Kernel
      */
     class Artisan {
@@ -2083,7 +2107,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Run an Artisan console command by name.
          *
-         * @param string $command
+         * @param \Symfony\Component\Console\Command\Command|string $command
          * @param array $parameters
          * @param \Symfony\Component\Console\Output\OutputInterface|null $outputBuffer
          * @return int
@@ -2212,8 +2236,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Auth\AuthManager
      * @see \Illuminate\Auth\SessionGuard
      */
@@ -2591,7 +2613,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Log the user out of the application on their current device only.
-         *
+         * 
          * This method does not cycle the "remember" token.
          *
          * @return void
@@ -2605,7 +2627,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Invalidate other sessions for the current user.
-         *
+         * 
          * The application must be using the AuthenticateSession middleware.
          *
          * @param string $password
@@ -2957,8 +2979,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\View\Compilers\BladeCompiler
      */
     class Blade {
@@ -3407,7 +3427,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getCompiledPath($path)
         {
-            //Method inherited from \Illuminate\View\Compilers\Compiler
+            //Method inherited from \Illuminate\View\Compilers\Compiler 
             /** @var \Illuminate\View\Compilers\BladeCompiler $instance */
             return $instance->getCompiledPath($path);
         }
@@ -3422,7 +3442,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function isExpired($path)
         {
-            //Method inherited from \Illuminate\View\Compilers\Compiler
+            //Method inherited from \Illuminate\View\Compilers\Compiler 
             /** @var \Illuminate\View\Compilers\BladeCompiler $instance */
             return $instance->isExpired($path);
         }
@@ -3532,8 +3552,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static mixed auth(\Illuminate\Http\Request $request)
      * @method static mixed validAuthenticationResponse(\Illuminate\Http\Request $request, mixed $result)
      * @method static void broadcast(array $channels, string $event, array $payload = [])
@@ -3573,7 +3591,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Register the routes for handling broadcast authentication and sockets.
-         *
+         * 
          * Alias of "routes" method.
          *
          * @param array|null $attributes
@@ -3801,8 +3819,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Bus\Dispatcher
      * @see \Illuminate\Support\Testing\Fakes\BusFake
      */
@@ -3822,7 +3838,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Dispatch a command to its appropriate handler in the current process.
-         *
+         * 
          * Queueable jobs will be dispatched to the "sync" queue.
          *
          * @param mixed $command
@@ -3866,7 +3882,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Create a new batch of queueable jobs.
          *
-         * @param \Illuminate\Support\Collection|array|mixed $jobs
+         * @param \Illuminate\Support\Collection|mixed $jobs
          * @return \Illuminate\Bus\PendingBatch
          * @static
          */
@@ -3879,11 +3895,11 @@ namespace Illuminate\Support\Facades {
         /**
          * Create a new chain of queueable jobs.
          *
-         * @param \Illuminate\Support\Collection|array $jobs
+         * @param \Illuminate\Support\Collection|array|null $jobs
          * @return \Illuminate\Foundation\Bus\PendingChain
          * @static
          */
-        public static function chain($jobs)
+        public static function chain($jobs = null)
         {
             /** @var \Illuminate\Bus\Dispatcher $instance */
             return $instance->chain($jobs);
@@ -3906,7 +3922,7 @@ namespace Illuminate\Support\Facades {
          * Retrieve the handler for a command.
          *
          * @param mixed $command
-         * @return bool|mixed
+         * @return mixed
          * @static
          */
         public static function getCommandHandler($command)
@@ -4018,6 +4034,20 @@ namespace Illuminate\Support\Facades {
         {
             /** @var \Illuminate\Support\Testing\Fakes\BusFake $instance */
             $instance->assertDispatched($command, $callback);
+        }
+
+        /**
+         * Assert if a job was pushed exactly once.
+         *
+         * @param string|\Closure $command
+         * @param int $times
+         * @return void
+         * @static
+         */
+        public static function assertDispatchedOnce($command)
+        {
+            /** @var \Illuminate\Support\Testing\Fakes\BusFake $instance */
+            $instance->assertDispatchedOnce($command);
         }
 
         /**
@@ -4393,8 +4423,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Cache\CacheManager
      * @see \Illuminate\Cache\Repository
      */
@@ -4612,7 +4640,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Retrieve multiple items from the cache by key.
-         *
+         * 
          * Items not found in the cache will have a null value.
          *
          * @param array $keys
@@ -5280,8 +5308,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static array run(\Closure|array $tasks)
      * @method static \Illuminate\Support\Defer\DeferredCallback defer(\Closure|array $tasks)
      * @see \Illuminate\Concurrency\ConcurrencyManager
@@ -5387,7 +5413,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function instance($name = null)
         {
-            //Method inherited from \Illuminate\Support\MultipleInstanceManager
+            //Method inherited from \Illuminate\Support\MultipleInstanceManager 
             /** @var \Illuminate\Concurrency\ConcurrencyManager $instance */
             return $instance->instance($name);
         }
@@ -5401,7 +5427,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetInstance($name = null)
         {
-            //Method inherited from \Illuminate\Support\MultipleInstanceManager
+            //Method inherited from \Illuminate\Support\MultipleInstanceManager 
             /** @var \Illuminate\Concurrency\ConcurrencyManager $instance */
             return $instance->forgetInstance($name);
         }
@@ -5415,7 +5441,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function purge($name = null)
         {
-            //Method inherited from \Illuminate\Support\MultipleInstanceManager
+            //Method inherited from \Illuminate\Support\MultipleInstanceManager 
             /** @var \Illuminate\Concurrency\ConcurrencyManager $instance */
             $instance->purge($name);
         }
@@ -5431,7 +5457,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function extend($name, $callback)
         {
-            //Method inherited from \Illuminate\Support\MultipleInstanceManager
+            //Method inherited from \Illuminate\Support\MultipleInstanceManager 
             /** @var \Illuminate\Concurrency\ConcurrencyManager $instance */
             return $instance->extend($name, $callback);
         }
@@ -5445,15 +5471,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function setApplication($app)
         {
-            //Method inherited from \Illuminate\Support\MultipleInstanceManager
+            //Method inherited from \Illuminate\Support\MultipleInstanceManager 
             /** @var \Illuminate\Concurrency\ConcurrencyManager $instance */
             return $instance->setApplication($app);
         }
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Config\Repository
      */
     class Config {
@@ -5565,6 +5589,20 @@ namespace Illuminate\Support\Facades {
         {
             /** @var \Illuminate\Config\Repository $instance */
             return $instance->array($key, $default);
+        }
+
+        /**
+         * Get the specified array configuration value as a collection.
+         *
+         * @param string $key
+         * @param (\Closure():(array<array-key, mixed>|null))|array<array-key, mixed>|null $default
+         * @return Collection<array-key, mixed>
+         * @static
+         */
+        public static function collection($key, $default = null)
+        {
+            /** @var \Illuminate\Config\Repository $instance */
+            return $instance->collection($key, $default);
         }
 
         /**
@@ -5727,8 +5765,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Log\Context\Repository
      */
     class Context {
@@ -5942,6 +5978,34 @@ namespace Illuminate\Support\Facades {
         {
             /** @var \Illuminate\Log\Context\Repository $instance */
             return $instance->addHidden($key, $value);
+        }
+
+        /**
+         * Add a context value if it does not exist yet, and return the value.
+         *
+         * @param string $key
+         * @param mixed $value
+         * @return mixed
+         * @static
+         */
+        public static function remember($key, $value)
+        {
+            /** @var \Illuminate\Log\Context\Repository $instance */
+            return $instance->remember($key, $value);
+        }
+
+        /**
+         * Add a hidden context value if it does not exist yet, and return the value.
+         *
+         * @param string $key
+         * @param mixed $value
+         * @return mixed
+         * @static
+         */
+        public static function rememberHidden($key, $value)
+        {
+            /** @var \Illuminate\Log\Context\Repository $instance */
+            return $instance->rememberHidden($key, $value);
         }
 
         /**
@@ -6322,8 +6386,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Cookie\CookieJar
      */
     class Cookie {
@@ -6547,8 +6609,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Encryption\Encrypter
      */
     class Crypt {
@@ -6686,8 +6746,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see https://carbon.nesbot.com/docs/
      * @see https://github.com/briannesbitt/Carbon/blob/master/src/Carbon/Factory.php
      * @method static bool canBeCreatedFromFormat(?string $date, string $format)
@@ -6845,15 +6903,13 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Database\DatabaseManager
      */
     class DB {
         /**
          * Get a database connection instance.
          *
-         * @param string|null $name
+         * @param \UnitEnum|string|null $name
          * @return \Illuminate\Database\Connection
          * @static
          */
@@ -7233,7 +7289,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function useDefaultQueryGrammar()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->useDefaultQueryGrammar();
         }
@@ -7246,7 +7302,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function useDefaultSchemaGrammar()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->useDefaultSchemaGrammar();
         }
@@ -7259,7 +7315,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function useDefaultPostProcessor()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->useDefaultPostProcessor();
         }
@@ -7267,14 +7323,14 @@ namespace Illuminate\Support\Facades {
         /**
          * Begin a fluent query against a database table.
          *
-         * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Contracts\Database\Query\Expression|string $table
+         * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Contracts\Database\Query\Expression|\UnitEnum|string $table
          * @param string|null $as
          * @return \Illuminate\Database\Query\Builder
          * @static
          */
         public static function table($table, $as = null)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->table($table, $as);
         }
@@ -7287,7 +7343,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function query()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->query();
         }
@@ -7303,7 +7359,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function selectOne($query, $bindings = [], $useReadPdo = true)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->selectOne($query, $bindings, $useReadPdo);
         }
@@ -7320,7 +7376,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function scalar($query, $bindings = [], $useReadPdo = true)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->scalar($query, $bindings, $useReadPdo);
         }
@@ -7335,7 +7391,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function selectFromWriteConnection($query, $bindings = [])
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->selectFromWriteConnection($query, $bindings);
         }
@@ -7351,7 +7407,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function select($query, $bindings = [], $useReadPdo = true)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->select($query, $bindings, $useReadPdo);
         }
@@ -7367,7 +7423,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function selectResultSets($query, $bindings = [], $useReadPdo = true)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->selectResultSets($query, $bindings, $useReadPdo);
         }
@@ -7383,7 +7439,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function cursor($query, $bindings = [], $useReadPdo = true)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->cursor($query, $bindings, $useReadPdo);
         }
@@ -7398,7 +7454,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function update($query, $bindings = [])
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->update($query, $bindings);
         }
@@ -7413,7 +7469,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function delete($query, $bindings = [])
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->delete($query, $bindings);
         }
@@ -7428,7 +7484,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function statement($query, $bindings = [])
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->statement($query, $bindings);
         }
@@ -7443,7 +7499,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function affectingStatement($query, $bindings = [])
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->affectingStatement($query, $bindings);
         }
@@ -7457,7 +7513,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function unprepared($query)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->unprepared($query);
         }
@@ -7470,7 +7526,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function threadCount()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->threadCount();
         }
@@ -7478,13 +7534,13 @@ namespace Illuminate\Support\Facades {
         /**
          * Execute the given callback in "dry run" mode.
          *
-         * @param \Closure $callback
-         * @return array
+         * @param (\Closure(\Illuminate\Database\Connection): mixed) $callback
+         * @return \Illuminate\Database\array{query: string, bindings: array, time: float|null}[]
          * @static
          */
         public static function pretend($callback)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->pretend($callback);
         }
@@ -7498,7 +7554,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function withoutPretending($callback)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->withoutPretending($callback);
         }
@@ -7513,7 +7569,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function bindValues($statement, $bindings)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->bindValues($statement, $bindings);
         }
@@ -7527,7 +7583,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function prepareBindings($bindings)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->prepareBindings($bindings);
         }
@@ -7543,7 +7599,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function logQuery($query, $bindings, $time = null)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->logQuery($query, $bindings, $time);
         }
@@ -7552,13 +7608,13 @@ namespace Illuminate\Support\Facades {
          * Register a callback to be invoked when the connection queries for longer than a given amount of time.
          *
          * @param \DateTimeInterface|\Carbon\CarbonInterval|float|int $threshold
-         * @param callable $handler
+         * @param (callable(\Illuminate\Database\Connection, class-string<\Illuminate\Database\Events\QueryExecuted>): mixed) $handler
          * @return void
          * @static
          */
         public static function whenQueryingForLongerThan($threshold, $handler)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->whenQueryingForLongerThan($threshold, $handler);
         }
@@ -7571,7 +7627,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function allowQueryDurationHandlersToRunAgain()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->allowQueryDurationHandlersToRunAgain();
         }
@@ -7584,7 +7640,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function totalQueryDuration()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->totalQueryDuration();
         }
@@ -7597,7 +7653,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function resetTotalQueryDuration()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->resetTotalQueryDuration();
         }
@@ -7610,7 +7666,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function reconnectIfMissingConnection()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->reconnectIfMissingConnection();
         }
@@ -7624,7 +7680,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function beforeStartingTransaction($callback)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->beforeStartingTransaction($callback);
         }
@@ -7638,7 +7694,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function beforeExecuting($callback)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->beforeExecuting($callback);
         }
@@ -7652,7 +7708,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function listen($callback)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->listen($callback);
         }
@@ -7666,7 +7722,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function raw($value)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->raw($value);
         }
@@ -7681,7 +7737,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function escape($value, $binary = false)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->escape($value, $binary);
         }
@@ -7694,7 +7750,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasModifiedRecords()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->hasModifiedRecords();
         }
@@ -7708,7 +7764,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function recordsHaveBeenModified($value = true)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->recordsHaveBeenModified($value);
         }
@@ -7722,7 +7778,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setRecordModificationState($value)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setRecordModificationState($value);
         }
@@ -7735,7 +7791,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetRecordModificationState()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->forgetRecordModificationState();
         }
@@ -7749,7 +7805,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function useWriteConnectionWhenReading($value = true)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->useWriteConnectionWhenReading($value);
         }
@@ -7762,7 +7818,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPdo()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getPdo();
         }
@@ -7775,7 +7831,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRawPdo()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getRawPdo();
         }
@@ -7788,7 +7844,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getReadPdo()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getReadPdo();
         }
@@ -7801,7 +7857,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRawReadPdo()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getRawReadPdo();
         }
@@ -7815,7 +7871,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setPdo($pdo)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setPdo($pdo);
         }
@@ -7829,7 +7885,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setReadPdo($pdo)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setReadPdo($pdo);
         }
@@ -7842,7 +7898,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getName()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getName();
         }
@@ -7855,7 +7911,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getNameWithReadWriteType()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getNameWithReadWriteType();
         }
@@ -7869,7 +7925,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getConfig($option = null)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getConfig($option);
         }
@@ -7882,7 +7938,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getDriverName()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getDriverName();
         }
@@ -7895,7 +7951,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getQueryGrammar()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getQueryGrammar();
         }
@@ -7909,7 +7965,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setQueryGrammar($grammar)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setQueryGrammar($grammar);
         }
@@ -7922,7 +7978,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getSchemaGrammar()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getSchemaGrammar();
         }
@@ -7936,7 +7992,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setSchemaGrammar($grammar)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setSchemaGrammar($grammar);
         }
@@ -7949,7 +8005,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPostProcessor()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getPostProcessor();
         }
@@ -7963,7 +8019,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setPostProcessor($processor)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setPostProcessor($processor);
         }
@@ -7976,7 +8032,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getEventDispatcher()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getEventDispatcher();
         }
@@ -7990,7 +8046,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setEventDispatcher($events)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setEventDispatcher($events);
         }
@@ -8003,7 +8059,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function unsetEventDispatcher()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->unsetEventDispatcher();
         }
@@ -8017,7 +8073,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setTransactionManager($manager)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setTransactionManager($manager);
         }
@@ -8030,7 +8086,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function unsetTransactionManager()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->unsetTransactionManager();
         }
@@ -8043,7 +8099,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function pretending()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->pretending();
         }
@@ -8051,12 +8107,12 @@ namespace Illuminate\Support\Facades {
         /**
          * Get the connection query log.
          *
-         * @return array
+         * @return \Illuminate\Database\array{query: string, bindings: array, time: float|null}[]
          * @static
          */
         public static function getQueryLog()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getQueryLog();
         }
@@ -8069,7 +8125,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRawQueryLog()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getRawQueryLog();
         }
@@ -8082,7 +8138,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function flushQueryLog()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->flushQueryLog();
         }
@@ -8095,7 +8151,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function enableQueryLog()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->enableQueryLog();
         }
@@ -8108,7 +8164,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function disableQueryLog()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->disableQueryLog();
         }
@@ -8121,7 +8177,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function logging()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->logging();
         }
@@ -8134,7 +8190,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getDatabaseName()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getDatabaseName();
         }
@@ -8148,7 +8204,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setDatabaseName($database)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setDatabaseName($database);
         }
@@ -8162,7 +8218,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setReadWriteType($readWriteType)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setReadWriteType($readWriteType);
         }
@@ -8175,7 +8231,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getTablePrefix()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->getTablePrefix();
         }
@@ -8189,7 +8245,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setTablePrefix($prefix)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->setTablePrefix($prefix);
         }
@@ -8203,7 +8259,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function withoutTablePrefix($callback)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->withoutTablePrefix($callback);
         }
@@ -8218,7 +8274,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function resolverFor($driver, $callback)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             \Illuminate\Database\MySqlConnection::resolverFor($driver, $callback);
         }
 
@@ -8231,15 +8287,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function getResolver($driver)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             return \Illuminate\Database\MySqlConnection::getResolver($driver);
         }
 
         /**
-         *
-         *
          * @template TReturn of mixed
-         *
+         * 
          * Execute a Closure within a transaction.
          * @param (\Closure(static): TReturn) $callback
          * @param int $attempts
@@ -8249,7 +8303,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function transaction($callback, $attempts = 1)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->transaction($callback, $attempts);
         }
@@ -8263,7 +8317,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function beginTransaction()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->beginTransaction();
         }
@@ -8277,7 +8331,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function commit()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->commit();
         }
@@ -8292,7 +8346,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function rollBack($toLevel = null)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->rollBack($toLevel);
         }
@@ -8305,7 +8359,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function transactionLevel()
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             return $instance->transactionLevel();
         }
@@ -8320,15 +8374,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function afterCommit($callback)
         {
-            //Method inherited from \Illuminate\Database\Connection
+            //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\MySqlConnection $instance */
             $instance->afterCommit($callback);
         }
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Events\Dispatcher
      * @see \Illuminate\Support\Testing\Fakes\EventFake
      */
@@ -8535,6 +8587,20 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
+         * Execute the given callback while deferring events, then dispatch all deferred events.
+         *
+         * @param callable $callback
+         * @param array|null $events
+         * @return mixed
+         * @static
+         */
+        public static function defer($callback, $events = null)
+        {
+            /** @var \Illuminate\Events\Dispatcher $instance */
+            return $instance->defer($callback, $events);
+        }
+
+        /**
          * Gets the raw, unprepared listeners.
          *
          * @return array
@@ -8639,6 +8705,20 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
+         * Assert if an event was dispatched exactly once.
+         *
+         * @param string $event
+         * @param int $times
+         * @return void
+         * @static
+         */
+        public static function assertDispatchedOnce($event)
+        {
+            /** @var \Illuminate\Support\Testing\Fakes\EventFake $instance */
+            $instance->assertDispatchedOnce($event);
+        }
+
+        /**
          * Assert if an event was dispatched a number of times.
          *
          * @param string $event
@@ -8719,8 +8799,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Filesystem\Filesystem
      */
     class File {
@@ -9326,7 +9404,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Recursively delete a directory.
-         *
+         * 
          * The directory itself may be optionally preserved.
          *
          * @param string $directory
@@ -9453,8 +9531,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Auth\Access\Gate
      */
     class Gate {
@@ -9577,7 +9653,7 @@ namespace Illuminate\Support\Facades {
          * Determine if all of the given abilities should be granted for the current user.
          *
          * @param iterable|\UnitEnum|string $ability
-         * @param array|mixed $arguments
+         * @param mixed $arguments
          * @return bool
          * @static
          */
@@ -9591,7 +9667,7 @@ namespace Illuminate\Support\Facades {
          * Determine if any of the given abilities should be denied for the current user.
          *
          * @param iterable|\UnitEnum|string $ability
-         * @param array|mixed $arguments
+         * @param mixed $arguments
          * @return bool
          * @static
          */
@@ -9605,7 +9681,7 @@ namespace Illuminate\Support\Facades {
          * Determine if all of the given abilities should be granted for the current user.
          *
          * @param iterable|\UnitEnum|string $abilities
-         * @param array|mixed $arguments
+         * @param mixed $arguments
          * @return bool
          * @static
          */
@@ -9619,7 +9695,7 @@ namespace Illuminate\Support\Facades {
          * Determine if any one of the given abilities should be granted for the current user.
          *
          * @param iterable|\UnitEnum|string $abilities
-         * @param array|mixed $arguments
+         * @param mixed $arguments
          * @return bool
          * @static
          */
@@ -9633,7 +9709,7 @@ namespace Illuminate\Support\Facades {
          * Determine if all of the given abilities should be denied for the current user.
          *
          * @param iterable|\UnitEnum|string $abilities
-         * @param array|mixed $arguments
+         * @param mixed $arguments
          * @return bool
          * @static
          */
@@ -9647,7 +9723,7 @@ namespace Illuminate\Support\Facades {
          * Determine if the given ability should be granted for the current user.
          *
          * @param \UnitEnum|string $ability
-         * @param array|mixed $arguments
+         * @param mixed $arguments
          * @return \Illuminate\Auth\Access\Response
          * @throws \Illuminate\Auth\Access\AuthorizationException
          * @static
@@ -9821,8 +9897,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Hashing\HashManager
      * @see \Illuminate\Hashing\AbstractHasher
      */
@@ -9968,7 +10042,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function driver($driver = null)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Hashing\HashManager $instance */
             return $instance->driver($driver);
         }
@@ -9983,7 +10057,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function extend($driver, $callback)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Hashing\HashManager $instance */
             return $instance->extend($driver, $callback);
         }
@@ -9996,7 +10070,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getDrivers()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Hashing\HashManager $instance */
             return $instance->getDrivers();
         }
@@ -10009,7 +10083,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getContainer()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Hashing\HashManager $instance */
             return $instance->getContainer();
         }
@@ -10023,7 +10097,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setContainer($container)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Hashing\HashManager $instance */
             return $instance->setContainer($container);
         }
@@ -10036,15 +10110,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetDrivers()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Hashing\HashManager $instance */
             return $instance->forgetDrivers();
         }
 
             }
     /**
-     *
-     *
      * @method static \Illuminate\Http\Client\PendingRequest baseUrl(string $url)
      * @method static \Illuminate\Http\Client\PendingRequest withBody(\Psr\Http\Message\StreamInterface|string $content, string $contentType = 'application/json')
      * @method static \Illuminate\Http\Client\PendingRequest asJson()
@@ -10061,6 +10133,7 @@ namespace Illuminate\Support\Facades {
      * @method static \Illuminate\Http\Client\PendingRequest replaceHeaders(array $headers)
      * @method static \Illuminate\Http\Client\PendingRequest withBasicAuth(string $username, string $password)
      * @method static \Illuminate\Http\Client\PendingRequest withDigestAuth(string $username, string $password)
+     * @method static \Illuminate\Http\Client\PendingRequest withNtlmAuth(string $username, string $password)
      * @method static \Illuminate\Http\Client\PendingRequest withToken(string $token, string $type = 'Bearer')
      * @method static \Illuminate\Http\Client\PendingRequest withUserAgent(string|bool $userAgent)
      * @method static \Illuminate\Http\Client\PendingRequest withUrlParameters(array $parameters = [])
@@ -10102,6 +10175,8 @@ namespace Illuminate\Support\Facades {
      * @method static \Illuminate\Http\Client\PendingRequest stub(callable $callback)
      * @method static \Illuminate\Http\Client\PendingRequest async(bool $async = true)
      * @method static \GuzzleHttp\Promise\PromiseInterface|null getPromise()
+     * @method static \Illuminate\Http\Client\PendingRequest truncateExceptionsAt(int $length)
+     * @method static \Illuminate\Http\Client\PendingRequest dontTruncateExceptions()
      * @method static \Illuminate\Http\Client\PendingRequest setClient(\GuzzleHttp\Client $client)
      * @method static \Illuminate\Http\Client\PendingRequest setHandler(callable $handler)
      * @method static array getOptions()
@@ -10525,8 +10600,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Translation\Translator
      */
     class Lang {
@@ -10837,7 +10910,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setParsedKey($key, $parsed)
         {
-            //Method inherited from \Illuminate\Support\NamespacedItemResolver
+            //Method inherited from \Illuminate\Support\NamespacedItemResolver 
             /** @var \Illuminate\Translation\Translator $instance */
             $instance->setParsedKey($key, $parsed);
         }
@@ -10850,7 +10923,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function flushParsedKeys()
         {
-            //Method inherited from \Illuminate\Support\NamespacedItemResolver
+            //Method inherited from \Illuminate\Support\NamespacedItemResolver 
             /** @var \Illuminate\Translation\Translator $instance */
             $instance->flushParsedKeys();
         }
@@ -10908,8 +10981,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static void write(string $level, \Illuminate\Contracts\Support\Arrayable|\Illuminate\Contracts\Support\Jsonable|\Illuminate\Support\Stringable|array|string $message, array $context = [])
      * @method static \Illuminate\Log\Logger withContext(array $context = [])
      * @method static void listen(\Closure $callback)
@@ -11105,7 +11176,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Action must be taken immediately.
-         *
+         * 
          * Example: Entire website down, database unavailable, etc. This should
          * trigger the SMS alerts and wake you up.
          *
@@ -11122,7 +11193,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Critical conditions.
-         *
+         * 
          * Example: Application component unavailable, unexpected exception.
          *
          * @param string|\Stringable $message
@@ -11153,7 +11224,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Exceptional occurrences that are not errors.
-         *
+         * 
          * Example: Use of deprecated APIs, poor use of an API, undesirable things
          * that are not necessarily wrong.
          *
@@ -11184,7 +11255,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Interesting events.
-         *
+         * 
          * Example: User logs in, SQL logs.
          *
          * @param string|\Stringable $message
@@ -11242,8 +11313,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static void alwaysFrom(string $address, string|null $name = null)
      * @method static void alwaysReplyTo(string $address, string|null $name = null)
      * @method static void alwaysReturnPath(string $address)
@@ -11721,8 +11790,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Notifications\ChannelManager
      * @see \Illuminate\Support\Testing\Fakes\NotificationFake
      */
@@ -11829,7 +11896,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function driver($driver = null)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Notifications\ChannelManager $instance */
             return $instance->driver($driver);
         }
@@ -11844,7 +11911,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function extend($driver, $callback)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Notifications\ChannelManager $instance */
             return $instance->extend($driver, $callback);
         }
@@ -11857,7 +11924,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getDrivers()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Notifications\ChannelManager $instance */
             return $instance->getDrivers();
         }
@@ -11870,7 +11937,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getContainer()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Notifications\ChannelManager $instance */
             return $instance->getContainer();
         }
@@ -11884,7 +11951,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setContainer($container)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Notifications\ChannelManager $instance */
             return $instance->setContainer($container);
         }
@@ -11897,7 +11964,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetDrivers()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Notifications\ChannelManager $instance */
             return $instance->forgetDrivers();
         }
@@ -12138,8 +12205,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static string sendResetLink(array $credentials, \Closure|null $callback = null)
      * @method static mixed reset(array $credentials, \Closure $callback)
      * @method static \Illuminate\Contracts\Auth\CanResetPassword|null getUser(array $credentials)
@@ -12192,8 +12257,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static \Illuminate\Process\PendingProcess command(array|string $command)
      * @method static \Illuminate\Process\PendingProcess path(string $path)
      * @method static \Illuminate\Process\PendingProcess timeout(int $timeout)
@@ -12517,8 +12580,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Queue\QueueManager
      * @see \Illuminate\Queue\Queue
      * @see \Illuminate\Support\Testing\Fakes\QueueFake
@@ -12587,6 +12648,19 @@ namespace Illuminate\Support\Facades {
         {
             /** @var \Illuminate\Queue\QueueManager $instance */
             $instance->failing($callback);
+        }
+
+        /**
+         * Register an event listener for the daemon queue starting.
+         *
+         * @param mixed $callback
+         * @return void
+         * @static
+         */
+        public static function starting($callback)
+        {
+            /** @var \Illuminate\Queue\QueueManager $instance */
+            $instance->starting($callback);
         }
 
         /**
@@ -12923,6 +12997,58 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
+         * Get the number of pending jobs.
+         *
+         * @param string|null $queue
+         * @return int
+         * @static
+         */
+        public static function pendingSize($queue = null)
+        {
+            /** @var \Illuminate\Support\Testing\Fakes\QueueFake $instance */
+            return $instance->pendingSize($queue);
+        }
+
+        /**
+         * Get the number of delayed jobs.
+         *
+         * @param string|null $queue
+         * @return int
+         * @static
+         */
+        public static function delayedSize($queue = null)
+        {
+            /** @var \Illuminate\Support\Testing\Fakes\QueueFake $instance */
+            return $instance->delayedSize($queue);
+        }
+
+        /**
+         * Get the number of reserved jobs.
+         *
+         * @param string|null $queue
+         * @return int
+         * @static
+         */
+        public static function reservedSize($queue = null)
+        {
+            /** @var \Illuminate\Support\Testing\Fakes\QueueFake $instance */
+            return $instance->reservedSize($queue);
+        }
+
+        /**
+         * Get the creation timestamp of the oldest pending job, excluding delayed jobs.
+         *
+         * @param string|null $queue
+         * @return int|null
+         * @static
+         */
+        public static function creationTimeOfOldestPendingJob($queue = null)
+        {
+            /** @var \Illuminate\Support\Testing\Fakes\QueueFake $instance */
+            return $instance->creationTimeOfOldestPendingJob($queue);
+        }
+
+        /**
          * Push a new job onto the queue.
          *
          * @param string|object $job
@@ -13204,7 +13330,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getJobTries($job)
         {
-            //Method inherited from \Illuminate\Queue\Queue
+            //Method inherited from \Illuminate\Queue\Queue 
             /** @var \Illuminate\Queue\RedisQueue $instance */
             return $instance->getJobTries($job);
         }
@@ -13218,7 +13344,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getJobBackoff($job)
         {
-            //Method inherited from \Illuminate\Queue\Queue
+            //Method inherited from \Illuminate\Queue\Queue 
             /** @var \Illuminate\Queue\RedisQueue $instance */
             return $instance->getJobBackoff($job);
         }
@@ -13232,7 +13358,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getJobExpiration($job)
         {
-            //Method inherited from \Illuminate\Queue\Queue
+            //Method inherited from \Illuminate\Queue\Queue 
             /** @var \Illuminate\Queue\RedisQueue $instance */
             return $instance->getJobExpiration($job);
         }
@@ -13246,7 +13372,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function createPayloadUsing($callback)
         {
-            //Method inherited from \Illuminate\Queue\Queue
+            //Method inherited from \Illuminate\Queue\Queue 
             \Illuminate\Queue\RedisQueue::createPayloadUsing($callback);
         }
 
@@ -13258,7 +13384,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getContainer()
         {
-            //Method inherited from \Illuminate\Queue\Queue
+            //Method inherited from \Illuminate\Queue\Queue 
             /** @var \Illuminate\Queue\RedisQueue $instance */
             return $instance->getContainer();
         }
@@ -13272,15 +13398,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function setContainer($container)
         {
-            //Method inherited from \Illuminate\Queue\Queue
+            //Method inherited from \Illuminate\Queue\Queue 
             /** @var \Illuminate\Queue\RedisQueue $instance */
             $instance->setContainer($container);
         }
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Cache\RateLimiter
      */
     class RateLimiter {
@@ -13402,7 +13526,7 @@ namespace Illuminate\Support\Facades {
          * Reset the number of attempts for the given key.
          *
          * @param string $key
-         * @return mixed
+         * @return bool
          * @static
          */
         public static function resetAttempts($key)
@@ -13480,8 +13604,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Routing\Redirector
      */
     class Redirect {
@@ -13761,11 +13883,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
-     * @method static array validate(array $rules, ...$params)
-     * @method static array validateWithBag(string $errorBag, array $rules, ...$params)
-     * @method static bool hasValidSignature(bool $absolute = true)
      * @see \Illuminate\Http\Request
      */
     class Request {
@@ -14128,7 +14245,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * This method belongs to Symfony HttpFoundation and is not usually needed when using Laravel.
-         *
+         * 
          * Instead, you may use the "input" method.
          *
          * @param string $key
@@ -14201,7 +14318,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Whether the request contains a Session object.
-         *
+         * 
          * This method does not give any information about the state of the session object,
          * like whether the session is started or not. It is just a way to check if this Request
          * is associated with a Session instance.
@@ -14449,7 +14566,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Sets the parameters for this request.
-         *
+         * 
          * This method also re-initializes all properties.
          *
          * @param array $query The GET parameters
@@ -14463,7 +14580,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function initialize($query = [], $request = [], $attributes = [], $cookies = [], $files = [], $server = [], $content = null)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->initialize($query, $request, $attributes, $cookies, $files, $server, $content);
         }
@@ -14475,13 +14592,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function createFromGlobals()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::createFromGlobals();
         }
 
         /**
          * Creates a Request based on a given URI and configuration.
-         *
+         * 
          * The information contained in the URI always take precedence
          * over the other information (server and parameters).
          *
@@ -14497,13 +14614,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function create($uri, $method = 'GET', $parameters = [], $cookies = [], $files = [], $server = [], $content = null)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::create($uri, $method, $parameters, $cookies, $files, $server, $content);
         }
 
         /**
          * Sets a callable able to create a Request instance.
-         *
+         * 
          * This is mainly useful when you need to override the Request class
          * to keep BC with an existing system. It should not be used for any
          * other purpose.
@@ -14512,13 +14629,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function setFactory($callable)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::setFactory($callable);
         }
 
         /**
          * Overrides the PHP global variables according to this request instance.
-         *
+         * 
          * It overrides $_GET, $_POST, $_REQUEST, $_SERVER, $_COOKIE.
          * $_FILES is never overridden, see rfc1867
          *
@@ -14526,14 +14643,14 @@ namespace Illuminate\Support\Facades {
          */
         public static function overrideGlobals()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->overrideGlobals();
         }
 
         /**
          * Sets a list of trusted proxies.
-         *
+         * 
          * You should only list the reverse proxies that you manage directly.
          *
          * @param array $proxies A list of trusted proxies, the string 'REMOTE_ADDR' will be replaced with $_SERVER['REMOTE_ADDR'] and 'PRIVATE_SUBNETS' by IpUtils::PRIVATE_SUBNETS
@@ -14542,7 +14659,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setTrustedProxies($proxies, $trustedHeaderSet)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::setTrustedProxies($proxies, $trustedHeaderSet);
         }
 
@@ -14554,7 +14671,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getTrustedProxies()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::getTrustedProxies();
         }
 
@@ -14566,13 +14683,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function getTrustedHeaderSet()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::getTrustedHeaderSet();
         }
 
         /**
          * Sets a list of trusted host patterns.
-         *
+         * 
          * You should only list the hosts you manage using regexs.
          *
          * @param array $hostPatterns A list of trusted host patterns
@@ -14580,7 +14697,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setTrustedHosts($hostPatterns)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::setTrustedHosts($hostPatterns);
         }
 
@@ -14592,13 +14709,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function getTrustedHosts()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::getTrustedHosts();
         }
 
         /**
          * Normalizes a query string.
-         *
+         * 
          * It builds a normalized query string, where keys/value pairs are alphabetized,
          * have consistent escaping and unneeded delimiters are removed.
          *
@@ -14606,26 +14723,26 @@ namespace Illuminate\Support\Facades {
          */
         public static function normalizeQueryString($qs)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::normalizeQueryString($qs);
         }
 
         /**
          * Enables support for the _method request parameter to determine the intended HTTP method.
-         *
+         * 
          * Be warned that enabling this feature might lead to CSRF issues in your code.
          * Check that you are using CSRF tokens when required.
          * If the HTTP method parameter override is enabled, an html-form with method "POST" can be altered
          * and used to send a "PUT" or "DELETE" request via the _method request parameter.
          * If these methods are not protected against CSRF, this presents a possible vulnerability.
-         *
+         * 
          * The HTTP method can only be overridden when the real HTTP method is POST.
          *
          * @static
          */
         public static function enableHttpMethodParameterOverride()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::enableHttpMethodParameterOverride();
         }
 
@@ -14636,7 +14753,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getHttpMethodParameterOverride()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::getHttpMethodParameterOverride();
         }
 
@@ -14648,44 +14765,40 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasPreviousSession()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->hasPreviousSession();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setSession($session)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->setSession($session);
         }
 
         /**
-         *
-         *
          * @internal
          * @param callable():  SessionInterface $factory
          * @static
          */
         public static function setSessionFactory($factory)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->setSessionFactory($factory);
         }
 
         /**
          * Returns the client IP addresses.
-         *
+         * 
          * In the returned array the most trusted IP address is first, and the
          * least trusted one last. The "real" client IP address is the last one,
          * but this is also the least trusted one. Trusted proxies are stripped.
-         *
+         * 
          * Use this method carefully; you should use getClientIp() instead.
          *
          * @see getClientIp()
@@ -14693,20 +14806,20 @@ namespace Illuminate\Support\Facades {
          */
         public static function getClientIps()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getClientIps();
         }
 
         /**
          * Returns the client IP address.
-         *
+         * 
          * This method can read the client IP address from the "X-Forwarded-For" header
          * when trusted proxies were set via "setTrustedProxies()". The "X-Forwarded-For"
          * header value is a comma+space separated list of IP addresses, the left-most
          * being the original client, and each successive proxy that passed the request
          * adding the IP address where it received the request from.
-         *
+         * 
          * If your reverse proxy uses a different header name than "X-Forwarded-For",
          * ("Client-Ip" for instance), configure it via the $trustedHeaderSet
          * argument of the Request::setTrustedProxies() method instead.
@@ -14717,7 +14830,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getClientIp()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getClientIp();
         }
@@ -14729,18 +14842,18 @@ namespace Illuminate\Support\Facades {
          */
         public static function getScriptName()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getScriptName();
         }
 
         /**
          * Returns the path being requested relative to the executed script.
-         *
+         * 
          * The path info always starts with a /.
-         *
+         * 
          * Suppose this request is instantiated from /mysite on localhost:
-         *
+         * 
          *  * http://localhost/mysite              returns an empty string
          *  * http://localhost/mysite/about        returns '/about'
          *  * http://localhost/mysite/enco%20ded   returns '/enco%20ded'
@@ -14751,16 +14864,16 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPathInfo()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getPathInfo();
         }
 
         /**
          * Returns the root path from which this request is executed.
-         *
+         * 
          * Suppose that an index.php file instantiates this request object:
-         *
+         * 
          *  * http://localhost/index.php         returns an empty string
          *  * http://localhost/index.php/page    returns an empty string
          *  * http://localhost/web/index.php     returns '/web'
@@ -14771,16 +14884,16 @@ namespace Illuminate\Support\Facades {
          */
         public static function getBasePath()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getBasePath();
         }
 
         /**
          * Returns the root URL from which this request is executed.
-         *
+         * 
          * The base URL never ends with a /.
-         *
+         * 
          * This is similar to getBasePath(), except that it also includes the
          * script filename (e.g. index.php) if one exists.
          *
@@ -14789,7 +14902,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getBaseUrl()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getBaseUrl();
         }
@@ -14801,17 +14914,17 @@ namespace Illuminate\Support\Facades {
          */
         public static function getScheme()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getScheme();
         }
 
         /**
          * Returns the port on which the request is made.
-         *
+         * 
          * This method can read the client port from the "X-Forwarded-Port" header
          * when trusted proxies were set via "setTrustedProxies()".
-         *
+         * 
          * The "X-Forwarded-Port" header must contain the client port.
          *
          * @return int|string|null Can be a string if fetched from the server bag
@@ -14819,7 +14932,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPort()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getPort();
         }
@@ -14831,7 +14944,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getUser()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getUser();
         }
@@ -14843,7 +14956,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPassword()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getPassword();
         }
@@ -14856,21 +14969,21 @@ namespace Illuminate\Support\Facades {
          */
         public static function getUserInfo()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getUserInfo();
         }
 
         /**
          * Returns the HTTP host being requested.
-         *
+         * 
          * The port name will be appended to the host if it's non-standard.
          *
          * @static
          */
         public static function getHttpHost()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getHttpHost();
         }
@@ -14883,14 +14996,14 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRequestUri()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getRequestUri();
         }
 
         /**
          * Gets the scheme and HTTP host.
-         *
+         * 
          * If the URL was called with basic authentication, the user
          * and the password are not added to the generated string.
          *
@@ -14898,7 +15011,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getSchemeAndHttpHost()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getSchemeAndHttpHost();
         }
@@ -14911,7 +15024,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getUri()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getUri();
         }
@@ -14924,19 +15037,19 @@ namespace Illuminate\Support\Facades {
          */
         public static function getUriForPath($path)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getUriForPath($path);
         }
 
         /**
          * Returns the path as relative reference from the current Request path.
-         *
+         * 
          * Only the URIs path component (no schema, host etc.) is relevant and must be given.
          * Both paths must be absolute and not contain relative parts.
          * Relative URLs from one resource to another are useful when generating self-contained downloadable document archives.
          * Furthermore, they can be used to reduce the link size in documents.
-         *
+         * 
          * Example target paths, given a base path of "/a/b/c/d":
          * - "/a/b/c/d"     -> ""
          * - "/a/b/c/"      -> "./"
@@ -14948,14 +15061,14 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRelativeUriForPath($path)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getRelativeUriForPath($path);
         }
 
         /**
          * Generates the normalized query string for the Request.
-         *
+         * 
          * It builds a normalized query string, where keys/value pairs are alphabetized
          * and have consistent escaping.
          *
@@ -14963,34 +15076,34 @@ namespace Illuminate\Support\Facades {
          */
         public static function getQueryString()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getQueryString();
         }
 
         /**
          * Checks whether the request is secure or not.
-         *
+         * 
          * This method can read the client protocol from the "X-Forwarded-Proto" header
          * when trusted proxies were set via "setTrustedProxies()".
-         *
+         * 
          * The "X-Forwarded-Proto" header must contain the protocol: "https" or "http".
          *
          * @static
          */
         public static function isSecure()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->isSecure();
         }
 
         /**
          * Returns the host name.
-         *
+         * 
          * This method can read the client host name from the "X-Forwarded-Host" header
          * when trusted proxies were set via "setTrustedProxies()".
-         *
+         * 
          * The "X-Forwarded-Host" header must contain the client host name.
          *
          * @throws SuspiciousOperationException when the host name is invalid or not trusted
@@ -14998,7 +15111,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getHost()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getHost();
         }
@@ -15010,20 +15123,20 @@ namespace Illuminate\Support\Facades {
          */
         public static function setMethod($method)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->setMethod($method);
         }
 
         /**
          * Gets the request "intended" method.
-         *
+         * 
          * If the X-HTTP-Method-Override header is set, and if the method is a POST,
          * then it is used to determine the "real" intended HTTP method.
-         *
+         * 
          * The _method request parameter can also be used to determine the HTTP method,
          * but only if enableHttpMethodParameterOverride() has been called.
-         *
+         * 
          * The method is always an uppercased string.
          *
          * @see getRealMethod()
@@ -15031,7 +15144,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getMethod()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getMethod();
         }
@@ -15044,7 +15157,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRealMethod()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getRealMethod();
         }
@@ -15056,7 +15169,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getMimeType($format)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getMimeType($format);
         }
@@ -15069,7 +15182,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getMimeTypes($format)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             return \Illuminate\Http\Request::getMimeTypes($format);
         }
 
@@ -15080,7 +15193,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getFormat($mimeType)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getFormat($mimeType);
         }
@@ -15093,16 +15206,16 @@ namespace Illuminate\Support\Facades {
          */
         public static function setFormat($format, $mimeTypes)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->setFormat($format, $mimeTypes);
         }
 
         /**
          * Gets the request format.
-         *
+         * 
          * Here is the process to determine the format:
-         *
+         * 
          *  * format defined by the user (with setRequestFormat())
          *  * _format request attribute
          *  * $default
@@ -15112,7 +15225,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRequestFormat($default = 'html')
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getRequestFormat($default);
         }
@@ -15124,7 +15237,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setRequestFormat($format)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->setRequestFormat($format);
         }
@@ -15137,7 +15250,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getContentTypeFormat()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getContentTypeFormat();
         }
@@ -15149,7 +15262,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setDefaultLocale($locale)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->setDefaultLocale($locale);
         }
@@ -15161,7 +15274,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getDefaultLocale()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getDefaultLocale();
         }
@@ -15173,7 +15286,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setLocale($locale)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->setLocale($locale);
         }
@@ -15185,7 +15298,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getLocale()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getLocale();
         }
@@ -15198,7 +15311,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function isMethod($method)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->isMethod($method);
         }
@@ -15211,7 +15324,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function isMethodSafe()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->isMethodSafe();
         }
@@ -15223,7 +15336,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function isMethodIdempotent()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->isMethodIdempotent();
         }
@@ -15236,14 +15349,14 @@ namespace Illuminate\Support\Facades {
          */
         public static function isMethodCacheable()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->isMethodCacheable();
         }
 
         /**
          * Returns the protocol version.
-         *
+         * 
          * If the application is behind a proxy, the protocol version used in the
          * requests between the client and the proxy and between the proxy and the
          * server might be different. This returns the former (from the "Via" header)
@@ -15254,7 +15367,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getProtocolVersion()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getProtocolVersion();
         }
@@ -15269,7 +15382,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getContent($asResource = false)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getContent($asResource);
         }
@@ -15282,7 +15395,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPayload()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getPayload();
         }
@@ -15294,19 +15407,17 @@ namespace Illuminate\Support\Facades {
          */
         public static function getETags()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getETags();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function isNoCache()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->isNoCache();
         }
@@ -15315,7 +15426,7 @@ namespace Illuminate\Support\Facades {
          * Gets the preferred format for the response by inspecting, in the following order:
          *   * the request format set using setRequestFormat;
          *   * the values of the Accept HTTP header.
-         *
+         * 
          * Note that if you use this method, you should send the "Vary: Accept" header
          * in the response to prevent any issues with intermediary HTTP caches.
          *
@@ -15323,7 +15434,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPreferredFormat($default = 'html')
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getPreferredFormat($default);
         }
@@ -15336,7 +15447,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPreferredLanguage($locales = null)
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getPreferredLanguage($locales);
         }
@@ -15349,7 +15460,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getLanguages()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getLanguages();
         }
@@ -15362,7 +15473,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getCharsets()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getCharsets();
         }
@@ -15375,7 +15486,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getEncodings()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getEncodings();
         }
@@ -15388,14 +15499,14 @@ namespace Illuminate\Support\Facades {
          */
         public static function getAcceptableContentTypes()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->getAcceptableContentTypes();
         }
 
         /**
          * Returns true if the request is an XMLHttpRequest.
-         *
+         * 
          * It works if your JavaScript library sets an X-Requested-With HTTP header.
          * It is known to work with common JavaScript frameworks:
          *
@@ -15404,7 +15515,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function isXmlHttpRequest()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->isXmlHttpRequest();
         }
@@ -15417,14 +15528,14 @@ namespace Illuminate\Support\Facades {
          */
         public static function preferSafeContent()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->preferSafeContent();
         }
 
         /**
          * Indicates whether this request originated from a trusted proxy.
-         *
+         * 
          * This can be useful to determine whether or not to trust the
          * contents of a proxy-specific header.
          *
@@ -15432,7 +15543,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function isFromTrustedProxy()
         {
-            //Method inherited from \Symfony\Component\HttpFoundation\Request
+            //Method inherited from \Symfony\Component\HttpFoundation\Request 
             /** @var \Illuminate\Http\Request $instance */
             return $instance->isFromTrustedProxy();
         }
@@ -16053,7 +16164,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Retrieve data as a boolean value.
-         *
+         * 
          * Returns true when value is "1", "true", "on", and "yes". Otherwise, returns false.
          *
          * @param string|null $key
@@ -16100,7 +16211,7 @@ namespace Illuminate\Support\Facades {
          *
          * @param string $key
          * @param string|null $format
-         * @param string|null $tz
+         * @param \UnitEnum|string|null $tz
          * @return \Illuminate\Support\Carbon|null
          * @throws \Carbon\Exceptions\InvalidFormatException
          * @static
@@ -16279,10 +16390,71 @@ namespace Illuminate\Support\Facades {
             \Illuminate\Http\Request::flushMacros();
         }
 
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
+         * @param array $rules
+         * @param mixed $params
+         * @static
+         */
+        public static function validate($rules, ...$params)
+        {
+            return \Illuminate\Http\Request::validate($rules, ...$params);
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
+         * @param string $errorBag
+         * @param array $rules
+         * @param mixed $params
+         * @static
+         */
+        public static function validateWithBag($errorBag, $rules, ...$params)
+        {
+            return \Illuminate\Http\Request::validateWithBag($errorBag, $rules, ...$params);
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $absolute
+         * @static
+         */
+        public static function hasValidSignature($absolute = true)
+        {
+            return \Illuminate\Http\Request::hasValidSignature($absolute);
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @static
+         */
+        public static function hasValidRelativeSignature()
+        {
+            return \Illuminate\Http\Request::hasValidRelativeSignature();
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $ignoreQuery
+         * @param mixed $absolute
+         * @static
+         */
+        public static function hasValidSignatureWhileIgnoring($ignoreQuery = [], $absolute = true)
+        {
+            return \Illuminate\Http\Request::hasValidSignatureWhileIgnoring($ignoreQuery, $absolute);
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $ignoreQuery
+         * @static
+         */
+        public static function hasValidRelativeSignatureWhileIgnoring($ignoreQuery = [])
+        {
+            return \Illuminate\Http\Request::hasValidRelativeSignatureWhileIgnoring($ignoreQuery);
+        }
+
             }
     /**
-     *
-     *
      * @see \Illuminate\Routing\ResponseFactory
      */
     class Response {
@@ -16590,8 +16762,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static \Illuminate\Routing\RouteRegistrar attribute(string $key, mixed $value)
      * @method static \Illuminate\Routing\RouteRegistrar whereAlpha(array|string $parameters)
      * @method static \Illuminate\Routing\RouteRegistrar whereAlphaNumeric(array|string $parameters)
@@ -16799,6 +16969,20 @@ namespace Illuminate\Support\Facades {
         {
             /** @var \Illuminate\Routing\Router $instance */
             $instance->resources($resources, $options);
+        }
+
+        /**
+         * Register an array of resource controllers that can be soft deleted.
+         *
+         * @param array $resources
+         * @param array $options
+         * @return void
+         * @static
+         */
+        public static function softDeletableResources($resources, $options = [])
+        {
+            /** @var \Illuminate\Routing\Router $instance */
+            $instance->softDeletableResources($resources, $options);
         }
 
         /**
@@ -17189,7 +17373,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Add a middleware to the beginning of a middleware group.
-         *
+         * 
          * If the middleware is already in the group, it will not be added again.
          *
          * @param string $group
@@ -17205,7 +17389,7 @@ namespace Illuminate\Support\Facades {
 
         /**
          * Add a middleware to the end of a middleware group.
-         *
+         * 
          * If the middleware is already in the group, it will not be added again.
          *
          * @param string $group
@@ -17672,8 +17856,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static \Illuminate\Console\Scheduling\PendingEventAttributes withoutOverlapping(int $expiresAt = 1440)
      * @method static void mergeAttributes(\Illuminate\Console\Scheduling\Event $event)
      * @method static \Illuminate\Console\Scheduling\PendingEventAttributes user(string $user)
@@ -17735,7 +17917,7 @@ namespace Illuminate\Support\Facades {
      * @method static \Illuminate\Console\Scheduling\PendingEventAttributes yearly()
      * @method static \Illuminate\Console\Scheduling\PendingEventAttributes yearlyOn(int $month = 1, int|string $dayOfMonth = 1, string $time = '0:0')
      * @method static \Illuminate\Console\Scheduling\PendingEventAttributes days(array|mixed $days)
-     * @method static \Illuminate\Console\Scheduling\PendingEventAttributes timezone(\DateTimeZone|string $timezone)
+     * @method static \Illuminate\Console\Scheduling\PendingEventAttributes timezone(\UnitEnum|\DateTimeZone|string $timezone)
      * @see \Illuminate\Console\Scheduling\Schedule
      */
     class Schedule {
@@ -17756,7 +17938,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Add a new Artisan command event to the schedule.
          *
-         * @param string $command
+         * @param \Symfony\Component\Console\Command\Command|string $command
          * @param array $parameters
          * @return \Illuminate\Console\Scheduling\Event
          * @static
@@ -17771,8 +17953,8 @@ namespace Illuminate\Support\Facades {
          * Add a new job callback event to the schedule.
          *
          * @param object|string $job
-         * @param string|null $queue
-         * @param string|null $connection
+         * @param \UnitEnum|string|null $queue
+         * @param \UnitEnum|string|null $connection
          * @return \Illuminate\Console\Scheduling\CallbackEvent
          * @static
          */
@@ -17944,8 +18126,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Database\Schema\Builder
      */
     class Schema {
@@ -17994,7 +18174,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function defaultStringLength($length)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             \Illuminate\Database\Schema\MySqlBuilder::defaultStringLength($length);
         }
 
@@ -18005,7 +18185,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function defaultTimePrecision($precision)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             return \Illuminate\Database\Schema\MySqlBuilder::defaultTimePrecision($precision);
         }
 
@@ -18019,7 +18199,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function defaultMorphKeyType($type)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             \Illuminate\Database\Schema\MySqlBuilder::defaultMorphKeyType($type);
         }
 
@@ -18031,7 +18211,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function morphUsingUuids()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             \Illuminate\Database\Schema\MySqlBuilder::morphUsingUuids();
         }
 
@@ -18043,7 +18223,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function morphUsingUlids()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             \Illuminate\Database\Schema\MySqlBuilder::morphUsingUlids();
         }
 
@@ -18056,7 +18236,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function createDatabase($name)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->createDatabase($name);
         }
@@ -18070,7 +18250,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function dropDatabaseIfExists($name)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->dropDatabaseIfExists($name);
         }
@@ -18083,7 +18263,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getSchemas()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getSchemas();
         }
@@ -18097,7 +18277,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasTable($table)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->hasTable($table);
         }
@@ -18111,7 +18291,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasView($view)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->hasView($view);
         }
@@ -18125,7 +18305,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getTables($schema = null)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getTables($schema);
         }
@@ -18140,7 +18320,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getTableListing($schema = null, $schemaQualified = true)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getTableListing($schema, $schemaQualified);
         }
@@ -18154,7 +18334,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getViews($schema = null)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getViews($schema);
         }
@@ -18168,7 +18348,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getTypes($schema = null)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getTypes($schema);
         }
@@ -18183,7 +18363,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasColumn($table, $column)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->hasColumn($table, $column);
         }
@@ -18198,7 +18378,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasColumns($table, $columns)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->hasColumns($table, $columns);
         }
@@ -18214,7 +18394,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function whenTableHasColumn($table, $column, $callback)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->whenTableHasColumn($table, $column, $callback);
         }
@@ -18230,7 +18410,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function whenTableDoesntHaveColumn($table, $column, $callback)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->whenTableDoesntHaveColumn($table, $column, $callback);
         }
@@ -18246,7 +18426,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getColumnType($table, $column, $fullDefinition = false)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getColumnType($table, $column, $fullDefinition);
         }
@@ -18260,7 +18440,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getColumnListing($table)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getColumnListing($table);
         }
@@ -18274,7 +18454,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getColumns($table)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getColumns($table);
         }
@@ -18288,7 +18468,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getIndexes($table)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getIndexes($table);
         }
@@ -18302,7 +18482,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getIndexListing($table)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getIndexListing($table);
         }
@@ -18318,7 +18498,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasIndex($table, $index, $type = null)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->hasIndex($table, $index, $type);
         }
@@ -18332,7 +18512,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getForeignKeys($table)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getForeignKeys($table);
         }
@@ -18347,7 +18527,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function table($table, $callback)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->table($table, $callback);
         }
@@ -18362,7 +18542,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function create($table, $callback)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->create($table, $callback);
         }
@@ -18376,7 +18556,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function drop($table)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->drop($table);
         }
@@ -18390,7 +18570,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function dropIfExists($table)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->dropIfExists($table);
         }
@@ -18405,7 +18585,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function dropColumns($table, $columns)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->dropColumns($table, $columns);
         }
@@ -18419,7 +18599,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function dropAllTypes()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->dropAllTypes();
         }
@@ -18434,7 +18614,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function rename($from, $to)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->rename($from, $to);
         }
@@ -18447,7 +18627,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function enableForeignKeyConstraints()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->enableForeignKeyConstraints();
         }
@@ -18460,7 +18640,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function disableForeignKeyConstraints()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->disableForeignKeyConstraints();
         }
@@ -18474,7 +18654,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function withoutForeignKeyConstraints($callback)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->withoutForeignKeyConstraints($callback);
         }
@@ -18487,7 +18667,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getCurrentSchemaName()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getCurrentSchemaName();
         }
@@ -18502,7 +18682,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function parseSchemaAndTable($reference, $withDefaultSchema = null)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->parseSchemaAndTable($reference, $withDefaultSchema);
         }
@@ -18515,7 +18695,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getConnection()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             return $instance->getConnection();
         }
@@ -18523,13 +18703,13 @@ namespace Illuminate\Support\Facades {
         /**
          * Set the Schema Blueprint resolver callback.
          *
-         * @param \Closure(string, \Closure, string):  \Illuminate\Database\Schema\Blueprint|null  $resolver
+         * @param \Closure(\Illuminate\Database\Connection, string, \Closure|null):  \Illuminate\Database\Schema\Blueprint  $resolver
          * @return void
          * @static
          */
         public static function blueprintResolver($resolver)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\MySqlBuilder $instance */
             $instance->blueprintResolver($resolver);
         }
@@ -18545,7 +18725,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function macro($name, $macro)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             \Illuminate\Database\Schema\MySqlBuilder::macro($name, $macro);
         }
 
@@ -18560,7 +18740,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function mixin($mixin, $replace = true)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             \Illuminate\Database\Schema\MySqlBuilder::mixin($mixin, $replace);
         }
 
@@ -18573,7 +18753,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasMacro($name)
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             return \Illuminate\Database\Schema\MySqlBuilder::hasMacro($name);
         }
 
@@ -18585,14 +18765,12 @@ namespace Illuminate\Support\Facades {
          */
         public static function flushMacros()
         {
-            //Method inherited from \Illuminate\Database\Schema\Builder
+            //Method inherited from \Illuminate\Database\Schema\Builder 
             \Illuminate\Database\Schema\MySqlBuilder::flushMacros();
         }
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Session\SessionManager
      */
     class Session {
@@ -18691,7 +18869,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function driver($driver = null)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Session\SessionManager $instance */
             return $instance->driver($driver);
         }
@@ -18706,7 +18884,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function extend($driver, $callback)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Session\SessionManager $instance */
             return $instance->extend($driver, $callback);
         }
@@ -18719,7 +18897,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getDrivers()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Session\SessionManager $instance */
             return $instance->getDrivers();
         }
@@ -18732,7 +18910,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getContainer()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Session\SessionManager $instance */
             return $instance->getContainer();
         }
@@ -18746,7 +18924,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setContainer($container)
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Session\SessionManager $instance */
             return $instance->setContainer($container);
         }
@@ -18759,7 +18937,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function forgetDrivers()
         {
-            //Method inherited from \Illuminate\Support\Manager
+            //Method inherited from \Illuminate\Support\Manager 
             /** @var \Illuminate\Session\SessionManager $instance */
             return $instance->forgetDrivers();
         }
@@ -19459,8 +19637,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @method static bool has(string $location)
      * @method static string read(string $location)
      * @method static \League\Flysystem\DirectoryListing listContents(string $location, bool $deep = false)
@@ -19487,7 +19663,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Get a filesystem instance.
          *
-         * @param string|null $name
+         * @param \UnitEnum|string|null $name
          * @return \Illuminate\Filesystem\LocalFilesystemAdapter
          * @static
          */
@@ -19743,7 +19919,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function assertExists($path, $content = null)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->assertExists($path, $content);
         }
@@ -19759,7 +19935,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function assertCount($path, $count, $recursive = false)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->assertCount($path, $count, $recursive);
         }
@@ -19773,7 +19949,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function assertMissing($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->assertMissing($path);
         }
@@ -19787,7 +19963,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function assertDirectoryEmpty($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->assertDirectoryEmpty($path);
         }
@@ -19801,7 +19977,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function exists($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->exists($path);
         }
@@ -19815,7 +19991,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function missing($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->missing($path);
         }
@@ -19829,7 +20005,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function fileExists($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->fileExists($path);
         }
@@ -19843,7 +20019,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function fileMissing($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->fileMissing($path);
         }
@@ -19857,7 +20033,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function directoryExists($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->directoryExists($path);
         }
@@ -19871,7 +20047,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function directoryMissing($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->directoryMissing($path);
         }
@@ -19885,7 +20061,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function path($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->path($path);
         }
@@ -19899,7 +20075,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function get($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->get($path);
         }
@@ -19914,7 +20090,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function json($path, $flags = 0)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->json($path, $flags);
         }
@@ -19931,7 +20107,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function response($path, $name = null, $headers = [], $disposition = 'inline')
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->response($path, $name, $headers, $disposition);
         }
@@ -19948,7 +20124,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function serve($request, $path, $name = null, $headers = [])
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->serve($request, $path, $name, $headers);
         }
@@ -19964,7 +20140,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function download($path, $name = null, $headers = [])
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->download($path, $name, $headers);
         }
@@ -19980,7 +20156,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function put($path, $contents, $options = [])
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->put($path, $contents, $options);
         }
@@ -19996,7 +20172,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function putFile($path, $file = null, $options = [])
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->putFile($path, $file, $options);
         }
@@ -20013,7 +20189,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function putFileAs($path, $file, $name = null, $options = [])
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->putFileAs($path, $file, $name, $options);
         }
@@ -20027,7 +20203,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getVisibility($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->getVisibility($path);
         }
@@ -20042,7 +20218,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setVisibility($path, $visibility)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->setVisibility($path, $visibility);
         }
@@ -20059,7 +20235,7 @@ namespace Illuminate\Support\Facades {
         public static function prepend($path, $data, $separator = '
 ')
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->prepend($path, $data, $separator);
         }
@@ -20076,7 +20252,7 @@ namespace Illuminate\Support\Facades {
         public static function append($path, $data, $separator = '
 ')
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->append($path, $data, $separator);
         }
@@ -20090,7 +20266,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function delete($paths)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->delete($paths);
         }
@@ -20105,7 +20281,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function copy($from, $to)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->copy($from, $to);
         }
@@ -20120,7 +20296,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function move($from, $to)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->move($from, $to);
         }
@@ -20134,7 +20310,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function size($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->size($path);
         }
@@ -20148,7 +20324,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function checksum($path, $options = [])
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->checksum($path, $options);
         }
@@ -20162,7 +20338,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function mimeType($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->mimeType($path);
         }
@@ -20176,7 +20352,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function lastModified($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->lastModified($path);
         }
@@ -20190,7 +20366,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function readStream($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->readStream($path);
         }
@@ -20206,7 +20382,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function writeStream($path, $resource, $options = [])
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->writeStream($path, $resource, $options);
         }
@@ -20221,7 +20397,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function url($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->url($path);
         }
@@ -20238,7 +20414,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function temporaryUploadUrl($path, $expiration, $options = [])
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->temporaryUploadUrl($path, $expiration, $options);
         }
@@ -20253,7 +20429,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function files($directory = null, $recursive = false)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->files($directory, $recursive);
         }
@@ -20267,7 +20443,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function allFiles($directory = null)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->allFiles($directory);
         }
@@ -20282,7 +20458,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function directories($directory = null, $recursive = false)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->directories($directory, $recursive);
         }
@@ -20296,7 +20472,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function allDirectories($directory = null)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->allDirectories($directory);
         }
@@ -20310,7 +20486,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function makeDirectory($path)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->makeDirectory($path);
         }
@@ -20324,7 +20500,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function deleteDirectory($directory)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->deleteDirectory($directory);
         }
@@ -20337,7 +20513,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getDriver()
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->getDriver();
         }
@@ -20350,7 +20526,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getAdapter()
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->getAdapter();
         }
@@ -20363,7 +20539,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getConfig()
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->getConfig();
         }
@@ -20377,7 +20553,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function serveUsing($callback)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             $instance->serveUsing($callback);
         }
@@ -20391,7 +20567,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function buildTemporaryUrlsUsing($callback)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             $instance->buildTemporaryUrlsUsing($callback);
         }
@@ -20441,7 +20617,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function macro($name, $macro)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             \Illuminate\Filesystem\LocalFilesystemAdapter::macro($name, $macro);
         }
 
@@ -20456,7 +20632,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function mixin($mixin, $replace = true)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             \Illuminate\Filesystem\LocalFilesystemAdapter::mixin($mixin, $replace);
         }
 
@@ -20469,7 +20645,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasMacro($name)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             return \Illuminate\Filesystem\LocalFilesystemAdapter::hasMacro($name);
         }
 
@@ -20481,7 +20657,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function flushMacros()
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             \Illuminate\Filesystem\LocalFilesystemAdapter::flushMacros();
         }
 
@@ -20496,15 +20672,13 @@ namespace Illuminate\Support\Facades {
          */
         public static function macroCall($method, $parameters)
         {
-            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter
+            //Method inherited from \Illuminate\Filesystem\FilesystemAdapter 
             /** @var \Illuminate\Filesystem\LocalFilesystemAdapter $instance */
             return $instance->macroCall($method, $parameters);
         }
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Routing\UrlGenerator
      */
     class URL {
@@ -21148,8 +21322,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Validation\Factory
      */
     class Validator {
@@ -21346,8 +21518,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\View\Factory
      */
     class View {
@@ -22380,8 +22550,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     *
-     *
      * @see \Illuminate\Foundation\Vite
      */
     class Vite {
@@ -22762,8 +22930,6 @@ namespace Illuminate\Support\Facades {
 
 namespace AnourValar\EloquentSerialize\Facades {
     /**
-     *
-     *
      */
     class EloquentSerializeFacade {
         /**
@@ -22799,8 +22965,6 @@ namespace AnourValar\EloquentSerialize\Facades {
 
 namespace Barryvdh\Debugbar\Facades {
     /**
-     *
-     *
      * @method static void alert(mixed $message)
      * @method static void critical(mixed $message)
      * @method static void debug(mixed $message)
@@ -22812,10 +22976,10 @@ namespace Barryvdh\Debugbar\Facades {
      * @method static void warning(mixed $message)
      * @see \Barryvdh\Debugbar\LaravelDebugbar
      */
-    class Debugbar {
+    class Debugbar extends \DebugBar\DebugBar {
         /**
          * Returns the HTTP driver
-         *
+         * 
          * If no http driver where defined, a PhpHttpDriver is automatically created
          *
          * @return \DebugBar\HttpDriverInterface
@@ -22850,8 +23014,6 @@ namespace Barryvdh\Debugbar\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function shouldCollect($name, $default = false)
@@ -22897,12 +23059,13 @@ namespace Barryvdh\Debugbar\Facades {
          * @param string $name Internal name, used to stop the measure
          * @param string $label Public name
          * @param string|null $collector
+         * @param string|null $group
          * @static
          */
-        public static function startMeasure($name, $label = null, $collector = null)
+        public static function startMeasure($name, $label = null, $collector = null, $group = null)
         {
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
-            return $instance->startMeasure($name, $label, $collector);
+            return $instance->startMeasure($name, $label, $collector, $group);
         }
 
         /**
@@ -23051,12 +23214,13 @@ namespace Barryvdh\Debugbar\Facades {
          * @param float $end
          * @param array|null $params
          * @param string|null $collector
+         * @param string|null $group
          * @static
          */
-        public static function addMeasure($label, $start, $end, $params = [], $collector = null)
+        public static function addMeasure($label, $start, $end, $params = [], $collector = null, $group = null)
         {
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
-            return $instance->addMeasure($label, $start, $end, $params, $collector);
+            return $instance->addMeasure($label, $start, $end, $params, $collector, $group);
         }
 
         /**
@@ -23065,13 +23229,14 @@ namespace Barryvdh\Debugbar\Facades {
          * @param string $label
          * @param \Closure $closure
          * @param string|null $collector
+         * @param string|null $group
          * @return mixed
          * @static
          */
-        public static function measure($label, $closure, $collector = null)
+        public static function measure($label, $closure, $collector = null, $group = null)
         {
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
-            return $instance->measure($label, $closure, $collector);
+            return $instance->measure($label, $closure, $collector, $group);
         }
 
         /**
@@ -23088,7 +23253,7 @@ namespace Barryvdh\Debugbar\Facades {
 
         /**
          * Adds a message to the MessagesCollector
-         *
+         * 
          * A message can be anything from an object to a string
          *
          * @param mixed $message
@@ -23110,7 +23275,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function hasCollector($name)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->hasCollector($name);
         }
@@ -23125,7 +23290,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function getCollector($name)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->getCollector($name);
         }
@@ -23138,7 +23303,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function getCollectors()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->getCollectors();
         }
@@ -23152,20 +23317,18 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function setRequestIdGenerator($generator)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->setRequestIdGenerator($generator);
         }
 
         /**
-         *
-         *
          * @return \DebugBar\RequestIdGeneratorInterface
          * @static
          */
         public static function getRequestIdGenerator()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->getRequestIdGenerator();
         }
@@ -23178,7 +23341,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function getCurrentRequestId()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->getCurrentRequestId();
         }
@@ -23192,20 +23355,18 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function setStorage($storage = null)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->setStorage($storage);
         }
 
         /**
-         *
-         *
          * @return \DebugBar\StorageInterface
          * @static
          */
         public static function getStorage()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->getStorage();
         }
@@ -23218,7 +23379,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function isDataPersisted()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->isDataPersisted();
         }
@@ -23232,14 +23393,14 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function setHttpDriver($driver)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->setHttpDriver($driver);
         }
 
         /**
          * Returns collected data
-         *
+         * 
          * Will collect the data if none have been collected yet
          *
          * @return array
@@ -23247,7 +23408,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function getData()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->getData();
         }
@@ -23262,7 +23423,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function getDataAsHeaders($headerName = 'phpdebugbar', $maxHeaderLength = 4096, $maxTotalHeaderLength = 250000)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->getDataAsHeaders($headerName, $maxHeaderLength, $maxTotalHeaderLength);
         }
@@ -23278,7 +23439,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function sendDataInHeaders($useOpenHandler = null, $headerName = 'phpdebugbar', $maxHeaderLength = 4096)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->sendDataInHeaders($useOpenHandler, $headerName, $maxHeaderLength);
         }
@@ -23290,7 +23451,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function stackData()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->stackData();
         }
@@ -23304,7 +23465,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function setStackDataSessionNamespace($ns)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->setStackDataSessionNamespace($ns);
         }
@@ -23317,7 +23478,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function getStackDataSessionNamespace()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->getStackDataSessionNamespace();
         }
@@ -23332,7 +23493,7 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function setStackAlwaysUseSessionStorage($enabled = true)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->setStackAlwaysUseSessionStorage($enabled);
         }
@@ -23346,55 +23507,47 @@ namespace Barryvdh\Debugbar\Facades {
          */
         public static function isStackAlwaysUseSessionStorage()
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->isStackAlwaysUseSessionStorage();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function offsetSet($key, $value)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->offsetSet($key, $value);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function offsetGet($key)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->offsetGet($key);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function offsetExists($key)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->offsetExists($key);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function offsetUnset($key)
         {
-            //Method inherited from \DebugBar\DebugBar
+            //Method inherited from \DebugBar\DebugBar 
             /** @var \Barryvdh\Debugbar\LaravelDebugbar $instance */
             return $instance->offsetUnset($key);
         }
@@ -23402,242 +23555,60 @@ namespace Barryvdh\Debugbar\Facades {
             }
     }
 
-namespace Flux {
+namespace Laravel\Mcp\Server\Facades {
     /**
-     *
-     *
-     * @see \Flux\FluxManager
+     * @see \Laravel\Mcp\Server\Registrar
      */
-    class Flux {
+    class Mcp {
         /**
-         *
+         * Register an web-based MCP server running over HTTP.
          *
          * @static
          */
-        public static function boot()
+        public static function web($handle, $serverClass)
         {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->boot();
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->web($handle, $serverClass);
         }
 
         /**
-         *
+         * Register a local MCP server running over STDIO.
          *
          * @static
          */
-        public static function ensurePro()
+        public static function local($handle, $serverClass)
         {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->ensurePro();
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->local($handle, $serverClass);
         }
 
         /**
-         *
+         * Get the server class for a local MCP.
          *
          * @static
          */
-        public static function pro()
+        public static function getLocalServer($handle)
         {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->pro();
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->getLocalServer($handle);
         }
 
         /**
-         *
-         *
          * @static
          */
-        public static function markAssetsRendered()
+        public static function getWebServer($handle)
         {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->markAssetsRendered();
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->getWebServer($handle);
         }
 
         /**
-         *
-         *
          * @static
          */
-        public static function scripts($options = [])
+        public static function oauthRoutes($oauthPrefix = 'oauth')
         {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->scripts($options);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function fluxAppearance($options = [])
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->fluxAppearance($options);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function editorStyles()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->editorStyles();
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function editorScripts()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->editorScripts();
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function classes($styles = null)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->classes($styles);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function disallowWireModel($attributes, $componentName)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->disallowWireModel($attributes, $componentName);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function splitAttributes($attributes, $by = [], $strict = false)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->splitAttributes($attributes, $by, $strict);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function restorePassThroughProps($attributes, $passThroughProps)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->restorePassThroughProps($attributes, $passThroughProps);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function forwardedAttributes($attributes, $propKeys)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->forwardedAttributes($attributes, $propKeys);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function attributesAfter($prefix, $attributes, $default = [])
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->attributesAfter($prefix, $attributes, $default);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function applyInset($inset, $top, $right, $bottom, $left)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->applyInset($inset, $top, $right, $bottom, $left);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function componentExists($name)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->componentExists($name);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function bootComponents()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->bootComponents();
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function bootModal()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->bootModal();
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function modal($name)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->modal($name);
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function modals()
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->modals();
-        }
-
-        /**
-         *
-         *
-         * @static
-         */
-        public static function toast($text, $heading = null, $duration = 5000, $variant = null, $position = null)
-        {
-            /** @var \Flux\FluxManager $instance */
-            return $instance->toast($text, $heading, $duration, $variant, $position);
+            /** @var \Laravel\Mcp\Server\Registrar $instance */
+            return $instance->oauthRoutes($oauthPrefix);
         }
 
             }
@@ -23645,11 +23616,9 @@ namespace Flux {
 
 namespace Livewire {
     /**
-     *
-     *
      * @see \Livewire\LivewireManager
      */
-    class Livewire {
+    class Livewire extends \Livewire\LivewireManager {
         /**
          * {@inheritDoc}
          *
@@ -23673,501 +23642,403 @@ namespace Livewire {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setProvider($provider)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->setProvider($provider);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function provide($callback)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->provide($callback);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function component($name, $class = null)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->component($name, $class);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function componentHook($hook)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->componentHook($hook);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function propertySynthesizer($synth)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->propertySynthesizer($synth);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function directive($name, $callback)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->directive($name, $callback);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function precompiler($callback)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->precompiler($callback);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function new($name, $id = null)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->new($name, $id);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function isDiscoverable($componentNameOrClass)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->isDiscoverable($componentNameOrClass);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function resolveMissingComponent($resolver)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->resolveMissingComponent($resolver);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function snapshot($component)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->snapshot($component);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function fromSnapshot($snapshot)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->fromSnapshot($snapshot);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function listen($eventName, $callback)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->listen($eventName, $callback);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function current()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->current();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function findSynth($keyOrTarget, $component)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->findSynth($keyOrTarget, $component);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function updateProperty($component, $path, $value)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->updateProperty($component, $path, $value);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function isLivewireRequest()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->isLivewireRequest();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function componentHasBeenRendered()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->componentHasBeenRendered();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function forceAssetInjection()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->forceAssetInjection();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setUpdateRoute($callback)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->setUpdateRoute($callback);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function getUpdateUri()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->getUpdateUri();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setScriptRoute($callback)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->setScriptRoute($callback);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function useScriptTagAttributes($attributes)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->useScriptTagAttributes($attributes);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function withUrlParams($params)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->withUrlParams($params);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function withQueryParams($params)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->withQueryParams($params);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function withCookie($name, $value)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->withCookie($name, $value);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function withCookies($cookies)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->withCookies($cookies);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function withHeaders($headers)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->withHeaders($headers);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function withoutLazyLoading()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->withoutLazyLoading();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function test($name, $params = [])
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->test($name, $params);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function visit($name)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->visit($name);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function actingAs($user, $driver = null)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->actingAs($user, $driver);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function isRunningServerless()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->isRunningServerless();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function addPersistentMiddleware($middleware)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->addPersistentMiddleware($middleware);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setPersistentMiddleware($middleware)
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->setPersistentMiddleware($middleware);
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function getPersistentMiddleware()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->getPersistentMiddleware();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function flushState()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->flushState();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function originalUrl()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->originalUrl();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function originalPath()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->originalPath();
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function originalMethod()
         {
-            //Method inherited from \Livewire\LivewireManager
+            //Method inherited from \Livewire\LivewireManager 
             /** @var \Livewire\Volt\LivewireManager $instance */
             return $instance->originalMethod();
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class Component {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Livewire\Component::modal($name);
         }
 
             }
@@ -24175,14 +24046,10 @@ namespace Livewire {
 
 namespace Lorisleiva\Actions\Facades {
     /**
-     *
-     *
      * @see ActionManager
      */
     class Actions {
         /**
-         *
-         *
          * @param class-string<JobDecorator> $jobDecoratorClass
          * @static
          */
@@ -24192,8 +24059,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @param class-string<JobDecorator&ShouldBeUnique> $uniqueJobDecoratorClass
          * @static
          */
@@ -24203,8 +24068,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setBacktraceLimit($backtraceLimit)
@@ -24214,8 +24077,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setDesignPatterns($designPatterns)
@@ -24225,8 +24086,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function getDesignPatterns()
@@ -24236,8 +24095,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function registerDesignPattern($designPattern)
@@ -24247,8 +24104,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function getDesignPatternsMatching($usedTraits)
@@ -24258,8 +24113,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function extend($app, $abstract)
@@ -24269,8 +24122,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function isExtending($abstract)
@@ -24280,8 +24131,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function shouldExtend($abstract)
@@ -24291,8 +24140,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function identifyAndDecorate($instance)
@@ -24302,8 +24149,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function identifyFromBacktrace($usedTraits, $frame = null)
@@ -24313,8 +24158,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function registerRoutes($paths = 'app/Actions')
@@ -24324,8 +24167,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function registerCommands($paths = 'app/Actions')
@@ -24335,8 +24176,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function registerRoutesForAction($className)
@@ -24346,8 +24185,6 @@ namespace Lorisleiva\Actions\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function registerCommandsForAction($className)
@@ -24361,14 +24198,10 @@ namespace Lorisleiva\Actions\Facades {
 
 namespace Lorisleiva\Lody {
     /**
-     *
-     *
      * @see LodyManager
      */
     class Lody {
         /**
-         *
-         *
          * @static
          */
         public static function classes($paths, $recursive = true)
@@ -24378,8 +24211,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function classesFromFinder($finder)
@@ -24389,8 +24220,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function files($paths, $recursive = true, $hidden = false)
@@ -24400,8 +24229,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function filesFromFinder($finder)
@@ -24411,8 +24238,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function resolvePathUsing($callback)
@@ -24422,8 +24247,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function resolvePath($path)
@@ -24433,8 +24256,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function resolveClassnameUsing($callback)
@@ -24444,8 +24265,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function resolveClassname($file)
@@ -24455,8 +24274,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setBasePath($basePath)
@@ -24466,8 +24283,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function getBasePath($path = '')
@@ -24477,8 +24292,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setAutoloadPath($autoloadPath)
@@ -24488,8 +24301,6 @@ namespace Lorisleiva\Lody {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function getAutoloadPath()
@@ -24501,15 +24312,42 @@ namespace Lorisleiva\Lody {
             }
     }
 
+namespace ProtoneMedia\LaravelFFMpeg\Support {
+    /**
+     * @method static \ProtoneMedia\LaravelFFMpeg\MediaOpener fromDisk($disk)
+     * @method static \ProtoneMedia\LaravelFFMpeg\MediaOpener fromFilesystem(\Illuminate\Contracts\Filesystem\Filesystem $filesystem)
+     * @method static \ProtoneMedia\LaravelFFMpeg\MediaOpener open($path)
+     * @method static \ProtoneMedia\LaravelFFMpeg\MediaOpener openUrl($path, array $headers = [])
+     * @method static \ProtoneMedia\LaravelFFMpeg\MediaOpener cleanupTemporaryFiles()
+     * @see \ProtoneMedia\LaravelFFMpeg\MediaOpener
+     */
+    class FFMpeg {
+        /**
+         * @static
+         */
+        public static function new()
+        {
+            /** @var \ProtoneMedia\LaravelFFMpeg\Support\MediaOpenerFactory $instance */
+            return $instance->new();
+        }
+
+        /**
+         * @static
+         */
+        public static function dynamicHLSPlaylist()
+        {
+            /** @var \ProtoneMedia\LaravelFFMpeg\Support\MediaOpenerFactory $instance */
+            return $instance->dynamicHLSPlaylist();
+        }
+
+            }
+    }
+
 namespace Spatie\LaravelImageOptimizer\Facades {
     /**
-     *
-     *
      */
     class ImageOptimizer {
         /**
-         *
-         *
          * @static
          */
         public static function getOptimizers()
@@ -24519,8 +24357,6 @@ namespace Spatie\LaravelImageOptimizer\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function addOptimizer($optimizer)
@@ -24530,8 +24366,6 @@ namespace Spatie\LaravelImageOptimizer\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setOptimizers($optimizers)
@@ -24541,8 +24375,6 @@ namespace Spatie\LaravelImageOptimizer\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function setTimeout($timeoutInSeconds)
@@ -24552,8 +24384,6 @@ namespace Spatie\LaravelImageOptimizer\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function useLogger($log)
@@ -24563,8 +24393,6 @@ namespace Spatie\LaravelImageOptimizer\Facades {
         }
 
         /**
-         *
-         *
          * @static
          */
         public static function optimize($pathToImage, $pathToOutput = null)
@@ -24578,8 +24406,6 @@ namespace Spatie\LaravelImageOptimizer\Facades {
 
 namespace Illuminate\Support {
     /**
-     *
-     *
      * @template TKey of array-key
      * @template-covariant TValue
      * @implements \ArrayAccess<TKey, TValue>
@@ -24587,8 +24413,6 @@ namespace Illuminate\Support {
      */
     class Collection {
         /**
-         *
-         *
          * @see \Barryvdh\Debugbar\ServiceProvider::register()
          * @static
          */
@@ -24599,13 +24423,9 @@ namespace Illuminate\Support {
 
             }
     /**
-     *
-     *
      */
     class Str {
         /**
-         *
-         *
          * @see \Filament\Support\SupportServiceProvider::packageBooted()
          * @param string $html
          * @return string
@@ -24617,8 +24437,6 @@ namespace Illuminate\Support {
         }
 
         /**
-         *
-         *
          * @see \Filament\Support\SupportServiceProvider::packageBooted()
          * @param string $value
          * @return string
@@ -24631,13 +24449,9 @@ namespace Illuminate\Support {
 
             }
     /**
-     *
-     *
      */
     class Stringable {
         /**
-         *
-         *
          * @see \Filament\Support\SupportServiceProvider::packageBooted()
          * @return \Illuminate\Support\Stringable
          * @static
@@ -24648,8 +24462,6 @@ namespace Illuminate\Support {
         }
 
         /**
-         *
-         *
          * @see \Filament\Support\SupportServiceProvider::packageBooted()
          * @return \Illuminate\Support\Stringable
          * @static
@@ -24664,13 +24476,9 @@ namespace Illuminate\Support {
 
 namespace Illuminate\Http {
     /**
-     *
-     *
      */
-    class Request {
+    class Request extends \Symfony\Component\HttpFoundation\Request {
         /**
-         *
-         *
          * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
          * @param array $rules
          * @param mixed $params
@@ -24682,8 +24490,6 @@ namespace Illuminate\Http {
         }
 
         /**
-         *
-         *
          * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
          * @param string $errorBag
          * @param array $rules
@@ -24696,8 +24502,6 @@ namespace Illuminate\Http {
         }
 
         /**
-         *
-         *
          * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
          * @param mixed $absolute
          * @static
@@ -24708,8 +24512,6 @@ namespace Illuminate\Http {
         }
 
         /**
-         *
-         *
          * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
          * @static
          */
@@ -24719,8 +24521,6 @@ namespace Illuminate\Http {
         }
 
         /**
-         *
-         *
          * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
          * @param mixed $ignoreQuery
          * @param mixed $absolute
@@ -24732,8 +24532,6 @@ namespace Illuminate\Http {
         }
 
         /**
-         *
-         *
          * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
          * @param mixed $ignoreQuery
          * @static
@@ -24748,13 +24546,9 @@ namespace Illuminate\Http {
 
 namespace Illuminate\Database\Query {
     /**
-     *
-     *
      */
     class Builder {
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\QueryBuilderExtraMethods::getGroupBy()
          * @static
          */
@@ -24764,8 +24558,6 @@ namespace Illuminate\Database\Query {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\QueryBuilderExtraMethods::getSelect()
          * @static
          */
@@ -24779,8 +24571,6 @@ namespace Illuminate\Database\Query {
 
 namespace Illuminate\Database\Eloquent\Relations {
     /**
-     *
-     *
      * @template TRelatedModel of \Illuminate\Database\Eloquent\Model
      * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
      * @template TResult
@@ -24788,8 +24578,6 @@ namespace Illuminate\Database\Eloquent\Relations {
      */
     class Relation {
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoins()
          * @param mixed $builder
          * @param mixed $joinType
@@ -24806,8 +24594,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForBelongsTo()
          * @param mixed $query
          * @param mixed $joinType
@@ -24822,8 +24608,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForBelongsToMany()
          * @param mixed $builder
          * @param mixed $joinType
@@ -24838,8 +24622,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorphToMany()
          * @param mixed $builder
          * @param mixed $joinType
@@ -24854,8 +24636,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorph()
          * @param mixed $builder
          * @param mixed $joinType
@@ -24870,8 +24650,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForMorphTo()
          * @param mixed $builder
          * @param mixed $joinType
@@ -24887,8 +24665,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForHasMany()
          * @param mixed $builder
          * @param mixed $joinType
@@ -24904,8 +24680,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performJoinForEloquentPowerJoinsForHasManyThrough()
          * @param mixed $builder
          * @param mixed $joinType
@@ -24920,8 +24694,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::performHavingForEloquentPowerJoins()
          * @param mixed $builder
          * @param mixed $operator
@@ -24935,8 +24707,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::usesSoftDeletes()
          * @param mixed $model
          * @static
@@ -24947,8 +24717,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getThroughParent()
          * @static
          */
@@ -24958,8 +24726,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getFarParent()
          * @static
          */
@@ -24969,8 +24735,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyExtraConditions()
          * @param \Kirschbaum\PowerJoins\PowerJoinClause $join
          * @static
@@ -24981,8 +24745,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyBasicCondition()
          * @param mixed $join
          * @param mixed $condition
@@ -24994,8 +24756,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNullCondition()
          * @param mixed $join
          * @param mixed $condition
@@ -25007,8 +24767,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNotNullCondition()
          * @param mixed $join
          * @param mixed $condition
@@ -25020,8 +24778,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::applyNestedCondition()
          * @param mixed $join
          * @param mixed $condition
@@ -25033,8 +24789,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::shouldNotApplyExtraCondition()
          * @param mixed $condition
          * @static
@@ -25045,8 +24799,6 @@ namespace Illuminate\Database\Eloquent\Relations {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\RelationshipsExtraMethods::getPowerJoinExistenceCompareKey()
          * @static
          */
@@ -25060,13 +24812,9 @@ namespace Illuminate\Database\Eloquent\Relations {
 
 namespace Illuminate\Routing {
     /**
-     *
-     *
      */
     class Route {
         /**
-         *
-         *
          * @see \Livewire\Features\SupportLazyLoading\SupportLazyLoading::registerRouteMacro()
          * @param mixed $enabled
          * @static
@@ -25081,28 +24829,22 @@ namespace Illuminate\Routing {
 
 namespace Livewire\Features\SupportTesting {
     /**
-     *
-     *
      * @mixin \Illuminate\Testing\TestResponse
      */
     class Testable {
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::mountAction()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param array $arguments
          * @return static
          * @static
          */
-        public static function mountAction($name, $arguments = [])
+        public static function mountAction($actions, $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::mountAction($name, $arguments);
+            return \Livewire\Features\SupportTesting\Testable::mountAction($actions, $arguments);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::unmountAction()
          * @return static
          * @static
@@ -25113,8 +24855,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::setActionData()
          * @param array $data
          * @return static
@@ -25126,10 +24866,8 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionDataSet()
-         * @param array $data
+         * @param \Closure|array $data
          * @return static
          * @static
          */
@@ -25139,23 +24877,19 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::callAction()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param array $data
          * @param array $arguments
          * @return static
          * @static
          */
-        public static function callAction($name, $data = [], $arguments = [])
+        public static function callAction($actions, $data = [], $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::callAction($name, $data, $arguments);
+            return \Livewire\Features\SupportTesting\Testable::callAction($actions, $data, $arguments);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::callMountedAction()
          * @param array $arguments
          * @return static
@@ -25167,288 +24901,241 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionExists()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
+         * @param \Closure|null $checkActionUsing
+         * @param \Closure|null $generateMessageUsing
+         * @param array $arguments
          * @return static
          * @static
          */
-        public static function assertActionExists($name)
+        public static function assertActionExists($actions, $checkActionUsing = null, $generateMessageUsing = null, $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionExists($name);
+            return \Livewire\Features\SupportTesting\Testable::assertActionExists($actions, $checkActionUsing, $generateMessageUsing, $arguments);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionDoesNotExist()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
+         * @param \Closure|null $checkActionUsing
+         * @param \Closure|null $generateMessageUsing
          * @return static
          * @static
          */
-        public static function assertActionDoesNotExist($name)
+        public static function assertActionDoesNotExist($actions, $checkActionUsing = null, $generateMessageUsing = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotExist($name);
+            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotExist($actions, $checkActionUsing, $generateMessageUsing);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionVisible()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param array $arguments
          * @return static
          * @static
          */
-        public static function assertActionVisible($name, $arguments = [])
+        public static function assertActionVisible($actions, $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionVisible($name, $arguments);
+            return \Livewire\Features\SupportTesting\Testable::assertActionVisible($actions, $arguments);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionHidden()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param array $arguments
          * @return static
          * @static
          */
-        public static function assertActionHidden($name, $arguments = [])
+        public static function assertActionHidden($actions, $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionHidden($name, $arguments);
+            return \Livewire\Features\SupportTesting\Testable::assertActionHidden($actions, $arguments);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionEnabled()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @return static
          * @static
          */
-        public static function assertActionEnabled($name)
+        public static function assertActionEnabled($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionEnabled($name);
+            return \Livewire\Features\SupportTesting\Testable::assertActionEnabled($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionDisabled()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @return static
          * @static
          */
-        public static function assertActionDisabled($name)
+        public static function assertActionDisabled($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionDisabled($name);
+            return \Livewire\Features\SupportTesting\Testable::assertActionDisabled($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionHasIcon()
-         * @param array|string $name
-         * @param string $icon
-         * @param mixed $record
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
+         * @param \BackedEnum|string $icon
          * @return static
          * @static
          */
-        public static function assertActionHasIcon($name, $icon, $record = null)
+        public static function assertActionHasIcon($actions, $icon)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionHasIcon($name, $icon, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionHasIcon($actions, $icon);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionDoesNotHaveIcon()
-         * @param array|string $name
-         * @param string $icon
-         * @param mixed $record
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
+         * @param \BackedEnum|string $icon
          * @return static
          * @static
          */
-        public static function assertActionDoesNotHaveIcon($name, $icon, $record = null)
+        public static function assertActionDoesNotHaveIcon($actions, $icon)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotHaveIcon($name, $icon, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotHaveIcon($actions, $icon);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionHasLabel()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param string $label
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertActionHasLabel($name, $label, $record = null)
+        public static function assertActionHasLabel($actions, $label)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionHasLabel($name, $label, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionHasLabel($actions, $label);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionDoesNotHaveLabel()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param string $label
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertActionDoesNotHaveLabel($name, $label, $record = null)
+        public static function assertActionDoesNotHaveLabel($actions, $label)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotHaveLabel($name, $label, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotHaveLabel($actions, $label);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionHasColor()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param array|string $color
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertActionHasColor($name, $color, $record = null)
+        public static function assertActionHasColor($actions, $color)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionHasColor($name, $color, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionHasColor($actions, $color);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionDoesNotHaveColor()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param array|string $color
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertActionDoesNotHaveColor($name, $color, $record = null)
+        public static function assertActionDoesNotHaveColor($actions, $color)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotHaveColor($name, $color, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotHaveColor($actions, $color);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionHasUrl()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param string $url
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertActionHasUrl($name, $url, $record = null)
+        public static function assertActionHasUrl($actions, $url)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionHasUrl($name, $url, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionHasUrl($actions, $url);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionDoesNotHaveUrl()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @param string $url
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertActionDoesNotHaveUrl($name, $url, $record = null)
+        public static function assertActionDoesNotHaveUrl($actions, $url)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotHaveUrl($name, $url, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionDoesNotHaveUrl($actions, $url);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionShouldOpenUrlInNewTab()
-         * @param array|string $name
-         * @param mixed $record
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @return static
          * @static
          */
-        public static function assertActionShouldOpenUrlInNewTab($name, $record = null)
+        public static function assertActionShouldOpenUrlInNewTab($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionShouldOpenUrlInNewTab($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionShouldOpenUrlInNewTab($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionShouldNotOpenUrlInNewTab()
-         * @param array|string $name
-         * @param mixed $record
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @return static
          * @static
          */
-        public static function assertActionShouldNotOpenUrlInNewTab($name, $record = null)
+        public static function assertActionShouldNotOpenUrlInNewTab($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionShouldNotOpenUrlInNewTab($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertActionShouldNotOpenUrlInNewTab($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionMounted()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @return static
          * @static
          */
-        public static function assertActionMounted($name)
+        public static function assertActionMounted($actions = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionMounted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertActionMounted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionNotMounted()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @return static
          * @static
          */
-        public static function assertActionNotMounted($name)
+        public static function assertActionNotMounted($actions = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionNotMounted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertActionNotMounted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionMounted()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @return static
          * @static
          */
-        public static function assertActionHalted($name)
+        public static function assertActionHalted($actions = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionHalted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertActionHalted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionMounted()
-         * @param array|string $name
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
          * @return static
          * @static
          */
-        public static function assertActionHeld($name)
+        public static function assertActionHeld($actions = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::assertActionHeld($name);
+            return \Livewire\Features\SupportTesting\Testable::assertActionHeld($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertHasActionErrors()
          * @param array $keys
          * @return static
@@ -25460,8 +25147,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertHasNoActionErrors()
          * @param array $keys
          * @return static
@@ -25473,8 +25158,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Actions\Testing\TestsActions::assertActionListInOrder()
          * @param array $names
          * @param array $actions
@@ -25489,90 +25172,67 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Actions\Testing\TestsActions::parseActionName()
-         * @param string $name
-         * @return string
-         * @static
-         */
-        public static function parseActionName($name)
-        {
-            return \Livewire\Features\SupportTesting\Testable::parseActionName($name);
-        }
-
-        /**
-         *
-         *
-         * @see \Filament\Actions\Testing\TestsActions::parseNestedActionName()
-         * @param array|string $name
+         * @see \Filament\Actions\Testing\TestsActions::parseNestedActions()
+         * @param \Filament\Actions\Testing\TestAction|array|string $actions
+         * @param array $arguments
+         * @param bool $areRelativeToMountedActions
          * @return array
          * @static
          */
-        public static function parseNestedActionName($name)
+        public static function parseNestedActions($actions, $arguments = [], $areRelativeToMountedActions = true)
         {
-            return \Livewire\Features\SupportTesting\Testable::parseNestedActionName($name);
+            return \Livewire\Features\SupportTesting\Testable::parseNestedActions($actions, $arguments, $areRelativeToMountedActions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::fillForm()
          * @param \Closure|array $state
-         * @param string $formName
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function fillForm($state = [], $formName = 'form')
+        public static function fillForm($state = [], $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::fillForm($state, $formName);
+            return \Livewire\Features\SupportTesting\Testable::fillForm($state, $form);
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::assertFormSet()
          * @param \Closure|array $state
-         * @param string $formName
+         * @param string $form
          * @return static
          * @static
          */
-        public static function assertFormSet($state, $formName = 'form')
+        public static function assertFormSet($state, $form = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormSet($state, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormSet($state, $form);
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::assertHasFormErrors()
          * @param array $keys
-         * @param string $formName
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertHasFormErrors($keys = [], $formName = 'form')
+        public static function assertHasFormErrors($keys = [], $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertHasFormErrors($keys, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertHasFormErrors($keys, $form);
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::assertHasNoFormErrors()
          * @param array $keys
-         * @param string $formName
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertHasNoFormErrors($keys = [], $formName = 'form')
+        public static function assertHasNoFormErrors($keys = [], $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertHasNoFormErrors($keys, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertHasNoFormErrors($keys, $form);
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::assertFormExists()
          * @param string $name
          * @return static
@@ -25584,221 +25244,191 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::assertFormComponentExists()
          * @param string $componentKey
-         * @param \Closure|string $formName
+         * @param \Closure|string $form
          * @param \Closure|null $checkComponentUsing
          * @return static
          * @static
          */
-        public static function assertFormComponentExists($componentKey, $formName = 'form', $checkComponentUsing = null)
+        public static function assertFormComponentExists($componentKey, $form = 'form', $checkComponentUsing = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentExists($componentKey, $formName, $checkComponentUsing);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentExists($componentKey, $form, $checkComponentUsing);
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::assertFormComponentDoesNotExist()
          * @param string $componentKey
-         * @param string $formName
+         * @param string $form
          * @return static
          * @static
          */
-        public static function assertFormComponentDoesNotExist($componentKey, $formName = 'form')
+        public static function assertFormComponentDoesNotExist($componentKey, $form = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentDoesNotExist($componentKey, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentDoesNotExist($componentKey, $form);
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::assertFormFieldExists()
-         * @param string $fieldName
-         * @param \Closure|string $formName
+         * @param string $key
+         * @param \Closure|string|null $form
          * @param \Closure|null $checkFieldUsing
          * @return static
          * @static
          */
-        public static function assertFormFieldExists($fieldName, $formName = 'form', $checkFieldUsing = null)
+        public static function assertFormFieldExists($key, $form = null, $checkFieldUsing = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormFieldExists($fieldName, $formName, $checkFieldUsing);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldExists($key, $form, $checkFieldUsing);
         }
 
         /**
-         *
-         *
          * @see \Filament\Forms\Testing\TestsForms::assertFormFieldDoesNotExist()
-         * @param string $fieldName
-         * @param string $formName
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertFormFieldDoesNotExist($fieldName, $formName = 'form')
+        public static function assertFormFieldDoesNotExist($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormFieldDoesNotExist($fieldName, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldDoesNotExist($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldIsDisabled()
-         * @param string $fieldName
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldDisabled()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertFormFieldIsDisabled($fieldName, $formName = 'form')
+        public static function assertFormFieldDisabled($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsDisabled($fieldName, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldDisabled($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldIsEnabled()
-         * @param string $fieldName
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldDisabled()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertFormFieldIsEnabled($fieldName, $formName = 'form')
+        public static function assertFormFieldIsDisabled($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsEnabled($fieldName, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsDisabled($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldIsReadOnly()
-         * @param string $fieldName
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldEnabled()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertFormFieldIsReadOnly($fieldName, $formName = 'form')
+        public static function assertFormFieldEnabled($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsReadOnly($fieldName, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldEnabled($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldIsHidden()
-         * @param string $fieldName
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldEnabled()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertFormFieldIsHidden($fieldName, $formName = 'form')
+        public static function assertFormFieldIsEnabled($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsHidden($fieldName, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsEnabled($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldIsVisible()
-         * @param string $fieldName
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldReadOnly()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertFormFieldIsVisible($fieldName, $formName = 'form')
+        public static function assertFormFieldReadOnly($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsVisible($fieldName, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldReadOnly($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::assertWizardStepExists()
-         * @param int $step
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldReadOnly()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertWizardStepExists($step, $formName = 'form')
+        public static function assertFormFieldIsReadOnly($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertWizardStepExists($step, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsReadOnly($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::assertWizardCurrentStep()
-         * @param int $step
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldHidden()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function assertWizardCurrentStep($step, $formName = 'form')
+        public static function assertFormFieldHidden($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertWizardCurrentStep($step, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldHidden($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::goToWizardStep()
-         * @param int $step
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldHidden()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function goToWizardStep($step, $formName = 'form')
+        public static function assertFormFieldIsHidden($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::goToWizardStep($step, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsHidden($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::goToNextWizardStep()
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldVisible()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function goToNextWizardStep($formName = 'form')
+        public static function assertFormFieldVisible($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::goToNextWizardStep($formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldVisible($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsForms::goToPreviousWizardStep()
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsForms::assertFormFieldVisible()
+         * @param string $key
+         * @param string|null $form
          * @return static
          * @static
          */
-        public static function goToPreviousWizardStep($formName = 'form')
+        public static function assertFormFieldIsVisible($key, $form = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::goToPreviousWizardStep($formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormFieldIsVisible($key, $form);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::mountFormComponentAction()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::mountFormComponentAction()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function mountFormComponentAction($component, $name, $arguments = [], $formName = 'form')
+        public static function mountFormComponentAction($components, $actions, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::mountFormComponentAction($component, $name, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::mountFormComponentAction($components, $actions, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::unmountFormComponentAction()
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::unmountFormComponentAction()
          * @return static
          * @static
          */
@@ -25808,9 +25438,7 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::setFormComponentActionData()
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::setFormComponentActionData()
          * @param array $data
          * @return static
          * @static
@@ -25821,10 +25449,8 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionDataSet()
-         * @param array $data
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionDataSet()
+         * @param \Closure|array $data
          * @return static
          * @static
          */
@@ -25834,26 +25460,22 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::callFormComponentAction()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::callFormComponentAction()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array $data
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function callFormComponentAction($component, $name, $data = [], $arguments = [], $formName = 'form')
+        public static function callFormComponentAction($components, $actions, $data = [], $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::callFormComponentAction($component, $name, $data, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::callFormComponentAction($components, $actions, $data, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::callMountedFormComponentAction()
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::callMountedFormComponentAction()
          * @param array $arguments
          * @return static
          * @static
@@ -25864,316 +25486,276 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionExists()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionExists()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionExists($component, $name, $formName = 'form')
+        public static function assertFormComponentActionExists($components, $actions, $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionExists($component, $name, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionExists($components, $actions, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionDoesNotExist()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionDoesNotExist()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionDoesNotExist($component, $name, $formName = 'form')
+        public static function assertFormComponentActionDoesNotExist($components, $actions, $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotExist($component, $name, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotExist($components, $actions, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionVisible()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionVisible()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionVisible($component, $name, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionVisible($components, $actions, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionVisible($component, $name, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionVisible($components, $actions, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionHidden()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionHidden()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionHidden($component, $name, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionHidden($components, $actions, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHidden($component, $name, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHidden($components, $actions, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionEnabled()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionEnabled()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionEnabled($component, $name, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionEnabled($components, $actions, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionEnabled($component, $name, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionEnabled($components, $actions, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionDisabled()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionDisabled()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionDisabled($component, $name, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionDisabled($components, $actions, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDisabled($component, $name, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDisabled($components, $actions, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionHasIcon()
-         * @param array|string $component
-         * @param array|string $name
-         * @param string $icon
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionHasIcon()
+         * @param array|string $components
+         * @param array|string $actions
+         * @param \BackedEnum|string $icon
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionHasIcon($component, $name, $icon, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionHasIcon($components, $actions, $icon, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHasIcon($component, $name, $icon, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHasIcon($components, $actions, $icon, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionDoesNotHaveIcon()
-         * @param array|string $component
-         * @param array|string $name
-         * @param string $icon
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionDoesNotHaveIcon()
+         * @param array|string $components
+         * @param array|string $actions
+         * @param \BackedEnum|string $icon
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionDoesNotHaveIcon($component, $name, $icon, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionDoesNotHaveIcon($components, $actions, $icon, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotHaveIcon($component, $name, $icon, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotHaveIcon($components, $actions, $icon, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionHasLabel()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionHasLabel()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $label
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionHasLabel($component, $name, $label, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionHasLabel($components, $actions, $label, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHasLabel($component, $name, $label, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHasLabel($components, $actions, $label, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionDoesNotHaveLabel()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionDoesNotHaveLabel()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $label
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionDoesNotHaveLabel($component, $name, $label, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionDoesNotHaveLabel($components, $actions, $label, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotHaveLabel($component, $name, $label, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotHaveLabel($components, $actions, $label, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionHasColor()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionHasColor()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array|string $color
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionHasColor($component, $name, $color, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionHasColor($components, $actions, $color, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHasColor($component, $name, $color, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHasColor($components, $actions, $color, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionDoesNotHaveColor()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionDoesNotHaveColor()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array|string $color
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionDoesNotHaveColor($component, $name, $color, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionDoesNotHaveColor($components, $actions, $color, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotHaveColor($component, $name, $color, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotHaveColor($components, $actions, $color, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionHasUrl()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionHasUrl()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $url
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionHasUrl($component, $name, $url, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionHasUrl($components, $actions, $url, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHasUrl($component, $name, $url, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHasUrl($components, $actions, $url, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionDoesNotHaveUrl()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionDoesNotHaveUrl()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $url
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionDoesNotHaveUrl($component, $name, $url, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionDoesNotHaveUrl($components, $actions, $url, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotHaveUrl($component, $name, $url, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionDoesNotHaveUrl($components, $actions, $url, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionShouldOpenUrlInNewTab()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionShouldOpenUrlInNewTab()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionShouldOpenUrlInNewTab($component, $name, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionShouldOpenUrlInNewTab($components, $actions, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionShouldOpenUrlInNewTab($component, $name, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionShouldOpenUrlInNewTab($components, $actions, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionShouldNotOpenUrlInNewTab()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionShouldNotOpenUrlInNewTab()
+         * @param array|string $components
+         * @param array|string $actions
          * @param array $arguments
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionShouldNotOpenUrlInNewTab($component, $name, $arguments = [], $formName = 'form')
+        public static function assertFormComponentActionShouldNotOpenUrlInNewTab($components, $actions, $arguments = [], $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionShouldNotOpenUrlInNewTab($component, $name, $arguments, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionShouldNotOpenUrlInNewTab($components, $actions, $arguments, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionMounted()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionMounted()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionMounted($component, $name, $formName = 'form')
+        public static function assertFormComponentActionMounted($components, $actions, $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionMounted($component, $name, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionMounted($components, $actions, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionNotMounted()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionNotMounted()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionNotMounted($component, $name, $formName = 'form')
+        public static function assertFormComponentActionNotMounted($components, $actions, $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionNotMounted($component, $name, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionNotMounted($components, $actions, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertFormComponentActionMounted()
-         * @param array|string $component
-         * @param array|string $name
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertFormComponentActionMounted()
+         * @param array|string $components
+         * @param array|string $actions
          * @param string $formName
          * @return static
          * @static
          */
-        public static function assertFormComponentActionHalted($component, $name, $formName = 'form')
+        public static function assertFormComponentActionHalted($components, $actions, $formName = 'form')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHalted($component, $name, $formName);
+            return \Livewire\Features\SupportTesting\Testable::assertFormComponentActionHalted($components, $actions, $formName);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertHasFormComponentActionErrors()
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertHasFormComponentActionErrors()
          * @param array $keys
          * @return static
          * @static
@@ -26184,9 +25766,7 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::assertHasNoFormComponentActionErrors()
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::assertHasNoFormComponentActionErrors()
          * @param array $keys
          * @return static
          * @static
@@ -26197,55 +25777,34 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::getNestedFormComponentActionComponentAndName()
-         * @param array|string $component
-         * @param array|string $name
-         * @param string $formName
+         * @see \Filament\Forms\Testing\TestsFormComponentActions::parseNestedFormComponentActions()
+         * @param array|string $components
+         * @param array|string $actions
+         * @param string $form
          * @param array $arguments
          * @return array
          * @static
          */
-        public static function getNestedFormComponentActionComponentAndName($component, $name, $formName = 'form', $arguments = [])
+        public static function parseNestedFormComponentActions($components, $actions, $form, $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::getNestedFormComponentActionComponentAndName($component, $name, $formName, $arguments);
+            return \Livewire\Features\SupportTesting\Testable::parseNestedFormComponentActions($components, $actions, $form, $arguments);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Forms\Testing\TestsComponentActions::parseNestedFormComponentActionComponentAndName()
-         * @param array|string $component
-         * @param array|string $name
-         * @param string $formName
-         * @return array
-         * @static
-         */
-        public static function parseNestedFormComponentActionComponentAndName($component, $name, $formName = 'form')
-        {
-            return \Livewire\Features\SupportTesting\Testable::parseNestedFormComponentActionComponentAndName($component, $name, $formName);
-        }
-
-        /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::mountInfolistAction()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::mountInfolistAction()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function mountInfolistAction($component, $name, $infolistName = 'infolist')
+        public static function mountInfolistAction($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::mountInfolistAction($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::mountInfolistAction($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::unmountInfolistAction()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::unmountInfolistAction()
          * @return static
          * @static
          */
@@ -26255,9 +25814,7 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::setInfolistActionData()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::setInfolistActionData()
          * @param array $data
          * @return static
          * @static
@@ -26268,10 +25825,8 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionDataSet()
-         * @param array $data
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionDataSet()
+         * @param \Closure|array $data
          * @return static
          * @static
          */
@@ -26281,26 +25836,22 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::callInfolistAction()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::callInfolistAction()
          * @param string $component
-         * @param array|string $name
+         * @param array|string $actions
          * @param array $data
          * @param array $arguments
-         * @param string $infolistName
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function callInfolistAction($component, $name, $data = [], $arguments = [], $infolistName = 'infolist')
+        public static function callInfolistAction($component, $actions, $data = [], $arguments = [], $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::callInfolistAction($component, $name, $data, $arguments, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::callInfolistAction($component, $actions, $data, $arguments, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::callMountedInfolistAction()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::callMountedInfolistAction()
          * @param array $arguments
          * @return static
          * @static
@@ -26311,302 +25862,262 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionExists()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionExists()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionExists($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionExists($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionExists($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionExists($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionDoesNotExist()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionDoesNotExist()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionDoesNotExist($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionDoesNotExist($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotExist($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotExist($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionVisible()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionVisible()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionVisible($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionVisible($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionVisible($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionVisible($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionHidden()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionHidden()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionHidden($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionHidden($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHidden($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHidden($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionEnabled()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionEnabled()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionEnabled($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionEnabled($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionEnabled($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionEnabled($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionDisabled()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionDisabled()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionDisabled($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionDisabled($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDisabled($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDisabled($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionHasIcon()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionHasIcon()
          * @param string $component
-         * @param array|string $name
-         * @param string $icon
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param \BackedEnum|string $icon
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionHasIcon($component, $name, $icon, $infolistName = 'infolist')
+        public static function assertInfolistActionHasIcon($component, $actions, $icon, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHasIcon($component, $name, $icon, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHasIcon($component, $actions, $icon, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionDoesNotHaveIcon()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionDoesNotHaveIcon()
          * @param string $component
-         * @param array|string $name
-         * @param string $icon
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param \BackedEnum|string $icon
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionDoesNotHaveIcon($component, $name, $icon, $infolistName = 'infolist')
+        public static function assertInfolistActionDoesNotHaveIcon($component, $actions, $icon, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotHaveIcon($component, $name, $icon, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotHaveIcon($component, $actions, $icon, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionHasLabel()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionHasLabel()
          * @param string $component
-         * @param array|string $name
+         * @param array|string $actions
          * @param string $label
-         * @param string $infolistName
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionHasLabel($component, $name, $label, $infolistName = 'infolist')
+        public static function assertInfolistActionHasLabel($component, $actions, $label, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHasLabel($component, $name, $label, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHasLabel($component, $actions, $label, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionDoesNotHaveLabel()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionDoesNotHaveLabel()
          * @param string $component
-         * @param array|string $name
+         * @param array|string $actions
          * @param string $label
-         * @param string $infolistName
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionDoesNotHaveLabel($component, $name, $label, $infolistName = 'infolist')
+        public static function assertInfolistActionDoesNotHaveLabel($component, $actions, $label, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotHaveLabel($component, $name, $label, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotHaveLabel($component, $actions, $label, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionHasColor()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionHasColor()
          * @param string $component
-         * @param array|string $name
+         * @param array|string $actions
          * @param array|string $color
-         * @param string $infolistName
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionHasColor($component, $name, $color, $infolistName = 'infolist')
+        public static function assertInfolistActionHasColor($component, $actions, $color, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHasColor($component, $name, $color, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHasColor($component, $actions, $color, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionDoesNotHaveColor()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionDoesNotHaveColor()
          * @param string $component
-         * @param array|string $name
+         * @param array|string $actions
          * @param array|string $color
-         * @param string $infolistName
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionDoesNotHaveColor($component, $name, $color, $infolistName = 'infolist')
+        public static function assertInfolistActionDoesNotHaveColor($component, $actions, $color, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotHaveColor($component, $name, $color, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotHaveColor($component, $actions, $color, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionHasUrl()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionHasUrl()
          * @param string $component
-         * @param array|string $name
+         * @param array|string $actions
          * @param string $url
-         * @param string $infolistName
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionHasUrl($component, $name, $url, $infolistName = 'infolist')
+        public static function assertInfolistActionHasUrl($component, $actions, $url, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHasUrl($component, $name, $url, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHasUrl($component, $actions, $url, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionDoesNotHaveUrl()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionDoesNotHaveUrl()
          * @param string $component
-         * @param array|string $name
+         * @param array|string $actions
          * @param string $url
-         * @param string $infolistName
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionDoesNotHaveUrl($component, $name, $url, $infolistName = 'infolist')
+        public static function assertInfolistActionDoesNotHaveUrl($component, $actions, $url, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotHaveUrl($component, $name, $url, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionDoesNotHaveUrl($component, $actions, $url, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionShouldOpenUrlInNewTab()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionShouldOpenUrlInNewTab()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionShouldOpenUrlInNewTab($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionShouldOpenUrlInNewTab($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionShouldOpenUrlInNewTab($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionShouldOpenUrlInNewTab($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionShouldNotOpenUrlInNewTab()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionShouldNotOpenUrlInNewTab()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionShouldNotOpenUrlInNewTab($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionShouldNotOpenUrlInNewTab($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionShouldNotOpenUrlInNewTab($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionShouldNotOpenUrlInNewTab($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionMounted()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionMounted()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionMounted($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionMounted($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionMounted($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionMounted($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionNotMounted()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionNotMounted()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionNotMounted($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionNotMounted($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionNotMounted($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionNotMounted($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertInfolistActionMounted()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertInfolistActionMounted()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $schema
          * @return static
          * @static
          */
-        public static function assertInfolistActionHalted($component, $name, $infolistName = 'infolist')
+        public static function assertInfolistActionHalted($component, $actions, $schema = 'infolist')
         {
-            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHalted($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::assertInfolistActionHalted($component, $actions, $schema);
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertHasInfolistActionErrors()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertHasInfolistActionErrors()
          * @param array $keys
          * @return static
          * @static
@@ -26617,9 +26128,7 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::assertHasNoInfolistActionErrors()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::assertHasNoInfolistActionErrors()
          * @param array $keys
          * @return static
          * @static
@@ -26630,23 +26139,20 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Infolists\Testing\TestsActions::getNestedInfolistActionComponentAndName()
+         * @see \Filament\Infolists\Testing\TestsInfolistActions::parseNestedInfolistActions()
          * @param string $component
-         * @param array|string $name
-         * @param string $infolistName
+         * @param array|string $actions
+         * @param string $infolist
+         * @param array $arguments
          * @return array
          * @static
          */
-        public static function getNestedInfolistActionComponentAndName($component, $name, $infolistName = 'infolist')
+        public static function parseNestedInfolistActions($component, $actions, $infolist, $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::getNestedInfolistActionComponentAndName($component, $name, $infolistName);
+            return \Livewire\Features\SupportTesting\Testable::parseNestedInfolistActions($component, $actions, $infolist, $arguments);
         }
 
         /**
-         *
-         *
          * @see \Filament\Notifications\Testing\TestsNotifications::assertNotified()
          * @param \Filament\Notifications\Notification|string|null $notification
          * @return static
@@ -26658,8 +26164,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Notifications\Testing\TestsNotifications::assertNotNotified()
          * @param \Filament\Notifications\Notification|string|null $notification
          * @return static
@@ -26671,22 +26175,150 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
+         * @see \Filament\Schemas\Testing\TestsSchemas::assertSchemaComponentExists()
+         * @param string $key
+         * @param string|null $schema
+         * @param \Closure|null $checkComponentUsing
+         * @return static
+         * @static
+         */
+        public static function assertSchemaComponentExists($key, $schema = null, $checkComponentUsing = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertSchemaComponentExists($key, $schema, $checkComponentUsing);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::assertSchemaComponentDoesNotExist()
+         * @param string $key
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function assertSchemaComponentDoesNotExist($key, $schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertSchemaComponentDoesNotExist($key, $schema);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::assertSchemaExists()
+         * @param string $name
+         * @return static
+         * @static
+         */
+        public static function assertSchemaExists($name)
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertSchemaExists($name);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::assertSchemaStateSet()
+         * @param \Closure|array $state
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function assertSchemaStateSet($state, $schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertSchemaStateSet($state, $schema);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::assertSchemaComponentStateSet()
+         * @param string $key
+         * @param mixed|null $state
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function assertSchemaComponentStateSet($key, $state, $schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertSchemaComponentStateSet($key, $state, $schema);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::assertSchemaComponentStateNotSet()
+         * @param string $key
+         * @param mixed|null $state
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function assertSchemaComponentStateNotSet($key, $state, $schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertSchemaComponentStateNotSet($key, $state, $schema);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::assertWizardStepExists()
+         * @param int $step
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function assertWizardStepExists($step, $schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertWizardStepExists($step, $schema);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::assertWizardCurrentStep()
+         * @param int $step
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function assertWizardCurrentStep($step, $schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertWizardCurrentStep($step, $schema);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::goToWizardStep()
+         * @param int $step
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function goToWizardStep($step, $schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::goToWizardStep($step, $schema);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::goToNextWizardStep()
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function goToNextWizardStep($schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::goToNextWizardStep($schema);
+        }
+
+        /**
+         * @see \Filament\Schemas\Testing\TestsSchemas::goToPreviousWizardStep()
+         * @param string|null $schema
+         * @return static
+         * @static
+         */
+        public static function goToPreviousWizardStep($schema = null)
+        {
+            return \Livewire\Features\SupportTesting\Testable::goToPreviousWizardStep($schema);
+        }
+
+        /**
          * @see \Filament\Tables\Testing\TestsActions::mountTableAction()
-         * @param array|string $name
+         * @param array|string $actions
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function mountTableAction($name, $record = null)
+        public static function mountTableAction($actions, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::mountTableAction($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::mountTableAction($actions, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::unmountTableAction()
          * @return static
          * @static
@@ -26697,8 +26329,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::setTableActionData()
          * @param array $data
          * @return static
@@ -26710,37 +26340,31 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionDataSet()
-         * @param \Closure|array $state
+         * @param \Closure|array $data
          * @return static
          * @static
          */
-        public static function assertTableActionDataSet($state)
+        public static function assertTableActionDataSet($data)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionDataSet($state);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionDataSet($data);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::callTableAction()
-         * @param array|string $name
+         * @param array|string $actions
          * @param mixed $record
          * @param array $data
          * @param array $arguments
          * @return static
          * @static
          */
-        public static function callTableAction($name, $record = null, $data = [], $arguments = [])
+        public static function callTableAction($actions, $record = null, $data = [], $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::callTableAction($name, $record, $data, $arguments);
+            return \Livewire\Features\SupportTesting\Testable::callTableAction($actions, $record, $data, $arguments);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::callMountedTableAction()
          * @param array $arguments
          * @return static
@@ -26752,38 +26376,32 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionExists()
-         * @param array|string $name
+         * @param array|string $actions
          * @param \Closure|null $checkActionUsing
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionExists($name, $checkActionUsing = null, $record = null)
+        public static function assertTableActionExists($actions, $checkActionUsing = null, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionExists($name, $checkActionUsing, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionExists($actions, $checkActionUsing, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionDoesNotExist()
-         * @param array|string $name
+         * @param array|string $actions
          * @param \Closure|null $checkActionUsing
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionDoesNotExist($name, $checkActionUsing = null, $record = null)
+        public static function assertTableActionDoesNotExist($actions, $checkActionUsing = null, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotExist($name, $checkActionUsing, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotExist($actions, $checkActionUsing, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionsExistInOrder()
          * @param array $names
          * @return static
@@ -26795,8 +26413,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableHeaderActionsExistInOrder()
          * @param array $names
          * @return static
@@ -26808,8 +26424,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableEmptyStateActionsExistInOrder()
          * @param array $names
          * @return static
@@ -26821,264 +26435,226 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionVisible()
-         * @param array|string $name
+         * @param array|string $actions
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionVisible($name, $record = null)
+        public static function assertTableActionVisible($actions, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionVisible($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionVisible($actions, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionHidden()
-         * @param array|string $name
+         * @param array|string $actions
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionHidden($name, $record = null)
+        public static function assertTableActionHidden($actions, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionHidden($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionHidden($actions, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionEnabled()
-         * @param array|string $name
+         * @param array|string $actions
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionEnabled($name, $record = null)
+        public static function assertTableActionEnabled($actions, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionEnabled($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionEnabled($actions, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionDisabled()
-         * @param array|string $name
+         * @param array|string $actions
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionDisabled($name, $record = null)
+        public static function assertTableActionDisabled($actions, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionDisabled($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionDisabled($actions, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionHasIcon()
-         * @param array|string $name
-         * @param string $icon
+         * @param array|string $actions
+         * @param \BackedEnum|string $icon
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionHasIcon($name, $icon, $record = null)
+        public static function assertTableActionHasIcon($actions, $icon, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionHasIcon($name, $icon, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionHasIcon($actions, $icon, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionDoesNotHaveIcon()
-         * @param array|string $name
-         * @param string $icon
+         * @param array|string $actions
+         * @param \BackedEnum|string $icon
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionDoesNotHaveIcon($name, $icon, $record = null)
+        public static function assertTableActionDoesNotHaveIcon($actions, $icon, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotHaveIcon($name, $icon, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotHaveIcon($actions, $icon, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionHasLabel()
-         * @param array|string $name
+         * @param array|string $actions
          * @param string $label
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionHasLabel($name, $label, $record = null)
+        public static function assertTableActionHasLabel($actions, $label, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionHasLabel($name, $label, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionHasLabel($actions, $label, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionDoesNotHaveLabel()
-         * @param array|string $name
+         * @param array|string $actions
          * @param string $label
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionDoesNotHaveLabel($name, $label, $record = null)
+        public static function assertTableActionDoesNotHaveLabel($actions, $label, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotHaveLabel($name, $label, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotHaveLabel($actions, $label, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionHasColor()
-         * @param array|string $name
+         * @param array|string $actions
          * @param array|string $color
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionHasColor($name, $color, $record = null)
+        public static function assertTableActionHasColor($actions, $color, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionHasColor($name, $color, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionHasColor($actions, $color, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionDoesNotHaveColor()
-         * @param array|string $name
+         * @param array|string $actions
          * @param array|string $color
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionDoesNotHaveColor($name, $color, $record = null)
+        public static function assertTableActionDoesNotHaveColor($actions, $color, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotHaveColor($name, $color, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotHaveColor($actions, $color, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionHasUrl()
-         * @param array|string $name
+         * @param array|string $actions
          * @param string $url
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionHasUrl($name, $url, $record = null)
+        public static function assertTableActionHasUrl($actions, $url, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionHasUrl($name, $url, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionHasUrl($actions, $url, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionDoesNotHaveUrl()
-         * @param array|string $name
+         * @param array|string $actions
          * @param string $url
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionDoesNotHaveUrl($name, $url, $record = null)
+        public static function assertTableActionDoesNotHaveUrl($actions, $url, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotHaveUrl($name, $url, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionDoesNotHaveUrl($actions, $url, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionShouldOpenUrlInNewTab()
-         * @param array|string $name
+         * @param array|string $actions
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionShouldOpenUrlInNewTab($name, $record = null)
+        public static function assertTableActionShouldOpenUrlInNewTab($actions, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionShouldOpenUrlInNewTab($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionShouldOpenUrlInNewTab($actions, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionShouldNotOpenUrlInNewTab()
-         * @param array|string $name
+         * @param array|string $actions
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableActionShouldNotOpenUrlInNewTab($name, $record = null)
+        public static function assertTableActionShouldNotOpenUrlInNewTab($actions, $record = null)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionShouldNotOpenUrlInNewTab($name, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionShouldNotOpenUrlInNewTab($actions, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionMounted()
-         * @param array|string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableActionMounted($name)
+        public static function assertTableActionMounted($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionMounted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionMounted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionNotMounted()
-         * @param array|string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableActionNotMounted($name)
+        public static function assertTableActionNotMounted($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionNotMounted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionNotMounted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionMounted()
-         * @param array|string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableActionHalted($name)
+        public static function assertTableActionHalted($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionHalted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionHalted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertTableActionMounted()
-         * @param array|string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableActionHeld($name)
+        public static function assertTableActionHeld($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableActionHeld($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableActionHeld($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertHasTableActionErrors()
          * @param array $keys
          * @return static
@@ -27090,8 +26666,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsActions::assertHasNoTableActionErrors()
          * @param array $keys
          * @return static
@@ -27103,22 +26677,42 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
-         * @see \Filament\Tables\Testing\TestsBulkActions::mountTableBulkAction()
-         * @param string $name
+         * @see \Filament\Tables\Testing\TestsActions::parseNestedTableActions()
+         * @param array|string $actions
+         * @param mixed $record
+         * @param array $arguments
+         * @return array
+         * @static
+         */
+        public static function parseNestedTableActions($actions, $record = null, $arguments = [])
+        {
+            return \Livewire\Features\SupportTesting\Testable::parseNestedTableActions($actions, $record, $arguments);
+        }
+
+        /**
+         * @see \Filament\Tables\Testing\TestsBulkActions::selectTableRecords()
          * @param \Illuminate\Support\Collection|array $records
          * @return static
          * @static
          */
-        public static function mountTableBulkAction($name, $records)
+        public static function selectTableRecords($records)
         {
-            return \Livewire\Features\SupportTesting\Testable::mountTableBulkAction($name, $records);
+            return \Livewire\Features\SupportTesting\Testable::selectTableRecords($records);
         }
 
         /**
-         *
-         *
+         * @see \Filament\Tables\Testing\TestsBulkActions::mountTableBulkAction()
+         * @param array|string $actions
+         * @param \Illuminate\Support\Collection|array $records
+         * @return static
+         * @static
+         */
+        public static function mountTableBulkAction($actions, $records)
+        {
+            return \Livewire\Features\SupportTesting\Testable::mountTableBulkAction($actions, $records);
+        }
+
+        /**
          * @see \Filament\Tables\Testing\TestsBulkActions::setTableBulkActionData()
          * @param array $data
          * @return static
@@ -27130,37 +26724,31 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionDataSet()
-         * @param \Closure|array $state
+         * @param \Closure|array $data
          * @return static
          * @static
          */
-        public static function assertTableBulkActionDataSet($state)
+        public static function assertTableBulkActionDataSet($data)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDataSet($state);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDataSet($data);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::callTableBulkAction()
-         * @param string $name
+         * @param array|string $actions
          * @param \Illuminate\Support\Collection|array $records
          * @param array $data
          * @param array $arguments
          * @return static
          * @static
          */
-        public static function callTableBulkAction($name, $records, $data = [], $arguments = [])
+        public static function callTableBulkAction($actions, $records, $data = [], $arguments = [])
         {
-            return \Livewire\Features\SupportTesting\Testable::callTableBulkAction($name, $records, $data, $arguments);
+            return \Livewire\Features\SupportTesting\Testable::callTableBulkAction($actions, $records, $data, $arguments);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::callMountedTableBulkAction()
          * @param array $arguments
          * @return static
@@ -27172,34 +26760,28 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionExists()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionExists($name)
+        public static function assertTableBulkActionExists($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionExists($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionExists($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionDoesNotExist()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionDoesNotExist($name)
+        public static function assertTableBulkActionDoesNotExist($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDoesNotExist($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDoesNotExist($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionsExistInOrder()
          * @param array $names
          * @return static
@@ -27211,202 +26793,166 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionVisible()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionVisible($name)
+        public static function assertTableBulkActionVisible($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionVisible($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionVisible($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionHidden()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionHidden($name)
+        public static function assertTableBulkActionHidden($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHidden($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHidden($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionEnabled()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionEnabled($name)
+        public static function assertTableBulkActionEnabled($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionEnabled($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionEnabled($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionDisabled()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionDisabled($name)
+        public static function assertTableBulkActionDisabled($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDisabled($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDisabled($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionHasIcon()
-         * @param string $name
-         * @param string $icon
-         * @param mixed $record
+         * @param array|string $actions
+         * @param \BackedEnum|string $icon
          * @return static
          * @static
          */
-        public static function assertTableBulkActionHasIcon($name, $icon, $record = null)
+        public static function assertTableBulkActionHasIcon($actions, $icon)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHasIcon($name, $icon, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHasIcon($actions, $icon);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionDoesNotHaveIcon()
-         * @param string $name
-         * @param string $icon
-         * @param mixed $record
+         * @param array|string $actions
+         * @param \BackedEnum|string $icon
          * @return static
          * @static
          */
-        public static function assertTableBulkActionDoesNotHaveIcon($name, $icon, $record = null)
+        public static function assertTableBulkActionDoesNotHaveIcon($actions, $icon)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDoesNotHaveIcon($name, $icon, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDoesNotHaveIcon($actions, $icon);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionHasLabel()
-         * @param string $name
+         * @param array|string $actions
          * @param string $label
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableBulkActionHasLabel($name, $label, $record = null)
+        public static function assertTableBulkActionHasLabel($actions, $label)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHasLabel($name, $label, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHasLabel($actions, $label);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionDoesNotHaveLabel()
-         * @param string $name
+         * @param array|string $actions
          * @param string $label
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableBulkActionDoesNotHaveLabel($name, $label, $record = null)
+        public static function assertTableBulkActionDoesNotHaveLabel($actions, $label)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDoesNotHaveLabel($name, $label, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDoesNotHaveLabel($actions, $label);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionHasColor()
-         * @param string $name
+         * @param array|string $actions
          * @param array|string $color
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableBulkActionHasColor($name, $color, $record = null)
+        public static function assertTableBulkActionHasColor($actions, $color)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHasColor($name, $color, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHasColor($actions, $color);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionDoesNotHaveColor()
-         * @param string $name
+         * @param array|string $actions
          * @param array|string $color
-         * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableBulkActionDoesNotHaveColor($name, $color, $record = null)
+        public static function assertTableBulkActionDoesNotHaveColor($actions, $color)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDoesNotHaveColor($name, $color, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionDoesNotHaveColor($actions, $color);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionMounted()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionMounted($name)
+        public static function assertTableBulkActionMounted($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionMounted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionMounted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionNotMounted()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionNotMounted($name)
+        public static function assertTableBulkActionNotMounted($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionNotMounted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionNotMounted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionMounted()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionHalted($name)
+        public static function assertTableBulkActionHalted($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHalted($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHalted($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertTableBulkActionMounted()
-         * @param string $name
+         * @param array|string $actions
          * @return static
          * @static
          */
-        public static function assertTableBulkActionHeld($name)
+        public static function assertTableBulkActionHeld($actions)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHeld($name);
+            return \Livewire\Features\SupportTesting\Testable::assertTableBulkActionHeld($actions);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertHasTableBulkActionErrors()
          * @param array $keys
          * @return static
@@ -27418,8 +26964,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsBulkActions::assertHasNoTableBulkActionErrors()
          * @param array $keys
          * @return static
@@ -27431,8 +26975,17 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
+         * @see \Filament\Tables\Testing\TestsBulkActions::parseNestedTableBulkActions()
+         * @param array|string $actions
+         * @return array
+         * @static
+         */
+        public static function parseNestedTableBulkActions($actions)
+        {
+            return \Livewire\Features\SupportTesting\Testable::parseNestedTableBulkActions($actions);
+        }
+
+        /**
          * @see \Filament\Tables\Testing\TestsColumns::assertCanRenderTableColumn()
          * @param string $name
          * @return static
@@ -27444,8 +26997,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertCanNotRenderTableColumn()
          * @param string $name
          * @return static
@@ -27457,8 +27008,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnExists()
          * @param string $name
          * @param \Closure|null $checkColumnUsing
@@ -27472,8 +27021,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnDoesNotExist()
          * @param string $name
          * @param \Closure|null $checkColumnUsing
@@ -27487,8 +27034,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnVisible()
          * @param string $name
          * @return static
@@ -27500,8 +27045,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnHidden()
          * @param string $name
          * @return static
@@ -27513,68 +27056,58 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnStateSet()
          * @param string $name
-         * @param mixed $value
+         * @param mixed $state
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableColumnStateSet($name, $value, $record)
+        public static function assertTableColumnStateSet($name, $state, $record)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableColumnStateSet($name, $value, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableColumnStateSet($name, $state, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnStateNotSet()
          * @param string $name
-         * @param mixed $value
+         * @param mixed $state
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableColumnStateNotSet($name, $value, $record)
+        public static function assertTableColumnStateNotSet($name, $state, $record)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableColumnStateNotSet($name, $value, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableColumnStateNotSet($name, $state, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnFormattedStateSet()
          * @param string $name
-         * @param mixed $value
+         * @param mixed $state
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableColumnFormattedStateSet($name, $value, $record)
+        public static function assertTableColumnFormattedStateSet($name, $state, $record)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableColumnFormattedStateSet($name, $value, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableColumnFormattedStateSet($name, $state, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnFormattedStateNotSet()
          * @param string $name
-         * @param mixed $value
+         * @param mixed $state
          * @param mixed $record
          * @return static
          * @static
          */
-        public static function assertTableColumnFormattedStateNotSet($name, $value, $record)
+        public static function assertTableColumnFormattedStateNotSet($name, $state, $record)
         {
-            return \Livewire\Features\SupportTesting\Testable::assertTableColumnFormattedStateNotSet($name, $value, $record);
+            return \Livewire\Features\SupportTesting\Testable::assertTableColumnFormattedStateNotSet($name, $state, $record);
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnHasExtraAttributes()
          * @param string $name
          * @param array $attributes
@@ -27587,8 +27120,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnDoesNotHaveExtraAttributes()
          * @param string $name
          * @param array $attributes
@@ -27601,8 +27132,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnHasDescription()
          * @param string $name
          * @param mixed $description
@@ -27616,8 +27145,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableColumnDoesNotHaveDescription()
          * @param string $name
          * @param mixed $description
@@ -27631,8 +27158,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableSelectColumnHasOptions()
          * @param string $name
          * @param array $options
@@ -27645,8 +27170,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::assertTableSelectColumnDoesNotHaveOptions()
          * @param string $name
          * @param array $options
@@ -27659,8 +27182,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::callTableColumnAction()
          * @param string $name
          * @param mixed $record
@@ -27673,8 +27194,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::sortTable()
          * @param string|null $name
          * @param string|null $direction
@@ -27687,8 +27206,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::searchTable()
          * @param string|null $search
          * @return static
@@ -27700,8 +27217,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsColumns::searchTableColumns()
          * @param array $searches
          * @return static
@@ -27713,8 +27228,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsFilters::filterTable()
          * @param string $name
          * @param mixed $data
@@ -27727,8 +27240,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsFilters::resetTableFilters()
          * @return static
          * @static
@@ -27739,8 +27250,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsFilters::removeTableFilter()
          * @param string $filter
          * @param string|null $field
@@ -27753,8 +27262,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsFilters::removeTableFilters()
          * @return static
          * @static
@@ -27765,8 +27272,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsFilters::assertTableFilterExists()
          * @param string $name
          * @param \Closure|null $checkFilterUsing
@@ -27779,8 +27284,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsFilters::assertTableFilterVisible()
          * @param string $name
          * @return static
@@ -27792,8 +27295,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsFilters::assertTableFilterHidden()
          * @param string $name
          * @return static
@@ -27805,8 +27306,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsRecords::assertCanSeeTableRecords()
          * @param \Illuminate\Support\Collection|array $records
          * @param bool $inOrder
@@ -27819,8 +27318,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsRecords::assertCanNotSeeTableRecords()
          * @param \Illuminate\Support\Collection|array $records
          * @return static
@@ -27832,8 +27329,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsRecords::assertCountTableRecords()
          * @param int $count
          * @return static
@@ -27845,8 +27340,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsRecords::loadTable()
          * @return static
          * @static
@@ -27857,8 +27350,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsSummaries::assertTableColumnSummarySet()
          * @param string $columnName
          * @param string $summarizerId
@@ -27873,8 +27364,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsSummaries::assertTableColumnSummaryNotSet()
          * @param string $columnName
          * @param string $summarizerId
@@ -27889,8 +27378,6 @@ namespace Livewire\Features\SupportTesting {
         }
 
         /**
-         *
-         *
          * @see \Filament\Tables\Testing\TestsSummaries::assertTableColumnSummarizerExists()
          * @param string $columnName
          * @param string $summarizerId
@@ -27905,668 +27392,59 @@ namespace Livewire\Features\SupportTesting {
             }
     }
 
-namespace App\Filament\Admin\Resources\TenantResource\Pages {
+namespace Illuminate\Database\Eloquent {
     /**
-     *
-     *
+     * @template TKey of array-key
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     * @extends \Illuminate\Support\Collection<TKey, TModel>
      */
-    class CreateTenant {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Admin\Resources\TenantResource\Pages\CreateTenant::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class EditTenant {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Admin\Resources\TenantResource\Pages\EditTenant::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class ListTenants {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Admin\Resources\TenantResource\Pages\ListTenants::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Resources\Pages {
-    /**
-     *
-     *
-     * @property Form $form
-     */
-    class CreateRecord {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\Pages\CreateRecord::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class Page {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\Pages\Page::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     * @property Form $form
-     */
-    class EditRecord {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\Pages\EditRecord::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class ListRecords {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\Pages\ListRecords::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Pages {
-    /**
-     *
-     *
-     */
-    class Page {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Page::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class BasePage {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\BasePage::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class Dashboard {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Dashboard::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class SimplePage {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\SimplePage::modal($name);
-        }
-
-            }
-    }
-
-namespace App\Filament\Admin\Resources\TenantResource\RelationManagers {
-    /**
-     *
-     *
-     */
-    class ParticipantRelationManager {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Admin\Resources\TenantResource\RelationManagers\ParticipantRelationManager::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Resources\RelationManagers {
-    /**
-     *
-     *
-     */
-    class RelationManager {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\RelationManagers\RelationManager::modal($name);
-        }
-
-            }
-    }
-
-namespace App\Filament\Admin\Resources\UserResource\Pages {
-    /**
-     *
-     *
-     */
-    class CreateUser {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Admin\Resources\UserResource\Pages\CreateUser::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class EditUser {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Admin\Resources\UserResource\Pages\EditUser::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class ListUsers {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Admin\Resources\UserResource\Pages\ListUsers::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Livewire {
-    /**
-     *
-     *
-     */
-    class DatabaseNotifications {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Livewire\DatabaseNotifications::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class GlobalSearch {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Livewire\GlobalSearch::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class Notifications {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Livewire\Notifications::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Notifications\Livewire {
-    /**
-     *
-     *
-     */
-    class DatabaseNotifications {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Notifications\Livewire\DatabaseNotifications::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class Notifications {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Notifications\Livewire\Notifications::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Pages\Auth {
-    /**
-     *
-     *
-     * @property Form $form
-     */
-    class EditProfile {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Auth\EditProfile::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     * @property Form $form
-     */
-    class Login {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Auth\Login::modal($name);
-        }
-
-            }
-    }
-
-namespace App\Filament\Resources\FlowResource\Pages {
-    /**
-     *
-     *
-     */
-    class CreateFlow {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Resources\FlowResource\Pages\CreateFlow::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class EditFlow {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Resources\FlowResource\Pages\EditFlow::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     * @property-read Form $form
-     */
-    class FlowDocuments {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Resources\FlowResource\Pages\FlowDocuments::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class ListFlows {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Resources\FlowResource\Pages\ListFlows::modal($name);
-        }
-
-            }
-    }
-
-namespace App\Filament\Pages {
-    /**
-     *
-     *
-     */
-    class FlowsKanabanBoard {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Pages\FlowsKanabanBoard::modal($name);
-        }
-
-            }
-    /**
-     * ViewFlow.
-     *
-     * @property-read Flow $flow;
-     * @property-read array $getParticipantsArray
-     */
-    class ViewFlow {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Pages\ViewFlow::modal($name);
-        }
-
-            }
-    }
-
-namespace Mokhosh\FilamentKanban\Pages {
-    /**
-     *
-     *
-     */
-    class KanbanBoard {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Mokhosh\FilamentKanban\Pages\KanbanBoard::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Pages\Auth\PasswordReset {
-    /**
-     *
-     *
-     * @property Form $form
-     */
-    class RequestPasswordReset {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Auth\PasswordReset\RequestPasswordReset::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     * @property Form $form
-     */
-    class ResetPassword {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Auth\PasswordReset\ResetPassword::modal($name);
-        }
-
+    class Collection extends \Illuminate\Support\Collection {
             }
     }
 
 namespace Illuminate\View {
     /**
-     *
-     *
-     */
-    class Factory {
-        /**
-         *
-         *
-         * @see \Flux\FluxServiceProvider::bootMacros()
-         * @static
-         */
-        public static function getCurrentComponentData()
-        {
-            return \Illuminate\View\Factory::getCurrentComponentData();
-        }
-
-            }
-    /**
-     *
-     *
      */
     class ComponentAttributeBag {
         /**
-         *
-         *
-         * @see \Flux\FluxServiceProvider::bootMacros()
-         * @param mixed $key
+         * @see \Filament\Support\SupportServiceProvider::packageBooted()
+         * @param \Filament\Support\View\Components\Contracts\HasColor|string $component
+         * @param array|string|null $color
+         * @return \Illuminate\View\ComponentAttributeBag
          * @static
          */
-        public static function pluck($key)
+        public static function color($component, $color)
         {
-            return \Illuminate\View\ComponentAttributeBag::pluck($key);
+            return \Illuminate\View\ComponentAttributeBag::color($component, $color);
         }
 
         /**
-         *
-         *
+         * @see \Filament\Support\SupportServiceProvider::packageBooted()
+         * @param array|int|null $columns
+         * @param \Filament\Support\Enums\GridDirection $direction
+         * @return \Illuminate\View\ComponentAttributeBag
+         * @static
+         */
+        public static function grid($columns = [], $direction = \Filament\Support\Enums\GridDirection::Row)
+        {
+            return \Illuminate\View\ComponentAttributeBag::grid($columns, $direction);
+        }
+
+        /**
+         * @see \Filament\Support\SupportServiceProvider::packageBooted()
+         * @param array|string|int|null $span
+         * @param array|int|null $start
+         * @param array|string|int|null $order
+         * @param bool $isHidden
+         * @return \Illuminate\View\ComponentAttributeBag
+         * @static
+         */
+        public static function gridColumn($span = [], $start = [], $order = [], $isHidden = false)
+        {
+            return \Illuminate\View\ComponentAttributeBag::gridColumn($span, $start, $order, $isHidden);
+        }
+
+        /**
          * @see \Livewire\Features\SupportBladeAttributes\SupportBladeAttributes::provide()
          * @param mixed $name
          * @static
@@ -28578,13 +27456,9 @@ namespace Illuminate\View {
 
             }
     /**
-     *
-     *
      */
     class View {
         /**
-         *
-         *
          * @see \Livewire\Features\SupportPageComponents\SupportPageComponents::registerLayoutViewMacros()
          * @param mixed $data
          * @static
@@ -28595,8 +27469,6 @@ namespace Illuminate\View {
         }
 
         /**
-         *
-         *
          * @see \Livewire\Features\SupportPageComponents\SupportPageComponents::registerLayoutViewMacros()
          * @param mixed $section
          * @static
@@ -28607,8 +27479,6 @@ namespace Illuminate\View {
         }
 
         /**
-         *
-         *
          * @see \Livewire\Features\SupportPageComponents\SupportPageComponents::registerLayoutViewMacros()
          * @param mixed $title
          * @static
@@ -28619,8 +27489,6 @@ namespace Illuminate\View {
         }
 
         /**
-         *
-         *
          * @see \Livewire\Features\SupportPageComponents\SupportPageComponents::registerLayoutViewMacros()
          * @param mixed $slot
          * @static
@@ -28631,8 +27499,6 @@ namespace Illuminate\View {
         }
 
         /**
-         *
-         *
          * @see \Livewire\Features\SupportPageComponents\SupportPageComponents::registerLayoutViewMacros()
          * @param mixed $view
          * @param mixed $params
@@ -28644,8 +27510,6 @@ namespace Illuminate\View {
         }
 
         /**
-         *
-         *
          * @see \Livewire\Features\SupportPageComponents\SupportPageComponents::registerLayoutViewMacros()
          * @param mixed $view
          * @param mixed $params
@@ -28657,8 +27521,6 @@ namespace Illuminate\View {
         }
 
         /**
-         *
-         *
          * @see \Livewire\Features\SupportPageComponents\SupportPageComponents::registerLayoutViewMacros()
          * @param callable $callback
          * @static
@@ -28673,15 +27535,11 @@ namespace Illuminate\View {
 
 namespace Illuminate\Testing {
     /**
-     *
-     *
      * @template TResponse of \Symfony\Component\HttpFoundation\Response
      * @mixin \Illuminate\Http\Response
      */
     class TestResponse {
         /**
-         *
-         *
          * @see \Livewire\Volt\VoltServiceProvider::registerTestingMacros()
          * @param mixed $component
          * @static
@@ -28692,8 +27550,6 @@ namespace Illuminate\Testing {
         }
 
         /**
-         *
-         *
          * @see \Livewire\Volt\VoltServiceProvider::registerTestingMacros()
          * @param mixed $component
          * @static
@@ -28706,88 +27562,13 @@ namespace Illuminate\Testing {
             }
     }
 
-namespace App\Livewire {
-    /**
-     *
-     *
-     */
-    class Previewtest {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Livewire\Previewtest::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class PreviewVideo {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Livewire\PreviewVideo::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     */
-    class PreviewAudio {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Livewire\PreviewAudio::modal($name);
-        }
-
-            }
-    /**
-     *
-     *
-     * @property-read Form $form
-     */
-    class TestChunkedUpload {
-        /**
-         *
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static
-         */
-        public static function modal($name)
-        {
-            return \App\Livewire\TestChunkedUpload::modal($name);
-        }
-
-            }
-    }
-
 
 namespace  {
     class App extends \Illuminate\Support\Facades\App {}
     class Arr extends \Illuminate\Support\Arr {}
     class Artisan extends \Illuminate\Support\Facades\Artisan {}
     class Auth extends \Illuminate\Support\Facades\Auth {}
+    class Benchmark extends \Illuminate\Support\Benchmark {}
     class Blade extends \Illuminate\Support\Facades\Blade {}
     class Broadcast extends \Illuminate\Support\Facades\Broadcast {}
     class Bus extends \Illuminate\Support\Facades\Bus {}
@@ -28801,8 +27582,6 @@ namespace  {
     class DB extends \Illuminate\Support\Facades\DB {}
 
     /**
-     *
-     *
      * @template TCollection of static
      * @template TModel of static
      * @template TValue of static
@@ -29620,7 +28399,7 @@ namespace  {
 
         /**
          * Specify attributes that should be added to any new models created by this builder.
-         *
+         * 
          * The given key / value pairs will also be added as where conditions to the query.
          *
          * @param \Illuminate\Contracts\Database\Query\Expression|array|string $attributes
@@ -30201,7 +28980,7 @@ namespace  {
 
         /**
          * Add a relationship count / exists condition to the query with where clauses.
-         *
+         * 
          * Also load the relationship with the same condition.
          *
          * @param string $relation
@@ -30783,8 +29562,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::powerJoin()
          * @param mixed $table
          * @param mixed $first
@@ -30801,8 +29578,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::leftPowerJoin()
          * @param mixed $table
          * @param mixed $first
@@ -30816,8 +29591,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::rightPowerJoin()
          * @param mixed $table
          * @param mixed $first
@@ -30831,8 +29604,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::newPowerJoinClause()
          * @param \Illuminate\Database\Query\Builder $parentQuery
          * @param string $type
@@ -30846,8 +29617,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::joinRelationship()
          * @param string $relationName
          * @param \Closure|array|string|null $callback
@@ -30863,8 +29632,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::joinRelationshipUsingAlias()
          * @param string $relationName
          * @param \Closure|array|string|null $callback
@@ -30878,8 +29645,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::leftJoinRelationshipUsingAlias()
          * @param string $relationName
          * @param \Closure|array|string|null $callback
@@ -30893,8 +29658,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::rightJoinRelationshipUsingAlias()
          * @param string $relationName
          * @param \Closure|array|string|null $callback
@@ -30908,8 +29671,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::joinRelation()
          * @param string $relationName
          * @param \Closure|array|string|null $callback
@@ -30925,8 +29686,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::leftJoinRelationship()
          * @param string $relationName
          * @param \Closure|array|string|null $callback
@@ -30941,8 +29700,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::leftJoinRelation()
          * @param string $relation
          * @param \Closure|array|string|null $callback
@@ -30957,8 +29714,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::rightJoinRelationship()
          * @param string $relation
          * @param \Closure|array|string|null $callback
@@ -30973,8 +29728,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::rightJoinRelation()
          * @param string $relation
          * @param \Closure|array|string|null $callback
@@ -30989,8 +29742,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::joinNestedRelationship()
          * @param string $relationships
          * @param \Closure|array|string|null $callback
@@ -31006,8 +29757,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoins()
          * @param array|string $sort
          * @param string $direction
@@ -31022,8 +29771,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoins()
          * @param array|string $sort
          * @param string $direction
@@ -31035,8 +29782,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsCount()
          * @param array|string $sort
          * @param string $direction
@@ -31048,8 +29793,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsCount()
          * @param array|string $sort
          * @param string $direction
@@ -31061,8 +29804,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsSum()
          * @param array|string $sort
          * @param string $direction
@@ -31074,8 +29815,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsSum()
          * @param array|string $sort
          * @param string $direction
@@ -31087,8 +29826,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsAvg()
          * @param array|string $sort
          * @param string $direction
@@ -31100,8 +29837,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsAvg()
          * @param array|string $sort
          * @param string $direction
@@ -31113,8 +29848,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsMin()
          * @param array|string $sort
          * @param string $direction
@@ -31126,8 +29859,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsMin()
          * @param array|string $sort
          * @param string $direction
@@ -31139,8 +29870,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByPowerJoinsMax()
          * @param array|string $sort
          * @param string $direction
@@ -31152,8 +29881,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::orderByLeftPowerJoinsMax()
          * @param array|string $sort
          * @param string $direction
@@ -31165,8 +29892,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::powerJoinHas()
          * @param string $relation
          * @param string $operator
@@ -31183,8 +29908,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::hasNestedUsingJoins()
          * @param string $relations
          * @param string $operator
@@ -31200,8 +29923,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::powerJoinDoesntHave()
          * @param mixed $relation
          * @param mixed $boolean
@@ -31214,8 +29935,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\JoinRelationship::powerJoinWhereHas()
          * @param mixed $relation
          * @param mixed $callback
@@ -31229,8 +29948,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\QueryRelationshipExistence::getGroupBy()
          * @static
          */
@@ -31240,8 +29957,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\QueryRelationshipExistence::getScopes()
          * @static
          */
@@ -31251,8 +29966,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\QueryRelationshipExistence::getSelect()
          * @static
          */
@@ -31262,8 +29975,6 @@ namespace  {
         }
 
         /**
-         *
-         *
          * @see \Kirschbaum\PowerJoins\Mixins\QueryRelationshipExistence::getRelationWithoutConstraintsProxy()
          * @param mixed $relation
          * @static
@@ -32051,6 +30762,65 @@ namespace  {
         {
             /** @var \Illuminate\Database\Query\Builder $instance */
             return $instance->orWhereNotBetweenColumns($column, $values);
+        }
+
+        /**
+         * Add a where between columns statement using a value to the query.
+         *
+         * @param mixed $value
+         * @param array{\Illuminate\Contracts\Database\Query\Expression|string, \Illuminate\Contracts\Database\Query\Expression|string} $columns
+         * @param string $boolean
+         * @param bool $not
+         * @return \Illuminate\Database\Eloquent\Builder<static>
+         * @static
+         */
+        public static function whereValueBetween($value, $columns, $boolean = 'and', $not = false)
+        {
+            /** @var \Illuminate\Database\Query\Builder $instance */
+            return $instance->whereValueBetween($value, $columns, $boolean, $not);
+        }
+
+        /**
+         * Add an or where between columns statement using a value to the query.
+         *
+         * @param mixed $value
+         * @param array{\Illuminate\Contracts\Database\Query\Expression|string, \Illuminate\Contracts\Database\Query\Expression|string} $columns
+         * @return \Illuminate\Database\Eloquent\Builder<static>
+         * @static
+         */
+        public static function orWhereValueBetween($value, $columns)
+        {
+            /** @var \Illuminate\Database\Query\Builder $instance */
+            return $instance->orWhereValueBetween($value, $columns);
+        }
+
+        /**
+         * Add a where not between columns statement using a value to the query.
+         *
+         * @param mixed $value
+         * @param array{\Illuminate\Contracts\Database\Query\Expression|string, \Illuminate\Contracts\Database\Query\Expression|string} $columns
+         * @param string $boolean
+         * @return \Illuminate\Database\Eloquent\Builder<static>
+         * @static
+         */
+        public static function whereValueNotBetween($value, $columns, $boolean = 'and')
+        {
+            /** @var \Illuminate\Database\Query\Builder $instance */
+            return $instance->whereValueNotBetween($value, $columns, $boolean);
+        }
+
+        /**
+         * Add an or where not between columns statement using a value to the query.
+         *
+         * @param mixed $value
+         * @param array{\Illuminate\Contracts\Database\Query\Expression|string, \Illuminate\Contracts\Database\Query\Expression|string} $columns
+         * @return \Illuminate\Database\Eloquent\Builder<static>
+         * @static
+         */
+        public static function orWhereValueNotBetween($value, $columns)
+        {
+            /** @var \Illuminate\Database\Query\Builder $instance */
+            return $instance->orWhereValueNotBetween($value, $columns);
         }
 
         /**
@@ -33203,7 +31973,7 @@ namespace  {
          * Get the count of the total records for the paginator.
          *
          * @param array<string|\Illuminate\Contracts\Database\Query\Expression> $columns
-         * @return int
+         * @return int<0, max>
          * @static
          */
         public static function getCountForPagination($columns = [])
@@ -33278,7 +32048,7 @@ namespace  {
          * Retrieve the "count" result of the query.
          *
          * @param \Illuminate\Contracts\Database\Query\Expression|string $columns
-         * @return int
+         * @return int<0, max>
          * @static
          */
         public static function count($columns = '*')
@@ -33395,7 +32165,7 @@ namespace  {
         /**
          * Insert new records into the database while ignoring errors.
          *
-         * @return int
+         * @return int<0, max>
          * @static
          */
         public static function insertOrIgnore($values)
@@ -33472,7 +32242,7 @@ namespace  {
          *
          * @param array<string, float|int|numeric-string> $columns
          * @param array<string, mixed> $extra
-         * @return int
+         * @return int<0, max>
          * @throws \InvalidArgumentException
          * @static
          */
@@ -33487,7 +32257,7 @@ namespace  {
          *
          * @param array<string, float|int|numeric-string> $columns
          * @param array<string, mixed> $extra
-         * @return int
+         * @return int<0, max>
          * @throws \InvalidArgumentException
          * @static
          */
@@ -34078,10 +32848,11 @@ namespace  {
     class Vite extends \Illuminate\Support\Facades\Vite {}
     class EloquentSerialize extends \AnourValar\EloquentSerialize\Facades\EloquentSerializeFacade {}
     class Debugbar extends \Barryvdh\Debugbar\Facades\Debugbar {}
-    class Flux extends \Flux\Flux {}
+    class Mcp extends \Laravel\Mcp\Server\Facades\Mcp {}
     class Livewire extends \Livewire\Livewire {}
     class Action extends \Lorisleiva\Actions\Facades\Actions {}
     class Lody extends \Lorisleiva\Lody\Lody {}
+    class FFMpeg extends \ProtoneMedia\LaravelFFMpeg\Support\FFMpeg {}
     class ImageOptimizer extends \Spatie\LaravelImageOptimizer\Facades\ImageOptimizer {}
 }
 

@@ -21,6 +21,10 @@ class VideoEmbed {
         };
     }
 
+    static get isInline() {
+        return false;
+    }
+
     static get isReadOnlySupported() {
         return true;
     }
@@ -44,9 +48,12 @@ class VideoEmbed {
         this.config = config || {};
         this.data = data || {};
 
+        // Initialize localization
+        this.t = this.initializeLocalization();
+
         // Default configuration
         this.defaultConfig = {
-            placeholder: 'Paste a YouTube URL...',
+            placeholder: this.t.placeholder,
             width: '100%',
             height: 'auto',
             aspectRatio: '16:9',
@@ -67,6 +74,45 @@ class VideoEmbed {
         // Bind methods
         this.handleUrlInput = this.handleUrlInput.bind(this);
         this.handlePaste = this.handlePaste.bind(this);
+    }
+
+    initializeLocalization() {
+        // Detect current locale from HTML lang attribute or other sources
+        const htmlElement = document.documentElement;
+        const currentLocale = htmlElement.lang || 'en';
+        const locale = currentLocale.split('-')[0]; // Get base locale (e.g., 'en' from 'en-US')
+        
+        // Define translations for VideoEmbed plugin
+        const translations = {
+            'en': {
+                placeholder: 'Paste a YouTube URL...',
+                embedButton: 'Embed Video',
+                captionPlaceholder: 'Add a caption for this video...',
+                loading: 'Loading video...',
+                retry: 'Try Again',
+                errors: {
+                    unsupportedFormat: 'Unsupported video URL format',
+                    invalidYoutube: 'Invalid YouTube URL',
+                    failedToLoad: 'Failed to load video. Please check the URL and try again.',
+                    invalidUrl: 'Please enter a valid YouTube URL or direct video URL'
+                }
+            },
+            'ar': {
+                placeholder: 'الصق رابط يوتيوب...',
+                embedButton: 'تضمين الفيديو',
+                captionPlaceholder: 'أضف تسمية توضيحية لهذا الفيديو...',
+                loading: 'جاري تحميل الفيديو...',
+                retry: 'حاول مرة أخرى',
+                errors: {
+                    unsupportedFormat: 'تنسيق رابط الفيديو غير مدعوم',
+                    invalidYoutube: 'رابط يوتيوب غير صالح',
+                    failedToLoad: 'فشل في تحميل الفيديو. يرجى التحقق من الرابط والمحاولة مرة أخرى.',
+                    invalidUrl: 'يرجى إدخال رابط يوتيوب صالح أو رابط فيديو مباشر'
+                }
+            }
+        };
+        
+        return translations[locale] || translations['en'];
     }
 
     render() {
@@ -109,7 +155,7 @@ class VideoEmbed {
         const urlInput = document.createElement('input');
         urlInput.type = 'url';
         urlInput.classList.add('video-embed__url-input');
-        urlInput.placeholder = this.config.placeholder;
+        urlInput.placeholder = this.t.placeholder;
         urlInput.value = this.data.url || '';
 
         // Create submit button
@@ -119,7 +165,7 @@ class VideoEmbed {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            <span>Embed Video</span>
+            <span>${this.t.embedButton}</span>
         `;
 
         // Event listeners
@@ -169,7 +215,7 @@ class VideoEmbed {
         } else if (this.config.allowDirectUrls && this.isDirectVideoUrl(this.data.url)) {
             this.renderDirectVideo(videoWrapper);
         } else {
-            this.renderError('Unsupported video URL format');
+            this.renderError(this.t.errors.unsupportedFormat);
             this.isRendering = false;
             return;
         }
@@ -200,7 +246,7 @@ class VideoEmbed {
     renderYouTubeVideo(container) {
         const videoId = this.extractYouTubeId(this.data.url);
         if (!videoId) {
-            this.renderError('Invalid YouTube URL');
+            this.renderError(this.t.errors.invalidYoutube);
             this.isRendering = false;
             return;
         }
@@ -326,7 +372,7 @@ class VideoEmbed {
         if (!this.readOnly) {
             const retryButton = document.createElement('button');
             retryButton.classList.add('video-embed__retry-btn');
-            retryButton.textContent = 'Try Again';
+            retryButton.textContent = this.t.retry;
             retryButton.addEventListener('click', () => {
                 this.data = {};
                 this.renderUrlInput();
@@ -341,7 +387,7 @@ class VideoEmbed {
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
         captionInput.classList.add('video-embed__caption');
-        captionInput.placeholder = 'Add a caption for this video...';
+        captionInput.placeholder = this.t.captionPlaceholder;
         captionInput.value = this.data.caption || '';
 
         captionInput.addEventListener('input', (e) => {
@@ -377,7 +423,7 @@ class VideoEmbed {
 
         // Validate URL
         if (!this.isYouTubeUrl(url) && !(this.config.allowDirectUrls && this.isDirectVideoUrl(url))) {
-            this.showUrlError('Please enter a valid YouTube URL or direct video URL');
+            this.showUrlError(this.t.errors.invalidUrl);
             return;
         }
 
@@ -396,7 +442,7 @@ class VideoEmbed {
             if (this.data.type === 'youtube') {
                 const videoId = this.extractYouTubeId(url);
                 if (!videoId) {
-                    throw new Error('Could not extract video ID from YouTube URL');
+                    throw new Error(this.t.errors.invalidYoutube);
                 }
                 this.data.videoId = videoId;
             }
@@ -409,7 +455,7 @@ class VideoEmbed {
 
         } catch (error) {
             console.error('Failed to process video URL:', error);
-            this.renderError('Failed to load video. Please check the URL and try again.');
+            this.renderError(this.t.errors.failedToLoad);
             // Signal editor is free even on error
             setTimeout(() => {
                 document.dispatchEvent(new CustomEvent('editor:free'));
@@ -429,7 +475,7 @@ class VideoEmbed {
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
             </div>
-            <div class="video-embed__loading-text">Loading video...</div>
+            <div class="video-embed__loading-text">${this.t.loading}</div>
         `;
 
         this.wrapper.appendChild(loadingContainer);

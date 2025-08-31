@@ -2,7 +2,7 @@
     @if ($canEdit)
         <div class="px-4 py-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/30">
             <header class="pb-2 font-semibold border-b border-zinc-200 dark:border-zinc-800/60">
-                Assign new members
+                {{ __('app.assign') }} {{ __('app.users') }}
             </header>
             <div class="flex flex-col gap-2 mt-2">
                 <form wire:submit.prevent>
@@ -10,7 +10,7 @@
                 </form>
                 <div class="flex justify-end mt-1">
                     <x-filament::button size="xs" color="primary" outlined wire:click="addMember">
-                        Add Member
+                        {{ __('app.invite') }}
                     </x-filament::button>
                 </div>
             </div>
@@ -36,7 +36,7 @@
 
                                 </p>
                                 <p class="text-xs capitalize text-zinc-700 dark:text-zinc-500">
-                                    {{ $member['role_name'] }}
+                                    {{ $member['role_label'] }}
                                 </p>
                             </div>
                         </div>
@@ -56,7 +56,7 @@
                                     <x-filament::input.wrapper class="!rounded-md">
                                         <x-filament::input.select x-model="role" class="!py-1.5 !pe-6 !ps-2 !text-sm"
                                             @change="role = $event.target.value; $nextTick(()=>updateRole())">
-                                            <option value="" disabled>Update role</option>
+                                            <option value="" disabled>{{ __('app.role') }}</option>
 
                                             @foreach ($this->authedUserAssignableRoles as $role)
                                                 <option value="{{ $role['value'] }}"
@@ -72,10 +72,11 @@
                                 </div>
                                 <div>
                                     <x-filament::icon-button size="xs" color="danger" icon="heroicon-o-trash"
-                                        outlined tooltip="remove member"
-                                        wire:click="mountAction('removeMemberAction', { memberId: '{{ $member['participant_id'] }}' })">
+                                        outlined tooltip="{{ __('app.delete') }}"
+                                        wire:click="removeMember('{{ $member['participant_id'] }}')"
+                                        wire:confirm="{{ __('app.confirm_delete') }}">
                                         {{-- <x-filament::icon name="heroicon-o-trash" /> --}}
-                                        remove
+                                        {{ __('app.delete') }}
                                     </x-filament::icon-button>
                                     {{-- {{ ($this->removeMemberAction)(['memberId' => $member->id]) }} --}}
                                 </div>
@@ -86,15 +87,15 @@
             @else
                 <div
                     class="flex flex-col justify-center pt-3 text-sm font-normal text-center text-zinc-400 dark:text-zinc-600">
-                    <p class="font-medium">Projects are not lonely planets 😵‍💫</p>
-                    <p class="mt-1 text-sm">Add some fellows to get this mission started!</p>
+                    <p class="font-medium">{{ __('app.no_records_found') }}</p>
+                    <p class="mt-1 text-sm">{{ __('app.assign') }} {{ __('app.users') }}</p>
                 </div>
             @endif
         </div>
+
     </div>
     {{-- <x-filament::button size="xs" color="danger" icon="heroicon-o-trash" outlined tooltip="remove member"
         wire:click="">
         Leave Flow
     </x-filament::button> --}}
-    <x-filament-actions::modals />
 </div>

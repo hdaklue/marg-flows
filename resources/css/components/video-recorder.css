@@ -1,4 +1,5 @@
 /* Import VideoJS Record CSS which includes proper font icons */
+@reference "tailwindcss";
 @import 'videojs-record/dist/css/videojs.record.css';
 
 /* Hide all VideoJS default controls since we're using custom ones */
@@ -106,7 +107,7 @@
     cursor: pointer;
     @apply text-white hover:text-zinc-200;
     @apply bg-green-500 hover:bg-green-600;
-    @apply rounded-lg px-3 py-1 mx-1;
+    @apply px-3 py-1 mx-1 rounded-lg;
     transition: all 0.2s ease;
 }
 
@@ -134,7 +135,7 @@
     cursor: pointer;
     @apply text-white hover:text-zinc-200;
     @apply bg-blue-500 hover:bg-blue-600;
-    @apply rounded-lg px-3 py-1 mx-1;
+    @apply px-3 py-1 mx-1 rounded-lg;
     transition: all 0.2s ease;
 }
 
@@ -233,7 +234,7 @@
     cursor: pointer;
     @apply text-white hover:text-zinc-200;
     @apply bg-zinc-600 hover:bg-zinc-700;
-    @apply rounded-lg px-3 py-1 mx-1;
+    @apply px-3 py-1 mx-1 rounded-lg;
     transition: all 0.2s ease;
 }
 
@@ -268,7 +269,7 @@
 
 /* Play button theming */
 .video-js .vjs-big-play-button {
-    @apply bg-green-500/80 hover:bg-green-500 text-white;
+    @apply text-white bg-green-500/80 hover:bg-green-500;
     border: none;
     border-radius: 50%;
     width: 60px;
@@ -278,7 +279,7 @@
 }
 
 .video-js .vjs-big-play-button:focus {
-    @apply ring-2 ring-green-500/50 outline-none;
+    @apply outline-none ring-2 ring-green-500/50;
 }
 
 /* Progress bar theming */
@@ -319,13 +320,13 @@
     .video-recorder {
         @apply text-sm;
     }
-    
+
     /* Force story aspect ratio container on mobile */
     .video-recorder .video-js {
         aspect-ratio: 9/16 !important;
         max-height: 70vh; /* Don't take full screen height */
     }
-    
+
     /* Mobile device button styling */
     .vjs-record .vjs-device-button.vjs-control {
         font-size: 2.5em !important;
@@ -334,12 +335,12 @@
         margin-top: -1.5em;
         margin-left: -1.75em;
     }
-    
+
     /* Mobile custom controls positioning */
     .video-recorder .absolute.inset-0 {
         /* Ensure custom controls overlay is properly positioned for mobile story format */
     }
-    
+
     /* Position record button lower on mobile story format */
     .video-recorder button[data-mobile-record] {
         transform: translateY(20vh); /* Move button down from center for story format */

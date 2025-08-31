@@ -4,10 +4,10 @@
  * Only supports Video.js compatible formats (MP4, WebM, OGG)
  */
 
-// Import validation utilities (single source of truth)
+// Import validation utilities (for format validation and display)
 import { 
     VIDEO_VALIDATION_CONFIG, 
-    validateVideoFile 
+    isVideoFormatSupported 
 } from '../video-validation.js';
 
 // Import the plugin styles
@@ -52,6 +52,9 @@ class VideoUpload {
         this.config = config || {};
         this.data = data || {};
 
+        // Initialize localization
+        this.t = this.initializeLocalization();
+
         // Initialize single file data
         if (!this.data.file) {
             this.data.file = null;
@@ -65,7 +68,7 @@ class VideoUpload {
         this.eventHandlers = null;
         this.currentVideoId = null;
 
-        // Default configuration (uses validation config as single source of truth)
+        // Default configuration (fallback values, will be overridden by server config)
         this.defaultConfig = {
             endpoints: {
                 byFile: '/upload-video',
@@ -74,14 +77,14 @@ class VideoUpload {
             additionalRequestHeaders: {},
             field: 'video',
             types: 'video/*',
-            captionPlaceholder: 'Enter video caption...',
-            buttonContent: 'Select a video',
+            captionPlaceholder: this.t.captionPlaceholder,
+            buttonContent: this.t.buttonContent,
             uploader: null,
             actions: [],
-            // Import settings from validation config (single source of truth)
-            chunkSize: VIDEO_VALIDATION_CONFIG.chunkSize,
-            maxFileSize: VIDEO_VALIDATION_CONFIG.maxFileSize,
-            useChunkedUpload: VIDEO_VALIDATION_CONFIG.useChunkedUpload
+            // Fallback chunk settings (will be overridden by server config)
+            chunkSize: 5 * 1024 * 1024,     // 5MB default chunk size
+            maxFileSize: 100 * 1024 * 1024, // 100MB default max file size  
+            useChunkedUpload: true
         };
 
         this.config = Object.assign(this.defaultConfig, this.config);
@@ -89,6 +92,127 @@ class VideoUpload {
         // Bind methods
         this.onUpload = this.onUpload.bind(this);
         this.onPaste = this.onPaste.bind(this);
+    }
+
+    initializeLocalization() {
+        // Detect current locale from HTML lang attribute or other sources
+        const htmlElement = document.documentElement;
+        const currentLocale = htmlElement.lang || 'en';
+        const locale = currentLocale.split('-')[0]; // Get base locale (e.g., 'en' from 'en-US')
+        
+        // Define translations for VideoUpload plugin
+        const translations = {
+            'en': {
+                captionPlaceholder: 'Enter video caption...',
+                buttonContent: 'Select a video',
+                uploadTitle: 'Upload a video',
+                uploadSubtitle: 'Drag, paste, or click to select',
+                addCaption: 'Add caption...',
+                galleryCaptionPlaceholder: 'Add a caption for this video gallery...',
+                addMore: 'Add more',
+                processingTitle: 'Processing video...',
+                processingSubtitle: 'Converting and uploading',
+                replacementConfirm: 'This will replace the current video. Continue?',
+                status: {
+                    pending: 'Pending',
+                    converting: 'Converting...',
+                    uploading: 'Uploading...',
+                    complete: 'Complete',
+                    failed: 'Failed',
+                    unknown: 'Unknown'
+                },
+                errors: {
+                    invalidFormat: 'Invalid file format. Please select a video file.',
+                    unsupportedFormat: 'Unsupported video format. Please use MP4, WebM, or OGV format for best compatibility.',
+                    fileTooLarge: 'File is too large ({fileSize}MB). Maximum size allowed is {maxSize}MB.',
+                    uploadFailed: 'Upload failed',
+                    pasteProcessFailed: 'Failed to process pasted video file.',
+                    unknownError: 'Upload failed',
+                    videoNotSupported: 'Video Format Not Supported',
+                    browserCompatibility: 'This video format cannot be played in your browser.',
+                    formatSuggestion: 'Try converting it to MP4 or WebM format for better compatibility.',
+                    downloadOriginal: 'Download Original File'
+                },
+                ui: {
+                    uploadFailed: 'Upload Failed',
+                    filesFailed: '{count} file(s) failed to upload',
+                    retryFailedUploads: 'Retry Failed Uploads',
+                    dismiss: 'Dismiss'
+                }
+            },
+            'ar': {
+                captionPlaceholder: 'أدخل تسمية توضيحية للفيديو...',
+                buttonContent: 'اختر فيديو',
+                uploadTitle: 'رفع فيديو',
+                uploadSubtitle: 'اسحب أو الصق أو انقر للاختيار',
+                addCaption: 'إضافة تسمية توضيحية...',
+                galleryCaptionPlaceholder: 'أضف تسمية توضيحية لمعرض الفيديو...',
+                addMore: 'إضافة المزيد',
+                processingTitle: 'معالجة الفيديو...',
+                processingSubtitle: 'التحويل والرفع',
+                replacementConfirm: 'سيؤدي هذا إلى استبدال الفيديو الحالي. الاستمرار؟',
+                status: {
+                    pending: 'في الانتظار',
+                    converting: 'جاري التحويل...',
+                    uploading: 'جاري الرفع...',
+                    complete: 'مكتمل',
+                    failed: 'فشل',
+                    unknown: 'غير معروف'
+                },
+                errors: {
+                    invalidFormat: 'تنسيق ملف غير صالح. يرجى اختيار ملف فيديو.',
+                    unsupportedFormat: 'تنسيق فيديو غير مدعوم. يرجى استخدام تنسيق MP4 أو WebM أو OGV للحصول على أفضل توافق.',
+                    fileTooLarge: 'الملف كبير جداً ({fileSize} ميغابايت). الحد الأقصى المسموح هو {maxSize} ميغابايت.',
+                    uploadFailed: 'فشل الرفع',
+                    pasteProcessFailed: 'فشل في معالجة ملف الفيديو المُلصق.',
+                    unknownError: 'فشل الرفع',
+                    videoNotSupported: 'تنسيق الفيديو غير مدعوم',
+                    browserCompatibility: 'لا يمكن تشغيل هذا التنسيق من الفيديو في متصفحك.',
+                    formatSuggestion: 'جرب تحويله إلى تنسيق MP4 أو WebM للحصول على توافق أفضل.',
+                    downloadOriginal: 'تحميل الملف الأصلي'
+                },
+                ui: {
+                    uploadFailed: 'فشل الرفع',
+                    filesFailed: 'فشل رفع {count} ملف',
+                    retryFailedUploads: 'إعادة محاولة الملفات الفاشلة',
+                    dismiss: 'إغلاق'
+                }
+            }
+        };
+        
+        return translations[locale] || translations['en'];
+    }
+
+    /**
+     * Validate video file using dynamic configuration from server
+     */
+    validateVideoFile(file) {
+        const errors = [];
+
+        // Check if it's a video file
+        if (!file.type.startsWith('video/')) {
+            errors.push(this.t.errors.invalidFormat);
+            return { isValid: false, errors };
+        }
+
+        // Check format compatibility (use static config for supported formats)
+        if (!isVideoFormatSupported(file)) {
+            errors.push(this.t.errors.unsupportedFormat);
+            return { isValid: false, errors };
+        }
+
+        // Check file size using dynamic config from server
+        if (file.size > this.config.maxFileSize) {
+            const fileSizeMB = Math.round(file.size / (1024 * 1024));
+            const maxSizeMB = Math.round(this.config.maxFileSize / (1024 * 1024));
+            const errorMessage = this.t.errors.fileTooLarge
+                .replace('{fileSize}', fileSizeMB)
+                .replace('{maxSize}', maxSizeMB);
+            errors.push(errorMessage);
+            return { isValid: false, errors };
+        }
+
+        return { isValid: true, errors: [] };
     }
 
 
@@ -119,8 +243,8 @@ class VideoUpload {
             return false;
         }
 
-        // Validate file using single source of truth
-        const validation = validateVideoFile(file);
+        // Validate file using dynamic config from server
+        const validation = this.validateVideoFile(file);
         if (!validation.isValid) {
             validation.errors.forEach(error => {
                 this.showErrorMessage(error, file.name);
@@ -129,9 +253,9 @@ class VideoUpload {
         }
 
         // Check if we already have a video (single video only)
-        if (this.data.file && this.data.file.url) {
+        if (this.data.file && (this.data.file.url || this.data.file.filename)) {
             // Show notification that video will be replaced
-            if (!confirm('This will replace the current video. Continue?')) {
+            if (!confirm(this.t.replacementConfirm)) {
                 return false;
             }
         }
@@ -142,7 +266,7 @@ class VideoUpload {
             return true;
         } catch (error) {
             console.error('Paste upload failed:', error);
-            this.showErrorMessage('Failed to process pasted video file.', file.name);
+            this.showErrorMessage(this.t.errors.pasteProcessFailed, file.name);
             return false;
         }
     }
@@ -160,8 +284,8 @@ class VideoUpload {
         // Add paste functionality
         this.setupPasteHandling(wrapper);
 
-        // Check if we have a video
-        const hasVideo = this.data.file && this.data.file.url && this.data.file.url.trim() !== '';
+        // Check if we have a video (check for filename since we now store filenames)
+        const hasVideo = this.data.file && (this.data.file.url || this.data.file.filename);
 
         if (hasVideo) {
             // Show the video player
@@ -214,10 +338,10 @@ class VideoUpload {
                     file.type.startsWith('video/')
                 );
 
-                // Validate files using single source of truth
+                // Validate files using dynamic config from server
                 const validFiles = [];
                 videoFiles.forEach(file => {
-                    const validation = validateVideoFile(file);
+                    const validation = this.validateVideoFile(file);
                     if (validation.isValid) {
                         validFiles.push(file);
                     } else {
@@ -282,7 +406,7 @@ class VideoUpload {
                 const invalidFiles = [];
 
                 videoFiles.forEach(file => {
-                    const validation = validateVideoFile(file);
+                    const validation = this.validateVideoFile(file);
                     if (validation.isValid) {
                         validFiles.push(file);
                     } else {
@@ -299,8 +423,8 @@ class VideoUpload {
 
                 if (validFiles.length > 0) {
                     // Check if we already have a video (single video only)
-                    if (this.data.file && this.data.file.url) {
-                        if (!confirm('This will replace the current video. Continue?')) {
+                    if (this.data.file && (this.data.file.url || this.data.file.filename)) {
+                        if (!confirm(this.t.replacementConfirm)) {
                             return;
                         }
                     }
@@ -355,10 +479,10 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__upload-text">
-                    <div class="ce-video-upload__upload-title">Upload a video</div>
-                    <div class="ce-video-upload__upload-subtitle">Drag, paste, or click to select</div>
+                    <div class="ce-video-upload__upload-title">${this.t.uploadTitle}</div>
+                    <div class="ce-video-upload__upload-subtitle">${this.t.uploadSubtitle}</div>
                 </div>
-                <div class="ce-video-upload__upload-formats">${VIDEO_VALIDATION_CONFIG.supportedExtensions.map(ext => ext.toUpperCase()).join(', ')} up to ${Math.round(VIDEO_VALIDATION_CONFIG.maxFileSize / (1024 * 1024))}MB</div>
+                <div class="ce-video-upload__upload-formats">${VIDEO_VALIDATION_CONFIG.supportedExtensions.map(ext => ext.toUpperCase()).join(', ')} up to ${Math.round(this.config.maxFileSize / (1024 * 1024))}MB</div>
             </div>
         `;
 
@@ -521,7 +645,7 @@ class VideoUpload {
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
         captionInput.classList.add('ce-video-upload__caption');
-        captionInput.placeholder = this.config.captionPlaceholder || 'Add caption...';
+        captionInput.placeholder = this.t.addCaption;
         captionInput.value = this.data.caption || '';
         captionInput.readOnly = this.readOnly;
 
@@ -537,8 +661,9 @@ class VideoUpload {
         if (this.readOnly) return;
 
         // Delete from server if needed
-        if (this.data.file && this.data.file.url) {
-            this.handleDeleteFile(this.data.file.url);
+        if (this.data.file && (this.data.file.url || this.data.file.filename)) {
+            const videoUrl = this.data.file.url || this.resolveVideoUrl(this.data.file.filename);
+            this.handleDeleteFile(videoUrl);
         }
 
         // Clear the data
@@ -646,7 +771,7 @@ class VideoUpload {
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
             </div>
-            <span class="video-upload__add-more-text">Add more</span>
+            <span class="video-upload__add-more-text">${this.t.addMore}</span>
         `;
 
         addButton.addEventListener('click', () => this.openFileSelection());
@@ -668,7 +793,7 @@ class VideoUpload {
 
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
-        captionInput.placeholder = 'Add a caption for this video gallery...';
+        captionInput.placeholder = this.t.galleryCaptionPlaceholder;
         captionInput.classList.add('video-upload__caption');
         captionInput.value = this.data.caption || '';
 
@@ -680,7 +805,11 @@ class VideoUpload {
     }
 
     openModal() {
-        if (!this.data.file || !this.data.file.url) return;
+        if (!this.data.file || (!this.data.file.url && !this.data.file.filename)) return;
+        
+        // Get the video URL (resolve from filename if needed)
+        const videoUrl = this.data.file.url || this.resolveVideoUrl(this.data.file.filename);
+        if (!videoUrl) return;
 
         // Create modal overlay
         const modal = document.createElement('div');
@@ -746,8 +875,8 @@ class VideoUpload {
 
         // Set video source
         const source = document.createElement('source');
-        source.src = this.data.file.url;
-        source.type = this.getVideoMimeType(this.data.file.url);
+        source.src = videoUrl;
+        source.type = this.getVideoMimeType(videoUrl);
         modalVideo.appendChild(source);
 
         // Create close button
@@ -972,9 +1101,9 @@ class VideoUpload {
         const validFiles = [];
         const invalidFiles = [];
 
-        // Validate files client-side using single source of truth
+        // Validate files client-side using dynamic config from server
         for (const file of fileArray) {
-            const validation = validateVideoFile(file);
+            const validation = this.validateVideoFile(file);
             if (validation.isValid) {
                 validFiles.push(file);
             } else {
@@ -1072,7 +1201,7 @@ class VideoUpload {
             console.error(`Upload failed for file ${index}:`, error);
 
             // Show user-friendly error message (auto-dismiss server errors)
-            this.showErrorMessage(error.message || 'Upload failed', uploadItem.file.name, true);
+            this.showErrorMessage(error.message || this.t.errors.uploadFailed, uploadItem.file.name, true);
         }
     }
 
@@ -1223,9 +1352,57 @@ class VideoUpload {
         }
     }
 
+    extractFilenameFromUrl(url) {
+        if (!url) return null;
+        
+        // Handle both full URLs and paths
+        let path = url;
+        
+        // If it's a full URL, extract the path part
+        if (url.includes('://')) {
+            try {
+                const urlObj = new URL(url);
+                path = urlObj.pathname;
+            } catch (e) {
+                // If URL parsing fails, use the original string
+                path = url;
+            }
+        }
+        
+        // Remove leading slash if present
+        if (path.startsWith('/')) {
+            path = path.substring(1);
+        }
+        
+        // Extract just the filename from paths like 'storage/documents/videos/tenant_id/document_id/filename.mp4'
+        const segments = path.split('/');
+        return segments[segments.length - 1];
+    }
+    
+    resolveVideoUrl(filename) {
+        if (!filename) return null;
+        
+        // If it's already a full URL (backward compatibility), return as-is
+        if (filename.includes('://') || filename.startsWith('/')) {
+            return filename;
+        }
+        
+        // Build URL using config baseDirectory
+        if (this.config.baseDirectory) {
+            return `${this.config.baseDirectory}/${filename}`;
+        }
+        
+        // Fallback to default pattern
+        return `/storage/documents/videos/${filename}`;
+    }
+
     addUploadedFile(response) {
+        // Extract filename from the full URL for storage
+        const fullUrl = response.url || response.file?.url;
+        const filename = this.extractFilenameFromUrl(fullUrl);
+        
         const fileData = {
-            url: response.url || response.file?.url,
+            filename: filename,  // Store only filename
             thumbnail: response.thumbnail || response.file?.thumbnail || null,
             caption: response.caption || '',
             width: response.width || null,
@@ -1244,8 +1421,8 @@ class VideoUpload {
         // Re-render the component to show the uploaded video
         this.wrapper.innerHTML = '';
 
-        // Check if we have a video and render accordingly
-        const hasVideo = this.data.file && this.data.file.url && this.data.file.url.trim() !== '';
+        // Check if we have a video and render accordingly (check for filename since we now store filenames)
+        const hasVideo = this.data.file && (this.data.file.url || this.data.file.filename);
         if (hasVideo) {
             this.createVideoElement(this.wrapper);
         } else {
@@ -1301,8 +1478,9 @@ class VideoUpload {
 
         try {
             // Delete from server if URL exists
-            if (file.url) {
-                await this.executeDeleteRequest(file.url);
+            const fileUrl = file.url || this.resolveVideoUrl(file.filename);
+            if (fileUrl) {
+                await this.executeDeleteRequest(fileUrl);
             }
 
             // Remove from data array
@@ -1414,8 +1592,8 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__uploading-text">
-                    <div class="ce-video-upload__uploading-title">Processing video...</div>
-                    <div class="ce-video-upload__uploading-subtitle">Converting and uploading</div>
+                    <div class="ce-video-upload__uploading-title">${this.t.processingTitle}</div>
+                    <div class="ce-video-upload__uploading-subtitle">${this.t.processingSubtitle}</div>
                 </div>
             </div>
         `;
@@ -1450,7 +1628,7 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__error-details">
-                    <div class="ce-video-upload__error-title">Upload Failed</div>
+                    <div class="ce-video-upload__error-title">${this.t.ui.uploadFailed}</div>
                     <div class="ce-video-upload__error-message">${message}</div>
                     ${fileName ? `<div class="ce-video-upload__error-file">File: ${fileName}</div>` : ''}
                 </div>
@@ -1495,13 +1673,13 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__video-error-details">
-                    <div class="ce-video-upload__video-error-title">Video Format Not Supported</div>
+                    <div class="ce-video-upload__video-error-title">${this.t.errors.videoNotSupported}</div>
                     <div class="ce-video-upload__video-error-message">
-                        This video format cannot be played in your browser.
-                        <br>Try converting it to MP4 or WebM format for better compatibility.
+                        ${this.t.errors.browserCompatibility}
+                        <br>${this.t.errors.formatSuggestion}
                     </div>
-                    <a href="${this.data.file.url}" download class="ce-video-upload__video-error-download">
-                        Download Original File
+                    <a href="${videoUrl}" download class="ce-video-upload__video-error-download">
+                        ${this.t.errors.downloadOriginal}
                     </a>
                 </div>
             </div>
@@ -1527,8 +1705,8 @@ class VideoUpload {
                     </svg>
                 </div>
                 <div class="ce-video-upload__error-info">
-                    <div class="ce-video-upload__error-title">Upload Failed</div>
-                    <div class="ce-video-upload__error-subtitle">${errorItems.length} file(s) failed to upload</div>
+                    <div class="ce-video-upload__error-title">${this.t.ui.uploadFailed}</div>
+                    <div class="ce-video-upload__error-subtitle">${this.t.ui.filesFailed.replace('{count}', errorItems.length)}</div>
                 </div>
             </div>
             <div class="ce-video-upload__error-list">
@@ -1547,9 +1725,9 @@ class VideoUpload {
                         <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/>
                         <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
                     </svg>
-                    Retry Failed Uploads
+                    ${this.t.ui.retryFailedUploads}
                 </button>
-                <button class="ce-video-upload__dismiss-btn" type="button">Dismiss</button>
+                <button class="ce-video-upload__dismiss-btn" type="button">${this.t.ui.dismiss}</button>
             </div>
         `;
 
@@ -1708,12 +1886,12 @@ class VideoUpload {
 
     getStatusText(status) {
         switch (status) {
-            case 'pending': return 'Pending';
-            case 'converting': return 'Converting...';
-            case 'uploading': return 'Uploading...';
-            case 'success': return 'Complete';
-            case 'error': return 'Failed';
-            default: return 'Unknown';
+            case 'pending': return this.t.status.pending;
+            case 'converting': return this.t.status.converting;
+            case 'uploading': return this.t.status.uploading;
+            case 'success': return this.t.status.complete;
+            case 'error': return this.t.status.failed;
+            default: return this.t.status.unknown;
         }
     }
 
@@ -1755,7 +1933,7 @@ class VideoUpload {
         if (Object.keys(savedData).length === 0) return true;
 
         // Check if we have a valid file or empty data
-        if (savedData.file && savedData.file.url) {
+        if (savedData.file && (savedData.file.url || savedData.file.filename)) {
             return true; // Valid file
         }
 
@@ -1812,8 +1990,9 @@ class VideoUpload {
             try {
                 // Delete all videos from server
                 const deletePromises = this.data.files.map(file => {
-                    if (file.url) {
-                        return this.executeDeleteRequest(file.url);
+                    const fileUrl = file.url || this.resolveVideoUrl(file.filename);
+                    if (fileUrl) {
+                        return this.executeDeleteRequest(fileUrl);
                     }
                     return Promise.resolve();
                 });

@@ -1,5 +1,10 @@
 /* Audio Annotation Component Styles */
+/* @config "./filament/portal/tailwind.config.js"; */
 
+
+
+@reference "tailwindcss";
+@import 'tailwind-scrollbar-hide/v4';
 .audio-annotation-container {
     @apply w-full mx-auto max-w-7xl;
 }

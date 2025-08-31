@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders\BusinessDB;
 
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Document;
 use App\Models\Flow;
 use App\Models\User;
@@ -24,11 +24,15 @@ final class DocumentSeeder extends Seeder
             return;
         }
 
-        // Get flows from main database that the test user has access to
-        $flows = Flow::whereHas('participants', function ($query) use ($testUser) {
-            $query->where('model_id', $testUser->id)
-                ->where('model_type', $testUser->getMorphClass());
-        })->limit(10)->get();
+        // Get flows from tenants where the test user is a participant
+        $userTenants = $testUser->getAssignedTenants();
+        if ($userTenants->isEmpty()) {
+            $this->command->warn('Test user has no assigned tenants. Please run main DatabaseSeeder first.');
+            return;
+        }
+        
+        $tenantIds = $userTenants->pluck('id')->toArray();
+        $flows = Flow::whereIn('tenant_id', $tenantIds)->limit(10)->get();
 
         if ($flows->isEmpty()) {
             $this->command->warn('No flows found for test user. Please run main DatabaseSeeder first.');

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder\Blocks\DTO;
 
 use App\Services\Document\Contratcs\BlockConfigContract;
+use App\Support\FileSize;
+use App\Support\FileTypes;
 use WendellAdriel\ValidatedDTO\SimpleDTO;
 
 final class ImagesConfigData extends SimpleDTO implements BlockConfigContract
@@ -19,6 +21,9 @@ final class ImagesConfigData extends SimpleDTO implements BlockConfigContract
 
     protected function defaults(): array
     {
+        $availableTypes = FileTypes::getWebImageFormatsAsValidationString();
+        $maxFileSize = FileSize::fromMB(10); // Default 10MB
+
         return [
             'class' => 'ResizableImage',
             'tunes' => ['commentTune'],
@@ -32,10 +37,11 @@ final class ImagesConfigData extends SimpleDTO implements BlockConfigContract
                 'additionalRequestHeaders' => [
                     'X-CSRF-TOKEN' => '',
                 ],
-                'types' => 'image/*',
+                'types' => $availableTypes,
                 'field' => 'image',
                 'captionPlaceholder' => 'Enter image caption...',
                 'buttonContent' => 'Select an image',
+                'maxFileSize' => $maxFileSize,
             ],
         ];
     }

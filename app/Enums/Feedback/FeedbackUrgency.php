@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums\Feedback;
 
-use App\Traits\EnumSelectArrays;
+use App\Concerns\Enums\EnumSelectArrays;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -20,9 +20,9 @@ enum FeedbackUrgency: int implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::NORMAL => 'Normal',
-            self::SUGGESTION => 'Suggestion',
-            self::URGENT => 'Urgent',
+            self::NORMAL => __('app.feedback_urgency.normal'),
+            self::SUGGESTION => __('app.feedback_urgency.suggestion'),
+            self::URGENT => __('app.feedback_urgency.urgent'),
         };
     }
 

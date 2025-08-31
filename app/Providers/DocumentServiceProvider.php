@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Services\Document\ConfigBuilder\ConfigManager;
-use App\Services\Document\ConfigBuilder\DocumentManager;
-use App\Services\Document\Facades\ConfigBuilder;
-use App\Services\Document\Facades\DocumentBuilder;
+use App\Services\Document\ConfigBuilder\EditorConfigManager;
+use App\Services\Document\ConfigBuilder\EditorManager;
 use App\Services\Document\Facades\DocumentResolver;
+use App\Services\Document\Facades\EditorBuilder;
+use App\Services\Document\Facades\EditorConfigBuilder;
 use App\Services\Document\Resolver\DocumentStrategyResolver;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,9 +23,9 @@ final class DocumentServiceProvider extends ServiceProvider
     public function register(): void
     {
 
-        $this->app->singleton(ConfigBuilder::class, fn ($app) => new ConfigManager($app));
+        $this->app->singleton(EditorConfigBuilder::class, fn ($app) => new EditorConfigManager($app));
 
-        $this->app->singleton(DocumentBuilder::class, fn ($app) => new DocumentManager($app));
+        $this->app->singleton(EditorBuilder::class, fn ($app) => new EditorManager($app));
         $this->app->singleton(DocumentResolver::class, fn ($app) => new DocumentStrategyResolver);
     }
 

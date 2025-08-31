@@ -177,7 +177,7 @@ trait HasTimeProgress
      * Get the attribute name for the start date
      * Override this method to customize the start date attribute.
      */
-    public function getProgressStartDateAttribute(): string
+    protected function getProgressStartDateAttribute(): string
     {
         return 'start_date';
     }
@@ -186,7 +186,7 @@ trait HasTimeProgress
      * Get the attribute name for the due date
      * Override this method to customize the due date attribute.
      */
-    public function getProgressDueDateAttribute(): string
+    protected function getProgressDueDateAttribute(): string
     {
         return 'due_date';
     }
@@ -195,7 +195,7 @@ trait HasTimeProgress
      * Get the attribute name for the status
      * Override this method to customize the status attribute.
      */
-    public function getProgressCompletedDateAttribute(): string
+    protected function getProgressCompletedDateAttribute(): string
     {
         return 'completed_at';
     }

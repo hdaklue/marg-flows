@@ -22,11 +22,62 @@ class Timezone
     {
         return collect(static::getTimezones())
             ->flatten(1)
-            ->mapWithKeys(fn ($timezone) => [$timezone => $timezone])->sortKeys()->toArray();
+            ->mapWithKeys(function ($timezone) {
+                return [$timezone => static::displayTimezone($timezone)];
+            })->sortKeys()->toArray();
     }
 
     public static function getTimezonesAsFlatList(): array
     {
         return \collect(static::getTimezones())->flatten()->toArray();
+    }
+
+    public static function displayTimezone(string $timezone): string
+    {
+        $offset = \Illuminate\Support\Carbon::now($timezone)->format('P');
+        
+        // Get localized timezone name
+        $localizedTimezone = static::getLocalizedTimezoneName($timezone);
+        
+        $label = __('common.labels.timezone_format', [
+            'timezone' => $localizedTimezone, 
+            'offset' => $offset
+        ]);
+        
+        return $label ?: "{$localizedTimezone} (UTC{$offset})";
+    }
+
+    protected static function getLocalizedTimezoneName(string $timezone): string
+    {
+        $timezoneTranslations = [
+            'ar' => [
+                'Africa/Cairo' => 'أفريقيا/القاهرة',
+                'Asia/Riyadh' => 'آسيا/الرياض',
+                'Asia/Dubai' => 'آسيا/دبي',
+                'Asia/Kuwait' => 'آسيا/الكويت',
+                'Asia/Qatar' => 'آسيا/قطر',
+                'Asia/Bahrain' => 'آسيا/البحرين',
+                'Asia/Baghdad' => 'آسيا/بغداد',
+                'Asia/Damascus' => 'آسيا/دمشق',
+                'Asia/Beirut' => 'آسيا/بيروت',
+                'Asia/Amman' => 'آسيا/عمان',
+                'Asia/Jerusalem' => 'آسيا/القدس',
+                'Africa/Casablanca' => 'أفريقيا/الدار البيضاء',
+                'Africa/Tunis' => 'أفريقيا/تونس',
+                'Africa/Algiers' => 'أفريقيا/الجزائر',
+                'Europe/London' => 'أوروبا/لندن',
+                'Europe/Paris' => 'أوروبا/باريس',
+                'America/New_York' => 'أمريكا/نيويورك',
+                'America/Los_Angeles' => 'أمريكا/لوس أنجلوس',
+            ],
+        ];
+
+        $locale = app()->getLocale();
+        
+        if (isset($timezoneTranslations[$locale][$timezone])) {
+            return $timezoneTranslations[$locale][$timezone];
+        }
+
+        return $timezone;
     }
 }

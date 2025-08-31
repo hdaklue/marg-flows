@@ -27,6 +27,8 @@ return new class extends Migration
             // Polymorphic relation (likely to flows in main db)
             $table->string('documentable_type');
             $table->string('documentable_id');
+
+            $table->timestamp('archived_at')->nullable();
             $table->timestamps();
 
             // Optimized indexes for cross-database queries

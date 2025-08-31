@@ -1,11 +1,11 @@
-@tailwind components;
+@reference "tailwindcss";
 
 .comment-tune {
     @apply relative;
 }
 
 .comment-tune__button {
-    @apply relative flex items-center justify-center w-8 h-8 text-zinc-500 transition-all duration-200 bg-transparent border border-transparent rounded-md hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2;
+    @apply relative flex items-center justify-center w-8 h-8 transition-all duration-200 bg-transparent border border-transparent rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2;
 }
 
 .comment-tune__button:hover {
@@ -21,7 +21,7 @@
 }
 
 .comment-tune__badge {
-    @apply absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-xs font-medium text-white bg-sky-600 rounded-full;
+    @apply absolute flex items-center justify-center w-4 h-4 text-xs font-medium text-white rounded-full -top-1 -right-1 bg-sky-600;
     min-width: 1rem;
 }
 
@@ -43,7 +43,7 @@
 }
 
 .dark .comment-tune__badge {
-    @apply bg-sky-500 text-white;
+    @apply text-white bg-sky-500;
 }
 
 /* Focus styles for accessibility */
@@ -81,7 +81,7 @@
 
 /* Hover tooltip style */
 .comment-tune__button::after {
-    @apply absolute invisible px-2 py-1 text-xs text-white transition-opacity duration-200 bg-zinc-900 rounded opacity-0 pointer-events-none whitespace-nowrap;
+    @apply absolute invisible px-2 py-1 text-xs text-white transition-opacity duration-200 rounded opacity-0 pointer-events-none bg-zinc-900 whitespace-nowrap;
     content: attr(title);
     bottom: 100%;
     left: 50%;

@@ -36,9 +36,7 @@ final class DesignDeliverableService implements DeliverableServiceContract
 
     public function quantity(int $quantity): self
     {
-        if ($quantity <= 0) {
-            throw new InvalidArgumentException('Quantity must be greater than zero.');
-        }
+        throw_if($quantity <= 0, new InvalidArgumentException('Quantity must be greater than zero.'));
         $this->quantity = $quantity;
 
         return $this;
@@ -46,9 +44,7 @@ final class DesignDeliverableService implements DeliverableServiceContract
 
     public function successOn(Carbon $date): self
     {
-        if ($date->isPast()) {
-            throw new InvalidArgumentException('Success date must be in the future.');
-        }
+        throw_if($date->isPast(), new InvalidArgumentException('Success date must be in the future.'));
         $this->successOn = $date;
 
         return $this;
@@ -56,9 +52,7 @@ final class DesignDeliverableService implements DeliverableServiceContract
 
     public function name(string $name): self
     {
-        if (empty($name)) {
-            throw new InvalidArgumentException('Name cannot be empty.');
-        }
+        throw_if(empty($name), new InvalidArgumentException('Name cannot be empty.'));
         $this->name = $name;
 
         return $this;
@@ -71,9 +65,7 @@ final class DesignDeliverableService implements DeliverableServiceContract
         if (is_string($users)) {
             $users = [$users];
         }
-        if (! is_array($users) || empty($users)) {
-            throw new InvalidArgumentException('Assigned users must be a non-empty array or string.');
-        }
+        throw_if(! is_array($users) || empty($users), new InvalidArgumentException('Assigned users must be a non-empty array or string.'));
         $this->assignedUsers = $users;
 
         return $this;
@@ -81,9 +73,7 @@ final class DesignDeliverableService implements DeliverableServiceContract
 
     public function build(): Deliverable
     {
-        if (! isset($this->formatObject) || ! isset($this->typeObject) || ! isset($this->deliverableSpecification)) {
-            throw new InvalidArgumentException('Deliverable type must be set before building.');
-        }
+        throw_if(! isset($this->formatObject) || ! isset($this->typeObject) || ! isset($this->deliverableSpecification), new InvalidArgumentException('Deliverable type must be set before building.'));
 
         return new Deliverable(
             owners: $this->assignedUsers,

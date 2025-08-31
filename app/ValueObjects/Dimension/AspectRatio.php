@@ -42,7 +42,7 @@ final class AspectRatio implements JsonSerializable
     /**
      * Common screen resolutions with their aspect ratios.
      *
-     * @var array<ResolutionData>
+     * @var array<array{name: string, width: int, height: int, label: string, ratio: float}>
      */
     private static array $resolutions = [
         ['name' => 'HD', 'width' => 1280, 'height' => 720,  'label' => '16:9', 'ratio' => 1.7778],
@@ -79,13 +79,9 @@ final class AspectRatio implements JsonSerializable
         private readonly int $width = 0,
         private readonly int $height = 0,
     ) {
-        if ($this->width < 0 || $this->height < 0) {
-            throw new InvalidArgumentException('Width and height cannot be negative.');
-        }
+        throw_if($this->width < 0 || $this->height < 0, new InvalidArgumentException('Width and height cannot be negative.'));
 
-        if ($this->ratio <= 0) {
-            throw new InvalidArgumentException('Ratio must be positive.');
-        }
+        throw_if($this->ratio <= 0, new InvalidArgumentException('Ratio must be positive.'));
     }
 
     /**
@@ -93,9 +89,7 @@ final class AspectRatio implements JsonSerializable
      */
     public static function from(float $width, float $height, float $tolerance = self::DEFAULT_TOLERANCE): ?self
     {
-        if ($width <= 0 || $height <= 0) {
-            throw new InvalidArgumentException('Width and height must be positive non-zero values.');
-        }
+        throw_if($width <= 0 || $height <= 0, new InvalidArgumentException('Width and height must be positive non-zero values.'));
 
         $intWidth = (int) $width;
         $intHeight = (int) $height;
@@ -146,9 +140,7 @@ final class AspectRatio implements JsonSerializable
      */
     public static function fromRatio(float $ratio, float $tolerance = self::DEFAULT_TOLERANCE): ?self
     {
-        if ($ratio <= 0) {
-            throw new InvalidArgumentException('Ratio must be positive.');
-        }
+        throw_if($ratio <= 0, new InvalidArgumentException('Ratio must be positive.'));
 
         foreach (self::$map as $label => $targetRatio) {
             if (abs($ratio - $targetRatio) < $tolerance) {
@@ -213,9 +205,7 @@ final class AspectRatio implements JsonSerializable
      */
     public function scaleTo(int $targetWidth, int $targetHeight): array
     {
-        if ($targetWidth <= 0 || $targetHeight <= 0) {
-            throw new InvalidArgumentException('Target dimensions must be positive.');
-        }
+        throw_if($targetWidth <= 0 || $targetHeight <= 0, new InvalidArgumentException('Target dimensions must be positive.'));
 
         $targetRatio = $targetWidth / $targetHeight;
 

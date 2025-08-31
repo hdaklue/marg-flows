@@ -4,17 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\Database\LivesInOriginalDB;
-use App\Concerns\HasStaticTypeTrait;
-use App\Concerns\Role\HasSystemRoles;
-use App\Concerns\Role\ManagesParticipants;
-use App\Contracts\HasStaticType;
-use App\Contracts\Role\HasSystemRoleContract;
-use App\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Concerns\HasStaticTypeTrait;
+use Hdaklue\MargRbac\Contracts\HasStaticType;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -53,14 +47,10 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-final class Tenant extends Model implements HasStaticType, HasSystemRoleContract, RoleableEntity
+final class Tenant extends \Hdaklue\MargRbac\Models\Tenant
 {
-    use HasFactory,
-        HasStaticTypeTrait,
-        HasSystemRoles,
-        HasUlids,
-        LivesInOriginalDB,
-        ManagesParticipants;
+
+    protected static $factory = TenantFactory::class;
 
     protected $fillable = ['name'];
 
@@ -69,34 +59,13 @@ final class Tenant extends Model implements HasStaticType, HasSystemRoleContract
     //     return $this->belongsToMany(User::class)->using(TenantUser::class);
     // }
 
-    /**
-     * Enforces the RoleableEntity.
-     *
-     * @see RoleableEntity contract
-     */
-    public function getTenant(): Tenant
-    {
-        return $this;
-    }
 
     /**
-     * Enforces the RoleableEntity.
-     *
-     * @see RoleableEntity
+     * Get the model's morph class.
      */
-    public function getTenantId(): string
+    public function getMorphClass(): string
     {
-        return $this->getKey();
-    }
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'creator_id');
-    }
-
-    public function getTypeName(): string
-    {
-        return 'Team';
+        return 'tenant';
     }
 
     public function flows(): HasMany

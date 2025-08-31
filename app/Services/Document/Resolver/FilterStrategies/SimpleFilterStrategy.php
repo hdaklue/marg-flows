@@ -19,7 +19,7 @@ final class SimpleFilterStrategy implements DocumentBlockFilterStrategy
         'table',
         'nestedList',
         'alert',
-        'hyperlink',
+        'linkTool',
         'videoEmbed', // Embed only, no uploads
     ];
 

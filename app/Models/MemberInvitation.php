@@ -53,7 +53,7 @@ final class MemberInvitation extends Model
         return $this->belongsTo(User::class, 'receiver_id');
     }
 
-    public function scopeSentBy(Builder $query, User $user): Builder
+    protected function scopeSentBy(Builder $query, User $user): Builder
     {
         return $query->where('sender_id', '=', $user->id);
     }

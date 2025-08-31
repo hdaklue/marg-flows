@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\DTOs\AssignableEntity;
 
-use App\Contracts\Role\RoleableEntity;
-use App\Enums\Role\RoleEnum;
-use App\Facades\RoleManager;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;

@@ -8,19 +8,18 @@ use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\Document\ManagesDocuments;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
-use App\Concerns\Role\ManagesParticipants;
+use Hdaklue\MargRbac\Concerns\Role\ManagesParticipants;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\Document\Documentable;
 use App\Contracts\HasStaticType;
-use App\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\FlowStage;
 use App\Facades\MentionService;
-use BackedEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -35,15 +34,12 @@ use Illuminate\Support\Collection;
 /**
  * @property string $id
  * @property string $title
- * @property int $status
- * @property int $is_default
- * @property int $order_column
- * @property Carbon|null $start_date
- * @property Carbon|null $due_date
+ * @property string|null $description
+ * @property int $stage
+ * @property string|null $started_at
  * @property Carbon|null $completed_at
  * @property Carbon|null $canceled_at
  * @property array<array-key, mixed>|null $settings
- * @property mixed $blocks
  * @property string $tenant_id
  * @property string $creator_id
  * @property Carbon|null $deleted_at
@@ -52,9 +48,8 @@ use Illuminate\Support\Collection;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
  * @property-read User $creator
- * @property-read string $progress_completed_date
- * @property-read string $progress_due_date
- * @property-read string $progress_start_date
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Document> $documents
+ * @property-read int|null $documents_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $participants
  * @property-read int|null $participants_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ModelHasRole> $roleAssignments
@@ -66,42 +61,30 @@ use Illuminate\Support\Collection;
  * @property-read Tenant $tenant
  *
  * @method static Builder<static>|Flow assignable()
- * @method static Builder<static>|Flow byStage(\App\Enums\FlowStage|string $status)
- * @method static Builder<static>|Flow byStatus(\App\Enums\FlowStage|string $status)
- * @method static Builder<static>|Flow byTenant(\App\Models\Tenant $tenant)
+ * @method static Builder<static>|Flow byStage(\App\Enums\FlowStage|string $stage)
  * @method static \Database\Factories\FlowFactory factory($count = null, $state = [])
  * @method static Builder<static>|Flow forParticipant(\App\Contracts\Role\AssignableEntity $member)
  * @method static Builder<static>|Flow newModelQuery()
  * @method static Builder<static>|Flow newQuery()
  * @method static Builder<static>|Flow onlyTrashed()
- * @method static Builder<static>|Flow ordered(string $direction = 'asc')
  * @method static Builder<static>|Flow query()
- * @method static Builder<static>|Flow running()
- * @method static Builder<static>|Flow whereBlocks($value)
+ * @method static Builder<static>|Flow scopeByTenant(\App\Models\Tenant $tenant)
+ * @method static Builder<static>|Flow scopeRunning()
  * @method static Builder<static>|Flow whereCanceledAt($value)
  * @method static Builder<static>|Flow whereCompletedAt($value)
  * @method static Builder<static>|Flow whereCreatedAt($value)
  * @method static Builder<static>|Flow whereCreatorId($value)
  * @method static Builder<static>|Flow whereDeletedAt($value)
- * @method static Builder<static>|Flow whereDueDate($value)
+ * @method static Builder<static>|Flow whereDescription($value)
  * @method static Builder<static>|Flow whereId($value)
- * @method static Builder<static>|Flow whereIsDefault($value)
- * @method static Builder<static>|Flow whereOrderColumn($value)
  * @method static Builder<static>|Flow whereSettings($value)
- * @method static Builder<static>|Flow whereStartDate($value)
- * @method static Builder<static>|Flow whereStatus($value)
+ * @method static Builder<static>|Flow whereStage($value)
+ * @method static Builder<static>|Flow whereStartedAt($value)
  * @method static Builder<static>|Flow whereTenantId($value)
  * @method static Builder<static>|Flow whereTitle($value)
  * @method static Builder<static>|Flow whereUpdatedAt($value)
- * @method static Builder<static>|Flow withTrashed()
+ * @method static Builder<static>|Flow withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|Flow withoutTrashed()
- *
- * @property string|null $description
- *
- * @method static Builder<static>|Flow whereDescription($value)
- *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Document> $pages
- * @property-read int|null $pages_count
  *
  * @mixin \Eloquent
  */
@@ -179,23 +162,6 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
         return $this->deliverables()->overdue();
     }
 
-    #[Scope]
-    public function assignable(Builder $builder)
-    {
-        return $builder->where('stage', '!=', FlowStage::COMPLETED->value);
-
-    }
-
-    #[Scope]
-    public function byStage(Builder $builder, string|FlowStage $stage)
-    {
-        if ($stage instanceof BackedEnum) {
-            $stage = $stage->value;
-        }
-
-        return $builder->where('stage', '=', $stage);
-    }
-
     public function setAsCompleted()
     {
         $this->update([
@@ -222,12 +188,6 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
             'completed_at' => null,
             'canceled_at' => null,
         ]);
-    }
-
-    #[Scope]
-    public function scopeRunning(Builder $query): Builder
-    {
-        return $query->whereNotIn('stage', [FlowStage::COMPLETED->value, FlowStage::CANCELED->value, FlowStage::PAUSED->value]);
     }
 
     // public function buildSortQuery()
@@ -261,12 +221,13 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     public function getDeliverablesProgress(): float
     {
         $total = $this->getDeliverablesCount();
-        
+
         if ($total === 0) {
             return 0.0;
         }
 
         $completed = $this->getCompletedDeliverablesCount();
+
         return round(($completed / $total) * 100, 1);
     }
 
@@ -284,6 +245,19 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     {
         // Flow can only be completed if all deliverables are completed
         return $this->getActiveDeliverablesCount() === 0;
+    }
+
+    #[Scope]
+    protected function assignable(Builder $builder)
+    {
+        return $builder->where('stage', '!=', FlowStage::COMPLETED->value);
+
+    }
+
+    #[Scope]
+    protected function scopeRunning(Builder $query): Builder
+    {
+        return $query->whereNotIn('stage', [FlowStage::COMPLETED->value, FlowStage::CANCELED->value, FlowStage::PAUSED->value]);
     }
 
     protected function casts(): array

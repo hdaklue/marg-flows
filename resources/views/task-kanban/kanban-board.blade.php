@@ -1,4 +1,4 @@
-@use(App\Enums\Role\RoleEnum)
+@use(Hdaklue\MargRbac\Enums\Role\RoleEnum)
 @php
     $users = $this->getParticipantsArray;
 @endphp

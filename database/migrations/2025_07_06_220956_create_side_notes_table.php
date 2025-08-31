@@ -17,11 +17,12 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->text('content');
             $table->ulidMorphs('sidenoteable');
-            $table->foreignUlid('owner_id')->references('id')->on('users');
+            $table->string('owner_id');
             $table->timestamps();
 
             // Indexes for performance (owner_id already indexed by foreign key)
             $table->index(['owner_id', 'sidenoteable_type', 'sidenoteable_id']);
+            $table->index('owner_id');
             $table->index('created_at');
         });
     }

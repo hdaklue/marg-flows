@@ -39,7 +39,6 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|Stage whereStageableType($value)
  * @method static Builder<static>|Stage whereUpdatedAt($value)
  *
- * @mixin \Eloquent
  * @mixin Eloquent
  */
 final class Stage extends Model
@@ -59,7 +58,7 @@ final class Stage extends Model
         return $this->morphTo();
     }
 
-    public function scopeBy(Builder $builder, HasStages $entity)
+    protected function scopeBy(Builder $builder, HasStages $entity)
     {
         return $builder->whereHas('stageable', function ($query) use ($entity) {
             $query->where('stageable_id', $entity->getKey())

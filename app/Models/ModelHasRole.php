@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\Database\LivesInOriginalDB;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,10 +19,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $roleable_type
  * @property string $roleable_id
  * @property string $role_id
- * @property-read Model|Eloquent $model
- * @property-read Role $role
- * @property-read Model|Eloquent $roleable
- *
+ * @property-read Model|\Eloquent $model
+ * @property-read \App\Models\Role $role
+ * @property-read Model|\Eloquent $roleable
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ModelHasRole newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ModelHasRole newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ModelHasRole query()
@@ -32,7 +31,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ModelHasRole whereRoleId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ModelHasRole whereRoleableId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ModelHasRole whereRoleableType($value)
- *
  * @mixin Eloquent
  */
 final class ModelHasRole extends MorphPivot

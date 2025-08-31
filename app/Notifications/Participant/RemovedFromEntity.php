@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications\Participant;
 
 use App\Contracts\HasStaticType;
-use App\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use Exception;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;

@@ -78,10 +78,10 @@
         <div x-show="uploading" x-cloak class="fi-fo-file-upload-progress w-full space-y-3">
             <div class="flex items-center justify-between">
                 <h4 class="text-sm font-medium text-gray-950 dark:text-white">
-                    Uploading Files...
+                    {{ __('app.file_upload.uploading') }}
                 </h4>
                 <x-filament::button color="danger" size="xs" @click="cancelAllUploads()">
-                    Cancel All
+                    {{ __('app.cancel') }}
                 </x-filament::button>
             </div>
 
@@ -179,7 +179,7 @@
                                             <x-filament::button color="primary" size="xs"
                                                 x-show="file.status === 'error'" x-cloak @click="retryUpload(file.id)">
                                                 <x-filament::icon icon="heroicon-m-arrow-path" class="h-3 w-3" />
-                                                Retry
+                                                {{ __('filament.retry') }}
                                             </x-filament::button>
                                         </div>
                                     </div>
@@ -219,7 +219,7 @@
 
         <!-- Uploaded Files -->
         <div x-show="uploadedFiles.length > 0" x-cloak class="fi-fo-file-upload-files w-full space-y-2">
-            <h4 class="text-sm font-medium text-gray-950 dark:text-white">Uploaded Files</h4>
+            <h4 class="text-sm font-medium text-gray-950 dark:text-white">{{ __('app.file_upload.upload_complete') }}</h4>
             <template x-for="file in uploadedFiles" :key="file.key">
                 <div
                     class="fi-fo-file-upload-file group relative w-full overflow-hidden rounded-lg border border-green-200 bg-green-50 transition-all duration-200 hover:bg-green-100 dark:border-green-700 dark:bg-green-900/20 dark:hover:bg-green-900/30">

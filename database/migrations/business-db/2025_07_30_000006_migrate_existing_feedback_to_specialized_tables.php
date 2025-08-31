@@ -7,7 +7,6 @@ use App\Models\DesignFeedback;
 use App\Models\DocumentFeedback;
 use App\Models\GeneralFeedback;
 use App\Models\VideoFeedback;
-use App\ValueObjects\FeedbackMetadata;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +15,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $this->command->info('Migrating existing feedback data to specialized tables...');
+        // Migrating existing feedback data to specialized tables...
 
         // Get all existing feedback from the general feedbacks table
         $existingFeedback = DB::connection('business_db')
@@ -25,7 +24,6 @@ return new class extends Migration
             ->get();
 
         if ($existingFeedback->isEmpty()) {
-            $this->command->info('No existing feedback found to migrate.');
             return;
         }
 
@@ -42,11 +40,12 @@ return new class extends Migration
         foreach ($existingFeedback as $feedback) {
             try {
                 $metadata = json_decode($feedback->metadata, true);
-                
-                if (!$metadata || !isset($metadata['type'])) {
+
+                if (! $metadata || ! isset($metadata['type'])) {
                     // No metadata or type - move to general feedback
                     $this->migrateToGeneralFeedback($feedback, null);
                     $migrationStats['general']++;
+
                     continue;
                 }
 
@@ -89,9 +88,7 @@ return new class extends Migration
                         break;
                 }
 
-                if ($migrated) {
-                    $this->command->info("Migrated feedback {$feedback->id} ({$feedbackType}) successfully.");
-                }
+                // Migration completed for feedback {$feedback->id}
 
             } catch (\Exception $e) {
                 $migrationStats['errors']++;
@@ -100,7 +97,7 @@ return new class extends Migration
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
-                $this->command->error("Failed to migrate feedback {$feedback->id}: " . $e->getMessage());
+                // Failed to migrate feedback {$feedback->id}
             }
         }
 
@@ -109,35 +106,24 @@ return new class extends Migration
 
         // Optionally rename the old table to preserve data
         if ($migrationStats['errors'] === 0) {
-            $this->command->info('Migration completed successfully. Renaming old feedbacks table...');
             DB::connection('business_db')->statement('RENAME TABLE feedbacks TO feedbacks_legacy');
-            $this->command->info('✅ Old feedbacks table renamed to feedbacks_legacy');
-        } else {
-            $this->command->warn('Migration completed with errors. Old feedbacks table preserved.');
         }
     }
 
     public function down(): void
     {
-        $this->command->info('Rolling back feedback migration...');
-
         // Restore the original feedbacks table if it was renamed
         $tables = DB::connection('business_db')->select("SHOW TABLES LIKE 'feedbacks_legacy'");
-        if (!empty($tables)) {
+        if (! empty($tables)) {
             DB::connection('business_db')->statement('RENAME TABLE feedbacks_legacy TO feedbacks');
-            $this->command->info('✅ Restored original feedbacks table');
         }
 
         // Clear specialized feedback tables
-        $this->command->info('Clearing specialized feedback tables...');
-        
         DB::connection('business_db')->table('video_feedbacks')->truncate();
         DB::connection('business_db')->table('audio_feedbacks')->truncate();
         DB::connection('business_db')->table('document_feedbacks')->truncate();
         DB::connection('business_db')->table('design_feedbacks')->truncate();
         DB::connection('business_db')->table('general_feedbacks')->truncate();
-
-        $this->command->info('✅ Migration rollback completed');
     }
 
     private function migrateToVideoFeedback($feedback, array $metadata): void
@@ -173,9 +159,7 @@ return new class extends Migration
         $data = $metadata['data'] ?? [];
 
         // Ensure we have required time data
-        if (empty($data['start_time']) || empty($data['end_time'])) {
-            throw new \InvalidArgumentException('Audio feedback requires start_time and end_time');
-        }
+        throw_if(empty($data['start_time']) || empty($data['end_time']), new \InvalidArgumentException('Audio feedback requires start_time and end_time'));
 
         AudioFeedback::create([
             'id' => $feedback->id,
@@ -203,9 +187,7 @@ return new class extends Migration
         $data = $metadata['data'] ?? [];
 
         // Ensure we have required block_id
-        if (empty($data['block_id'])) {
-            throw new \InvalidArgumentException('Document feedback requires block_id');
-        }
+        throw_if(empty($data['block_id']), new \InvalidArgumentException('Document feedback requires block_id'));
 
         DocumentFeedback::create([
             'id' => $feedback->id,
@@ -233,9 +215,7 @@ return new class extends Migration
         $data = $metadata['data'] ?? [];
 
         // Ensure we have required coordinates
-        if (!isset($data['x_coordinate']) || !isset($data['y_coordinate'])) {
-            throw new \InvalidArgumentException('Design feedback requires x_coordinate and y_coordinate');
-        }
+        throw_if(! isset($data['x_coordinate']) || ! isset($data['y_coordinate']), new \InvalidArgumentException('Design feedback requires x_coordinate and y_coordinate'));
 
         DesignFeedback::create([
             'id' => $feedback->id,
@@ -250,7 +230,8 @@ return new class extends Migration
             'resolved_at' => $feedback->resolved_at,
             'x_coordinate' => $data['x_coordinate'],
             'y_coordinate' => $data['y_coordinate'],
-            'annotation_type' => $data['annotation_type'] ?? 'point',
+            'width' => $data['width'] ?? 0,
+            'height' => $data['height'] ?? 0,
             'annotation_data' => $data['annotation_data'] ?? null,
             'area_bounds' => $data['area_bounds'] ?? null,
             'color' => $data['color'] ?? null,
@@ -266,12 +247,12 @@ return new class extends Migration
         $category = null;
         if ($metadata) {
             $category = $metadata['category'] ?? $metadata['type'] ?? null;
-            
+
             // Clean up category to match enum values
-            if ($category && !in_array($category, [
-                'ui', 'ux', 'content', 'functionality', 'performance', 
-                'accessibility', 'security', 'bug', 'feature', 
-                'improvement', 'question', 'other'
+            if ($category && ! in_array($category, [
+                'ui', 'ux', 'content', 'functionality', 'performance',
+                'accessibility', 'security', 'bug', 'feature',
+                'improvement', 'question', 'other',
             ])) {
                 $category = 'other';
             }
@@ -298,22 +279,6 @@ return new class extends Migration
 
     private function displayMigrationStats(array $stats): void
     {
-        $this->command->info('');
-        $this->command->info('📊 Migration Statistics:');
-        $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━');
-        $this->command->info("Total feedback processed: {$stats['total']}");
-        $this->command->info("├─ Video feedback: {$stats['video']}");
-        $this->command->info("├─ Audio feedback: {$stats['audio']}");
-        $this->command->info("├─ Document feedback: {$stats['document']}");
-        $this->command->info("├─ Design feedback: {$stats['design']}");
-        $this->command->info("├─ General feedback: {$stats['general']}");
-        $this->command->info("└─ Errors: {$stats['errors']}");
-        
-        if ($stats['errors'] === 0) {
-            $this->command->info('✅ All feedback migrated successfully!');
-        } else {
-            $this->command->warn("⚠️  {$stats['errors']} errors encountered during migration.");
-            $this->command->warn('Check the logs for details.');
-        }
+        // Migration completed - check logs for detailed statistics
     }
 };

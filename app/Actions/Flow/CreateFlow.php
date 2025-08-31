@@ -6,7 +6,7 @@ namespace App\Actions\Flow;
 
 use App\Actions\Roleable\AddParticipant;
 use App\DTOs\Flow\CreateFlowDto;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Exceptions\Flow\FlowCreationException;
 use App\Models\Flow;
 use App\Models\Stage;

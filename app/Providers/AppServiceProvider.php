@@ -16,11 +16,12 @@ use App\Services\Document\DocumentService;
 use App\Services\Flow\TimeProgressService;
 use App\Services\MentionService;
 use App\Services\Role\RoleAssignmentService;
+use App\Services\Upload\UploadSessionManager;
 use Filament\Actions\Action;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
-use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\Size;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
@@ -38,11 +39,12 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(TimeProgressService::class);
-        $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
+        // $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
         $this->app->singleton('document.manager', fn (): DocumentService => new DocumentService);
         $this->app->singleton('mention.service', fn (): MentionService => new MentionService);
         $this->app->singleton(DeliverableBuilder::class, fn (): DeliverablesManager => new DeliverablesManager($this->app));
         $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
+        $this->app->singleton(UploadSessionManager::class, fn ($app) => new UploadSessionManager($app));
 
         $this->configureGate();
         $this->configureModel();
@@ -55,7 +57,7 @@ final class AppServiceProvider extends ServiceProvider
 
         Action::configureUsing(function (Action $action): void {
 
-            $action->size(ActionSize::ExtraSmall);
+            $action->size(Size::ExtraSmall);
         });
     }
 
@@ -64,6 +66,16 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Override any package morph maps with correct application models
+        Relation::morphMap([
+            'user' => User::class,
+            'tenant' => Tenant::class,
+            'flow' => Flow::class,
+            'document' => Document::class,
+            // Also include package models for backward compatibility
+            'Hdaklue\MargRbac\Models\User' => User::class,
+            'Hdaklue\MargRbac\Models\Tenant' => Tenant::class,
+        ]);
 
         Event::subscribe(TenantEventSubscriber::class);
         FilamentAsset::register([
@@ -97,12 +109,14 @@ final class AppServiceProvider extends ServiceProvider
 
     protected function configureModel()
     {
+        // Set up morph map for all models
         Relation::enforceMorphMap([
             'user' => User::class,
             'tenant' => Tenant::class,
             'flow' => Flow::class,
             'document' => Document::class,
         ]);
+
         Model::shouldBeStrict();
     }
 

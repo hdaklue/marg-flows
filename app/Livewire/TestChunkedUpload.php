@@ -1,21 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Forms\Components\ChunkedFileUpload;
-use Filament\Forms\Components\Section;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Livewire\Component;
 
 /**
- * @property-read Form $form
+ * @property-read Schema $form
  */
-class TestChunkedUpload extends Component implements HasForms
+final class TestChunkedUpload extends Component implements HasActions, HasForms
 {
-    use InteractsWithForms;
+    use InteractsWithActions, InteractsWithForms;
 
     public ?array $data = [];
 
@@ -24,17 +28,17 @@ class TestChunkedUpload extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Test Chunked Upload')
                     ->description('Upload files using chunked upload for large files')
                     ->schema([
                         TextInput::make('title')
                             ->label('Title')
                             ->required(),
-                        
+
                         ChunkedFileUpload::make('documents')
                             ->label('Documents')
                             ->directory('test-uploads')
@@ -45,7 +49,7 @@ class TestChunkedUpload extends Component implements HasForms
                             ->maxSize(100 * 1024 * 1024) // 100MB max
                             ->acceptedFileTypes(['application/pdf', 'image/*', 'text/*'])
                             ->helperText('Upload PDF, image, or text files. Large files will be uploaded in chunks.'),
-                        
+
                         ChunkedFileUpload::make('large_file')
                             ->label('Single Large File')
                             ->directory('large-uploads')
@@ -55,7 +59,7 @@ class TestChunkedUpload extends Component implements HasForms
                             ->maxFiles(1)
                             ->maxSize(500 * 1024 * 1024) // 500MB max
                             ->helperText('Upload a single large file (up to 500MB).'),
-                    ])
+                    ]),
             ])
             ->statePath('data');
     }
@@ -63,16 +67,16 @@ class TestChunkedUpload extends Component implements HasForms
     public function submit(): void
     {
         $data = $this->form->getState();
-        
+
         // Here you would typically save the data to your model
         // For now, we'll just show a success message
-        
-        $this->dispatch('notify', 
+
+        $this->dispatch('notify',
             title: 'Success!',
             message: 'Files uploaded successfully!',
-            type: 'success'
+            type: 'success',
         );
-        
+
         // Reset form
         $this->form->fill();
     }

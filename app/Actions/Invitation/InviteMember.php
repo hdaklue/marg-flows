@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Invitation;
 
+use App\Actions\User\GenerateUserAvatar;
 use App\DTOs\Invitation\InvitationDTO;
-use App\Facades\RoleManager;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\Tenant;
 use App\Models\TenantUser;
 use App\Models\User;
@@ -17,6 +18,9 @@ use function config;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
+
+use function Illuminate\Support\defer;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -69,6 +73,8 @@ final class InviteMember
             'password' => $this->password,
             'timezone' => $dto->timezone,
         ]);
+
+        defer(fn () => GenerateUserAvatar::run($this->member));
     }
 
     private function generatePassword(): string

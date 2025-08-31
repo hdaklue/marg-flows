@@ -6,12 +6,9 @@ namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
-use Mokhosh\FilamentKanban\Concerns\IsKanbanStatus;
 
 enum FlowStage: int implements HasColor, HasLabel
 {
-    use IsKanbanStatus;
-
     case DRAFT = 1;
     case ACTIVE = 2;
     case PAUSED = 3;
@@ -19,16 +16,22 @@ enum FlowStage: int implements HasColor, HasLabel
     case COMPLETED = 5;
     case CANCELED = 6;
 
+    public static function asFilamentHtmlArray(): array
+    {
+        return collect(self::cases())
+            ->mapWithKeys(fn ($case) => [$case->value => "<div class='flex items-center gap-2'><div class='w-3 h-3 rounded bg-{$case->getColor()}-500 dark:bg-{$case->getColor()}-700'></div><span>{$case->getLabel()}</span></div>"])
+            ->toArray();
+    }
+
     public function getLabel(): string
     {
         return match ($this) {
-            self::ACTIVE => 'Active',
-            self::PAUSED => 'Pased',
-            self::BLOCKED => 'Blocked',
-            self::COMPLETED => 'Completed',
-            self::CANCELED => 'Canceled',
-            self::DRAFT => 'Drafted',
-
+            self::ACTIVE => __('flow.stages.active'),
+            self::PAUSED => __('flow.stages.paused'),
+            self::BLOCKED => __('flow.stages.blocked'),
+            self::COMPLETED => __('flow.stages.completed'),
+            self::CANCELED => __('flow.stages.canceled'),
+            self::DRAFT => __('flow.stages.draft'),
         };
     }
 
@@ -36,11 +39,11 @@ enum FlowStage: int implements HasColor, HasLabel
     {
         return match ($this) {
             self::ACTIVE => 'sky',
-            self::PAUSED => 'yellow',
+            self::PAUSED => 'amber',
             self::BLOCKED => 'red',
             self::COMPLETED => 'green',
             self::DRAFT => 'indigo',
-            default => 'slate',
+            default => 'zinc',
 
         };
     }

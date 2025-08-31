@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Concerns\Livewire;
 
+use Exception;
 use Illuminate\Validation\ValidationException;
+use Log;
+use RuntimeException;
 
 trait WithSortable
 {
@@ -15,11 +20,11 @@ trait WithSortable
 
     /**
      * Abstract method that implementing classes must define
-     * Handles sorting items within the same group
-     * 
-     * @param array $itemIds Array of item identifiers in their new order
-     * @param string|null $from Source container/group identifier  
-     * @param string|null $to Target container/group identifier
+     * Handles sorting items within the same group.
+     *
+     * @param  array  $itemIds  Array of item identifiers in their new order
+     * @param  string|null  $from  Source container/group identifier
+     * @param  string|null  $to  Target container/group identifier
      * @return mixed The updated items or result of the sort operation
      */
     abstract public function onSort(array $itemIds, ?string $from = null, ?string $to = null): mixed;
@@ -29,6 +34,29 @@ trait WithSortable
         $this->mergeSortableConfig();
     }
 
+    public function handleSort(array $itemIds, ?array $eventData = null): void
+    {
+        try {
+            $this->validateSortableOperation($itemIds, $eventData);
+
+            $from = $eventData['from'] ?? null;
+            $to = $eventData['to'] ?? null;
+
+            $this->beforeSort($itemIds, $from, $to);
+
+            $result = $this->performSort($itemIds, $from, $to);
+
+            $this->afterSort($result, $from, $to);
+
+        } catch (ValidationException $e) {
+            $this->handleSortError($e, $itemIds, $eventData);
+            throw $e;
+        } catch (Exception $e) {
+            $this->handleSortError($e, $itemIds, $eventData);
+            throw new RuntimeException('Sortable operation failed: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
     protected function mergeSortableConfig(): void
     {
         if (method_exists($this, 'getSortableConfig')) {
@@ -36,55 +64,26 @@ trait WithSortable
         }
     }
 
-    public function handleSort(array $itemIds, ?array $eventData = null): void
-    {
-        try {
-            $this->validateSortableOperation($itemIds, $eventData);
-            
-            $from = $eventData['from'] ?? null;
-            $to = $eventData['to'] ?? null;
-            
-            $this->beforeSort($itemIds, $from, $to);
-            
-            $result = $this->performSort($itemIds, $from, $to);
-            
-            $this->afterSort($result, $from, $to);
-            
-        } catch (ValidationException $e) {
-            $this->handleSortError($e, $itemIds, $eventData);
-            throw $e;
-        } catch (\Exception $e) {
-            $this->handleSortError($e, $itemIds, $eventData);
-            throw new \RuntimeException('Sortable operation failed: ' . $e->getMessage(), 0, $e);
-        }
-    }
-
     protected function validateSortableOperation(array $itemIds, ?array $eventData = null): void
     {
-        if (!$this->sortableConfig['validate_items']) {
+        if (! $this->sortableConfig['validate_items']) {
             return;
         }
 
-        if (count($itemIds) > $this->sortableConfig['max_items']) {
-            throw ValidationException::withMessages([
-                'items' => "Cannot sort more than {$this->sortableConfig['max_items']} items"
-            ]);
-        }
+        throw_if(count($itemIds) > $this->sortableConfig['max_items'], ValidationException::withMessages([
+            'items' => "Cannot sort more than {$this->sortableConfig['max_items']} items",
+        ]));
 
-        if (empty($itemIds)) {
-            throw ValidationException::withMessages([
-                'items' => 'No items provided for sorting'
-            ]);
-        }
+        throw_if(empty($itemIds), ValidationException::withMessages([
+            'items' => 'No items provided for sorting',
+        ]));
 
         $uniqueItems = array_unique($itemIds);
-        if (count($uniqueItems) !== count($itemIds)) {
-            throw ValidationException::withMessages([
-                'items' => 'Duplicate items detected in sort operation'
-            ]);
-        }
+        throw_if(count($uniqueItems) !== count($itemIds), ValidationException::withMessages([
+            'items' => 'Duplicate items detected in sort operation',
+        ]));
 
-        if (property_exists($this, 'sortableRules') && !empty($this->sortableRules)) {
+        if (property_exists($this, 'sortableRules') && ! empty($this->sortableRules)) {
             $this->validate([
                 'items' => $itemIds,
                 'eventData' => $eventData,
@@ -115,11 +114,9 @@ trait WithSortable
 
     protected function handleCrossGroupSort(array $itemIds, string $from, string $to): mixed
     {
-        if (!$this->sortableConfig['allow_cross_group']) {
-            throw ValidationException::withMessages([
-                'cross_group' => 'Cross-group sorting is not allowed'
-            ]);
-        }
+        throw_unless($this->sortableConfig['allow_cross_group'], ValidationException::withMessages([
+            'cross_group' => 'Cross-group sorting is not allowed',
+        ]));
 
         if (method_exists($this, 'onCrossGroupSort')) {
             return $this->onCrossGroupSort($itemIds, $from, $to);
@@ -148,7 +145,7 @@ trait WithSortable
         ]);
     }
 
-    protected function handleSortError(\Exception $e, array $itemIds, ?array $eventData = null): void
+    protected function handleSortError(Exception $e, array $itemIds, ?array $eventData = null): void
     {
         if (method_exists($this, 'onSortError')) {
             $this->onSortError($e, $itemIds, $eventData);
@@ -160,7 +157,7 @@ trait WithSortable
             'eventData' => $eventData,
         ]);
 
-        \Log::error('Sortable operation failed', [
+        Log::error('Sortable operation failed', [
             'component' => static::class,
             'error' => $e->getMessage(),
             'items_count' => count($itemIds),

@@ -27,20 +27,20 @@ enum AssigneeRole: string implements HasDescription, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::ASSIGNEE => 'Assignee',
-            self::APPROVER => 'Approver',
-            self::REVIEWER => 'Reviewer',
-            self::OBSERVER => 'Observer',
+            self::ASSIGNEE => __('app.roles.assignee'),
+            self::APPROVER => __('app.roles.approver'),
+            self::REVIEWER => __('app.roles.reviewer'),
+            self::OBSERVER => __('app.roles.observer'),
         };
     }
 
     public function getDescription(): string
     {
         return match ($this) {
-            self::ASSIGNEE => 'Responsible for completing the task',
-            self::APPROVER => 'Reviews and approves task completion',
-            self::REVIEWER => 'Provides feedback and suggestions',
-            self::OBSERVER => 'Monitors progress without direct involvement',
+            self::ASSIGNEE => __('app.role_descriptions.assignee'),
+            self::APPROVER => __('app.role_descriptions.approver'),
+            self::REVIEWER => __('app.role_descriptions.reviewer'),
+            self::OBSERVER => __('app.role_descriptions.observer'),
         };
     }
 

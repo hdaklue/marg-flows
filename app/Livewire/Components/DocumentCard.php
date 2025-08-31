@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Components;
 
-use App\Collections\Role\ParticipantsCollection;
-use App\Filament\Resources\DocumentResource;
+use App\Filament\Resources\Documents\DocumentResource;
 use App\Models\Document;
+use Hdaklue\MargRbac\Collections\Role\ParticipantsCollection;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -37,7 +37,7 @@ final class DocumentCard extends Component
 
     public function mount(string $pageId, string $pageableId): void
     {
-        $this->page = Document::where('id', $pageId)->firstOrFail();
+        $this->page = Document::where('id', $pageId)->with('documentable')->firstOrFail();
         $this->createdAt = toUserDateTime($this->page->created_at, filamentUser());
         $this->updatedAt = toUserDateTime($this->page->updated_at, filamentUser());
 

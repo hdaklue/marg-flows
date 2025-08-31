@@ -33,14 +33,16 @@ return new class extends Migration
             $table->json('settings')->nullable();
 
             // foreign keys
-            $table->foreignUlid('tenant_id')->references('id')->on('tenants');
-            $table->foreignUlid('creator_id')
-                ->references('id')->on('users');
+            $table->string('tenant_id');
+            $table->string('creator_id');
 
             $table->softDeletes();
             $table->timestamps();
 
             $table->index(['tenant_id', 'stage']);
+            $table->index(['id', 'tenant_id']);
+            $table->index(['id', 'creator_id']);
+            $table->index(['id', 'creator_id', 'tenant_id']);
             // $table->index(['status', 'due_date']);
             // $table->index('creator_id');
         });

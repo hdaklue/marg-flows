@@ -5,13 +5,20 @@ import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
 import Alert from 'editorjs-alert';
 import DragDrop from 'editorjs-drag-drop';
-import HyperLink from 'editorjs-hyperlink';
+import LinkTool from '../editorjs/plugins/link-tool';
 import Undo from 'editorjs-undo';
 import CommentTune from '../editorjs/plugins/comment-tune';
 import ResizableImage from '../editorjs/plugins/resizable-image';
 import VideoEmbed from '../editorjs/plugins/video-embed';
 import VideoUpload from '../editorjs/plugins/video-upload';
 import { VIDEO_VALIDATION_CONFIG } from '../editorjs/video-validation.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ar';
+import 'dayjs/locale/en';
+
+// Initialize Day.js with plugins
+dayjs.extend(relativeTime);
 
 
 export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null, toolsConfig = null, allowedTools = null) {
@@ -19,7 +26,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
         editor: null,
         state: livewireState,
         currentLocale: null,
-        editorLocale: null,
+        direction: 'ltr',
         canEdit: canEdit,
         saveCallback: saveCallback,
         autosaveInterval: autosaveIntervalSeconds * 1000, // Convert to milliseconds
@@ -60,10 +67,11 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 isDirty: this.isDirty,
                 isSaving: this.isSaving,
                 saveStatus: this.saveStatus,
-                statusText: this.isSaving ? 'Saving...' :
-                    this.saveStatus === 'success' ? 'Saved' :
-                        this.saveStatus === 'error' ? 'Save failed' :
-                            this.isDirty ? 'Unsaved changes' : 'No changes'
+                statusText: this.isSaving ? this.statusTranslations?.saving || 'Saving...' :
+                    this.saveStatus === 'success' ? this.statusTranslations?.saved || 'Saved' :
+                        this.saveStatus === 'error' ? this.statusTranslations?.save_failed || 'Save failed' :
+                            this.isDirty ? this.statusTranslations?.unsaved_changes || 'Unsaved changes' : 
+                            this.statusTranslations?.no_changes || 'No changes'
             };
         },
 
@@ -91,6 +99,9 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 this.currentEditorTime = now;
             }
 
+            // Detect current locale and direction
+            this.detectLocaleAndDirection();
+
             this.lastSaved = initialUpdatedAt ? new Date(initialUpdatedAt) : null;
             this.updateTopbarHeight();
             this.startUpdateTimer();
@@ -99,6 +110,222 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             this.setupEventListeners();
             this.setupEditorBusyListeners();
             this.startAutosave();
+        },
+
+        detectLocaleAndDirection() {
+            // Get current locale from Laravel app
+            const htmlElement = document.documentElement;
+            const bodyElement = document.body;
+            
+            // Try to get locale from various sources
+            this.currentLocale = htmlElement.lang || 
+                                bodyElement.getAttribute('data-locale') || 
+                                'en';
+            
+            // Determine if the current locale requires RTL
+            const rtlLocales = ['ar', 'he', 'fa', 'ur', 'ku', 'dv'];
+            const isRtl = rtlLocales.includes(this.currentLocale.split('-')[0]);
+            
+            // Set direction for RTL support
+            this.direction = isRtl ? 'rtl' : 'ltr';
+            
+            // Get tool translations from Laravel's translation data
+            this.toolTranslations = this.getToolTranslations();
+            this.uiTranslations = this.getUITranslations();
+            this.statusTranslations = this.getStatusTranslations();
+            
+            // Set Day.js locale
+            dayjs.locale(this.currentLocale.split('-')[0]);
+            
+            // console.log('EditorJS Localization Debug:');
+            // console.log('- HTML lang attribute:', htmlElement.lang);
+            // console.log('- Detected locale:', this.currentLocale);
+            // console.log('- Direction:', this.direction);
+            // console.log('- Tool translations:', this.toolTranslations);
+            // console.log('- UI translations:', this.uiTranslations);
+        },
+
+        getToolTranslations() {
+            // Try to get translations from Laravel's localization data
+            // This assumes Laravel passes the translations to the frontend
+            if (typeof window.Laravel !== 'undefined' && window.Laravel.translations) {
+                return window.Laravel.translations.editor_tools || {};
+            }
+            
+            // Fallback translations based on detected locale
+            const translations = {
+                'en': {
+                    'paragraph': 'Text',
+                    'header': 'Heading', 
+                    'images': 'Image',
+                    'table': 'Table',
+                    'nestedList': 'List',
+                    'alert': 'Alert',
+                    'linkTool': 'Link',
+                    'videoEmbed': 'Video Embed',
+                    'videoUpload': 'Video Upload',
+                    'commentTune': 'Add Comment'
+                },
+                'ar': {
+                    'paragraph': 'نص',
+                    'header': 'عنوان',
+                    'images': 'صورة', 
+                    'table': 'جدول',
+                    'nestedList': 'قائمة',
+                    'alert': 'تنبيه',
+                    'linkTool': 'رابط',
+                    'videoEmbed': 'تضمين فيديو',
+                    'videoUpload': 'رفع فيديو',
+                    'commentTune': 'إضافة تعليق'
+                }
+            };
+            
+            const locale = this.currentLocale.split('-')[0];
+            return translations[locale] || translations['en'];
+        },
+
+        getUITranslations() {
+            // Try to get UI translations from Laravel's localization data
+            if (typeof window.Laravel !== 'undefined' && window.Laravel.translations) {
+                return window.Laravel.translations.editor_ui || {};
+            }
+            
+            // Fallback UI translations based on detected locale using EditorJS format
+            const uiTranslations = {
+                'en': {
+                    ui: {
+                        "blockTunes": {
+                            "toggler": {
+                                "Click to tune": "Click to tune",
+                                "or drag to move": "or drag to move"
+                            },
+                        },
+                        "inlineToolbar": {
+                            "converter": {
+                                "Convert to": "Convert to"
+                            }
+                        },
+                        "toolbar": {
+                            "toolbox": {
+                                "Add": "Add",
+                                "Filter": "Filter",
+                                "Nothing found": "Nothing found"
+                            }
+                        },
+                        "popover": {
+                            "Filter": "Filter",
+                            "Nothing found": "Nothing found",
+                        }
+                    },
+                    toolNames: {
+                        "Text": "Text",
+                        "Heading": "Heading",
+                        "List": "List",
+                        "Table": "Table",
+                        "Link": "Link",
+                        "Bold": "Bold",
+                        "Italic": "Italic"
+                    },
+                    blockTunes: {
+                        "delete": {
+                            "Delete": "Delete"
+                        },
+                        "moveUp": {
+                            "Move up": "Move up"
+                        },
+                        "moveDown": {
+                            "Move down": "Move down"
+                        },
+                        "commentTune": {
+                            "Add Comment": "Add Comment",
+                            "Comment": "Comment",
+                            "Add a comment": "Add a comment"
+                        }
+                    }
+                },
+                'ar': {
+                    ui: {
+                        "blockTunes": {
+                            "toggler": {
+                                "Click to tune": "انقر للضبط",
+                                "or drag to move": "أو اسحب للتحريك"
+                            },
+                        },
+                        "inlineToolbar": {
+                            "converter": {
+                                "Convert to": "تحويل إلى"
+                            }
+                        },
+                        "toolbar": {
+                            "toolbox": {
+                                "Add": "إضافة",
+                                "Filter": "تصفية",
+                                "Nothing found": "لا يوجد شيء"
+                            }
+                        },
+                        "popover": {
+                            "Filter": "تصفية",
+                            "Nothing found": "لا يوجد شيء",
+                        }
+                    },
+                    toolNames: {
+                        "Text": "نص",
+                        "Heading": "عنوان",
+                        "List": "قائمة",
+                        "Table": "جدول",
+                        "Link": "رابط",
+                        "Bold": "عريض",
+                        "Italic": "مائل"
+                    },
+                    blockTunes: {
+                        "delete": {
+                            "Delete": "حذف"
+                        },
+                        "moveUp": {
+                            "Move up": "تحريك لأعلى"
+                        },
+                        "moveDown": {
+                            "Move down": "تحريك لأسفل"
+                        },
+                        "commentTune": {
+                            "Add Comment": "إضافة تعليق",
+                            "Comment": "تعليق",
+                            "Add a comment": "إضافة تعليق"
+                        }
+                    }
+                }
+            };
+            
+            const locale = this.currentLocale.split('-')[0];
+            return uiTranslations[locale] || uiTranslations['en'];
+        },
+
+        getStatusTranslations() {
+            // Try to get status translations from Laravel's localization data
+            if (typeof window.Laravel !== 'undefined' && window.Laravel.translations) {
+                return window.Laravel.translations.document?.editor || {};
+            }
+            
+            // Fallback status translations based on detected locale
+            const statusTranslations = {
+                'en': {
+                    'saving': 'Saving...',
+                    'saved': 'Saved',
+                    'save_failed': 'Save failed',
+                    'unsaved_changes': 'Unsaved changes',
+                    'no_changes': 'No changes'
+                },
+                'ar': {
+                    'saving': 'جاري الحفظ...',
+                    'saved': 'محفوظ',
+                    'save_failed': 'فشل الحفظ',
+                    'unsaved_changes': 'تغييرات غير محفوظة',
+                    'no_changes': 'لا توجد تغييرات'
+                }
+            };
+            
+            const locale = this.currentLocale.split('-')[0];
+            return statusTranslations[locale] || statusTranslations['en'];
         },
 
         watchStateChanges() {
@@ -160,7 +387,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             this.editorReady = false;
             this.isInitializing = true;
 
-            this.editor = new EditorJS({
+            const editorConfig = {
                 holder: 'editor-wrap',
                 data: initialData,
                 readOnly: !this.canEdit,
@@ -168,6 +395,16 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 defaultBlock: false, // Disable default block during initialization
                 inlineToolbar: false, // Disable during initialization
                 tools: this.getEditorTools(csrf, uploadUrl),
+                i18n: {
+                    /**
+                     * Text direction
+                     */
+                    direction: this.direction,
+                    /**
+                     * UI translations 
+                     */
+                    messages: this.uiTranslations
+                }, // Add RTL support and UI translations based on detected locale
                 onChange: (api, event) => {
                     // Defensive check - ensure editor exists and is ready
                     if (!this.editor || !this.editorReady || this.isInitializing) {
@@ -207,11 +444,12 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         // The actual save() will be called by autosave or manual save
                     }, 100);
                 },
-
                 onReady: () => {
                     this.editor.isReady?.then(() => {
                         // Mark editor as ready
                         this.editorReady = true;
+
+                        // EditorJS automatically adds --rtl classes when direction: 'rtl' is set in i18n config
 
                         // Enable inline toolbar now that editor is ready
                         if (this.editor.configuration) {
@@ -237,7 +475,12 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         this.isInitializing = false; // Ensure we don't get stuck in initializing state
                     });
                 }
-            });
+            };
+            
+            // console.log('EditorJS Configuration:', editorConfig);
+            // console.log('EditorJS i18n config:', editorConfig.i18n);
+            
+            this.editor = new EditorJS(editorConfig);
         },
 
         getEditorTools(csrf, uploadUrl) {
@@ -251,7 +494,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 paragraph: {
                     class: Paragraph,
                     config: { preserveBlank: true },
-                    tunes: ['commentTune']
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.paragraph || 'Text'
+                    }
                 },
                 header: {
                     class: Header,
@@ -260,7 +506,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         // levels: [2, 3, 4, 5],
                         // defaultLevel: 2,
                     },
-                    tunes: ['commentTune']
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.header || 'Heading'
+                    }
                 },
 
                 // image: {
@@ -287,13 +536,16 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         additionalRequestHeaders: {
                             'X-CSRF-TOKEN': csrf,
                         },
-                        types: 'image/*',
+                        types: 'image/*', // This will be overridden by config from PHP if available
                         field: 'image',
                         captionPlaceholder: 'Enter image caption...',
                         buttonContent: 'Select an image',
+                        maxFileSize: 10485760, // 10MB default - will be overridden by config from PHP if available
                     },
-                    tunes: ['commentTune']
-
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.images || 'Image'
+                    }
                 },
                 table: {
                     class: Table,
@@ -302,7 +554,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         rows: 2,
                         cols: 3,
                     },
-                    tunes: ['commentTune']
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.table || 'Table'
+                    }
                 },
                 nestedList: {
                     class: EditorJsList,
@@ -311,7 +566,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         placeholder: "Add an item",
                         maxLevel: 2,
                     },
-                    tunes: ['commentTune']
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.nestedList || 'List'
+                    }
                 },
                 alert: {
                     class: Alert,
@@ -321,19 +579,23 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         defaultType: 'primary',
                         messagePlaceholder: 'Enter something',
                     },
-                    tunes: ['commentTune']
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.alert || 'Alert'
+                    }
                 },
-                hyperlink: {
-                    class: HyperLink,
+                linkTool: {
+                    class: LinkTool,
                     config: {
-                        shortcut: 'CMD+L',
-                        target: '_blank',
-                        rel: 'nofollow',
-                        availableTargets: ['_blank', '_self'],
-                        availableRels: ['author', 'noreferrer'],
-                        validate: false,
+                        endpoint: '/editor/fetch-url',
+                        headers: {
+                            'X-CSRF-TOKEN': csrf,
+                        },
                     },
-                    tunes: ['commentTune']
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.linkTool || 'Link'
+                    }
                 },
                 videoEmbed: {
                     class: VideoEmbed,
@@ -341,7 +603,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         placeholder: 'Paste a YouTube URL...',
                         allowDirectUrls: true
                     },
-                    tunes: ['commentTune']
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.videoEmbed || 'Video Embed'
+                    }
                 },
                 videoUpload: {
                     class: VideoUpload,
@@ -359,7 +624,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         chunkSize: VIDEO_VALIDATION_CONFIG.chunkSize,
                         useChunkedUpload: VIDEO_VALIDATION_CONFIG.useChunkedUpload
                     },
-                    tunes: ['commentTune']
+                    tunes: ['commentTune'],
+                    toolbox: {
+                        title: this.toolTranslations?.videoUpload || 'Video Upload'
+                    }
                 },
                 commentTune: CommentTune
             };
@@ -379,7 +647,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 'Table': Table,
                 'EditorJsList': EditorJsList,
                 'Alert': Alert,
-                'HyperLink': HyperLink,
+                'LinkTool': LinkTool,
                 'VideoEmbed': VideoEmbed,
                 'VideoUpload': VideoUpload
             };
@@ -405,6 +673,15 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 if (allowedTools && !allowedTools.includes(toolName)) {
                     tool.toolbox = false; // Hide from toolbox but keep for rendering
                     console.log(`Tool ${toolName} hidden from toolbox (not in allowed tools for current plan)`);
+                } else {
+                    // Add localized tool title
+                    if (!tool.toolbox) {
+                        tool.toolbox = {};
+                    }
+                    if (typeof tool.toolbox === 'object' && this.toolTranslations && this.toolTranslations[toolName]) {
+                        tool.toolbox.title = this.toolTranslations[toolName];
+                        // console.log(`Applied localized title for ${toolName}: ${this.toolTranslations[toolName]}`);
+                    }
                 }
                 
                 console.log(`Built tool config for ${toolName}:`, tool);
@@ -417,6 +694,14 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 // Handle tools that need CSRF token injection
                 if (tool.config.additionalRequestHeaders && csrf) {
                     tool.config.additionalRequestHeaders['X-CSRF-TOKEN'] = csrf;
+                }
+
+                // Handle LinkTool CSRF token
+                if (toolConfig.class === 'LinkTool' && csrf) {
+                    if (!tool.config.headers) {
+                        tool.config.headers = {};
+                    }
+                    tool.config.headers['X-CSRF-TOKEN'] = csrf;
                 }
 
                 // Handle tools that need upload URL configuration
@@ -433,6 +718,13 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     }
                     // For other tools like VideoUpload, preserve the endpoints from PHP config
                     // They already have the correct routes set
+                }
+
+                // Handle VideoUpload chunk configuration from server
+                if (toolConfig.class === 'VideoUpload' && toolConfig.config.chunkConfig) {
+                    // Merge chunk configuration from server
+                    Object.assign(tool.config, toolConfig.config.chunkConfig);
+                    console.log(`VideoUpload chunk config applied:`, toolConfig.config.chunkConfig);
                 }
 
                 tools[toolName] = tool;
@@ -627,16 +919,9 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
         formatLastSaved() {
             if (!this.lastSaved) return '';
-
-            const diff = this.currentTime - this.lastSaved;
-            const seconds = Math.max(0, Math.floor(diff / 1000)); // Ensure non-negative
-            const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-
-            if (seconds < 60) return `${seconds}s ago`;
-            if (minutes < 60) return `${minutes}m ago`;
-            if (hours < 24) return `${hours}h ago`;
-            return this.lastSaved.toLocaleDateString();
+            
+            // Use Day.js for proper internationalization
+            return dayjs(this.lastSaved).fromNow();
         },
 
         startUpdateTimer() {

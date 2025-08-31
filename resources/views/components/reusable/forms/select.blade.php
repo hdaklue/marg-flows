@@ -96,18 +96,35 @@
             :class="isIconOnly ?
                 'p-1.5 group flex w-auto items-center justify-center rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-1' :
                 '{{ $classes['button'] }} group flex w-auto items-center justify-between gap-2 rounded-lg border shadow-sm transition-colors duration-200 focus:outline-none focus:ring-1'"
-            class="@if ($disabled) border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed
+            @if ($disabled)
+                class="border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed"
             @elseif($error)
-                border-red-300 dark:border-red-600 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:border-red-400 dark:hover:border-red-500 focus:ring-red-500/20
+                class="border-red-300 dark:border-red-600 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:border-red-400 dark:hover:border-red-500 focus:ring-red-500/20"
             @else
-                bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 focus:ring-sky-500/20 @endif"
-            :class="{
-                @if (!$disabled && !$error) ['border-' + currentColor + '-200 dark:border-' + currentColor + '-700']: allowColors && selectedOption && selectedOption.color,
-                    ['hover:border-' + currentColor + '-300 dark:hover:border-' + currentColor + '-600']: allowColors && selectedOption && selectedOption.color,
-                    ['focus:border-' + currentColor + '-500 dark:focus:border-' + currentColor + '-400']: allowColors && selectedOption && selectedOption.color,
-                    ['focus:ring-' + currentColor + '-500/20']: allowColors && selectedOption && selectedOption.color,
-                    'focus:border-sky-500 dark:focus:border-sky-400': !allowColors || !selectedOption || !selectedOption.color @endif
-            }">
+                class="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                :class="{
+                    // Default styles when no color is selected
+                    'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 focus:border-sky-500 dark:focus:border-sky-400 focus:ring-sky-500/20': !allowColors || !selectedOption || !selectedOption.color,
+                    
+                    // Sky color scheme
+                    'border-sky-200 dark:border-sky-700 hover:border-sky-300 dark:hover:border-sky-600 focus:border-sky-500 dark:focus:border-sky-400 focus:ring-sky-500/20': allowColors && selectedOption && selectedOption.color && currentColor === 'sky',
+                    
+                    // Emerald color scheme  
+                    'border-emerald-200 dark:border-emerald-700 hover:border-emerald-300 dark:hover:border-emerald-600 focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-emerald-500/20': allowColors && selectedOption && selectedOption.color && currentColor === 'emerald',
+                    
+                    // Red color scheme
+                    'border-red-200 dark:border-red-700 hover:border-red-300 dark:hover:border-red-600 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500/20': allowColors && selectedOption && selectedOption.color && currentColor === 'red',
+                    
+                    // Amber color scheme
+                    'border-amber-200 dark:border-amber-700 hover:border-amber-300 dark:hover:border-amber-600 focus:border-amber-500 dark:focus:border-amber-400 focus:ring-amber-500/20': allowColors && selectedOption && selectedOption.color && currentColor === 'amber',
+                    
+                    // Indigo color scheme
+                    'border-indigo-200 dark:border-indigo-700 hover:border-indigo-300 dark:hover:border-indigo-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-500/20': allowColors && selectedOption && selectedOption.color && currentColor === 'indigo',
+                    
+                    // Zinc color scheme
+                    'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 focus:border-zinc-500 dark:focus:border-zinc-400 focus:ring-zinc-500/20': allowColors && selectedOption && selectedOption.color && currentColor === 'zinc'
+                }"
+            @endif>
             <!-- Selected option display -->
             <div class="flex items-center flex-1 min-w-0"
                 :class="(selectedOption && selectedOption.icon) || (allowColors && selectedOption && selectedOption.color) ?
@@ -122,17 +139,30 @@
                 <template x-if="allowColors && selectedOption && selectedOption.color && !selectedOption.icon">
                     <div x-tooltip="isIconOnly && selectedOption.label"
                         class="{{ $classes['checkIcon'] }} shrink-0 rounded-md border border-opacity-20"
-                        :class="'bg-' + selectedOption.color + '-500 border-' + selectedOption.color + '-600'"></div>
+                        :class="{
+                            'bg-sky-500 border-sky-600': selectedOption.color === 'sky',
+                            'bg-emerald-500 border-emerald-600': selectedOption.color === 'emerald',
+                            'bg-red-500 border-red-600': selectedOption.color === 'red',
+                            'bg-amber-500 border-amber-600': selectedOption.color === 'amber',
+                            'bg-indigo-500 border-indigo-600': selectedOption.color === 'indigo',
+                            'bg-zinc-500 border-zinc-600': selectedOption.color === 'zinc'
+                        }"></div>
                 </template>
 
                 <!-- Selected option text -->
                 @if (!$iconOnly)
                     <span x-text="selectedOption ? selectedOption.label : '{{ $placeholder }}'"
                         class="text-left truncate"
-                        :class="!selectedOption ? 'text-zinc-400 dark:text-zinc-500' :
-                            (allowColors && selectedOption && selectedOption.color ?
-                                'text-' + selectedOption.color + '-700 dark:text-' + selectedOption.color + '-300' :
-                                'text-zinc-900 dark:text-zinc-100')"></span>
+                        :class="{
+                            'text-zinc-400 dark:text-zinc-500': !selectedOption,
+                            'text-zinc-900 dark:text-zinc-100': selectedOption && (!allowColors || !selectedOption.color),
+                            'text-sky-700 dark:text-sky-300': allowColors && selectedOption && selectedOption.color && selectedOption.color === 'sky',
+                            'text-emerald-700 dark:text-emerald-300': allowColors && selectedOption && selectedOption.color && selectedOption.color === 'emerald',
+                            'text-red-700 dark:text-red-300': allowColors && selectedOption && selectedOption.color && selectedOption.color === 'red',
+                            'text-amber-700 dark:text-amber-300': allowColors && selectedOption && selectedOption.color && selectedOption.color === 'amber',
+                            'text-indigo-700 dark:text-indigo-300': allowColors && selectedOption && selectedOption.color && selectedOption.color === 'indigo',
+                            'text-zinc-700 dark:text-zinc-300': allowColors && selectedOption && selectedOption.color && selectedOption.color === 'zinc'
+                        }"></span>
                 @endif
             </div>
 
@@ -160,17 +190,32 @@
             <template x-for="option in options" :key="option.value">
                 <li x-listbox:option :value="option.value" :disabled="option.disabled"
                     :class="{
-                        ['bg-' + option.color + '-50 dark:bg-' + option.color + '-900/20 text-' + option.color +
-                            '-700 dark:text-' + option.color + '-300'
-                        ]: $listboxOption.isActive && !$listboxOption.isDisabled && allowColors && option.color,
-                            'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300': $listboxOption.isActive && !
-                            $listboxOption.isDisabled && (!allowColors || !option.color),
-                            'text-zinc-900 dark:text-zinc-100': !$listboxOption.isActive && !$listboxOption.isDisabled,
-                            'text-zinc-400 dark:text-zinc-500 cursor-not-allowed': $listboxOption.isDisabled,
-                            'px-4 py-2 text-base': isTouchDevice,
-                            '{{ $classes['option'] }}': !isTouchDevice,
-                            'flex items-center w-full transition-colors duration-150 rounded-md cursor-default group':
-                            true
+                        'flex items-center w-full transition-colors duration-150 rounded-md cursor-default group': true,
+                        'px-4 py-2 text-base': isTouchDevice,
+                        '{{ $classes['option'] }}': !isTouchDevice,
+                        'text-zinc-400 dark:text-zinc-500 cursor-not-allowed': $listboxOption.isDisabled,
+                        'text-zinc-900 dark:text-zinc-100': !$listboxOption.isActive && !$listboxOption.isDisabled,
+                        
+                        // Default active state
+                        'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300': $listboxOption.isActive && !$listboxOption.isDisabled && (!allowColors || !option.color),
+                        
+                        // Sky color active state
+                        'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300': $listboxOption.isActive && !$listboxOption.isDisabled && allowColors && option.color && option.color === 'sky',
+                        
+                        // Emerald color active state
+                        'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300': $listboxOption.isActive && !$listboxOption.isDisabled && allowColors && option.color && option.color === 'emerald',
+                        
+                        // Red color active state
+                        'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': $listboxOption.isActive && !$listboxOption.isDisabled && allowColors && option.color && option.color === 'red',
+                        
+                        // Amber color active state
+                        'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300': $listboxOption.isActive && !$listboxOption.isDisabled && allowColors && option.color && option.color === 'amber',
+                        
+                        // Indigo color active state
+                        'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300': $listboxOption.isActive && !$listboxOption.isDisabled && allowColors && option.color && option.color === 'indigo',
+                        
+                        // Zinc color active state
+                        'bg-zinc-50 dark:bg-zinc-900/20 text-zinc-700 dark:text-zinc-300': $listboxOption.isActive && !$listboxOption.isDisabled && allowColors && option.color && option.color === 'zinc'
                     }"
                     <!-- Icon or Color Square Container -->
                     <template x-if="option.icon || (allowColors && option.color)">
@@ -185,7 +230,14 @@
                             <!-- Status color square (when no icon but color exists) -->
                             <template x-if="allowColors && option.color && !option.icon">
                                 <div class="{{ $classes['checkIcon'] }} shrink-0 rounded-md border border-opacity-20"
-                                    :class="'bg-' + option.color + '-500 border-' + option.color + '-600'"></div>
+                                    :class="{
+                                        'bg-sky-500 border-sky-600': option.color === 'sky',
+                                        'bg-emerald-500 border-emerald-600': option.color === 'emerald',
+                                        'bg-red-500 border-red-600': option.color === 'red',
+                                        'bg-amber-500 border-amber-600': option.color === 'amber',
+                                        'bg-indigo-500 border-indigo-600': option.color === 'indigo',
+                                        'bg-zinc-500 border-zinc-600': option.color === 'zinc'
+                                    }"></div>
                             </template>
                         </div>
                     </template>
@@ -199,9 +251,15 @@
                     <template x-if="$listboxOption.isSelected">
                         <div class="{{ $classes['checkContainer'] }} flex shrink-0 items-center justify-center">
                             <svg class="{{ $classes['checkIcon'] }} shrink-0"
-                                :class="allowColors && option.color ?
-                                    'text-' + option.color + '-500 dark:text-' + option.color + '-400' :
-                                    'text-sky-500 dark:text-sky-400'"
+                                :class="{
+                                    'text-sky-500 dark:text-sky-400': !allowColors || !option.color,
+                                    'text-sky-500 dark:text-sky-400': allowColors && option.color && option.color === 'sky',
+                                    'text-emerald-500 dark:text-emerald-400': allowColors && option.color && option.color === 'emerald',
+                                    'text-red-500 dark:text-red-400': allowColors && option.color && option.color === 'red',
+                                    'text-amber-500 dark:text-amber-400': allowColors && option.color && option.color === 'amber',
+                                    'text-indigo-500 dark:text-indigo-400': allowColors && option.color && option.color === 'indigo',
+                                    'text-zinc-500 dark:text-zinc-400': allowColors && option.color && option.color === 'zinc'
+                                }"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                 aria-hidden="true">
                                 <path fill-rule="evenodd"

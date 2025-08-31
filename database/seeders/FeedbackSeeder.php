@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\Document;
-use App\Models\Feedback;
+use App\Models\Feedbacks\DocumentFeedback;
+use App\Models\Feedbacks\AudioFeedback;
+use App\Models\Feedbacks\VideoFeedback;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 final class FeedbackSeeder extends Seeder
 {
@@ -40,24 +43,24 @@ final class FeedbackSeeder extends Seeder
     {
         // Create various document block feedbacks
         $feedbackTypes = [
-            ['status' => 'open', 'content' => 'This paragraph needs more detail about the implementation.'],
-            ['status' => 'urgent', 'content' => 'Critical error in this code block - needs immediate attention!'],
-            ['status' => 'resolved', 'content' => 'Grammar issues in this header.'],
-            ['status' => 'in_progress', 'content' => 'Working on restructuring this table for better readability.'],
-            ['status' => 'rejected', 'content' => 'Suggested removing this alert box.'],
+            ['status' => 'open', 'urgency' => 1, 'content' => 'This paragraph needs more detail about the implementation.'],
+            ['status' => 'open', 'urgency' => 3, 'content' => 'Critical error in this code block - needs immediate attention!'],
+            ['status' => 'resolved', 'urgency' => 1, 'content' => 'Grammar issues in this header.'],
+            ['status' => 'running', 'urgency' => 2, 'content' => 'Working on restructuring this table for better readability.'],
+            ['status' => 'rejected', 'urgency' => 1, 'content' => 'Suggested removing this alert box.'],
         ];
 
         foreach ($feedbackTypes as $index => $feedbackData) {
             $creator = $users->random();
 
-            $feedback = Feedback::factory()
-                ->documentBlock()
-                ->forPage($page)
-                ->byCreator($creator)
-                ->create([
-                    'content' => $feedbackData['content'],
-                    'status' => $feedbackData['status'],
-                ]);
+            $feedbackData['id'] = Str::ulid();
+            $feedbackData['creator_id'] = $creator->id;
+            $feedbackData['feedbackable_type'] = $page->getMorphClass();
+            $feedbackData['feedbackable_id'] = $page->id;
+            $feedbackData['block_id'] = 'block-' . Str::random(8);
+            $feedbackData['element_type'] = fake()->randomElement(['paragraph', 'header', 'list']);
+
+            $feedback = DocumentFeedback::create($feedbackData);
 
             // If resolved or rejected, add resolver
             if (in_array($feedbackData['status'], ['resolved', 'rejected'])) {
@@ -73,24 +76,30 @@ final class FeedbackSeeder extends Seeder
         }
 
         // Create some additional random document feedbacks
-        Feedback::factory()
-            ->count(rand(3, 8))
-            ->documentBlock()
-            ->forPage($page)
-            ->create([
+        for ($i = 0; $i < rand(3, 8); $i++) {
+            DocumentFeedback::create([
+                'id' => Str::ulid(),
                 'creator_id' => $users->random()->id,
+                'feedbackable_type' => $page->getMorphClass(),
+                'feedbackable_id' => $page->id,
+                'content' => fake()->sentence(),
+                'status' => fake()->randomElement(['open', 'running', 'resolved']),
+                'urgency' => fake()->randomElement([1, 2, 3]),
+                'block_id' => 'block-' . Str::random(8),
+                'element_type' => fake()->randomElement(['paragraph', 'header', 'list']),
             ]);
+        }
     }
 
     private function createMediaFeedbacks(Document $page, $users): void
     {
         // Create some audio region feedbacks
-        Feedback::factory()
-            ->count(rand(2, 5))
-            ->audioRegion()
-            ->forPage($page)
-            ->create([
+        for ($i = 0; $i < rand(2, 5); $i++) {
+            AudioFeedback::create([
+                'id' => Str::ulid(),
                 'creator_id' => $users->random()->id,
+                'feedbackable_type' => $page->getMorphClass(),
+                'feedbackable_id' => $page->id,
                 'content' => fake()->randomElement([
                     'Audio quality is poor in this section.',
                     'Background noise is too loud here.',
@@ -98,15 +107,20 @@ final class FeedbackSeeder extends Seeder
                     'Volume needs to be adjusted.',
                     'Consider adding subtitles for this part.',
                 ]),
+                'status' => fake()->randomElement(['open', 'running', 'resolved']),
+                'urgency' => fake()->randomElement([1, 2, 3]),
+                'start_time' => fake()->randomFloat(2, 0, 300),
+                'end_time' => fake()->randomFloat(2, 300, 600),
             ]);
+        }
 
         // Create some video region feedbacks
-        Feedback::factory()
-            ->count(rand(1, 3))
-            ->videoRegion()
-            ->forPage($page)
-            ->create([
+        for ($i = 0; $i < rand(1, 3); $i++) {
+            VideoFeedback::create([
+                'id' => Str::ulid(),
                 'creator_id' => $users->random()->id,
+                'feedbackable_type' => $page->getMorphClass(),
+                'feedbackable_id' => $page->id,
                 'content' => fake()->randomElement([
                     'Lighting needs adjustment in this area.',
                     'Color correction required for this region.',
@@ -114,15 +128,23 @@ final class FeedbackSeeder extends Seeder
                     'Consider cropping this area out.',
                     'Graphics overlay needed here.',
                 ]),
+                'status' => fake()->randomElement(['open', 'running', 'resolved']),
+                'urgency' => fake()->randomElement([1, 2, 3]),
+                'feedback_type' => 'region',
+                'start_time' => fake()->randomFloat(2, 0, 300),
+                'end_time' => fake()->randomFloat(2, 300, 600),
+                'x_coordinate' => fake()->numberBetween(0, 1920),
+                'y_coordinate' => fake()->numberBetween(0, 1080),
             ]);
+        }
 
         // Create some video frame feedbacks
-        Feedback::factory()
-            ->count(rand(1, 4))
-            ->videoFrame()
-            ->forPage($page)
-            ->create([
+        for ($i = 0; $i < rand(1, 4); $i++) {
+            VideoFeedback::create([
+                'id' => Str::ulid(),
                 'creator_id' => $users->random()->id,
+                'feedbackable_type' => $page->getMorphClass(),
+                'feedbackable_id' => $page->id,
                 'content' => fake()->randomElement([
                     'This frame has a visual artifact.',
                     'Timestamp overlay is incorrect.',
@@ -130,6 +152,13 @@ final class FeedbackSeeder extends Seeder
                     'Consider using this as a thumbnail.',
                     'Quality degradation visible in this frame.',
                 ]),
+                'status' => fake()->randomElement(['open', 'running', 'resolved']),
+                'urgency' => fake()->randomElement([1, 2, 3]),
+                'feedback_type' => 'frame',
+                'timestamp' => fake()->randomFloat(2, 0, 600),
+                'x_coordinate' => fake()->numberBetween(0, 1920),
+                'y_coordinate' => fake()->numberBetween(0, 1080),
             ]);
+        }
     }
 }

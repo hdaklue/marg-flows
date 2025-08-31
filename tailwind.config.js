@@ -1,17 +1,5 @@
 
-import preset from './vendor/filament/filament/tailwind.config.preset'
 export default {
-    content: [
-        './app/Filament/**/*.php',
-        './resources/views/**/*.blade.php',
-        './resources/views/livewire/**/*.blade.php',
-        './resources/views/components/**/*.blade.php',
-        './resources/views/livewire/preview-audio.blade.php',
-        './resources/js/**/*.js',
-        './resources/css/**/*.css',
-        './vendor/filament/**/*.blade.php',
-    ],
-    presets: [preset],
     plugins: [require('tailwind-scrollbar-hide')
     ],
     // safelist: [

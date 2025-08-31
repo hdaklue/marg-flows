@@ -1,7 +1,28 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
+@plugin "@tailwindcss/typography";
+@source '../../../../app/Filament';
+@source '../../../../resources/views/filament';
+@source '../../../views/';
 
-@config 'tailwind.config.js';
 
+@theme{
+     --text-2xs:0.625rem;
+     --text-2xs--line-height:0.75rem;
+     --text-3xs: 0.5rem;
+     --text-3xs-line-height: 0.625rem;
+}
+
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}zinc-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}sky-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}indigo-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}emerald-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}amber-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}red-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}slate-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}gray-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}blue-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}green-{50,100,200,300,400,500,600,700,800,900,950}');
+@source inline('{text-,bg-,border-,hover:text-,hover:bg-,hover:border-,dark:text-,dark:bg-,dark:border-,dark:hover:text-,dark:hover:bg-,dark:hover:border-}yellow-{50,100,200,300,400,500,600,700,800,900,950}');
 
 .draggable-item {
     @apply border border-gray-500 shadow-md;

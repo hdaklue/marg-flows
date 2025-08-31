@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -81,7 +83,7 @@ return [
                 'image/webp',
                 'image/svg+xml',
                 'image/bmp',
-                'image/tiff'
+                'image/tiff',
             ],
             'max_size' => env('CHUNKED_UPLOAD_IMAGE_MAX_SIZE', 50 * 1024 * 1024), // 50MB
             'chunk_size' => env('CHUNKED_UPLOAD_IMAGE_CHUNK_SIZE', 2 * 1024 * 1024), // 2MB
@@ -98,7 +100,7 @@ return [
                 'video/webm',
                 'video/ogg',
                 'video/3gpp',
-                'video/x-flv'
+                'video/x-flv',
             ],
             'max_size' => env('CHUNKED_UPLOAD_VIDEO_MAX_SIZE', 500 * 1024 * 1024), // 500MB
             'chunk_size' => env('CHUNKED_UPLOAD_VIDEO_CHUNK_SIZE', 10 * 1024 * 1024), // 10MB

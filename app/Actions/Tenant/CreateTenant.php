@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Tenant;
 
-use App\Contracts\Role\AssignableEntity;
-use App\Enums\Role\RoleEnum;
 use App\Events\Tenant\TenantCreated;
-use App\Models\Tenant;
 use App\Models\User;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
+use Hdaklue\MargRbac\Actions\Tenant\CreateTenant as PackageCreateTenant;
+use Hdaklue\MargRbac\DTOs\Tenant\CreateTenantDto;
+use Hdaklue\MargRbac\DTOs\Tenant\TenantMemberDto;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -19,34 +17,37 @@ final class CreateTenant
 {
     use AsAction;
 
-    // TODO:Should Receive CreateTenantDto
     public function handle(array $data, User $user): void
     {
-
-        $tenant = null;
-        $participants = null;
-
         try {
-            DB::transaction(function () use ($data, &$tenant, &$participants, $user) {
+            // Transform array data to DTO format for package action
+            $members = [];
+            if (isset($data['members']) && is_array($data['members'])) {
+                $members = array_map(function ($member) {
+                    return TenantMemberDto::from([
+                        'user_id' => $member['name'], // Assuming 'name' is actually user_id
+                        'role' => $member['role'],
+                    ]);
+                }, $data['members']);
+            }
 
-                $tenant = new Tenant(['name' => $data['name']]);
+            $dto = CreateTenantDto::from([
+                'name' => $data['name'],
+                'creator_id' => $user->id,
+                'members' => $members,
+            ]);
 
-                $tenant->creator()->associate($user);
+            // Call the package action to handle the core functionality
+            $result = PackageCreateTenant::run($dto);
+            
+            // Get the created tenant and participants for app-specific logic
+            $tenant = $result['tenant'] ?? null;
+            $participants = $result['participants'] ?? collect();
 
-                $tenant->save();
-
-                $participants = $this->getParticipants(array_column($data['members'], 'name'));
-
-                $systemRoles = $this->getSysyemRoles();
-
-                $tenant->systemRoles()->createMany($systemRoles);
-
-                $roles = collect($data['members'])->pluck('role', 'name')->toArray();
-
-                /** @phpstan-ignore-next-line */
-                $participants->each(fn (AssignableEntity $participant) => $tenant->addParticipant($participant, $roles[$participant->getKey()], silently: true),
-                );
-            });
+            // Fire app-specific event
+            if ($tenant && $participants->isNotEmpty()) {
+                TenantCreated::dispatch($tenant, $participants, $user);
+            }
 
         } catch (Exception $e) {
             Log::error('Tenant creation failed', [
@@ -56,23 +57,6 @@ final class CreateTenant
 
             throw $e; // Re-throw to let caller handle
         }
-
-        if ($tenant && $participants) {
-            TenantCreated::dispatch($tenant, $participants, $user);
-        }
-
     }
 
-    protected function getParticipants(array $ids): Collection
-    {
-        /** @phpstan-ignore-next-line */
-        return User::whereIn('id', $ids)->get();
-    }
-
-    protected function getSysyemRoles(): array
-    {
-        return collect(RoleEnum::cases())->map(fn ($case) => [
-            'name' => $case->value,
-        ])->toArray();
-    }
 }

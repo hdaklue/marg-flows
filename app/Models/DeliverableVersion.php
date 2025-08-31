@@ -17,13 +17,35 @@ use Illuminate\Support\Carbon;
  * @property int $version_number
  * @property DeliverableVersionStatus $status
  * @property string|null $notes
- * @property array|null $files
+ * @property array<array-key, mixed>|null $files
  * @property string $created_by
  * @property Carbon|null $submitted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Deliverable $deliverable
- * @property-read User $creator
+ * @property-read User|null $creator
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion byStatus(\App\Enums\Deliverable\DeliverableVersionStatus $status)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion drafts()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion latestVersions()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion needingRevision()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion orderByVersion(string $direction = 'desc')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion submitted()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereDeliverableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereFiles($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereSubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion whereVersionNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DeliverableVersion withFiles()
+ *
+ * @mixin \Eloquent
  */
 final class DeliverableVersion extends Model
 {
@@ -42,15 +64,6 @@ final class DeliverableVersion extends Model
     protected $attributes = [
         'status' => DeliverableVersionStatus::DRAFT->value,
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'files' => 'array',
-            'submitted_at' => 'datetime',
-            'status' => DeliverableVersionStatus::class,
-        ];
-    }
 
     // Relationships
     public function deliverable(): BelongsTo
@@ -94,7 +107,7 @@ final class DeliverableVersion extends Model
 
     public function transitionTo(DeliverableVersionStatus $newStatus): bool
     {
-        if (!$this->canTransitionTo($newStatus)) {
+        if (! $this->canTransitionTo($newStatus)) {
             return false;
         }
 
@@ -111,6 +124,7 @@ final class DeliverableVersion extends Model
         }
 
         $this->update($updateData);
+
         return true;
     }
 
@@ -125,7 +139,7 @@ final class DeliverableVersion extends Model
     public function removeFile(string $fileId): void
     {
         $files = $this->files ?? [];
-        $files = array_filter($files, fn($file) => ($file['id'] ?? null) !== $fileId);
+        $files = array_filter($files, fn ($file) => ($file['id'] ?? null) !== $fileId);
         $this->update(['files' => array_values($files)]);
     }
 
@@ -148,7 +162,7 @@ final class DeliverableVersion extends Model
 
     public function hasFiles(): bool
     {
-        return !empty($this->files);
+        return ! empty($this->files);
     }
 
     public function getFileCount(): int
@@ -159,7 +173,8 @@ final class DeliverableVersion extends Model
     public function getFileByType(string $type): array
     {
         $files = $this->files ?? [];
-        return array_filter($files, fn($file) => ($file['type'] ?? null) === $type);
+
+        return array_filter($files, fn ($file) => ($file['type'] ?? null) === $type);
     }
 
     // Status Helpers
@@ -197,17 +212,17 @@ final class DeliverableVersion extends Model
     public function getPreviousVersion(): ?self
     {
         return $this->deliverable->versions()
-                   ->where('version_number', '<', $this->version_number)
-                   ->orderByDesc('version_number')
-                   ->first();
+            ->where('version_number', '<', $this->version_number)
+            ->orderByDesc('version_number')
+            ->first();
     }
 
     public function getNextVersion(): ?self
     {
         return $this->deliverable->versions()
-                   ->where('version_number', '>', $this->version_number)
-                   ->orderBy('version_number')
-                   ->first();
+            ->where('version_number', '>', $this->version_number)
+            ->orderBy('version_number')
+            ->first();
     }
 
     public function getVersionLabel(): string
@@ -226,21 +241,21 @@ final class DeliverableVersion extends Model
         $currentNotes = $this->notes ? $this->notes . "\n\n" : '';
         $timestamp = now()->format('Y-m-d H:i:s');
         $newNote = "[{$timestamp}] {$note}";
-        
+
         $this->update(['notes' => $currentNotes . $newNote]);
     }
 
     public function hasNotes(): bool
     {
-        return !empty(trim($this->notes ?? ''));
+        return ! empty(trim($this->notes ?? ''));
     }
 
     // Comparison
     public function getChangesFromPrevious(): array
     {
         $previous = $this->getPreviousVersion();
-        
-        if (!$previous) {
+
+        if (! $previous) {
             return ['changes' => 'Initial version', 'files_added' => $this->getFileCount()];
         }
 
@@ -255,45 +270,54 @@ final class DeliverableVersion extends Model
         return $changes;
     }
 
+    protected function casts(): array
+    {
+        return [
+            'files' => 'array',
+            'submitted_at' => 'datetime',
+            'status' => DeliverableVersionStatus::class,
+        ];
+    }
+
     // Scopes
-    public function scopeByStatus($query, DeliverableVersionStatus $status)
+    protected function scopeByStatus($query, DeliverableVersionStatus $status)
     {
         return $query->where('status', $status);
     }
 
-    public function scopeSubmitted($query)
+    protected function scopeSubmitted($query)
     {
         return $query->where('status', DeliverableVersionStatus::SUBMITTED);
     }
 
-    public function scopeDrafts($query)
+    protected function scopeDrafts($query)
     {
         return $query->where('status', DeliverableVersionStatus::DRAFT);
     }
 
-    public function scopeNeedingRevision($query)
+    protected function scopeNeedingRevision($query)
     {
         return $query->where('status', DeliverableVersionStatus::REVISION_NEEDED);
     }
 
-    public function scopeWithFiles($query)
+    protected function scopeWithFiles($query)
     {
         return $query->whereNotNull('files')
-                    ->where('files', '!=', '[]');
+            ->where('files', '!=', '[]');
     }
 
-    public function scopeLatestVersions($query)
+    protected function scopeLatestVersions($query)
     {
         return $query->whereIn('id', function ($subquery) {
             $subquery->select('id')
-                    ->from('deliverable_versions as dv2')
-                    ->whereColumn('dv2.deliverable_id', 'deliverable_versions.deliverable_id')
-                    ->orderByDesc('version_number')
-                    ->limit(1);
+                ->from('deliverable_versions as dv2')
+                ->whereColumn('dv2.deliverable_id', 'deliverable_versions.deliverable_id')
+                ->orderByDesc('version_number')
+                ->limit(1);
         });
     }
 
-    public function scopeOrderByVersion($query, string $direction = 'desc')
+    protected function scopeOrderByVersion($query, string $direction = 'desc')
     {
         return $query->orderBy('version_number', $direction);
     }

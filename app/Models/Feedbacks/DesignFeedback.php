@@ -7,7 +7,7 @@ namespace App\Models\Feedbacks;
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Enums\Feedback\FeedbackStatus;
 use App\Enums\Feedback\FeedbackUrgency;
-use Carbon\Carbon;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -23,23 +23,62 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @property string $id
  * @property string $creator_id
+ * @property FeedbackStatus $status
+ * @property FeedbackUrgency $urgency
  * @property string $content
  * @property string $feedbackable_type
  * @property string $feedbackable_id
- * @property FeedbackStatus $status
- * @property FeedbackUrgency $urgency
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property Carbon|null $resolved_at
+ * @property \Illuminate\Support\Carbon|null $resolved_at
  * @property int $x_coordinate X coordinate on the design/image
  * @property int $y_coordinate Y coordinate on the design/image
- * @property string|null $annotation_type Type of annotation (point, area, arrow, etc.)
- * @property array|null $annotation_data Additional annotation metadata (shape, color, size, etc.)
- * @property array|null $area_bounds Bounds for area-based annotations (x, y, width, height)
+ * @property string $width
+ * @property string $height
+ * @property array<array-key, mixed>|null $annotation_data Additional annotation metadata (shape, color, size, etc.)
+ * @property array<array-key, mixed>|null $area_bounds Bounds for area-based annotations (x, y, width, height)
  * @property string|null $color Annotation color/theme
  * @property float|null $zoom_level Zoom level when annotation was created
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|Eloquent $feedbackable
+ *
+ * @method static Builder<static>|DesignFeedback areaAnnotations()
+ * @method static Builder<static>|DesignFeedback arrowAnnotations()
+ * @method static Builder<static>|DesignFeedback atCoordinates(int $x, int $y, int $tolerance = 20)
+ * @method static Builder<static>|DesignFeedback atZoomLevel(float $zoomLevel, float $tolerance = 0.1)
+ * @method static Builder<static>|DesignFeedback byAnnotationType(string $type)
+ * @method static Builder<static>|DesignFeedback byAnnotationTypes(array $types)
+ * @method static Builder<static>|DesignFeedback byColor(string $color)
+ * @method static Builder<static>|DesignFeedback inArea(int $x, int $y, int $width, int $height)
+ * @method static Builder<static>|DesignFeedback nearCoordinates(int $x, int $y, int $radius = 50)
+ * @method static Builder<static>|DesignFeedback newModelQuery()
+ * @method static Builder<static>|DesignFeedback newQuery()
+ * @method static Builder<static>|DesignFeedback pointAnnotations()
+ * @method static Builder<static>|DesignFeedback query()
+ * @method static Builder<static>|DesignFeedback textAnnotations()
+ * @method static Builder<static>|DesignFeedback whereAnnotationData($value)
+ * @method static Builder<static>|DesignFeedback whereAreaBounds($value)
+ * @method static Builder<static>|DesignFeedback whereColor($value)
+ * @method static Builder<static>|DesignFeedback whereContent($value)
+ * @method static Builder<static>|DesignFeedback whereCreatedAt($value)
+ * @method static Builder<static>|DesignFeedback whereCreatorId($value)
+ * @method static Builder<static>|DesignFeedback whereFeedbackableId($value)
+ * @method static Builder<static>|DesignFeedback whereFeedbackableType($value)
+ * @method static Builder<static>|DesignFeedback whereHeight($value)
+ * @method static Builder<static>|DesignFeedback whereId($value)
+ * @method static Builder<static>|DesignFeedback whereResolution($value)
+ * @method static Builder<static>|DesignFeedback whereResolvedAt($value)
+ * @method static Builder<static>|DesignFeedback whereResolvedBy($value)
+ * @method static Builder<static>|DesignFeedback whereStatus($value)
+ * @method static Builder<static>|DesignFeedback whereUpdatedAt($value)
+ * @method static Builder<static>|DesignFeedback whereUrgency($value)
+ * @method static Builder<static>|DesignFeedback whereWidth($value)
+ * @method static Builder<static>|DesignFeedback whereXCoordinate($value)
+ * @method static Builder<static>|DesignFeedback whereYCoordinate($value)
+ * @method static Builder<static>|DesignFeedback whereZoomLevel($value)
+ *
+ * @mixin \Eloquent
  */
 final class DesignFeedback extends Model
 {
@@ -143,67 +182,6 @@ final class DesignFeedback extends Model
     public function acknowledgments(): MorphMany
     {
         return $this->morphMany(Acknowledgement::class, 'acknowlegeable');
-    }
-
-    // Type-specific scopes
-    public function scopeAtCoordinates(Builder $query, int $x, int $y, int $tolerance = 20): Builder
-    {
-        return $query->whereBetween('x_coordinate', [$x - $tolerance, $x + $tolerance])
-            ->whereBetween('y_coordinate', [$y - $tolerance, $y + $tolerance]);
-    }
-
-    public function scopeNearCoordinates(Builder $query, int $x, int $y, int $radius = 50): Builder
-    {
-        return $query->whereRaw(
-            'SQRT(POW(x_coordinate - ?, 2) + POW(y_coordinate - ?, 2)) <= ?',
-            [$x, $y, $radius],
-        );
-    }
-
-    public function scopeInArea(Builder $query, int $x, int $y, int $width, int $height): Builder
-    {
-        return $query->whereBetween('x_coordinate', [$x, $x + $width])
-            ->whereBetween('y_coordinate', [$y, $y + $height]);
-    }
-
-    public function scopeByAnnotationType(Builder $query, string $type): Builder
-    {
-        return $query->where('annotation_type', $type);
-    }
-
-    public function scopeByAnnotationTypes(Builder $query, array $types): Builder
-    {
-        return $query->whereIn('annotation_type', $types);
-    }
-
-    public function scopePointAnnotations(Builder $query): Builder
-    {
-        return $query->where('annotation_type', 'point');
-    }
-
-    public function scopeAreaAnnotations(Builder $query): Builder
-    {
-        return $query->whereIn('annotation_type', ['rectangle', 'circle', 'polygon', 'area']);
-    }
-
-    public function scopeArrowAnnotations(Builder $query): Builder
-    {
-        return $query->where('annotation_type', 'arrow');
-    }
-
-    public function scopeTextAnnotations(Builder $query): Builder
-    {
-        return $query->where('annotation_type', 'text');
-    }
-
-    public function scopeByColor(Builder $query, string $color): Builder
-    {
-        return $query->where('color', $color);
-    }
-
-    public function scopeAtZoomLevel(Builder $query, float $zoomLevel, float $tolerance = 0.1): Builder
-    {
-        return $query->whereBetween('zoom_level', [$zoomLevel - $tolerance, $zoomLevel + $tolerance]);
     }
 
     // Type-specific methods
@@ -405,6 +383,67 @@ final class DesignFeedback extends Model
     public function getModelType(): string
     {
         return $this->getFeedbackType();
+    }
+
+    // Type-specific scopes
+    protected function scopeAtCoordinates(Builder $query, int $x, int $y, int $tolerance = 20): Builder
+    {
+        return $query->whereBetween('x_coordinate', [$x - $tolerance, $x + $tolerance])
+            ->whereBetween('y_coordinate', [$y - $tolerance, $y + $tolerance]);
+    }
+
+    protected function scopeNearCoordinates(Builder $query, int $x, int $y, int $radius = 50): Builder
+    {
+        return $query->whereRaw(
+            'SQRT(POW(x_coordinate - ?, 2) + POW(y_coordinate - ?, 2)) <= ?',
+            [$x, $y, $radius],
+        );
+    }
+
+    protected function scopeInArea(Builder $query, int $x, int $y, int $width, int $height): Builder
+    {
+        return $query->whereBetween('x_coordinate', [$x, $x + $width])
+            ->whereBetween('y_coordinate', [$y, $y + $height]);
+    }
+
+    protected function scopeByAnnotationType(Builder $query, string $type): Builder
+    {
+        return $query->where('annotation_type', $type);
+    }
+
+    protected function scopeByAnnotationTypes(Builder $query, array $types): Builder
+    {
+        return $query->whereIn('annotation_type', $types);
+    }
+
+    protected function scopePointAnnotations(Builder $query): Builder
+    {
+        return $query->where('annotation_type', 'point');
+    }
+
+    protected function scopeAreaAnnotations(Builder $query): Builder
+    {
+        return $query->whereIn('annotation_type', ['rectangle', 'circle', 'polygon', 'area']);
+    }
+
+    protected function scopeArrowAnnotations(Builder $query): Builder
+    {
+        return $query->where('annotation_type', 'arrow');
+    }
+
+    protected function scopeTextAnnotations(Builder $query): Builder
+    {
+        return $query->where('annotation_type', 'text');
+    }
+
+    protected function scopeByColor(Builder $query, string $color): Builder
+    {
+        return $query->where('color', $color);
+    }
+
+    protected function scopeAtZoomLevel(Builder $query, float $zoomLevel, float $tolerance = 0.1): Builder
+    {
+        return $query->whereBetween('zoom_level', [$zoomLevel - $tolerance, $zoomLevel + $tolerance]);
     }
 
     protected function casts(): array

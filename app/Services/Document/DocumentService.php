@@ -6,14 +6,12 @@ namespace App\Services\Document;
 
 use App\Contracts\Document\Documentable;
 use App\Contracts\Document\DocumentManagerInterface;
-use App\Contracts\Role\AssignableEntity;
 use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
-use App\Enums\Role\RoleEnum;
-use App\Facades\RoleManager;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\Document;
 use App\Models\User;
-use App\Services\Document\DTOs\DocumentWithBlocksDto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -73,6 +71,14 @@ final class DocumentService implements DocumentManagerInterface
         return $document->refresh();
     }
 
+    public function updateBlocks(Document $document, array|string $blocks)
+    {
+
+        $document->updateBlocks($blocks);
+        $this->clearCache($document->documentable);
+        $this->clearDocumentsCache($document);
+    }
+
     /**
      * Delete a page and clear associated caches.
      *
@@ -96,7 +102,7 @@ final class DocumentService implements DocumentManagerInterface
     /**
      * Returns pages of a documentable entity can be accessed by User.
      */
-    public function getDocumentsForUser(Documentable $documentable, AssignableEntity $user): Collection
+    public function getDocumentsForUser(Documentable $documentable, User $user): Collection
     {
         $documentablePages = $this->getDocumentsFordocumentable($documentable);
 
@@ -148,14 +154,9 @@ final class DocumentService implements DocumentManagerInterface
         return $page;
     }
 
-    /**
-     * Get document with full blocks data as DTO for editing.
-     */
-    public function getDocumentWithBlocks(string $documentId): DocumentWithBlocksDto
+    public function getDocumentDto(string $documentId): ?DocumentDto
     {
-        $document = $this->getDocument($documentId);
-
-        return DocumentWithBlocksDto::fromDocument($document);
+        return DocumentDto::fromModel($this->getDocument($documentId));
     }
 
     public function getDocumentsByCreator(User $creator): Collection

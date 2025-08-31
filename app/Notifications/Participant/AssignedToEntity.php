@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Notifications\Participant;
 
 use App\Contracts\HasStaticType;
-use App\Contracts\Role\RoleableEntity;
-use App\Filament\Pages\FlowsKanabanBoard;
-use App\Filament\Resources\FlowResource;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use App\Filament\Pages\Dashboard;
+use App\Filament\Resources\Flows\FlowResource;
 use App\Models\Flow;
 use App\Models\Tenant;
 use Exception;
-use Filament\Notifications\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 
 use function get_class;
@@ -85,7 +85,7 @@ final class AssignedToEntity extends Notification implements ShouldQueue
 
         return match ($class) {
             Flow::class => FlowResource::getUrl('index', ['tenant' => $this->entity->getTenant()]),
-            Tenant::class => FlowsKanabanBoard::getUrl(['tenant' => $this->entity]),
+            Tenant::class => Dashboard::getUrl(['tenant' => $this->entity]),
             default => null,
         };
     }

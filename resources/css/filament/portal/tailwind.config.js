@@ -1,4 +1,4 @@
-import preset from '../../../../vendor/filament/filament/tailwind.config.preset'
+// import preset from '../../../../vendor/filament/filament/tailwind.config.preset'
 const colors = import('tailwindcss/colors')
 export default {
     theme: {
@@ -9,7 +9,7 @@ export default {
             }
         }
     },
-    presets: [preset],
+    // presets: [preset],
     content: [
         './resources/views/forms/**/*.blade.php',
         './resources/views/**/*.blade.php',

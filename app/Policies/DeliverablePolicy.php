@@ -6,7 +6,7 @@ namespace App\Policies;
 
 use App\Contracts\Role\AssignableEntity;
 use App\Enums\AssigneeRole;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Deliverable;
 use App\Models\User;
 
@@ -25,7 +25,7 @@ final class DeliverablePolicy
      */
     public function view(AssignableEntity $user, Deliverable $deliverable): bool
     {
-        return $deliverable->isParticipant($user) || 
+        return $deliverable->isParticipant($user) ||
                $deliverable->flow->isParticipant($user) ||
                $deliverable->getTenant()->isAdmin($user);
     }
@@ -45,15 +45,11 @@ final class DeliverablePolicy
     public function update(User $user, Deliverable $deliverable): bool
     {
         // Admin/Manager on deliverable or flow can always update
-        if ($user->hasAssignmentOn($deliverable, RoleEnum::ADMIN) || 
+        return $user->hasAssignmentOn($deliverable, RoleEnum::ADMIN) ||
             $user->hasAssignmentOn($deliverable, RoleEnum::MANAGER) ||
-            $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN) || 
-            $user->hasAssignmentOn($deliverable->flow, RoleEnum::MANAGER)) {
-            return true;
-        }
+            $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN) ||
+            $user->hasAssignmentOn($deliverable->flow, RoleEnum::MANAGER);
 
-        // Assignees can update deliverables assigned to them
-        return $deliverable->hasParticipantWithRole($user, AssigneeRole::ASSIGNEE);
     }
 
     /**
@@ -141,7 +137,7 @@ final class DeliverablePolicy
     {
         // Check role-based status change permissions
         $userRoles = $deliverable->getParticipantRoles($user);
-        
+
         foreach ($userRoles as $role) {
             if ($role->isActionRequired()) {
                 return true;

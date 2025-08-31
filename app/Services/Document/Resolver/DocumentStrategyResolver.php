@@ -78,9 +78,7 @@ final class DocumentStrategyResolver
      */
     private function getStrategy(string $name): DocumentBlockFilterStrategy
     {
-        if (! isset($this->strategies[$name])) {
-            throw new InvalidArgumentException("Unknown filtering strategy: {$name}");
-        }
+        throw_unless(isset($this->strategies[$name]), new InvalidArgumentException("Unknown filtering strategy: {$name}"));
 
         return $this->strategies[$name];
     }

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\DTOs\User;
 
+use App\DTOs\BaseDto;
+use WendellAdriel\ValidatedDTO\Casting\DTOCast;
 use WendellAdriel\ValidatedDTO\Concerns\Wireable;
-use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-final class UserDto extends ValidatedDTO
+final class UserDto extends BaseDto
 {
     use Wireable;
 
@@ -17,14 +18,12 @@ final class UserDto extends ValidatedDTO
 
     public $email;
 
-    public $avatar;
-
-    public string $timezone;
+    public array $profile;
 
     protected function defaults(): array
     {
         return [
-            'timezone' => 'UTC',
+
         ];
     }
 
@@ -33,14 +32,14 @@ final class UserDto extends ValidatedDTO
         return [
             'id' => ['required'],
             'name' => ['required'],
-            'email' => ['required'],
-            'avatar' => ['required'],
-            'timezone' => ['required'],
+            'email' => ['required', 'email'],
         ];
     }
 
     protected function casts(): array
     {
-        return [];
+        return [
+            'profile' => new DTOCast(ProfileDto::class),
+        ];
     }
 }

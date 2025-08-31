@@ -5,22 +5,25 @@ declare(strict_types=1);
 namespace App\Http\Middleware\Filament;
 
 use Closure;
+
+use function config;
+
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class ConfigureDateTimePickers
+final class ConfigureDateTimePickers
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request):Response  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $timezone = filamentUser()->timezone ?: \config('app.timezone');
+        $timezone = filamentUser()->timezone ?: config('app.timezone');
 
         DateTimePicker::configureUsing(function (DateTimePicker $component) use ($timezone) {
             $component->timezone($timezone);

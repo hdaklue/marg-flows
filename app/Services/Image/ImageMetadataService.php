@@ -55,16 +55,14 @@ final class ImageMetadataService
         $baseKey = self::CACHE_PREFIX . md5($imageUrlOrPath);
         
         try {
-            // Try to get Redis instance for pattern matching
-            $redis = Cache::getRedis();
-            $keys = $redis->keys($baseKey . '*');
-            
-            if (!empty($keys)) {
-                $redis->del($keys);
+            // Clear cache keys with common suffixes
+            $suffixes = ['', '_width', '_height', '_size', '_type', '_dimensions'];
+            foreach ($suffixes as $suffix) {
+                Cache::forget($baseKey . $suffix);
             }
         } catch (\Exception $e) {
-            // Fallback: Clear common cache keys manually if Redis pattern matching fails
-            Log::warning('Failed to clear image metadata cache pattern, falling back to manual clearing', [
+            // Log warning if cache clearing fails
+            Log::warning('Failed to clear image metadata cache', [
                 'image' => $imageUrlOrPath,
                 'error' => $e->getMessage(),
             ]);
