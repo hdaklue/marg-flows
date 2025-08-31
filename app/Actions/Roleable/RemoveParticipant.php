@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Roleable;
 
-use App\Contracts\Role\AssignableEntity;
+use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
 use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use App\Notifications\Participant\RemovedFromEntity;
 use Hdaklue\MargRbac\Actions\Roleable\RemoveParticipant as PackageRemoveParticipant;
