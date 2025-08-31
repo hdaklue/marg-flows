@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Notifications\Participant\RemovedFromEntity;
+use Hdaklue\MargRbac\Notifications\Participant\RemovedFromEntity;
 use Hdaklue\MargRbac\Events\Role\EntityAllRolesRemoved;
 use Hdaklue\MargRbac\Events\Role\EntityRoleRemoved;
 use Illuminate\Contracts\Queue\ShouldQueue;
