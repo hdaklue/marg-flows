@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Flows\Pages;
 
 use App\DTOs\Document\CreateDocumentDto;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;

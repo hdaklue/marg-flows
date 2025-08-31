@@ -4,40 +4,26 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\Database\LivesInOriginalDB;
-use App\Concerns\Role\CanBeAssignedToEntity;
-use App\Concerns\Tenant\HasActiveTenant;
-use App\Concerns\User\ManagesAvatar;
-use App\Contracts\Role\AssignableEntity;
 use App\Enums\Account\AccountType;
-use App\Facades\RoleManager;
 use App\Services\Timezone;
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasAvatar;
-use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Attributes\Scope;
+use Hdaklue\MargRbac\Facades\RoleManager;
+use Hdaklue\MargRbac\Models\User as RbacUser;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
-use Illuminate\Support\Str;
-
-use function ucwords;
 
 /**
  * @property string $id
@@ -75,9 +61,9 @@ use function ucwords;
  * @method static Builder<static>|User newQuery()
  * @method static Builder<static>|User query()
  * @method static Builder<static>|User scopeAppAdmin()
- * @method static Builder<static>|User scopeAssignedTo(\App\Contracts\Role\RoleableEntity $entity)
+ * @method static Builder<static>|User scopeAssignedTo(\Hdaklue\MargRbac\Contracts\Role\RoleableEntity $entity)
  * @method static Builder<static>|User scopeMemberOf(\App\Models\Tenant $tenant)
- * @method static Builder<static>|User scopeNotAssignedTo(\App\Contracts\Role\RoleableEntity $entity)
+ * @method static Builder<static>|User scopeNotAssignedTo(\Hdaklue\MargRbac\Contracts\Role\RoleableEntity $entity)
  * @method static Builder<static>|User scopeNotMemberOf(\App\Models\Tenant $tenant)
  * @method static Builder<static>|User whereAccountType($value)
  * @method static Builder<static>|User whereActiveTenantId($value)
@@ -93,16 +79,9 @@ use function ucwords;
  *
  * @mixin \Eloquent
  */
-final class User extends Authenticatable implements AssignableEntity, FilamentUser, HasAvatar, HasDefaultTenant, HasTenants
+final class User extends RbacUser implements FilamentUser, HasTenants
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use CanBeAssignedToEntity,
-        HasActiveTenant,
-        HasFactory,
-        HasUlids,
-        LivesInOriginalDB,
-        ManagesAvatar,
-        Notifiable;
+    protected static $factory = UserFactory::class;
 
     /**
      * The attributes that are mass assignable.
@@ -114,9 +93,7 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         'email',
         'password',
         'account_type',
-        'timezone',
         'active_tenant_id',
-        'avatar',
     ];
 
     /**
@@ -146,6 +123,14 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
     }
 
     /**
+     * Get the user's profile.
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(Profile::class, 'user_id', 'id');
+    }
+
+    /**
      * Get all flows where this user has any role.
      */
     public function flows(): MorphToMany
@@ -159,114 +144,14 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         )->withPivot(['role_id', 'tenant_id']);
     }
 
-    /**
-     * Get the user's initials.
-     */
-    public function initials(): string
-    {
-        return Str::of($this->name)
-            ->explode(' ')
-            ->map(fn (string $name) => Str::of($name)->substr(0, 1))
-            ->implode('');
-    }
-
-    // public function tenants(): BelongsToMany
-    // {
-    //     return $this->belongsToMany(Tenant::class)->using(TenantUser::class);
-    // }
+    // // public function tenants(): BelongsToMany
+    // // {
+    // //     return $this->belongsToMany(Tenant::class)->using(TenantUser::class);
+    // // }
 
     public function getTenants(Panel $panel): SupportCollection
     {
-
         return $this->getAssignedTenants();
-    }
-
-    public function getAssignedTenants()
-    {
-        return RoleManager::getAssignedEntitiesByType($this, Relation::getMorphAlias(Tenant::class));
-
-    }
-
-    public function logins(): HasMany
-    {
-        return $this->hasMany(LoginLog::class);
-    }
-
-    public function latestLogin(): HasOne
-    {
-        return $this->hasOne(LoginLog::class)->latestOfMany();
-    }
-
-    public function receivedInvitation(): HasOne
-    {
-        return $this->hasOne(MemberInvitation::class, 'receiver_id');
-    }
-
-    public function updateLastLogin(string $userAgent, string $ip): self
-    {
-        $this->logins()->create([
-            'user_agent' => $userAgent,
-            'ip_address' => $ip,
-        ]);
-
-        return $this;
-    }
-
-    public function invitations(): HasMany
-    {
-        return $this->hasMany(MemberInvitation::class, 'sender_id');
-    }
-
-    public function isAppAdmin(): bool
-    {
-        return $this->account_type === AccountType::ADMIN->value;
-    }
-
-    public function isAppManager(): bool
-    {
-        return $this->account_type === AccountType::MANAGER->value;
-    }
-
-    public function isAppUser(): bool
-    {
-        return $this->account_type === AccountType::USER->value;
-    }
-
-    public function createdTenants(): HasMany
-    {
-        return $this->hasMany(Tenant::class, 'creator_id');
-    }
-
-    public function canAccessAdmin(): bool
-    {
-        return $this->isAppAdmin() || $this->isAppManager();
-    }
-
-    /**
-     * Summary of canAccessTenant.
-     *
-     * @param  mixed  $tenant
-     */
-    public function canAccessTenant($tenant): bool
-    {
-
-        return $this->isAssignedTo($tenant);
-    }
-
-    /**
-     * Check if user has any of the specified roles.
-     */
-    public function hasRole(array|string $roles): bool
-    {
-        $rolesToCheck = is_array($roles) ? $roles : [$roles];
-
-        foreach ($rolesToCheck as $role) {
-            if ($this->hasAssignmentOn($this->activeTenant(), $role)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -285,53 +170,49 @@ final class User extends Authenticatable implements AssignableEntity, FilamentUs
         return $this->hasAssignmentOn($flow, $role);
     }
 
+    public function getAvatar(): ?string
+    {
+        return $this->load('profile')->profile?->avatar;
+    }
+
+    public function getAvatarFileName(): ?string
+    {
+        return $this->load('profile')->profile?->avatar;
+    }
+
+    public function getTimezone(): ?string
+    {
+        return $this->load('profile')->profile?->timezone;
+    }
+
     public function displayTimeZone(): string
     {
-        return Timezone::displayTimezone($this->timezone);
+        return Timezone::displayTimezone($this->getTimezone());
     }
 
-    #[Scope]
-    protected function scopeNotMemberOf(Builder $builder, Tenant $tenant): Builder
+    /**
+     * Get all tenants created by this user.
+     */
+    public function createdTenants(): HasMany
     {
-        return $builder->whereDoesntHave('tenants', function ($query) use ($tenant) {
-            $query->where('tenants.id', '=', $tenant->id);
-        });
+        return $this->hasMany(Tenant::class, 'creator_id');
     }
 
-    #[Scope]
-    protected function scopeMemberOf(Builder $builder, Tenant $tenant): Builder
+    /**
+     * Get all tenants this user is assigned to with any role.
+     * Override package method to use correct App\Models\Tenant class.
+     */
+    public function getAssignedTenants()
     {
-        return $builder->whereHas('tenants', function ($query) use ($tenant) {
-            $query->where('tenants.id', '=', $tenant->id);
-        });
+        return RoleManager::getAssignedEntitiesByType($this, Relation::getMorphAlias(Tenant::class));
     }
 
-    #[Scope]
-    protected function scopeAppAdmin(Builder $builder): Builder
+    /**
+     * Get the model's morph class.
+     */
+    public function getMorphClass(): string
     {
-        return $builder->where('account_type', AccountType::ADMIN->value);
-    }
-
-    #[Scope]
-    protected function appUser(Builder $builder): Builder
-    {
-        return $builder->where('account_type', AccountType::USER->value);
-    }
-
-    protected function inviterName(): Attribute
-    {
-
-        return Attribute::make(
-            get: fn () => $this->load('receivedInvitation')->receivedInvitation->sender->name ?? null,
-        );
-
-    }
-
-    protected function name(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => ucwords($value),
-        );
+        return 'user';
     }
 
     /**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications\Participant;
 
 use App\Contracts\HasStaticType;
-use App\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Models\Flow;

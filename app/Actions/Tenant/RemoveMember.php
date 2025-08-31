@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Tenant;
 
 use App\Contracts\Role\AssignableEntity;
-use App\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use App\Events\Tenant\MemberRemoved;
-use App\Facades\RoleManager;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;

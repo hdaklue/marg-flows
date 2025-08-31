@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders\BusinessDB;
 
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Document;
 use App\Models\Flow;
 use App\Models\User;

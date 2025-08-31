@@ -6,7 +6,7 @@ namespace App\Actions\Invitation;
 
 use App\Actions\User\GenerateUserAvatar;
 use App\DTOs\Invitation\InvitationDTO;
-use App\Facades\RoleManager;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\Tenant;
 use App\Models\TenantUser;
 use App\Models\User;

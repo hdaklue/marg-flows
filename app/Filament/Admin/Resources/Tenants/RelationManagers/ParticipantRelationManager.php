@@ -6,7 +6,7 @@ namespace App\Filament\Admin\Resources\Tenants\RelationManagers;
 
 use App\Actions\Tenant\AddMember;
 use App\Actions\Tenant\RemoveMember;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\Tenants\TenantResource;
 use App\Models\Tenant;
 use App\Models\User;

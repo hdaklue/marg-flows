@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTOs\Task;
 
-use App\Facades\RoleManager;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\User;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 

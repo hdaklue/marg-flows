@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Tenants\Pages;
 
 use App\Actions\Tenant\CreateTenant;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\Tenants\TenantResource;
 use App\Models\User;
 use Exception;

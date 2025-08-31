@@ -6,7 +6,7 @@ namespace App\Filament\Admin\Resources\Tenants;
 
 use App\Actions\Tenant\AddMember;
 use App\Enums\Account\AccountType;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Filament\Admin\Resources\TenantResource\Pages;
 use App\Filament\Admin\Resources\Tenants\Pages\EditTenant;
 use App\Filament\Admin\Resources\Tenants\Pages\ListTenants;

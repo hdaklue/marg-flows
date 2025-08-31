@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Events\Tenant;
 
 use Illuminate\Broadcasting\Channel;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;

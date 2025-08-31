@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Role;
 
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\ModelHasRole;
 use App\Models\Role;
 use DomainException;

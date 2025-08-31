@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Tenant;
 
-use App\Contracts\Role\RoleableEntity;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Events\Tenant\TanantMemberAdded;
-use App\Facades\RoleManager;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\Flow;
 use App\Models\Role;
 use App\Models\Tenant;

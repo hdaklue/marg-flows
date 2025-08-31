@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Role;
 
-use App\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Attributes\On;
 use Livewire\Component;

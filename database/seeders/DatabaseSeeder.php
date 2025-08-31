@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Actions\User\GenerateUserAvatar;
-use App\Services\Avatar\AvatarService;
-use App\Enums\Account\AccountType;
-use App\Enums\Role\RoleEnum;
 use App\Models\Flow;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
+use App\Services\Avatar\AvatarService;
 use Exception;
+use Hdaklue\MargRbac\Enums\Account\AccountType;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Illuminate\Database\Seeder;
 
 final class DatabaseSeeder extends Seeder
@@ -23,22 +21,36 @@ final class DatabaseSeeder extends Seeder
     {
         $this->command->info('Creating original test user...');
 
-        // Keep original test user
-        $testUser = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => bcrypt('password'),
-            'account_type' => AccountType::ADMIN->value,
-            'timezone' => 'Africa/Cairo',
-        ]);
+        // Keep original test user or use existing one
+        $testUser = User::where('email', 'test@example.com')->first();
+        
+        if (!$testUser) {
+            $testUser = User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+                'password' => bcrypt('password'),
+                'account_type' => AccountType::ADMIN->value,
+            ]);
+        } else {
+            $this->command->info('Using existing test user...');
+        }
 
-        // Generate and save avatar for test user
-        $this->command->info('Generating avatar for test user...');
+        // Create profile for test user
+        $this->command->info('Creating profile for test user...');
         try {
             $avatarUrl = AvatarService::generateAvatarUrl($testUser);
-            $this->command->info('Avatar generated for test user');
+            $testUser->profile()->create([
+                'avatar' => $avatarUrl,
+                'timezone' => 'Africa/Cairo',
+            ]);
+            $this->command->info('Profile created for test user');
         } catch (Exception $e) {
-            $this->command->warn('Could not generate avatar for test user: ' . $e->getMessage());
+            $this->command->warn('Could not create profile for test user: ' . $e->getMessage());
+            // Create profile without avatar
+            $testUser->profile()->firstOrCreate(
+                ['user_id' => $testUser->id],
+                ['timezone' => 'Africa/Cairo']
+            );
         }
 
         $this->command->info('Creating tenants...');
@@ -92,7 +104,17 @@ final class DatabaseSeeder extends Seeder
             $users = User::factory($batchSize)->create();
             $allUsers = $allUsers->concat($users);
 
-            $this->command->info('Created users batch ' . ($batch + 1) . '/10');
+            // Create profiles for each user in this batch
+            $users->each(function ($user) {
+                $user->profile()->create([
+                    'timezone' => fake()->randomElement([
+                        'America/New_York', 'Europe/London', 'Asia/Tokyo', 'Australia/Sydney',
+                        'America/Los_Angeles', 'Europe/Paris', 'Asia/Dubai', 'Africa/Cairo',
+                    ]),
+                ]);
+            });
+
+            $this->command->info('Created users batch ' . ($batch + 1) . '/10 with profiles');
         }
 
         $this->command->info('Assigning users to tenants with 10 max per tenant...');

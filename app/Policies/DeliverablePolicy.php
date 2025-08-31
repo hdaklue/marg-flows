@@ -6,7 +6,7 @@ namespace App\Policies;
 
 use App\Contracts\Role\AssignableEntity;
 use App\Enums\AssigneeRole;
-use App\Enums\Role\RoleEnum;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Deliverable;
 use App\Models\User;
 
