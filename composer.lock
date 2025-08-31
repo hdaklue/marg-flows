@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dfbaaf7ada73caeeacc6f64da203823b",
+    "content-hash": "d773af3f16c8ffa0e5cab27656247b50",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2268,11 +2268,11 @@
         },
         {
             "name": "hdaklue/marg-brac",
-            "version": "1.3.12",
+            "version": "1.3.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/marg-brac.git",
-                "reference": "1.3.12"
+                "reference": "1.3.13"
             },
             "type": "library",
             "autoload": {

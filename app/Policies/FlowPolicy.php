@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Contracts\Role\AssignableEntity;
 use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Flow;
 use App\Models\User;
@@ -22,7 +21,7 @@ final class FlowPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(AssignableEntity $user, Flow $flow): bool
+    public function view(User $user, Flow $flow): bool
     {
 
         return $flow->isParticipant($user) || $flow->getTenant()->isAdmin($user);

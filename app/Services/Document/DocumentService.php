@@ -6,7 +6,6 @@ namespace App\Services\Document;
 
 use App\Contracts\Document\Documentable;
 use App\Contracts\Document\DocumentManagerInterface;
-use App\Contracts\Role\AssignableEntity;
 use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
 use Hdaklue\MargRbac\Enums\Role\RoleEnum;
@@ -103,7 +102,7 @@ final class DocumentService implements DocumentManagerInterface
     /**
      * Returns pages of a documentable entity can be accessed by User.
      */
-    public function getDocumentsForUser(Documentable $documentable, AssignableEntity $user): Collection
+    public function getDocumentsForUser(Documentable $documentable, User $user): Collection
     {
         $documentablePages = $this->getDocumentsFordocumentable($documentable);
 

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Components;
 
-use App\Collections\Role\ParticipantsCollection;
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Models\Document;
+use Hdaklue\MargRbac\Collections\Role\ParticipantsCollection;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;

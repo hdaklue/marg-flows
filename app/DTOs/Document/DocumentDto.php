@@ -31,28 +31,6 @@ final class DocumentDto extends ValidatedDTO
 
     public Carbon $updated_at;
 
-    // public array $creator;
-
-    // public function toEditorJSFormat(): array
-    // {
-    //     return [
-    //         'time' => now()->timestamp,
-    //         'blocks' => $this->blocks,
-    //         'version' => config('page.editorjs.version', '2.28.2'),
-    //     ];
-    // }
-
-    // public function toArray(): array
-    // {
-    //     return [
-    //         'name' => $this->name,
-    //         'blocks' => $this->toEditorJSFormat(),
-    //         'pageable_type' => $this->pageable->getMorphClass(),
-    //         'pageable_id' => $this->pageable->getKey(),
-    //         'creator_id' => $this->creator->getKey(),
-    //     ];
-    // }
-
     protected function casts(): array
     {
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\Account\AccountType;
+use App\Services\Avatar\AvatarService;
 use App\Services\Timezone;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -106,6 +107,8 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         'remember_token',
     ];
 
+    protected $with = ['profile'];
+
     public function canAccessPanel(Panel $panel): bool
     {
 
@@ -178,6 +181,11 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     public function getAvatarFileName(): ?string
     {
         return $this->load('profile')->profile?->avatar;
+    }
+
+    public function getAvatarUrl(): string
+    {
+        return AvatarService::generateAvatarUrl($this);
     }
 
     public function getTimezone(): ?string

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Roleable;
 
-use App\Contracts\Role\AssignableEntity;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Notifications\Participant\AssignedToEntity;
 use Hdaklue\MargRbac\Actions\Roleable\AddParticipant as PackageAddParticipant;
+use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 final class AddParticipant
