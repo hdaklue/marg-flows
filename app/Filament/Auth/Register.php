@@ -8,14 +8,15 @@ use App\Actions\Auth\RegisterUser;
 use App\Http\Responses\RegistrationResponse;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Exception;
-use Filament\Auth\Events\Registered;
 use Filament\Auth\Http\Responses\Contracts\RegistrationResponse as RegistrationResponseContract;
 use Filament\Auth\Pages\Register as BaseRegister;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Hdaklue\MargRbac\Rules\Username\UsernameAvailable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -53,7 +54,7 @@ final class Register extends BaseRegister
     {
         return $schema
             ->schema([
-                $this->getNameFormComponent(),
+                $this->getUsernameFormComponent(),
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
             ])
@@ -72,8 +73,7 @@ final class Register extends BaseRegister
         $data = $this->form->getState();
 
         try {
-            $user = RegisterUser::run($data['email'], $data['name'], $data['password']);
-            event(new Registered($user));
+            $user = RegisterUser::run($data['email'], $data['username'], $data['password']);
 
             $this->sendEmailVerificationNotification($user);
 
@@ -97,12 +97,15 @@ final class Register extends BaseRegister
         ];
     }
 
-    protected function getNameFormComponent(): Component
+    protected function getUsernameFormComponent(): Component
     {
-        return TextInput::make('name')
-            ->label(__('auth.register.full_name'))
-            ->placeholder(__('auth.register.full_name_placeholder'))
+        return TextInput::make('username')
+            ->label(__('auth.register.username'))
+            ->placeholder(__('auth.register.username_placeholder'))
             ->required()
+            ->live(onBlur: true)
+            ->afterStateUpdated(fn ($livewire, Field $component) => $livewire->validateOnly($component->getStatePath()))
+            ->rules([new UsernameAvailable])
             ->maxLength(255)
             ->autofocus();
     }
@@ -114,6 +117,8 @@ final class Register extends BaseRegister
             ->placeholder(__('auth.register.email_placeholder'))
             ->email()
             ->required()
+            ->live(onBlur: true)
+            ->afterStateUpdated(fn ($livewire, Field $component) => $livewire->validateOnly($component->getStatePath()))
             ->maxLength(255)
             ->unique($this->getUserModel());
     }

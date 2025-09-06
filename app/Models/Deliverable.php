@@ -7,10 +7,10 @@ namespace App\Models;
 use App\Casts\DeliverableSpecificationCast;
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Concerns\HasSideNotes;
-use Hdaklue\MargRbac\Concerns\Role\ManagesParticipants;
+use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use Hdaklue\Porter\Contracts\RoleableEntity;
 use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
@@ -72,7 +72,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
         HasStagesTrait,
         HasUlids,
         LivesInBusinessDB,
-        ManagesParticipants,
+        ReceivesRoleAssignments,
         SoftDeletes;
 
     protected $fillable = [
@@ -93,7 +93,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     ];
 
     protected $attributes = [
-        'status' => DeliverableStatus::DRAFT->value,
+        'status' => DeliverableStatus::REQUESTED->value,
         'priority' => 3,
         'order_column' => 0,
     ];
@@ -158,7 +158,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     public function requestRevision(): void
     {
         $this->update([
-            'status' => DeliverableStatus::REVISION_REQUESTED,
+            'status' => DeliverableStatus::REVIEW,
         ]);
     }
 

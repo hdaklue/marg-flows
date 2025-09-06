@@ -8,10 +8,10 @@ use App\Contracts\Document\Documentable;
 use App\Contracts\Document\DocumentManagerInterface;
 use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
-use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\Document;
 use App\Models\User;
+use Hdaklue\Porter\Facades\Porter;
+use Hdaklue\Porter\RoleFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -38,7 +38,7 @@ final class DocumentService implements DocumentManagerInterface
         $document->documentable()->associate($documentable);
         $document->creator()->associate($creator);
         $document->save();
-        $document->addParticipant($creator, RoleEnum::ADMIN);
+        $document->assign($creator, RoleFactory::admin());
 
         $this->clearCache($documentable);
 
@@ -108,7 +108,7 @@ final class DocumentService implements DocumentManagerInterface
 
         $pageKeys = $documentablePages->pluck('id')->toArray();
 
-        return RoleManager::getAssignedEntitiesByKeysByType(
+        return Porter::getAssignedEntitiesByKeysByType(
             $user,
             $pageKeys,
             Relation::getMorphAlias(Document::class),

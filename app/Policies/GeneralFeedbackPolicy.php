@@ -7,6 +7,7 @@ namespace App\Policies;
 use App\Models\Document;
 use App\Models\Feedbacks\GeneralFeedback;
 use App\Models\User;
+use Hdaklue\Porter\RoleFactory;
 
 final class GeneralFeedbackPolicy
 {
@@ -212,7 +213,7 @@ final class GeneralFeedbackPolicy
 
         // For pages, check if user has contributor+ access to the flow
         if ($feedbackable instanceof Document) {
-            return $user->hasRoleOnFlow($feedbackable->flow, ['CONTRIBUTOR', 'ADMIN']);
+            return $user->hasRoleOnFlow($feedbackable->flow, RoleFactory::admin());
         }
 
         // For other entities, implement specific management logic

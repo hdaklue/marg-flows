@@ -104,6 +104,7 @@ return [
         'updated_successfully' => 'Updated successfully',
         'deleted_successfully' => 'Deleted successfully',
         'operation_completed' => 'Operation completed successfully',
+        'operation_failed' => 'Operation failed',
     ],
 
     'navigation' => [

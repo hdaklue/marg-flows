@@ -12,7 +12,8 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Hdaklue\MargRbac\Facades\RoleManager;
-use Hdaklue\MargRbac\Models\User as RbacUser;
+use Hdaklue\MargRbac\Models\RbacUser;
+use Hdaklue\Porter\Contracts\RoleContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -112,12 +113,20 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     public function canAccessPanel(Panel $panel): bool
     {
 
-        if ($panel->getId() === 'admin') {
-
-            return $this->canAccessAdmin() ?: abort(404);
-        }
-
         return true;
+    }
+
+    public function updateProfileAvatar(string $avatarFileName)
+    {
+        $this->loadMissing('profile')->profile->update([
+            'avatar' => $avatarFileName,
+        ]);
+
+    }
+
+    public function getTimeZone(): string
+    {
+        return $this->loadMissing('profile')->profile->getAttribute('timezone');
     }
 
     public function getDefaultTenant(Panel $panel): ?Model
@@ -168,7 +177,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     /**
      * Check if user has a specific role on a flow.
      */
-    public function hasRoleOnFlow(Flow $flow, string $role): bool
+    public function hasRoleOnFlow(Flow $flow, RoleContract $role): bool
     {
         return $this->hasAssignmentOn($flow, $role);
     }
@@ -188,11 +197,6 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return AvatarService::generateAvatarUrl($this);
     }
 
-    public function getTimezone(): ?string
-    {
-        return $this->load('profile')->profile?->timezone;
-    }
-
     public function displayTimeZone(): string
     {
         return Timezone::displayTimezone($this->getTimezone());
@@ -206,14 +210,14 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return $this->hasMany(Tenant::class, 'creator_id');
     }
 
-    /**
-     * Get all tenants this user is assigned to with any role.
-     * Override package method to use correct App\Models\Tenant class.
-     */
-    public function getAssignedTenants()
-    {
-        return RoleManager::getAssignedEntitiesByType($this, Relation::getMorphAlias(Tenant::class));
-    }
+    // /**
+    //  * Get all tenants this user is assigned to with any role.
+    //  * Override package method to use correct App\Models\Tenant class.
+    //  */
+    // public function getAssignedTenants()
+    // {
+    //     return RoleManager::getAssignedEntitiesByType($this, Relation::getMorphAlias(Tenant::class));
+    // }
 
     /**
      * Get the model's morph class.

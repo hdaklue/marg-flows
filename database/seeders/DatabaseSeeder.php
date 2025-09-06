@@ -9,7 +9,9 @@ use App\Models\User;
 use App\Services\Avatar\AvatarService;
 use Exception;
 use Hdaklue\MargRbac\Enums\Account\AccountType;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
+use Hdaklue\Porter\Facades\Porter;
+use Hdaklue\Porter\RoleFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Seeder;
 
 final class DatabaseSeeder extends Seeder
@@ -23,8 +25,8 @@ final class DatabaseSeeder extends Seeder
 
         // Keep original test user or use existing one
         $testUser = User::where('email', 'test@example.com')->first();
-        
-        if (!$testUser) {
+
+        if (! $testUser) {
             $testUser = User::factory()->create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
@@ -39,17 +41,20 @@ final class DatabaseSeeder extends Seeder
         $this->command->info('Creating profile for test user...');
         try {
             $avatarUrl = AvatarService::generateAvatarUrl($testUser);
-            $testUser->profile()->create([
-                'avatar' => $avatarUrl,
-                'timezone' => 'Africa/Cairo',
-            ]);
+            $testUser->profile()->firstOrCreate(
+                ['user_id' => $testUser->id],
+                [
+                    'avatar' => $avatarUrl,
+                    'timezone' => 'Africa/Cairo',
+                ],
+            );
             $this->command->info('Profile created for test user');
         } catch (Exception $e) {
             $this->command->warn('Could not create profile for test user: ' . $e->getMessage());
             // Create profile without avatar
             $testUser->profile()->firstOrCreate(
                 ['user_id' => $testUser->id],
-                ['timezone' => 'Africa/Cairo']
+                ['timezone' => 'Africa/Cairo'],
             );
         }
 
@@ -63,9 +68,16 @@ final class DatabaseSeeder extends Seeder
             'name' => 'Test Tenant 2',
         ]);
 
-        // Create 298 additional tenants for performance testing (300 total)
+        // Create 3 additional tenants for the test user admin access (5 total)
         $performanceTenants = collect();
-        for ($i = 3; $i <= 300; $i++) {
+        for ($i = 3; $i <= 5; $i++) {
+            $performanceTenants->push($testUser->createdTenants()->create([
+                'name' => "Test Tenant {$i}",
+            ]));
+        }
+
+        // Create additional performance tenants (295 more for 300 total)
+        for ($i = 6; $i <= 300; $i++) {
             $performanceTenants->push($testUser->createdTenants()->create([
                 'name' => "Performance Tenant {$i}",
             ]));
@@ -73,27 +85,21 @@ final class DatabaseSeeder extends Seeder
 
         $allTenants = collect([$tenant1, $tenant2])->concat($performanceTenants);
 
-        $this->command->info('Creating system roles for all tenants...');
-
-        $systemRoles = collect(RoleEnum::cases())->map(function ($case) {
-            return [
-                'name' => $case->value,
-            ];
-        })->toArray();
-
-        // Create roles for all tenants
-        $allTenants->each(function ($tenant) use ($systemRoles) {
-            $tenant->systemRoles()->createMany($systemRoles);
-        });
-
-        // Assign test user as ADMIN to only 5 tenants (realistic limit)
-        $this->command->info('Assigning test user as ADMIN to 5 tenants...');
+        // Assign test user as ADMIN to only first 5 tenants using Porter
+        $this->command->info('Assigning test user as ADMIN to 5 tenants using Porter...');
         $testUserTenants = $allTenants->take(5); // First 5 tenants
-        $testUserTenants->each(function ($tenant) use ($testUser) {
-            $roleAdmin = $tenant->systemRoles()->where('name', RoleEnum::ADMIN->value)->firstOrFail();
-            $tenant->addParticipant($testUser, $roleAdmin->name);
-        });
+        $adminRole = RoleFactory::admin();
 
+        $testUserTenants->each(function ($tenant) use ($testUser, $adminRole) {
+            try {
+                Porter::assign($testUser, $tenant, $adminRole);
+
+                $this->command->info("✓ Assigned admin role to tenant: {$tenant->name}");
+            } catch (Exception $e) {
+                $this->command->warn("Failed to assign admin role to tenant {$tenant->name}: " . $e->getMessage());
+            }
+        });
+        $testUser->switchActiveTenant($testUserTenants->first());
         $this->command->info('Creating 1000 users for performance testing...');
 
         // Create 1000 users in batches for performance
@@ -106,27 +112,39 @@ final class DatabaseSeeder extends Seeder
 
             // Create profiles for each user in this batch
             $users->each(function ($user) {
-                $user->profile()->create([
-                    'timezone' => fake()->randomElement([
-                        'America/New_York', 'Europe/London', 'Asia/Tokyo', 'Australia/Sydney',
-                        'America/Los_Angeles', 'Europe/Paris', 'Asia/Dubai', 'Africa/Cairo',
-                    ]),
-                ]);
+                try {
+                    $user->profile()->firstOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'timezone' => fake()->randomElement([
+                                'America/New_York', 'Europe/London', 'Asia/Tokyo', 'Australia/Sydney',
+                                'America/Los_Angeles', 'Europe/Paris', 'Asia/Dubai', 'Africa/Cairo',
+                            ]),
+                        ],
+                    );
+                } catch (Exception $e) {
+                    $this->command->warn("Failed to create profile for user {$user->id}: " . $e->getMessage());
+                }
             });
 
             $this->command->info('Created users batch ' . ($batch + 1) . '/10 with profiles');
         }
 
-        $this->command->info('Assigning users to tenants with 10 max per tenant...');
+        $this->command->info('Assigning users to tenants with Porter system...');
+
+        // Get available roles from Porter (excluding admin since test user has it)
+        $availableRoles = collect(RoleFactory::getAllWithKeys())
+            ->reject(fn ($role, $key) => $key === 'admin')
+            ->values()
+            ->toArray();
 
         // Track participants per tenant (max 10 each, test user assigned to first 5)
         $tenantParticipantCounts = [];
         foreach ($allTenants as $index => $tenant) {
             $tenantParticipantCounts[$tenant->id] = $index < 5 ? 1 : 0; // Test user only in first 5
         }
-        $roles = collect(RoleEnum::cases())->reject(fn ($role) => $role === RoleEnum::ADMIN); // Exclude ADMIN since test user has it
 
-        $allUsers->skip(1)->each(function ($user) use ($allTenants, $roles, &$tenantParticipantCounts) {
+        $allUsers->skip(1)->each(function ($user) use ($allTenants, $availableRoles, &$tenantParticipantCounts) {
             // Find tenants that aren't full (have less than 10 participants)
             $availableTenants = $allTenants->filter(function ($tenant) use ($tenantParticipantCounts) {
                 return $tenantParticipantCounts[$tenant->id] < 10;
@@ -154,12 +172,13 @@ final class DatabaseSeeder extends Seeder
                     continue;
                 }
 
-                $randomRole = $roles->random();
-                $role = $tenant->systemRoles()->where('name', $randomRole->value)->first();
+                $randomRole = $availableRoles[array_rand($availableRoles)];
 
-                if ($role) {
-                    $tenant->addParticipant($user, $role->name);
+                try {
+                    Porter::assign($user, $tenant, $randomRole);
                     $tenantParticipantCounts[$tenant->id]++;
+                } catch (Exception $e) {
+                    $this->command->warn("Failed to assign role to user {$user->id} on tenant {$tenant->id}: " . $e->getMessage());
                 }
             }
         });
@@ -183,44 +202,48 @@ final class DatabaseSeeder extends Seeder
         $totalFlows = $allTenants->count() * 5;
         $this->command->info("Created {$totalFlows} flows total (5 per tenant)");
 
-        $this->command->info('Assigning participants to flows...');
+        $this->command->info('Assigning participants to flows using Porter...');
+
+        // Get available roles for flow assignments
+        $flowRoles = collect(RoleFactory::getAllWithKeys())
+            ->reject(fn ($role, $key) => $key === 'admin')
+            ->values()
+            ->toArray();
+
+        $adminRole = RoleFactory::admin();
 
         // Assign participants to flows with 10 max limit and test user as admin
-        Flow::with('tenant')->chunk(25, function ($flows) use ($testUser) {
+        Flow::with('tenant')->chunk(25, function ($flows) use ($testUser, $adminRole, $flowRoles) {
             foreach ($flows as $flow) {
-                // First, assign test user as ADMIN on every flow (only if test user is a participant of this tenant)
-                $testUserIsParticipant = $flow->tenant->isParticipant($testUser);
-                if ($testUserIsParticipant) {
-                    $adminRole = $flow->tenant->systemRoles()->where('name', RoleEnum::ADMIN->value)->first();
-                    if ($adminRole) {
+                try {
+                    // First, assign test user as ADMIN on flows where they have tenant access
+                    if (Porter::check($testUser, $flow->tenant, $adminRole)) {
                         try {
-                            $flow->addParticipant($testUser, $adminRole->name, true);
+                            Porter::assign($testUser, $flow, $adminRole);
                         } catch (Exception $e) {
                             // Skip if already assigned
                         }
                     }
-                }
 
-                // Get all participants of this tenant (excluding test user if already assigned)
-                $tenantParticipants = $flow->tenant->getParticipants();
-                $availableUsers = $tenantParticipants->pluck('model')->filter(fn ($user) => $user->id !== $testUser->id);
+                    // Get tenant participants using Porter
+                    $tenantParticipants = Porter::getAssignedEntitiesByType($flow->tenant, Relation::getMorphAlias(User::class));
+                    $availableUsers = $tenantParticipants->filter(fn ($user) => $user->id !== $testUser->id);
 
-                // Assign up to 9 more participants (or fewer if tenant has fewer participants)
-                $maxParticipants = $testUserIsParticipant ? 9 : 10;
-                $participantsToAssign = $availableUsers->random(min($maxParticipants, $availableUsers->count()));
-                $roles = collect(RoleEnum::cases())->reject(fn ($role) => $role === RoleEnum::ADMIN); // Exclude ADMIN since test user has it
+                    // Assign up to 9 more participants (or fewer if tenant has fewer participants)
+                    $maxParticipants = Porter::check($testUser, $flow, $adminRole) ? 9 : 10;
+                    $participantsToAssign = $availableUsers->random(min($maxParticipants, $availableUsers->count()));
 
-                foreach ($participantsToAssign as $participant) {
-                    $randomRole = $roles->random();
-                    $role = $flow->tenant->systemRoles()->where('name', $randomRole->value)->first();
+                    foreach ($participantsToAssign as $participant) {
+                        $randomRole = $flowRoles[array_rand($flowRoles)];
 
-                    if ($role) {
                         try {
-                            $flow->addParticipant($participant, $role->name, true);
+                            Porter::assign($participant, $flow, $randomRole);
                         } catch (Exception $e) {
                             // Skip if participant already assigned
                         }
                     }
+                } catch (Exception $e) {
+                    $this->command->warn("Failed to process flow {$flow->id}: " . $e->getMessage());
                 }
             }
         });

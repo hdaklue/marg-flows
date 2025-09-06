@@ -23,6 +23,7 @@ final class UpdateActiveTenant
 
     public function handle(TenantSet $event): void
     {
+
         abort_unless($event->getUser()->canAccessTenant($event->getTenant()), 404);
 
         // Prevent duplicate switches - only switch if it's actually different

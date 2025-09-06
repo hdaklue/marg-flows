@@ -35,6 +35,7 @@ use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Enums\Width;
+use Hdaklue\Porter\RoleFactory;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -170,119 +171,101 @@ final class CreateFlow extends CreateRecord
 
     }
 
-    // public function begin()
-    // {
-    //     while ($this->start >= 0) {
-    //         // Stream the current count to the browser...
-    //         $this->stream(
-    //             to: 'count',
-    //             content: $this->start,
-    //             replace: true,
-    //         );
-
-    //         // Pause for 1 second between numbers...
-    //         sleep(1);
-
-    //         // Decrement the counter...
-    //         $this->start = $this->start - 1;
-    //     }
-    // }
-
     public function getHeading(): string|Htmlable // @phpstan-ignore-line
     {
         return '';
     }
 
-    protected function getSteps(): array
-    {
-        return [
-            Step::make('Flow Details')
-                ->description('Provide the details of the flow you want to create.')
-                ->schema([
-                    ChunkedFileUpload::make('files'),
-                    TextInput::make('title')
-                        ->required()
-                        ->label('Flow Title'),
+    // protected function getSteps(): array
+    // {
+    //     return [
+    //         Step::make('Flow Details')
+    //             ->description('Provide the details of the flow you want to create.')
+    //             ->schema([
+    //                 ChunkedFileUpload::make('files'),
+    //                 TextInput::make('title')
+    //                     ->required()
+    //                     ->label('Flow Title'),
 
-                    Textarea::make('description')
-                        ->required()
-                        ->label('Description'),
-                    Select::make('stage')
-                        ->options(FlowStage::class)
-                        ->default(FlowStage::DRAFT),
-                    // ChunkedFileUpload::make('attachments')
-                    //     ->maxFiles(5)
-                    //     ->label('Attachments'),
-                ]),
-            Step::make('deliverables')
-                ->label('Deliverables')
-                ->description(fn ($get): string => 'Add deliverables for the flow. You can add multiple deliverables.')
-                ->schema([
-                    Repeater::make('delivrables')
-                        ->table([
-                            TableColumn::make('title'),
-                            TableColumn::make('format'),
-                            TableColumn::make('type'),
-                            TableColumn::make('# of Options'),
-                            TableColumn::make('success_date'),
-                        ])
-                        ->schema(
-                            [
+    //                 Textarea::make('description')
+    //                     ->required()
+    //                     ->label('Description'),
+    //                 Select::make('stage')
+    //                     ->options(FlowStage::class)
+    //                     ->default(FlowStage::DRAFT),
+    //                 // ChunkedFileUpload::make('attachments')
+    //                 //     ->maxFiles(5)
+    //                 //     ->label('Attachments'),
+    //             ]),
+    //         Step::make('deliverables')
+    //             ->label('Deliverables')
+    //             ->description(fn ($get): string => 'Add deliverables for the flow. You can add multiple deliverables.')
+    //             ->schema([
+    //                 Repeater::make('delivrables')
+    //                     ->table([
+    //                         TableColumn::make('title'),
+    //                         TableColumn::make('format'),
+    //                         TableColumn::make('type'),
+    //                         TableColumn::make('# of Options'),
+    //                         TableColumn::make('success_date'),
+    //                     ])
+    //                     ->schema(
+    //                         [
 
-                                TextInput::make('Title'),
-                                Select::make('template')
-                                    ->options(DeliverableSpecResolver::getSupportedFormats())
-                                    ->live()
-                                    ->native(false)
-                                    ->partiallyRenderComponentsAfterStateUpdated(['urgency'])
-                                    ->selectablePlaceholder(false)
-                                    ->required(),
-                                Select::make('urgency')
-                                    ->multiple(false)
-                                    ->disabled(fn (Get $get) => empty($get('template')))
-                                    ->options(fn ($get) => $get('template') ? (new DeliverableFormat($get('template')))->typesAsSelectArray() : [])
-                                    ->native(false),
-                                TextInput::make('options')
-                                    ->numeric()
-                                    ->default(1)
-                                    ->minValue(1)
-                                    ->maxValue(5),
-                                DatePicker::make('sucess_date')
-                                    ->closeOnDateSelection()
-                                    ->native(false)
-                                    ->minDate(today(filamentUser()->timezone)),
-                            ],
-                        )
-                        ->cloneable()
-                        ->grid(1)
-                        ->reorderable(false)
-                        ->collapsible(),
-                ]),
-            Step::make('participatns')
-                ->label('Participants')
-                ->description(fn ($get): string => 'Select participants for the flow. You can select multiple participants.')
-                ->schema([
-                    Toggle::make('custom_members'),
-                    Repeater::make('participants')
-                        ->schema([
-                            Select::make('participant_id')
-                                ->options($this->getParticipantsSelectArray())
-                                ->selectablePlaceholder(false)
-                                ->required(),
-                            Select::make('role_id')
-                                ->options(filamentTenant()->getSystemRoles()->pluck('name', 'id'))
-                                ->selectablePlaceholder(false)
-                                ->required(),
-                        ])
-                        ->visibleJs(<<<'JS'
-                                 $get('custom_members')
-                                JS)
-                        ->grid(2)
-                        ->reorderable(false)
-                        ->collapsible(),
-                ]),
-        ];
-    }
+    //                             TextInput::make('Title'),
+    //                             Select::make('template')
+    //                                 ->options(DeliverableSpecResolver::getSupportedFormats())
+    //                                 ->live()
+    //                                 ->native(false)
+    //                                 ->partiallyRenderComponentsAfterStateUpdated(['urgency'])
+    //                                 ->selectablePlaceholder(false)
+    //                                 ->required(),
+    //                             Select::make('urgency')
+    //                                 ->multiple(false)
+    //                                 ->disabled(fn (Get $get) => empty($get('template')))
+    //                                 ->options(fn ($get) => $get('template') ? (new DeliverableFormat($get('template')))->typesAsSelectArray() : [])
+    //                                 ->native(false),
+    //                             TextInput::make('options')
+    //                                 ->numeric()
+    //                                 ->default(1)
+    //                                 ->minValue(1)
+    //                                 ->maxValue(5),
+    //                             DatePicker::make('sucess_date')
+    //                                 ->closeOnDateSelection()
+    //                                 ->native(false)
+    //                                 ->minDate(today(filamentUser()->timezone)),
+    //                         ],
+    //                     )
+    //                     ->cloneable()
+    //                     ->grid(1)
+    //                     ->reorderable(false)
+    //                     ->collapsible(),
+    //             ]),
+    //         Step::make('participatns')
+    //             ->label('Participants')
+    //             ->description(fn ($get): string => 'Select participants for the flow. You can select multiple participants.')
+    //             ->schema([
+    //                 Toggle::make('custom_members'),
+    //                 Repeater::make('participants')
+    //                     ->schema([
+    //                         Select::make('participant_id')
+    //                             ->options($this->getParticipantsSelectArray())
+    //                             ->selectablePlaceholder(false)
+    //                             ->required(),
+    //                         Select::make('role_id')
+    //                             ->options(RoleFactory::getAllWithKeys())
+    //                             ->selectablePlaceholder(false)
+    //                             ->required(),
+    //                     ])
+    //                     ->visibleJs(<<<'JS'
+    //                              $get('custom_members')
+    //                             JS)
+    //                     ->grid(2)
+    //                     ->reorderable(false)
+    //                     ->collapsible(),
+    //             ]),
+    //     ];
+    // }
 
     protected function getCreatedNotification(): ?Notification
     {
@@ -291,9 +274,11 @@ final class CreateFlow extends CreateRecord
 
     private function getParticipantsSelectArray(): array
     {
-        $participants = filamentTenant()->getParticipants()->exceptAssignable(filamentUser()->getKey());
+        $participants = filamentTenant()->getParticipants()->pluck('assignable');
 
-        return $participants->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => "{$item->model->getAttribute('name')} - {$item->role->name}"])->toArray();
+        // return $participants->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => "{$item->model->getAttribute('name')} - {$item->role->name}"])->toArray();
+
+        return $participants->toArray();
 
     }
 }

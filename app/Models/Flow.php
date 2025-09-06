@@ -8,18 +8,18 @@ use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\Document\ManagesDocuments;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
-use Hdaklue\MargRbac\Concerns\Role\ManagesParticipants;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\Document\Documentable;
 use App\Contracts\HasStaticType;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\FlowStage;
 use App\Facades\MentionService;
+use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
+use Hdaklue\Porter\Contracts\RoleableEntity;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -98,7 +98,7 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
         HasUlids,
         LivesInOriginalDB,
         ManagesDocuments,
-        ManagesParticipants,
+        ReceivesRoleAssignments,
         SoftDeletes;
 
     // protected $connection = 'mysql';
@@ -140,6 +140,24 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    /**
+     * Get all participants (users with role assignments) on this flow
+     */
+    public function participants()
+    {
+        return $this->roleAssignments()->where('assignable_type', 'user');
+    }
+
+    /**
+     * Get participants as User models
+     */
+    public function getParticipants(): Collection
+    {
+        return $this->participants()->get()
+            ->pluck('assignable')
+            ->filter();
     }
 
     public function deliverables(): HasMany

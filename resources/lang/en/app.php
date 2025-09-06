@@ -19,16 +19,16 @@ declare(strict_types=1);
 return [
     // Legacy support - gradually migrate these to feature-specific files
     // Most of these translations have been moved to common.php, document.php, flow.php, etc.
-    
+
     // Navigation - use common.navigation instead
     'dashboard' => 'Dashboard',
-    'flows' => 'Flows',
+    'flows' => 'Workflows',
     'documents' => 'Documents',
     'users' => 'Users',
     'tenants' => 'Tenants',
     'settings' => 'Settings',
     'profile' => 'Profile',
-    
+
     // Actions - use common.actions instead
     'create' => 'Create',
     'edit' => 'Edit',
@@ -47,7 +47,7 @@ return [
     'reject' => 'Reject',
     'publish' => 'Publish',
     'draft' => 'Draft',
-    
+
     // Labels - use common.labels instead
     'name' => 'Name',
     'email' => 'Email',
@@ -64,7 +64,7 @@ return [
     'account_type' => 'Account Type',
     'last_login' => 'Last Login',
     'invited_by' => 'Invited By',
-    
+
     // Status - use common.status instead
     'active' => 'Active',
     'inactive' => 'Inactive',
@@ -75,7 +75,7 @@ return [
     'in_progress' => 'In Progress',
     'draft' => 'Draft',
     'published' => 'Published',
-    
+
     // Messages - use common.messages instead
     'success' => 'Success',
     'error' => 'Error',
@@ -87,7 +87,7 @@ return [
     'operation_completed' => 'Operation completed successfully',
     'no_records_found' => 'No records found',
     'confirm_delete' => 'Are you sure you want to delete this item?',
-    
+
     // Form placeholders - use common.placeholders instead
     'enter_name' => 'Enter name',
     'enter_email' => 'Enter email address',
@@ -95,7 +95,7 @@ return [
     'enter_description' => 'Enter description',
     'search_placeholder' => 'Search...',
     'select_option' => 'Select an option',
-    
+
     // Flow stages - use flow.stages instead
     'flow_stages' => [
         'draft' => 'Draft',
@@ -109,15 +109,15 @@ return [
         'published' => 'Published',
         'archived' => 'Archived',
     ],
-    
+
     // Roles - use roles.types instead
     'roles' => [
         'assignee' => 'Assignee',
         'approver' => 'Approver',
-        'reviewer' => 'Reviewer', 
+        'reviewer' => 'Reviewer',
         'observer' => 'Observer',
     ],
-    
+
     // File upload - use ui.components.file_upload instead
     'file_upload' => [
         'drag_drop' => 'Drag and drop files here or click to browse',
@@ -129,14 +129,14 @@ return [
         'video_upload' => 'Video Upload',
         'video_file' => 'Video File',
     ],
-    
+
     // Account types - use roles.account_types instead
     'account_types' => [
         'admin' => 'Admin',
         'manager' => 'Manager',
         'user' => 'User',
     ],
-    
+
     // Role descriptions - use roles.descriptions instead
     'role_descriptions' => [
         'assignee' => 'Responsible for completing the task',
@@ -144,7 +144,7 @@ return [
         'reviewer' => 'Provides feedback and suggestions',
         'observer' => 'Monitors progress without direct involvement',
     ],
-    
+
     // Feedback status - use feedback.status instead
     'feedback_status' => [
         'open' => 'Open',
@@ -152,14 +152,14 @@ return [
         'resolved' => 'Resolved',
         'rejected' => 'Rejected',
     ],
-    
+
     // Feedback urgency - use feedback.urgency instead
     'feedback_urgency' => [
         'normal' => 'Normal',
         'suggestion' => 'Suggestion',
         'urgent' => 'Urgent',
     ],
-    
+
     // System roles - use roles.system_roles instead
     'system_roles' => [
         'admin' => 'Administrator',
@@ -169,7 +169,7 @@ return [
         'viewer' => 'Viewer',
         'guest' => 'Guest',
     ],
-    
+
     // System role descriptions - use roles.system_descriptions instead
     'system_role_descriptions' => [
         'admin' => 'Full administrative access to assigned entities',
@@ -179,7 +179,7 @@ return [
         'viewer' => 'Read-only access to content',
         'guest' => 'Limited access to public content',
     ],
-    
+
     // EditorJS tool titles - use document.tools instead
     'editor_tools' => [
         'paragraph' => 'Text',
@@ -193,7 +193,7 @@ return [
         'videoUpload' => 'Video Upload',
         'commentTune' => 'Add Comment',
     ],
-    
+
     // EditorJS interface translations - use document.ui, document.toolNames, document.blockTunes instead
     'editor_ui' => [
         'ui' => [

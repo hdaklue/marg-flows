@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Hdaklue\MargRbac\Concerns\HasStaticTypeTrait;
-use Hdaklue\MargRbac\Contracts\HasStaticType;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use App\Concerns\HasStaticTypeTrait;
+use App\Contracts\HasStaticType;
 use Database\Factories\TenantFactory;
+use Hdaklue\MargRbac\Models\RbacTenant;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
@@ -47,18 +45,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-final class Tenant extends \Hdaklue\MargRbac\Models\Tenant
+final class Tenant extends RbacTenant implements HasStaticType
 {
+    use HasStaticTypeTrait;
 
     protected static $factory = TenantFactory::class;
 
     protected $fillable = ['name'];
-
-    // public function members(): BelongsToMany
-    // {
-    //     return $this->belongsToMany(User::class)->using(TenantUser::class);
-    // }
-
 
     /**
      * Get the model's morph class.

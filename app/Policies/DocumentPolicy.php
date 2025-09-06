@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Contracts\Document\Documentable;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Document;
 use App\Models\User;
+use Hdaklue\Porter\RoleFactory;
 
 final class DocumentPolicy
 {
@@ -40,8 +40,7 @@ final class DocumentPolicy
      */
     public function update(User $user, Document $document): bool
     {
-        return $user->hasAssignmentOn($document, RoleEnum::ADMIN)
-        || $user->hasAssignmentOn($document, RoleEnum::MANAGER);
+        return $user->isAtLeastOn(RoleFactory::contributer(), $document);
     }
 
     /**
@@ -71,6 +70,6 @@ final class DocumentPolicy
     public function manageMembers(User $user, Document $document): bool
     {
 
-        return $user->hasAssignmentOn($document, RoleEnum::ADMIN) || $user->hasAssignmentOn($document, RoleEnum::MANAGER);
+        return $user->isAtLeastOn(RoleFactory::manager(), $document);
     }
 }

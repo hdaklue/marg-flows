@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Session;
 
 Route::get('/imagePreview', action: PreviewImage::class)->name('home');
 
-Route::get('/', SortableDemo::class);
+// Route::get('/', SortableDemo::class);
 
 Route::get('/annotation', fn () => view('annotation'));
 Route::get('/videoPreview', PreviewVideo::class)->name('video.preview');

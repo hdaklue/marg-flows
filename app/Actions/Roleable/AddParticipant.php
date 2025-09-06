@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Roleable;
 
-use App\Notifications\Participant\AssignedToEntity;
 use Hdaklue\MargRbac\Actions\Roleable\AddParticipant as PackageAddParticipant;
 use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
 use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
@@ -18,11 +17,8 @@ final class AddParticipant
     public function handle(RoleableEntity $roleable, AssignableEntity $user, RoleEnum|string $role)
     {
         // Call the package action to handle the core functionality
+        // The package will dispatch events that our event listeners will handle
         PackageAddParticipant::run($roleable, $user, $role);
-
-        // Add app-specific logic after assignment
-        $roleLabel = $role instanceof RoleEnum ? $role->getLabel() : RoleEnum::from($role)->getLabel();
-        $user->notify(new AssignedToEntity($roleable, $roleLabel));
     }
 
     public function asJob(RoleableEntity $roleable, AssignableEntity $user, RoleEnum|string $role)

@@ -43,9 +43,7 @@ final class GenerateUserAvatar
 
         $file = UploadedFile::fake()->createWithContent($fileName, $content);
         $avatarFileName = DirectoryManager::avatars()->store($file);
-        $user->loadMissing('profile')->profile->update([
-            'avatar' => $avatarFileName,
-        ]);
+        $user->updateProfileAvatar($avatarFileName);
 
     }
 

@@ -16,6 +16,7 @@ use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
+use Hdaklue\Porter\RoleFactory;
 use Illuminate\Database\Eloquent\Model;
 
 final class FlowsTable
@@ -25,13 +26,12 @@ final class FlowsTable
 
         return $table
             ->query(function () {
-                $isAdmin = filamentTenant()->isAdmin(filamentUser());
+                $isAdmin = filamentUser()->hasAssignmentOn(filamentTenant(), RoleFactory::admin());
 
                 return Flow::query()->unless($isAdmin, function ($query) {
                     $query->forParticipant(filamentUser());
-                })->orderBy('stage')->with(['creator', 'participants']);
+                })->orderBy('stage')->with(['creator']);
             })
-
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
             ->recordUrl(fn (Model $record) => FlowResource::getUrl('view', ['record' => $record->getKey()]))
@@ -51,19 +51,21 @@ final class FlowsTable
                     ->allowOptionsHtml()
                     ->selectablePlaceholder(false)
                     ->native(false),
+                TextColumn::make('started_at')
+                    ->formatStateUsing(fn ($state) => toUserDate($state, filamentUser())),
                 ImageColumn::make('creator_avatar')
                     ->label(__('flow.table.columns.creator_avatar'))
                     ->getStateUsing(fn ($record) => avatarUrlFromUser($record->creator))
                     ->imageSize(30)
                     ->circular(),
-                ImageColumn::make('participant_stack')
-                    ->label(__('flow.table.columns.participant_stack'))
-                    ->getStateUsing(fn ($record) => $record->getParticipants()->avatars()->toArray())
-                    ->imageHeight(30)
-                    ->circular()
-                    ->stacked()
-                    ->limit(3)
-                    ->limitedRemainingText(),
+                // ImageColumn::make('participant_stack')
+                //     ->label(__('flow.table.columns.participant_stack'))
+                //     ->getStateUsing(fn ($record) => $record->getParticipants()->avatars()->toArray())
+                //     ->imageHeight(30)
+                //     ->circular()
+                //     ->stacked()
+                //     ->limit(3)
+                //     ->limitedRemainingText(),
             ])
 
             ->filters([

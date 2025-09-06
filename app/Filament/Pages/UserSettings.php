@@ -7,6 +7,7 @@ namespace App\Filament\Pages;
 use App\Actions\User\UpdateBasicInfo;
 use App\DTOs\User\UserDto;
 use App\Filament\Tables\UserTenant;
+use App\Services\Avatar\AvatarService;
 use App\Services\Timezone;
 use Exception;
 use Filament\Actions\Action;
@@ -73,8 +74,8 @@ final class UserSettings extends Page implements HasTable
                         ->outlined()
                         ->fillForm(fn () => [
                             'email' => filamentUser()->getAttribute('email'),
-                            'avatar' => filamentUser()->getAvatarPath() ?: null,
-                            'timezone' => filamentUser()->getAttribute('timezone'),
+                            'avatar' => AvatarService::getAvatarPath(filamentUser()) ?: null,
+                            'timezone' => filamentUser()->getTimeZone(),
                         ])
                         ->form([
                             TextInput::make('email')

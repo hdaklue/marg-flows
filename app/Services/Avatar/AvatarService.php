@@ -7,11 +7,12 @@ namespace App\Services\Avatar;
 use App\Actions\User\GenerateUserAvatar;
 use App\Models\User;
 use App\Services\Directory\DirectoryManager;
+use Illuminate\Auth\Authenticatable;
 use Illuminate\Support\Uri;
 
 /**
- * Avatar Service
- * 
+ * Avatar Service.
+ *
  * Handles avatar generation, file management, and URL generation for user profile images.
  * Provides fallback to UI Avatars service for users without uploaded avatars.
  */
@@ -19,11 +20,11 @@ final class AvatarService
 {
     /**
      * Generate avatar URL for a user.
-     * 
+     *
      * Returns the stored avatar URL if user has uploaded one, otherwise generates
      * a fallback avatar using UI Avatars service with user initials.
      *
-     * @param User $user The user to generate avatar for
+     * @param  User  $user  The user to generate avatar for
      * @return string Avatar URL (either stored file or generated fallback)
      */
     public static function generateAvatarUrl(User $user): string
@@ -33,6 +34,15 @@ final class AvatarService
         }
 
         // Use user's name for initials, fallback to email if no name
+        $url = self::buildAvatarUrl($user);
+
+        GenerateUserAvatar::dispatch($url, $user);
+
+        return $url;
+    }
+
+    public static function buildAvatarUrl(User|Authenticatable $user): string
+    {
         $name = $user->name ?: $user->email;
 
         $params = [
@@ -45,21 +55,17 @@ final class AvatarService
             'length' => 2,
         ];
 
-        $url = (string) Uri::of('https://ui-avatars.com/api/')
+        return (string) Uri::of('https://ui-avatars.com/api/')
             ->withQuery($params);
-
-        GenerateUserAvatar::dispatch($url, $user);
-
-        return $url;
     }
 
     /**
      * Generate standardized filename for user avatar.
-     * 
+     *
      * Uses MD5 hash of user key to ensure unique, collision-safe filenames
      * that replace previous avatars automatically.
      *
-     * @param User $user The user to generate filename for
+     * @param  User  $user  The user to generate filename for
      * @return string MD5 hashed filename (without extension)
      */
     public static function generateFileName(User $user): string
@@ -69,11 +75,11 @@ final class AvatarService
 
     /**
      * Get storage path for user's avatar file.
-     * 
+     *
      * Returns the relative storage path if user has an avatar, null otherwise.
      * Used by Filament FileUpload component for form population.
      *
-     * @param User $user The user to get avatar path for
+     * @param  User  $user  The user to get avatar path for
      * @return string|null Relative storage path or null if no avatar
      */
     public static function getAvatarPath(User $user): ?string

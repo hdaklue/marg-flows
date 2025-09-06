@@ -6,7 +6,6 @@ namespace App\Actions\Roleable;
 
 use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
 use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
-use App\Notifications\Participant\RemovedFromEntity;
 use Hdaklue\MargRbac\Actions\Roleable\RemoveParticipant as PackageRemoveParticipant;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -17,9 +16,7 @@ final class RemoveParticipant
     public function handle(RoleableEntity $roleable, AssignableEntity $user)
     {
         // Call the package action to handle the core functionality
+        // The package will dispatch events that our event listeners will handle
         PackageRemoveParticipant::run($roleable, $user);
-        
-        // Add app-specific logic after removal
-        $user->notify(new RemovedFromEntity($roleable));
     }
 }

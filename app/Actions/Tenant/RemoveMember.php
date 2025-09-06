@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Tenant;
 
-use App\Contracts\Role\AssignableEntity;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use App\Events\Tenant\MemberRemoved;
-use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
@@ -15,6 +12,9 @@ use App\Models\User;
 use function config;
 
 use Exception;
+use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
+use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

@@ -7,13 +7,22 @@
       "Bash(php artisan tinker:*)",
       "mcp__filesystem__read_text_file",
       "mcp__filesystem__directory_tree",
-      "context7__read_file"
+      "context7__read_file",
+      "mcp__laravel-boost__tinker",
+      "Bash(find:*)",
+      "mcp__laravel-boost__application-info",
+      "mcp__laravel-boost__database-schema",
+      "mcp__laravel-boost__list-artisan-commands",
+      "Bash(php artisan:*)",
+      "mcp__laravel-boost__last-error",
+      "mcp__laravel-boost__read-log-entries"
     ],
     "deny": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "filesystem",
-    "laravel-boost"
-  ],
-  "enableAllProjectMcpServers": true
+    "laravel-boost",
+    "herd"
+  ]
 }

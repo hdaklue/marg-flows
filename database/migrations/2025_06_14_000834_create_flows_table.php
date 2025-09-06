@@ -25,10 +25,10 @@ return new class extends Migration
 
             // $table->smallInteger('order_column');
 
-            $table->date('started_at')->nullable();
+            $table->dateTime('started_at')->nullable();
             // $table->date('due_date')->nullable();
-            $table->date('completed_at')->nullable();
-            $table->date('canceled_at')->nullable();
+            $table->dateTime('completed_at')->nullable();
+            $table->dateTime('canceled_at')->nullable();
 
             $table->json('settings')->nullable();
 

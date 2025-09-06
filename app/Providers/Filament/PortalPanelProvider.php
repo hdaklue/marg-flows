@@ -38,23 +38,25 @@ final class PortalPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('portal')
-            ->path('/portal')
+            ->path('/')
             ->login(Login::class)
             ->passwordReset()
             ->registration(Register::class)
             ->databaseNotificationsPolling(fn () => app()->isProduction() ? '60s' : '90s')
-            ->tenant(Tenant::class, ownershipRelationship: 'tenant')
+            ->tenant(Tenant::class)
+            ->homeUrl(fn () => filament()->getTenant() ? route('filament.portal.pages.dashboard', ['tenant' => filament()->getTenant()]) : '/')
             ->colors([
                 'primary' => Color::Sky,
             ])
-            ->topNavigation(true)
+            ->topNavigation(false)
+            ->sidebarCollapsibleOnDesktop()
             ->viteTheme('resources/css/filament/portal/theme.css')
             ->databaseNotifications()
             ->unsavedChangesAlerts(false)
             ->plugins([
                 // Custom language switching will be added via render hooks
             ])
-            ->maxContentWidth(Width::Full)
+            ->maxContentWidth(Width::ScreenTwoExtraLarge)
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
                 fn (): string => Blade::render('<x-language-switch />'),

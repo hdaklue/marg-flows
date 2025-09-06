@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Document;
 
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
+use Hdaklue\Porter\Contracts\RoleableEntity;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 

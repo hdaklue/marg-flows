@@ -7,15 +7,15 @@ namespace App\Models;
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Concerns\HasSideNotes;
 use App\Concerns\HasStaticTypeTrait;
-use Hdaklue\MargRbac\Concerns\Role\ManagesParticipants;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\HasStaticType;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Services\Document\Collections\DocumentBlocksCollection;
 use Eloquent;
 use Exception;
+use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
+use Hdaklue\Porter\Contracts\RoleableEntity;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -75,7 +75,7 @@ use Illuminate\Support\Carbon;
 final class Document extends Model implements BelongsToTenantContract, HasStaticType, RoleableEntity, Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DocumentFactory> */
-    use BelongsToTenant, HasFactory, HasSideNotes, HasStaticTypeTrait, HasUlids, LivesInBusinessDB, ManagesParticipants;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasStaticTypeTrait, HasUlids, LivesInBusinessDB, ReceivesRoleAssignments;
 
     protected $fillable = [
         'name',

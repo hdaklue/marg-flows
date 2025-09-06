@@ -100,6 +100,7 @@ return [
         'updated_successfully' => 'تم التحديث بنجاح',
         'deleted_successfully' => 'تم الحذف بنجاح',
         'operation_completed' => 'تمت العملية بنجاح',
+        'operation_failed' => 'فشلت العملية',
     ],
 
     'navigation' => [

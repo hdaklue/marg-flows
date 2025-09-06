@@ -27,7 +27,7 @@ if (! function_exists('toUserDate')) {
         }
 
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
-        return Carbon::parse($date, 'UTC')->setTimezone($timezone)->format('d/M/Y');
+        return Carbon::parse($date, 'UTC')->setTimezone($timezone)->format('M j, Y');
     }
 }
 
