@@ -74,14 +74,8 @@ final class FlowPolicy
         return true;
     }
 
-    public function manageMembers(User $user, Flow $flow): bool
+    public function manage(User $user, Flow $flow): bool
     {
-        return $user->hasAssignmentOn($flow, RoleFactory::admin()) || $user->hasAssignmentOn($flow, RoleFactory::manager());
-    }
-
-    public function manageFlow(User $user, Flow $flow): bool
-    {
-
-        return $user->hasAssignmentOn($flow, RoleFactory::admin()) || $user->hasAssignmentOn($flow, RoleFactory::manager());
+        return $user->isAtLeastOn(RoleFactory::manager(), $flow);
     }
 }

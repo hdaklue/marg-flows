@@ -1,93 +1,113 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Forms\Components;
 
 use Closure;
 use Filament\Forms\Components\BaseFileUpload;
-use Filament\Support\Concerns\HasExtraAlpineAttributes;
 use Filament\Forms\Components\Concerns\HasPlaceholder;
+use Filament\Support\Concerns\HasExtraAlpineAttributes;
 use Illuminate\Support\Facades\Storage;
 
-class ChunkedFileUpload extends BaseFileUpload
+final class ChunkedFileUpload extends BaseFileUpload
 {
     use HasExtraAlpineAttributes;
     use HasPlaceholder;
+
     protected string $view = 'forms.components.chunked-file-upload';
-    
+
     protected bool|Closure $useChunking = true;
+
     protected int|Closure|null $chunkSize = null;
+
     protected Closure|int|null $maxParallelUploads = null;
+
     protected Closure|string|null $alignment = null;
+
     protected bool|Closure $previewable = false;
+
     protected bool|Closure $isImageUpload = false;
+
     protected bool|Closure $isVideoUpload = false;
-    
+
+    protected bool|Closure $modalMode = false;
+
+    protected bool|Closure $showUrlImport = false;
+
+    protected bool|Closure $autoFocus = true;
+
     // Default to multiple files for chunked uploads (always returns array)
     protected bool|Closure $isMultiple = true;
-    
+
     public function chunked(bool|Closure $chunked = true): static
     {
         $this->useChunking = $chunked;
+
         return $this;
     }
-    
+
     public function chunkSize(int|Closure|null $bytes): static
     {
         $this->chunkSize = $bytes;
+
         return $this;
     }
-    
+
     public function maxParallelUploads(int|Closure|null $count): static
     {
         $this->maxParallelUploads = $count;
+
         return $this;
     }
-    
+
     public function alignment(string|Closure|null $alignment): static
     {
         $this->alignment = $alignment;
+
         return $this;
     }
-    
+
     public function previewable(bool|Closure $previewable = true): static
     {
         $this->previewable = $previewable;
+
         return $this;
     }
-    
+
     public function image(bool|Closure $image = true): static
     {
         $this->isImageUpload = $image;
-        
+
         if ($this->evaluate($image)) {
             $imageConfig = config('chunked-upload.file_types.images');
             $this->acceptedFileTypes($imageConfig['accepted_types'] ?? [
                 'image/jpeg',
-                'image/jpg', 
+                'image/jpg',
                 'image/png',
                 'image/gif',
                 'image/webp',
                 'image/svg+xml',
                 'image/bmp',
-                'image/tiff'
+                'image/tiff',
             ]);
-            
+
             // Set chunk size for images
-            if (!isset($this->chunkSize)) {
+            if (! isset($this->chunkSize)) {
                 $this->chunkSize = $imageConfig['chunk_size'] ?? config('chunked-upload.default_chunk_size');
             }
-            
+
             // Enable preview for images by default
             $this->previewable($imageConfig['previewable'] ?? true);
         }
-        
+
         return $this;
     }
-    
+
     public function video(bool|Closure $video = true): static
     {
         $this->isVideoUpload = $video;
-        
+
         if ($this->evaluate($video)) {
             $videoConfig = config('chunked-upload.file_types.videos');
             $this->acceptedFileTypes($videoConfig['accepted_types'] ?? [
@@ -99,18 +119,39 @@ class ChunkedFileUpload extends BaseFileUpload
                 'video/webm',
                 'video/ogg',
                 'video/3gpp',
-                'video/x-flv'
+                'video/x-flv',
             ]);
-            
+
             // Set chunk size for videos
-            if (!isset($this->chunkSize)) {
+            if (! isset($this->chunkSize)) {
                 $this->chunkSize = $videoConfig['chunk_size'] ?? config('chunked-upload.default_chunk_size');
             }
-            
+
             // Enable preview for videos by default
             $this->previewable($videoConfig['previewable'] ?? true);
         }
-        
+
+        return $this;
+    }
+
+    public function modal(bool|Closure $modal = true): static
+    {
+        $this->modalMode = $modal;
+
+        return $this;
+    }
+
+    public function urlImport(bool|Closure $urlImport = true): static
+    {
+        $this->showUrlImport = $urlImport;
+
+        return $this;
+    }
+
+    public function autoFocus(bool|Closure $autoFocus = true): static
+    {
+        $this->autoFocus = $autoFocus;
+
         return $this;
     }
 
@@ -118,57 +159,72 @@ class ChunkedFileUpload extends BaseFileUpload
     {
         return $this->evaluate($this->useChunking);
     }
-    
+
     public function getChunkSize(): int
     {
         return $this->evaluate($this->chunkSize ?? config('chunked-upload.default_chunk_size', 5 * 1024 * 1024));
     }
-    
+
     public function getMaxParallelUploads(): int
     {
         return $this->evaluate($this->maxParallelUploads) ?? config('chunked-upload.max_parallel_uploads', 3);
     }
-    
-    public function getAlignment(): string|null
+
+    public function getAlignment(): ?string
     {
         return $this->evaluate($this->alignment);
     }
-    
+
     public function isPreviewable(): bool
     {
         return $this->evaluate($this->previewable);
     }
-    
+
     public function isImageUpload(): bool
     {
         return $this->evaluate($this->isImageUpload);
     }
-    
+
     public function isVideoUpload(): bool
     {
         return $this->evaluate($this->isVideoUpload);
+    }
+
+    public function isModalMode(): bool
+    {
+        return $this->evaluate($this->modalMode);
+    }
+
+    public function hasUrlImport(): bool
+    {
+        return $this->evaluate($this->showUrlImport);
+    }
+
+    public function getAutoFocus(): bool
+    {
+        return $this->evaluate($this->autoFocus);
     }
 
     public function getChunkUploadUrl(): string
     {
         return route(config('chunked-upload.routes.store', 'chunked-upload.store'));
     }
-    
+
     public function getChunkDeleteUrl(): string
     {
         return route(config('chunked-upload.routes.delete', 'chunked-upload.delete'));
     }
-    
+
     public function getChunkCancelUrl(): string
     {
         return route(config('chunked-upload.routes.cancel', 'chunked-upload.cancel'));
     }
-    
+
     public function getChunkSizeFormatted(): string
     {
         return $this->formatBytes($this->getChunkSize());
     }
-    
+
     public function getUploadTimeouts(): array
     {
         return [
@@ -177,7 +233,7 @@ class ChunkedFileUpload extends BaseFileUpload
             'cleanup' => config('chunked-upload.timeouts.cleanup_delay', 300),
         ];
     }
-    
+
     public function getStorageConfig(): array
     {
         return [
@@ -187,7 +243,7 @@ class ChunkedFileUpload extends BaseFileUpload
             'autoCleanup' => config('chunked-upload.storage.auto_cleanup', true),
         ];
     }
-    
+
     public function getSecurityConfig(): array
     {
         return [
@@ -197,37 +253,39 @@ class ChunkedFileUpload extends BaseFileUpload
             'maxFilenameLength' => config('chunked-upload.security.max_filename_length', 255),
         ];
     }
-    
+
     public function buildFileUrl(string $fileName): string
     {
         $disk = config('chunked-upload.storage.disk', 'public');
         $finalDir = config('chunked-upload.storage.final_directory', 'uploads');
-        
+
         // For local/public disk, use standard Laravel storage URL
         if ($disk === 'public') {
             return Storage::disk($disk)->url("{$finalDir}/{$fileName}");
         }
-        
+
         // For other disks (S3, DO Spaces, etc.), get the proper URL
         return Storage::disk($disk)->url("{$finalDir}/{$fileName}");
     }
-    
+
     // Override saveUploadedFiles to handle chunked files
     public function saveUploadedFiles(): void
     {
         // For chunked uploads, files are already saved by the controller
         // No additional processing needed since they're already in final location
-        return;
+
     }
-    
+
     protected function formatBytes(int $bytes): string
     {
-        if ($bytes === 0) return '0 Bytes';
-        
+        if ($bytes === 0) {
+            return '0 Bytes';
+        }
+
         $k = 1024;
         $sizes = ['Bytes', 'KB', 'MB', 'GB'];
         $i = floor(log($bytes) / log($k));
-        
+
         return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
     }
 }

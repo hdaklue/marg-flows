@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 final class DocumentResource extends Resource
 {
@@ -67,10 +68,20 @@ final class DocumentResource extends Resource
         ];
     }
 
+    public static function getNavigationIcon(): string|BackedEnum|Htmlable|null
+    {
+        return 'heroicon-o-clipboard-document-list';
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => ListDocuments::route('/'),
+            // 'index' => ListDocuments::route('/'),
             'view' => ViewDocument::route('/{record}'),
             // 'edit' => Pages\EditPage::route('/{record}/edit'),
         ];

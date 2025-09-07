@@ -7,9 +7,9 @@ namespace App\Concerns;
 use Illuminate\Support\Str;
 use LogicException;
 
-trait HasStaticTypeTrait
+trait SentInNotificationTrait
 {
-    public function getTypeName(): string
+    public function getTypeForNotification(): string
     {
         return Str::of(static::class)
             ->afterLast('\\')
@@ -17,7 +17,7 @@ trait HasStaticTypeTrait
             ->toString();
     }
 
-    public function getTypeTitle(): ?string
+    public function getNameForNotification(): string
     {
         if ($this->hasAttribute('title')) {
             return $this->getAttribute('title');

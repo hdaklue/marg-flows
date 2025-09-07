@@ -251,6 +251,70 @@ final class FileTypes
         return 'mimes:' . implode(',', self::getWebImageExtensions());
     }
 
+    /**
+     * Get web-safe video formats supported by all modern browsers.
+     *
+     * @return array<string, string> Extension => MIME type pairs
+     */
+    public static function getWebSafeVideo(): array
+    {
+        return self::getStreamVideoFormats();
+    }
+
+    /**
+     * Get web-safe audio formats supported by all modern browsers.
+     *
+     * @return array<string, string> Extension => MIME type pairs
+     */
+    public static function getWebSafeAudio(): array
+    {
+        return self::getStreamAudioFormats();
+    }
+
+    /**
+     * Get web-safe image formats (excludes potentially scripted formats like SVG).
+     *
+     * @return array<string, string> Extension => MIME type pairs
+     */
+    public static function getWebSafeImages(): array
+    {
+        return [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'avif' => 'image/avif',
+            'heic' => 'image/heic',
+            'tiff' => 'image/tiff',
+        ];
+    }
+
+    /**
+     * Get SVG format for document handling (requires sanitization before use).
+     * 
+     * Note: SVGs should be treated as documents due to XSS risks. 
+     * Always sanitize SVGs using libraries like enshrined/svg-sanitize
+     * and serve with proper CSP headers.
+     *
+     * @return array<string, string> Extension => MIME type pairs
+     */
+    public static function getSvgAsDocument(): array
+    {
+        return [
+            'svg' => 'image/svg+xml',
+        ];
+    }
+
+    /**
+     * Check if the file is an SVG document that requires special handling.
+     */
+    public static function isSvgDocument(string $filename): bool
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        return $extension === 'svg';
+    }
+
     public static function getStreamAudioFormats(): array
     {
         return [

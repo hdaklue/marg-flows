@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Contracts\Document\DocumentManagerInterface;
 use App\Facades\DeliverableBuilder;
 use App\Listeners\TenantEventSubscriber;
 use App\Models\Document;
@@ -43,7 +42,6 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton('document.manager', fn (): DocumentService => new DocumentService);
         $this->app->singleton('mention.service', fn (): MentionService => new MentionService);
         $this->app->singleton(DeliverableBuilder::class, fn (): DeliverablesManager => new DeliverablesManager($this->app));
-        $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
         $this->app->singleton(UploadSessionManager::class, fn ($app) => new UploadSessionManager($app));
 
         $this->configureGate();

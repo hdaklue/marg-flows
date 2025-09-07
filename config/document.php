@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use App\Services\Document\Templates\General;
 
 return [
     /*
@@ -15,6 +16,10 @@ return [
     */
 
     'should_cache' => env('DOCUMENT_CACHE_ENABLED', true),
+
+    'templates' => [
+        'general' => General::class,
+    ],
 
     /*
     |--------------------------------------------------------------------------

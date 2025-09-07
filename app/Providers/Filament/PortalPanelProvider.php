@@ -38,7 +38,7 @@ final class PortalPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('portal')
-            ->path('/')
+            ->path('/portal')
             ->login(Login::class)
             ->passwordReset()
             ->registration(Register::class)
@@ -50,6 +50,7 @@ final class PortalPanelProvider extends PanelProvider
             ])
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
+            // ->breadcrumbs(false)
             ->viteTheme('resources/css/filament/portal/theme.css')
             ->databaseNotifications()
             ->unsavedChangesAlerts(false)

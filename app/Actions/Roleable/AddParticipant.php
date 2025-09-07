@@ -4,24 +4,32 @@ declare(strict_types=1);
 
 namespace App\Actions\Roleable;
 
-use Hdaklue\MargRbac\Actions\Roleable\AddParticipant as PackageAddParticipant;
-use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
+use Exception;
+use Hdaklue\Porter\Contracts\AssignableEntity;
+use Hdaklue\Porter\Contracts\RoleableEntity;
+use Hdaklue\Porter\Contracts\RoleContract;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 final class AddParticipant
 {
     use AsAction;
 
-    public function handle(RoleableEntity $roleable, AssignableEntity $user, RoleEnum|string $role)
+    public function handle(RoleableEntity $roleable, AssignableEntity $user, RoleContract $role)
     {
-        // Call the package action to handle the core functionality
-        // The package will dispatch events that our event listeners will handle
-        PackageAddParticipant::run($roleable, $user, $role);
+
+        try {
+            $roleable->assign($user, $role);
+        } catch (Exception $e) {
+            logger()->error('Error Adding Participant', [
+                'roleable' => $roleable,
+                'role' => $role,
+                'assignable' => $user,
+            ]);
+            throw $e;
+        }
     }
 
-    public function asJob(RoleableEntity $roleable, AssignableEntity $user, RoleEnum|string $role)
+    public function asJob(RoleableEntity $roleable, AssignableEntity $user, RoleContract $role)
     {
         $this->handle($roleable, $user, $role);
     }

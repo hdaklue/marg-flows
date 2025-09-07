@@ -23,6 +23,7 @@ import mentionableText from './components/mentionable';
 
 import videoRecorder from './components/video-recorder';
 import recorder from './components/voice-recorder';
+import chunkedFileUploadComponent from './components/ChunkedFileUpload/index.js';
 
 import anchor from "@alpinejs/anchor";
 import Hammer from 'hammerjs';
@@ -41,6 +42,8 @@ window.ui = ui;
 
 // Make video annotation available globally for Blade component
 window.videoAnnotationComponent = videoAnnotationComponent;
+// Make chunked file upload available globally for Blade component  
+window.chunkedFileUploadComponent = chunkedFileUploadComponent;
 
 Alpine.data('designReviewApp', designReviewApp)
 Alpine.data('designAnnotationApp', designAnnotationApp)
@@ -51,6 +54,7 @@ Alpine.data('mentionableText', mentionableText);
 Alpine.data('recorder', recorder);
 Alpine.data('audioPlayer', audioPlayer);
 Alpine.data('videoRecorder', videoRecorder);
+Alpine.data('chunkedFileUpload', chunkedFileUploadComponent);
 Alpine.plugin(ui);
 Alpine.plugin(Autosize);
 Alpine.plugin(Tooltip);

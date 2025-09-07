@@ -1,28 +1,59 @@
-<div class="max-w-4xl p-6 mx-auto">
-    <div class="bg-white rounded-lg shadow-sm dark:bg-gray-800">
+<div class="mx-auto max-w-4xl p-6">
+    <div class="rounded-lg bg-white shadow-sm dark:bg-zinc-800">
         <div class="p-6">
-            <h1 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-                Chunked Upload Test
+            <h1 class="mb-2 text-2xl font-bold text-zinc-900 dark:text-white">
+                Modern File Upload Test
             </h1>
-            <p class="mb-6 text-gray-600 dark:text-gray-400">
-                Test the chunked file upload functionality with large files.
+            <p class="mb-6 text-zinc-600 dark:text-zinc-400">
+                Test the modern chunked file upload component matching the uploaded image design.
             </p>
 
-            <form wire:submit="submit">
-                {{ $this->form }}
+            {{-- Success Message --}}
+            @if (session('success'))
+                <div
+                    class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-                <div class="flex items-center justify-end mt-6 gap-x-6">
-                    <button
-                        type="button"
-                        class="text-sm font-semibold leading-6 text-gray-900 dark:text-white"
-                        wire:click="$refresh"
-                    >
+            <form wire:submit="submit">
+                <div class="space-y-6">
+                    {{-- Document Title --}}
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                            Document Title
+                        </label>
+                        <input type="text" wire:model="data.title" placeholder="Enter document title..."
+                            class="w-full rounded-lg border border-zinc-300 px-4 py-2 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100" />
+                    </div>
+
+                    {{-- Modal File Upload (Matching uploaded image design) --}}
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                            Upload Files (Modal)
+                        </label>
+                        <livewire:chunked-file-upload wire:key="modal-upload" :modal-mode="true" :allow-url-import="true"
+                            :multiple="true" :accepted-file-types="['image/jpeg', 'image/png', 'application/pdf', 'video/mp4']" :max-files="10" :max-file-size="52428800" />
+                    </div>
+
+                    {{-- Inline File Upload Example --}}
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                            Upload Files (Inline)
+                        </label>
+                        <livewire:chunked-file-upload wire:key="inline-upload" :modal-mode="false" :allow-url-import="false"
+                            :multiple="true" :accepted-file-types="['image/jpeg', 'image/png', 'application/pdf', 'video/*']" :max-files="5" :max-file-size="10485760" />
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center justify-end gap-x-4">
+                    <button type="button"
+                        class="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                        wire:click="mount">
                         Reset
                     </button>
-                    <button
-                        type="submit"
-                        class="px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                    >
+                    <button type="submit"
+                        class="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-500/20">
                         Submit
                     </button>
                 </div>
@@ -31,8 +62,8 @@
     </div>
 
     <!-- Debug Info -->
-    <div class="p-4 mt-6 bg-gray-100 rounded-lg dark:bg-gray-700">
-        <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">Debug Info</h3>
-        <pre class="overflow-auto text-xs text-gray-700 dark:text-gray-300">{{ json_encode($data, JSON_PRETTY_PRINT) }}</pre>
+    <div class="mt-6 rounded-lg bg-zinc-100 p-4 dark:bg-zinc-700">
+        <h3 class="mb-2 font-semibold text-zinc-900 dark:text-white">Debug Info</h3>
+        <pre class="overflow-auto text-xs text-zinc-700 dark:text-zinc-300">{{ json_encode($data, JSON_PRETTY_PRINT) }}</pre>
     </div>
 </div>

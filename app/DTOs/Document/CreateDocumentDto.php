@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTOs\Document;
 
+use App\Services\Document\Contracts\DocumentTemplateContract;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 final class CreateDocumentDto extends ValidatedDTO
@@ -11,6 +12,14 @@ final class CreateDocumentDto extends ValidatedDTO
     public string $name;
 
     public array $blocks;
+
+    public static function fromTemplate(DocumentTemplateContract $documentTemplateContract): self
+    {
+        return self::fromArray([
+            'name' => $documentTemplateContract->getName(),
+            'blocks' => $documentTemplateContract->toArray(),
+        ]);
+    }
 
     public function toEditorJSFormat(): array
     {

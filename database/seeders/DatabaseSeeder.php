@@ -6,7 +6,6 @@ namespace Database\Seeders;
 
 use App\Models\Flow;
 use App\Models\User;
-use App\Services\Avatar\AvatarService;
 use Exception;
 use Hdaklue\MargRbac\Enums\Account\AccountType;
 use Hdaklue\Porter\Facades\Porter;
@@ -40,11 +39,10 @@ final class DatabaseSeeder extends Seeder
         // Create profile for test user
         $this->command->info('Creating profile for test user...');
         try {
-            $avatarUrl = AvatarService::generateAvatarUrl($testUser);
+
             $testUser->profile()->firstOrCreate(
                 ['user_id' => $testUser->id],
                 [
-                    'avatar' => $avatarUrl,
                     'timezone' => 'Africa/Cairo',
                 ],
             );

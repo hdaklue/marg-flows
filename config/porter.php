@@ -124,7 +124,7 @@ return [
     |
     */
     'cache' => [
-        'enabled' => env('PORTER_CACHE_ENABLED', true),
+        'enabled' => env('PORTER_CACHE_ENABLED', false),
         'connection' => env('PORTER_CACHE_CONNECTION', 'default'),
         'key_prefix' => env('PORTER_CACHE_PREFIX', 'porter'),
         'ttl' => env('PORTER_CACHE_TTL', 3600), // 1 hour

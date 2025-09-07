@@ -4,20 +4,25 @@ declare(strict_types=1);
 
 namespace App\Notifications\Participant;
 
-use Hdaklue\MargRbac\Notifications\Participant\AssignedToEntity as PackageAssignedToEntity;
-use Filament\Notifications\Notification as FilamentNotification;
-use Filament\Actions\Action;
+use App\Contracts\SentInNotification;
+use App\Filament\Pages\Dashboard;
+use App\Filament\Resources\Flows\FlowResource;
 use App\Models\Flow;
 use App\Models\Tenant;
-use App\Filament\Resources\Flows\FlowResource;
-use App\Filament\Pages\Dashboard;
-use Hdaklue\MargRbac\Contracts\HasStaticType;
 use Exception;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification as FilamentNotification;
 
 use function get_class;
 
-final class AssignedToEntity extends PackageAssignedToEntity
+use Hdaklue\Porter\Contracts\RoleableEntity;
+use Hdaklue\Porter\Contracts\RoleContract;
+use Notification;
+
+final class AssignedToEntity extends Notification
 {
+    public function __construct(public readonly RoleableEntity $roleable, public readonly RoleContract $role) {}
+
     /**
      * Get the notification's delivery channels.
      *
@@ -33,8 +38,8 @@ final class AssignedToEntity extends PackageAssignedToEntity
      */
     public function toDatabase(object $notifiable): array
     {
-        throw_unless($this->roleable instanceof HasStaticType, new Exception('Entity must implement HasStaticType'));
-        $message = "You've been added to ({$this->roleable->getTypeTitle()}) {$this->roleable->getTypeName()} as {$this->roleLabel}";
+        throw_unless($this->roleable instanceof SentInNotification, new Exception('Entity must implement ' . SentInNotification::class));
+        $message = "You've been added to ({$this->roleable->getTypeForNotification()}) {$this->roleable->getNameForNotification()} as {$this->role->getName()}";
 
         return FilamentNotification::make()
             ->body($message)

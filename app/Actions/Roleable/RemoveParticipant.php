@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Roleable;
 
-use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
-use Hdaklue\MargRbac\Actions\Roleable\RemoveParticipant as PackageRemoveParticipant;
+use Exception;
+use Hdaklue\Porter\Contracts\AssignableEntity;
+use Hdaklue\Porter\Contracts\RoleableEntity;
+use Hdaklue\Porter\Facades\Porter;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 final class RemoveParticipant
@@ -17,6 +18,14 @@ final class RemoveParticipant
     {
         // Call the package action to handle the core functionality
         // The package will dispatch events that our event listeners will handle
-        PackageRemoveParticipant::run($roleable, $user);
+        try {
+            Porter::remove($user, $roleable);
+        } catch (Exception $e) {
+            logger()->error('Error Removing Participant', [
+                'roleable' => $roleable,
+                'assignable' => $user,
+            ]);
+            throw $e;
+        }
     }
 }

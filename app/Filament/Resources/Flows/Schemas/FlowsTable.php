@@ -9,8 +9,9 @@ use App\Filament\Resources\Flows\FlowResource;
 use App\Models\Flow;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -30,16 +31,19 @@ final class FlowsTable
 
                 return Flow::query()->unless($isAdmin, function ($query) {
                     $query->forParticipant(filamentUser());
-                })->orderBy('stage')->with(['creator']);
+                })->orderBy('stage')->orderByDesc('updated_at')->with(['creator']);
             })
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
             ->recordUrl(fn (Model $record) => FlowResource::getUrl('view', ['record' => $record->getKey()]))
             ->columns([
                 TextColumn::make('title')
+                    ->formatStateUsing(fn ($state) => str($state)->title()->toString())
                     ->label(__('flow.table.columns.title'))
                     ->weight(FontWeight::Bold),
-
+                TextColumn::make('description')
+                    ->formatStateUsing(fn ($state) => str($state)->ucfirst()->toString())
+                    ->limit(80),
                 SelectColumn::make('stage')
                     ->label(__('flow.table.columns.stage'))
                     ->grow(false)
@@ -74,13 +78,17 @@ final class FlowsTable
             ->recordActions([
                 EditAction::make()
                     ->iconButton()
-                    ->size(Size::Small),
+                    ->color('gray')
+                    ->form([
+                        TextInput::make('title')
+                            ->required(),
+                        Textarea::make('description')
+                            ->maxLength(255),
+                    ]),
                 Action::make('view')
                     ->label(__('flow.table.actions.view'))
                     ->color('gray')
-                    ->size(Size::ExtraSmall)
-                    ->icon('heroicon-o-document-text')
-                    ->outlined()
+                    ->icon('heroicon-s-clipboard-document-list')
                     ->iconButton()
                     ->url(fn ($record) => FlowResource::getUrl('pages', ['record' => $record])),
             ])

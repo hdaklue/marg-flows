@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\Database\LivesInBusinessDB;
+use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\HasSideNotes;
-use App\Concerns\HasStaticTypeTrait;
+use App\Concerns\SentInNotificationTrait;
 use App\Concerns\Tenant\BelongsToTenant;
-use App\Contracts\HasStaticType;
+use App\Contracts\SentInNotification;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Services\Document\Collections\DocumentBlocksCollection;
@@ -72,10 +72,10 @@ use Illuminate\Support\Carbon;
  *
  * @mixin Eloquent
  */
-final class Document extends Model implements BelongsToTenantContract, HasStaticType, RoleableEntity, Sidenoteable
+final class Document extends Model implements BelongsToTenantContract, RoleableEntity, SentInNotification, Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DocumentFactory> */
-    use BelongsToTenant, HasFactory, HasSideNotes, HasStaticTypeTrait, HasUlids, LivesInBusinessDB, ReceivesRoleAssignments;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, SentInNotificationTrait;
 
     protected $fillable = [
         'name',

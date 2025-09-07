@@ -32,7 +32,7 @@ final class DocumentPolicy
      */
     public function create(User $user, Documentable $documentable): bool
     {
-        return true;
+        return $user->isAtLeastOn(RoleFactory::editor(), $documentable);
     }
 
     /**

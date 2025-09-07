@@ -2353,16 +2353,16 @@
         },
         {
             "name": "hdaklue/porter",
-            "version": "1.0.30",
+            "version": "1.0.36",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/porter.git",
-                "reference": "3f743439de536722694b51a2457f40d01edfb71a"
+                "reference": "b7f2746cde01101f695ab2f1afe74d55c3e24dfc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/porter/zipball/3f743439de536722694b51a2457f40d01edfb71a",
-                "reference": "3f743439de536722694b51a2457f40d01edfb71a",
+                "url": "https://api.github.com/repos/hdaklue/porter/zipball/b7f2746cde01101f695ab2f1afe74d55c3e24dfc",
+                "reference": "b7f2746cde01101f695ab2f1afe74d55c3e24dfc",
                 "shasum": ""
             },
             "require": {
@@ -2414,9 +2414,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hdaklue/porter/issues",
-                "source": "https://github.com/hdaklue/porter/tree/1.0.30"
+                "source": "https://github.com/hdaklue/porter/tree/1.0.36"
             },
-            "time": "2025-09-06T02:09:57+00:00"
+            "time": "2025-09-07T03:40:56+00:00"
         },
         {
             "name": "jaybizzle/crawler-detect",

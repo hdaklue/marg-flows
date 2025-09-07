@@ -354,7 +354,9 @@ export default function chunkedFileUploadComponent(config) {
                     body: formData,
                     signal: controller.signal,
                     headers: {
-                        'X-CSRF-TOKEN': this.getCsrfToken()
+                        'X-CSRF-TOKEN': this.getCsrfToken(),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
 
@@ -398,7 +400,9 @@ export default function chunkedFileUploadComponent(config) {
                     body: formData,
                     signal: controller.signal,
                     headers: {
-                        'X-CSRF-TOKEN': this.getCsrfToken()
+                        'X-CSRF-TOKEN': this.getCsrfToken(),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
 

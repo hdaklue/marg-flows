@@ -19,12 +19,9 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\EmbeddedTable;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\Size;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use LaraDumps\LaraDumps\Livewire\Attributes\Ds;
 
-#[Ds]
 final class ListFlows extends ListRecords
 {
     protected static string $resource = FlowResource::class;
@@ -40,9 +37,9 @@ final class ListFlows extends ListRecords
             'active' => Tab::make()
                 ->label(__('flow.tabs.active'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->running()),
-            'draft' => Tab::make()
-                ->label(__('flow.tabs.draft'))
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('stage', FlowStage::DRAFT->value)),
+            'blocked' => Tab::make()
+                ->label(__('flow.tabs.blocked'))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('stage', FlowStage::BLOCKED->value)),
             'all' => Tab::make()
                 ->label(__('flow.tabs.all')),
         ];
@@ -64,6 +61,8 @@ final class ListFlows extends ListRecords
             Action::make('create')
                 ->visible(filamentUser()->can('create', [Flow::class, filamentTenant()]))
                 ->label(__('flow.actions.create'))
+                ->outlined()
+
                 ->form([
                     TextInput::make('title')
                         ->required()
@@ -91,8 +90,7 @@ final class ListFlows extends ListRecords
                             ->danger()
                             ->send();
                     }
-                })
-                ->size(Size::Small),
+                }),
         ];
     }
 }

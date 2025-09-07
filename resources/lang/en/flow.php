@@ -84,7 +84,7 @@ return [
 
     'tabs' => [
         'active' => 'Active',
-        'draft' => 'Draft',
+        'blocked' => 'Blocked',
         'all' => 'All',
     ],
 

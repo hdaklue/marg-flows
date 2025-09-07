@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\HasStaticTypeTrait;
-use App\Contracts\HasStaticType;
+use App\Concerns\SentInNotificationTrait;
+use App\Contracts\SentInNotification;
 use Database\Factories\TenantFactory;
 use Hdaklue\MargRbac\Models\RbacTenant;
 use Illuminate\Database\Eloquent\Collection;
@@ -45,9 +45,9 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-final class Tenant extends RbacTenant implements HasStaticType
+final class Tenant extends RbacTenant implements SentInNotification
 {
-    use HasStaticTypeTrait;
+    use SentInNotificationTrait;
 
     protected static $factory = TenantFactory::class;
 

@@ -15,7 +15,10 @@
       "mcp__laravel-boost__list-artisan-commands",
       "Bash(php artisan:*)",
       "mcp__laravel-boost__last-error",
-      "mcp__laravel-boost__read-log-entries"
+      "mcp__laravel-boost__read-log-entries",
+      "Bash(mkdir:*)",
+      "mcp__laravel-boost__browser-logs",
+      "Bash(cp:*)"
     ],
     "deny": []
   },

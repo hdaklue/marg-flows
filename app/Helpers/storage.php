@@ -8,6 +8,7 @@ if (! function_exists('avatarUrlFromUser')) {
 
     function avatarUrlFromUser(User $user): string
     {
+
         return AvatarService::generateAvatarUrl($user);
     }
 }

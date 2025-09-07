@@ -49,13 +49,6 @@ final class FlowResource extends Resource
         ];
     }
 
-    // public static function getRecordSubNavigation(Page $page): array
-    // {
-    //     return $page->generateNavigationItems([
-    //         FlowPages::class,
-    //     ]);
-    // }
-
     public static function getPages(): array
     {
         return [
@@ -66,4 +59,12 @@ final class FlowResource extends Resource
             'createDocument' => CreateDocument::route('{flow}/p/c'),
         ];
     }
+
+    // public static function getRecordSubNavigation(Page $page): array
+    // {
+    //     return $page->generateNavigationItems([
+    //         FlowPages::class,
+    //     ]);
+    // }
+
 }

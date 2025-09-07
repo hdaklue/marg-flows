@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('business_db')->create('documents', function (Blueprint $table) {
+        Schema::create('documents', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('name');
             $table->json('blocks');
@@ -47,6 +47,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection('business_db')->dropIfExists('documents');
+        Schema::dropIfExists('documents');
     }
 };

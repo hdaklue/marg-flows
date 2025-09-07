@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Responses\ChunkedUploadResponse;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,8 @@ final class ChunkedUploadController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        // File uploads require FormData (multipart/form-data), not JSON
+        // The response will be JSON, but the request uses FormData for file uploads
 
         $validator = Validator::make($request->all(), [
             'file' => 'required|file',
@@ -29,11 +32,7 @@ final class ChunkedUploadController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return ChunkedUploadResponse::validationError($validator->errors()->toArray());
         }
 
         $fileKey = $request->input('fileKey');
@@ -51,10 +50,12 @@ final class ChunkedUploadController extends Controller
             return $this->handleDirectUpload($request, $fileKey, $fileName);
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
+            Log::error('Chunked upload error', [
                 'message' => $e->getMessage(),
-            ], 500);
+                'fileKey' => $fileKey ?? 'unknown',
+                'fileName' => $fileName ?? 'unknown',
+            ]);
+            return ChunkedUploadResponse::error($e->getMessage());
         }
     }
 
@@ -68,11 +69,7 @@ final class ChunkedUploadController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return ChunkedUploadResponse::validationError($validator->errors()->toArray());
         }
 
         $fileKey = $request->input('fileKey');
@@ -90,15 +87,9 @@ final class ChunkedUploadController extends Controller
                 rmdir($chunkDir);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Upload cancelled and chunks cleaned up',
-            ]);
+            return ChunkedUploadResponse::cancelled();
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to cancel upload: ' . $e->getMessage(),
-            ], 500);
+            return ChunkedUploadResponse::error('Failed to cancel upload: ' . $e->getMessage());
         }
     }
 
@@ -113,11 +104,7 @@ final class ChunkedUploadController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return ChunkedUploadResponse::validationError($validator->errors()->toArray());
         }
 
         $fileKey = $request->input('fileKey');
@@ -151,15 +138,9 @@ final class ChunkedUploadController extends Controller
                 rmdir($chunkDir);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'File deleted successfully',
-            ]);
+            return ChunkedUploadResponse::deleted();
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete file: ' . $e->getMessage(),
-            ], 500);
+            return ChunkedUploadResponse::error('Failed to delete file: ' . $e->getMessage());
         }
     }
 
@@ -240,21 +221,17 @@ final class ChunkedUploadController extends Controller
             // Clean up chunks
             $this->cleanupChunks($fileKey);
 
-            return response()->json([
-                'success' => true,
+            return ChunkedUploadResponse::assemblySuccess([
                 'completed' => true,
                 'fileKey' => $fileKey,
                 'path' => $finalPath,
                 'url' => Storage::url($finalPath),
-                'message' => 'File uploaded successfully',
             ]);
         }
 
-        return response()->json([
-            'success' => true,
+        return ChunkedUploadResponse::chunkSuccess([
             'completed' => false,
             'chunk' => $chunkIndex,
-            'message' => 'Chunk uploaded successfully',
         ]);
     }
 
@@ -272,13 +249,11 @@ final class ChunkedUploadController extends Controller
         // Store the file
         $path = $uploadedFile->storeAs('uploads', $uniqueFileName, 'public');
 
-        return response()->json([
-            'success' => true,
+        return ChunkedUploadResponse::success([
             'completed' => true,
             'fileKey' => $fileKey,
             'path' => $path,
             'url' => Storage::disk('public')->url($path),
-            'message' => 'File uploaded successfully',
         ]);
     }
 

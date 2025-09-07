@@ -7,12 +7,12 @@ namespace App\Models;
 use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\Document\ManagesDocuments;
 use App\Concerns\HasSideNotes;
-use App\Concerns\HasStaticTypeTrait;
+use App\Concerns\SentInNotificationTrait;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\Document\Documentable;
-use App\Contracts\HasStaticType;
 use App\Contracts\ScopedToTenant;
+use App\Contracts\SentInNotification;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
@@ -88,17 +88,17 @@ use Illuminate\Support\Collection;
  *
  * @mixin \Eloquent
  */
-final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, HasStaticType, RoleableEntity, ScopedToTenant, Sidenoteable
+final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, RoleableEntity, ScopedToTenant, SentInNotification, Sidenoteable
 {
     use BelongsToTenant,
         HasFactory,
         HasSideNotes,
         HasStagesTrait,
-        HasStaticTypeTrait ,
-        HasUlids,
+        HasUlids ,
         LivesInOriginalDB,
         ManagesDocuments,
         ReceivesRoleAssignments,
+        SentInNotificationTrait,
         SoftDeletes;
 
     // protected $connection = 'mysql';
@@ -127,23 +127,13 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
         return MentionService::getMentionables($this);
     }
 
-    public function systemRoleByName(string $name): Role
-    {
-        return $this->getTenant()->systemRoleByName($name);
-    }
-
-    public function getSystemRoles(): Collection
-    {
-        return $this->getTenant()->getSystemRoles();
-    }
-
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
     /**
-     * Get all participants (users with role assignments) on this flow
+     * Get all participants (users with role assignments) on this flow.
      */
     public function participants()
     {
@@ -151,7 +141,7 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     }
 
     /**
-     * Get participants as User models
+     * Get participants as User models.
      */
     public function getParticipants(): Collection
     {
