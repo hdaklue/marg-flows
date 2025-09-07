@@ -9,7 +9,7 @@ use WendellAdriel\ValidatedDTO\Casting\CollectionCast;
 use WendellAdriel\ValidatedDTO\Casting\DTOCast;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-abstract class ItemableDto extends ValidatedDTO
+abstract class ItemableDto extends BaseDto
 {
     public Collection $items;
 

@@ -13,10 +13,8 @@ final class FlowBasicInfoForm
 
     public static function configure(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('title')
-                    ->state(fn () => $this->title),
-            ]);
+        return $schema->components([
+            TextInput::make('title')->state(fn() => $this->title),
+        ]);
     }
 }

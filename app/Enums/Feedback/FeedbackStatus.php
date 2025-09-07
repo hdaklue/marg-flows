@@ -11,6 +11,7 @@ use Filament\Support\Contracts\HasLabel;
 enum FeedbackStatus: string implements HasColor, HasLabel
 {
     use EnumSelectArrays;
+
     case OPEN = 'open';
     case RUNNING = 'running';
     case RESOLVED = 'resolved';

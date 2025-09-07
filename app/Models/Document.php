@@ -72,7 +72,11 @@ use Illuminate\Support\Carbon;
  *
  * @mixin Eloquent
  */
-final class Document extends Model implements BelongsToTenantContract, RoleableEntity, SentInNotification, Sidenoteable
+final class Document extends Model implements
+    BelongsToTenantContract,
+    RoleableEntity,
+    SentInNotification,
+    Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DocumentFactory> */
     use BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, SentInNotificationTrait;
@@ -97,7 +101,6 @@ final class Document extends Model implements BelongsToTenantContract, RoleableE
     {
         $this->setAttribute('blocks', $data);
         $this->save();
-
     }
 
     public function getCreator(): User
@@ -107,7 +110,7 @@ final class Document extends Model implements BelongsToTenantContract, RoleableE
 
     public function isArchived(): bool
     {
-        return ! empty($this->getAttribute('archived_at'));
+        return !empty($this->getAttribute('archived_at'));
     }
 
     public function casts(): array
@@ -142,8 +145,8 @@ final class Document extends Model implements BelongsToTenantContract, RoleableE
      */
     protected function blockCollection(): Attribute
     {
-        return Attribute::make(
-            get: fn () => DocumentBlocksCollection::fromEditorJS($this->getAttribute('blocks')),
-        );
+        return Attribute::make(get: fn() => DocumentBlocksCollection::fromEditorJS($this->getAttribute(
+            'blocks',
+        )));
     }
 }

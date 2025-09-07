@@ -35,7 +35,6 @@ final class EditorJsImageDelete extends Controller
                 'success' => true,
                 'message' => 'File deleted successfully',
             ]);
-
         } catch (Exception $e) {
             Log::error('Failed to delete EditorJS image', [
                 'path' => $path,

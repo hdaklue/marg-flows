@@ -7,7 +7,6 @@ namespace App\Services\Video\Services;
 use App\Services\Video\Contracts\ConversionContract;
 use App\Services\Video\DTOs\ResolutionData;
 use App\Services\Video\Enums\NamingPattern;
-use App\Services\Video\Video;
 use App\Services\Video\Resolutions\Resolution1080p;
 use App\Services\Video\Resolutions\Resolution1440p;
 use App\Services\Video\Resolutions\Resolution144p;
@@ -17,34 +16,39 @@ use App\Services\Video\Resolutions\Resolution360p;
 use App\Services\Video\Resolutions\Resolution480p;
 use App\Services\Video\Resolutions\Resolution4K;
 use App\Services\Video\Resolutions\Resolution720p;
+use App\Services\Video\Video;
 use Closure;
 use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
 
 final class ResolutionManager
 {
-    private ?NamingPattern $namingStrategy;
+    private null|NamingPattern $namingStrategy;
 
     private array $conversions = [];
 
     private array $results = [];
 
-    private ?Closure $onStepSuccess = null;
+    private null|Closure $onStepSuccess = null;
 
-    private ?Closure $onStepFailure = null;
+    private null|Closure $onStepFailure = null;
 
     public function __construct(
         private readonly Video $video,
-        ?NamingPattern $namingStrategy = null
+        null|NamingPattern $namingStrategy = null,
     ) {
-        $this->namingStrategy = $namingStrategy ?? NamingPattern::ResolutionLabel;
+        $this->namingStrategy =
+            $namingStrategy ?? NamingPattern::ResolutionLabel;
     }
 
     /**
      * Static factory method for fluent API.
      */
-    public static function from(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null): self
-    {
+    public static function from(
+        string $sourcePath,
+        string $disk = 'local',
+        null|NamingPattern $namingStrategy = null,
+    ): self {
         $video = Video::fromPath($sourcePath, $disk);
         return new self($video, $namingStrategy);
     }
@@ -52,8 +56,11 @@ final class ResolutionManager
     /**
      * Static factory method from disk.
      */
-    public static function fromDisk(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null): self
-    {
+    public static function fromDisk(
+        string $sourcePath,
+        string $disk = 'local',
+        null|NamingPattern $namingStrategy = null,
+    ): self {
         $video = Video::fromPath($sourcePath, $disk);
         return new self($video, $namingStrategy);
     }
@@ -61,8 +68,10 @@ final class ResolutionManager
     /**
      * Static factory method from Video object.
      */
-    public static function fromVideo(Video $video, ?NamingPattern $namingStrategy = null): self
-    {
+    public static function fromVideo(
+        Video $video,
+        null|NamingPattern $namingStrategy = null,
+    ): self {
         return new self($video, $namingStrategy);
     }
 
@@ -181,8 +190,10 @@ final class ResolutionManager
     public function addConversions(array $conversions): self
     {
         foreach ($conversions as $conversion) {
-            if (! $conversion instanceof ConversionContract) {
-                throw new InvalidArgumentException('All conversions must implement ConversionContract');
+            if (!$conversion instanceof ConversionContract) {
+                throw new InvalidArgumentException(
+                    'All conversions must implement ConversionContract',
+                );
             }
             $this->addConversion($conversion);
         }
@@ -231,16 +242,25 @@ final class ResolutionManager
      */
     public function saveTo(string $directory = ''): array
     {
-        throw_if(empty($this->conversions), new InvalidArgumentException('No conversions specified'));
+        throw_if(
+            empty($this->conversions),
+            new InvalidArgumentException('No conversions specified'),
+        );
 
         $this->results = [];
         // If no directory specified, use same directory as source file
         $outputDirectory = $directory ?: $this->video->getDirectory();
 
-        $exporter = ResolutionExporter::start($this->video->getPath(), $this->video->getDisk());
+        $exporter = ResolutionExporter::start(
+            $this->video->getPath(),
+            $this->video->getDisk(),
+        );
 
         foreach ($this->conversions as $conversion) {
-            $outputPath = $this->generateOutputPath($outputDirectory, $conversion);
+            $outputPath = $this->generateOutputPath(
+                $outputDirectory,
+                $conversion,
+            );
             $result = $exporter->export($conversion, $outputPath);
 
             $this->results[] = $result;
@@ -310,8 +330,10 @@ final class ResolutionManager
     /**
      * Generate output path using naming strategy.
      */
-    private function generateOutputPath(string $directory, ConversionContract $conversion): string
-    {
+    private function generateOutputPath(
+        string $directory,
+        ConversionContract $conversion,
+    ): string {
         $namingService = new VideoNamingService($this->namingStrategy);
         $filename = $namingService->generateName($this->video, $conversion);
 

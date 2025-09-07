@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Services\Video\Strategies;
 
 use App\Services\Video\Contracts\ScaleStrategyContract;
-use App\Services\Video\ValueObjects\{Dimension, AspectRatio};
+use App\Services\Video\ValueObjects\AspectRatio;
+use App\Services\Video\ValueObjects\Dimension;
 
 class ScaleToAspectRatio implements ScaleStrategyContract
 {
     public function __construct(
         private readonly AspectRatio $aspectRatio,
-        private readonly ?int $maxWidth = null
+        private readonly null|int $maxWidth = null,
     ) {}
 
     public function apply(Dimension $current, Dimension $_target): Dimension
@@ -35,12 +36,16 @@ class ScaleToAspectRatio implements ScaleStrategyContract
 
     public function getDescription(): string
     {
-        $maxWidthText = $this->maxWidth ? " (max width: {$this->maxWidth}px)" : '';
+        $maxWidthText = $this->maxWidth
+            ? " (max width: {$this->maxWidth}px)"
+            : '';
         return "Scale to {$this->aspectRatio} aspect ratio{$maxWidthText}";
     }
 
-    public static function make(AspectRatio $aspectRatio, ?int $maxWidth = null): self
-    {
+    public static function make(
+        AspectRatio $aspectRatio,
+        null|int $maxWidth = null,
+    ): self {
         return new self($aspectRatio, $maxWidth);
     }
 }

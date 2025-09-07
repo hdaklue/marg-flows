@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Events\Tenant;
 
-use Illuminate\Broadcasting\Channel;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Tenant;
 use App\Models\User;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -20,7 +20,11 @@ class TanantMemberAdded
     /**
      * Create a new event instance.
      */
-    public function __construct(public Tenant $tenant, public User $user, public RoleEnum $role) {}
+    public function __construct(
+        public Tenant $tenant,
+        public User $user,
+        public RoleEnum $role,
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

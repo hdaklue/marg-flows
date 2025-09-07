@@ -11,9 +11,9 @@ final class MentionableDTO extends ValidatedDTO
     public string $id;
     public string $name;
     public string $email;
-    public ?string $avatar;
-    public ?string $title;
-    public ?string $department;
+    public null|string $avatar;
+    public null|string $title;
+    public null|string $department;
 
     protected function rules(): array
     {

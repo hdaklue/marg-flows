@@ -20,7 +20,10 @@ final class FlowCreated
     /**
      * Create a new event instance.
      */
-    public function __construct(public readonly Flow $flow, public readonly User|Authenticatable $user) {}
+    public function __construct(
+        public readonly Flow $flow,
+        public readonly User|Authenticatable $user,
+    ) {}
 
     public function getCreator()
     {

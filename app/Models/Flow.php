@@ -88,18 +88,16 @@ use Illuminate\Support\Collection;
  *
  * @mixin \Eloquent
  */
-final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, RoleableEntity, ScopedToTenant, SentInNotification, Sidenoteable
+final class Flow extends Model implements
+    BelongsToTenantContract,
+    Documentable,
+    HasStages,
+    RoleableEntity,
+    ScopedToTenant,
+    SentInNotification,
+    Sidenoteable
 {
-    use BelongsToTenant,
-        HasFactory,
-        HasSideNotes,
-        HasStagesTrait,
-        HasUlids ,
-        LivesInOriginalDB,
-        ManagesDocuments,
-        ReceivesRoleAssignments,
-        SentInNotificationTrait,
-        SoftDeletes;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInOriginalDB, ManagesDocuments, ReceivesRoleAssignments, SentInNotificationTrait, SoftDeletes;
 
     // protected $connection = 'mysql';
 
@@ -145,7 +143,8 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
      */
     public function getParticipants(): Collection
     {
-        return $this->participants()->get()
+        return $this->participants()
+            ->get()
             ->pluck('assignable')
             ->filter();
     }
@@ -190,7 +189,6 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
 
     public function setStatus(FlowStage $status)
     {
-
         $this->update([
             'stage' => $status->value,
             'completed_at' => null,
@@ -259,13 +257,16 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     protected function assignable(Builder $builder)
     {
         return $builder->where('stage', '!=', FlowStage::COMPLETED->value);
-
     }
 
     #[Scope]
     protected function scopeRunning(Builder $query): Builder
     {
-        return $query->whereNotIn('stage', [FlowStage::COMPLETED->value, FlowStage::CANCELED->value, FlowStage::PAUSED->value]);
+        return $query->whereNotIn('stage', [
+            FlowStage::COMPLETED->value,
+            FlowStage::CANCELED->value,
+            FlowStage::PAUSED->value,
+        ]);
     }
 
     protected function casts(): array

@@ -61,8 +61,10 @@ final class Stage extends Model
     protected function scopeBy(Builder $builder, HasStages $entity)
     {
         return $builder->whereHas('stageable', function ($query) use ($entity) {
-            $query->where('stageable_id', $entity->getKey())
-                ->where('stageable_type', $entity->getMorphClass());
+            $query->where('stageable_id', $entity->getKey())->where(
+                'stageable_type',
+                $entity->getMorphClass(),
+            );
         });
     }
 

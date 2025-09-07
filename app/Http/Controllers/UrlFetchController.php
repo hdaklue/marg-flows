@@ -28,11 +28,9 @@ class UrlFetchController extends Controller
 
         try {
             // Fetch the webpage content
-            $response = Http::timeout(10)
-                ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (compatible; KluePortal/1.0; +https://klueportal.com)',
-                ])
-                ->get($url);
+            $response = Http::timeout(10)->withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (compatible; KluePortal/1.0; +https://klueportal.com)',
+            ])->get($url);
 
             if (!$response->successful()) {
                 return response()->json([
@@ -145,6 +143,13 @@ class UrlFetchController extends Controller
             $basePath = '/';
         }
 
-        return $scheme . '://' . $host . rtrim($basePath, '/') . '/' . ltrim($url, '/');
+        return (
+            $scheme
+            . '://'
+            . $host
+            . rtrim($basePath, '/')
+            . '/'
+            . ltrim($url, '/')
+        );
     }
 }

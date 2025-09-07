@@ -49,17 +49,19 @@ final class EditorJSDocumentDto extends ValidatedDTO
         if (is_array($this->blocks)) {
             $this->blocks = EditorJSBlocksCollection::fromArray($this->blocks);
         }
-        
-        return $this->blocks instanceof EditorJSBlocksCollection 
-            ? $this->blocks 
+
+        return $this->blocks instanceof EditorJSBlocksCollection
+            ? $this->blocks
             : EditorJSBlocksCollection::empty();
     }
 
     /**
      * Create a new document with blocks array
      */
-    public static function createWithBlocks(array $blocks, ?string $version = null): self
-    {
+    public static function createWithBlocks(
+        array $blocks,
+        null|string $version = null,
+    ): self {
         return static::fromArray([
             'time' => time(),
             'blocks' => $blocks,
@@ -75,20 +77,29 @@ final class EditorJSDocumentDto extends ValidatedDTO
         // Handle the nested structure with top-level time/blocks/version
         if (isset($data['blocks']) && is_array($data['blocks'])) {
             // Check if blocks contains the nested structure with inner blocks
-            if (isset($data['blocks']['blocks']) && is_array($data['blocks']['blocks'])) {
+            if (
+                isset($data['blocks']['blocks'])
+                && is_array($data['blocks']['blocks'])
+            ) {
                 // Use the inner blocks array
                 return static::fromArray([
                     'time' => $data['time'] ?? time(),
                     'blocks' => $data['blocks']['blocks'], // Use the inner blocks
-                    'version' => $data['version'] ?? config('editor.version', '2.28.2'),
+                    'version' => $data['version'] ?? config(
+                        'editor.version',
+                        '2.28.2',
+                    ),
                 ]);
             }
-            
+
             // Direct blocks array
             return static::fromArray([
                 'time' => $data['time'] ?? time(),
                 'blocks' => $data['blocks'],
-                'version' => $data['version'] ?? config('editor.version', '2.28.2'),
+                'version' => $data['version'] ?? config(
+                    'editor.version',
+                    '2.28.2',
+                ),
             ]);
         }
 

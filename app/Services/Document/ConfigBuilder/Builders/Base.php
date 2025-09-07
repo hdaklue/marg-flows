@@ -9,13 +9,14 @@ use App\Services\Upload\ChunkConfigManager;
 
 final class Base
 {
-    public function build(?string $documentId = null): array
+    public function build(null|string $documentId = null): array
     {
         $imagesConfig = EditorConfigBuilder::images();
         if ($documentId) {
-            $imagesConfig
-                ->forDocument($documentId)
-                ->baseDirectory(auth()->user()->getActiveTenantId(), $documentId);
+            $imagesConfig->forDocument($documentId)->baseDirectory(
+                auth()->user()->getActiveTenantId(),
+                $documentId,
+            );
         }
 
         return [
@@ -32,19 +33,22 @@ final class Base
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
+            'videoUpload' =>
+                $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
     }
 
-    private function buildVideoUploadConfig(?string $documentId)
+    private function buildVideoUploadConfig(null|string $documentId)
     {
-        $videoUploadConfig = EditorConfigBuilder::videoUpload()
-            ->withChunkConfig(ChunkConfigManager::forVideos('simple'));
+        $videoUploadConfig = EditorConfigBuilder::videoUpload()->withChunkConfig(ChunkConfigManager::forVideos(
+            'simple',
+        ));
 
         if ($documentId) {
-            $videoUploadConfig
-                ->forDocument($documentId)
-                ->baseDirectory(auth()->user()->getActiveTenantId(), $documentId);
+            $videoUploadConfig->forDocument($documentId)->baseDirectory(
+                auth()->user()->getActiveTenantId(),
+                $documentId,
+            );
         }
 
         return $videoUploadConfig;

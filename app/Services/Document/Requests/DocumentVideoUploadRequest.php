@@ -54,7 +54,9 @@ final class DocumentVideoUploadRequest extends FormRequest
                 'max:255',
                 function ($attribute, $value, $fail) {
                     if (!FileTypes::isStreamableVideo($value)) {
-                        $fail('File must have a valid video extension (mp4, webm, ogg).');
+                        $fail(
+                            'File must have a valid video extension (mp4, webm, ogg).',
+                        );
                     }
                 },
             ],
@@ -103,7 +105,10 @@ final class DocumentVideoUploadRequest extends FormRequest
 
     public function getFileName(): string
     {
-        return $this->input('fileName', $this->file('video')->getClientOriginalName());
+        return $this->input(
+            'fileName',
+            $this->file('video')->getClientOriginalName(),
+        );
     }
 
     public function getChunkIndex(): int

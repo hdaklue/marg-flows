@@ -10,7 +10,7 @@ use App\Services\Video\ValueObjects\Dimension;
 class ScaleExact implements ScaleStrategyContract
 {
     public function __construct(
-        private readonly Dimension $target
+        private readonly Dimension $target,
     ) {}
 
     public function apply(Dimension $current, Dimension $target): Dimension

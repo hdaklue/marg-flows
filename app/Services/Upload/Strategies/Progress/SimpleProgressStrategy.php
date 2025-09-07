@@ -31,8 +31,10 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->storeProgress($sessionId, $initialProgress);
     }
 
-    public function updateProgress(string $sessionId, ProgressData $progress): void
-    {
+    public function updateProgress(
+        string $sessionId,
+        ProgressData $progress,
+    ): void {
         $this->validateSessionId($sessionId);
         $this->storeProgress($sessionId, $progress);
     }
@@ -42,7 +44,12 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->validateSessionId($sessionId);
 
         $currentProgress = $this->getProgress($sessionId);
-        throw_unless($currentProgress, new InvalidArgumentException("Progress session '{$sessionId}' not found."));
+        throw_unless(
+            $currentProgress,
+            new InvalidArgumentException(
+                "Progress session '{$sessionId}' not found.",
+            ),
+        );
 
         $completedProgress = new ProgressData(
             completedChunks: $currentProgress->totalChunks,
@@ -61,7 +68,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->validateSessionId($sessionId);
 
         $currentProgress = $this->getProgress($sessionId);
-        if (! $currentProgress) {
+        if (!$currentProgress) {
             // Create error progress if session doesn't exist
             $errorProgress = new ProgressData(
                 completedChunks: 0,
@@ -87,17 +94,17 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->storeProgress($sessionId, $errorProgress);
     }
 
-    public function getProgress(string $sessionId): ?ProgressData
+    public function getProgress(string $sessionId): null|ProgressData
     {
         $this->validateSessionId($sessionId);
 
         $data = Redis::get($this->getRedisKey($sessionId));
-        if (! $data) {
+        if (!$data) {
             return null;
         }
 
         $decoded = json_decode($data, true);
-        if (! $decoded) {
+        if (!$decoded) {
             return null;
         }
 
@@ -110,8 +117,10 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         Redis::del($this->getRedisKey($sessionId));
     }
 
-    private function storeProgress(string $sessionId, ProgressData $progress): void
-    {
+    private function storeProgress(
+        string $sessionId,
+        ProgressData $progress,
+    ): void {
         Redis::setex(
             $this->getRedisKey($sessionId),
             self::TTL,
@@ -126,6 +135,9 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
 
     private function validateSessionId(string $sessionId): void
     {
-        throw_if(empty($sessionId), new InvalidArgumentException('Session ID cannot be empty.'));
+        throw_if(
+            empty($sessionId),
+            new InvalidArgumentException('Session ID cannot be empty.'),
+        );
     }
 }

@@ -44,8 +44,10 @@ enum BitrateEnum: int
     /**
      * Calculate optimal bitrate based on pixels and target quality.
      */
-    public static function calculateForPixels(int $pixels, string $qualityTier = 'medium'): int
-    {
+    public static function calculateForPixels(
+        int $pixels,
+        string $qualityTier = 'medium',
+    ): int {
         // Base bits per pixel (bpp) values for different quality tiers
         $bppValues = [
             'ultra_low' => 0.004,
@@ -58,7 +60,7 @@ enum BitrateEnum: int
         ];
 
         $bpp = $bppValues[$qualityTier] ?? 0.002;
-        
+
         // Calculate bitrate (assuming 30fps)
         $bitrate = (int) round(($pixels * $bpp * 30) / 1000);
 

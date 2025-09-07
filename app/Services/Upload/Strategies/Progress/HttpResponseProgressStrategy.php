@@ -14,28 +14,38 @@ final class HttpResponseProgressStrategy implements ProgressStrategyContract
     public function init(string $sessionId, array $metadata): void
     {
         // Store session metadata in cache for HTTP progress tracking
-        Cache::put("upload_session_{$sessionId}", [
-            'status' => 'initialized',
-            'metadata' => $metadata,
-            'created_at' => now(),
-        ], now()->addHours(2));
-        
+        Cache::put(
+            "upload_session_{$sessionId}",
+            [
+                'status' => 'initialized',
+                'metadata' => $metadata,
+                'created_at' => now(),
+            ],
+            now()->addHours(2),
+        );
+
         Log::info('HTTP upload session initialized', [
             'sessionId' => $sessionId,
             'metadata' => $metadata,
         ]);
     }
 
-    public function updateProgress(string $sessionId, ProgressData $progress): void
-    {
+    public function updateProgress(
+        string $sessionId,
+        ProgressData $progress,
+    ): void {
         // Update progress in cache - can be retrieved via API endpoint
         $sessionData = Cache::get("upload_session_{$sessionId}", []);
         $sessionData['progress'] = $progress->toArray();
         $sessionData['status'] = $progress->status;
         $sessionData['updated_at'] = now();
-        
-        Cache::put("upload_session_{$sessionId}", $sessionData, now()->addHours(2));
-        
+
+        Cache::put(
+            "upload_session_{$sessionId}",
+            $sessionData,
+            now()->addHours(2),
+        );
+
         Log::info('HTTP upload progress updated', [
             'sessionId' => $sessionId,
             'progress' => $progress->toArray(),
@@ -49,9 +59,13 @@ final class HttpResponseProgressStrategy implements ProgressStrategyContract
         $sessionData['status'] = 'completed';
         $sessionData['result'] = $result;
         $sessionData['completed_at'] = now();
-        
-        Cache::put("upload_session_{$sessionId}", $sessionData, now()->addHours(2));
-        
+
+        Cache::put(
+            "upload_session_{$sessionId}",
+            $sessionData,
+            now()->addHours(2),
+        );
+
         Log::info('HTTP upload session completed', [
             'sessionId' => $sessionId,
             'result' => $result,
@@ -65,25 +79,29 @@ final class HttpResponseProgressStrategy implements ProgressStrategyContract
         $sessionData['status'] = 'failed';
         $sessionData['error'] = $message;
         $sessionData['failed_at'] = now();
-        
-        Cache::put("upload_session_{$sessionId}", $sessionData, now()->addHours(2));
-        
+
+        Cache::put(
+            "upload_session_{$sessionId}",
+            $sessionData,
+            now()->addHours(2),
+        );
+
         Log::error('HTTP upload session failed', [
             'sessionId' => $sessionId,
             'error' => $message,
         ]);
     }
 
-    public function getProgress(string $sessionId): ?ProgressData
+    public function getProgress(string $sessionId): null|ProgressData
     {
         $sessionData = Cache::get("upload_session_{$sessionId}");
-        
+
         if (!$sessionData || !isset($sessionData['progress'])) {
             return null;
         }
-        
+
         $progressArray = $sessionData['progress'];
-        
+
         return new ProgressData(
             completedChunks: $progressArray['completedChunks'] ?? 0,
             totalChunks: $progressArray['totalChunks'] ?? 0,
@@ -91,14 +109,14 @@ final class HttpResponseProgressStrategy implements ProgressStrategyContract
             totalBytes: $progressArray['totalBytes'] ?? 0,
             percentage: $progressArray['percentage'] ?? 0,
             status: $progressArray['status'] ?? 'unknown',
-            currentChunk: $progressArray['currentChunk'] ?? null
+            currentChunk: $progressArray['currentChunk'] ?? null,
         );
     }
 
     public function cleanup(string $sessionId): void
     {
         Cache::forget("upload_session_{$sessionId}");
-        
+
         Log::info('HTTP upload session cleaned up', [
             'sessionId' => $sessionId,
         ]);
@@ -107,7 +125,7 @@ final class HttpResponseProgressStrategy implements ProgressStrategyContract
     /**
      * Get raw session data for HTTP response
      */
-    public function getSessionData(string $sessionId): ?array
+    public function getSessionData(string $sessionId): null|array
     {
         return Cache::get("upload_session_{$sessionId}");
     }

@@ -108,8 +108,11 @@ final class DesignFeedback extends Model
     protected $with = ['creator'];
 
     // Factory methods for different annotation types
-    public static function createPointAnnotation(int $x, int $y, array $attributes): static
-    {
+    public static function createPointAnnotation(
+        int $x,
+        int $y,
+        array $attributes,
+    ): static {
         return self::create([
             ...$attributes,
             'x_coordinate' => $x,
@@ -153,7 +156,9 @@ final class DesignFeedback extends Model
             'annotation_data' => [
                 'endX' => $endX,
                 'endY' => $endY,
-                'length' => sqrt(pow($endX - $startX, 2) + pow($endY - $startY, 2)),
+                'length' => sqrt(
+                    pow($endX - $startX, 2) + pow($endY - $startY, 2),
+                ),
             ],
         ]);
     }
@@ -229,7 +234,12 @@ final class DesignFeedback extends Model
 
     public function isAreaAnnotation(): bool
     {
-        return in_array($this->annotation_type, ['rectangle', 'circle', 'polygon', 'area']);
+        return in_array($this->annotation_type, [
+            'rectangle',
+            'circle',
+            'polygon',
+            'area',
+        ]);
     }
 
     public function isArrowAnnotation(): bool
@@ -244,23 +254,25 @@ final class DesignFeedback extends Model
 
     public function hasAreaBounds(): bool
     {
-        return ! empty($this->area_bounds) &&
-               isset($this->area_bounds['width'], $this->area_bounds['height']);
+        return (
+            !empty($this->area_bounds)
+            && isset($this->area_bounds['width'], $this->area_bounds['height'])
+        );
     }
 
-    public function getAreaWidth(): ?int
+    public function getAreaWidth(): null|int
     {
         return $this->area_bounds['width'] ?? null;
     }
 
-    public function getAreaHeight(): ?int
+    public function getAreaHeight(): null|int
     {
         return $this->area_bounds['height'] ?? null;
     }
 
-    public function getAreaSize(): ?int
+    public function getAreaSize(): null|int
     {
-        if (! $this->hasAreaBounds()) {
+        if (!$this->hasAreaBounds()) {
             return null;
         }
 
@@ -270,8 +282,7 @@ final class DesignFeedback extends Model
     public function getDistanceFrom(int $x, int $y): float
     {
         return sqrt(
-            pow($this->x_coordinate - $x, 2) +
-            pow($this->y_coordinate - $y, 2),
+            pow($this->x_coordinate - $x, 2) + pow($this->y_coordinate - $y, 2),
         );
     }
 
@@ -282,35 +293,53 @@ final class DesignFeedback extends Model
 
     public function containsPoint(int $x, int $y): bool
     {
-        if (! $this->hasAreaBounds()) {
+        if (!$this->hasAreaBounds()) {
             return false;
         }
 
         $bounds = $this->area_bounds;
 
-        return $x >= $this->x_coordinate &&
-               $x <= $this->x_coordinate + $bounds['width'] &&
-               $y >= $this->y_coordinate &&
-               $y <= $this->y_coordinate + $bounds['height'];
+        return (
+            $x >= $this->x_coordinate
+            && $x
+            <= ($this->x_coordinate + $bounds['width'])
+            && $y >= $this->y_coordinate
+            && $y
+            <= ($this->y_coordinate + $bounds['height'])
+        );
     }
 
-    public function overlapsWithArea(int $x, int $y, int $width, int $height): bool
-    {
-        if (! $this->hasAreaBounds()) {
+    public function overlapsWithArea(
+        int $x,
+        int $y,
+        int $width,
+        int $height,
+    ): bool {
+        if (!$this->hasAreaBounds()) {
             // For point annotations, check if the point is within the area
-            return $this->x_coordinate >= $x &&
-                   $this->x_coordinate <= $x + $width &&
-                   $this->y_coordinate >= $y &&
-                   $this->y_coordinate <= $y + $height;
+            return (
+                $this->x_coordinate >= $x
+                && $this->x_coordinate
+                <= ($x + $width)
+                && $this->y_coordinate >= $y
+                && $this->y_coordinate
+                <= ($y + $height)
+            );
         }
 
         $bounds = $this->area_bounds;
 
         // Check if rectangles overlap
-        return ! ($this->x_coordinate > $x + $width ||
-                $x > $this->x_coordinate + $bounds['width'] ||
-                $this->y_coordinate > $y + $height ||
-                $y > $this->y_coordinate + $bounds['height']);
+        return !(
+            $this->x_coordinate
+            > ($x + $width)
+            || $x
+            > ($this->x_coordinate + $bounds['width'])
+            || $this->y_coordinate
+            > ($y + $height)
+            || $y
+            > ($this->y_coordinate + $bounds['height'])
+        );
     }
 
     public function getColorDisplay(): string
@@ -332,8 +361,17 @@ final class DesignFeedback extends Model
 
     public function hasCustomColor(): bool
     {
-        return $this->color !== null &&
-               ! in_array($this->color, ['red', 'blue', 'green', 'yellow', 'orange', 'purple']);
+        return (
+            $this->color !== null
+            && !in_array($this->color, [
+                'red',
+                'blue',
+                'green',
+                'yellow',
+                'orange',
+                'purple',
+            ])
+        );
     }
 
     public function getZoomLevelDisplay(): string
@@ -377,7 +415,7 @@ final class DesignFeedback extends Model
         $nearby = $this->findNearbyAnnotations($radius);
         $area = pi() * pow($radius, 2);
 
-        return $nearby->count() / $area * 10000; // Normalize to per 10k pixels
+        return ($nearby->count() / $area) * 10000; // Normalize to per 10k pixels
     }
 
     public function getModelType(): string
@@ -386,33 +424,61 @@ final class DesignFeedback extends Model
     }
 
     // Type-specific scopes
-    protected function scopeAtCoordinates(Builder $query, int $x, int $y, int $tolerance = 20): Builder
-    {
-        return $query->whereBetween('x_coordinate', [$x - $tolerance, $x + $tolerance])
-            ->whereBetween('y_coordinate', [$y - $tolerance, $y + $tolerance]);
+    protected function scopeAtCoordinates(
+        Builder $query,
+        int $x,
+        int $y,
+        int $tolerance = 20,
+    ): Builder {
+        return $query->whereBetween('x_coordinate', [
+            $x - $tolerance,
+            $x + $tolerance,
+        ])->whereBetween('y_coordinate', [
+            $y - $tolerance,
+            $y + $tolerance,
+        ]);
     }
 
-    protected function scopeNearCoordinates(Builder $query, int $x, int $y, int $radius = 50): Builder
-    {
-        return $query->whereRaw(
-            'SQRT(POW(x_coordinate - ?, 2) + POW(y_coordinate - ?, 2)) <= ?',
-            [$x, $y, $radius],
-        );
+    protected function scopeNearCoordinates(
+        Builder $query,
+        int $x,
+        int $y,
+        int $radius = 50,
+    ): Builder {
+        return $query->whereRaw('SQRT(POW(x_coordinate - ?, 2) + POW(y_coordinate - ?, 2)) <= ?', [
+            $x,
+            $y,
+            $radius,
+        ]);
     }
 
-    protected function scopeInArea(Builder $query, int $x, int $y, int $width, int $height): Builder
-    {
-        return $query->whereBetween('x_coordinate', [$x, $x + $width])
-            ->whereBetween('y_coordinate', [$y, $y + $height]);
+    protected function scopeInArea(
+        Builder $query,
+        int $x,
+        int $y,
+        int $width,
+        int $height,
+    ): Builder {
+        return $query->whereBetween('x_coordinate', [
+            $x,
+            $x + $width,
+        ])->whereBetween('y_coordinate', [
+            $y,
+            $y + $height,
+        ]);
     }
 
-    protected function scopeByAnnotationType(Builder $query, string $type): Builder
-    {
+    protected function scopeByAnnotationType(
+        Builder $query,
+        string $type,
+    ): Builder {
         return $query->where('annotation_type', $type);
     }
 
-    protected function scopeByAnnotationTypes(Builder $query, array $types): Builder
-    {
+    protected function scopeByAnnotationTypes(
+        Builder $query,
+        array $types,
+    ): Builder {
         return $query->whereIn('annotation_type', $types);
     }
 
@@ -423,7 +489,12 @@ final class DesignFeedback extends Model
 
     protected function scopeAreaAnnotations(Builder $query): Builder
     {
-        return $query->whereIn('annotation_type', ['rectangle', 'circle', 'polygon', 'area']);
+        return $query->whereIn('annotation_type', [
+            'rectangle',
+            'circle',
+            'polygon',
+            'area',
+        ]);
     }
 
     protected function scopeArrowAnnotations(Builder $query): Builder
@@ -441,9 +512,15 @@ final class DesignFeedback extends Model
         return $query->where('color', $color);
     }
 
-    protected function scopeAtZoomLevel(Builder $query, float $zoomLevel, float $tolerance = 0.1): Builder
-    {
-        return $query->whereBetween('zoom_level', [$zoomLevel - $tolerance, $zoomLevel + $tolerance]);
+    protected function scopeAtZoomLevel(
+        Builder $query,
+        float $zoomLevel,
+        float $tolerance = 0.1,
+    ): Builder {
+        return $query->whereBetween('zoom_level', [
+            $zoomLevel - $tolerance,
+            $zoomLevel + $tolerance,
+        ]);
     }
 
     protected function casts(): array

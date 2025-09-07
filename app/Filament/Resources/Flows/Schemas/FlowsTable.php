@@ -24,42 +24,59 @@ final class FlowsTable
 {
     public static function configure(Table $table): Table
     {
-
         return $table
             ->query(function () {
-                $isAdmin = filamentUser()->hasAssignmentOn(filamentTenant(), RoleFactory::admin());
+                $isAdmin = filamentUser()->hasAssignmentOn(
+                    filamentTenant(),
+                    RoleFactory::admin(),
+                );
 
-                return Flow::query()->unless($isAdmin, function ($query) {
-                    $query->forParticipant(filamentUser());
-                })->orderBy('stage')->orderByDesc('updated_at')->with(['creator']);
+                return Flow::query()
+                    ->unless($isAdmin, function ($query) {
+                        $query->forParticipant(filamentUser());
+                    })
+                    ->orderBy('stage')
+                    ->orderByDesc('updated_at')
+                    ->with(['creator']);
             })
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
-            ->recordUrl(fn (Model $record) => FlowResource::getUrl('view', ['record' => $record->getKey()]))
+            ->recordUrl(fn(Model $record) => FlowResource::getUrl('view', ['record' =>
+                $record->getKey()]))
             ->columns([
                 TextColumn::make('title')
-                    ->formatStateUsing(fn ($state) => str($state)->title()->toString())
+                    ->formatStateUsing(
+                        fn($state) => str($state)->title()->toString(),
+                    )
                     ->label(__('flow.table.columns.title'))
                     ->weight(FontWeight::Bold),
                 TextColumn::make('description')
-                    ->formatStateUsing(fn ($state) => str($state)->ucfirst()->toString())
+                    ->formatStateUsing(
+                        fn($state) => str($state)->ucfirst()->toString(),
+                    )
                     ->limit(80),
                 SelectColumn::make('stage')
                     ->label(__('flow.table.columns.stage'))
                     ->grow(false)
                     ->options(options: FlowStage::asFilamentHtmlArray())
                     ->afterStateUpdated(function ($record, $state, $livewire) {
-                        $record->update(['stage' => $state]);
+                        $record->update([
+                            'stage' => $state,
+                        ]);
                         $livewire->resetTable();
                     })
                     ->allowOptionsHtml()
                     ->selectablePlaceholder(false)
                     ->native(false),
-                TextColumn::make('started_at')
-                    ->formatStateUsing(fn ($state) => toUserDate($state, filamentUser())),
+                TextColumn::make(
+                    'started_at',
+                )->formatStateUsing(fn($state) => toUserDate(
+                    $state,
+                    filamentUser(),
+                )),
                 ImageColumn::make('creator_avatar')
                     ->label(__('flow.table.columns.creator_avatar'))
-                    ->getStateUsing(fn ($record) => avatarUrlFromUser($record->creator))
+                    ->getStateUsing(fn($record) => avatarUrlFromUser($record->creator))
                     ->imageSize(30)
                     ->circular(),
                 // ImageColumn::make('participant_stack')
@@ -71,33 +88,28 @@ final class FlowsTable
                 //     ->limit(3)
                 //     ->limitedRemainingText(),
             ])
-
-            ->filters([
-
-            ], FiltersLayout::AboveContentCollapsible)
+            ->filters([], FiltersLayout::AboveContentCollapsible)
             ->recordActions([
                 EditAction::make()
                     ->iconButton()
                     ->color('gray')
                     ->form([
-                        TextInput::make('title')
-                            ->required(),
-                        Textarea::make('description')
-                            ->maxLength(255),
+                        TextInput::make('title')->required(),
+                        Textarea::make('description')->maxLength(255),
                     ]),
                 Action::make('view')
                     ->label(__('flow.table.actions.view'))
                     ->color('gray')
                     ->icon('heroicon-s-clipboard-document-list')
                     ->iconButton()
-                    ->url(fn ($record) => FlowResource::getUrl('pages', ['record' => $record])),
+                    ->url(fn($record) => FlowResource::getUrl('pages', [
+                        'record' => $record,
+                    ])),
             ])
             ->toolbarActions([
-
                 // Tables\Actions\BulkActionGroup::make([
                 //     // Tables\Actions\DeleteBulkAction::make(),
                 // ]),
             ]);
-
     }
 }

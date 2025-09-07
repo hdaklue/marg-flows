@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\DTOs\AssignableEntity;
 
+use App\Models\User;
 use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Hdaklue\MargRbac\Facades\RoleManager;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
@@ -15,16 +15,19 @@ final class AssigneeDto extends ValidatedDTO
 {
     public string $user_id;
 
-    public ?string $role;
+    public null|string $role;
 
     public string $assignment_type;
 
-    public ?string $entity_type;
+    public null|string $entity_type;
 
-    public ?string $entity_id;
+    public null|string $entity_id;
 
-    public static function fromUserAssignment(User $user, Model $entity, string $assignmentType = 'assignee'): self
-    {
+    public static function fromUserAssignment(
+        User $user,
+        Model $entity,
+        string $assignmentType = 'assignee',
+    ): self {
         /** @phpstan-ignore-next-line */
         $userRole = RoleManager::getRoleOn($user, $entity);
 
@@ -41,23 +44,25 @@ final class AssigneeDto extends ValidatedDTO
     {
         $user = User::find($this->user_id);
         $nameInitials = collect(explode(' ', $user->name ?? ''))
-            ->map(fn ($name) => substr($name, 0, 1))
+            ->map(fn($name) => substr($name, 0, 1))
             ->implode('');
 
-        return $this->role ? "{$nameInitials} ({$this->getRoleLabel()})" : $nameInitials;
+        return $this->role
+            ? "{$nameInitials} ({$this->getRoleLabel()})"
+            : $nameInitials;
     }
 
-    public function getRoleEnum(): ?RoleEnum
+    public function getRoleEnum(): null|RoleEnum
     {
         return $this->role ? RoleEnum::from($this->role) : null;
     }
 
-    public function getRoleLabel(): ?string
+    public function getRoleLabel(): null|string
     {
         return $this->getRoleEnum()?->getLabel();
     }
 
-    public function getRoleDescription(): ?string
+    public function getRoleDescription(): null|string
     {
         return $this->getRoleEnum()?->getDescription();
     }
@@ -70,7 +75,7 @@ final class AssigneeDto extends ValidatedDTO
     public function hasPermission(string $permission): bool
     {
         $roleEnum = $this->getRoleEnum();
-        if (! $roleEnum) {
+        if (!$roleEnum) {
             return false;
         }
 
@@ -124,12 +129,15 @@ final class AssigneeDto extends ValidatedDTO
     public function canAssignRole(RoleEnum $targetRole): bool
     {
         $currentRole = $this->getRoleEnum();
-        if (! $currentRole) {
+        if (!$currentRole) {
             return false;
         }
 
-        return $currentRole->isHigherThan($targetRole) ||
-               ($currentRole === RoleEnum::MANAGER && $targetRole->isLowerThanOrEqual(RoleEnum::EDITOR));
+        return (
+            $currentRole->isHigherThan($targetRole)
+            || $currentRole === RoleEnum::MANAGER
+            && $targetRole->isLowerThanOrEqual(RoleEnum::EDITOR)
+        );
     }
 
     protected function rules(): array

@@ -36,18 +36,19 @@ final class ListFlows extends ListRecords
         return [
             'active' => Tab::make()
                 ->label(__('flow.tabs.active'))
-                ->modifyQueryUsing(fn (Builder $query) => $query->running()),
+                ->modifyQueryUsing(fn(Builder $query) => $query->running()),
             'blocked' => Tab::make()
                 ->label(__('flow.tabs.blocked'))
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('stage', FlowStage::BLOCKED->value)),
-            'all' => Tab::make()
-                ->label(__('flow.tabs.all')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where(
+                    'stage',
+                    FlowStage::BLOCKED->value,
+                )),
+            'all' => Tab::make()->label(__('flow.tabs.all')),
         ];
     }
 
     public function content(Schema $schema): Schema
     {
-
         return $schema->components([
             $this->getTabsContentComponent(), // This method returns a component to display the tabs above a table
             EmbeddedTable::make(),
@@ -56,23 +57,20 @@ final class ListFlows extends ListRecords
 
     protected function getHeaderActions(): array
     {
-
         return [
             Action::make('create')
-                ->visible(filamentUser()->can('create', [Flow::class, filamentTenant()]))
+                ->visible(filamentUser()->can('create', [
+                    Flow::class,
+                    filamentTenant(),
+                ]))
                 ->label(__('flow.actions.create'))
                 ->outlined()
-
                 ->form([
-                    TextInput::make('title')
-                        ->required()
-                        ->maxLength(100),
-                    Textarea::make('description')
-                        ->maxLength(255),
+                    TextInput::make('title')->required()->maxLength(100),
+                    Textarea::make('description')->maxLength(255),
                 ])
                 ->action(function (array $data) {
                     try {
-
                         $dto = CreateFlowDto::fromArray([
                             'title' => $data['title'],
                             'description' => $data['description'],

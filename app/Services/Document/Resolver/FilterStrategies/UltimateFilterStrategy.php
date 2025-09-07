@@ -13,8 +13,10 @@ use App\Services\Document\DTOs\DocumentBlocksDto;
  */
 final class UltimateFilterStrategy implements DocumentBlockFilterStrategy
 {
-    public function filter(DocumentBlocksDto $blocks, array $context = []): DocumentBlocksDto
-    {
+    public function filter(
+        DocumentBlocksDto $blocks,
+        array $context = [],
+    ): DocumentBlocksDto {
         return $blocks; // No filtering - all blocks allowed
     }
 
@@ -23,8 +25,10 @@ final class UltimateFilterStrategy implements DocumentBlockFilterStrategy
         return 'ultimate';
     }
 
-    public function isBlockTypeAllowed(string $blockType, array $context = []): bool
-    {
+    public function isBlockTypeAllowed(
+        string $blockType,
+        array $context = [],
+    ): bool {
         return true; // All block types allowed
     }
 

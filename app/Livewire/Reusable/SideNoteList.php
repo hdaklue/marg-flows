@@ -62,15 +62,19 @@ final class SideNoteList extends Component
         // Match URLs with or without protocol
         $regex = '/\b((https?:\/\/)?(www\.)?[a-z0-9\-]+(\.[a-z]{2,})(\/\S*)?)/i';
 
-        return preg_replace_callback($regex, function ($matches) {
-            $url = $matches[0];
-            $hasProtocol = Str::startsWith($url, ['http://', 'https://']);
-            $href = $hasProtocol ? $url : 'https://' . $url;
+        return preg_replace_callback(
+            $regex,
+            function ($matches) {
+                $url = $matches[0];
+                $hasProtocol = Str::startsWith($url, ['http://', 'https://']);
+                $href = $hasProtocol ? $url : 'https://' . $url;
 
-            $escapedHref = e($href);
-            $escapedText = e($url);
+                $escapedHref = e($href);
+                $escapedText = e($url);
 
-            return "<a href=\"{$escapedHref}\" target=\"_blank\" rel=\"noopener noreferrer\">{$escapedText}</a>";
-        }, e($text));
+                return "<a href=\"{$escapedHref}\" target=\"_blank\" rel=\"noopener noreferrer\">{$escapedText}</a>";
+            },
+            e($text),
+        );
     }
 }

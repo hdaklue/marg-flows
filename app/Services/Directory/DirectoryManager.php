@@ -31,8 +31,7 @@ final class DirectoryManager
      * @param  string  $tenantId  The tenant identifier
      * @return DocumentStorageStrategyContract Configured document storage strategy
      */
-    public static function document(string $tenantId): DocumentStorageStrategyContract
-    {
+    public static function document(string $tenantId): DocumentStorageStrategyContract {
         return new DocumentStorageStrategy(self::baseDirectiry($tenantId));
     }
 
@@ -42,8 +41,7 @@ final class DirectoryManager
      * @param  string  $tenantId  The tenant identifier
      * @return ChunksStorageStrategyContract Configured chunks storage strategy
      */
-    public static function chunks(string $tenantId): ChunksStorageStrategyContract
-    {
+    public static function chunks(string $tenantId): ChunksStorageStrategyContract {
         return new ChunksStorageStrategy(self::baseDirectiry($tenantId));
     }
 
@@ -56,7 +54,7 @@ final class DirectoryManager
      */
     public static function avatars(): StorageStrategyContract
     {
-        return new AvatarStorageStrategy;
+        return new AvatarStorageStrategy();
     }
 
     /**
@@ -66,14 +64,19 @@ final class DirectoryManager
      */
     public static function temp(): StorageStrategyContract
     {
-        return new TempStorageStrategy;
+        return new TempStorageStrategy();
     }
 
-    public static function video(string $tenantId, string $baseDirectory): VideoStorageStrategy
-    {
+    public static function video(
+        string $tenantId,
+        string $baseDirectory,
+    ): VideoStorageStrategy {
         // $rootDirectory = self::baseDirectiry($tenantId);
 
-        $rootDirectory = LaraPath::base($tenantId, SanitizationStrategy::HASHED)->add($baseDirectory);
+        $rootDirectory = LaraPath::base(
+            $tenantId,
+            SanitizationStrategy::HASHED,
+        )->add($baseDirectory);
 
         return new VideoStorageStrategy($rootDirectory);
     }

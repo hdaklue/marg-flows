@@ -24,16 +24,16 @@ final class AVIFormat implements VideoFormatContract
     {
         return new self();
     }
-    public function getDriverFormat(?BitrateEnum $bitrate = null): VideoInterface
-    {
+
+    public function getDriverFormat(null|BitrateEnum $bitrate = null): VideoInterface {
         $format = new WMV();
-        
+
         if ($bitrate) {
             $format->setKiloBitrate($bitrate->getKbps());
         } elseif ($this->getDefaultBitrate()) {
             $format->setKiloBitrate($this->getDefaultBitrate());
         }
-        
+
         return $format;
     }
 
@@ -47,7 +47,7 @@ final class AVIFormat implements VideoFormatContract
         return 'AVI (WMV)';
     }
 
-    public function getDefaultBitrate(): ?int
+    public function getDefaultBitrate(): null|int
     {
         return BitrateEnum::HIGH_1080P->getKbps(); // 4500 kbps
     }

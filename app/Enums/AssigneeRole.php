@@ -47,10 +47,29 @@ enum AssigneeRole: string implements HasDescription, HasLabel
     public function getResponsibilities(): array
     {
         return match ($this) {
-            self::ASSIGNEE => ['execute', 'update_progress', 'request_help', 'mark_complete'],
-            self::APPROVER => ['approve', 'reject', 'request_changes', 'final_approval'],
-            self::REVIEWER => ['review', 'comment', 'suggest', 'request_revision'],
-            self::OBSERVER => ['view', 'receive_notifications', 'track_progress'],
+            self::ASSIGNEE => [
+                'execute',
+                'update_progress',
+                'request_help',
+                'mark_complete',
+            ],
+            self::APPROVER => [
+                'approve',
+                'reject',
+                'request_changes',
+                'final_approval',
+            ],
+            self::REVIEWER => [
+                'review',
+                'comment',
+                'suggest',
+                'request_revision',
+            ],
+            self::OBSERVER => [
+                'view',
+                'receive_notifications',
+                'track_progress',
+            ],
         };
     }
 
@@ -75,8 +94,10 @@ enum AssigneeRole: string implements HasDescription, HasLabel
         };
     }
 
-    public function canTriggerStatusChange(string $fromStatus, string $toStatus): bool
-    {
+    public function canTriggerStatusChange(
+        string $fromStatus,
+        string $toStatus,
+    ): bool {
         return match ([$this, $fromStatus, $toStatus]) {
             [self::ASSIGNEE, 'assigned', 'in_progress'] => true,
             [self::ASSIGNEE, 'in_progress', 'review_requested'] => true,

@@ -14,7 +14,7 @@ use Livewire\Component;
 
 /**
  * Generic Calendar Component for KluePortal
- * 
+ *
  * @property-read CalendarConfigDTO $config
  * @property-read array $calendarData
  * @property-read array $currentEvents
@@ -33,10 +33,8 @@ final class CalendarComponent extends Component
     // Event source data
     public array $events = [];
 
-    public function mount(
-        array $config = [],
-        array $events = []
-    ): void {
+    public function mount(array $config = [], array $events = []): void
+    {
         $this->configArray = array_merge([
             'titleField' => 'title',
             'dateField' => 'startDate',
@@ -61,7 +59,7 @@ final class CalendarComponent extends Component
             'month' => $this->buildMonthView(),
             'week' => $this->buildWeekView(),
             'day' => $this->buildDayView(),
-            default => $this->buildMonthView()
+            default => $this->buildMonthView(),
         };
     }
 
@@ -76,7 +74,9 @@ final class CalendarComponent extends Component
             $events = $events->merge($additionalEvents);
         }
 
-        return $events->map(fn($event) => $this->ensureEventDTO($event))->toArray();
+        return $events->map(
+            fn($event) => $this->ensureEventDTO($event),
+        )->toArray();
     }
 
     /**
@@ -103,9 +103,9 @@ final class CalendarComponent extends Component
             'week' => sprintf(
                 'Week of %s - %s',
                 $date->copy()->startOfWeek()->format('M j'),
-                $date->copy()->endOfWeek()->format('M j, Y')
+                $date->copy()->endOfWeek()->format('M j, Y'),
             ),
-            default => $this->currentMonthName
+            default => $this->currentMonthName,
         };
     }
 
@@ -116,7 +116,11 @@ final class CalendarComponent extends Component
         }
 
         $this->currentView = $view;
-        $this->dispatch('calendar:view-changed', view: $view, date: $this->currentDate);
+        $this->dispatch(
+            'calendar:view-changed',
+            view: $view,
+            date: $this->currentDate,
+        );
     }
 
     public function goToToday(): void
@@ -132,7 +136,7 @@ final class CalendarComponent extends Component
             'month' => $currentDateCarbon->subMonth(),
             'week' => $currentDateCarbon->subWeek(),
             'day' => $currentDateCarbon->subDay(),
-            default => $currentDateCarbon->subMonth()
+            default => $currentDateCarbon->subMonth(),
         };
 
         $this->currentDate = $newDate->toISOString();
@@ -146,7 +150,7 @@ final class CalendarComponent extends Component
             'month' => $currentDateCarbon->addMonth(),
             'week' => $currentDateCarbon->addWeek(),
             'day' => $currentDateCarbon->addDay(),
-            default => $currentDateCarbon->addMonth()
+            default => $currentDateCarbon->addMonth(),
         };
 
         $this->currentDate = $newDate->toISOString();
@@ -170,9 +174,13 @@ final class CalendarComponent extends Component
         }
 
         $event = collect($this->currentEvents)->firstWhere('id', $eventId);
-        
+
         if ($event) {
-            $this->dispatch('calendar:event-selected', eventId: $eventId, event: $event);
+            $this->dispatch(
+                'calendar:event-selected',
+                eventId: $eventId,
+                event: $event,
+            );
         }
     }
 
@@ -180,7 +188,10 @@ final class CalendarComponent extends Component
     {
         try {
             $selectedDate = Carbon::parse($date);
-            $this->dispatch('calendar:date-selected', date: $selectedDate->toISOString());
+            $this->dispatch(
+                'calendar:date-selected',
+                date: $selectedDate->toISOString(),
+            );
         } catch (\Exception $e) {
             // Invalid date, ignore
         }
@@ -189,10 +200,10 @@ final class CalendarComponent extends Component
     public function refreshEvents(): void
     {
         $this->loading = true;
-        
+
         // Reset computed properties
         unset($this->currentEvents);
-        
+
         $this->loading = false;
         $this->dispatch('calendar:events-refreshed');
     }
@@ -202,7 +213,7 @@ final class CalendarComponent extends Component
         $currentDateCarbon = Carbon::parse($this->currentDate);
         $startOfMonth = $currentDateCarbon->copy()->startOfMonth();
         $endOfMonth = $currentDateCarbon->copy()->endOfMonth();
-        
+
         // Get first day of week for the month view (start from Sunday or Monday based on locale)
         $startDate = $startOfMonth->copy()->startOfWeek();
         $endDate = $endOfMonth->copy()->endOfWeek();
@@ -214,30 +225,39 @@ final class CalendarComponent extends Component
             $week = [];
             for ($i = 0; $i < 7; $i++) {
                 $date = $currentWeekStart->copy()->addDays($i);
-                
-                if (!$this->config->showWeekends && in_array($date->dayOfWeek, [0, 6])) {
+
+                if (
+                    !$this->config->showWeekends
+                    && in_array($date->dayOfWeek, [0, 6])
+                ) {
                     continue;
                 }
 
-                $dayEvents = collect($this->currentEvents)->filter(
-                    fn($event) => $this->ensureEventDTO($event)->occursOnDate($date)
-                )->values()->toArray();
+                $dayEvents = collect($this->currentEvents)
+                    ->filter(
+                        fn($event) => $this->ensureEventDTO(
+                            $event,
+                        )->occursOnDate($date),
+                    )
+                    ->values()
+                    ->toArray();
 
                 $week[] = [
                     'date' => $date->toDateString(),
                     'day' => $date->day,
-                    'isCurrentMonth' => $date->month === $currentDateCarbon->month,
+                    'isCurrentMonth' =>
+                        $date->month === $currentDateCarbon->month,
                     'isToday' => $date->isToday(),
                     'isWeekend' => in_array($date->dayOfWeek, [0, 6]),
                     'events' => $dayEvents,
                     'dayOfWeek' => $date->dayOfWeek,
                 ];
             }
-            
+
             if (!empty($week)) {
                 $weeks[] = $week;
             }
-            
+
             $currentWeekStart->addWeek();
         }
 
@@ -258,14 +278,22 @@ final class CalendarComponent extends Component
         $current = $startOfWeek->copy();
 
         while ($current->lte($endOfWeek)) {
-            if (!$this->config->showWeekends && in_array($current->dayOfWeek, [0, 6])) {
+            if (
+                !$this->config->showWeekends
+                && in_array($current->dayOfWeek, [0, 6])
+            ) {
                 $current->addDay();
                 continue;
             }
 
-            $dayEvents = collect($this->currentEvents)->filter(
-                fn($event) => $this->ensureEventDTO($event)->occursOnDate($current)
-            )->values()->toArray();
+            $dayEvents = collect($this->currentEvents)
+                ->filter(
+                    fn($event) => $this->ensureEventDTO($event)->occursOnDate(
+                        $current,
+                    ),
+                )
+                ->values()
+                ->toArray();
 
             $days[] = [
                 'date' => $current->toDateString(),
@@ -288,9 +316,14 @@ final class CalendarComponent extends Component
     private function buildDayView(): array
     {
         $currentDateCarbon = Carbon::parse($this->currentDate);
-        $dayEvents = collect($this->currentEvents)->filter(
-            fn($event) => $this->ensureEventDTO($event)->occursOnDate($currentDateCarbon)
-        )->values()->toArray();
+        $dayEvents = collect($this->currentEvents)
+            ->filter(
+                fn($event) => $this->ensureEventDTO($event)->occursOnDate(
+                    $currentDateCarbon,
+                ),
+            )
+            ->values()
+            ->toArray();
 
         return [
             'type' => 'day',
@@ -305,14 +338,13 @@ final class CalendarComponent extends Component
     private function getWeekdayLabels(): array
     {
         $labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        
+
         if (!$this->config->showWeekends) {
             return array_slice($labels, 1, 5); // Mon-Fri only
         }
 
         return $labels;
     }
-
 
     private function ensureEventDTO($event): CalendarEventDTO
     {
@@ -324,9 +356,10 @@ final class CalendarComponent extends Component
             return CalendarEventDTO::fromArray($event);
         }
 
-        throw new \InvalidArgumentException('Event must be CalendarEventDTO or array');
+        throw new \InvalidArgumentException(
+            'Event must be CalendarEventDTO or array',
+        );
     }
-
 
     public function render()
     {

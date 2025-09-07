@@ -23,7 +23,7 @@ interface TimeProgressable
     /**
      * Get the completed date for progress calculation
      */
-    public function getProgressCompletedDate(): ?Carbon;
+    public function getProgressCompletedDate(): null|Carbon;
 
     /**
      * Check if the progressable item has valid progress dates

@@ -11,11 +11,10 @@ final class Advanced
 {
     private string $tenantId;
 
-    public function build(?string $documentId = null): array
+    public function build(null|string $documentId = null): array
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
-        $imagesConfig = EditorConfigBuilder::images()
-            ->forPlan('advanced');
+        $imagesConfig = EditorConfigBuilder::images()->forPlan('advanced');
         $baseDirectory = DirectoryManager::document($this->tenantId)
             ->forDocument($documentId)
             ->images()
@@ -35,14 +34,16 @@ final class Advanced
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
+            'videoUpload' =>
+                $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
     }
 
-    private function buildVideoUploadConfig(?string $documentId)
+    private function buildVideoUploadConfig(null|string $documentId)
     {
-        $videoUploadConfig = EditorConfigBuilder::videoUpload()
-            ->forPlan('advanced');
+        $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan(
+            'advanced',
+        );
 
         $baseDirectory = DirectoryManager::document($this->tenantId)
             ->forDocument($documentId)

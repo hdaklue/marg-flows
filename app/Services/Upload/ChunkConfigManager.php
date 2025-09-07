@@ -15,12 +15,12 @@ final class ChunkConfigManager
     public static function simple(): ChunkConfig
     {
         return new ChunkConfig(
-            maxFileSize: FileSize::fromMB(50),        // 50MB max file
-            chunkSize: FileSize::fromMB(1),           // 1MB chunks
+            maxFileSize: FileSize::fromMB(50), // 50MB max file
+            chunkSize: FileSize::fromMB(1), // 1MB chunks
             useChunkedUpload: true,
-            maxConcurrentUploads: 2,                  // Conservative concurrency
-            retryAttempts: 2,                         // Fewer retries
-            timeoutSeconds: 180                       // 3 minutes timeout
+            maxConcurrentUploads: 2, // Conservative concurrency
+            retryAttempts: 2, // Fewer retries
+            timeoutSeconds: 180, // 3 minutes timeout
         );
     }
 
@@ -30,12 +30,12 @@ final class ChunkConfigManager
     public static function advanced(): ChunkConfig
     {
         return new ChunkConfig(
-            maxFileSize: FileSize::fromMB(250),       // 250MB max file
-            chunkSize: FileSize::fromMB(5),           // 5MB chunks
+            maxFileSize: FileSize::fromMB(250), // 250MB max file
+            chunkSize: FileSize::fromMB(5), // 5MB chunks
             useChunkedUpload: true,
-            maxConcurrentUploads: 3,                  // Balanced concurrency
-            retryAttempts: 3,                         // Standard retries
-            timeoutSeconds: 300                       // 5 minutes timeout
+            maxConcurrentUploads: 3, // Balanced concurrency
+            retryAttempts: 3, // Standard retries
+            timeoutSeconds: 300, // 5 minutes timeout
         );
     }
 
@@ -45,12 +45,12 @@ final class ChunkConfigManager
     public static function ultimate(): ChunkConfig
     {
         return new ChunkConfig(
-            maxFileSize: FileSize::fromGB(2),         // 2GB max file
-            chunkSize: FileSize::fromMB(10),          // 10MB chunks
+            maxFileSize: FileSize::fromGB(2), // 2GB max file
+            chunkSize: FileSize::fromMB(10), // 10MB chunks
             useChunkedUpload: true,
-            maxConcurrentUploads: 5,                  // High concurrency
-            retryAttempts: 5,                         // More retries for large files
-            timeoutSeconds: 600                       // 10 minutes timeout
+            maxConcurrentUploads: 5, // High concurrency
+            retryAttempts: 5, // More retries for large files
+            timeoutSeconds: 600, // 10 minutes timeout
         );
     }
 
@@ -81,11 +81,11 @@ final class ChunkConfigManager
                 'ultimate' => FileSize::fromMB(25),
                 default => FileSize::fromMB(5),
             },
-            chunkSize: FileSize::fromMB(1),           // Always use small chunks for images
-            useChunkedUpload: false,                  // Images typically don't need chunking
+            chunkSize: FileSize::fromMB(1), // Always use small chunks for images
+            useChunkedUpload: false, // Images typically don't need chunking
             maxConcurrentUploads: $baseConfig->maxConcurrentUploads,
             retryAttempts: $baseConfig->retryAttempts,
-            timeoutSeconds: 120                       // Shorter timeout for images
+            timeoutSeconds: 120, // Shorter timeout for images
         );
     }
 
@@ -104,10 +104,10 @@ final class ChunkConfigManager
                 default => FileSize::fromMB(100),
             },
             chunkSize: $baseConfig->chunkSize,
-            useChunkedUpload: true,                   // Videos always use chunking
+            useChunkedUpload: true, // Videos always use chunking
             maxConcurrentUploads: $baseConfig->maxConcurrentUploads,
             retryAttempts: $baseConfig->retryAttempts + 1, // Extra retry for large videos
-            timeoutSeconds: $baseConfig->timeoutSeconds * 2 // Longer timeout for videos
+            timeoutSeconds: $baseConfig->timeoutSeconds * 2, // Longer timeout for videos
         );
     }
 }

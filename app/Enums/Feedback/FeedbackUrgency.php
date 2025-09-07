@@ -11,6 +11,7 @@ use Filament\Support\Contracts\HasLabel;
 enum FeedbackUrgency: int implements HasColor, HasLabel
 {
     use EnumSelectArrays;
+
     case NORMAL = 1;
 
     case SUGGESTION = 2;

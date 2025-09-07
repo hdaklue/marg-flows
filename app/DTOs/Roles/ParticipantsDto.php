@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\DTOs\Roles;
 
-use App\Collections\Role\ParticipantsCollection;
+use App\Collections\ParticipantsCollection;
 use App\DTOs\ItemableDto;
 
 final class ParticipantsDto extends ItemableDto
 {
-    public static function fromParticipantsCollection(ParticipantsCollection $data): self
-    {
+    public static function fromParticipantsCollection(ParticipantsCollection $data): self {
         return new self([
             'items' => $data->toDto(),
         ]);
     }
+
     // public static function fromParticipantsCollection(ParticipantsCollection $data): self
     // {
     //     return new self([

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\Document;
-use App\Models\Feedbacks\DocumentFeedback;
 use App\Models\Feedbacks\AudioFeedback;
+use App\Models\Feedbacks\DocumentFeedback;
 use App\Models\Feedbacks\VideoFeedback;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -21,7 +21,9 @@ final class FeedbackSeeder extends Seeder
         $pages = Document::limit(5)->get();
 
         if ($users->isEmpty() || $pages->isEmpty()) {
-            $this->command->warn('No users or pages found. Please run UserSeeder and PageSeeder first.');
+            $this->command->warn(
+                'No users or pages found. Please run UserSeeder and PageSeeder first.',
+            );
 
             return;
         }
@@ -43,11 +45,31 @@ final class FeedbackSeeder extends Seeder
     {
         // Create various document block feedbacks
         $feedbackTypes = [
-            ['status' => 'open', 'urgency' => 1, 'content' => 'This paragraph needs more detail about the implementation.'],
-            ['status' => 'open', 'urgency' => 3, 'content' => 'Critical error in this code block - needs immediate attention!'],
-            ['status' => 'resolved', 'urgency' => 1, 'content' => 'Grammar issues in this header.'],
-            ['status' => 'running', 'urgency' => 2, 'content' => 'Working on restructuring this table for better readability.'],
-            ['status' => 'rejected', 'urgency' => 1, 'content' => 'Suggested removing this alert box.'],
+            [
+                'status' => 'open',
+                'urgency' => 1,
+                'content' => 'This paragraph needs more detail about the implementation.',
+            ],
+            [
+                'status' => 'open',
+                'urgency' => 3,
+                'content' => 'Critical error in this code block - needs immediate attention!',
+            ],
+            [
+                'status' => 'resolved',
+                'urgency' => 1,
+                'content' => 'Grammar issues in this header.',
+            ],
+            [
+                'status' => 'running',
+                'urgency' => 2,
+                'content' => 'Working on restructuring this table for better readability.',
+            ],
+            [
+                'status' => 'rejected',
+                'urgency' => 1,
+                'content' => 'Suggested removing this alert box.',
+            ],
         ];
 
         foreach ($feedbackTypes as $index => $feedbackData) {
@@ -58,7 +80,11 @@ final class FeedbackSeeder extends Seeder
             $feedbackData['feedbackable_type'] = $page->getMorphClass();
             $feedbackData['feedbackable_id'] = $page->id;
             $feedbackData['block_id'] = 'block-' . Str::random(8);
-            $feedbackData['element_type'] = fake()->randomElement(['paragraph', 'header', 'list']);
+            $feedbackData['element_type'] = fake()->randomElement([
+                'paragraph',
+                'header',
+                'list',
+            ]);
 
             $feedback = DocumentFeedback::create($feedbackData);
 
@@ -83,10 +109,18 @@ final class FeedbackSeeder extends Seeder
                 'feedbackable_type' => $page->getMorphClass(),
                 'feedbackable_id' => $page->id,
                 'content' => fake()->sentence(),
-                'status' => fake()->randomElement(['open', 'running', 'resolved']),
+                'status' => fake()->randomElement([
+                    'open',
+                    'running',
+                    'resolved',
+                ]),
                 'urgency' => fake()->randomElement([1, 2, 3]),
                 'block_id' => 'block-' . Str::random(8),
-                'element_type' => fake()->randomElement(['paragraph', 'header', 'list']),
+                'element_type' => fake()->randomElement([
+                    'paragraph',
+                    'header',
+                    'list',
+                ]),
             ]);
         }
     }
@@ -107,7 +141,11 @@ final class FeedbackSeeder extends Seeder
                     'Volume needs to be adjusted.',
                     'Consider adding subtitles for this part.',
                 ]),
-                'status' => fake()->randomElement(['open', 'running', 'resolved']),
+                'status' => fake()->randomElement([
+                    'open',
+                    'running',
+                    'resolved',
+                ]),
                 'urgency' => fake()->randomElement([1, 2, 3]),
                 'start_time' => fake()->randomFloat(2, 0, 300),
                 'end_time' => fake()->randomFloat(2, 300, 600),
@@ -128,7 +166,11 @@ final class FeedbackSeeder extends Seeder
                     'Consider cropping this area out.',
                     'Graphics overlay needed here.',
                 ]),
-                'status' => fake()->randomElement(['open', 'running', 'resolved']),
+                'status' => fake()->randomElement([
+                    'open',
+                    'running',
+                    'resolved',
+                ]),
                 'urgency' => fake()->randomElement([1, 2, 3]),
                 'feedback_type' => 'region',
                 'start_time' => fake()->randomFloat(2, 0, 300),
@@ -152,7 +194,11 @@ final class FeedbackSeeder extends Seeder
                     'Consider using this as a thumbnail.',
                     'Quality degradation visible in this frame.',
                 ]),
-                'status' => fake()->randomElement(['open', 'running', 'resolved']),
+                'status' => fake()->randomElement([
+                    'open',
+                    'running',
+                    'resolved',
+                ]),
                 'urgency' => fake()->randomElement([1, 2, 3]),
                 'feedback_type' => 'frame',
                 'timestamp' => fake()->randomFloat(2, 0, 600),

@@ -11,20 +11,32 @@ use JsonSerializable;
 use Livewire\Wireable;
 use Stringable;
 
-abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, Stringable, Wireable
+abstract class MediaTimestamp implements
+    Arrayable,
+    Jsonable,
+    JsonSerializable,
+    Stringable,
+    Wireable
 {
     /**
      * Wire deserialization for Livewire.
      */
     public static function fromLivewire($value): self
     {
-        throw_if(! is_array($value) || ! isset($value['type']), new InvalidArgumentException('Invalid Livewire value for MediaTimestamp'));
+        throw_if(
+            !is_array($value) || !isset($value['type']),
+            new InvalidArgumentException(
+                'Invalid Livewire value for MediaTimestamp',
+            ),
+        );
 
         return match ($value['type']) {
             'audio_region' => AudioRegion::fromArray($value),
             'video_frame' => VideoFrame::fromArray($value),
             'video_region' => VideoRegion::fromArray($value),
-            default => throw new InvalidArgumentException('Unknown MediaTimestamp type: ' . $value['type']),
+            default => throw new InvalidArgumentException(
+                'Unknown MediaTimestamp type: ' . $value['type'],
+            ),
         };
     }
 
@@ -36,7 +48,7 @@ abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, 
 
     abstract public function getDuration(): CommentTime;
 
-    abstract public function getFrameRate(): ?float;
+    abstract public function getFrameRate(): null|float;
 
     /**
      * JSON serialization.

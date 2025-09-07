@@ -7,18 +7,18 @@ namespace App\Listeners;
 use App\Events\Tenant\MemberRemoved;
 use App\Events\Tenant\TanantMemberAdded;
 use App\Events\Tenant\TenantCreated;
-use Hdaklue\MargRbac\Events\Role\EntityRoleAssigned;
-use Hdaklue\MargRbac\Events\Role\EntityRoleRemoved;
-use Hdaklue\MargRbac\Events\Tenant\TenantCreated as PackageTenantCreated;
-use Hdaklue\MargRbac\Events\Tenant\TanantMemberAdded as PackageTanantMemberAdded;
-use Hdaklue\MargRbac\Events\Tenant\TenantMemberRemoved as PackageTenantMemberRemoved;
-use Hdaklue\MargRbac\Events\TenantMemberInvited;
-use Hdaklue\MargRbac\Events\TenantSwitched;
-use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\User;
 use App\Notifications\Participant\AssignedToEntity;
 use App\Notifications\Participant\RemovedFromEntity;
 use App\Notifications\TenantCreatedNotification;
+use Hdaklue\MargRbac\Events\Role\EntityRoleAssigned;
+use Hdaklue\MargRbac\Events\Role\EntityRoleRemoved;
+use Hdaklue\MargRbac\Events\Tenant\TanantMemberAdded as PackageTanantMemberAdded;
+use Hdaklue\MargRbac\Events\Tenant\TenantCreated as PackageTenantCreated;
+use Hdaklue\MargRbac\Events\Tenant\TenantMemberRemoved as PackageTenantMemberRemoved;
+use Hdaklue\MargRbac\Events\TenantMemberInvited;
+use Hdaklue\MargRbac\Events\TenantSwitched;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use Illuminate\Events\Dispatcher;
 
 final class TenantEventSubscriber
@@ -28,15 +28,11 @@ final class TenantEventSubscriber
      */
     public function handleTenantCreated(TenantCreated $event): void
     {
-
-        $users = User::appAdmin()
-            ->where('id', '!=', $event->user->id)
-            ->get();
+        $users = User::appAdmin()->where('id', '!=', $event->user->id)->get();
 
         foreach ($users as $user) {
             $user->notify(new TenantCreatedNotification($event->tenant));
         }
-
     }
 
     public function handleMemberRemoved(MemberRemoved $event): void
@@ -48,20 +44,17 @@ final class TenantEventSubscriber
 
     public function handleMemberAdded(TanantMemberAdded $event): void
     {
-
         RoleManager::clearCache($event->tenant);
-        $event->user->notify(new AssignedToEntity($event->tenant, $event->role->getLabel()));
-
+        $event->user->notify(
+            new AssignedToEntity($event->tenant, $event->role->getLabel()),
+        );
     }
 
     /**
      * Handle package tenant created event
      */
-    public function handlePackageTenantCreated(PackageTenantCreated $event): void
-    {
-        $users = User::appAdmin()
-            ->where('id', '!=', $event->user->id)
-            ->get();
+    public function handlePackageTenantCreated(PackageTenantCreated $event): void {
+        $users = User::appAdmin()->where('id', '!=', $event->user->id)->get();
 
         foreach ($users as $user) {
             $user->notify(new TenantCreatedNotification($event->tenant));
@@ -71,17 +64,16 @@ final class TenantEventSubscriber
     /**
      * Handle package member added event
      */
-    public function handlePackageMemberAdded(PackageTanantMemberAdded $event): void
-    {
+    public function handlePackageMemberAdded(PackageTanantMemberAdded $event): void {
         RoleManager::clearCache($event->tenant);
+
         // Handle any app-specific logic for member addition
     }
 
     /**
      * Handle package member removed event
      */
-    public function handlePackageMemberRemoved(PackageTenantMemberRemoved $event): void
-    {
+    public function handlePackageMemberRemoved(PackageTenantMemberRemoved $event): void {
         RoleManager::clearCache($event->tenant);
         $event->memberRemoved->notify(new RemovedFromEntity($event->tenant));
     }
@@ -134,7 +126,6 @@ final class TenantEventSubscriber
             TenantCreated::class => 'handleTenantCreated',
             MemberRemoved::class => 'handleMemberRemoved',
             TanantMemberAdded::class => 'handleMemberAdded',
-            
             // Package events
             PackageTenantCreated::class => 'handlePackageTenantCreated',
             PackageTanantMemberAdded::class => 'handlePackageMemberAdded',

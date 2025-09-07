@@ -14,7 +14,10 @@ interface DocumentBlockFilterStrategy
     /**
      * Filter blocks based on strategy implementation.
      */
-    public function filter(DocumentBlocksDto $blocks, array $context = []): DocumentBlocksDto;
+    public function filter(
+        DocumentBlocksDto $blocks,
+        array $context = [],
+    ): DocumentBlocksDto;
 
     /**
      * Get the strategy name for identification.
@@ -24,7 +27,10 @@ interface DocumentBlockFilterStrategy
     /**
      * Check if a block type is allowed by this strategy.
      */
-    public function isBlockTypeAllowed(string $blockType, array $context = []): bool;
+    public function isBlockTypeAllowed(
+        string $blockType,
+        array $context = [],
+    ): bool;
 
     /**
      * Get allowed block types for this strategy.

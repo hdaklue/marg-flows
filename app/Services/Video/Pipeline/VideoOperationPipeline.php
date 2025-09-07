@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Pipeline;
 
-use App\Services\Video\Contracts\VideoOperationContract;
 use App\Services\Video\Contracts\VideoFormatContract;
+use App\Services\Video\Contracts\VideoOperationContract;
 use App\Services\Video\Enums\BitrateEnum;
 use App\Services\Video\Services\VideoPipelineExporter;
 use Exception;
@@ -22,11 +22,11 @@ final class VideoOperationPipeline
 
     private bool $forceTranscoding = false;
 
-    private ?VideoFormatContract $convertFormat = null;
+    private null|VideoFormatContract $convertFormat = null;
 
-    private ?BitrateEnum $convertBitrate = null;
+    private null|BitrateEnum $convertBitrate = null;
 
-    private ?int $forcedBitrate = null;
+    private null|int $forcedBitrate = null;
 
     public function __construct(
         private readonly string $sourcePath,
@@ -52,8 +52,10 @@ final class VideoOperationPipeline
     public function addOperations(array $operations): self
     {
         foreach ($operations as $operation) {
-            if (! $operation instanceof VideoOperationContract) {
-                throw new InvalidArgumentException('All operations must implement VideoOperationContract');
+            if (!$operation instanceof VideoOperationContract) {
+                throw new InvalidArgumentException(
+                    'All operations must implement VideoOperationContract',
+                );
             }
 
             $this->addOperation($operation);
@@ -65,8 +67,10 @@ final class VideoOperationPipeline
     /**
      * Set conversion format and bitrate for the pipeline.
      */
-    public function setConvertFormat(VideoFormatContract $format, ?BitrateEnum $bitrate = null): self
-    {
+    public function setConvertFormat(
+        VideoFormatContract $format,
+        null|BitrateEnum $bitrate = null,
+    ): self {
         $this->convertFormat = $format;
         $this->convertBitrate = $bitrate;
 
@@ -81,11 +85,19 @@ final class VideoOperationPipeline
     {
         $this->executionLog = [];
 
-        $exporter = new VideoPipelineExporter($this, $this->sourcePath, $this->disk);
-        $finalPath = $exporter->export($outputPath, $this->convertFormat, $this->convertBitrate);
-        
+        $exporter = new VideoPipelineExporter(
+            $this,
+            $this->sourcePath,
+            $this->disk,
+        );
+        $finalPath = $exporter->export(
+            $outputPath,
+            $this->convertFormat,
+            $this->convertBitrate,
+        );
+
         $this->logPipelineCompletion($finalPath);
-        
+
         return $finalPath;
     }
 
@@ -118,13 +130,13 @@ final class VideoOperationPipeline
      */
     public function getOperationsMetadata(): array
     {
-        return array_map(fn ($op) => $op->getMetadata(), $this->operations);
+        return array_map(fn($op) => $op->getMetadata(), $this->operations);
     }
 
     /**
      * Force transcoding even if operations might not require it.
      */
-    public function forceTranscoding(?int $bitrate = null): self
+    public function forceTranscoding(null|int $bitrate = null): self
     {
         $this->forceTranscoding = true;
         if ($bitrate) {
@@ -137,12 +149,15 @@ final class VideoOperationPipeline
     /**
      * Log successful operation execution.
      */
-    private function logSuccessfulOperation(VideoOperationContract $operation, float $startTime): void
-    {
+    private function logSuccessfulOperation(
+        VideoOperationContract $operation,
+        float $startTime,
+    ): void {
         $this->executionLog[] = [
             'operation' => $operation->getName(),
             'status' => 'success',
-            'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
+            'execution_time' =>
+                round((microtime(true) - $startTime) * 1000, 2) . 'ms',
             'metadata' => $operation->getMetadata(),
             'timestamp' => now()->toISOString(),
         ];
@@ -151,13 +166,17 @@ final class VideoOperationPipeline
     /**
      * Log failed operation execution.
      */
-    private function logFailedOperation(VideoOperationContract $operation, Exception $e, float $startTime): void
-    {
+    private function logFailedOperation(
+        VideoOperationContract $operation,
+        Exception $e,
+        float $startTime,
+    ): void {
         $this->executionLog[] = [
             'operation' => $operation->getName(),
             'status' => 'failed',
             'error' => $e->getMessage(),
-            'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
+            'execution_time' =>
+                round((microtime(true) - $startTime) * 1000, 2) . 'ms',
             'metadata' => $operation->getMetadata(),
             'timestamp' => now()->toISOString(),
         ];
@@ -166,8 +185,10 @@ final class VideoOperationPipeline
     /**
      * Log skipped operation.
      */
-    private function logSkippedOperation(VideoOperationContract $operation, string $reason): void
-    {
+    private function logSkippedOperation(
+        VideoOperationContract $operation,
+        string $reason,
+    ): void {
         $this->executionLog[] = [
             'operation' => $operation->getName(),
             'status' => 'skipped',
@@ -189,5 +210,4 @@ final class VideoOperationPipeline
             'timestamp' => now()->toISOString(),
         ];
     }
-
 }

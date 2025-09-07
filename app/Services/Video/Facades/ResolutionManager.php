@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Facades;
 
-use App\Services\Video\Services\ResolutionManager as ResolutionManagerService;
 use App\Services\Video\Enums\NamingPattern;
+use App\Services\Video\Services\ResolutionManager as ResolutionManagerService;
 use App\Services\Video\Video;
 
 /**
@@ -19,17 +19,31 @@ class ResolutionManager
     /**
      * Create a new ResolutionManager instance from path.
      */
-    public static function from(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null): ResolutionManagerService
-    {
-        return ResolutionManagerService::from($sourcePath, $disk, $namingStrategy);
+    public static function from(
+        string $sourcePath,
+        string $disk = 'local',
+        null|NamingPattern $namingStrategy = null,
+    ): ResolutionManagerService {
+        return ResolutionManagerService::from(
+            $sourcePath,
+            $disk,
+            $namingStrategy,
+        );
     }
 
     /**
      * Create a new ResolutionManager instance from disk.
      */
-    public static function fromDisk(string $sourcePath, string $disk = 'local', ?NamingPattern $namingStrategy = null): ResolutionManagerService
-    {
-        return ResolutionManagerService::fromDisk($sourcePath, $disk, $namingStrategy);
+    public static function fromDisk(
+        string $sourcePath,
+        string $disk = 'local',
+        null|NamingPattern $namingStrategy = null,
+    ): ResolutionManagerService {
+        return ResolutionManagerService::fromDisk(
+            $sourcePath,
+            $disk,
+            $namingStrategy,
+        );
     }
 
     /**

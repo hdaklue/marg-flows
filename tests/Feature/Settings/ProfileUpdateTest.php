@@ -51,13 +51,12 @@ test('user can delete their account', function () {
 
     $this->actingAs($user);
 
-    $response = Livewire::test('settings.delete-user-form')
-        ->set('password', 'password')
-        ->call('deleteUser');
+    $response = Livewire::test('settings.delete-user-form')->set(
+        'password',
+        'password',
+    )->call('deleteUser');
 
-    $response
-        ->assertHasNoErrors()
-        ->assertRedirect('/');
+    $response->assertHasNoErrors()->assertRedirect('/');
 
     expect($user->fresh())->toBeNull();
     expect(auth()->check())->toBeFalse();
@@ -68,9 +67,10 @@ test('correct password must be provided to delete account', function () {
 
     $this->actingAs($user);
 
-    $response = Livewire::test('settings.delete-user-form')
-        ->set('password', 'wrong-password')
-        ->call('deleteUser');
+    $response = Livewire::test('settings.delete-user-form')->set(
+        'password',
+        'wrong-password',
+    )->call('deleteUser');
 
     $response->assertHasErrors(['password']);
 

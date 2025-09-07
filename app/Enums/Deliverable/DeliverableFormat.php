@@ -27,10 +27,14 @@ enum DeliverableFormat: string implements HasLabel, HasDescription
     public function getDescription(): string
     {
         return match ($this) {
-            self::DESIGN => 'Visual design deliverables including graphics, layouts, and UI elements',
-            self::VIDEO => 'Video content including promotional videos, tutorials, and presentations',
-            self::AUDIO => 'Audio content including podcasts, voiceovers, and sound effects',
-            self::DOCUMENT => 'Written content including reports, specifications, and documentation',
+            self::DESIGN
+                => 'Visual design deliverables including graphics, layouts, and UI elements',
+            self::VIDEO
+                => 'Video content including promotional videos, tutorials, and presentations',
+            self::AUDIO
+                => 'Audio content including podcasts, voiceovers, and sound effects',
+            self::DOCUMENT
+                => 'Written content including reports, specifications, and documentation',
         };
     }
 
@@ -47,7 +51,18 @@ enum DeliverableFormat: string implements HasLabel, HasDescription
     public function getAllowedExtensions(): array
     {
         return match ($this) {
-            self::DESIGN => ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp', 'ai', 'psd', 'sketch', 'fig'],
+            self::DESIGN => [
+                'png',
+                'jpg',
+                'jpeg',
+                'svg',
+                'gif',
+                'webp',
+                'ai',
+                'psd',
+                'sketch',
+                'fig',
+            ],
             self::VIDEO => ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv'],
             self::AUDIO => ['mp3', 'wav', 'aac', 'flac', 'm4a', 'ogg'],
             self::DOCUMENT => ['pdf', 'doc', 'docx', 'txt', 'md', 'rtf'],

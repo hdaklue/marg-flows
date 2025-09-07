@@ -45,7 +45,8 @@ final class Images implements DocumentBlockConfigContract
         $this->config['endpoints']['byFile'] = null;
         $this->config['endpoints']['byUrl'] = null;
         $this->config['endpoints']['delete'] = null;
-        $this->config['types'] = FileTypes::getWebImageFormatsAsValidationString();
+        $this->config['types'] =
+            FileTypes::getWebImageFormatsAsValidationString();
         $this->config['maxFileSize'] = $chunkConfig->maxFileSize;
 
         // Add chunk configuration for frontend (even if not used, provides consistency)
@@ -54,7 +55,10 @@ final class Images implements DocumentBlockConfigContract
 
     public function endpoints(array $endpoints): self
     {
-        $this->config['endpoints'] = array_merge($this->config['endpoints'], $endpoints);
+        $this->config['endpoints'] = array_merge(
+            $this->config['endpoints'],
+            $endpoints,
+        );
 
         return $this;
     }
@@ -104,7 +108,10 @@ final class Images implements DocumentBlockConfigContract
 
     public function additionalRequestHeaders(array $headers): self
     {
-        $this->config['additionalRequestHeaders'] = array_merge($this->config['additionalRequestHeaders'], $headers);
+        $this->config['additionalRequestHeaders'] = array_merge(
+            $this->config['additionalRequestHeaders'],
+            $headers,
+        );
 
         return $this;
     }
@@ -132,16 +139,21 @@ final class Images implements DocumentBlockConfigContract
 
     public function forDocument(string $documentId): self
     {
-        $this->config['endpoints']['byFile'] = route('editorjs.upload-image', ['document' => $documentId]);
-        $this->config['endpoints']['byUrl'] = route('editorjs.upload-image', ['document' => $documentId]);
-        $this->config['endpoints']['delete'] = route('editorjs.document.delete-image', ['document' => $documentId]);
+        $this->config['endpoints']['byFile'] = route('editorjs.upload-image', [
+            'document' => $documentId,
+        ]);
+        $this->config['endpoints']['byUrl'] = route('editorjs.upload-image', [
+            'document' => $documentId,
+        ]);
+        $this->config['endpoints']['delete'] = route('editorjs.document.delete-image', [
+            'document' => $documentId,
+        ]);
 
         return $this;
     }
 
     public function baseDirectory(string $baseDirectory): self
     {
-
         $this->config['baseDirectory'] = Storage::get($baseDirectory);
 
         return $this;

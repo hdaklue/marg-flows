@@ -14,20 +14,23 @@ trait hasTranslatableEditorJS
 
     public function updatedActiveLocale(): void
     {
-
         if (blank($this->oldActiveLocale)) {
             return;
         }
 
         $this->resetValidation();
 
-        $translatableAttributes = static::getResource()::getTranslatableAttributes();
+        $translatableAttributes =
+            static::getResource()::getTranslatableAttributes();
 
-        $this->otherLocaleData[$this->oldActiveLocale] = Arr::only($this->data, $translatableAttributes);
+        $this->otherLocaleData[$this->oldActiveLocale] = Arr::only(
+            $this->data,
+            $translatableAttributes,
+        );
 
         $this->data = [
             ...Arr::except($this->data, $translatableAttributes),
-            ...$this->otherLocaleData[$this->activeLocale] ?? [],
+            ...($this->otherLocaleData[$this->activeLocale] ?? []),
         ];
 
         unset($this->otherLocaleData[$this->activeLocale]);

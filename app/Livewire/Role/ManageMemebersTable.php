@@ -28,7 +28,10 @@ use Hdaklue\Porter\Roles\BaseRole;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
-final class ManageMemebersTable extends Component implements HasActions, HasSchemas, HasTable
+final class ManageMemebersTable extends Component implements
+    HasActions,
+    HasSchemas,
+    HasTable
 {
     use InteractsWithActions;
     use InteractsWithSchemas;
@@ -43,23 +46,24 @@ final class ManageMemebersTable extends Component implements HasActions, HasSche
 
     public function table(Table $table): Table
     {
-
         return $table
-            ->records(fn () => $this->getParticipants())
+            ->records(fn() => $this->getParticipants())
             ->columns([
-                TextColumn::make('assignable.name')
-                    ->label('name'),
-                TextColumn::make('assignable.username')
-                    ->label('username'),
-                TextColumn::make('role')
-                    ->state(fn ($record) => ucfirst($record['role_key']->getName())),
+                TextColumn::make('assignable.name')->label('name'),
+                TextColumn::make('assignable.username')->label('username'),
+                TextColumn::make('role')->state(fn($record) => ucfirst(
+                    $record['role_key']['name'],
+                )),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
                 Action::make('add_member')
-                    ->visible(fn () => filamentUser()->can('manage', $this->roleableEntity))
+                    ->visible(fn() => filamentUser()->can(
+                        'manage',
+                        $this->roleableEntity,
+                    ))
                     ->form([
                         Select::make('member')
                             ->native(false)
@@ -74,9 +78,15 @@ final class ManageMemebersTable extends Component implements HasActions, HasSche
                         try {
                             $role = RoleFactory::tryMake($data['role']);
                             $user = User::where('id', $data['member'])->first();
-                            AddParticipant::run($this->roleableEntity, $user, $role);
+                            AddParticipant::run(
+                                $this->roleableEntity,
+                                $user,
+                                $role,
+                            );
                             Notification::make()
-                                ->body(__('common.messages.operation_completed'))
+                                ->body(__(
+                                    'common.messages.operation_completed',
+                                ))
                                 ->success()
                                 ->send();
                         } catch (Exception $e) {
@@ -85,22 +95,25 @@ final class ManageMemebersTable extends Component implements HasActions, HasSche
                                 ->body(__('common.messages.operation_failed'))
                                 ->danger()
                                 ->send();
-
                         }
-
                     })
                     ->label('Add Memeber'),
             ])
             ->recordActions([
                 Action::make('change_role')
-                    ->visible(filamentUser()->can('manage', $this->roleableEntity))
+                    ->visible(filamentUser()->can(
+                        'manage',
+                        $this->roleableEntity,
+                    ))
                     ->label('Change Role'),
                 Action::make('remove')
                     ->label('Remove Member')
                     ->color('danger')
                     ->action(function (Component $livewire, $record) {
-
-                        $user = User::where('id', $record['assignable']['id'])->first();
+                        $user = User::where(
+                            'id',
+                            $record['assignable']['id'],
+                        )->first();
                         RemoveParticipant::run($this->roleableEntity, $user);
                         $livewire->resetTable();
                     })
@@ -121,8 +134,14 @@ final class ManageMemebersTable extends Component implements HasActions, HasSche
     private function getParticipants()
     {
         return Porter::getParticipantsWithRoles($this->roleableEntity)
-            ->reject(fn (Roster $item) => $item->assignable_id === filamentUser()->getKey())
-            ->keyBy('assignable_id')->toArray();
+            ->reject(
+                fn(Roster $item) => (
+                    $item->assignable_id === filamentUser()->getKey()
+                ),
+            )
+            ->keyBy('assignable_id')
+            ->toArray();
+
         // dd($this->roleableEntity->getParticipantsWithRole()->keyBy('id')->toArray());
     }
 
@@ -135,15 +154,19 @@ final class ManageMemebersTable extends Component implements HasActions, HasSche
         $participantKeys[] = filamentUser()->getKey();
 
         return Porter::getParticipantsWithRoles($tenant)
-            ->reject(fn (Roster $item) => in_array($item->assignable_id, $participantKeys))
-            ->pluck('assignable.name', 'assignable.id')->toArray();
+            ->reject(fn(Roster $item) => in_array(
+                $item->assignable_id,
+                $participantKeys,
+            ))
+            ->pluck('assignable.name', 'assignable.id')
+            ->toArray();
     }
 
     private function getAllowedRoles()
     {
         $currentRole = Porter::getRoleOn(filamentUser(), $this->roleableEntity);
 
-        if (! empty($currentRole)) {
+        if (!empty($currentRole)) {
             return BaseRole::whereLowerThanOrEqual($currentRole);
         }
 

@@ -17,22 +17,25 @@ use InvalidArgumentException;
  * and support for images, videos, and document types. Both tenant IDs and
  * document IDs are MD5 hashed for security and privacy.
  */
-final class DocumentStorageStrategy extends BaseStorageStrategy implements DocumentStorageStrategyContract
+final class DocumentStorageStrategy extends BaseStorageStrategy implements
+    DocumentStorageStrategyContract
 {
-    private ?string $documentId = null;
+    private null|string $documentId = null;
 
-    private ?UploadedFile $file = null;
+    private null|UploadedFile $file = null;
 
-    private ?string $subdirectory = null;
+    private null|string $subdirectory = null;
 
-    private ?string $storedPath = null;
+    private null|string $storedPath = null;
 
     /**
      * Constructor receives the hashed tenant base directory from DirectoryManager.
      *
      * @param  string  $tenantBaseDirectory  The MD5-hashed tenant base directory
      */
-    public function __construct(private readonly string $tenantBaseDirectory) {}
+    public function __construct(
+        private readonly string $tenantBaseDirectory,
+    ) {}
 
     /**
      * Set the document ID for this storage session.
@@ -51,7 +54,12 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
 
     public function images(): ImageStorageStrategy
     {
-        throw_unless($this->documentId, new Exception('Cannot access images directory: Document ID is required. Call forDocument($documentId) first.'));
+        throw_unless(
+            $this->documentId,
+            new Exception(
+                'Cannot access images directory: Document ID is required. Call forDocument($documentId) first.',
+            ),
+        );
 
         $baseDirectory = $this->buildDirectoryPath('images');
 
@@ -60,7 +68,12 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
 
     public function videos(): VideoStorageStrategy
     {
-        throw_unless($this->documentId, new Exception('Cannot access videos directory: Document ID is required. Call forDocument($documentId) first.'));
+        throw_unless(
+            $this->documentId,
+            new Exception(
+                'Cannot access videos directory: Document ID is required. Call forDocument($documentId) first.',
+            ),
+        );
 
         $baseDirectory = $this->buildDirectoryPath('videos');
 
@@ -88,7 +101,12 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements Docum
 
     public function getUrl(): string
     {
-        throw_unless($this->storedPath, new InvalidArgumentException('Cannot generate URL: File must be stored first. Call store($file) before getUrl().'));
+        throw_unless(
+            $this->storedPath,
+            new InvalidArgumentException(
+                'Cannot generate URL: File must be stored first. Call store($file) before getUrl().',
+            ),
+        );
 
         return Storage::url($this->storedPath);
     }

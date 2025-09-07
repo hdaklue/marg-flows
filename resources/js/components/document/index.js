@@ -466,10 +466,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         new DragDrop(this.editor);
                         undo.initialize(initialData);
 
-                        // Set initialization complete after a short delay to ensure all initial rendering is done
+                        // Set initialization complete after a longer delay to ensure mobile layout events are properly setup
                         setTimeout(() => {
                             this.isInitializing = false;
-                        }, 100);
+                        }, 300);
                     }).catch((e) => {
                         console.error('Editor.js failed to initialize:', e);
                         this.isInitializing = false; // Ensure we don't get stuck in initializing state
@@ -975,10 +975,26 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 window.removeEventListener('resize', this.resizeHandler);
             }
 
-            // Cleanup editor
-            if (this.editor && this.editor.destroy) {
-                this.editor.destroy();
-                this.editor = null;
+            // Cleanup editor safely
+            if (this.editor && typeof this.editor.destroy === 'function') {
+                try {
+                    // Wait for editor to be fully ready before destroying to avoid event cleanup issues
+                    if (this.editor.isReady) {
+                        this.editor.isReady.then(() => {
+                            this.editor.destroy();
+                            this.editor = null;
+                        }).catch((e) => {
+                            console.warn('Editor destroy failed:', e);
+                            this.editor = null;
+                        });
+                    } else {
+                        // Editor not ready yet, just set to null
+                        this.editor = null;
+                    }
+                } catch (e) {
+                    console.warn('Error during editor cleanup:', e);
+                    this.editor = null;
+                }
             }
         }
     }

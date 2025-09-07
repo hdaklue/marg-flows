@@ -18,13 +18,16 @@ final class UploadSessionManager extends Manager
     /**
      * Factory method to create and configure an upload session.
      */
-    public static function start(string $strategy, string $tenantId): UploadSessionService
-    {
+    public static function start(
+        string $strategy,
+        string $tenantId,
+    ): UploadSessionService {
         /** @var UploadSessionManager $manager */
         $manager = app(UploadSessionManager::class);
-        
+
         return $manager->driver($strategy)->forTenant($tenantId);
     }
+
     /**
      * Get the default driver name.
      */
@@ -38,9 +41,7 @@ final class UploadSessionManager extends Manager
      */
     public function createHttpDriver(): UploadSessionService
     {
-        return new UploadSessionService(
-            new HttpResponseProgressStrategy()
-        );
+        return new UploadSessionService(new HttpResponseProgressStrategy());
     }
 
     /**
@@ -48,9 +49,7 @@ final class UploadSessionManager extends Manager
      */
     public function createWebsocketDriver(): UploadSessionService
     {
-        return new UploadSessionService(
-            new WebSocketProgressStrategy()
-        );
+        return new UploadSessionService(new WebSocketProgressStrategy());
     }
 
     /**
@@ -58,9 +57,7 @@ final class UploadSessionManager extends Manager
      */
     public function createLogDriver(): UploadSessionService
     {
-        return new UploadSessionService(
-            new LogProgressStrategy()
-        );
+        return new UploadSessionService(new LogProgressStrategy());
     }
 
     /**
@@ -68,8 +65,6 @@ final class UploadSessionManager extends Manager
      */
     public function createRedisDriver(): UploadSessionService
     {
-        return new UploadSessionService(
-            new SimpleProgressStrategy()
-        );
+        return new UploadSessionService(new SimpleProgressStrategy());
     }
 }

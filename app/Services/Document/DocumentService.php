@@ -27,8 +27,11 @@ final class DocumentService implements DocumentManagerInterface
      * @param  User  $creator  The user creating the page
      * @return Document The created page instance
      */
-    public function create(CreateDocumentDto $data, Documentable $documentable, User $creator): Document
-    {
+    public function create(
+        CreateDocumentDto $data,
+        Documentable $documentable,
+        User $creator,
+    ): Document {
         $document = new Document([
             'name' => $data->name,
             'blocks' => $data->toEditorJSFormat(),
@@ -54,7 +57,6 @@ final class DocumentService implements DocumentManagerInterface
      */
     public function update(Document $document, array $data): Document
     {
-
         if (isset($data['name'])) {
             $document->name = $data['name'];
         }
@@ -73,7 +75,6 @@ final class DocumentService implements DocumentManagerInterface
 
     public function updateBlocks(Document $document, array|string $blocks)
     {
-
         $document->updateBlocks($blocks);
         $this->clearCache($document->documentable);
         $this->clearDocumentsCache($document);
@@ -102,8 +103,10 @@ final class DocumentService implements DocumentManagerInterface
     /**
      * Returns pages of a documentable entity can be accessed by User.
      */
-    public function getDocumentsForUser(Documentable $documentable, User $user): Collection
-    {
+    public function getDocumentsForUser(
+        Documentable $documentable,
+        User $user,
+    ): Collection {
         $documentablePages = $this->getDocumentsFordocumentable($documentable);
 
         $pageKeys = $documentablePages->pluck('id')->toArray();
@@ -123,38 +126,56 @@ final class DocumentService implements DocumentManagerInterface
      */
     public function getDocuments(Documentable $documentable): Collection
     {
-
         if (config('document.should_cache', true)) {
             $cahcedDocuments = Cache::remember(
                 $this->generateDocumentsCacheKey($documentable),
                 now()->addMinutes(config('document.cache_ttl.list', 60)),
-                fn () => $documentable->documents()->with('creator')->orderBy('created_at', 'desc')->get(['id', 'name', 'created_at', 'updated_at', 'creator_id']),
+                fn() => $documentable
+                    ->documents()
+                    ->with('creator')
+                    ->orderBy('created_at', 'desc')
+                    ->get([
+                        'id',
+                        'name',
+                        'created_at',
+                        'updated_at',
+                        'creator_id',
+                    ]),
             );
 
             return $this->mapDocumentsToDtos($cahcedDocuments, $documentable);
         }
 
         /** @var Collection<int, Document> $documents */
-        $documents = $documentable->documents()->with('creator')->orderBy('created_at', 'desc')->get(['id', 'name', 'created_at', 'updated_at', 'creator_id']);
+        $documents = $documentable
+            ->documents()
+            ->with('creator')
+            ->orderBy('created_at', 'desc')
+            ->get(['id', 'name', 'created_at', 'updated_at', 'creator_id']);
 
         return $this->mapDocumentsToDtos($documents, $documentable);
     }
 
-    public function getDocument(string $documentId): ?Document
+    public function getDocument(string $documentId): null|Document
     {
         $page = Document::where('id', $documentId)
-            ->with(['creator', 'documentable'])->firstOrFail();
+            ->with(['creator', 'documentable'])
+            ->firstOrFail();
 
         if (config('document.should_cache', true)) {
             $cacheKey = $this->generateDocumentCacheKey($page);
 
-            return Cache::remember($cacheKey, now()->addMinutes(config('document.cache_ttl.document', 1440)), fn () => $page);
+            return Cache::remember(
+                $cacheKey,
+                now()->addMinutes(config('document.cache_ttl.document', 1440)),
+                fn() => $page,
+            );
         }
 
         return $page;
     }
 
-    public function getDocumentDto(string $documentId): ?DocumentDto
+    public function getDocumentDto(string $documentId): null|DocumentDto
     {
         return DocumentDto::fromModel($this->getDocument($documentId));
     }
@@ -165,7 +186,7 @@ final class DocumentService implements DocumentManagerInterface
             return Cache::remember(
                 "documents:creator:{$creator->getKey()}",
                 now()->addMinutes(config('document.cache_ttl.creator', 60)),
-                fn () => Document::where('creator_id', $creator->getKey())
+                fn() => Document::where('creator_id', $creator->getKey())
                     ->with(['documentable', 'creator'])
                     ->orderBy('created_at', 'desc')
                     ->get(),
@@ -185,13 +206,16 @@ final class DocumentService implements DocumentManagerInterface
      * @param  int  $limit  Maximum number of pages to return
      * @return Collection<int, Document> Collection of recent pages
      */
-    public function getRecentDocuments(Documentable $documentable, int $limit = 10): Collection
-    {
+    public function getRecentDocuments(
+        Documentable $documentable,
+        int $limit = 10,
+    ): Collection {
         if (config('document.should_cache', true)) {
             return Cache::remember(
                 "documents:recent:{$documentable->getMorphClass()}:{$documentable->getKey()}:{$limit}",
                 now()->addMinutes(config('document.cache_ttl.recent', 60)),
-                fn () => $documentable->documents()
+                fn() => $documentable
+                    ->documents()
                     ->with('creator')
                     ->orderBy('created_at', 'desc')
                     ->limit($limit)
@@ -200,7 +224,8 @@ final class DocumentService implements DocumentManagerInterface
         }
 
         /** @var Collection<int, Document> $pages */
-        $pages = $documentable->documents()
+        $pages = $documentable
+            ->documents()
             ->with('creator')
             ->orderBy('created_at', 'desc')
             ->limit($limit)
@@ -216,13 +241,18 @@ final class DocumentService implements DocumentManagerInterface
      * @param  string  $query  The search query
      * @return Collection<int, Document> Collection of matching pages
      */
-    public function searchDocuments(Documentable $documentable, string $query): Collection
-    {
+    public function searchDocuments(
+        Documentable $documentable,
+        string $query,
+    ): Collection {
         /** @var Collection<int, Document> $pages */
-        $pages = $documentable->documents()
+        $pages = $documentable
+            ->documents()
             ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhereJsonContains('blocks', $query);
+                $q->where('name', 'like', "%{$query}%")->orWhereJsonContains(
+                    'blocks',
+                    $query,
+                );
             })
             ->with('creator')
             ->orderBy('created_at', 'desc')
@@ -273,8 +303,7 @@ final class DocumentService implements DocumentManagerInterface
      * @param  Documentable  $documentable  The entity to generate key for
      * @return string The cache key
      */
-    public function generateDocumentsCacheKey(Documentable $documentable): string
-    {
+    public function generateDocumentsCacheKey(Documentable $documentable): string {
         return "documents:{$documentable->getMorphClass()}:{$documentable->getKey()}";
     }
 
@@ -286,7 +315,9 @@ final class DocumentService implements DocumentManagerInterface
      */
     public function generateDocumentCacheKey(Document $page): string
     {
-        return "document:{$page->getKey()}:" . $this->generateContentHash($page);
+        return (
+            "document:{$page->getKey()}:" . $this->generateContentHash($page)
+        );
     }
 
     public function generateContentHash(Document $page): string
@@ -310,18 +341,21 @@ final class DocumentService implements DocumentManagerInterface
      * Get all pages for a documentable entity with caching.
      * Cache key automatically invalidates when pages are added/removed.
      */
-    public function getDocumentsFordocumentable(Documentable $documentable): Collection
-    {
-        $pages = Document::whereHasMorph('documentable',
-            $documentable->getMorphClass(), function ($query) use ($documentable) {
-                $query
-                    ->where('id', $documentable->getKey());
-            })->get();
+    public function getDocumentsFordocumentable(Documentable $documentable): Collection {
+        $pages = Document::whereHasMorph(
+            'documentable',
+            $documentable->getMorphClass(),
+            function ($query) use ($documentable) {
+                $query->where('id', $documentable->getKey());
+            },
+        )->get();
 
         if (config('document.should_cache')) {
-            $cacheKey = "documents:documentable:{$documentable->getMorphClass()}:{$documentable->getKey()}:" . md5(serialize($pages->pluck('id')->toArray()));
+            $cacheKey =
+                "documents:documentable:{$documentable->getMorphClass()}:{$documentable->getKey()}:"
+                . md5(serialize($pages->pluck('id')->toArray()));
 
-            return Cache::remember($cacheKey, now()->addDay(), fn () => $pages);
+            return Cache::remember($cacheKey, now()->addDay(), fn() => $pages);
         }
 
         return $pages;
@@ -350,10 +384,11 @@ final class DocumentService implements DocumentManagerInterface
      * @param  Documentable  $documentable  The documentable entity
      * @return Collection<int, DocumentDto> Collection of page DTOs
      */
-    private function mapDocumentsToDtos(Collection $documents, Documentable $documentable): Collection
-    {
-
-        return $documents->map(fn (Document $document) => DocumentDto::fromArray([
+    private function mapDocumentsToDtos(
+        Collection $documents,
+        Documentable $documentable,
+    ): Collection {
+        return $documents->map(fn(Document $document) => DocumentDto::fromArray([
             'name' => $document->getAttribute('name'),
             'id' => $document->getKey(),
             'created_at' => $document->getAttribute('created_at'),

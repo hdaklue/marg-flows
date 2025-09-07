@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use Filament\Actions\Action;
 use App\Models\Tenant;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +19,9 @@ class TenantCreatedNotification extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Tenant $tenant) {}
+    public function __construct(
+        public Tenant $tenant,
+    ) {}
 
     /**
      * Get the notification's delivery channels.
@@ -36,7 +38,7 @@ class TenantCreatedNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return (new MailMessage())
             ->line('The introduction to the notification.')
             ->action('Notification Action', url('/'))
             ->line('Thank you for using our application!');
@@ -54,7 +56,8 @@ class TenantCreatedNotification extends Notification implements ShouldQueue
                     ->label('mark as read')
                     ->link()
                     ->markAsRead(),
-            ])->getDatabaseMessage();
+            ])
+            ->getDatabaseMessage();
     }
 
     /**

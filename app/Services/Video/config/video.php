@@ -6,55 +6,49 @@ use App\Services\Video\Enums\NamingPattern;
 
 return [
     /*
-    |--------------------------------------------------------------------------
-    | Default Storage Disk
-    |--------------------------------------------------------------------------
-    |
-    | The default disk to use for video operations when none is specified.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Default Storage Disk
+     |--------------------------------------------------------------------------
+     |
+     | The default disk to use for video operations when none is specified.
+     |
+     */
     'default_disk' => env('VIDEO_DEFAULT_DISK', 'local'),
-
     /*
-    |--------------------------------------------------------------------------
-    | Default Naming Pattern
-    |--------------------------------------------------------------------------
-    |
-    | The default naming pattern to use when generating output filenames.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Default Naming Pattern
+     |--------------------------------------------------------------------------
+     |
+     | The default naming pattern to use when generating output filenames.
+     |
+     */
     'default_naming_pattern' => NamingPattern::Quality,
-
     /*
-    |--------------------------------------------------------------------------
-    | Processing Settings
-    |--------------------------------------------------------------------------
-    |
-    | Global settings for video processing operations.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Processing Settings
+     |--------------------------------------------------------------------------
+     |
+     | Global settings for video processing operations.
+     |
+     */
     'processing' => [
         // Default frame rate for video processing
         'default_frame_rate' => 30,
-
         // Default bitrate multiplier for quality calculations
         'bitrate_multiplier' => 1.0,
-
         // Whether to allow scale-up operations by default
         'allow_scale_up' => false,
-
         // Maximum processing timeout in seconds
         'timeout' => env('VIDEO_PROCESSING_TIMEOUT', 300),
     ],
-
     /*
-    |--------------------------------------------------------------------------
-    | Quality Presets
-    |--------------------------------------------------------------------------
-    |
-    | Predefined quality settings for common video formats.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Quality Presets
+     |--------------------------------------------------------------------------
+     |
+     | Predefined quality settings for common video formats.
+     |
+     */
     'quality_presets' => [
         '144p' => [
             'width' => 256,
@@ -105,43 +99,40 @@ return [
             'fps' => 30,
         ],
     ],
-
     /*
-    |--------------------------------------------------------------------------
-    | Storage Paths
-    |--------------------------------------------------------------------------
-    |
-    | Default paths for video storage.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Storage Paths
+     |--------------------------------------------------------------------------
+     |
+     | Default paths for video storage.
+     |
+     */
     'paths' => [
         'uploads' => 'videos/uploads',
         'processed' => 'videos/processed',
         'temp' => 'videos/temp',
         'thumbnails' => 'videos/thumbnails',
     ],
-
     /*
-    |--------------------------------------------------------------------------
-    | Supported Formats
-    |--------------------------------------------------------------------------
-    |
-    | List of supported input and output video formats.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Supported Formats
+     |--------------------------------------------------------------------------
+     |
+     | List of supported input and output video formats.
+     |
+     */
     'formats' => [
         'input' => ['mp4', 'avi', 'mov', 'mkv', 'webm', 'flv'],
         'output' => ['mp4', 'webm', 'mov'],
     ],
-
     /*
-    |--------------------------------------------------------------------------
-    | Watermark Settings
-    |--------------------------------------------------------------------------
-    |
-    | Default settings for video watermarks.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Watermark Settings
+     |--------------------------------------------------------------------------
+     |
+     | Default settings for video watermarks.
+     |
+     */
     'watermark' => [
         'default_position' => 'bottom-right',
         'default_opacity' => 0.8,

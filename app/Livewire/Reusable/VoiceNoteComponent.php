@@ -56,12 +56,15 @@ final class VoiceNoteComponent extends Component
     #[On('voice-recorder:voice-uploaded')]
     public function onVoiceUploaded($url)
     {
-        logger()->info('VoiceNote received voice-recorder:voice-uploaded event', ['url' => $url]);
+        logger()->info('VoiceNote received voice-recorder:voice-uploaded event', [
+            'url' => $url,
+        ]);
 
         $this->voiceNoteUrls[] = $url;
-        $this->hasRecording = ! empty($this->voiceNoteUrls);
+        $this->hasRecording = !empty($this->voiceNoteUrls);
 
-        logger()->info('VoiceNote updated URLs', ['voiceNoteUrls' => $this->voiceNoteUrls]);
+        logger()->info('VoiceNote updated URLs', ['voiceNoteUrls' =>
+            $this->voiceNoteUrls]);
 
         unset($this->getNotesUrls);
 
@@ -80,7 +83,9 @@ final class VoiceNoteComponent extends Component
 
             if (Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
-                logger()->info('Deleted voice note file during clear', ['path' => $path]);
+                logger()->info('Deleted voice note file during clear', [
+                    'path' => $path,
+                ]);
             }
         }
 
@@ -112,7 +117,7 @@ final class VoiceNoteComponent extends Component
             $this->voiceNoteUrls = array_values($this->voiceNoteUrls); // Reindex array
         }
 
-        $this->hasRecording = ! empty($this->voiceNoteUrls);
+        $this->hasRecording = !empty($this->voiceNoteUrls);
 
         // Dispatch event to notify parent component
         $this->dispatch('voice-note:removed', $index);

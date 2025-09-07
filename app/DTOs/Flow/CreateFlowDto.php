@@ -14,15 +14,14 @@ final class CreateFlowDto extends ValidatedDTO
 {
     public string $title;
 
-    public ?FlowStage $stage;
+    public null|FlowStage $stage;
 
-    public ?string $description;
+    public null|string $description;
 
-    public ?string $id;
+    public null|string $id;
 
     protected function rules(): array
     {
-
         return [
             'title' => ['required', 'string', 'min:3', 'max:100'],
             'stage' => ['sometimes', Rule::enum(FlowStage::class)],
@@ -44,7 +43,6 @@ final class CreateFlowDto extends ValidatedDTO
 
     protected function evaluateDefaultStage(): FlowStage
     {
-
         return FlowStage::ACTIVE;
     }
 

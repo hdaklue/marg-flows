@@ -16,7 +16,6 @@ trait BelongsToTenant
     public static function bootBelongsToTenant(): void
     {
         static::creating(static function ($model) {
-
             // Skip if tenant_id already set
             if ($model->tenant_id) {
                 return;
@@ -24,7 +23,10 @@ trait BelongsToTenant
 
             $tenantId = static::resolveTenantId();
 
-            throw_unless($tenantId, new Exception('Cannot resolve tenant for creating model'));
+            throw_unless(
+                $tenantId,
+                new Exception('Cannot resolve tenant for creating model'),
+            );
 
             $model->tenant_id = $tenantId;
         });
@@ -57,8 +59,6 @@ trait BelongsToTenant
     {
         return $this->belongsto(Tenant::class);
     }
-
-
 
     /**
      * @return Tenant

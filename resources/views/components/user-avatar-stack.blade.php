@@ -39,8 +39,8 @@
         'xl' => 'border-4',
     ];
 
-    $visibleUsers = collect($users)->take($maxVisible - ($showCount && count($users) > $maxVisible ? 1 : 0));
-    $remainingCount = count($users) - $visibleUsers->count();
+    $visibleUsers = $users->take($maxVisible - ($showCount && count($users) > $maxVisible ? 1 : 0));
+    $remainingCount = $users->count() - $visibleUsers->count();
 @endphp
 
 <div class="flex items-center" x-data="{
@@ -72,19 +72,19 @@
         @endphp --}}
         <div class="{{ $index > 0 ? $offsetClasses[$size] ?? '' : '' }} group relative">
             @if ($user)
-                <img src="{{ $user['participant_avatar'] }}" alt="{{ $user['participant_name'] }}"
+                <img src="{{ $user->avatarUrl }}" alt="{{ $user->name }}"
                     class="{{ $sizeClasses[$size] ?? '' }} {{ $borderClasses[$size] ?? '' }} cursor-pointer rounded-full border-white object-cover shadow-sm ring-2 ring-white transition-all duration-200 hover:z-10 hover:scale-110 dark:border-gray-700 dark:ring-gray-800">
             @else
                 <div
                     class="{{ $sizeClasses[$size] ?? '' }} {{ $borderClasses[$size] ?? '' }} flex cursor-pointer items-center justify-center rounded-full border-white bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white shadow-sm ring-2 ring-white transition-all duration-200 hover:z-10 hover:scale-110 dark:border-gray-700 dark:ring-gray-800">
-                    {{ strtoupper(substr($user['participant_name'], 0, 1)) }}
+                    {{ strtoupper(substr($user->name, 0, 1)) }}
                 </div>
             @endif
             @if ($showTooltip)
                 <!-- CSS-only tooltip -->
                 <div
                     class="absolute z-50 px-2 py-1 mb-2 text-xs text-white transition-opacity duration-200 transform -translate-x-1/2 bg-gray-900 rounded shadow-lg opacity-0 pointer-events-none bottom-full left-1/2 whitespace-nowrap group-hover:opacity-100 dark:bg-gray-700">
-                    {{ $user['participant_name'] }}
+                    {{ $user->name }}
                 </div>
             @endif
         </div>

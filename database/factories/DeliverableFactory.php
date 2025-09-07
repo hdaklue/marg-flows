@@ -32,19 +32,29 @@ class DeliverableFactory extends Factory
             'status' => fake()->randomElement(DeliverableStatus::cases()),
             'priority' => fake()->numberBetween(1, 5),
             'order_column' => fake()->numberBetween(0, 100),
-            'start_date' => fake()->optional(0.7)->dateTimeBetween('-1 month', '+1 week'),
-            'success_date' => fake()->optional(0.8)->dateTimeBetween('+1 week', '+3 months'),
-            'completed_at' => fake()->optional(0.3)->dateTimeBetween('-2 weeks', 'now'),
+            'start_date' => fake()
+                ->optional(0.7)
+                ->dateTimeBetween('-1 month', '+1 week'),
+            'success_date' => fake()
+                ->optional(0.8)
+                ->dateTimeBetween('+1 week', '+3 months'),
+            'completed_at' => fake()
+                ->optional(0.3)
+                ->dateTimeBetween('-2 weeks', 'now'),
             'format_specifications' => $formatSpecs,
-            'settings' => fake()->optional(0.4)->randomElements([
-                'auto_save' => true,
-                'notifications' => fake()->boolean(),
-                'quality_check' => fake()->boolean(),
-                'backup_enabled' => true,
-            ]),
+            'settings' => fake()
+                ->optional(0.4)
+                ->randomElements([
+                    'auto_save' => true,
+                    'notifications' => fake()->boolean(),
+                    'quality_check' => fake()->boolean(),
+                    'backup_enabled' => true,
+                ]),
             'flow_id' => Flow::factory(),
             'creator_id' => User::factory(),
-            'tenant_id' => fn(array $attributes) => Flow::find($attributes['flow_id'])->tenant_id,
+            'tenant_id' => fn(array $attributes) => Flow::find(
+                $attributes['flow_id'],
+            )->tenant_id,
         ];
     }
 
@@ -52,7 +62,13 @@ class DeliverableFactory extends Factory
     {
         return $this->state(fn(array $attributes) => [
             'format' => DeliverableFormat::DESIGN,
-            'type' => fake()->randomElement(['video_cover', 'square', 'story', 'Portrait', 'land_scape']),
+            'type' => fake()->randomElement([
+                'video_cover',
+                'square',
+                'story',
+                'Portrait',
+                'land_scape',
+            ]),
         ]);
     }
 
@@ -135,10 +151,24 @@ class DeliverableFactory extends Factory
     private function getRandomTypeForFormat(DeliverableFormat $format): string
     {
         return match ($format) {
-            DeliverableFormat::DESIGN => fake()->randomElement(['video_cover', 'square', 'story', 'Portrait', 'land_scape']),
-            DeliverableFormat::VIDEO => fake()->randomElement(['promotional', 'tutorial']),
-            DeliverableFormat::AUDIO => fake()->randomElement(['podcast_episode', 'voiceover']),
-            DeliverableFormat::DOCUMENT => fake()->randomElement(['project_brief']),
+            DeliverableFormat::DESIGN => fake()->randomElement([
+                'video_cover',
+                'square',
+                'story',
+                'Portrait',
+                'land_scape',
+            ]),
+            DeliverableFormat::VIDEO => fake()->randomElement([
+                'promotional',
+                'tutorial',
+            ]),
+            DeliverableFormat::AUDIO => fake()->randomElement([
+                'podcast_episode',
+                'voiceover',
+            ]),
+            DeliverableFormat::DOCUMENT => fake()->randomElement([
+                'project_brief',
+            ]),
         };
     }
 }

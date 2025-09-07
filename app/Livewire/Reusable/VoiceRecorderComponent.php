@@ -19,7 +19,7 @@ final class VoiceRecorderComponent extends Component
 
     public string $size = 'sm';
 
-    public ?int $maxDuration = null;
+    public null|int $maxDuration = null;
 
     public int $maxDurationInSeconds;
 
@@ -27,21 +27,30 @@ final class VoiceRecorderComponent extends Component
 
     public function mount()
     {
-        $this->maxDurationInSeconds = $this->maxDuration ?? config('voice-notes.maxDuration');
+        $this->maxDurationInSeconds = $this->maxDuration ?? config(
+            'voice-notes.maxDuration',
+        );
         $this->instanceKey = 'recorder_' . uniqid();
     }
 
     public function finalizeNoteUpload($tempFilename)
     {
         // Move the temporary uploaded file to permanent storage
-        $path = $this->audio->storeAs('voice-notes', 'voice-note-' . time() . '.webm', 'public');
+        $path = $this->audio->storeAs(
+            'voice-notes',
+            'voice-note-' . time() . '.webm',
+            'public',
+        );
         $url = Storage::url($path);
         $this->audio->delete();
 
         // Clear the audio property to clean up temporary file
         $this->audio = null;
 
-        logger()->info('VoiceRecorder moved file to permanent storage', ['path' => $path, 'url' => $url]);
+        logger()->info('VoiceRecorder moved file to permanent storage', [
+            'path' => $path,
+            'url' => $url,
+        ]);
         $this->dispatch('voice-recorder:voice-uploaded', url: $url);
     }
 

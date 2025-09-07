@@ -15,7 +15,12 @@ final class UserTenant
     public static function configure(Table $table): Table
     {
         return $table
-            ->records(fn () => filamentUser()->getAssignedTenants()->keyBy('id')->toArray())
+            ->records(
+                fn() => filamentUser()
+                    ->getAssignedTenants()
+                    ->keyBy('id')
+                    ->toArray(),
+            )
             ->columns([
                 TextColumn::make('name'),
             ])
@@ -26,11 +31,15 @@ final class UserTenant
                 //
             ])
             ->recordActions([
-
                 Action::make('switch')
-                    ->hidden(fn ($record) => $record['id'] === filamentTenant()->getKey())
+                    ->hidden(
+                        fn($record) => (
+                            $record['id'] === filamentTenant()->getKey()
+                        ),
+                    )
                     ->action(function ($record) {
                         SwitchTenant::run(filamentUser(), $record['id']);
+
                         // Force page reload to new tenant context
                     }),
                 // Action::make('leave')

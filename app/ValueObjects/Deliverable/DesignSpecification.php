@@ -23,14 +23,12 @@ final class DesignSpecification implements DeliverableSpecification
         private readonly array $constraints,
         private readonly array $requirements,
     ) {
-
         $this->dimensions = Dimension::from($this->width, $this->height);
     }
 
     public static function fromConfig(array $config): self
     {
         return new self(
-
             width: $config['width'] ?? 0,
             height: $config['height'] ?? 0,
 
@@ -88,25 +86,33 @@ final class DesignSpecification implements DeliverableSpecification
         if (isset($safeArea['top'])) {
             $result['top'] = $safeArea['top'];
         } elseif (isset($safeArea['top_percentage'])) {
-            $result['top'] = (int) ($this->height * $safeArea['top_percentage']);
+            $result['top'] = (int) (
+                $this->height * $safeArea['top_percentage']
+            );
         }
 
         if (isset($safeArea['bottom'])) {
             $result['bottom'] = $safeArea['bottom'];
         } elseif (isset($safeArea['bottom_percentage'])) {
-            $result['bottom'] = (int) ($this->height * $safeArea['bottom_percentage']);
+            $result['bottom'] = (int) (
+                $this->height * $safeArea['bottom_percentage']
+            );
         }
 
         if (isset($safeArea['left'])) {
             $result['left'] = $safeArea['left'];
         } elseif (isset($safeArea['left_percentage'])) {
-            $result['left'] = (int) ($this->width * $safeArea['left_percentage']);
+            $result['left'] = (int) (
+                $this->width * $safeArea['left_percentage']
+            );
         }
 
         if (isset($safeArea['right'])) {
             $result['right'] = $safeArea['right'];
         } elseif (isset($safeArea['right_percentage'])) {
-            $result['right'] = (int) ($this->width * $safeArea['right_percentage']);
+            $result['right'] = (int) (
+                $this->width * $safeArea['right_percentage']
+            );
         }
 
         return $result;
@@ -168,7 +174,11 @@ final class DesignSpecification implements DeliverableSpecification
         return [
             'width' => ['required', 'integer', 'min:1'],
             'height' => ['required', 'integer', 'min:1'],
-            'format' => ['required', 'string', 'in:png,jpg,jpeg,svg,gif,webp,ai,psd,sketch,fig'],
+            'format' => [
+                'required',
+                'string',
+                'in:png,jpg,jpeg,svg,gif,webp,ai,psd,sketch,fig',
+            ],
         ];
     }
 
@@ -177,8 +187,10 @@ final class DesignSpecification implements DeliverableSpecification
         return $this->width === $width && $this->height === $height;
     }
 
-    public function matchesAspectRatio(float $ratio, float $tolerance = 0.02): bool
-    {
+    public function matchesAspectRatio(
+        float $ratio,
+        float $tolerance = 0.02,
+    ): bool {
         return abs($this->getAspectRatio() - $ratio) <= $tolerance;
     }
 
@@ -196,7 +208,6 @@ final class DesignSpecification implements DeliverableSpecification
     public function toArray(): array
     {
         return [
-
             'width' => $this->width,
             'height' => $this->height,
             'aspect_ratio' => $this->getAspectRatio(),
@@ -216,8 +227,10 @@ final class DesignSpecification implements DeliverableSpecification
 
     public function equals(self $other): bool
     {
-        return $this->width === $other->width &&
-               $this->height === $other->height &&
-               abs($this->getAspectRatio() - $other->getAspectRatio()) < 1e-10;
+        return (
+            $this->width === $other->width
+            && $this->height === $other->height
+            && abs($this->getAspectRatio() - $other->getAspectRatio()) < 1e-10
+        );
     }
 }

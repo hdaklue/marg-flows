@@ -18,15 +18,26 @@ final class CreateDocument
 {
     use AsAction;
 
-    public function handle(AssignableEntity|User $creator, Documentable $targetDocumentable, DocumentTemplateContract $template)
-    {
+    public function handle(
+        string $name,
+        AssignableEntity|User $creator,
+        Documentable $targetDocumentable,
+        DocumentTemplateContract $template,
+    ) {
         try {
-            $documentDto = CreateDocumentDto::fromTemplate($template);
+            $documentDto = CreateDocumentDto::fromTemplate($name, $template);
 
-            DocumentManager::create($documentDto, $targetDocumentable, $creator);
+            $createdDocument = DocumentManager::create(
+                $documentDto,
+                $targetDocumentable,
+                $creator,
+            );
 
-            DocumentCreated::dispatch($targetDocumentable, $creator);
-
+            DocumentCreated::dispatch(
+                $createdDocument,
+                $targetDocumentable,
+                $creator,
+            );
         } catch (Exception $e) {
             logger()->error('Error creating new document', [
                 'documentable' => $targetDocumentable,

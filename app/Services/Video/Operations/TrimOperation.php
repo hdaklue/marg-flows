@@ -8,10 +8,9 @@ use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
 
 class TrimOperation extends AbstractVideoOperation
 {
-
     public function __construct(
         private readonly float $start,
-        private readonly float $duration
+        private readonly float $duration,
     ) {
         $this->metadata = [
             'start' => $this->start,
@@ -24,8 +23,10 @@ class TrimOperation extends AbstractVideoOperation
     {
         // Use Laravel FFMpeg's clip functionality
         return $mediaExporter->addFilter(function ($filters) {
-            $filters->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($this->start), 
-                          \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration));
+            $filters->clip(
+                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->start),
+                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration),
+            );
         });
     }
 
@@ -42,16 +43,19 @@ class TrimOperation extends AbstractVideoOperation
     public function applyToBuilder(MediaExporter $builder): MediaExporter
     {
         return $builder->addFilter(function ($filters) {
-            $filters->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($this->start), 
-                          \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration));
+            $filters->clip(
+                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->start),
+                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration),
+            );
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
-    {
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
         return $media->addFilter(function ($filters) {
-            $filters->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($this->start), 
-                          \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration));
+            $filters->clip(
+                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->start),
+                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration),
+            );
         });
     }
 }

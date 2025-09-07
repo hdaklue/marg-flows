@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs\Document;
 
 use App\Services\Document\Contracts\DocumentTemplateContract;
+use BumpCore\EditorPhp\EditorPhp;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 final class CreateDocumentDto extends ValidatedDTO
@@ -13,10 +14,13 @@ final class CreateDocumentDto extends ValidatedDTO
 
     public array $blocks;
 
-    public static function fromTemplate(DocumentTemplateContract $documentTemplateContract): self
-    {
+    public static function fromTemplate(
+        string $name,
+        DocumentTemplateContract $documentTemplateContract,
+    ): self {
+        EditorPhp::make($documentTemplateContract->toJson());
         return self::fromArray([
-            'name' => $documentTemplateContract->getName(),
+            'name' => $name,
             'blocks' => $documentTemplateContract->toArray(),
         ]);
     }

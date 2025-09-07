@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace App\Services\Video;
 
-use App\Services\Video\Video;
-use App\Services\Video\Services\VideoEditor;
 use App\Services\Video\Services\ResolutionManager;
+use App\Services\Video\Services\VideoEditor;
+use App\Services\Video\Video;
 use Illuminate\Contracts\Foundation\Application;
 
 class VideoManager
 {
     public function __construct(
-        private readonly Application $app
+        private readonly Application $app,
     ) {}
 
     /**
      * Create a video object.
      */
-    public function make(string $sourcePath, bool $isUrl = false, string $disk = 'local'): Video
-    {
+    public function make(
+        string $sourcePath,
+        bool $isUrl = false,
+        string $disk = 'local',
+    ): Video {
         return new Video($sourcePath, $isUrl, $disk);
     }
 
@@ -75,8 +78,10 @@ class VideoManager
     /**
      * Create a resolution manager from a path (convenience method).
      */
-    public function convert(string $path, string $disk = 'local'): ResolutionManager
-    {
+    public function convert(
+        string $path,
+        string $disk = 'local',
+    ): ResolutionManager {
         $video = $this->fromDisk($path, $disk);
         return $this->resolutions($video);
     }

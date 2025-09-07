@@ -23,9 +23,7 @@ use Illuminate\Support\Carbon;
 final class Profile extends Model
 {
     /** @use HasFactory<\Database\Factories\ProfileFactory> */
-    use HasFactory,
-        HasUlids,
-        LivesInRbacDB;
+    use HasFactory, HasUlids, LivesInRbacDB;
 
     protected $fillable = [
         'user_id',

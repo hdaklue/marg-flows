@@ -29,8 +29,10 @@ class OriginalMigrateCommand extends Command
      */
     public function handle(): int
     {
-        $this->info('Running migrations on original database (mysql connection)...');
-        
+        $this->info(
+            'Running migrations on original database (mysql connection)...',
+        );
+
         try {
             // Run migrations on mysql connection, excluding RBAC migrations
             $exitCode = Artisan::call('migrate', array_filter([
@@ -40,8 +42,10 @@ class OriginalMigrateCommand extends Command
             ]));
 
             if ($exitCode === 0) {
-                $this->info('✅ Original database migrations completed successfully!');
-                
+                $this->info(
+                    '✅ Original database migrations completed successfully!',
+                );
+
                 if ($this->option('seed')) {
                     $this->info('Running seeders on original database...');
                     Artisan::call('db:seed', ['--database' => 'mysql']);
@@ -51,7 +55,6 @@ class OriginalMigrateCommand extends Command
                 $this->error('❌ Original database migrations failed!');
                 return 1;
             }
-
         } catch (\Exception $e) {
             $this->error('❌ Migration failed: ' . $e->getMessage());
             return 1;

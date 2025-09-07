@@ -22,21 +22,21 @@ final class TimeProgressService
     private const STATUS_IN_PROGRESS = 'in-progress';
 
     // Color constants
-    private const COLOR_GREEN_500 = '#10b981';    // Completed
+    private const COLOR_GREEN_500 = '#10b981'; // Completed
 
-    private const COLOR_RED_500 = '#ef4444';      // Overdue
+    private const COLOR_RED_500 = '#ef4444'; // Overdue
 
-    private const COLOR_INDIGO_500 = '#6366f1';   // Scheduled
+    private const COLOR_INDIGO_500 = '#6366f1'; // Scheduled
 
-    private const COLOR_GRAY_600 = '#71717a';     // Default
+    private const COLOR_GRAY_600 = '#71717a'; // Default
 
-    private const COLOR_SKY_600 = '#0284c7';      // In-progress >= 80%
+    private const COLOR_SKY_600 = '#0284c7'; // In-progress >= 80%
 
-    private const COLOR_CYAN_600 = '#0891b2';     // In-progress >= 50%
+    private const COLOR_CYAN_600 = '#0891b2'; // In-progress >= 50%
 
-    private const COLOR_CYAN_400 = '#22d3ee';     // In-progress >= 20%
+    private const COLOR_CYAN_400 = '#22d3ee'; // In-progress >= 20%
 
-    private const COLOR_CYAN_300 = '#67e8f9';     // In-progress < 20%
+    private const COLOR_CYAN_300 = '#67e8f9'; // In-progress < 20%
 
     /**
      * Calculate time-based progress percentage for a progressable item.
@@ -86,32 +86,34 @@ final class TimeProgressService
     public function getProgressDetails(TimeProgressable $item): array
     {
         $status = $this->getProgressStatus($item);
-        $percentage = $this->isCompleted($item) ? Percentage::complete() : $this->calculateProgressPercentage($item);
+        $percentage = $this->isCompleted($item)
+            ? Percentage::complete()
+            : $this->calculateProgressPercentage($item);
         $color = $this->mapStatusToColor($status, $percentage);
         $cacheKey = $this->getCacheKey($item);
         $ttl = (int) now()->diffInSeconds(now()->endOfDay());
 
-        return Cache::remember(
-            $cacheKey,
-            $ttl,
-            fn () => [
-                'percentage' => $percentage->toArray(),
-                'color' => $color,
-                'status' => $status,
-                'days_remaining' => $this->getDaysRemaining($item),
-                'days_remaining_display' => now()->diffForHumans($this->getDueDate($item), [
+        return Cache::remember($cacheKey, $ttl, fn() => [
+            'percentage' => $percentage->toArray(),
+            'color' => $color,
+            'status' => $status,
+            'days_remaining' => $this->getDaysRemaining($item),
+            'days_remaining_display' => now()->diffForHumans(
+                $this->getDueDate($item),
+                [
                     'syntax' => CarbonInterface::DIFF_ABSOLUTE,
                     'short' => false,
                     'parts' => 1,
-                ]),
-                'days_elapsed' => $this->getDaysElapsed($item),
-                'total_days' => $this->getTotalDays($item),
-                'is_overdue' => $this->isPastDue($item),
-                'is_completed' => $this->isCompleted($item),
-                'is_scheduled' => $this->isScheduled($item),
-                'start_date' => $item->getProgressStartDate()->format('Y-m-d'),
-                'due_date' => $item->getProgressDueDate()->format('Y-m-d'),
-            ]);
+                ],
+            ),
+            'days_elapsed' => $this->getDaysElapsed($item),
+            'total_days' => $this->getTotalDays($item),
+            'is_overdue' => $this->isPastDue($item),
+            'is_completed' => $this->isCompleted($item),
+            'is_scheduled' => $this->isScheduled($item),
+            'start_date' => $item->getProgressStartDate()->format('Y-m-d'),
+            'due_date' => $item->getProgressDueDate()->format('Y-m-d'),
+        ]);
     }
 
     /**
@@ -127,7 +129,10 @@ final class TimeProgressService
             return 1;
         }
 
-        return $item->getProgressStartDate()->startOfDay()->diffInDays($item->getProgressDueDate()->startOfDay());
+        return $item
+            ->getProgressStartDate()
+            ->startOfDay()
+            ->diffInDays($item->getProgressDueDate()->startOfDay());
     }
 
     /**
@@ -158,7 +163,8 @@ final class TimeProgressService
             (int) now()->endOfDay()->diffInSeconds(now()),
             function () use ($item) {
                 return today()->diffInDays($item->getProgressDueDate()->startOfDay());
-            });
+            },
+        );
     }
 
     /**
@@ -278,7 +284,7 @@ final class TimeProgressService
             return self::STATUS_OVERDUE;
         }
 
-        if (! $this->hasStarted($item)) {
+        if (!$this->hasStarted($item)) {
             return self::STATUS_SCHEDULED;
         }
 
@@ -288,13 +294,14 @@ final class TimeProgressService
     private function handleSameDayProject(TimeProgressable $item): Percentage
     {
         // For same-day projects, consider them 100% if today or past due date
-        return today()->gte($this->getDueDate($item)) ? Percentage::complete() : Percentage::zero();
+        return today()->gte($this->getDueDate($item))
+            ? Percentage::complete()
+            : Percentage::zero();
     }
 
-    private function calculateProgressPercentage(TimeProgressable $item): Percentage
-    {
+    private function calculateProgressPercentage(TimeProgressable $item): Percentage {
         // Project hasn't started
-        if (! $this->hasStarted($item)) {
+        if (!$this->hasStarted($item)) {
             return Percentage::zero();
         }
 
@@ -317,8 +324,10 @@ final class TimeProgressService
         return Percentage::fromRatio($clampedRatio);
     }
 
-    private function mapStatusToColor(string $status, Percentage $percentage): string
-    {
+    private function mapStatusToColor(
+        string $status,
+        Percentage $percentage,
+    ): string {
         return match ($status) {
             self::STATUS_COMPLETED => self::COLOR_GREEN_500,
             self::STATUS_OVERDUE => self::COLOR_RED_500,

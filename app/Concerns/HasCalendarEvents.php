@@ -7,7 +7,6 @@ use Livewire\Attributes\On;
 
 trait HasCalendarEvents
 {
-
     /**
      * Current calendar view (month, week, day)
      */
@@ -21,7 +20,7 @@ trait HasCalendarEvents
     /**
      * Selected event for modal display
      */
-    public ?array $selectedEvent = null;
+    public null|array $selectedEvent = null;
 
     /**
      * View-only mode - prevents create/edit/delete operations
@@ -46,7 +45,7 @@ trait HasCalendarEvents
         if ($this->viewOnly) {
             return;
         }
-        
+
         $this->onDateSelect($data);
     }
 
@@ -96,11 +95,11 @@ trait HasCalendarEvents
         if ($this->viewOnly) {
             $this->dispatch('show-notification', [
                 'message' => 'Cannot create events in view-only mode',
-                'type' => 'warning'
+                'type' => 'warning',
             ]);
             return false;
         }
-        
+
         return $this->onEventCreate($data);
     }
 
@@ -113,11 +112,11 @@ trait HasCalendarEvents
         if ($this->viewOnly) {
             $this->dispatch('show-notification', [
                 'message' => 'Cannot edit events in view-only mode',
-                'type' => 'warning'
+                'type' => 'warning',
             ]);
             return false;
         }
-        
+
         return $this->onEventEdit($eventId, $data);
     }
 
@@ -130,18 +129,18 @@ trait HasCalendarEvents
         if ($this->viewOnly) {
             $this->dispatch('show-notification', [
                 'message' => 'Cannot delete events in view-only mode',
-                'type' => 'warning'
+                'type' => 'warning',
             ]);
             return false;
         }
-        
+
         $result = $this->onEventDelete($eventId);
-        
+
         // Close modal if the deleted event was selected
         if ($this->selectedEvent && $this->selectedEvent['id'] === $eventId) {
             $this->closeEventModal();
         }
-        
+
         return $result;
     }
 

@@ -27,6 +27,7 @@ final class General extends BaseDocumentTemplate
     {
         return 'General';
     }
+
     /**
      * {@inheritDoc}
      */
@@ -53,11 +54,9 @@ final class General extends BaseDocumentTemplate
                 'text' => 'Welcome!',
                 'level' => 1,
             ]),
-
             Paragraph::make([
                 'text' => 'Today is always the perfect time to start.',
             ]),
-
             Paragraph::make([
                 'text' => 'This is your new document template. You can edit, add blocks, and make it your own.',
             ]),

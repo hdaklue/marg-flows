@@ -10,10 +10,9 @@ use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
 
 class ScaleOperation extends AbstractVideoOperation
 {
-
     public function __construct(
         private readonly ScaleStrategyContract $strategy,
-        private readonly Dimension $currentDimension
+        private readonly Dimension $currentDimension,
     ) {
         $this->metadata = [
             'strategy' => get_class($this->strategy),
@@ -24,17 +23,22 @@ class ScaleOperation extends AbstractVideoOperation
 
     public function execute(MediaExporter $mediaExporter): MediaExporter
     {
-        $finalDimension = $this->strategy->apply($this->currentDimension, $this->currentDimension);
-        
+        $finalDimension = $this->strategy->apply(
+            $this->currentDimension,
+            $this->currentDimension,
+        );
+
         $this->metadata['final_dimension'] = $finalDimension->toArray();
-        
-        return $mediaExporter->addFilter(function ($filters) use ($finalDimension) {
+
+        return $mediaExporter->addFilter(function ($filters) use (
+            $finalDimension,
+        ) {
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(
                     $finalDimension->getWidth(),
-                    $finalDimension->getHeight()
+                    $finalDimension->getHeight(),
                 ),
-                'fit'
+                'fit',
             );
         });
     }
@@ -46,34 +50,39 @@ class ScaleOperation extends AbstractVideoOperation
 
     public function applyToBuilder(MediaExporter $builder): MediaExporter
     {
-        $finalDimension = $this->strategy->apply($this->currentDimension, $this->currentDimension);
-        
+        $finalDimension = $this->strategy->apply(
+            $this->currentDimension,
+            $this->currentDimension,
+        );
+
         $this->metadata['final_dimension'] = $finalDimension->toArray();
-        
+
         return $builder->addFilter(function ($filters) use ($finalDimension) {
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(
                     $finalDimension->getWidth(),
-                    $finalDimension->getHeight()
+                    $finalDimension->getHeight(),
                 ),
-                'fit'
+                'fit',
             );
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
-    {
-        $finalDimension = $this->strategy->apply($this->currentDimension, $this->currentDimension);
-        
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
+        $finalDimension = $this->strategy->apply(
+            $this->currentDimension,
+            $this->currentDimension,
+        );
+
         $this->metadata['final_dimension'] = $finalDimension->toArray();
-        
+
         return $media->addFilter(function ($filters) use ($finalDimension) {
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(
                     $finalDimension->getWidth(),
-                    $finalDimension->getHeight()
+                    $finalDimension->getHeight(),
                 ),
-                'fit'
+                'fit',
             );
         });
     }

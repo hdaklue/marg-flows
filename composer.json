@@ -22,6 +22,7 @@
         "lorisleiva/laravel-actions": "^2.9",
         "pbmedia/laravel-ffmpeg": "^8.7",
         "predis/predis": "^3.0",
+        "propaganistas/laravel-disposable-email": "^2.4",
         "rinvex/countries": "^9.0",
         "spatie/eloquent-sortable": "^4.5",
         "spatie/image": "^3.8",
@@ -31,7 +32,6 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
         "barryvdh/laravel-ide-helper": "^3.5",
-        "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "laradumps/laradumps": "^4.4",
         "larastan/larastan": "^3.0",
@@ -69,7 +69,11 @@
             "clear && php -d memory_limit=2G ./vendor/bin/phpstan analyse"
         ],
         "lint": [
-            "@phpstan:analyze"
+            "mago format"
+        ],
+        "analyze": [
+            "mago lint",
+            "mago analyze"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

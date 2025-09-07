@@ -24,16 +24,16 @@ final class MOVFormat implements VideoFormatContract
     {
         return new self();
     }
-    public function getDriverFormat(?BitrateEnum $bitrate = null): VideoInterface
-    {
+
+    public function getDriverFormat(null|BitrateEnum $bitrate = null): VideoInterface {
         $format = new X264();
-        
+
         if ($bitrate) {
             $format->setKiloBitrate($bitrate->getKbps());
         } elseif ($this->getDefaultBitrate()) {
             $format->setKiloBitrate($this->getDefaultBitrate());
         }
-        
+
         return $format;
     }
 
@@ -47,7 +47,7 @@ final class MOVFormat implements VideoFormatContract
         return 'QuickTime (MOV)';
     }
 
-    public function getDefaultBitrate(): ?int
+    public function getDefaultBitrate(): null|int
     {
         return BitrateEnum::VERY_HIGH_2K->getKbps(); // 12000 kbps - high quality for MOV
     }

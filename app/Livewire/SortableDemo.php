@@ -17,74 +17,230 @@ final class SortableDemo extends Component
 
     public $todos = [
         ['id' => '1', 'title' => 'Design user interface', 'status' => 'todo'],
-        ['id' => '2', 'title' => 'Implement authentication', 'status' => 'todo'],
+        [
+            'id' => '2',
+            'title' => 'Implement authentication',
+            'status' => 'todo',
+        ],
         ['id' => '3', 'title' => 'Write unit tests', 'status' => 'todo'],
         ['id' => '4', 'title' => 'Deploy to staging', 'status' => 'todo'],
-        ['id' => '9', 'title' => 'Create landing page design', 'status' => 'todo'],
+        [
+            'id' => '9',
+            'title' => 'Create landing page design',
+            'status' => 'todo',
+        ],
         ['id' => '10', 'title' => 'Setup CI/CD pipeline', 'status' => 'todo'],
-        ['id' => '11', 'title' => 'Implement user registration flow', 'status' => 'todo'],
+        [
+            'id' => '11',
+            'title' => 'Implement user registration flow',
+            'status' => 'todo',
+        ],
         ['id' => '12', 'title' => 'Add email verification', 'status' => 'todo'],
         ['id' => '13', 'title' => 'Create admin dashboard', 'status' => 'todo'],
-        ['id' => '14', 'title' => 'Implement search functionality', 'status' => 'todo'],
-        ['id' => '15', 'title' => 'Add payment integration', 'status' => 'todo'],
-        ['id' => '16', 'title' => 'Setup monitoring and logging', 'status' => 'todo'],
-        ['id' => '17', 'title' => 'Write API documentation', 'status' => 'todo'],
-        ['id' => '18', 'title' => 'Implement data export feature', 'status' => 'todo'],
-        ['id' => '19', 'title' => 'Add multi-language support', 'status' => 'todo'],
-        ['id' => '20', 'title' => 'Optimize database queries', 'status' => 'todo'],
+        [
+            'id' => '14',
+            'title' => 'Implement search functionality',
+            'status' => 'todo',
+        ],
+        [
+            'id' => '15',
+            'title' => 'Add payment integration',
+            'status' => 'todo',
+        ],
+        [
+            'id' => '16',
+            'title' => 'Setup monitoring and logging',
+            'status' => 'todo',
+        ],
+        [
+            'id' => '17',
+            'title' => 'Write API documentation',
+            'status' => 'todo',
+        ],
+        [
+            'id' => '18',
+            'title' => 'Implement data export feature',
+            'status' => 'todo',
+        ],
+        [
+            'id' => '19',
+            'title' => 'Add multi-language support',
+            'status' => 'todo',
+        ],
+        [
+            'id' => '20',
+            'title' => 'Optimize database queries',
+            'status' => 'todo',
+        ],
     ];
 
     public $inProgress = [
-        ['id' => '5', 'title' => 'Review pull requests', 'status' => 'in_progress'],
-        ['id' => '6', 'title' => 'Fix reported bugs', 'status' => 'in_progress'],
-        ['id' => '21', 'title' => 'Refactor authentication module', 'status' => 'in_progress'],
-        ['id' => '22', 'title' => 'Update user profile UI', 'status' => 'in_progress'],
-        ['id' => '23', 'title' => 'Implement real-time notifications', 'status' => 'in_progress'],
-        ['id' => '24', 'title' => 'Add file upload functionality', 'status' => 'in_progress'],
-        ['id' => '25', 'title' => 'Create mobile responsive design', 'status' => 'in_progress'],
-        ['id' => '26', 'title' => 'Integrate third-party APIs', 'status' => 'in_progress'],
-        ['id' => '27', 'title' => 'Setup automated testing', 'status' => 'in_progress'],
-        ['id' => '28', 'title' => 'Optimize image loading', 'status' => 'in_progress'],
-        ['id' => '29', 'title' => 'Implement caching strategy', 'status' => 'in_progress'],
-        ['id' => '30', 'title' => 'Add data validation rules', 'status' => 'in_progress'],
+        [
+            'id' => '5',
+            'title' => 'Review pull requests',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '6',
+            'title' => 'Fix reported bugs',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '21',
+            'title' => 'Refactor authentication module',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '22',
+            'title' => 'Update user profile UI',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '23',
+            'title' => 'Implement real-time notifications',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '24',
+            'title' => 'Add file upload functionality',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '25',
+            'title' => 'Create mobile responsive design',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '26',
+            'title' => 'Integrate third-party APIs',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '27',
+            'title' => 'Setup automated testing',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '28',
+            'title' => 'Optimize image loading',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '29',
+            'title' => 'Implement caching strategy',
+            'status' => 'in_progress',
+        ],
+        [
+            'id' => '30',
+            'title' => 'Add data validation rules',
+            'status' => 'in_progress',
+        ],
     ];
 
     public $done = [
         ['id' => '7', 'title' => 'Setup project structure', 'status' => 'done'],
-        ['id' => '8', 'title' => 'Create database migrations', 'status' => 'done'],
-        ['id' => '31', 'title' => 'Configure development environment', 'status' => 'done'],
+        [
+            'id' => '8',
+            'title' => 'Create database migrations',
+            'status' => 'done',
+        ],
+        [
+            'id' => '31',
+            'title' => 'Configure development environment',
+            'status' => 'done',
+        ],
         ['id' => '32', 'title' => 'Setup version control', 'status' => 'done'],
-        ['id' => '33', 'title' => 'Create initial wireframes', 'status' => 'done'],
+        [
+            'id' => '33',
+            'title' => 'Create initial wireframes',
+            'status' => 'done',
+        ],
         ['id' => '34', 'title' => 'Setup database schema', 'status' => 'done'],
-        ['id' => '35', 'title' => 'Implement basic routing', 'status' => 'done'],
+        [
+            'id' => '35',
+            'title' => 'Implement basic routing',
+            'status' => 'done',
+        ],
         ['id' => '36', 'title' => 'Add error handling', 'status' => 'done'],
-        ['id' => '37', 'title' => 'Setup basic security measures', 'status' => 'done'],
+        [
+            'id' => '37',
+            'title' => 'Setup basic security measures',
+            'status' => 'done',
+        ],
         ['id' => '38', 'title' => 'Create user model', 'status' => 'done'],
-        ['id' => '39', 'title' => 'Implement basic CRUD operations', 'status' => 'done'],
+        [
+            'id' => '39',
+            'title' => 'Implement basic CRUD operations',
+            'status' => 'done',
+        ],
         ['id' => '40', 'title' => 'Add input validation', 'status' => 'done'],
         ['id' => '41', 'title' => 'Setup test environment', 'status' => 'done'],
         ['id' => '42', 'title' => 'Create basic layouts', 'status' => 'done'],
     ];
 
     public $testing = [
-        ['id' => '43', 'title' => 'Write unit tests for core features', 'status' => 'testing'],
-        ['id' => '44', 'title' => 'Perform integration testing', 'status' => 'testing'],
-        ['id' => '45', 'title' => 'Run performance tests', 'status' => 'testing'],
-        ['id' => '46', 'title' => 'Execute security testing', 'status' => 'testing'],
-        ['id' => '47', 'title' => 'Test mobile responsiveness', 'status' => 'testing'],
+        [
+            'id' => '43',
+            'title' => 'Write unit tests for core features',
+            'status' => 'testing',
+        ],
+        [
+            'id' => '44',
+            'title' => 'Perform integration testing',
+            'status' => 'testing',
+        ],
+        [
+            'id' => '45',
+            'title' => 'Run performance tests',
+            'status' => 'testing',
+        ],
+        [
+            'id' => '46',
+            'title' => 'Execute security testing',
+            'status' => 'testing',
+        ],
+        [
+            'id' => '47',
+            'title' => 'Test mobile responsiveness',
+            'status' => 'testing',
+        ],
     ];
 
     public $review = [
-        ['id' => '48', 'title' => 'Code review for authentication', 'status' => 'review'],
-        ['id' => '49', 'title' => 'Security audit review', 'status' => 'review'],
-        ['id' => '50', 'title' => 'Performance optimization review', 'status' => 'review'],
+        [
+            'id' => '48',
+            'title' => 'Code review for authentication',
+            'status' => 'review',
+        ],
+        [
+            'id' => '49',
+            'title' => 'Security audit review',
+            'status' => 'review',
+        ],
+        [
+            'id' => '50',
+            'title' => 'Performance optimization review',
+            'status' => 'review',
+        ],
         ['id' => '51', 'title' => 'UI/UX design review', 'status' => 'review'],
     ];
 
     public $deployment = [
-        ['id' => '52', 'title' => 'Deploy to staging environment', 'status' => 'deployment'],
-        ['id' => '53', 'title' => 'Configure production servers', 'status' => 'deployment'],
-        ['id' => '54', 'title' => 'Setup monitoring and alerts', 'status' => 'deployment'],
+        [
+            'id' => '52',
+            'title' => 'Deploy to staging environment',
+            'status' => 'deployment',
+        ],
+        [
+            'id' => '53',
+            'title' => 'Configure production servers',
+            'status' => 'deployment',
+        ],
+        [
+            'id' => '54',
+            'title' => 'Setup monitoring and alerts',
+            'status' => 'deployment',
+        ],
     ];
 
     protected array $sortableRules = [
@@ -142,7 +298,7 @@ final class SortableDemo extends Component
     public function getAvailableColumnsFor(string $currentColumnId): array
     {
         return collect($this->columns)
-            ->reject(fn ($column) => $column['id'] === $currentColumnId)
+            ->reject(fn($column) => $column['id'] === $currentColumnId)
             ->values()
             ->toArray();
     }
@@ -154,8 +310,11 @@ final class SortableDemo extends Component
         return false;
     }
 
-    public function onSort(array $itemIds, ?string $from = null, ?string $to = null): mixed
-    {
+    public function onSort(
+        array $itemIds,
+        null|string $from = null,
+        null|string $to = null,
+    ): mixed {
         return true;
     }
 
@@ -272,8 +431,11 @@ final class SortableDemo extends Component
     //     throw new RuntimeException('Unable to determine which property to sort');
     // }
 
-    public function onCrossGroupSort(array $itemIds, string $from, string $to): array
-    {
+    public function onCrossGroupSort(
+        array $itemIds,
+        string $from,
+        string $to,
+    ): array {
         logger()->info('onCrossGroupSort called', [
             'itemIds' => $itemIds,
             'from' => $from,
@@ -285,7 +447,12 @@ final class SortableDemo extends Component
 
     public function addTodo(): void
     {
-        $newId = (string) (count($this->todos) + count($this->inProgress) + count($this->done) + 1);
+        $newId = (string) (
+            count($this->todos)
+            + count($this->inProgress)
+            + count($this->done)
+            + 1
+        );
 
         $newTodo = [
             'id' => $newId,
@@ -310,14 +477,24 @@ final class SortableDemo extends Component
             $oldInProgress = count($this->inProgress);
             $oldDone = count($this->done);
 
-            $this->todos = collect($this->todos)->reject(fn ($item) => $item['id'] === $itemId)->values()->toArray();
-            $this->inProgress = collect($this->inProgress)->reject(fn ($item) => $item['id'] === $itemId)->values()->toArray();
-            $this->done = collect($this->done)->reject(fn ($item) => $item['id'] === $itemId)->values()->toArray();
+            $this->todos = collect($this->todos)
+                ->reject(fn($item) => $item['id'] === $itemId)
+                ->values()
+                ->toArray();
+            $this->inProgress = collect($this->inProgress)
+                ->reject(fn($item) => $item['id'] === $itemId)
+                ->values()
+                ->toArray();
+            $this->done = collect($this->done)
+                ->reject(fn($item) => $item['id'] === $itemId)
+                ->values()
+                ->toArray();
 
             logger()->info('removeItem completed', [
                 'itemId' => $itemId,
                 'todos_removed' => $oldTodos - count($this->todos),
-                'inProgress_removed' => $oldInProgress - count($this->inProgress),
+                'inProgress_removed' =>
+                    $oldInProgress - count($this->inProgress),
                 'done_removed' => $oldDone - count($this->done),
                 'new_counts' => [
                     'todos' => count($this->todos),
@@ -330,7 +507,10 @@ final class SortableDemo extends Component
                 'itemId' => $itemId,
                 'error' => $e->getMessage(),
             ]);
-            $this->addError('remove', 'Failed to remove item: ' . $e->getMessage());
+            $this->addError(
+                'remove',
+                'Failed to remove item: ' . $e->getMessage(),
+            );
         }
     }
 
@@ -349,8 +529,11 @@ final class SortableDemo extends Component
         ];
     }
 
-    private function handleCrossGroupMove(array $itemIds, string $from, string $to): array
-    {
+    private function handleCrossGroupMove(
+        array $itemIds,
+        string $from,
+        string $to,
+    ): array {
         $fromProperty = $this->getPropertyFromContainer($from);
         $toProperty = $this->getPropertyFromContainer($to);
 
@@ -362,9 +545,11 @@ final class SortableDemo extends Component
         ]);
 
         $movedItemId = $itemIds[0] ?? null;
-        if (! $movedItemId) {
+        if (!$movedItemId) {
             logger()->error('handleCrossGroupMove failed - no item ID');
-            throw new InvalidArgumentException('No item ID provided for cross-group sort');
+            throw new InvalidArgumentException(
+                'No item ID provided for cross-group sort',
+            );
         }
 
         logger()->info('handleCrossGroupMove moving item', [
@@ -399,8 +584,7 @@ final class SortableDemo extends Component
         return $this->$toProperty;
     }
 
-    private function determinePropertyFromContainer(string $containerData): string
-    {
+    private function determinePropertyFromContainer(string $containerData): string {
         return $this->getPropertyFromContainer($containerData);
     }
 
@@ -459,20 +643,28 @@ final class SortableDemo extends Component
         };
     }
 
-    private function findAndRemoveItem(string $property, string $itemId): ?array
-    {
+    private function findAndRemoveItem(
+        string $property,
+        string $itemId,
+    ): null|array {
         $items = collect($this->$property);
         $item = $items->firstWhere('id', $itemId);
 
         if ($item) {
-            $this->$property = $items->reject(fn ($i) => $i['id'] === $itemId)->values()->toArray();
+            $this->$property = $items
+                ->reject(fn($i) => $i['id'] === $itemId)
+                ->values()
+                ->toArray();
         }
 
         return $item;
     }
 
-    private function addItemToProperty(string $property, array $item, int $position): void
-    {
+    private function addItemToProperty(
+        string $property,
+        array $item,
+        int $position,
+    ): void {
         $items = collect($this->$property);
 
         if ($position === -1 || $position >= $items->count()) {

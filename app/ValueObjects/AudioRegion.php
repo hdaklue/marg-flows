@@ -15,21 +15,27 @@ final class AudioRegion extends MediaTimestamp
         $this->validateTimes();
     }
 
-    public static function fromTimes(CommentTime $startTime, CommentTime $endTime): self
-    {
+    public static function fromTimes(
+        CommentTime $startTime,
+        CommentTime $endTime,
+    ): self {
         return new self($startTime, $endTime);
     }
 
-    public static function fromSeconds(float $startSeconds, float $endSeconds): self
-    {
+    public static function fromSeconds(
+        float $startSeconds,
+        float $endSeconds,
+    ): self {
         return new self(
             CommentTime::fromSeconds($startSeconds),
             CommentTime::fromSeconds($endSeconds),
         );
     }
 
-    public static function fromFormatted(string $startTime, string $endTime): self
-    {
+    public static function fromFormatted(
+        string $startTime,
+        string $endTime,
+    ): self {
         return new self(
             CommentTime::fromFormatted($startTime),
             CommentTime::fromFormatted($endTime),
@@ -40,11 +46,15 @@ final class AudioRegion extends MediaTimestamp
     {
         $startTime = isset($data['start_time'])
             ? CommentTime::fromSeconds((float) $data['start_time'])
-            : CommentTime::fromSeconds((float) ($data['timing']['start']['seconds'] ?? 0));
+            : CommentTime::fromSeconds(
+                (float) ($data['timing']['start']['seconds'] ?? 0),
+            );
 
         $endTime = isset($data['end_time'])
             ? CommentTime::fromSeconds((float) $data['end_time'])
-            : CommentTime::fromSeconds((float) ($data['timing']['end']['seconds'] ?? 0));
+            : CommentTime::fromSeconds(
+                (float) ($data['timing']['end']['seconds'] ?? 0),
+            );
 
         return new self($startTime, $endTime);
     }
@@ -69,37 +79,49 @@ final class AudioRegion extends MediaTimestamp
         return $this->endTime->subtract($this->startTime);
     }
 
-    public function getFrameRate(): ?float
+    public function getFrameRate(): null|float
     {
         return null; // Audio regions don't have frame rates
     }
 
     public function contains(CommentTime $time): bool
     {
-        return $time->asSeconds() >= $this->startTime->asSeconds()
-            && $time->asSeconds() <= $this->endTime->asSeconds();
+        return (
+            $time->asSeconds() >= $this->startTime->asSeconds()
+            && $time->asSeconds() <= $this->endTime->asSeconds()
+        );
     }
 
     public function overlaps(AudioRegion $other): bool
     {
-        return $this->startTime->asSeconds() < $other->endTime->asSeconds()
-            && $other->startTime->asSeconds() < $this->endTime->asSeconds();
+        return (
+            $this->startTime->asSeconds() < $other->endTime->asSeconds()
+            && $other->startTime->asSeconds() < $this->endTime->asSeconds()
+        );
     }
 
-    public function getOverlapDuration(AudioRegion $other): ?CommentTime
+    public function getOverlapDuration(AudioRegion $other): null|CommentTime
     {
-        if (! $this->overlaps($other)) {
+        if (!$this->overlaps($other)) {
             return null;
         }
 
-        $overlapStart = max($this->startTime->asSeconds(), $other->startTime->asSeconds());
-        $overlapEnd = min($this->endTime->asSeconds(), $other->endTime->asSeconds());
+        $overlapStart = max(
+            $this->startTime->asSeconds(),
+            $other->startTime->asSeconds(),
+        );
+        $overlapEnd = min(
+            $this->endTime->asSeconds(),
+            $other->endTime->asSeconds(),
+        );
 
         return CommentTime::fromSeconds($overlapEnd - $overlapStart);
     }
 
-    public function expand(CommentTime $beforeBuffer, CommentTime $afterBuffer): self
-    {
+    public function expand(
+        CommentTime $beforeBuffer,
+        CommentTime $afterBuffer,
+    ): self {
         $newStart = $this->startTime->subtract($beforeBuffer);
         $newEnd = $this->endTime->add($afterBuffer);
 
@@ -117,7 +139,8 @@ final class AudioRegion extends MediaTimestamp
                 'start' => [
                     'seconds' => $this->startTime->asSeconds(),
                     'formatted' => $this->startTime->asFormatted(),
-                    'formatted_precise' => $this->startTime->asFormattedPrecise(),
+                    'formatted_precise' =>
+                        $this->startTime->asFormattedPrecise(),
                 ],
                 'end' => [
                     'seconds' => $this->endTime->asSeconds(),
@@ -127,7 +150,8 @@ final class AudioRegion extends MediaTimestamp
                 'duration' => [
                     'seconds' => $this->getDuration()->asSeconds(),
                     'formatted' => $this->getDuration()->asFormatted(),
-                    'formatted_precise' => $this->getDuration()->asFormattedPrecise(),
+                    'formatted_precise' =>
+                        $this->getDuration()->asFormattedPrecise(),
                 ],
             ],
         ];
@@ -135,9 +159,14 @@ final class AudioRegion extends MediaTimestamp
 
     private function validateTimes(): void
     {
-        throw_if($this->startTime->asSeconds() >= $this->endTime->asSeconds(), new InvalidArgumentException(
-            'Start time must be before end time. Got start: ' .
-            $this->startTime->display() . ', end: ' . $this->endTime->display(),
-        ));
+        throw_if(
+            $this->startTime->asSeconds() >= $this->endTime->asSeconds(),
+            new InvalidArgumentException(
+                'Start time must be before end time. Got start: '
+                . $this->startTime->display()
+                . ', end: '
+                . $this->endTime->display(),
+            ),
+        );
     }
 }

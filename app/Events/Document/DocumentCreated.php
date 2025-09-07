@@ -23,7 +23,8 @@ final class DocumentCreated
     public function __construct(
         public readonly Document $document,
         public readonly Documentable $documentable,
-        public readonly User $creator) {}
+        public readonly User $creator,
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Contracts\Role;
 
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\ModelHasRole;
 use App\Models\Role;
 use DomainException;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Illuminate\Support\Collection;
 
 interface RoleAssignmentManagerInterface
@@ -15,22 +15,36 @@ interface RoleAssignmentManagerInterface
     /**
      * Assign a role to a user or assignable entity on a target.
      */
-    public function assign(AssignableEntity $user, RoleableEntity $target, string|RoleEnum $role): void;
+    public function assign(
+        AssignableEntity $user,
+        RoleableEntity $target,
+        string|RoleEnum $role,
+    ): void;
 
     /**
      * Revoke a role from a user or assignable entity on a target.
      */
-    public function remove(AssignableEntity $user, RoleableEntity $target): void;
+    public function remove(
+        AssignableEntity $user,
+        RoleableEntity $target,
+    ): void;
 
     /**
      * Determine if the user/entity has a specific role on the target.
      */
-    public function hasRoleOn(AssignableEntity $user, RoleableEntity $target, string|RoleEnum $role): bool;
+    public function hasRoleOn(
+        AssignableEntity $user,
+        RoleableEntity $target,
+        string|RoleEnum $role,
+    ): bool;
 
     /**
      * Determine if the user/entity has any role on the target.
      */
-    public function hasAnyRoleOn(AssignableEntity $user, RoleableEntity $target): bool;
+    public function hasAnyRoleOn(
+        AssignableEntity $user,
+        RoleableEntity $target,
+    ): bool;
 
     /**
      * Get all users/entities assigned a specific role on the target.
@@ -38,7 +52,10 @@ interface RoleAssignmentManagerInterface
      *
      * @return Collection<AssignableEntity>
      */
-    public function getParticipantsHasRole(RoleableEntity $target, string|RoleEnum $role): Collection;
+    public function getParticipantsHasRole(
+        RoleableEntity $target,
+        string|RoleEnum $role,
+    ): Collection;
 
     /**
      * Get all users/entities assigned to the target, regardless of role.
@@ -68,18 +85,32 @@ interface RoleAssignmentManagerInterface
      */
     public function bulkClearCache(Collection $targets);
 
-    public function getRoleOn(AssignableEntity $user, RoleableEntity $target): ?Role;
+    public function getRoleOn(
+        AssignableEntity $user,
+        RoleableEntity $target,
+    ): null|Role;
 
-    public function getAssignedEntitiesByType(AssignableEntity $entity, string $type): Collection;
+    public function getAssignedEntitiesByType(
+        AssignableEntity $entity,
+        string $type,
+    ): Collection;
 
     /**
      * Summary of getAssignedEntitiesByKeysByType.
      *
      * @return Collection<int|string, mixed>
      */
-    public function getAssignedEntitiesByKeysByType(AssignableEntity $target, array $keys, string $type): Collection;
+    public function getAssignedEntitiesByKeysByType(
+        AssignableEntity $target,
+        array $keys,
+        string $type,
+    ): Collection;
 
-    public function changeRoleOn(AssignableEntity $user, RoleableEntity $target, string|RoleEnum $role);
+    public function changeRoleOn(
+        AssignableEntity $user,
+        RoleableEntity $target,
+        string|RoleEnum $role,
+    );
 
     /**
      * Generate a cache key for a role assignment.
@@ -91,5 +122,8 @@ interface RoleAssignmentManagerInterface
      *
      * @throws DomainException if the role does not belong to the correct tenant.
      */
-    public function ensureRoleBelongsToTenant(RoleableEntity $target, string|RoleEnum $roleName): Role;
+    public function ensureRoleBelongsToTenant(
+        RoleableEntity $target,
+        string|RoleEnum $roleName,
+    ): Role;
 }

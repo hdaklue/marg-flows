@@ -20,7 +20,11 @@ final class MemberRemoved
     /**
      * Create a new event instance.
      */
-    public function __construct(public Tenant $tenant, public AssignableEntity $memberRemoved, public User $by) {}
+    public function __construct(
+        public Tenant $tenant,
+        public AssignableEntity $memberRemoved,
+        public User $by,
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

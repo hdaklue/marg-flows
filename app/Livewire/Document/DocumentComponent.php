@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Livewire\Document;
 
+use App\Collections\ParticipantsCollection;
 use App\DTOs\Document\DocumentDto;
 use App\Facades\DocumentManager;
 use App\Models\Document;
 use App\Services\Document\Facades\EditorBuilder;
 use Exception;
+use Hdaklue\Porter\Facades\Porter;
 use Illuminate\Support\Collection;
 use LaraDumps\LaraDumps\Livewire\Attributes\Ds;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Log;
@@ -23,25 +26,25 @@ use Log;
 #[Ds]
 final class DocumentComponent extends Component
 {
-    public $canEdit = true;
+    public $canEdit = false;
 
     public array $content;
 
     public string $userPlan = 'ultimate'; // Default plan - testing restrictions
 
+    #[Locked]
     public string $documentId;
 
     private DocumentDto $documentDto;
 
-    public function mount(string $documentId, $canEdit = true)
+    public function mount(string $documentId, $canEdit = false)
     {
         $this->documentDto = DocumentManager::getDocumentDto($documentId);
 
         $this->documentId = $documentId;
-
         // Initialize resolver using facade - blocks already contains full EditorJS format
         $this->content = $this->documentDto->blocks;
-        $this->canEdit = $canEdit;
+        $this->canEdit = filamentUser()->can('manage', $this->document);
     }
 
     #[Computed]
@@ -104,29 +107,32 @@ final class DocumentComponent extends Component
     public function userPermissions(): array
     {
         return [
-            'canManageMembers' => filamentUser()->can('manageMembers', $this->document),
+            'canManageMembers' => filamentUser()->can(
+                'manageMembers',
+                $this->document,
+            ),
             'canEdit' => filamentUser()->can('update', $this->document),
         ];
     }
 
     #[Computed]
-    public function participants(): Collection
+    public function participants(): ParticipantsCollection
     {
-        return $this->document->getParticipants();
+        return new ParticipantsCollection(Porter::getParticipantsWithRoles($this->document));
+
+        // return $this->document->getParticipants();
     }
 
     #[Computed]
-    public function participantsArray(): array
+    public function participantsArray(): ParticipantsCollection
     {
-
-        return $this->participants->asDtoArray()->toArray();
+        return $this->participants->asDtoCollection();
     }
 
     #[On('roleable-entity:members-updated.{documentId}')]
     public function reloadPartipants(): void
     {
         unset($this->participants, $this->participantsArray);
-
     }
 
     public function saveDocument(string $content)
@@ -145,8 +151,7 @@ final class DocumentComponent extends Component
             DocumentManager::updateBlocks($this->document, $editorData);
 
             // Update the DTO with new content
-            unset($this->updatedAtString,$this->document);
-
+            unset($this->updatedAtString, $this->document);
         } catch (Exception $e) {
             Log::error('Document save failed', [
                 'document_id' => $this->documentId,
@@ -192,7 +197,7 @@ final class DocumentComponent extends Component
                     'save_failed' => __('document.editor.error'),
                     'unsaved_changes' => __('document.editor.unsaved_changes'),
                     'no_changes' => __('document.editor.no_changes'),
-                ]
+                ],
             ],
             'editor_tools' => [
                 'paragraph' => __('document.tools.paragraph'),

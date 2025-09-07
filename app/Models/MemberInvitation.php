@@ -61,7 +61,6 @@ final class MemberInvitation extends Model
     protected function casts(): array
     {
         return [
-
             'role_data' => 'array',
         ];
     }

@@ -13,7 +13,7 @@ final class VideoFrame extends MediaTimestamp
     public function __construct(
         private readonly CommentTime $time,
         private readonly float $frameRate,
-        ?int $frameNumber = null
+        null|int $frameNumber = null,
     ) {
         $this->validateFrameRate();
         $this->frameNumber = $frameNumber ?? $this->time->getFrame($frameRate);
@@ -35,15 +35,19 @@ final class VideoFrame extends MediaTimestamp
         return new self($time, $frameRate, $frameNumber);
     }
 
-    public static function fromFormatted(string $timeString, float $frameRate): self
-    {
+    public static function fromFormatted(
+        string $timeString,
+        float $frameRate,
+    ): self {
         return new self(CommentTime::fromFormatted($timeString), $frameRate);
     }
 
     public static function fromArray(array $data): self
     {
-        $frameRate = (float) ($data['frame_rate'] ?? $data['media']['frame_rate'] ?? 30.0);
-        
+        $frameRate = (float) (
+            $data['frame_rate'] ?? $data['media']['frame_rate'] ?? 30.0
+        );
+
         if (isset($data['frame_number'])) {
             return self::fromFrame((int) $data['frame_number'], $frameRate);
         }
@@ -99,7 +103,12 @@ final class VideoFrame extends MediaTimestamp
 
     public function previousFrame(): self
     {
-        throw_if($this->frameNumber <= 0, new InvalidArgumentException('Cannot go to previous frame from frame 0'));
+        throw_if(
+            $this->frameNumber <= 0,
+            new InvalidArgumentException(
+                'Cannot go to previous frame from frame 0',
+            ),
+        );
 
         return self::fromFrame($this->frameNumber - 1, $this->frameRate);
     }
@@ -107,21 +116,31 @@ final class VideoFrame extends MediaTimestamp
     public function addFrames(int $frames): self
     {
         $newFrameNumber = $this->frameNumber + $frames;
-        
-        throw_if($newFrameNumber < 0, new InvalidArgumentException('Cannot have negative frame number'));
+
+        throw_if(
+            $newFrameNumber < 0,
+            new InvalidArgumentException('Cannot have negative frame number'),
+        );
 
         return self::fromFrame($newFrameNumber, $this->frameRate);
     }
 
     public function isAtSameFrame(VideoFrame $other): bool
     {
-        return $this->frameNumber === $other->frameNumber 
-            && abs($this->frameRate - $other->frameRate) < PHP_FLOAT_EPSILON;
+        return (
+            $this->frameNumber === $other->frameNumber
+            && abs($this->frameRate - $other->frameRate) < PHP_FLOAT_EPSILON
+        );
     }
 
     public function frameDifference(VideoFrame $other): int
     {
-        throw_if(abs($this->frameRate - $other->frameRate) >= PHP_FLOAT_EPSILON, new InvalidArgumentException('Cannot compare frames with different frame rates'));
+        throw_if(
+            abs($this->frameRate - $other->frameRate) >= PHP_FLOAT_EPSILON,
+            new InvalidArgumentException(
+                'Cannot compare frames with different frame rates',
+            ),
+        );
 
         return abs($this->frameNumber - $other->frameNumber);
     }
@@ -154,8 +173,15 @@ final class VideoFrame extends MediaTimestamp
 
     private function validateFrameRate(): void
     {
-        throw_if($this->frameRate <= 0, new InvalidArgumentException('Frame rate must be positive, got: ' . $this->frameRate));
+        throw_if(
+            $this->frameRate <= 0,
+            new InvalidArgumentException('Frame rate must be positive, got: '
+            . $this->frameRate),
+        );
 
-        throw_unless(is_finite($this->frameRate), new InvalidArgumentException('Frame rate must be finite'));
+        throw_unless(
+            is_finite($this->frameRate),
+            new InvalidArgumentException('Frame rate must be finite'),
+        );
     }
 }

@@ -25,14 +25,20 @@ class MigrateCommand extends Command
 
     public function handle(): int
     {
-        $this->info('Running migrations on Business Database (business_db connection)...');
+        $this->info(
+            'Running migrations on Business Database (business_db connection)...',
+        );
 
         // Get all business-db migration paths
         $businessDbPaths = $this->getBusinessDbMigrationPaths();
-        
+
         if (empty($businessDbPaths)) {
-            $this->warn('No migrations found in database/migrations/business-db/ folder.');
-            $this->info('Create the folder and add your business database migrations there.');
+            $this->warn(
+                'No migrations found in database/migrations/business-db/ folder.',
+            );
+            $this->info(
+                'Create the folder and add your business database migrations there.',
+            );
             return 0;
         }
 
@@ -52,9 +58,14 @@ class MigrateCommand extends Command
         // Handle different migration operations
         if ($this->option('fresh')) {
             $command = 'migrate:fresh';
-            $this->warn('⚠️  This will DROP ALL TABLES in the business database!');
-            
-            if (!$this->option('force') && !$this->confirm('Do you really wish to run this command?')) {
+            $this->warn(
+                '⚠️  This will DROP ALL TABLES in the business database!',
+            );
+
+            if (
+                !$this->option('force')
+                && !$this->confirm('Do you really wish to run this command?')
+            ) {
                 $this->info('Command cancelled.');
                 return 1;
             }
@@ -63,16 +74,22 @@ class MigrateCommand extends Command
         } elseif ($this->option('reset')) {
             $command = 'migrate:reset';
             $this->warn('⚠️  This will rollback ALL migrations!');
-            
-            if (!$this->option('force') && !$this->confirm('Do you really wish to run this command?')) {
+
+            if (
+                !$this->option('force')
+                && !$this->confirm('Do you really wish to run this command?')
+            ) {
                 $this->info('Command cancelled.');
                 return 1;
             }
         } elseif ($this->option('refresh')) {
             $command = 'migrate:refresh';
             $this->warn('⚠️  This will reset and re-run all migrations!');
-            
-            if (!$this->option('force') && !$this->confirm('Do you really wish to run this command?')) {
+
+            if (
+                !$this->option('force')
+                && !$this->confirm('Do you really wish to run this command?')
+            ) {
                 $this->info('Command cancelled.');
                 return 1;
             }
@@ -90,7 +107,10 @@ class MigrateCommand extends Command
         // Add any additional paths specified by user
         if ($this->option('additional-path')) {
             $additionalPaths = $this->option('additional-path');
-            $arguments['--path'] = array_merge($arguments['--path'], $additionalPaths);
+            $arguments['--path'] = array_merge(
+                $arguments['--path'],
+                $additionalPaths,
+            );
         }
 
         if ($this->option('realpath')) {
@@ -107,7 +127,10 @@ class MigrateCommand extends Command
 
         // Show what we're about to run
         $this->line('');
-        $this->comment("Executing: php artisan {$command} " . $this->buildArgumentsString($arguments));
+        $this->comment(
+            "Executing: php artisan {$command} "
+            . $this->buildArgumentsString($arguments),
+        );
         $this->line('');
 
         // Run the migration command
@@ -117,7 +140,9 @@ class MigrateCommand extends Command
         $this->line(Artisan::output());
 
         if ($exitCode === 0) {
-            $this->info('✅ Business database migrations completed successfully!');
+            $this->info(
+                '✅ Business database migrations completed successfully!',
+            );
         } else {
             $this->error('❌ Business database migrations failed!');
         }
@@ -128,7 +153,7 @@ class MigrateCommand extends Command
     private function buildArgumentsString(array $arguments): string
     {
         $parts = [];
-        
+
         foreach ($arguments as $key => $value) {
             if ($key === '--database') {
                 $parts[] = "--database={$value}";
@@ -142,20 +167,20 @@ class MigrateCommand extends Command
                 $parts[] = "{$key}={$value}";
             }
         }
-        
+
         return implode(' ', $parts);
     }
 
     private function getBusinessDbMigrationPaths(): array
     {
         $businessDbPath = database_path('migrations/business-db');
-        
+
         if (!is_dir($businessDbPath)) {
             return [];
         }
 
         $files = glob($businessDbPath . '/*.php');
-        
+
         // Convert absolute paths to relative paths from the Laravel root
         return array_map(function ($file) {
             return 'database/migrations/business-db/' . basename($file);

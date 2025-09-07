@@ -9,11 +9,10 @@ use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
 
 class WatermarkOperation extends AbstractVideoOperation
 {
-
     public function __construct(
         private readonly string $watermarkPath,
         private readonly string $position = 'bottom-right',
-        private readonly float $opacity = 1.0
+        private readonly float $opacity = 1.0,
     ) {
         $this->metadata = [
             'watermark_path' => $this->watermarkPath,
@@ -27,7 +26,7 @@ class WatermarkOperation extends AbstractVideoOperation
         return $mediaExporter->addFilter(function ($filters) {
             $filters->watermark($this->watermarkPath, [
                 'position' => $this->position,
-                'opacity' => $this->opacity
+                'opacity' => $this->opacity,
             ]);
         });
     }
@@ -55,17 +54,16 @@ class WatermarkOperation extends AbstractVideoOperation
         return $builder->addFilter(function ($filters) {
             $filters->watermark($this->watermarkPath, [
                 'position' => $this->position,
-                'opacity' => $this->opacity
+                'opacity' => $this->opacity,
             ]);
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
-    {
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
         return $media->addFilter(function ($filters) {
             $filters->watermark($this->watermarkPath, [
                 'position' => $this->position,
-                'opacity' => $this->opacity
+                'opacity' => $this->opacity,
             ]);
         });
     }

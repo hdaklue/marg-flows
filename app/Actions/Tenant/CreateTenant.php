@@ -23,12 +23,15 @@ final class CreateTenant
             // Transform array data to DTO format for package action
             $members = [];
             if (isset($data['members']) && is_array($data['members'])) {
-                $members = array_map(function ($member) {
-                    return TenantMemberDto::from([
-                        'user_id' => $member['name'], // Assuming 'name' is actually user_id
-                        'role' => $member['role'],
-                    ]);
-                }, $data['members']);
+                $members = array_map(
+                    function ($member) {
+                        return TenantMemberDto::from([
+                            'user_id' => $member['name'], // Assuming 'name' is actually user_id
+                            'role' => $member['role'],
+                        ]);
+                    },
+                    $data['members'],
+                );
             }
 
             $dto = CreateTenantDto::from([
@@ -39,7 +42,7 @@ final class CreateTenant
 
             // Call the package action to handle the core functionality
             $result = PackageCreateTenant::run($dto);
-            
+
             // Get the created tenant and participants for app-specific logic
             $tenant = $result['tenant'] ?? null;
             $participants = $result['participants'] ?? collect();
@@ -48,7 +51,6 @@ final class CreateTenant
             if ($tenant && $participants->isNotEmpty()) {
                 TenantCreated::dispatch($tenant, $participants, $user);
             }
-
         } catch (Exception $e) {
             Log::error('Tenant creation failed', [
                 'error' => $e->getMessage(),
@@ -58,5 +60,4 @@ final class CreateTenant
             throw $e; // Re-throw to let caller handle
         }
     }
-
 }

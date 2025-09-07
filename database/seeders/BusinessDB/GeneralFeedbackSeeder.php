@@ -15,19 +15,25 @@ final class GeneralFeedbackSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('Creating general feedback in business database...');
+        $this->command->info(
+            'Creating general feedback in business database...',
+        );
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
         if (!$testUser) {
-            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
+            $this->command->warn(
+                'Test user not found. Please run main DatabaseSeeder first.',
+            );
             return;
         }
 
         // Get documents from business database to associate feedback with
         $documents = Document::limit(5)->get();
         if ($documents->isEmpty()) {
-            $this->command->warn('No documents found in business database. Please run DocumentSeeder first.');
+            $this->command->warn(
+                'No documents found in business database. Please run DocumentSeeder first.',
+            );
             return;
         }
 
@@ -46,19 +52,28 @@ final class GeneralFeedbackSeeder extends Seeder
         ];
 
         $categories = [
-            'ui', 'ux', 'content', 'functionality', 'performance', 
-            'accessibility', 'security', 'bug', 'feature', 
-            'improvement', 'question', 'other'
+            'ui',
+            'ux',
+            'content',
+            'functionality',
+            'performance',
+            'accessibility',
+            'security',
+            'bug',
+            'feature',
+            'improvement',
+            'question',
+            'other',
         ];
 
         // Create general feedback for each document
         foreach ($documents as $document) {
             // Create 3-5 general feedback entries per document
             $feedbackCount = rand(3, 5);
-            
+
             for ($i = 1; $i <= $feedbackCount; $i++) {
                 $category = fake()->randomElement($categories);
-                
+
                 GeneralFeedback::create([
                     'creator_id' => $testUser->id,
                     'content' => $this->generateGeneralComment($category),
@@ -77,7 +92,9 @@ final class GeneralFeedbackSeeder extends Seeder
         $this->createSpecializedGeneralFeedback($testUser, $documents->first());
 
         $totalGeneralFeedback = GeneralFeedback::count();
-        $this->command->info("✅ Created {$totalGeneralFeedback} general feedback entries in business database");
+        $this->command->info(
+            "✅ Created {$totalGeneralFeedback} general feedback entries in business database",
+        );
     }
 
     private function generateGeneralComment(string $category): string
@@ -179,7 +196,7 @@ final class GeneralFeedbackSeeder extends Seeder
         return fake()->randomElement($categoryComments);
     }
 
-    private function generateMetadata(string $category): ?array
+    private function generateMetadata(string $category): null|array
     {
         if (!fake()->boolean(80)) { // 80% chance of having metadata
             return null;
@@ -188,31 +205,87 @@ final class GeneralFeedbackSeeder extends Seeder
         $baseMetadata = [
             'type' => 'general',
             'category' => $category,
-            'priority' => fake()->randomElement(['low', 'medium', 'high', 'critical']),
+            'priority' => fake()->randomElement([
+                'low',
+                'medium',
+                'high',
+                'critical',
+            ]),
             'reported_at' => now()->toISOString(),
-            'browser' => fake()->randomElement(['Chrome', 'Firefox', 'Safari', 'Edge']),
-            'platform' => fake()->randomElement(['Windows', 'macOS', 'Linux', 'iOS', 'Android']),
+            'browser' => fake()->randomElement([
+                'Chrome',
+                'Firefox',
+                'Safari',
+                'Edge',
+            ]),
+            'platform' => fake()->randomElement([
+                'Windows',
+                'macOS',
+                'Linux',
+                'iOS',
+                'Android',
+            ]),
         ];
 
         // Add category-specific metadata
         return match ($category) {
             'ui' => array_merge($baseMetadata, [
-                'component' => fake()->randomElement(['button', 'form', 'navigation', 'modal', 'dropdown']),
+                'component' => fake()->randomElement([
+                    'button',
+                    'form',
+                    'navigation',
+                    'modal',
+                    'dropdown',
+                ]),
                 'design_system_version' => '2.1.0',
-                'screen_resolution' => fake()->randomElement(['1920x1080', '1366x768', '414x896', '375x667']),
-                'color_scheme' => fake()->randomElement(['light', 'dark', 'auto']),
+                'screen_resolution' => fake()->randomElement([
+                    '1920x1080',
+                    '1366x768',
+                    '414x896',
+                    '375x667',
+                ]),
+                'color_scheme' => fake()->randomElement([
+                    'light',
+                    'dark',
+                    'auto',
+                ]),
             ]),
             'ux' => array_merge($baseMetadata, [
-                'user_journey_step' => fake()->randomElement(['onboarding', 'discovery', 'conversion', 'retention']),
-                'interaction_type' => fake()->randomElement(['click', 'hover', 'scroll', 'keyboard', 'touch']),
-                'user_type' => fake()->randomElement(['new', 'returning', 'power_user', 'admin']),
+                'user_journey_step' => fake()->randomElement([
+                    'onboarding',
+                    'discovery',
+                    'conversion',
+                    'retention',
+                ]),
+                'interaction_type' => fake()->randomElement([
+                    'click',
+                    'hover',
+                    'scroll',
+                    'keyboard',
+                    'touch',
+                ]),
+                'user_type' => fake()->randomElement([
+                    'new',
+                    'returning',
+                    'power_user',
+                    'admin',
+                ]),
                 'completion_rate' => fake()->randomFloat(2, 0.1, 1.0),
             ]),
             'performance' => array_merge($baseMetadata, [
                 'load_time' => fake()->randomFloat(3, 0.1, 5.0),
                 'memory_usage' => fake()->numberBetween(50, 500) . 'MB',
-                'network_speed' => fake()->randomElement(['slow-3g', 'fast-3g', '4g', 'wifi']),
-                'device_type' => fake()->randomElement(['desktop', 'tablet', 'mobile']),
+                'network_speed' => fake()->randomElement([
+                    'slow-3g',
+                    'fast-3g',
+                    '4g',
+                    'wifi',
+                ]),
+                'device_type' => fake()->randomElement([
+                    'desktop',
+                    'tablet',
+                    'mobile',
+                ]),
             ]),
             'bug' => array_merge($baseMetadata, [
                 'reproduction_steps' => [
@@ -222,44 +295,95 @@ final class GeneralFeedbackSeeder extends Seeder
                 ],
                 'expected_behavior' => 'Should work as intended',
                 'actual_behavior' => 'Does not work as expected',
-                'severity' => fake()->randomElement(['low', 'medium', 'high', 'critical']),
+                'severity' => fake()->randomElement([
+                    'low',
+                    'medium',
+                    'high',
+                    'critical',
+                ]),
                 'affects_versions' => ['2.1.0', '2.0.5'],
             ]),
             'accessibility' => array_merge($baseMetadata, [
                 'wcag_level' => fake()->randomElement(['A', 'AA', 'AAA']),
-                'assistive_technology' => fake()->randomElement(['screen_reader', 'keyboard_only', 'voice_control']),
+                'assistive_technology' => fake()->randomElement([
+                    'screen_reader',
+                    'keyboard_only',
+                    'voice_control',
+                ]),
                 'contrast_ratio' => fake()->randomFloat(2, 1.0, 21.0),
-                'compliance_status' => fake()->randomElement(['compliant', 'partial', 'non_compliant']),
+                'compliance_status' => fake()->randomElement([
+                    'compliant',
+                    'partial',
+                    'non_compliant',
+                ]),
             ]),
             default => $baseMetadata,
         };
     }
 
-    private function generateCustomData(string $category): ?array
+    private function generateCustomData(string $category): null|array
     {
         if (!fake()->boolean(60)) { // 60% chance of having custom data
             return null;
         }
 
         return [
-            'tags' => fake()->randomElements(['important', 'quick-fix', 'enhancement', 'breaking-change', 'documentation'], rand(1, 3)),
-            'estimated_effort' => fake()->randomElement(['1h', '4h', '1d', '3d', '1w', '2w']),
-            'stakeholders' => fake()->randomElements(['design-team', 'dev-team', 'product-manager', 'qa-team'], rand(1, 3)),
+            'tags' => fake()->randomElements(
+                [
+                    'important',
+                    'quick-fix',
+                    'enhancement',
+                    'breaking-change',
+                    'documentation',
+                ],
+                rand(1, 3),
+            ),
+            'estimated_effort' => fake()->randomElement([
+                '1h',
+                '4h',
+                '1d',
+                '3d',
+                '1w',
+                '2w',
+            ]),
+            'stakeholders' => fake()->randomElements(
+                ['design-team', 'dev-team', 'product-manager', 'qa-team'],
+                rand(1, 3),
+            ),
             'external_references' => [
                 'ticket_id' => 'PROJ-' . fake()->numberBetween(1000, 9999),
-                'design_file' => fake()->boolean(40) ? 'https://figma.com/file/' . fake()->uuid() : null,
-                'documentation' => fake()->boolean(30) ? 'https://docs.example.com/feature/' . fake()->slug() : null,
+                'design_file' => fake()->boolean(40)
+                    ? 'https://figma.com/file/' . fake()->uuid()
+                    : null,
+                'documentation' => fake()->boolean(30)
+                    ? 'https://docs.example.com/feature/' . fake()->slug()
+                    : null,
             ],
             'metrics' => [
-                'user_impact' => fake()->randomElement(['low', 'medium', 'high']),
-                'business_value' => fake()->randomElement(['low', 'medium', 'high']),
-                'technical_debt' => fake()->randomElement(['none', 'minor', 'moderate', 'significant']),
+                'user_impact' => fake()->randomElement([
+                    'low',
+                    'medium',
+                    'high',
+                ]),
+                'business_value' => fake()->randomElement([
+                    'low',
+                    'medium',
+                    'high',
+                ]),
+                'technical_debt' => fake()->randomElement([
+                    'none',
+                    'minor',
+                    'moderate',
+                    'significant',
+                ]),
             ],
         ];
     }
 
-    private function createSpecializedGeneralFeedback(User $user, Document $document): void
-    {
+    private function createSpecializedGeneralFeedback(
+        User $user,
+        Document $document,
+    ): void {
         // High-priority bug report with detailed metadata
         GeneralFeedback::create([
             'creator_id' => $user->id,

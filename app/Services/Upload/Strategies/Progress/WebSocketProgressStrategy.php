@@ -27,8 +27,10 @@ final class WebSocketProgressStrategy implements ProgressStrategyContract
         // broadcast(new UploadSessionInitialized($sessionId, $metadata));
     }
 
-    public function updateProgress(string $sessionId, ProgressData $progress): void
-    {
+    public function updateProgress(
+        string $sessionId,
+        ProgressData $progress,
+    ): void {
         // TODO: Implement WebSocket progress broadcasting
         // This would typically:
         // 1. Update session progress in storage
@@ -77,7 +79,7 @@ final class WebSocketProgressStrategy implements ProgressStrategyContract
         // broadcast(new UploadSessionFailed($sessionId, $message));
     }
 
-    public function getProgress(string $sessionId): ?ProgressData
+    public function getProgress(string $sessionId): null|ProgressData
     {
         // TODO: Implement progress retrieval from WebSocket storage
         // This would typically query the session storage to get current progress

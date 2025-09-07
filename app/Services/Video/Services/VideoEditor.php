@@ -7,7 +7,6 @@ namespace App\Services\Video\Services;
 use App\Services\Video\Contracts\ScaleStrategyContract;
 use App\Services\Video\Contracts\VideoFormatContract;
 use App\Services\Video\Enums\BitrateEnum;
-use App\Services\Video\Video;
 use App\Services\Video\Operations\CropOperation;
 use App\Services\Video\Operations\ResizeOperation;
 use App\Services\Video\Operations\ResizeToHeightOperation;
@@ -19,20 +18,24 @@ use App\Services\Video\Pipeline\VideoOperationPipeline;
 use App\Services\Video\Services\VideoNamingService;
 use App\Services\Video\ValueObjects\AspectRatio;
 use App\Services\Video\ValueObjects\Dimension;
+use App\Services\Video\Video;
 use InvalidArgumentException;
 
 final class VideoEditor
 {
     private VideoOperationPipeline $pipeline;
 
-    private ?VideoFormatContract $convertFormat = null;
+    private null|VideoFormatContract $convertFormat = null;
 
-    private ?BitrateEnum $convertBitrate = null;
+    private null|BitrateEnum $convertBitrate = null;
 
     public function __construct(
-        private readonly Video $video
+        private readonly Video $video,
     ) {
-        $this->pipeline = new VideoOperationPipeline($video->getPath(), $video->getDisk());
+        $this->pipeline = new VideoOperationPipeline(
+            $video->getPath(),
+            $video->getDisk(),
+        );
     }
 
     /**
@@ -40,7 +43,9 @@ final class VideoEditor
      */
     public function scale(ScaleStrategyContract $strategy): self
     {
-        $this->pipeline->addOperation(new ScaleOperation($strategy, $this->video->getDimension()));
+        $this->pipeline->addOperation(
+            new ScaleOperation($strategy, $this->video->getDimension()),
+        );
 
         return $this;
     }
@@ -60,7 +65,10 @@ final class VideoEditor
      */
     public function resizeToWidth(int $width): self
     {
-        throw_if($width <= 0, new InvalidArgumentException('Width must be positive'));
+        throw_if(
+            $width <= 0,
+            new InvalidArgumentException('Width must be positive'),
+        );
 
         $this->pipeline->addOperation(new ResizeToWidthOperation($width));
 
@@ -72,7 +80,10 @@ final class VideoEditor
      */
     public function resizeToHeight(int $height): self
     {
-        throw_if($height <= 0, new InvalidArgumentException('Height must be positive'));
+        throw_if(
+            $height <= 0,
+            new InvalidArgumentException('Height must be positive'),
+        );
 
         $this->pipeline->addOperation(new ResizeToHeightOperation($height));
 
@@ -84,7 +95,12 @@ final class VideoEditor
      */
     public function crop(int $x, int $y, Dimension $dimension): self
     {
-        throw_if($x < 0 || $y < 0, new InvalidArgumentException('Crop coordinates must be non-negative'));
+        throw_if(
+            $x < 0 || $y < 0,
+            new InvalidArgumentException(
+                'Crop coordinates must be non-negative',
+            ),
+        );
 
         $this->pipeline->addOperation(new CropOperation($x, $y, $dimension));
 
@@ -118,7 +134,12 @@ final class VideoEditor
      */
     public function trim(float $start, float $duration): self
     {
-        throw_if($start < 0 || $duration <= 0, new InvalidArgumentException('Start time and duration must be positive'));
+        throw_if(
+            $start < 0 || $duration <= 0,
+            new InvalidArgumentException(
+                'Start time and duration must be positive',
+            ),
+        );
 
         $this->pipeline->addOperation(new TrimOperation($start, $duration));
 
@@ -128,12 +149,25 @@ final class VideoEditor
     /**
      * Add watermark to video.
      */
-    public function watermark(string $path, string $position = 'bottom-right', float $opacity = 1.0): self
-    {
-        throw_if(! file_exists($path), new InvalidArgumentException("Watermark file not found: {$path}"));
-        throw_if($opacity < 0 || $opacity > 1, new InvalidArgumentException('Opacity must be between 0 and 1'));
+    public function watermark(
+        string $path,
+        string $position = 'bottom-right',
+        float $opacity = 1.0,
+    ): self {
+        throw_if(
+            !file_exists($path),
+            new InvalidArgumentException("Watermark file not found: {$path}"),
+        );
+        throw_if(
+            $opacity < 0 || $opacity > 1,
+            new InvalidArgumentException('Opacity must be between 0 and 1'),
+        );
 
-        $this->pipeline->addOperation(new WatermarkOperation($path, $position, $opacity));
+        $this->pipeline->addOperation(new WatermarkOperation(
+            $path,
+            $position,
+            $opacity,
+        ));
 
         return $this;
     }
@@ -143,7 +177,10 @@ final class VideoEditor
      */
     public function addAudio(string $audioPath): self
     {
-        throw_if(! file_exists($audioPath), new InvalidArgumentException("Audio file not found: {$audioPath}"));
+        throw_if(
+            !file_exists($audioPath),
+            new InvalidArgumentException("Audio file not found: {$audioPath}"),
+        );
 
         // Note: addAudio would need an AddAudioOperation implementation
         // For now, skip adding to pipeline
@@ -166,8 +203,10 @@ final class VideoEditor
      * Convert video to specific format with optional bitrate.
      * If no bitrate provided, uses original video bitrate.
      */
-    public function convertTo(VideoFormatContract $format, ?BitrateEnum $bitrate = null): self
-    {
+    public function convertTo(
+        VideoFormatContract $format,
+        null|BitrateEnum $bitrate = null,
+    ): self {
         $this->convertFormat = $format;
         $this->convertBitrate = $bitrate;
 
@@ -178,7 +217,7 @@ final class VideoEditor
      * Save video with auto-generated filename using naming service.
      * Always uses CopyFormat unless convertTo() was called.
      */
-    public function save(?VideoNamingService $namingService = null): string
+    public function save(null|VideoNamingService $namingService = null): string
     {
         // Always use naming service - create default if not provided
         $namingService = $namingService ?? VideoNamingService::timestamped();
@@ -254,11 +293,19 @@ final class VideoEditor
     private function executeOperations(string $outputPath): string
     {
         $directory = dirname($outputPath);
-        throw_if(! is_dir($directory), new InvalidArgumentException("Output directory does not exist: {$directory}"));
+        throw_if(
+            !is_dir($directory),
+            new InvalidArgumentException(
+                "Output directory does not exist: {$directory}",
+            ),
+        );
 
         // Pass format and bitrate to pipeline if conversion requested
         if ($this->convertFormat) {
-            $this->pipeline->setConvertFormat($this->convertFormat, $this->convertBitrate);
+            $this->pipeline->setConvertFormat(
+                $this->convertFormat,
+                $this->convertBitrate,
+            );
         }
 
         // Execute the pipeline and return final path

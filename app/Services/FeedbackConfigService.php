@@ -23,7 +23,7 @@ final class FeedbackConfigService
     /**
      * Get concrete model class for a specific type
      */
-    public static function getModelClass(string $type): ?string
+    public static function getModelClass(string $type): null|string
     {
         return config("feedback.concrete_models.{$type}");
     }
@@ -55,8 +55,10 @@ final class FeedbackConfigService
     /**
      * Get default value for a specific setting
      */
-    public static function getDefault(string $key, mixed $fallback = null): mixed
-    {
+    public static function getDefault(
+        string $key,
+        mixed $fallback = null,
+    ): mixed {
         return config("feedback.defaults.{$key}", $fallback);
     }
 
@@ -71,8 +73,11 @@ final class FeedbackConfigService
     /**
      * Get specific setting for a feedback type
      */
-    public static function getTypeSetting(string $type, string $key, mixed $fallback = null): mixed
-    {
+    public static function getTypeSetting(
+        string $type,
+        string $key,
+        mixed $fallback = null,
+    ): mixed {
         return config("feedback.{$type}.{$key}", $fallback);
     }
 
@@ -91,7 +96,7 @@ final class FeedbackConfigService
     {
         $globalRules = config('feedback.validation.required_fields.all', []);
         $typeRules = config("feedback.validation.required_fields.{$type}", []);
-        
+
         return array_merge($globalRules, $typeRules);
     }
 
@@ -187,10 +192,12 @@ final class FeedbackConfigService
     /**
      * Validate feedback attributes against configuration rules
      */
-    public static function validateAttributes(string $type, array $attributes): array
-    {
+    public static function validateAttributes(
+        string $type,
+        array $attributes,
+    ): array {
         $errors = [];
-        
+
         // Check required fields
         $requiredFields = self::getValidationRules($type);
         foreach ($requiredFields as $field) {
@@ -203,12 +210,15 @@ final class FeedbackConfigService
         if (isset($attributes['content'])) {
             $contentLimits = self::getContentLimits();
             $contentLength = mb_strlen($attributes['content']);
-            
+
             if ($contentLength < ($contentLimits['min_length'] ?? 0)) {
                 $errors[] = "Content too short (minimum {$contentLimits['min_length']} characters)";
             }
-            
-            if ($contentLength > ($contentLimits['max_length'] ?? PHP_INT_MAX)) {
+
+            if (
+                $contentLength
+                > ($contentLimits['max_length'] ?? PHP_INT_MAX)
+            ) {
                 $errors[] = "Content too long (maximum {$contentLimits['max_length']} characters)";
             }
         }
@@ -216,14 +226,23 @@ final class FeedbackConfigService
         // Type-specific validation
         switch ($type) {
             case 'design':
-                $errors = array_merge($errors, self::validateDesignAttributes($attributes));
+                $errors = array_merge(
+                    $errors,
+                    self::validateDesignAttributes($attributes),
+                );
                 break;
             case 'video':
             case 'audio':
-                $errors = array_merge($errors, self::validateTimeAttributes($attributes));
+                $errors = array_merge(
+                    $errors,
+                    self::validateTimeAttributes($attributes),
+                );
                 break;
             case 'document':
-                $errors = array_merge($errors, self::validateDocumentAttributes($attributes));
+                $errors = array_merge(
+                    $errors,
+                    self::validateDocumentAttributes($attributes),
+                );
                 break;
         }
 
@@ -237,26 +256,36 @@ final class FeedbackConfigService
     {
         $errors = [];
         $coordinateLimits = self::getCoordinateLimits();
-        
+
         if (isset($attributes['x_coordinate'])) {
             $x = $attributes['x_coordinate'];
-            if ($x < ($coordinateLimits['x']['min'] ?? 0) || $x > ($coordinateLimits['x']['max'] ?? PHP_INT_MAX)) {
-                $errors[] = "X coordinate out of bounds";
+            if (
+                $x < ($coordinateLimits['x']['min'] ?? 0)
+                || $x > ($coordinateLimits['x']['max'] ?? PHP_INT_MAX)
+            ) {
+                $errors[] = 'X coordinate out of bounds';
             }
         }
-        
+
         if (isset($attributes['y_coordinate'])) {
             $y = $attributes['y_coordinate'];
-            if ($y < ($coordinateLimits['y']['min'] ?? 0) || $y > ($coordinateLimits['y']['max'] ?? PHP_INT_MAX)) {
-                $errors[] = "Y coordinate out of bounds";
+            if (
+                $y < ($coordinateLimits['y']['min'] ?? 0)
+                || $y > ($coordinateLimits['y']['max'] ?? PHP_INT_MAX)
+            ) {
+                $errors[] = 'Y coordinate out of bounds';
             }
         }
 
         // Validate annotation type
         if (isset($attributes['annotation_type'])) {
-            $supportedTypes = self::getTypeSetting('design', 'supported_annotation_types', []);
+            $supportedTypes = self::getTypeSetting(
+                'design',
+                'supported_annotation_types',
+                [],
+            );
             if (!in_array($attributes['annotation_type'], $supportedTypes)) {
-                $errors[] = "Unsupported annotation type";
+                $errors[] = 'Unsupported annotation type';
             }
         }
 
@@ -270,30 +299,32 @@ final class FeedbackConfigService
     {
         $errors = [];
         $timeLimits = self::getTimeLimits();
-        
+
         if (isset($attributes['timestamp'])) {
             $timestamp = $attributes['timestamp'];
-            if ($timestamp < ($timeLimits['timestamp']['min'] ?? 0) || 
-                $timestamp > ($timeLimits['timestamp']['max'] ?? PHP_INT_MAX)) {
-                $errors[] = "Timestamp out of bounds";
+            if (
+                $timestamp < ($timeLimits['timestamp']['min'] ?? 0)
+                || $timestamp > ($timeLimits['timestamp']['max'] ?? PHP_INT_MAX)
+            ) {
+                $errors[] = 'Timestamp out of bounds';
             }
         }
-        
+
         if (isset($attributes['start_time'], $attributes['end_time'])) {
             $startTime = $attributes['start_time'];
             $endTime = $attributes['end_time'];
             $duration = $endTime - $startTime;
-            
+
             if ($duration < ($timeLimits['duration']['min'] ?? 0)) {
-                $errors[] = "Duration too short";
+                $errors[] = 'Duration too short';
             }
-            
+
             if ($duration > ($timeLimits['duration']['max'] ?? PHP_INT_MAX)) {
-                $errors[] = "Duration too long";
+                $errors[] = 'Duration too long';
             }
-            
+
             if ($startTime >= $endTime) {
-                $errors[] = "Start time must be before end time";
+                $errors[] = 'Start time must be before end time';
             }
         }
 
@@ -306,18 +337,22 @@ final class FeedbackConfigService
     private static function validateDocumentAttributes(array $attributes): array
     {
         $errors = [];
-        
+
         if (isset($attributes['block_id'])) {
             $pattern = self::getTypeSetting('document', 'block_id_pattern');
             if ($pattern && !preg_match($pattern, $attributes['block_id'])) {
-                $errors[] = "Invalid block ID format";
+                $errors[] = 'Invalid block ID format';
             }
         }
-        
+
         if (isset($attributes['element_type'])) {
-            $supportedTypes = self::getTypeSetting('document', 'supported_block_types', []);
+            $supportedTypes = self::getTypeSetting(
+                'document',
+                'supported_block_types',
+                [],
+            );
             if (!in_array($attributes['element_type'], $supportedTypes)) {
-                $errors[] = "Unsupported block element type";
+                $errors[] = 'Unsupported block element type';
             }
         }
 
@@ -333,9 +368,12 @@ final class FeedbackConfigService
             'concrete_models' => count(self::getConcreteModels()),
             'available_types' => self::getAvailableTypes(),
             'enabled_features' => count(self::getEnabledFeatures()),
-            'factory_enabled' => self::getFactorySettings()['auto_detect_type'] ?? false,
-            'validation_enabled' => self::getFactorySettings()['strict_validation'] ?? false,
-            'caching_enabled' => self::getPerformanceSettings()['caching']['enabled'] ?? false,
+            'factory_enabled' =>
+                self::getFactorySettings()['auto_detect_type'] ?? false,
+            'validation_enabled' =>
+                self::getFactorySettings()['strict_validation'] ?? false,
+            'caching_enabled' =>
+                self::getPerformanceSettings()['caching']['enabled'] ?? false,
         ];
     }
 
@@ -354,7 +392,7 @@ final class FeedbackConfigService
             ],
             'features' => array_intersect_key(
                 config('feedback.features', []),
-                array_flip(["{$type}_*"])
+                array_flip(["{$type}_*"]),
             ),
         ];
     }

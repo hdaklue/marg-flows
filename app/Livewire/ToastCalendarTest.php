@@ -13,12 +13,12 @@ use Livewire\Component;
 class ToastCalendarTest extends Component implements CalendarInterface
 {
     use HasCalendarEvents;
-    
+
     public function getEventsCountProperty()
     {
         return $this->getEvents()->count();
     }
-    
+
     public function mount()
     {
         $this->currentDate = now()->format('Y-m-d');
@@ -26,7 +26,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
         $this->currentView = 'month';
         $this->selectedEvent = null;
     }
-    
+
     /**
      * Toggle view-only mode for testing
      */
@@ -34,11 +34,13 @@ class ToastCalendarTest extends Component implements CalendarInterface
     {
         $this->viewOnly = !$this->viewOnly;
         $this->dispatch('show-notification', [
-            'message' => $this->viewOnly ? 'Calendar is now in view-only mode' : 'Calendar editing is now enabled',
-            'type' => 'info'
+            'message' => $this->viewOnly
+                ? 'Calendar is now in view-only mode'
+                : 'Calendar editing is now enabled',
+            'type' => 'info',
         ]);
     }
-    
+
     // Abstract method implementations - DOMAIN SPECIFIC LOGIC
 
     public function getEvents(): Collection
@@ -49,7 +51,10 @@ class ToastCalendarTest extends Component implements CalendarInterface
                 'calendarId' => 'personal',
                 'title' => 'Team Meeting',
                 'start' => Carbon::now()->addDays(2)->format('Y-m-d\TH:i:s'),
-                'end' => Carbon::now()->addDays(2)->addHour()->format('Y-m-d\TH:i:s'),
+                'end' => Carbon::now()
+                    ->addDays(2)
+                    ->addHour()
+                    ->format('Y-m-d\TH:i:s'),
                 'category' => 'time',
                 'backgroundColor' => '#03bd9e',
                 'borderColor' => '#03bd9e',
@@ -70,7 +75,10 @@ class ToastCalendarTest extends Component implements CalendarInterface
                 'calendarId' => 'personal',
                 'title' => 'Client Call',
                 'start' => Carbon::now()->addDays(1)->format('Y-m-d\TH:i:s'),
-                'end' => Carbon::now()->addDays(1)->addMinutes(30)->format('Y-m-d\TH:i:s'),
+                'end' => Carbon::now()
+                    ->addDays(1)
+                    ->addMinutes(30)
+                    ->format('Y-m-d\TH:i:s'),
                 'category' => 'time',
                 'backgroundColor' => '#00a9ff',
                 'borderColor' => '#00a9ff',
@@ -80,7 +88,10 @@ class ToastCalendarTest extends Component implements CalendarInterface
                 'calendarId' => 'work',
                 'title' => 'Code Review',
                 'start' => Carbon::now()->addDays(3)->format('Y-m-d\TH:i:s'),
-                'end' => Carbon::now()->addDays(3)->addHours(2)->format('Y-m-d\TH:i:s'),
+                'end' => Carbon::now()
+                    ->addDays(3)
+                    ->addHours(2)
+                    ->format('Y-m-d\TH:i:s'),
                 'category' => 'time',
                 'backgroundColor' => '#ffc107',
                 'borderColor' => '#ffc107',
@@ -90,7 +101,10 @@ class ToastCalendarTest extends Component implements CalendarInterface
                 'calendarId' => 'personal',
                 'title' => 'Design Workshop',
                 'start' => Carbon::now()->addDays(5)->format('Y-m-d\TH:i:s'),
-                'end' => Carbon::now()->addDays(5)->addHours(3)->format('Y-m-d\TH:i:s'),
+                'end' => Carbon::now()
+                    ->addDays(5)
+                    ->addHours(3)
+                    ->format('Y-m-d\TH:i:s'),
                 'category' => 'time',
                 'backgroundColor' => '#9c27b0',
                 'borderColor' => '#9c27b0',
@@ -124,8 +138,9 @@ class ToastCalendarTest extends Component implements CalendarInterface
     {
         // Test implementation - you can show a modal, create event, etc.
         $this->dispatch('show-notification', [
-            'message' => 'Date selected: ' . $data['start'] . ' to ' . $data['end'],
-            'type' => 'info'
+            'message' =>
+                'Date selected: ' . $data['start'] . ' to ' . $data['end'],
+            'type' => 'info',
         ]);
     }
 
@@ -134,7 +149,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
         // Test implementation - event is already set in selectedEvent by trait
         $this->dispatch('show-notification', [
             'message' => 'Event clicked: ' . $event['title'],
-            'type' => 'success'
+            'type' => 'success',
         ]);
     }
 
@@ -143,7 +158,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
         // Test implementation
         $this->dispatch('show-notification', [
             'message' => 'Event created successfully!',
-            'type' => 'success'
+            'type' => 'success',
         ]);
         return ['success' => true, 'id' => uniqid()];
     }
@@ -153,7 +168,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
         // Test implementation
         $this->dispatch('show-notification', [
             'message' => "Event {$eventId} updated successfully!",
-            'type' => 'success'
+            'type' => 'success',
         ]);
         return ['success' => true];
     }
@@ -163,7 +178,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
         // Test implementation
         $this->dispatch('show-notification', [
             'message' => "Event {$eventId} deleted successfully!",
-            'type' => 'success'
+            'type' => 'success',
         ]);
         return true;
     }
@@ -173,7 +188,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
         // Test implementation
         $this->dispatch('show-notification', [
             'message' => "View changed to: {$view}",
-            'type' => 'info'
+            'type' => 'info',
         ]);
     }
 
@@ -182,7 +197,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
         // Test implementation
         $this->dispatch('show-notification', [
             'message' => "Navigated: {$direction}",
-            'type' => 'info'
+            'type' => 'info',
         ]);
     }
 

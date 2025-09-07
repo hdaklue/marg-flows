@@ -13,7 +13,10 @@ interface VideoOperationContract
     /**
      * Handle the video operation (Laravel Pipeline pattern).
      */
-    public function handle(MediaExporter $mediaExporter, Closure $next): MediaExporter;
+    public function handle(
+        MediaExporter $mediaExporter,
+        Closure $next,
+    ): MediaExporter;
 
     /**
      * Execute the video operation.

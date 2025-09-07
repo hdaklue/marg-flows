@@ -12,11 +12,13 @@ final class DeliverablesManager extends Manager
 {
     public function getDefaultDriver()
     {
-        throw new InvalidArgumentException('No default driver set for DeliverablesManager.');
+        throw new InvalidArgumentException(
+            'No default driver set for DeliverablesManager.',
+        );
     }
 
     public function design(): DeliverableServiceContract
     {
-        return new DesignDeliverableService;
+        return new DesignDeliverableService();
     }
 }

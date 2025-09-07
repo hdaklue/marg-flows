@@ -17,7 +17,7 @@ use Illuminate\Contracts\Support\Htmlable;
 
 final class DocumentResource extends Resource
 {
-    protected static ?string $model = Document::class;
+    protected static null|string $model = Document::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -45,8 +45,7 @@ final class DocumentResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->label(__('app.name')),
+                TextColumn::make('name')->label(__('app.name')),
             ])
             ->filters([
                 //

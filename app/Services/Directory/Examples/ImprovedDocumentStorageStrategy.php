@@ -16,21 +16,24 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * Improved Document Storage Strategy
- * 
+ *
  * Example implementation showing all improvements applied:
  * - File facade usage
  * - Utility classes for paths and filenames
  * - Better error handling
  * - Consistent naming and structure
  */
-final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implements DocumentStorageStrategyContract
+final class ImprovedDocumentStorageStrategy extends
+    BaseStorageStrategy implements DocumentStorageStrategyContract
 {
-    private ?string $documentId = null;
-    private ?UploadedFile $file = null;
-    private ?string $subdirectory = null;
-    private ?string $storedPath = null;
+    private null|string $documentId = null;
+    private null|UploadedFile $file = null;
+    private null|string $subdirectory = null;
+    private null|string $storedPath = null;
 
-    public function __construct(private readonly string $tenantBaseDirectory) {}
+    public function __construct(
+        private readonly string $tenantBaseDirectory,
+    ) {}
 
     /**
      * Set the document ID for this storage session.
@@ -45,8 +48,10 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
     public function images(): ImageStorageStrategy
     {
         throw_unless(
-            $this->documentId, 
-            DirectoryException::configurationError('Document ID is required. Call forDocument($documentId) first.')
+            $this->documentId,
+            DirectoryException::configurationError(
+                'Document ID is required. Call forDocument($documentId) first.',
+            ),
         );
 
         $baseDirectory = $this->buildDirectoryPath('images');
@@ -56,8 +61,10 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
     public function videos(): VideoStorageStrategy
     {
         throw_unless(
-            $this->documentId, 
-            DirectoryException::configurationError('Document ID is required. Call forDocument($documentId) first.')
+            $this->documentId,
+            DirectoryException::configurationError(
+                'Document ID is required. Call forDocument($documentId) first.',
+            ),
         );
 
         $baseDirectory = $this->buildDirectoryPath('videos');
@@ -81,15 +88,20 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
             $this->storedPath = $file->storeAs($directory, $filename);
             return $this->storedPath;
         } catch (\Exception $e) {
-            throw DirectoryException::storageError('file upload', $e->getMessage());
+            throw DirectoryException::storageError(
+                'file upload',
+                $e->getMessage(),
+            );
         }
     }
 
     public function getUrl(): string
     {
         throw_unless(
-            $this->storedPath, 
-            DirectoryException::configurationError('File must be stored first. Call store($file) before getUrl().')
+            $this->storedPath,
+            DirectoryException::configurationError(
+                'File must be stored first. Call store($file) before getUrl().',
+            ),
         );
 
         return Storage::url($this->storedPath);
@@ -118,9 +130,10 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
             $segments[] = $this->subdirectory;
         }
 
-        return PathBuilder::base($segments[0])
-            ->add(...array_slice($segments, 1))
-            ->toString();
+        return PathBuilder::base($segments[0])->add(...array_slice(
+            $segments,
+            1,
+        ))->toString();
     }
 
     /**
@@ -139,8 +152,9 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
 
         $segments[] = $subdirectory;
 
-        return PathBuilder::base($segments[0])
-            ->add(...array_slice($segments, 1))
-            ->toString();
+        return PathBuilder::base($segments[0])->add(...array_slice(
+            $segments,
+            1,
+        ))->toString();
     }
 }

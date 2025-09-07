@@ -12,7 +12,7 @@ abstract class BaseDocumentTemplate implements DocumentTemplateContract
 {
     public static function make(): static
     {
-        return new static;
+        return new static();
     }
 
     public function toArray(): array
@@ -20,9 +20,20 @@ abstract class BaseDocumentTemplate implements DocumentTemplateContract
         $blockCollection = collect($this->getBlocks());
 
         if ($blockCollection->isNotEmpty()) {
-            return $blockCollection->map(fn (Block $block) => $block->toArray())->toArray();
+            return [
+                'time' => $this->getTimestamp(),
+                'blocks' => $blockCollection->map(
+                    fn(Block $block) => $block->toArray(),
+                )->toArray(),
+                'version' => config('document.editorjs.version', '2.30.8'),
+            ];
         }
         throw new Exception('Empty template blocks in {static::class}');
+    }
+
+    public function getTimestamp(): int
+    {
+        return (int) now()->timestamp;
     }
 
     public function toJson(int $options = 0): string

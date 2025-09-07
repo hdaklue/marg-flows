@@ -20,6 +20,7 @@ use Hdaklue\MargRbac\Rules\Username\UsernameAvailable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Propaganistas\LaravelDisposableEmail\Validation\Indisposable;
 
 final class Register extends BaseRegister
 {
@@ -52,16 +53,14 @@ final class Register extends BaseRegister
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->schema([
-                $this->getUsernameFormComponent(),
-                $this->getEmailFormComponent(),
-                $this->getPasswordFormComponent(),
-            ])
-            ->statePath('data');
+        return $schema->schema([
+            $this->getUsernameFormComponent(),
+            $this->getEmailFormComponent(),
+            $this->getPasswordFormComponent(),
+        ])->statePath('data');
     }
 
-    public function register(): ?RegistrationResponseContract
+    public function register(): null|RegistrationResponseContract
     {
         try {
             $this->rateLimit(2);
@@ -73,7 +72,11 @@ final class Register extends BaseRegister
         $data = $this->form->getState();
 
         try {
-            $user = RegisterUser::run($data['email'], $data['username'], $data['password']);
+            $user = RegisterUser::run(
+                $data['email'],
+                $data['username'],
+                $data['password'],
+            );
 
             $this->sendEmailVerificationNotification($user);
 
@@ -81,16 +84,14 @@ final class Register extends BaseRegister
 
             session()->regenerate();
 
-            return new RegistrationResponse;
+            return new RegistrationResponse();
         } catch (Exception $e) {
             throw $e;
         }
-
     }
 
     protected function getLayoutData(): array
     {
-
         return [
             'hasTopbar' => false,
             'maxWidth' => $this->getMaxWidth(),
@@ -104,8 +105,11 @@ final class Register extends BaseRegister
             ->placeholder(__('auth.register.username_placeholder'))
             ->required()
             ->live(onBlur: true)
-            ->afterStateUpdated(fn ($livewire, Field $component) => $livewire->validateOnly($component->getStatePath()))
-            ->rules([new UsernameAvailable])
+            ->afterStateUpdated(fn(
+                $livewire,
+                Field $component,
+            ) => $livewire->validateOnly($component->getStatePath()))
+            ->rules([new UsernameAvailable()])
             ->maxLength(255)
             ->autofocus();
     }
@@ -117,8 +121,12 @@ final class Register extends BaseRegister
             ->placeholder(__('auth.register.email_placeholder'))
             ->email()
             ->required()
+            ->rule('indisposable')
             ->live(onBlur: true)
-            ->afterStateUpdated(fn ($livewire, Field $component) => $livewire->validateOnly($component->getStatePath()))
+            ->afterStateUpdated(fn(
+                $livewire,
+                Field $component,
+            ) => $livewire->validateOnly($component->getStatePath()))
             ->maxLength(255)
             ->unique($this->getUserModel());
     }
@@ -133,7 +141,7 @@ final class Register extends BaseRegister
             ->required()
             ->rule(Password::default())
             ->showAllValidationMessages()
-            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+            ->dehydrateStateUsing(fn($state) => Hash::make($state))
             ->validationAttribute(__('auth.register.password'));
     }
 

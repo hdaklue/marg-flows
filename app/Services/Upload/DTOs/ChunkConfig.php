@@ -12,7 +12,7 @@ final readonly class ChunkConfig
         public bool $useChunkedUpload,
         public int $maxConcurrentUploads = 3,
         public int $retryAttempts = 3,
-        public int $timeoutSeconds = 300 // 5 minutes
+        public int $timeoutSeconds = 300, // 5 minutes
     ) {}
 
     public function toArray(): array
@@ -50,7 +50,7 @@ final readonly class ChunkConfig
             useChunkedUpload: $data['useChunkedUpload'],
             maxConcurrentUploads: $data['maxConcurrentUploads'] ?? 3,
             retryAttempts: $data['retryAttempts'] ?? 3,
-            timeoutSeconds: $data['timeoutSeconds'] ?? 300
+            timeoutSeconds: $data['timeoutSeconds'] ?? 300,
         );
     }
 }

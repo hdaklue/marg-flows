@@ -17,7 +17,9 @@ final class Deliverable implements DeliverableContarct
         private string $name,
         private DeliverableFormat $format,
         private DeliverableType $type,
-        private Carbon $successOn, private int $quantity = 1) {}
+        private Carbon $successOn,
+        private int $quantity = 1,
+    ) {}
 
     public function getType(): DeliverableType
     {

@@ -22,7 +22,9 @@ final class UpdateBasicInfo
 
         // Get new data from DTO (normalize avatar to filename only)
         $newData = collect($dto->toArray())->except('id')->toArray();
-        $newData['avatar'] = DirectoryManager::avatars()->getFileNameFromRelativePath($newData['avatar']);
+        $newData['avatar'] = DirectoryManager::avatars()->getFileNameFromRelativePath(
+            $newData['avatar'],
+        );
 
         // Check if avatar file changed and handle it specially
         if ($this->avatarChanged($user, $newData['avatar'])) {
@@ -33,7 +35,7 @@ final class UpdateBasicInfo
         $changes = array_diff_assoc($newData, $currentData);
 
         // Only update if there are actual changes
-        if (! empty($changes)) {
+        if (!empty($changes)) {
             $user->update($changes);
         }
 
@@ -45,12 +47,20 @@ final class UpdateBasicInfo
         return $user->getAvatarFileName() !== $newFileName;
     }
 
-    private function handleAvatarChange(User $user, ?string $newAvatarPath): string
-    {
-        $extension = str($newAvatarPath)->afterLast('/')->afterLast('.')->toString();
+    private function handleAvatarChange(
+        User $user,
+        null|string $newAvatarPath,
+    ): string {
+        $extension = str($newAvatarPath)
+            ->afterLast('/')
+            ->afterLast('.')
+            ->toString();
         $newFileName = AvatarService::generateFileName($user);
 
-        DirectoryManager::avatars()->fromPath($newAvatarPath, "{$newFileName}.{$extension}");
+        DirectoryManager::avatars()->fromPath(
+            $newAvatarPath,
+            "{$newFileName}.{$extension}",
+        );
 
         return "{$newFileName}.{$extension}";
     }

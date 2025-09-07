@@ -117,17 +117,17 @@ final class GeneralFeedback extends Model
     // Type-specific methods
     public function hasCategory(): bool
     {
-        return ! empty($this->feedback_category);
+        return !empty($this->feedback_category);
     }
 
     public function hasMetadata(): bool
     {
-        return ! empty($this->metadata);
+        return !empty($this->metadata);
     }
 
     public function hasCustomData(): bool
     {
-        return ! empty($this->custom_data);
+        return !empty($this->custom_data);
     }
 
     public function getMetadataValue(string $key, mixed $default = null): mixed
@@ -155,8 +155,10 @@ final class GeneralFeedback extends Model
         return $this;
     }
 
-    public function getCustomDataValue(string $key, mixed $default = null): mixed
-    {
+    public function getCustomDataValue(
+        string $key,
+        mixed $default = null,
+    ): mixed {
         return data_get($this->custom_data, $key, $default);
     }
 
@@ -172,7 +174,7 @@ final class GeneralFeedback extends Model
 
     public function getCategoryDisplay(): string
     {
-        if (! $this->hasCategory()) {
+        if (!$this->hasCategory()) {
             return 'Uncategorized';
         }
 
@@ -251,10 +253,10 @@ final class GeneralFeedback extends Model
         return 'general';
     }
 
-    public function convertToSpecializedModel(): ?Model
+    public function convertToSpecializedModel(): null|Model
     {
         // Attempt to convert to specialized model based on metadata
-        if (! $this->hasMetadata()) {
+        if (!$this->hasMetadata()) {
             return null;
         }
 
@@ -264,7 +266,9 @@ final class GeneralFeedback extends Model
             'video_frame', 'video_region' => $this->convertToVideoFeedback(),
             'audio_region' => $this->convertToAudioFeedback(),
             'document_block' => $this->convertToDocumentFeedback(),
-            'image_annotation', 'design_annotation' => $this->convertToDesignFeedback(),
+            'image_annotation',
+            'design_annotation',
+                => $this->convertToDesignFeedback(),
             default => null,
         };
     }
@@ -288,30 +292,43 @@ final class GeneralFeedback extends Model
 
     protected function scopeWithMetadata(Builder $query): Builder
     {
-        return $query->whereNotNull('metadata')
-            ->whereJsonLength('metadata', '>', 0);
+        return $query->whereNotNull('metadata')->whereJsonLength(
+            'metadata',
+            '>',
+            0,
+        );
     }
 
     protected function scopeWithoutMetadata(Builder $query): Builder
     {
-        return $query->whereNull('metadata')
-            ->orWhereJsonLength('metadata', '=', 0);
+        return $query->whereNull('metadata')->orWhereJsonLength(
+            'metadata',
+            '=',
+            0,
+        );
     }
 
     protected function scopeWithCustomData(Builder $query): Builder
     {
-        return $query->whereNotNull('custom_data')
-            ->whereJsonLength('custom_data', '>', 0);
+        return $query->whereNotNull('custom_data')->whereJsonLength(
+            'custom_data',
+            '>',
+            0,
+        );
     }
 
     protected function scopeHasMetadataKey(Builder $query, string $key): Builder
     {
-        return $query->whereJsonContains('metadata->' . $key, true)
+        return $query
+            ->whereJsonContains('metadata->' . $key, true)
             ->orWhereNotNull('metadata->' . $key);
     }
 
-    protected function scopeMetadataEquals(Builder $query, string $key, mixed $value): Builder
-    {
+    protected function scopeMetadataEquals(
+        Builder $query,
+        string $key,
+        mixed $value,
+    ): Builder {
         return $query->whereJson('metadata->' . $key, $value);
     }
 
@@ -326,7 +343,7 @@ final class GeneralFeedback extends Model
         ];
     }
 
-    private function convertToVideoFeedback(): ?VideoFeedback
+    private function convertToVideoFeedback(): null|VideoFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -341,7 +358,9 @@ final class GeneralFeedback extends Model
             'feedbackable_id' => $this->feedbackable_id,
             'status' => $this->status,
             'urgency' => $this->urgency,
-            'feedback_type' => $this->getMetadataValue('type') === 'video_frame' ? 'frame' : 'region',
+            'feedback_type' => $this->getMetadataValue('type') === 'video_frame'
+                ? 'frame'
+                : 'region',
             'timestamp' => $data['timestamp'] ?? null,
             'start_time' => $data['start_time'] ?? null,
             'end_time' => $data['end_time'] ?? null,
@@ -351,7 +370,7 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToAudioFeedback(): ?AudioFeedback
+    private function convertToAudioFeedback(): null|AudioFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -374,7 +393,7 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToDocumentFeedback(): ?DocumentFeedback
+    private function convertToDocumentFeedback(): null|DocumentFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -396,11 +415,11 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToDesignFeedback(): ?DesignFeedback
+    private function convertToDesignFeedback(): null|DesignFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
-        if (! isset($data['x_coordinate']) || ! isset($data['y_coordinate'])) {
+        if (!isset($data['x_coordinate']) || !isset($data['y_coordinate'])) {
             return null;
         }
 

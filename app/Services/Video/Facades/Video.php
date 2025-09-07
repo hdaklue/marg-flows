@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static VideoEditor fromDisk(string $path, string $disk = 'local')
  * @method static VideoEditor fromUrl(string $url, string $disk = 'local')
  * @method static VideoEditor fromPublic(string $path)
- * 
+ *
  * @see \App\Services\Video\VideoManager
  */
 class Video extends Facade

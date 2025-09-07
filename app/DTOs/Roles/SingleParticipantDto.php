@@ -4,86 +4,77 @@ declare(strict_types=1);
 
 namespace App\DTOs\Roles;
 
+use App\DTOs\BaseDto;
+use App\DTOs\User\UserDto;
+use Hdaklue\Porter\Contracts\RoleContract;
 use WendellAdriel\ValidatedDTO\SimpleDTO;
+use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-final class SingleParticipantDto extends SimpleDTO
+final class SingleParticipantDto extends ValidatedDTO
 {
-    public string $participant_id;
+    public string $avatarUrl;
+    public string $username;
 
-    public string $participant_name;
+    public string $id;
 
-    public string $participant_email;
+    public string $email;
 
-    public ?string $participant_avatar = null;
+    public string $name;
 
-    public string $role_id;
+    public string $timezone;
 
-    public string $role_name;
+    public array $role;
 
-    public string $role_label;
-
-    public string $role_description;
-
-    public function participantName(): string
+    public function name(): string
     {
-        return $this->participant_name;
+        return $this->name;
     }
 
-    public function roleValue(): string
+    public function roleKey(): string
     {
         return $this->role_name;
     }
 
     public function roleLabel(): string
     {
-        return $this->role_label;
+        return $this->role->getName();
     }
 
     public function roleDescription(): string
     {
-        return $this->role_description;
+        return $this->role->getDescription();
     }
 
-    public function participantAvatar(): ?string
+    public function participantAvatar(): null|string
     {
-        return $this->participant_avatar;
+        return $this->avatarUrl;
     }
 
     public function participantId(): string
     {
-        return $this->participant_id;
+        return $this->id;
     }
 
-    public function roleId(): string
+    protected function rules(): array
     {
-        return $this->role_id;
+        return [
+            'name' => ['required', 'string'],
+            'avatarUrl' => ['required', 'string'],
+            'email' => ['required'],
+            'username' => ['required', 'string'],
+            'id' => ['required', 'string'],
+            'timezone' => ['sometimes'],
+            'role' => ['sometimes'],
+        ];
     }
-
-    // protected function rules(): array
-    // {
-    //     return [
-    //         'participant_id' => ['required', 'string'],
-    //         'participant_name' => ['required', 'string'],
-    //         'participant_email' => ['required', 'email'],
-    //         'participant_avatar' => ['nullable', 'string'],
-    //         'role_id' => ['required', 'string'],
-    //         'role_name' => ['required', 'string'],
-    //         'role_label' => ['required', 'string'],
-    //         'role_description' => ['required', 'string'],
-    //     ];
-    // }
 
     protected function defaults(): array
     {
-        return [
-            'participant_avatar' => null,
-        ];
+        return [];
     }
 
     protected function casts(): array
     {
-        return [
-
-        ];
+        return [];
     }
 }

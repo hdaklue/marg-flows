@@ -17,20 +17,27 @@ final class DocumentImageUploadController extends Controller
     /**
      * Handle document image upload requests with tenant-aware storage.
      */
-    public function __invoke(DocumentImageUploadRequest $request, string $document): JsonResponse
-    {
+    public function __invoke(
+        DocumentImageUploadRequest $request,
+        string $document,
+    ): JsonResponse {
         try {
             // Validation is automatically handled by DocumentImageUploadRequest
             $file = $request->getValidatedFile();
 
             // Get organized directory from DirectoryManager
-            $storageDirectory = DirectoryManager::document(auth()->user()->getActiveTenantId())
+            $storageDirectory = DirectoryManager::document(
+                auth()->user()->getActiveTenantId(),
+            )
                 ->forDocument($document)
                 ->images()
                 ->getDirectory();
 
             // Use UploadSessionManager with http strategy for single file uploads
-            $path = UploadSessionManager::start('http', auth()->user()->getActiveTenantId())
+            $path = UploadSessionManager::start(
+                'http',
+                auth()->user()->getActiveTenantId(),
+            )
                 ->storeIn($storageDirectory)
                 ->upload($file);
 

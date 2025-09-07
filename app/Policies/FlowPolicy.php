@@ -27,8 +27,10 @@ final class FlowPolicy
     {
         $flow->loadMissing('tenant');
 
-        return $user->isAssignedTo($flow) ||
-        $user->isAtLeastOn(RoleFactory::admin(), $flow->tenant);
+        return (
+            $user->isAssignedTo($flow)
+            || $user->isAtLeastOn(RoleFactory::admin(), $flow->tenant)
+        );
     }
 
     /**
@@ -44,8 +46,10 @@ final class FlowPolicy
      */
     public function update(User $user, Flow $flow): bool
     {
-
-        return $user->hasAssignmentOn($flow, RoleFactory::admin()) || $user->hasAssignmentOn($flow, RoleFactory::manager());
+        return (
+            $user->hasAssignmentOn($flow, RoleFactory::admin())
+            || $user->hasAssignmentOn($flow, RoleFactory::manager())
+        );
 
         // return $user->hasAssignmentOn('writer', $flow) || $user->hasAssignmentOn(RoleEnum::SUPER_ADMIN, filament()->getTenant());
     }

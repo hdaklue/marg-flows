@@ -20,14 +20,18 @@ final class VideoFeedbackSeeder extends Seeder
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
         if (!$testUser) {
-            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
+            $this->command->warn(
+                'Test user not found. Please run main DatabaseSeeder first.',
+            );
             return;
         }
 
         // Get documents from business database to associate feedback with
         $documents = Document::limit(5)->get();
         if ($documents->isEmpty()) {
-            $this->command->warn('No documents found in business database. Please run DocumentSeeder first.');
+            $this->command->warn(
+                'No documents found in business database. Please run DocumentSeeder first.',
+            );
             return;
         }
 
@@ -49,10 +53,10 @@ final class VideoFeedbackSeeder extends Seeder
         foreach ($documents as $document) {
             // Create 3-5 frame comments per document
             $frameCount = rand(3, 5);
-            
+
             for ($i = 1; $i <= $frameCount; $i++) {
                 $timestamp = rand(10, 300) + (rand(0, 999) / 1000); // 10s to 5min with milliseconds
-                
+
                 VideoFeedback::create([
                     'creator_id' => $testUser->id,
                     'content' => $this->generateFrameComment(),
@@ -70,12 +74,12 @@ final class VideoFeedbackSeeder extends Seeder
 
             // Create 2-3 region comments per document
             $regionCount = rand(2, 3);
-            
+
             for ($i = 1; $i <= $regionCount; $i++) {
                 $startTime = rand(5, 240) + (rand(0, 999) / 1000); // 5s to 4min
                 $duration = rand(5, 30) + (rand(0, 999) / 1000); // 5s to 30s duration
                 $endTime = $startTime + $duration;
-                
+
                 VideoFeedback::create([
                     'creator_id' => $testUser->id,
                     'content' => $this->generateRegionComment(),
@@ -87,8 +91,12 @@ final class VideoFeedbackSeeder extends Seeder
                     'timestamp' => null,
                     'start_time' => $startTime,
                     'end_time' => $endTime,
-                    'x_coordinate' => fake()->boolean(70) ? rand(100, 1820) : null, // 70% chance of having coordinates
-                    'y_coordinate' => fake()->boolean(70) ? rand(100, 980) : null,
+                    'x_coordinate' => fake()->boolean(70)
+                        ? rand(100, 1820)
+                        : null, // 70% chance of having coordinates
+                    'y_coordinate' => fake()->boolean(70)
+                        ? rand(100, 980)
+                        : null,
                     'region_data' => $this->generateRegionData(),
                 ]);
             }
@@ -98,7 +106,9 @@ final class VideoFeedbackSeeder extends Seeder
         $this->createEdgeCaseFeedback($testUser, $documents->first());
 
         $totalVideoFeedback = VideoFeedback::count();
-        $this->command->info("✅ Created {$totalVideoFeedback} video feedback entries in business database");
+        $this->command->info(
+            "✅ Created {$totalVideoFeedback} video feedback entries in business database",
+        );
     }
 
     private function generateFrameComment(): string
@@ -147,14 +157,18 @@ final class VideoFeedbackSeeder extends Seeder
         return fake()->randomElement($comments);
     }
 
-    private function generateRegionData(): ?array
+    private function generateRegionData(): null|array
     {
         if (!fake()->boolean(60)) { // 60% chance of having region data
             return null;
         }
 
         return [
-            'region_type' => fake()->randomElement(['rectangular', 'circular', 'freeform']),
+            'region_type' => fake()->randomElement([
+                'rectangular',
+                'circular',
+                'freeform',
+            ]),
             'bounds' => [
                 'x' => rand(0, 1920),
                 'y' => rand(0, 1080),
@@ -166,13 +180,15 @@ final class VideoFeedbackSeeder extends Seeder
                 ['blur', 'tracking'],
                 ['highlight', 'zoom'],
                 ['crop', 'stabilize'],
-                null
+                null,
             ]),
         ];
     }
 
-    private function createEdgeCaseFeedback(User $user, Document $document): void
-    {
+    private function createEdgeCaseFeedback(
+        User $user,
+        Document $document,
+    ): void {
         // Very short timestamp (beginning of video)
         VideoFeedback::create([
             'creator_id' => $user->id,
@@ -232,7 +248,7 @@ final class VideoFeedbackSeeder extends Seeder
             'region_data' => [
                 'region_type' => 'scene',
                 'scene_name' => 'Act 2 - Character Development',
-                'notes' => 'Excellent character development throughout this extended sequence.'
+                'notes' => 'Excellent character development throughout this extended sequence.',
             ],
         ]);
     }

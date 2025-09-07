@@ -23,9 +23,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
 {
     private const string ROOT_DIRECTORY = 'videos';
 
-    private ?UploadedFile $file = null;
+    private null|UploadedFile $file = null;
 
-    private ?string $storedPath = null;
+    private null|string $storedPath = null;
 
     private PathBuilder $pathBuilder;
 
@@ -39,9 +39,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
         if ($basePath instanceof PathBuilder) {
             $this->pathBuilder = $basePath;
         } else {
-            $this->pathBuilder = LaraPath::base($basePath)
-                ->add(self::ROOT_DIRECTORY)
-                ->validate();
+            $this->pathBuilder = LaraPath::base(
+                $basePath,
+            )->add(self::ROOT_DIRECTORY)->validate();
         }
     }
 
@@ -112,12 +112,21 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function saveVideoThumbnail(string $filePath): string
     {
-        throw_unless(file_exists($filePath), new InvalidArgumentException("Thumbnail file does not exist: {$filePath}"));
+        throw_unless(
+            file_exists($filePath),
+            new InvalidArgumentException(
+                "Thumbnail file does not exist: {$filePath}",
+            ),
+        );
 
         $thumbnailDirectory = $this->pathBuilder->toString();
         $filename = $this->generateThumbnailFilename($filePath);
 
-        $this->storedPath = Storage::putFileAs($thumbnailDirectory, new File($filePath), $filename);
+        $this->storedPath = Storage::putFileAs(
+            $thumbnailDirectory,
+            new File($filePath),
+            $filename,
+        );
 
         return $this->storedPath;
     }
@@ -131,7 +140,12 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getUrl(): string
     {
-        throw_unless($this->storedPath, new InvalidArgumentException('Cannot generate URL: File must be stored first.'));
+        throw_unless(
+            $this->storedPath,
+            new InvalidArgumentException(
+                'Cannot generate URL: File must be stored first.',
+            ),
+        );
 
         return Storage::url($this->storedPath);
     }
@@ -148,9 +162,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
 
     public function getDirectoryForVideo(Video $video): string
     {
-        return $this->pathBuilder
-            ->add($video->getFileNameWithoutExt())
-            ->toString();
+        return $this->pathBuilder->add($video->getFileNameWithoutExt())->toString();
     }
 
     /**
@@ -172,9 +184,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getVariantRelativePath(string $fileName): string
     {
-        return (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        return (clone $this->pathBuilder)->add($fileName)->toString();
     }
 
     /**
@@ -183,11 +193,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): ?string
+    public function get(string $fileName): null|string
     {
-        $path = (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        $path = (clone $this->pathBuilder)->add($fileName)->toString();
 
         return Storage::get($path);
     }
@@ -198,11 +206,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function getVariant(string $fileName): ?string
+    public function getVariant(string $fileName): null|string
     {
-        $path = (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        $path = (clone $this->pathBuilder)->add($fileName)->toString();
 
         return Storage::get($path);
     }
@@ -213,11 +219,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): ?string
+    public function getPath(string $fileName): null|string
     {
-        $fullPath = (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
 
         if (Storage::getDefaultDriver() === 'local') {
             return Storage::path($fullPath);
@@ -232,11 +236,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getVariantPath(string $fileName): ?string
+    public function getVariantPath(string $fileName): null|string
     {
-        $fullPath = (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
 
         if (Storage::getDefaultDriver() === 'local') {
             return Storage::path($fullPath);
@@ -253,9 +255,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function delete(string $fileName): bool
     {
-        $path = (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        $path = (clone $this->pathBuilder)->add($fileName)->toString();
 
         return Storage::delete($path);
     }
@@ -268,9 +268,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function deleteVariant(string $fileName): bool
     {
-        $path = (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        $path = (clone $this->pathBuilder)->add($fileName)->toString();
 
         return Storage::delete($path);
     }
@@ -283,9 +281,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getFileUrl(string $fileName): string
     {
-        $path = (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        $path = (clone $this->pathBuilder)->add($fileName)->toString();
 
         return Storage::url($path);
     }
@@ -298,9 +294,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function getVariantFileUrl(string $fileName): string
     {
-        $path = (clone $this->pathBuilder)
-            ->add($fileName)
-            ->toString();
+        $path = (clone $this->pathBuilder)->add($fileName)->toString();
 
         return Storage::url($path);
     }

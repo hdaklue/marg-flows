@@ -48,7 +48,7 @@ final class CreateFlow extends CreateRecord
 
     protected static bool $canCreateAnother = false;
 
-    protected static ?string $title = '';
+    protected static null|string $title = '';
 
     public $start = 3;
 
@@ -58,7 +58,7 @@ final class CreateFlow extends CreateRecord
 
     // public ?string $maxContentWidth = 'screen-7xl';
 
-    protected ?bool $hasUnsavedDataChangesAlert = true;
+    protected null|bool $hasUnsavedDataChangesAlert = true;
 
     // public function form(Form $form): Form
     // {
@@ -135,7 +135,6 @@ final class CreateFlow extends CreateRecord
 
     public function create(bool $another = false): void
     {
-
         $this->authorizeAccess();
         $data = $this->form->getState();
 
@@ -154,8 +153,8 @@ final class CreateFlow extends CreateRecord
                 ->body('Created Successfully')
                 ->success()
                 ->send();
-            // $this->redirect(FlowsKanabanBoard::getUrl(['tenant' => filamentTenant()]));
 
+            // $this->redirect(FlowsKanabanBoard::getUrl(['tenant' => filamentTenant()]));
         } catch (FlowCreationException $e) {
             Notification::make()
                 ->body('We could not create the flow')
@@ -168,7 +167,6 @@ final class CreateFlow extends CreateRecord
                 ->send();
             Log::error($e->getMessage());
         }
-
     }
 
     public function getHeading(): string|Htmlable // @phpstan-ignore-line
@@ -267,18 +265,19 @@ final class CreateFlow extends CreateRecord
     //     ];
     // }
 
-    protected function getCreatedNotification(): ?Notification
+    protected function getCreatedNotification(): null|Notification
     {
         return null; // Disables automatic notification
     }
 
     private function getParticipantsSelectArray(): array
     {
-        $participants = filamentTenant()->getParticipants()->pluck('assignable');
+        $participants = filamentTenant()
+            ->getParticipants()
+            ->pluck('assignable');
 
         // return $participants->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => "{$item->model->getAttribute('name')} - {$item->role->name}"])->toArray();
 
         return $participants->toArray();
-
     }
 }

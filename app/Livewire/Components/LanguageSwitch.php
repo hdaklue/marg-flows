@@ -24,7 +24,7 @@ class LanguageSwitch extends Component
 
         Session::put('locale', $locale);
         $this->currentLocale = $locale;
-        
+
         // Use JavaScript to refresh the page
         $this->dispatch('language-changed', locale: $locale);
     }

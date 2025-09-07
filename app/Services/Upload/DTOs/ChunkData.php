@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\Upload\DTOs;
 
-
 final readonly class ChunkInfo
 {
     public function __construct(
         public int $index,
         public int $size,
         public string $hash,
-        public bool $uploaded = false
+        public bool $uploaded = false,
     ) {}
 
     public function toArray(): array
@@ -30,7 +29,7 @@ final readonly class ChunkInfo
             index: $data['index'],
             size: $data['size'],
             hash: $data['hash'],
-            uploaded: $data['uploaded'] ?? false
+            uploaded: $data['uploaded'] ?? false,
         );
     }
 }
@@ -45,8 +44,8 @@ final readonly class ChunkData
         public int $chunkSize,
         /** @var ChunkInfo[] */
         public array $chunks,
-        public ?string $mimeType = null,
-        public ?array $metadata = null
+        public null|string $mimeType = null,
+        public null|array $metadata = null,
     ) {}
 
     public function getTotalChunks(): int
@@ -56,17 +55,17 @@ final readonly class ChunkData
 
     public function getCompletedChunks(): int
     {
-        return count(array_filter($this->chunks, fn(ChunkInfo $chunk) => $chunk->uploaded));
+        return count(array_filter(
+            $this->chunks,
+            fn(ChunkInfo $chunk) => $chunk->uploaded,
+        ));
     }
 
     public function getUploadedBytes(): int
     {
-        return array_sum(
-            array_map(
-                fn(ChunkInfo $chunk) => $chunk->uploaded ? $chunk->size : 0,
-                $this->chunks
-            )
-        );
+        return array_sum(array_map(fn(ChunkInfo $chunk) => $chunk->uploaded
+            ? $chunk->size
+            : 0, $this->chunks));
     }
 
     public function getProgress(): float
@@ -83,7 +82,7 @@ final readonly class ChunkData
         return $this->getCompletedChunks() === $this->getTotalChunks();
     }
 
-    public function getNextChunk(): ?ChunkInfo
+    public function getNextChunk(): null|ChunkInfo
     {
         foreach ($this->chunks as $chunk) {
             if (!$chunk->uploaded) {
@@ -96,12 +95,10 @@ final readonly class ChunkData
 
     public function markChunkAsUploaded(int $chunkIndex): self
     {
-        $updatedChunks = array_map(
-            fn(ChunkInfo $chunk) => $chunk->index === $chunkIndex
-                ? new ChunkInfo($chunk->index, $chunk->size, $chunk->hash, true)
-                : $chunk,
-            $this->chunks
-        );
+        $updatedChunks = array_map(fn(ChunkInfo $chunk) => $chunk->index
+        === $chunkIndex
+            ? new ChunkInfo($chunk->index, $chunk->size, $chunk->hash, true)
+            : $chunk, $this->chunks);
 
         return new self(
             sessionId: $this->sessionId,
@@ -111,7 +108,7 @@ final readonly class ChunkData
             chunkSize: $this->chunkSize,
             chunks: $updatedChunks,
             mimeType: $this->mimeType,
-            metadata: $this->metadata
+            metadata: $this->metadata,
         );
     }
 
@@ -123,7 +120,10 @@ final readonly class ChunkData
             'fileName' => $this->fileName,
             'totalSize' => $this->totalSize,
             'chunkSize' => $this->chunkSize,
-            'chunks' => array_map(fn(ChunkInfo $chunk) => $chunk->toArray(), $this->chunks),
+            'chunks' => array_map(
+                fn(ChunkInfo $chunk) => $chunk->toArray(),
+                $this->chunks,
+            ),
             'mimeType' => $this->mimeType,
             'metadata' => $this->metadata,
         ];
@@ -137,9 +137,11 @@ final readonly class ChunkData
             fileName: $data['fileName'],
             totalSize: $data['totalSize'],
             chunkSize: $data['chunkSize'],
-            chunks: array_map(fn(array $chunk) => ChunkInfo::fromArray($chunk), $data['chunks']),
+            chunks: array_map(fn(array $chunk) => ChunkInfo::fromArray(
+                $chunk,
+            ), $data['chunks']),
             mimeType: $data['mimeType'] ?? null,
-            metadata: $data['metadata'] ?? null
+            metadata: $data['metadata'] ?? null,
         );
     }
 }

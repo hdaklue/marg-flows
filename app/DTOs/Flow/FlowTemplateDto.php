@@ -16,7 +16,7 @@ class FlowTemplateDto extends ValidatedDTO
 
     public string $slug;
 
-    public ?string $id;
+    public null|string $id;
 
     public string $description;
 
@@ -25,11 +25,9 @@ class FlowTemplateDto extends ValidatedDTO
     protected function rules(): array
     {
         return [
-
             'name' => 'required',
             'description' => 'required',
             'stages' => 'required',
-
         ];
     }
 

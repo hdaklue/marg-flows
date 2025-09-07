@@ -54,27 +54,30 @@ final class UserSettings extends Page implements HasTable
         return $schema->components([
             Section::make(__('auth.profile.sections.general'))
                 ->schema([
-                    Grid::make(12)
-                        ->schema([
-                            Image::make(filamentUser()->getAvatarUrl(), filamentUser()->name)
-                                ->imageSize(50),
-                            Grid::make(1)
-                                ->schema([
-                                    Text::make(fn () => filamentUser()->name)
-                                        ->weight(FontWeight::Bold),
-                                    Text::make(filamentUser()->email),
-                                    Text::make(filamentUser()->displayTimeZone()),
-                                ])
-                                ->columnSpan(4),
-                        ]),
-                ])->afterHeader([
+                    Grid::make(12)->schema([
+                        Image::make(
+                            filamentUser()->getAvatarUrl(),
+                            filamentUser()->name,
+                        )->imageSize(50),
+                        Grid::make(1)
+                            ->schema([
+                                Text::make(fn() => filamentUser()->name)->weight(FontWeight::Bold),
+                                Text::make(filamentUser()->email),
+                                Text::make(filamentUser()->displayTimeZone()),
+                            ])
+                            ->columnSpan(4),
+                    ]),
+                ])
+                ->afterHeader([
                     Action::make('edit')
                         ->label(__('auth.profile.actions.edit'))
                         ->color('primary')
                         ->outlined()
-                        ->fillForm(fn () => [
+                        ->fillForm(fn() => [
                             'email' => filamentUser()->getAttribute('email'),
-                            'avatar' => AvatarService::getAvatarPath(filamentUser()) ?: null,
+                            'avatar' =>
+                                AvatarService::getAvatarPath(filamentUser())
+                                ?: null,
                             'timezone' => filamentUser()->getTimeZone(),
                         ])
                         ->form([
@@ -95,14 +98,15 @@ final class UserSettings extends Page implements HasTable
                                 ->searchable()
                                 ->options(Timezone::getTimezonesAsSelectList()),
                         ])
-                        ->action(fn (array $data) => $this->updateUserBasicData($data)),
+                        ->action(
+                            fn(array $data) => $this->updateUserBasicData(
+                                $data,
+                            ),
+                        ),
                 ]),
-
-            Section::make(__('auth.profile.sections.teams'))
-                ->schema([
-                    EmbeddedTable::make(),
-                ]),
-
+            Section::make(__('auth.profile.sections.teams'))->schema([
+                EmbeddedTable::make(),
+            ]),
         ]);
     }
 
@@ -122,12 +126,11 @@ final class UserSettings extends Page implements HasTable
                 ->success()
                 ->send();
         } catch (Exception $e) {
-            Logger()->error(($e->getMessage()));
+            Logger()->error($e->getMessage());
             Notification::make()
                 ->body('Something went wrong')
                 ->danger()
                 ->send();
         }
-
     }
 }

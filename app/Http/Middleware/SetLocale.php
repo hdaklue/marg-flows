@@ -14,12 +14,11 @@ final class SetLocale
 {
     public function handle(Request $request, Closure $next)
     {
-
         // Get locale from session, URL parameter, browser locale, or default
-        $locale = $request->get('locale')
-            ?? Session::get('locale')
-            ?? $this->getBrowserLocale($request)
-            ?? config('app.locale');
+        $locale =
+            $request->get('locale') ?? Session::get(
+                'locale',
+            ) ?? $this->getBrowserLocale($request) ?? config('app.locale');
 
         // Validate locale is supported
         if (array_key_exists($locale, config('app.available_locales'))) {
@@ -30,9 +29,9 @@ final class SetLocale
         return $next($request);
     }
 
-    private function getBrowserLocale(Request $request): ?string
+    private function getBrowserLocale(Request $request): null|string
     {
-        $agent = new Agent;
+        $agent = new Agent();
 
         // $agent->setHttpHeaders($request->headers->all());
         // $agent->setUserAgent($request->header('User-Agent'));

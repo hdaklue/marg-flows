@@ -14,12 +14,28 @@ final class DeliverableFormat
 
     protected string $configPath;
 
-    public function __construct(private string $key)
-    {
-        throw_unless(config('deliverables.formats'), new InvalidArgumentException("Deliverable format '{$key}' does not exist."));
+    public function __construct(
+        private string $key,
+    ) {
+        throw_unless(
+            config('deliverables.formats'),
+            new InvalidArgumentException(
+                "Deliverable format '{$key}' does not exist.",
+            ),
+        );
 
-        throw_unless(array_key_exists($key, config('deliverables.formats')), new InvalidArgumentException("Deliverable format '{$key}' is not defined in the configuration."));
-        throw_unless(config("deliverables.{$key}"), new InvalidArgumentException("Deliverable format '{$key}' configuration path does not exist."));
+        throw_unless(
+            array_key_exists($key, config('deliverables.formats')),
+            new InvalidArgumentException(
+                "Deliverable format '{$key}' is not defined in the configuration.",
+            ),
+        );
+        throw_unless(
+            config("deliverables.{$key}"),
+            new InvalidArgumentException(
+                "Deliverable format '{$key}' configuration path does not exist.",
+            ),
+        );
         $config = config('deliverables.formats')[$key];
 
         $this->name = $key;
@@ -52,18 +68,20 @@ final class DeliverableFormat
     {
         $types = config($this->configPath);
 
-        if (! $types) {
+        if (!$types) {
             return [];
         }
 
-        return collect($types)->mapWithKeys(fn ($definition, $key) => [$key => $definition['name']])->toArray();
+        return collect($types)->mapWithKeys(fn($definition, $key) => [
+            $key => $definition['name'],
+        ])->toArray();
     }
 
     public function types(): array
     {
         $types = config($this->configPath);
 
-        if (! $types) {
+        if (!$types) {
             return [];
         }
 

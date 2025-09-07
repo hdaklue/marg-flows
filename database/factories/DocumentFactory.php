@@ -92,8 +92,8 @@ final class DocumentFactory extends Factory
             $rowData = [];
             for ($col = 0; $col < $cols; $col++) {
                 $rowData[] = $row === 0
-                    ? fake()->word() // Headers
-                    : fake()->words(rand(1, 3), true); // Content
+                    ? fake()->word()
+                    : fake()->words(rand(1, 3), true); // Headers // Content
             }
             $content[] = $rowData;
         }

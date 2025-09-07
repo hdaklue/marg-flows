@@ -26,6 +26,8 @@ trait SentInNotificationTrait
         if ($this->hasAttribute('name')) {
             return $this->getAttribute('name');
         }
-        throw new LogicException("Model [{get_class({$this})] must have either 'title' or 'name' attribute.");
+        throw new LogicException(
+            "Model [{get_class({$this})] must have either 'title' or 'name' attribute.",
+        );
     }
 }

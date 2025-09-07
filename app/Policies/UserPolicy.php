@@ -19,7 +19,6 @@ class UserPolicy
 
     public function view(User $actor, User $mode): bool
     {
-
         return $actor->canAccessAdmin();
     }
 
@@ -31,6 +30,5 @@ class UserPolicy
     public function create(User $user): bool
     {
         return $user->isAppAdmin();
-
     }
 }

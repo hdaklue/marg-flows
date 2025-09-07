@@ -46,29 +46,115 @@ final class AspectRatio implements JsonSerializable
      */
     private static array $resolutions = [
         // Standard HD/UHD resolutions
-        ['name' => 'HD', 'width' => 1280, 'height' => 720, 'label' => '16:9', 'ratio' => 1.7778],
-        ['name' => 'Full HD', 'width' => 1920, 'height' => 1080, 'label' => '16:9', 'ratio' => 1.7778],
-        ['name' => 'QHD', 'width' => 2560, 'height' => 1440, 'label' => '16:9', 'ratio' => 1.7778],
-        ['name' => '4K UHD', 'width' => 3840, 'height' => 2160, 'label' => '16:9', 'ratio' => 1.7778],
-        ['name' => '8K UHD', 'width' => 7680, 'height' => 4320, 'label' => '16:9', 'ratio' => 1.7778],
-        
+        [
+            'name' => 'HD',
+            'width' => 1280,
+            'height' => 720,
+            'label' => '16:9',
+            'ratio' => 1.7778,
+        ],
+        [
+            'name' => 'Full HD',
+            'width' => 1920,
+            'height' => 1080,
+            'label' => '16:9',
+            'ratio' => 1.7778,
+        ],
+        [
+            'name' => 'QHD',
+            'width' => 2560,
+            'height' => 1440,
+            'label' => '16:9',
+            'ratio' => 1.7778,
+        ],
+        [
+            'name' => '4K UHD',
+            'width' => 3840,
+            'height' => 2160,
+            'label' => '16:9',
+            'ratio' => 1.7778,
+        ],
+        [
+            'name' => '8K UHD',
+            'width' => 7680,
+            'height' => 4320,
+            'label' => '16:9',
+            'ratio' => 1.7778,
+        ],
         // Cinema resolutions
-        ['name' => 'CinemaScope', 'width' => 2048, 'height' => 858, 'label' => '2.39:1', 'ratio' => 2.39],
-        ['name' => 'DCI 4K', 'width' => 4096, 'height' => 1716, 'label' => '2.39:1', 'ratio' => 2.39],
-        ['name' => 'DCI Flat', 'width' => 1998, 'height' => 1080, 'label' => '1.85:1', 'ratio' => 1.85],
-        
+        [
+            'name' => 'CinemaScope',
+            'width' => 2048,
+            'height' => 858,
+            'label' => '2.39:1',
+            'ratio' => 2.39,
+        ],
+        [
+            'name' => 'DCI 4K',
+            'width' => 4096,
+            'height' => 1716,
+            'label' => '2.39:1',
+            'ratio' => 2.39,
+        ],
+        [
+            'name' => 'DCI Flat',
+            'width' => 1998,
+            'height' => 1080,
+            'label' => '1.85:1',
+            'ratio' => 1.85,
+        ],
         // Mobile/Social Media resolutions
-        ['name' => 'Mobile Portrait', 'width' => 1080, 'height' => 1920, 'label' => '9:16', 'ratio' => 0.5625],
-        ['name' => 'Instagram Portrait', 'width' => 1080, 'height' => 1350, 'label' => '4:5', 'ratio' => 0.8],
-        ['name' => 'Instagram Square', 'width' => 1080, 'height' => 1080, 'label' => '1:1', 'ratio' => 1.0],
-        
+        [
+            'name' => 'Mobile Portrait',
+            'width' => 1080,
+            'height' => 1920,
+            'label' => '9:16',
+            'ratio' => 0.5625,
+        ],
+        [
+            'name' => 'Instagram Portrait',
+            'width' => 1080,
+            'height' => 1350,
+            'label' => '4:5',
+            'ratio' => 0.8,
+        ],
+        [
+            'name' => 'Instagram Square',
+            'width' => 1080,
+            'height' => 1080,
+            'label' => '1:1',
+            'ratio' => 1.0,
+        ],
         // Traditional TV/Computer resolutions
-        ['name' => 'SD 4:3', 'width' => 640, 'height' => 480, 'label' => '4:3', 'ratio' => 1.3333],
-        ['name' => 'XGA', 'width' => 1024, 'height' => 768, 'label' => '4:3', 'ratio' => 1.3333],
-        
+        [
+            'name' => 'SD 4:3',
+            'width' => 640,
+            'height' => 480,
+            'label' => '4:3',
+            'ratio' => 1.3333,
+        ],
+        [
+            'name' => 'XGA',
+            'width' => 1024,
+            'height' => 768,
+            'label' => '4:3',
+            'ratio' => 1.3333,
+        ],
         // Widescreen computer resolutions
-        ['name' => 'WXGA+', 'width' => 1440, 'height' => 900, 'label' => '16:10', 'ratio' => 1.6],
-        ['name' => 'WUXGA', 'width' => 1920, 'height' => 1200, 'label' => '16:10', 'ratio' => 1.6],
+        [
+            'name' => 'WXGA+',
+            'width' => 1440,
+            'height' => 900,
+            'label' => '16:10',
+            'ratio' => 1.6,
+        ],
+        [
+            'name' => 'WUXGA',
+            'width' => 1920,
+            'height' => 1200,
+            'label' => '16:10',
+            'ratio' => 1.6,
+        ],
     ];
 
     /**
@@ -79,20 +165,36 @@ final class AspectRatio implements JsonSerializable
     private function __construct(
         private readonly string $label,
         private readonly float $ratio,
-        private readonly ?string $resolutionName = null,
+        private readonly null|string $resolutionName = null,
         private readonly int $width = 0,
         private readonly int $height = 0,
     ) {
-        throw_if($this->width < 0 || $this->height < 0, new InvalidArgumentException('Width and height cannot be negative.'));
-        throw_if($this->ratio <= 0, new InvalidArgumentException('Ratio must be positive.'));
+        throw_if(
+            $this->width < 0 || $this->height < 0,
+            new InvalidArgumentException(
+                'Width and height cannot be negative.',
+            ),
+        );
+        throw_if(
+            $this->ratio <= 0,
+            new InvalidArgumentException('Ratio must be positive.'),
+        );
     }
 
     /**
      * Create an AspectRatio instance from width and height dimensions.
      */
-    public static function from(float $width, float $height, float $tolerance = self::DEFAULT_TOLERANCE): ?self
-    {
-        throw_if($width <= 0 || $height <= 0, new InvalidArgumentException('Width and height must be positive non-zero values.'));
+    public static function from(
+        float $width,
+        float $height,
+        float $tolerance = self::DEFAULT_TOLERANCE,
+    ): null|self {
+        throw_if(
+            $width <= 0 || $height <= 0,
+            new InvalidArgumentException(
+                'Width and height must be positive non-zero values.',
+            ),
+        );
 
         $intWidth = (int) $width;
         $intHeight = (int) $height;
@@ -101,14 +203,26 @@ final class AspectRatio implements JsonSerializable
         // Check resolution cache first
         if (isset(self::$resolutionCache[$cacheKey])) {
             $res = self::$resolutionCache[$cacheKey];
-            return new self($res['label'], $res['ratio'], $res['name'], $intWidth, $intHeight);
+            return new self(
+                $res['label'],
+                $res['ratio'],
+                $res['name'],
+                $intWidth,
+                $intHeight,
+            );
         }
 
         // Check exact resolution match
         foreach (self::$resolutions as $res) {
             if ($res['width'] === $intWidth && $res['height'] === $intHeight) {
                 self::$resolutionCache[$cacheKey] = $res;
-                return new self($res['label'], $res['ratio'], $res['name'], $intWidth, $intHeight);
+                return new self(
+                    $res['label'],
+                    $res['ratio'],
+                    $res['name'],
+                    $intWidth,
+                    $intHeight,
+                );
             }
         }
 
@@ -117,7 +231,13 @@ final class AspectRatio implements JsonSerializable
 
         foreach (self::$map as $label => $targetRatio) {
             if (abs($actual - $targetRatio) < $tolerance) {
-                return new self($label, $targetRatio, null, $intWidth, $intHeight);
+                return new self(
+                    $label,
+                    $targetRatio,
+                    null,
+                    $intWidth,
+                    $intHeight,
+                );
             }
         }
 
@@ -127,15 +247,21 @@ final class AspectRatio implements JsonSerializable
     /**
      * Create an AspectRatio instance from a Dimension object.
      */
-    public static function fromDimension(Dimension $dimension, float $tolerance = self::DEFAULT_TOLERANCE): ?self
-    {
-        return self::from($dimension->getWidth(), $dimension->getHeight(), $tolerance);
+    public static function fromDimension(
+        Dimension $dimension,
+        float $tolerance = self::DEFAULT_TOLERANCE,
+    ): null|self {
+        return self::from(
+            $dimension->getWidth(),
+            $dimension->getHeight(),
+            $tolerance,
+        );
     }
 
     /**
      * Create an AspectRatio instance from a ratio string (e.g., "16:9").
      */
-    public static function fromString(string $ratioString): ?self
+    public static function fromString(string $ratioString): null|self
     {
         if (!isset(self::$map[$ratioString])) {
             return null;
@@ -147,9 +273,14 @@ final class AspectRatio implements JsonSerializable
     /**
      * Create an AspectRatio instance from a decimal ratio value.
      */
-    public static function fromRatio(float $ratio, float $tolerance = self::DEFAULT_TOLERANCE): ?self
-    {
-        throw_if($ratio <= 0, new InvalidArgumentException('Ratio must be positive.'));
+    public static function fromRatio(
+        float $ratio,
+        float $tolerance = self::DEFAULT_TOLERANCE,
+    ): null|self {
+        throw_if(
+            $ratio <= 0,
+            new InvalidArgumentException('Ratio must be positive.'),
+        );
 
         foreach (self::$map as $label => $targetRatio) {
             if (abs($ratio - $targetRatio) < $tolerance) {
@@ -186,7 +317,7 @@ final class AspectRatio implements JsonSerializable
         return $this->ratio;
     }
 
-    public function getResolutionName(): ?string
+    public function getResolutionName(): null|string
     {
         return $this->resolutionName;
     }
@@ -231,8 +362,10 @@ final class AspectRatio implements JsonSerializable
      */
     public function equals(self $other): bool
     {
-        return $this->label === $other->label &&
-               abs($this->ratio - $other->ratio) < 1e-10;
+        return (
+            $this->label === $other->label
+            && abs($this->ratio - $other->ratio) < 1e-10
+        );
     }
 
     /**
@@ -240,7 +373,10 @@ final class AspectRatio implements JsonSerializable
      */
     public function scaleTo(int $targetWidth, int $targetHeight): array
     {
-        throw_if($targetWidth <= 0 || $targetHeight <= 0, new InvalidArgumentException('Target dimensions must be positive.'));
+        throw_if(
+            $targetWidth <= 0 || $targetHeight <= 0,
+            new InvalidArgumentException('Target dimensions must be positive.'),
+        );
 
         $targetRatio = $targetWidth / $targetHeight;
 
@@ -266,7 +402,7 @@ final class AspectRatio implements JsonSerializable
     public function getOptimalDimensions(int $maxWidth): array
     {
         $height = (int) round($maxWidth / $this->ratio);
-        
+
         return [
             'width' => $maxWidth,
             'height' => $height,
@@ -280,8 +416,11 @@ final class AspectRatio implements JsonSerializable
      */
     public function getResolutions(): array
     {
-        return array_filter(self::$resolutions, fn($res) => 
-            abs($res['ratio'] - $this->ratio) < self::DEFAULT_TOLERANCE
+        return array_filter(
+            self::$resolutions,
+            fn($res) => (
+                abs($res['ratio'] - $this->ratio) < self::DEFAULT_TOLERANCE
+            ),
         );
     }
 
@@ -310,8 +449,15 @@ final class AspectRatio implements JsonSerializable
      */
     public static function getStandardVideoResolutions(): array
     {
-        return array_filter(self::$resolutions, fn($res) => 
-            in_array($res['name'], ['HD', 'Full HD', 'QHD', '4K UHD', '8K UHD'])
+        return array_filter(
+            self::$resolutions,
+            fn($res) => in_array($res['name'], [
+                'HD',
+                'Full HD',
+                'QHD',
+                '4K UHD',
+                '8K UHD',
+            ]),
         );
     }
 
@@ -322,9 +468,12 @@ final class AspectRatio implements JsonSerializable
      */
     public static function getMobileResolutions(): array
     {
-        return array_filter(self::$resolutions, fn($res) => 
-            str_contains($res['name'], 'Mobile') || 
-            str_contains($res['name'], 'Instagram')
+        return array_filter(
+            self::$resolutions,
+            fn($res) => (
+                str_contains($res['name'], 'Mobile')
+                || str_contains($res['name'], 'Instagram')
+            ),
         );
     }
 
@@ -335,9 +484,12 @@ final class AspectRatio implements JsonSerializable
      */
     public static function getCinemaResolutions(): array
     {
-        return array_filter(self::$resolutions, fn($res) => 
-            str_contains($res['name'], 'Cinema') || 
-            str_contains($res['name'], 'DCI')
+        return array_filter(
+            self::$resolutions,
+            fn($res) => (
+                str_contains($res['name'], 'Cinema')
+                || str_contains($res['name'], 'DCI')
+            ),
         );
     }
 

@@ -48,7 +48,6 @@ final class ImagesConfigData extends SimpleDTO implements BlockConfigContract
 
     protected function casts(): array
     {
-        return [
-        ];
+        return [];
     }
 }

@@ -11,11 +11,10 @@ final class Simple
 {
     private string $tenantId;
 
-    public function build(?string $documentId = null): array
+    public function build(null|string $documentId = null): array
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
-        $imagesConfig = EditorConfigBuilder::images()
-            ->forPlan('simple');
+        $imagesConfig = EditorConfigBuilder::images()->forPlan('simple');
         $baseDirectory = DirectoryManager::document($this->tenantId)
             ->forDocument($documentId)
             ->images()
@@ -33,17 +32,20 @@ final class Simple
             'nestedList' => EditorConfigBuilder::nestedList()->toArray(),
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()
-                ->enablePreview(false)->toArray(),
+                ->enablePreview(false)
+                ->toArray(),
             'images' => $imagesConfig->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
+            'videoUpload' =>
+                $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
     }
 
-    private function buildVideoUploadConfig(?string $documentId)
+    private function buildVideoUploadConfig(null|string $documentId)
     {
-        $videoUploadConfig = EditorConfigBuilder::videoUpload()
-            ->forPlan('simple');
+        $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan(
+            'simple',
+        );
 
         $baseDirectory = DirectoryManager::document($this->tenantId)
             ->forDocument($documentId)

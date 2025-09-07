@@ -33,14 +33,17 @@ class CalendarTest extends Component
                 'id' => '1',
                 'title' => 'Team Meeting',
                 'startDate' => Carbon::now()->addDays(2)->toISOString(),
-                'endDate' => Carbon::now()->addDays(2)->addHour()->toISOString(),
+                'endDate' => Carbon::now()
+                    ->addDays(2)
+                    ->addHour()
+                    ->toISOString(),
                 'color' => 'sky-500',
                 'allDay' => false,
                 'meta' => [
                     'type' => 'meeting',
                     'attendees' => 5,
-                    'location' => 'Conference Room A'
-                ]
+                    'location' => 'Conference Room A',
+                ],
             ],
             [
                 'id' => '2',
@@ -51,21 +54,24 @@ class CalendarTest extends Component
                 'meta' => [
                     'type' => 'deadline',
                     'priority' => 'high',
-                    'project' => 'KluePortal v2'
-                ]
+                    'project' => 'KluePortal v2',
+                ],
             ],
             [
                 'id' => '3',
                 'title' => 'Client Call',
                 'startDate' => Carbon::now()->addDays(1)->toISOString(),
-                'endDate' => Carbon::now()->addDays(1)->addMinutes(30)->toISOString(),
+                'endDate' => Carbon::now()
+                    ->addDays(1)
+                    ->addMinutes(30)
+                    ->toISOString(),
                 'color' => 'emerald-500',
                 'allDay' => false,
                 'meta' => [
                     'type' => 'call',
                     'client' => 'ABC Corp',
-                    'status' => 'confirmed'
-                ]
+                    'status' => 'confirmed',
+                ],
             ],
             [
                 'id' => '4',
@@ -76,21 +82,24 @@ class CalendarTest extends Component
                 'meta' => [
                     'type' => 'review',
                     'feature' => 'Calendar Component',
-                    'reviewer' => 'Senior Dev'
-                ]
+                    'reviewer' => 'Senior Dev',
+                ],
             ],
             [
                 'id' => '5',
                 'title' => 'Design Workshop',
                 'startDate' => Carbon::now()->addDays(5)->toISOString(),
-                'endDate' => Carbon::now()->addDays(5)->addHours(3)->toISOString(),
+                'endDate' => Carbon::now()
+                    ->addDays(5)
+                    ->addHours(3)
+                    ->toISOString(),
                 'color' => 'indigo-500',
                 'allDay' => false,
                 'meta' => [
                     'type' => 'workshop',
                     'topic' => 'UI/UX Best Practices',
-                    'facilitator' => 'Design Team'
-                ]
+                    'facilitator' => 'Design Team',
+                ],
             ],
             [
                 'id' => '6',
@@ -101,21 +110,24 @@ class CalendarTest extends Component
                 'meta' => [
                     'type' => 'planning',
                     'sprint' => 'Sprint 23',
-                    'duration' => '2 weeks'
-                ]
+                    'duration' => '2 weeks',
+                ],
             ],
             [
                 'id' => '7',
                 'title' => 'All Hands Meeting',
                 'startDate' => Carbon::now()->addDays(10)->toISOString(),
-                'endDate' => Carbon::now()->addDays(10)->addHour()->toISOString(),
+                'endDate' => Carbon::now()
+                    ->addDays(10)
+                    ->addHour()
+                    ->toISOString(),
                 'color' => 'rose-500',
                 'allDay' => false,
                 'meta' => [
                     'type' => 'meeting',
                     'audience' => 'All Staff',
-                    'agenda' => 'Q4 Updates'
-                ]
+                    'agenda' => 'Q4 Updates',
+                ],
             ],
             [
                 'id' => '8',
@@ -126,14 +138,14 @@ class CalendarTest extends Component
                 'meta' => [
                     'type' => 'learning',
                     'topic' => 'Laravel Performance',
-                    'presenter' => 'Tech Lead'
-                ]
-            ]
+                    'presenter' => 'Tech Lead',
+                ],
+            ],
         ];
 
         return view('livewire.calendar-test', [
             'config' => $config,
-            'events' => $staticEvents
+            'events' => $staticEvents,
         ]);
     }
 }

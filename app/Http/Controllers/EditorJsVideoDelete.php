@@ -28,20 +28,23 @@ final class EditorJsVideoDelete extends Controller
         try {
             // Convert URL path to storage path if needed
             $storagePath = $this->convertUrlToStoragePath($path);
-            
+
             // Simply delete the file if it exists
             if (Storage::disk('public')->exists($storagePath)) {
                 Storage::disk('public')->delete($storagePath);
-                logger()->info('Video file deleted successfully', ['path' => $storagePath]);
+                logger()->info('Video file deleted successfully', [
+                    'path' => $storagePath,
+                ]);
             } else {
-                logger()->warning('Video file not found for deletion', ['path' => $storagePath]);
+                logger()->warning('Video file not found for deletion', [
+                    'path' => $storagePath,
+                ]);
             }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Video deleted successfully',
             ]);
-
         } catch (Exception $e) {
             Log::error('Failed to delete EditorJS video', [
                 'path' => $path,
@@ -62,7 +65,7 @@ final class EditorJsVideoDelete extends Controller
     {
         // Remove storage URL prefix if present
         $path = str_replace('/storage/', '', $path);
-        
+
         // Ensure it starts with documents/videos/
         if (!str_starts_with($path, 'documents/videos/')) {
             // If path doesn't contain documents/videos, assume it's just the filename

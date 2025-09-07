@@ -25,8 +25,10 @@ final class AdvancedFilterStrategy implements DocumentBlockFilterStrategy
         'videoUpload',
     ];
 
-    public function filter(DocumentBlocksDto $blocks, array $context = []): DocumentBlocksDto
-    {
+    public function filter(
+        DocumentBlocksDto $blocks,
+        array $context = [],
+    ): DocumentBlocksDto {
         return $blocks->applyBlockFilter(self::ALLOWED_BLOCKS);
     }
 
@@ -35,8 +37,10 @@ final class AdvancedFilterStrategy implements DocumentBlockFilterStrategy
         return 'advanced';
     }
 
-    public function isBlockTypeAllowed(string $blockType, array $context = []): bool
-    {
+    public function isBlockTypeAllowed(
+        string $blockType,
+        array $context = [],
+    ): bool {
         return in_array($blockType, self::ALLOWED_BLOCKS, true);
     }
 

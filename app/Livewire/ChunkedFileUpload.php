@@ -15,7 +15,12 @@ final class ChunkedFileUpload extends Component
 
     public bool $multiple = true;
 
-    public array $acceptedFileTypes = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4'];
+    public array $acceptedFileTypes = [
+        'image/jpeg',
+        'image/png',
+        'application/pdf',
+        'video/mp4',
+    ];
 
     public int $chunkSize = 5242880; // 5MB
 
@@ -35,7 +40,7 @@ final class ChunkedFileUpload extends Component
 
     public string $tempDir = 'uploads/temp';
 
-    public ?string $importUrlEndpoint = null;
+    public null|string $importUrlEndpoint = null;
 
     // Component state
     public array $uploadedFiles = [];
@@ -47,30 +52,35 @@ final class ChunkedFileUpload extends Component
 
     public bool $uploading = false;
 
-    public ?string $error = null;
+    public null|string $error = null;
 
-    public ?string $success = null;
+    public null|string $success = null;
 
     // Props for external configuration
     public function mount(
-        ?bool $modalMode = false,
-        ?bool $allowUrlImport = false,
-        ?bool $multiple = true,
-        ?array $acceptedFileTypes = null,
-        ?int $maxFiles = null,
-        ?int $maxFileSize = null,
-        ?int $minFileSize = null,
-        ?int $maxParallelUploads = null,
-        ?string $statePath = null,
-        ?string $disk = null,
-        ?string $finalDir = null,
-        ?string $tempDir = null,
-        ?string $importUrlEndpoint = null,
+        null|bool $modalMode = false,
+        null|bool $allowUrlImport = false,
+        null|bool $multiple = true,
+        null|array $acceptedFileTypes = null,
+        null|int $maxFiles = null,
+        null|int $maxFileSize = null,
+        null|int $minFileSize = null,
+        null|int $maxParallelUploads = null,
+        null|string $statePath = null,
+        null|string $disk = null,
+        null|string $finalDir = null,
+        null|string $tempDir = null,
+        null|string $importUrlEndpoint = null,
     ): void {
         $this->modalMode = $modalMode ?? false;
         $this->allowUrlImport = $allowUrlImport ?? false;
         $this->multiple = $multiple ?? true;
-        $this->acceptedFileTypes = $acceptedFileTypes ?? ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4'];
+        $this->acceptedFileTypes = $acceptedFileTypes ?? [
+            'image/jpeg',
+            'image/png',
+            'application/pdf',
+            'video/mp4',
+        ];
         $this->maxFiles = $maxFiles ?? 10;
         $this->maxFileSize = $maxFileSize ?? 52428800; // 50MB
         $this->minFileSize = $minFileSize ?? 0;
@@ -109,16 +119,17 @@ final class ChunkedFileUpload extends Component
 
         $this->clearMessages();
         $this->showSuccess('File uploaded successfully');
-        
+
         // Dispatch event for parent components
         $this->dispatch('chunked-upload-completed', $fileData);
     }
 
-    // Remove uploaded file from Livewire state  
+    // Remove uploaded file from Livewire state
     public function removeUploadedFile(string $fileKey): void
     {
-        $fileToRemove = collect($this->uploadedFiles)->firstWhere('key', $fileKey);
-        
+        $fileToRemove = collect($this->uploadedFiles)
+            ->firstWhere('key', $fileKey);
+
         if (!$fileToRemove) {
             $this->showError('File not found');
             return;
@@ -126,11 +137,13 @@ final class ChunkedFileUpload extends Component
 
         $this->uploadedFiles = array_values(array_filter(
             $this->uploadedFiles,
-            fn ($file) => $file['key'] !== $fileKey,
+            fn($file) => $file['key'] !== $fileKey,
         ));
 
-        $this->showSuccess("File '{$fileToRemove['name']}' removed successfully");
-        
+        $this->showSuccess(
+            "File '{$fileToRemove['name']}' removed successfully",
+        );
+
         // Dispatch delete event for cleanup
         $this->dispatch('chunked-upload-removed', ['key' => $fileKey]);
     }
@@ -156,7 +169,9 @@ final class ChunkedFileUpload extends Component
 
         $displayTypes = [];
         foreach ($this->acceptedFileTypes as $type) {
-            $displayTypes[] = $typeMap[$type] ?? strtoupper(explode('/', $type)[1] ?? 'FILE');
+            $displayTypes[] = $typeMap[$type] ?? strtoupper(
+                explode('/', $type)[1] ?? 'FILE',
+            );
         }
 
         $sizeDisplay = $this->maxFileSize >= 1048576
@@ -196,7 +211,7 @@ final class ChunkedFileUpload extends Component
             'startTime' => now()->toISOString(),
             'error' => null,
         ];
-        
+
         $this->uploading = true;
         $this->clearMessages();
     }
@@ -206,13 +221,23 @@ final class ChunkedFileUpload extends Component
         if (!isset($this->activeUploads[$fileId])) {
             return;
         }
-        
-        $this->activeUploads[$fileId] = array_merge($this->activeUploads[$fileId], $updates);
-        
+
+        $this->activeUploads[$fileId] = array_merge(
+            $this->activeUploads[$fileId],
+            $updates,
+        );
+
         // Calculate progress percentage
-        if (isset($updates['uploadedChunks']) && $this->activeUploads[$fileId]['totalChunks'] > 1) {
+        if (
+            isset($updates['uploadedChunks'])
+            && $this->activeUploads[$fileId]['totalChunks'] > 1
+        ) {
             $this->activeUploads[$fileId]['progress'] = round(
-                ($this->activeUploads[$fileId]['uploadedChunks'] / $this->activeUploads[$fileId]['totalChunks']) * 100
+                (
+                    $this->activeUploads[$fileId]['uploadedChunks']
+                    / $this->activeUploads[$fileId]['totalChunks']
+                )
+                * 100,
             );
         }
     }
@@ -222,22 +247,25 @@ final class ChunkedFileUpload extends Component
         if (isset($this->activeUploads[$fileId])) {
             $this->activeUploads[$fileId]['status'] = 'completed';
             $this->activeUploads[$fileId]['progress'] = 100;
-            
+
             // Move to uploaded files
             $this->addUploadedFile([
                 'key' => $fileId,
-                'name' => $fileData['name'] ?? $this->activeUploads[$fileId]['name'],
-                'size' => $fileData['size'] ?? $this->activeUploads[$fileId]['size'],
-                'type' => $fileData['type'] ?? $this->activeUploads[$fileId]['type'],
+                'name' =>
+                    $fileData['name'] ?? $this->activeUploads[$fileId]['name'],
+                'size' =>
+                    $fileData['size'] ?? $this->activeUploads[$fileId]['size'],
+                'type' =>
+                    $fileData['type'] ?? $this->activeUploads[$fileId]['type'],
                 'url' => $fileData['url'] ?? '',
                 'path' => $fileData['path'] ?? '',
                 'imported' => $fileData['imported'] ?? false,
             ]);
-            
+
             // Remove from active uploads after a delay
             unset($this->activeUploads[$fileId]);
         }
-        
+
         $this->checkUploadingStatus();
     }
 
@@ -247,7 +275,7 @@ final class ChunkedFileUpload extends Component
             $this->activeUploads[$fileId]['status'] = 'error';
             $this->activeUploads[$fileId]['error'] = $error;
         }
-        
+
         $this->showError($error);
         $this->checkUploadingStatus();
     }
@@ -258,7 +286,7 @@ final class ChunkedFileUpload extends Component
             $this->activeUploads[$fileId]['status'] = 'cancelled';
             unset($this->activeUploads[$fileId]);
         }
-        
+
         $this->checkUploadingStatus();
         $this->dispatch('upload-cancelled', ['fileId' => $fileId]);
     }
@@ -290,10 +318,9 @@ final class ChunkedFileUpload extends Component
                 'url' => $url,
                 'imported' => true,
             ];
-            
+
             $this->addUploadedFile($fileData);
             $this->showSuccess('File imported successfully from URL');
-            
         } catch (\Exception $e) {
             $this->showError('Failed to import from URL: ' . $e->getMessage());
         }
@@ -339,7 +366,7 @@ final class ChunkedFileUpload extends Component
             'doc' => 'application/msword',
             'zip' => 'application/zip',
         ];
-        
+
         return $mimeMap[$ext] ?? 'application/octet-stream';
     }
 

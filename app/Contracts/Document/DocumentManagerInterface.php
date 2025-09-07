@@ -15,7 +15,11 @@ interface DocumentManagerInterface
     /**
      * Create a new document using documentCreateData DTO.
      */
-    public function create(CreateDocumentDto $data, Documentable $documentable, User $creator): Document;
+    public function create(
+        CreateDocumentDto $data,
+        Documentable $documentable,
+        User $creator,
+    ): Document;
 
     /**
      * Update an existing document.
@@ -37,7 +41,7 @@ interface DocumentManagerInterface
     /**
      * Get a specific document by ID with content-based caching.
      */
-    public function getDocument(string $documentId): ?Document;
+    public function getDocument(string $documentId): null|Document;
 
     /**
      * Get documents created by a specific user.
@@ -51,14 +55,20 @@ interface DocumentManagerInterface
      *
      * @return Collection<Document>
      */
-    public function getRecentDocuments(Documentable $documentable, int $limit = 10): Collection;
+    public function getRecentDocuments(
+        Documentable $documentable,
+        int $limit = 10,
+    ): Collection;
 
     /**
      * Search documents by name or content.
      *
      * @return Collection<Document>
      */
-    public function searchDocuments(Documentable $documentable, string $query): Collection;
+    public function searchDocuments(
+        Documentable $documentable,
+        string $query,
+    ): Collection;
 
     /**
      * Clear cache for a specific documentable entity.

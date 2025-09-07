@@ -12,7 +12,6 @@ final class Previewtest extends Component
 {
     public string $image = 'https://picsum.photos/600/900?random=3';
 
-
     public $comments = [
         [
             'id' => 'c91c1dbe-3ef1-4208-a8e9-9d3f010f0c21',
@@ -88,18 +87,16 @@ final class Previewtest extends Component
                     'timestamp' => '2025-06-01T10:00:00Z',
                     'resolved' => false,
                 ],
-
             ],
-
         ],
     ];
 
-
-
     public function saveComment($comment, $imageId)
     {
-
-        $this->images = collect($this->images)->map(function ($image) use ($imageId, $comment) {
+        $this->images = collect($this->images)->map(function ($image) use (
+            $imageId,
+            $comment,
+        ) {
             if ($image['id'] === $imageId) {
                 $image['comments'][] = $comment;
             }

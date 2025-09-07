@@ -18,13 +18,13 @@ final class ExampleController extends Controller
             ->customBlocks([
                 VideoUploadBlock::class => [
                     'additionalData' => 'value', // Optional additional data
-                ]
+                ],
             ])
             ->toHtml();
 
         return view('flows.show', [
             'flow' => $flow,
-            'renderedContent' => $renderedContent
+            'renderedContent' => $renderedContent,
         ]);
     }
 }

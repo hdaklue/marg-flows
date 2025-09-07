@@ -9,11 +9,11 @@ trait LivesInOriginalDB
     /**
      * Get the database connection for the model.
      */
-    public function getConnectionName(): ?string
+    public function getConnectionName(): null|string
     {
         return config('database.default');
     }
-    
+
     /**
      * Get the table associated with the model.
      */
@@ -21,18 +21,25 @@ trait LivesInOriginalDB
     {
         if (!isset($this->table)) {
             return str_replace(
-                '\\', '', 
-                config('database.connections.' . config('database.default') . '.database') . '.' . parent::getTable()
+                '\\',
+                '',
+                config('database.connections.'
+                . config('database.default')
+                . '.database')
+                . '.'
+                . parent::getTable(),
             );
         }
 
-        $defaultDatabase = config('database.connections.' . config('database.default') . '.database');
-        
+        $defaultDatabase = config('database.connections.'
+        . config('database.default')
+        . '.database');
+
         // If table already has database prefix, return as is
         if (str_contains($this->table, '.')) {
             return $this->table;
         }
-        
+
         return $defaultDatabase . '.' . $this->table;
     }
 }

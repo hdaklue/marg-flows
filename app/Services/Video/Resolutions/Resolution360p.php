@@ -28,10 +28,19 @@ final class Resolution360p extends AbstractResolution
 
         // Constraints for 360p - adjust based on orientation
         $this->maxDimension = $this->resolution->dimension;
-        $this->minDimension = match($orientation) {
-            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(240, 426),
-            'square' => \App\Services\Video\ValueObjects\Dimension::from(240, 240),
-            default => \App\Services\Video\ValueObjects\Dimension::from(426, 240),
+        $this->minDimension = match ($orientation) {
+            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(
+                240,
+                426,
+            ),
+            'square' => \App\Services\Video\ValueObjects\Dimension::from(
+                240,
+                240,
+            ),
+            default => \App\Services\Video\ValueObjects\Dimension::from(
+                426,
+                240,
+            ),
         };
     }
 
@@ -43,8 +52,10 @@ final class Resolution360p extends AbstractResolution
     /**
      * Create Resolution360p based on source video orientation.
      */
-    public static function forOrientation(string $orientation, bool $allowScaleUp = true): self
-    {
+    public static function forOrientation(
+        string $orientation,
+        bool $allowScaleUp = true,
+    ): self {
         return new self($orientation, $allowScaleUp);
     }
 
@@ -59,9 +70,12 @@ final class Resolution360p extends AbstractResolution
     {
         // Create ResizeFilter directly instead of using closure
         return new ResizeFilter(
-            new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
+            new Dimension(
+                $this->dimension->getWidth(),
+                $this->dimension->getHeight(),
+            ),
             $this->resizeMode,
-            false  // Disable standard aspect ratio enforcement to prevent black bars
+            false, // Disable standard aspect ratio enforcement to prevent black bars
         );
     }
 

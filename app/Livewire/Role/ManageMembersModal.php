@@ -11,22 +11,32 @@ use Livewire\Component;
 
 final class ManageMembersModal extends Component
 {
-    public ?RoleableEntity $roleableEntity = null;
+    public null|RoleableEntity $roleableEntity = null;
 
-    public ?RoleableEntity $scopeToEntity = null;
+    public null|RoleableEntity $scopeToEntity = null;
 
     public $shouldShowModal = false;
 
     #[On('open-members-modal')]
-    public function handleOpenMemebersModal(string $roleableKey, string $roleableType, string $scopeToKey, string $scopeToType)
-    {
+    public function handleOpenMemebersModal(
+        string $roleableKey,
+        string $roleableType,
+        string $scopeToKey,
+        string $scopeToType,
+    ) {
         $modelClass = Relation::getMorphedModel($roleableType);
-        $this->roleableEntity = call_user_func([$modelClass, 'query'])->where('id', $roleableKey)->firstOrFail();
+        $this->roleableEntity = call_user_func([$modelClass, 'query'])->where(
+            'id',
+            $roleableKey,
+        )->firstOrFail();
 
         if ($scopeToKey && $scopeToType) {
             $scopeToModel = Relation::getMorphedModel($scopeToType);
 
-            $this->scopeToEntity = call_user_func([$scopeToModel, 'query'])->where('id', $scopeToKey)->firstOrFail();
+            $this->scopeToEntity = call_user_func([
+                $scopeToModel,
+                'query',
+            ])->where('id', $scopeToKey)->firstOrFail();
         }
 
         $this->dispatch('open-modal', id: 'edit-members-modal');

@@ -43,11 +43,11 @@ final class Record extends Component
         $this->color = cache()->remember(
             "flow_color_{$this->record->stage}",
             3600,
-            fn (): array|string|null => FlowStage::from($this->record->stage)->getColor(),
+            fn(): array|string|null => FlowStage::from($this->record->stage)->getColor(),
         );
         unset($this->participants);
-        // $this->shouldShowProgressDetails = in_array($this->record->status, [FlowStage::ACTIVE->value]);
 
+        // $this->shouldShowProgressDetails = in_array($this->record->status, [FlowStage::ACTIVE->value]);
         // if ($this->shouldShowProgressDetails) {
         //     $this->progressDetails = app(TimeProgressService::class)->getProgressDetails($this->record);
         // }
@@ -71,8 +71,14 @@ final class Record extends Component
     public function userPermissions(): array
     {
         return [
-            'canManageFlows' => filamentUser()->can('manageFlows', filamentTenant()),
-            'canManageMembers' => filamentUser()->can('manageMembers', $this->record),
+            'canManageFlows' => filamentUser()->can(
+                'manageFlows',
+                filamentTenant(),
+            ),
+            'canManageMembers' => filamentUser()->can(
+                'manageMembers',
+                $this->record,
+            ),
         ];
     }
 

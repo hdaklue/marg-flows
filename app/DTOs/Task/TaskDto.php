@@ -17,21 +17,21 @@ final class TaskDto extends ValidatedDTO
 
     public string $status;
 
-    public ?int $order_column;
+    public null|int $order_column;
 
-    public ?string $flow_id;
+    public null|string $flow_id;
 
-    public ?string $stage_id;
+    public null|string $stage_id;
 
     public array $assigned_to;
 
     public array $approvers;
 
-    public ?Carbon $start_date;
+    public null|Carbon $start_date;
 
-    public ?Carbon $due_date;
+    public null|Carbon $due_date;
 
-    public ?Carbon $completed_at;
+    public null|Carbon $completed_at;
 
     public int $priority;
 
@@ -39,14 +39,18 @@ final class TaskDto extends ValidatedDTO
 
     public array $settings;
 
-    public ?string $id;
+    public null|string $id;
 
     protected function rules(): array
     {
         return [
             'title' => ['required', 'string', 'min:3', 'max:255'],
             'description' => ['required', 'string'],
-            'status' => ['required', 'string', Rule::in(['Todo', 'Doing', 'Done'])],
+            'status' => [
+                'required',
+                'string',
+                Rule::in(['Todo', 'Doing', 'Done']),
+            ],
             'order_column' => ['sometimes', 'integer'],
             'flow_id' => ['sometimes', 'string'],
             'stage_id' => ['sometimes', 'string'],
@@ -80,9 +84,9 @@ final class TaskDto extends ValidatedDTO
     protected function casts(): array
     {
         return [
-            'start_date' => new CarbonCast,
-            'due_date' => new CarbonCast,
-            'completed_at' => new CarbonCast,
+            'start_date' => new CarbonCast(),
+            'due_date' => new CarbonCast(),
+            'completed_at' => new CarbonCast(),
         ];
     }
 

@@ -33,13 +33,10 @@ test('users can not authenticate with invalid password', function () {
         'password' => bcrypt('password'), // make sure password matches
     ]);
 
-    $response = Livewire::test(Login::class)
-        ->set('data', [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-
-        ])
-        ->call('authenticate');
+    $response = Livewire::test(Login::class)->set('data', [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ])->call('authenticate');
 
     $response->assertHasErrors('data.email');
 

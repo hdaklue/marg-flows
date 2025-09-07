@@ -22,7 +22,7 @@ final class ViewDocument extends ViewRecord
 {
     protected static string $resource = DocumentResource::class;
 
-    public ?array $data = [];
+    public null|array $data = [];
 
     public Width|string|null $maxContentWidth = 'full';
 
@@ -46,46 +46,48 @@ final class ViewDocument extends ViewRecord
         return DocumentManager::getDocument($key);
     }
 
-    #[Computed]
-    public function relatedDocuments(): Collection
-    {
-        $documentable = $this->record->documentable;
+    // #[Computed]
+    // public function relatedDocuments(): Collection
+    // {
+    //     $documentable = $this->record->documentable;
 
-        return DocumentManager::getDocumentsForUser($documentable, filamentUser())->reject(fn ($doc) => $doc->getKey() === $this->record->getKey() && $doc->getMorphClass() === $this->record->getMorphClass());
-    }
+    //     return DocumentManager::getDocumentsForUser($documentable, filamentUser())->reject(
+    //         fn($doc) => (
+    //             $doc->getKey() === $this->record->getKey()
+    //             && $doc->getMorphClass() === $this->record->getMorphClass()
+    //         ),
+    //     );
+    // }
 
     public function form(Schema $schema): Schema
     {
+        return $schema->components([
+            PlaceholderInput::make('title')
+                ->editable($this->canEdit)
+                ->required()
+                ->live(debounce: '100ms')
+                ->minLength(10)
+                ->placeholder('Page Title')
+                ->columnSpanFull()
+                ->maxLength(length: 100)
+                ->afterStateUpdated(function ($state, $livewire) {
+                    $livewire->validate();
 
-        return $schema
-            ->components([
-                PlaceholderInput::make('title')
-                    ->editable($this->canEdit)
-                    ->required()
-                    ->live(debounce: '100ms')
-                    ->minLength(10)
-                    ->placeholder('Page Title')
-                    ->columnSpanFull()
-                    ->maxLength(length: 100)
-                    ->afterStateUpdated(function ($state, $livewire) {
-                        $livewire->validate();
+                    if (!$this->canEdit() || blank($state)) {
+                        return;
+                    }
 
-                        if (! $this->canEdit() || blank($state)) {
-                            return;
-                        }
-
-                        $this->record->update([
-                            'name' => $state,
-                        ]);
-                    }),
-                // EditorJs::make('blocks')
-                //     ->editable($this->canEdit)
-                //     ->live()
-                //     ->afterStateUpdated(fn ($state) => $this->record->update([
-                //         'blocks' => $state,
-                //     ])),
-            ])
-            ->statePath('data');
+                    $this->record->update([
+                        'name' => $state,
+                    ]);
+                }),
+            // EditorJs::make('blocks')
+            //     ->editable($this->canEdit)
+            //     ->live()
+            //     ->afterStateUpdated(fn ($state) => $this->record->update([
+            //         'blocks' => $state,
+            //     ])),
+        ])->statePath('data');
     }
 
     #[Computed]

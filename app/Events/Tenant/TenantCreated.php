@@ -2,9 +2,9 @@
 
 namespace App\Events\Tenant;
 
-use Illuminate\Broadcasting\Channel;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,7 +18,11 @@ class TenantCreated
     /**
      * Create a new event instance.
      */
-    public function __construct(public Tenant $tenant, public Collection $participants, public User $user) {}
+    public function __construct(
+        public Tenant $tenant,
+        public Collection $participants,
+        public User $user,
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

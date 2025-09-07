@@ -14,7 +14,14 @@ class Timezone
             // return collect(countries(hydrate: true))->map(fn ($item) => $item->getTimezones())
             //     ->flatten()->mapWithKeys(fn ($item) => [$item => $item])
             //     ->sort()->toArray();
-            return collect(countries(hydrate: true))->flatten()->mapWithKeys(fn ($item) => [$item->getName() => $item->getTimezones()])->map(fn ($value, $key) => $value)->sortKeys()->toArray();
+            return collect(countries(hydrate: true))
+                ->flatten()
+                ->mapWithKeys(fn($item) => [
+                    $item->getName() => $item->getTimezones(),
+                ])
+                ->map(fn($value, $key) => $value)
+                ->sortKeys()
+                ->toArray();
         });
     }
 
@@ -24,7 +31,9 @@ class Timezone
             ->flatten(1)
             ->mapWithKeys(function ($timezone) {
                 return [$timezone => static::displayTimezone($timezone)];
-            })->sortKeys()->toArray();
+            })
+            ->sortKeys()
+            ->toArray();
     }
 
     public static function getTimezonesAsFlatList(): array
@@ -35,15 +44,15 @@ class Timezone
     public static function displayTimezone(string $timezone): string
     {
         $offset = \Illuminate\Support\Carbon::now($timezone)->format('P');
-        
+
         // Get localized timezone name
         $localizedTimezone = static::getLocalizedTimezoneName($timezone);
-        
+
         $label = __('common.labels.timezone_format', [
-            'timezone' => $localizedTimezone, 
-            'offset' => $offset
+            'timezone' => $localizedTimezone,
+            'offset' => $offset,
         ]);
-        
+
         return $label ?: "{$localizedTimezone} (UTC{$offset})";
     }
 
@@ -73,7 +82,7 @@ class Timezone
         ];
 
         $locale = app()->getLocale();
-        
+
         if (isset($timezoneTranslations[$locale][$timezone])) {
             return $timezoneTranslations[$locale][$timezone];
         }

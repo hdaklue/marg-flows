@@ -16,7 +16,10 @@ class VideoServiceProvider extends ServiceProvider
     {
         $this->app->bind('video', fn($app) => new VideoManager($app));
 
-        $this->app->bind(VideoNamingService::class, fn() => new VideoNamingService());
+        $this->app->bind(
+            VideoNamingService::class,
+            fn() => new VideoNamingService(),
+        );
     }
 
     /**

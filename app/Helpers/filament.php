@@ -6,7 +6,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 
-if (! function_exists('filamentUser')) {
+if (!function_exists('filamentUser')) {
     /**
      * Get the currently authenticated user from the Filament panel.
      *
@@ -16,11 +16,13 @@ if (! function_exists('filamentUser')) {
      */
     function filamentUser(): Authenticatable
     {
-        throw_unless(filament()->auth()->user(), new \Exception('Cannot resolve Filament Auth User'));
+        throw_unless(
+            filament()->auth()->user(),
+            new \Exception('Cannot resolve Filament Auth User'),
+        );
 
         return filament()->auth()->user();
     }
-
 }
 
 /**
@@ -30,20 +32,23 @@ if (! function_exists('filamentUser')) {
  *
  * @throws \Exception
  */
-if (! function_exists('filamentTenant')) {
+if (!function_exists('filamentTenant')) {
     /**
      * Get the currently resolved Filament tenant, if any.
      */
     function filamentTenant(): Tenant
     {
-        throw_unless(filament()->getTenant(), new \Exception('Cannot resolve Filament Tenant'));
+        throw_unless(
+            filament()->getTenant(),
+            new \Exception('Cannot resolve Filament Tenant'),
+        );
 
         /** @var Tenant */
         return filament()->getTenant();
     }
 }
 
-if (! function_exists('viteBuiltPath')) {
+if (!function_exists('viteBuiltPath')) {
     /**
      * Get the physical disk path of a built Vite asset from the manifest.
      *
@@ -55,11 +60,17 @@ if (! function_exists('viteBuiltPath')) {
     {
         $manifestFile = public_path('build/manifest.json');
 
-        throw_unless(file_exists($manifestFile), new \Exception('Vite manifest file not found: ' . $manifestFile));
+        throw_unless(
+            file_exists($manifestFile),
+            new \Exception('Vite manifest file not found: ' . $manifestFile),
+        );
 
         $manifest = json_decode(file_get_contents($manifestFile), true);
 
-        throw_unless(isset($manifest[$entry]['file']), new \Exception("Vite entry not found in manifest: {$entry}"));
+        throw_unless(
+            isset($manifest[$entry]['file']),
+            new \Exception("Vite entry not found in manifest: {$entry}"),
+        );
 
         return public_path('build/' . $manifest[$entry]['file']);
     }

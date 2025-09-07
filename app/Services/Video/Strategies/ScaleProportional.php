@@ -11,9 +11,12 @@ use InvalidArgumentException;
 class ScaleProportional implements ScaleStrategyContract
 {
     public function __construct(
-        private readonly float $factor
+        private readonly float $factor,
     ) {
-        throw_if($factor <= 0, new InvalidArgumentException('Scale factor must be positive'));
+        throw_if(
+            $factor <= 0,
+            new InvalidArgumentException('Scale factor must be positive'),
+        );
     }
 
     public function apply(Dimension $current, Dimension $target): Dimension

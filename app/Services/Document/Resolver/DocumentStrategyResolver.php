@@ -28,8 +28,7 @@ final class DocumentStrategyResolver
     /**
      * Register a filtering strategy.
      */
-    public function registerStrategy(DocumentBlockFilterStrategy $strategy): self
-    {
+    public function registerStrategy(DocumentBlockFilterStrategy $strategy): self {
         $this->strategies[$strategy->getName()] = $strategy;
 
         return $this;
@@ -38,8 +37,11 @@ final class DocumentStrategyResolver
     /**
      * Filter blocks using the specified strategy.
      */
-    public function filter(DocumentBlocksDto $blocks, string $strategyName, array $context = []): DocumentBlocksDto
-    {
+    public function filter(
+        DocumentBlocksDto $blocks,
+        string $strategyName,
+        array $context = [],
+    ): DocumentBlocksDto {
         $strategy = $this->getStrategy($strategyName);
 
         return $strategy->filter($blocks, $context);
@@ -56,8 +58,11 @@ final class DocumentStrategyResolver
     /**
      * Check if a block type is allowed for a strategy.
      */
-    public function isBlockTypeAllowed(string $blockType, string $strategyName, array $context = []): bool
-    {
+    public function isBlockTypeAllowed(
+        string $blockType,
+        string $strategyName,
+        array $context = [],
+    ): bool {
         $strategy = $this->getStrategy($strategyName);
 
         return $strategy->isBlockTypeAllowed($blockType, $context);
@@ -78,7 +83,10 @@ final class DocumentStrategyResolver
      */
     private function getStrategy(string $name): DocumentBlockFilterStrategy
     {
-        throw_unless(isset($this->strategies[$name]), new InvalidArgumentException("Unknown filtering strategy: {$name}"));
+        throw_unless(
+            isset($this->strategies[$name]),
+            new InvalidArgumentException("Unknown filtering strategy: {$name}"),
+        );
 
         return $this->strategies[$name];
     }
@@ -88,8 +96,8 @@ final class DocumentStrategyResolver
      */
     private function registerDefaultStrategies(): void
     {
-        $this->registerStrategy(new SimpleFilterStrategy);
-        $this->registerStrategy(new AdvancedFilterStrategy);
-        $this->registerStrategy(new UltimateFilterStrategy);
+        $this->registerStrategy(new SimpleFilterStrategy());
+        $this->registerStrategy(new AdvancedFilterStrategy());
+        $this->registerStrategy(new UltimateFilterStrategy());
     }
 }

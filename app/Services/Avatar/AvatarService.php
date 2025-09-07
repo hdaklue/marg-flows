@@ -29,7 +29,7 @@ final class AvatarService
      */
     public static function generateAvatarUrl(User $user): string
     {
-        if (! empty($user->getAvatarFileName())) {
+        if (!empty($user->getAvatarFileName())) {
             return DirectoryManager::avatars()->getFileUrl($user->getAvatarFileName());
         }
 
@@ -49,14 +49,15 @@ final class AvatarService
             'name' => $name,
             'size' => 64,
             'background' => '000000', // Dynamic color based on user
-            'color' => 'ffffff',              // White text for contrast
+            'color' => 'ffffff', // White text for contrast
             'format' => 'svg',
             'uppercase' => 'true',
             'length' => 2,
         ];
 
-        return (string) Uri::of('https://ui-avatars.com/api/')
-            ->withQuery($params);
+        return (string) Uri::of('https://ui-avatars.com/api/')->withQuery(
+            $params,
+        );
     }
 
     /**
@@ -82,9 +83,9 @@ final class AvatarService
      * @param  User  $user  The user to get avatar path for
      * @return string|null Relative storage path or null if no avatar
      */
-    public static function getAvatarPath(User $user): ?string
+    public static function getAvatarPath(User $user): null|string
     {
-        if (! empty($user->getAvatarFileName())) {
+        if (!empty($user->getAvatarFileName())) {
             return DirectoryManager::avatars()->getRelativePath($user->getAvatarFileName());
         }
 

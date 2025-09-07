@@ -10,12 +10,16 @@ use App\Services\Video\ValueObjects\Dimension;
 class ScaleToFit implements ScaleStrategyContract
 {
     public function __construct(
-        private readonly Dimension $target
+        private readonly Dimension $target,
     ) {}
 
     public function apply(Dimension $current, Dimension $target): Dimension
     {
-        return $current->scaleTo($this->target->getWidth(), $this->target->getHeight(), true);
+        return $current->scaleTo(
+            $this->target->getWidth(),
+            $this->target->getHeight(),
+            true,
+        );
     }
 
     public function getDescription(): string

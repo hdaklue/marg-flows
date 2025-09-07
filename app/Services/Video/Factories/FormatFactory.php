@@ -17,11 +17,15 @@ final class FormatFactory
     public static function create(string $formatClass): VideoFormatContract
     {
         if (!class_exists($formatClass)) {
-            throw new InvalidArgumentException("Format class does not exist: {$formatClass}");
+            throw new InvalidArgumentException(
+                "Format class does not exist: {$formatClass}",
+            );
         }
 
         if (!is_subclass_of($formatClass, VideoFormatContract::class)) {
-            throw new InvalidArgumentException("Format class must implement VideoFormatContract: {$formatClass}");
+            throw new InvalidArgumentException(
+                "Format class must implement VideoFormatContract: {$formatClass}",
+            );
         }
 
         if (!isset(self::$instances[$formatClass])) {

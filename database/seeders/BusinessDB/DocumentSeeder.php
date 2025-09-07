@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Seeders\BusinessDB;
 
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Models\Document;
 use App\Models\Flow;
 use App\Models\User;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Illuminate\Database\Seeder;
 
 final class DocumentSeeder extends Seeder
@@ -18,8 +18,10 @@ final class DocumentSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (! $testUser) {
-            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
+        if (!$testUser) {
+            $this->command->warn(
+                'Test user not found. Please run main DatabaseSeeder first.',
+            );
 
             return;
         }
@@ -27,20 +29,26 @@ final class DocumentSeeder extends Seeder
         // Get flows from tenants where the test user is a participant
         $userTenants = $testUser->getAssignedTenants();
         if ($userTenants->isEmpty()) {
-            $this->command->warn('Test user has no assigned tenants. Please run main DatabaseSeeder first.');
+            $this->command->warn(
+                'Test user has no assigned tenants. Please run main DatabaseSeeder first.',
+            );
             return;
         }
-        
+
         $tenantIds = $userTenants->pluck('id')->toArray();
         $flows = Flow::whereIn('tenant_id', $tenantIds)->limit(10)->get();
 
         if ($flows->isEmpty()) {
-            $this->command->warn('No flows found for test user. Please run main DatabaseSeeder first.');
+            $this->command->warn(
+                'No flows found for test user. Please run main DatabaseSeeder first.',
+            );
 
             return;
         }
 
-        $this->command->info("Found {$flows->count()} flows for page creation...");
+        $this->command->info(
+            "Found {$flows->count()} flows for page creation...",
+        );
 
         // Create 5 pages for each flow
         foreach ($flows as $flow) {
@@ -76,6 +84,8 @@ final class DocumentSeeder extends Seeder
         }
 
         $totalPages = Document::count();
-        $this->command->info("✅ Created {$totalPages} pages in business database");
+        $this->command->info(
+            "✅ Created {$totalPages} pages in business database",
+        );
     }
 }

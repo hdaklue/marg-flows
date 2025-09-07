@@ -19,60 +19,69 @@ final class ResolutionExporter
 {
     public function __construct(
         private readonly string $sourcePath,
-        private readonly string $disk = 'local'
+        private readonly string $disk = 'local',
     ) {}
 
-    public static function start(string $sourcePath, string $disk = 'local'): self
-    {
+    public static function start(
+        string $sourcePath,
+        string $disk = 'local',
+    ): self {
         return new self($sourcePath, $disk);
     }
 
-    public function export(ConversionContract $conversion, string $outputPath): ResolutionData
-    {
+    public function export(
+        ConversionContract $conversion,
+        string $outputPath,
+    ): ResolutionData {
         try {
             // Use FFMpeg directly
             $media = FFMpeg::fromDisk($this->disk)->open($this->sourcePath);
-            
+
             // Apply resolution conversion using the conversion's format and dimension
             $formatString = $conversion->getFormat();
             $dimension = $conversion->getDimension();
             $bitrate = $conversion->getTargetBitrate();
-            
+
             // Apply resize filter using FFMpeg's Dimension class
             $media->addFilter(function ($filters) use ($dimension) {
-                $ffmpegDimension = new \FFMpeg\Coordinate\Dimension($dimension->getWidth(), $dimension->getHeight());
-                
-                return $filters->resize($ffmpegDimension, ResizeFilter::RESIZEMODE_INSET);
+                $ffmpegDimension = new \FFMpeg\Coordinate\Dimension(
+                    $dimension->getWidth(),
+                    $dimension->getHeight(),
+                );
+
+                return $filters->resize(
+                    $ffmpegDimension,
+                    ResizeFilter::RESIZEMODE_INSET,
+                );
             });
-            
+
             // Create the appropriate FFMpeg format object
             $format = match ($formatString) {
-                'mp4', 'mov' => new X264,
-                'webm' => new WebM,
-                'avi' => new WMV,
-                default => new X264,
+                'mp4', 'mov' => new X264(),
+                'webm' => new WebM(),
+                'avi' => new WMV(),
+                default => new X264(),
             };
-            
+
             // Set bitrate if specified
             if ($bitrate && method_exists($format, 'setKiloBitrate')) {
                 $format->setKiloBitrate($bitrate);
             }
-            
+
             // Export with the conversion's format
-            $media->export()
-                ->inFormat($format)
-                ->save($outputPath);
+            $media->export()->inFormat($format)->save($outputPath);
 
             // Get file size using Storage disk path
             $fullStoragePath = Storage::disk($this->disk)->path($outputPath);
-            $fileSize = File::exists($fullStoragePath) ? File::size($fullStoragePath) : 0;
+            $fileSize = File::exists($fullStoragePath)
+                ? File::size($fullStoragePath)
+                : 0;
 
             return ResolutionData::success(
                 get_class($conversion),
                 $outputPath,
                 $fileSize,
             );
-
         } catch (Exception $e) {
             return ResolutionData::failed(
                 get_class($conversion),

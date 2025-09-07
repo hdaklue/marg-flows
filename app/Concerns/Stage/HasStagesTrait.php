@@ -18,8 +18,10 @@ trait HasStagesTrait
     }
 
     #[Scope]
-    protected function byStage(Builder $builder, string|FlowStage $status): Builder
-    {
+    protected function byStage(
+        Builder $builder,
+        string|FlowStage $status,
+    ): Builder {
         $status = $status instanceof FlowStage ? $status->value : $status;
 
         return $builder->whereHas('stages', function ($query) use ($status) {

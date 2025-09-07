@@ -18,8 +18,8 @@ final class SendAssignedToEntityNotification implements ShouldQueue
      */
     public function handle(EntityRoleAssigned $event): void
     {
-        $roleLabel = is_string($event->role) 
-            ? $event->role 
+        $roleLabel = is_string($event->role)
+            ? $event->role
             : $event->role->getLabel();
 
         $event->user->notify(new AssignedToEntity($event->entity, $roleLabel));

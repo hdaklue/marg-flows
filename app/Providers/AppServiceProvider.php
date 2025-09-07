@@ -39,22 +39,35 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TimeProgressService::class);
         // $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
-        $this->app->singleton('document.manager', fn (): DocumentService => new DocumentService);
-        $this->app->singleton('mention.service', fn (): MentionService => new MentionService);
-        $this->app->singleton(DeliverableBuilder::class, fn (): DeliverablesManager => new DeliverablesManager($this->app));
-        $this->app->singleton(UploadSessionManager::class, fn ($app) => new UploadSessionManager($app));
+        $this->app->singleton(
+            'document.manager',
+            fn(): DocumentService => new DocumentService(),
+        );
+        $this->app->singleton(
+            'mention.service',
+            fn(): MentionService => new MentionService(),
+        );
+        $this->app->singleton(
+            DeliverableBuilder::class,
+            fn(): DeliverablesManager => new DeliverablesManager($this->app),
+        );
+        $this->app->singleton(
+            UploadSessionManager::class,
+            fn($app) => new UploadSessionManager($app),
+        );
 
         $this->configureGate();
         $this->configureModel();
         // $this->configureVite();
 
-        if ($this->app->environment('local') && class_exists(TelescopeServiceProvider::class)) {
+        if (
+            $this->app->environment('local')
+            && class_exists(TelescopeServiceProvider::class)
+        ) {
             $this->app->register(TelescopeServiceProvider::class);
-
         }
 
         Action::configureUsing(function (Action $action): void {
-
             $action->size(Size::ExtraSmall);
         });
     }
@@ -77,27 +90,67 @@ final class AppServiceProvider extends ServiceProvider
 
         Event::subscribe(TenantEventSubscriber::class);
         FilamentAsset::register([
-            AlpineComponent::make('editorJs', __DIR__ . '/../../resources/js/dist/components/editorjs.js'),
-            AlpineComponent::make('chunkedFileUploadComponent', __DIR__ . '/../../resources/js/dist/components/chunked-file-upload.js'),
-            AlpineComponent::make('documentEditor', __DIR__ . '/../../resources/js/dist/components/document.js'),
-            AlpineComponent::make('mentionableText', __DIR__ . '/../../resources/js/dist/components/mentionable.js'),
-            AlpineComponent::make('voiceRecorder', __DIR__ . '/../../resources/js/dist/components/voice-recorder.js'),
-            AlpineComponent::make('videoRecorder', __DIR__ . '/../../resources/js/dist/components/video-recorder.js'),
-            AlpineComponent::make('audioPlayer', __DIR__ . '/../../resources/js/dist/components/audio-player.js'),
-            AlpineComponent::make('designAnnotation', __DIR__ . '/../../resources/js/dist/components/design-annotation.js'),
-            Css::make('chunkedFileUploadCss', __DIR__ . '/../../resources/css/components/chunked-file-upload.css')
-                ->loadedOnRequest(),
-            Css::make('mentionableTextCss', __DIR__ . '/../../resources/css/components/mentionable-text.css')
-                ->loadedOnRequest(),
-            Css::make('voiceRecorderCss', __DIR__ . '/../../resources/css/components/voice-recorder.css')
-                ->loadedOnRequest(),
-            Css::make('videoRecorderCss', __DIR__ . '/../../resources/css/components/video-recorder.css')
-                ->loadedOnRequest(),
-
-            Js::make('alpinesortable', __DIR__ . '/../../resources/js/dist/components/alpine-sortable.js'),
+            AlpineComponent::make(
+                'editorJs',
+                __DIR__ . '/../../resources/js/dist/components/editorjs.js',
+            ),
+            AlpineComponent::make(
+                'chunkedFileUploadComponent',
+                __DIR__
+                . '/../../resources/js/dist/components/chunked-file-upload.js',
+            ),
+            AlpineComponent::make(
+                'documentEditor',
+                __DIR__ . '/../../resources/js/dist/components/document.js',
+            ),
+            AlpineComponent::make(
+                'mentionableText',
+                __DIR__ . '/../../resources/js/dist/components/mentionable.js',
+            ),
+            AlpineComponent::make(
+                'voiceRecorder',
+                __DIR__
+                . '/../../resources/js/dist/components/voice-recorder.js',
+            ),
+            AlpineComponent::make(
+                'videoRecorder',
+                __DIR__
+                . '/../../resources/js/dist/components/video-recorder.js',
+            ),
+            AlpineComponent::make(
+                'audioPlayer',
+                __DIR__ . '/../../resources/js/dist/components/audio-player.js',
+            ),
+            AlpineComponent::make(
+                'designAnnotation',
+                __DIR__
+                . '/../../resources/js/dist/components/design-annotation.js',
+            ),
+            Css::make(
+                'chunkedFileUploadCss',
+                __DIR__
+                . '/../../resources/css/components/chunked-file-upload.css',
+            )->loadedOnRequest(),
+            Css::make(
+                'mentionableTextCss',
+                __DIR__
+                . '/../../resources/css/components/mentionable-text.css',
+            )->loadedOnRequest(),
+            Css::make(
+                'voiceRecorderCss',
+                __DIR__ . '/../../resources/css/components/voice-recorder.css',
+            )->loadedOnRequest(),
+            Css::make(
+                'videoRecorderCss',
+                __DIR__ . '/../../resources/css/components/video-recorder.css',
+            )->loadedOnRequest(),
+            Js::make(
+                'alpinesortable',
+                __DIR__
+                . '/../../resources/js/dist/components/alpine-sortable.js',
+            ),
             // Js::make('editorJs', __DIR__ . '/../../resources/js/components/editorjs/index.js'),
         ]);
-
     }
 
     protected function configureVite()
@@ -120,8 +173,8 @@ final class AppServiceProvider extends ServiceProvider
 
     protected function configureGate()
     {
-        Gate::defaultDenialResponse(
-            Response::denyAsNotFound(),
-        );
+        if (app()->isProduction()) {
+            Gate::defaultDenialResponse(Response::denyAsNotFound());
+        }
     }
 }

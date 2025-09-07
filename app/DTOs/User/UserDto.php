@@ -22,9 +22,7 @@ final class UserDto extends BaseDto
 
     protected function defaults(): array
     {
-        return [
-
-        ];
+        return [];
     }
 
     protected function rules(): array

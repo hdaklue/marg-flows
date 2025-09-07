@@ -9,7 +9,8 @@ use App\Support\FileSize;
 use App\Support\FileTypes;
 use WendellAdriel\ValidatedDTO\SimpleDTO;
 
-final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContract
+final class VideoUploadConfigData extends SimpleDTO implements
+    BlockConfigContract
 {
     public string $class;
 

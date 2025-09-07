@@ -42,9 +42,14 @@ final class PortalPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset()
             ->registration(Register::class)
-            ->databaseNotificationsPolling(fn () => app()->isProduction() ? '60s' : '90s')
+            ->databaseNotificationsPolling(fn() => app()->isProduction()
+                ? '60s'
+                : '90s')
             ->tenant(Tenant::class)
-            ->homeUrl(fn () => filament()->getTenant() ? route('filament.portal.pages.dashboard', ['tenant' => filament()->getTenant()]) : '/')
+            ->homeUrl(fn() => filament()->getTenant()
+                ? route('filament.portal.pages.dashboard', ['tenant' =>
+                    filament()->getTenant()])
+                : '/')
             ->colors([
                 'primary' => Color::Sky,
             ])
@@ -58,10 +63,9 @@ final class PortalPanelProvider extends PanelProvider
                 // Custom language switching will be added via render hooks
             ])
             ->maxContentWidth(Width::ScreenTwoExtraLarge)
-            ->renderHook(
-                PanelsRenderHook::TOPBAR_END,
-                fn (): string => Blade::render('<x-language-switch />'),
-            )
+            ->renderHook(PanelsRenderHook::TOPBAR_END, fn(): string => Blade::render(
+                '<x-language-switch />',
+            ))
             // ->renderHook(
             //     PanelsRenderHook::SIMPLE_LAYOUT_START,
             //     fn (): string => '<div class="w-full min-h-screen lg:grid lg:grid-cols-2"><div class="flex flex-col justify-center flex-1 px-4 py-12 sm:px-6 lg:px-8"><div class="w-full max-w-sm mx-auto">',
@@ -69,21 +73,30 @@ final class PortalPanelProvider extends PanelProvider
             // )
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,
-                fn (): string => Blade::render('<x-language-switch />'),
+                fn(): string => Blade::render('<x-language-switch />'),
                 scopes: [Login::class, Register::class],
             )
             ->userMenuItems([
                 Action::make('settings')
-                    ->label(fn (): string => __('auth.profile.title'))
-                    ->url(fn (): string => UserSettings::getUrl())
+                    ->label(fn(): string => __('auth.profile.title'))
+                    ->url(fn(): string => UserSettings::getUrl())
                     ->icon('heroicon-o-user-circle'),
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverResources(
+                in: app_path('Filament/Resources'),
+                for: 'App\\Filament\\Resources',
+            )
+            ->discoverPages(
+                in: app_path('Filament/Pages'),
+                for: 'App\\Filament\\Pages',
+            )
             ->pages([
                 // Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(
+                in: app_path('Filament/Widgets'),
+                for: 'App\\Filament\\Widgets',
+            )
             ->widgets([
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,

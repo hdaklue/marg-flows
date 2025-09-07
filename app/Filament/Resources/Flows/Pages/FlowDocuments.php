@@ -41,10 +41,8 @@ final class FlowDocuments extends Page implements HasForms
 
     public function mount(string $record)
     {
-
         $this->flow = Flow::where('id', $record)->first();
         $this->authorize('view', $this->flow);
-
     }
 
     public function getHeaderActions(): array
@@ -71,7 +69,10 @@ final class FlowDocuments extends Page implements HasForms
 
     public function pages(): Collection
     {
-        return DocumentManager::getDocumentsForUser($this->flow, filamentUser());
+        return DocumentManager::getDocumentsForUser(
+            $this->flow,
+            filamentUser(),
+        );
     }
 
     public function getTitle(): string|Htmlable // @phpstan-ignore-line

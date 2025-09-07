@@ -22,8 +22,10 @@ final class EditorJsVideoUpload extends Controller
     /**
      * Handle chunked video upload using UploadManager and DirectoryManager.
      */
-    protected function handleChunkedUpload(DocumentVideoUploadRequest $request, string $document): JsonResponse
-    {
+    protected function handleChunkedUpload(
+        DocumentVideoUploadRequest $request,
+        string $document,
+    ): JsonResponse {
         // Get tenant and session info
         $tenantId = auth()->user()->getActiveTenantId();
         $sessionId = $request->getFileKey();
@@ -33,11 +35,15 @@ final class EditorJsVideoUpload extends Controller
 
         try {
             // Configure session manager for this tenant and document-specific storage
-            $sessionManager = UploadSessionManager::start('http', $tenantId)
-                ->storeIn(DirectoryManager::document($tenantId)
+            $sessionManager = UploadSessionManager::start(
+                'http',
+                $tenantId,
+            )->storeIn(
+                DirectoryManager::document($tenantId)
                     ->forDocument($document)
                     ->videos()
-                    ->getDirectory());
+                    ->getDirectory(),
+            );
 
             // Store the chunk
             $sessionManager->storeChunk($sessionId, $file, $chunkIndex);
@@ -51,7 +57,11 @@ final class EditorJsVideoUpload extends Controller
             // Check if all chunks are uploaded
             if ($sessionManager->isComplete($sessionId, $totalChunks)) {
                 // Assemble all chunks into final file
-                $finalPath = $sessionManager->assembleFile($sessionId, $request->getFileName(), $totalChunks);
+                $finalPath = $sessionManager->assembleFile(
+                    $sessionId,
+                    $request->getFileName(),
+                    $totalChunks,
+                );
 
                 // Clean up chunk files
                 $sessionManager->cleanupSession($sessionId);
@@ -68,7 +78,6 @@ final class EditorJsVideoUpload extends Controller
                 'totalChunks' => $totalChunks,
                 'message' => 'Chunk uploaded successfully',
             ]);
-
         } catch (Exception $e) {
             Log::error('Chunked upload failed', [
                 'sessionId' => $sessionId,
@@ -84,8 +93,10 @@ final class EditorJsVideoUpload extends Controller
     /**
      * Handle direct video upload (for small files) using UploadManager and DirectoryManager.
      */
-    protected function handleDirectUpload(DocumentVideoUploadRequest $request, string $document): JsonResponse
-    {
+    protected function handleDirectUpload(
+        DocumentVideoUploadRequest $request,
+        string $document,
+    ): JsonResponse {
         // Get tenant and directory configuration for direct upload
         $tenantId = auth()->user()->getActiveTenantId();
         $directory = DirectoryManager::document($tenantId)
@@ -107,7 +118,6 @@ final class EditorJsVideoUpload extends Controller
 
             // Process the uploaded video file
             return $this->processVideoFile($path, $request->getFileKey());
-
         } catch (Exception $e) {
             Log::error('Direct upload failed', [
                 'fileKey' => $request->getFileKey(),
@@ -122,8 +132,10 @@ final class EditorJsVideoUpload extends Controller
     /**
      * Process uploaded video file (extract metadata, generate thumbnail, etc.).
      */
-    protected function processVideoFile(string $videoPath, string $fileKey): JsonResponse
-    {
+    protected function processVideoFile(
+        string $videoPath,
+        string $fileKey,
+    ): JsonResponse {
         try {
             $extension = pathinfo($videoPath, PATHINFO_EXTENSION);
 
@@ -148,9 +160,15 @@ final class EditorJsVideoUpload extends Controller
             if (config('video-upload.processing.generate_thumbnails', true)) {
                 $duration = $videoData['duration'] ?? null;
                 if ($duration && $duration > 0) {
-                    $thumbnailPath = $this->generateVideoThumbnail($videoPath, $duration);
+                    $thumbnailPath = $this->generateVideoThumbnail(
+                        $videoPath,
+                        $duration,
+                    );
                     if ($thumbnailPath) {
-                        $thumbnailUrl = Storage::disk(config('video-upload.storage.disk', 'public'))->url($thumbnailPath);
+                        $thumbnailUrl = Storage::disk(config(
+                            'video-upload.storage.disk',
+                            'public',
+                        ))->url($thumbnailPath);
                     }
                 }
             }
@@ -159,9 +177,15 @@ final class EditorJsVideoUpload extends Controller
                 'success' => true,
                 'completed' => true,
                 'fileKey' => $fileKey,
-                'url' => Storage::disk(config('video-upload.storage.disk', 'public'))->url($videoPath),
+                'url' => Storage::disk(config(
+                    'video-upload.storage.disk',
+                    'public',
+                ))->url($videoPath),
                 'file' => [
-                    'url' => Storage::disk(config('video-upload.storage.disk', 'public'))->url($videoPath),
+                    'url' => Storage::disk(config(
+                        'video-upload.storage.disk',
+                        'public',
+                    ))->url($videoPath),
                 ],
                 'width' => $videoData['width'] ?? null,
                 'height' => $videoData['height'] ?? null,
@@ -169,7 +193,10 @@ final class EditorJsVideoUpload extends Controller
                 'size' => $videoData['size'] ?? null,
                 'format' => strtolower($extension),
                 'original_format' => $extension,
-                'aspect_ratio' => $videoData['aspect_ratio'] ?? config('video-upload.processing.default_aspect_ratio', '16:9'),
+                'aspect_ratio' => $videoData['aspect_ratio'] ?? config(
+                    'video-upload.processing.default_aspect_ratio',
+                    '16:9',
+                ),
                 'aspect_ratio_data' => $videoData['aspect_ratio_data'] ?? null,
                 'conversion' => [
                     'performed' => $conversionResult['conversion_performed'],
@@ -186,7 +213,6 @@ final class EditorJsVideoUpload extends Controller
             }
 
             return response()->json($response);
-
         } catch (Exception $e) {
             Log::error('Failed to process video file', [
                 'path' => $videoPath,
@@ -241,7 +267,6 @@ final class EditorJsVideoUpload extends Controller
                 'aspect_ratio' => $aspectRatioString,
                 'aspect_ratio_data' => $aspectRatio,
             ];
-
         } catch (Exception $e) {
             Log::warning('Failed to extract video metadata', [
                 'path' => $path,
@@ -263,8 +288,10 @@ final class EditorJsVideoUpload extends Controller
     /**
      * Convert video to MP4 format for better browser compatibility.
      */
-    private function convertVideoToMp4(string $originalPath, string $originalExtension): array
-    {
+    private function convertVideoToMp4(
+        string $originalPath,
+        string $originalExtension,
+    ): array {
         try {
             // If already MP4, no conversion needed
             if (strtolower($originalExtension) === 'mp4') {
@@ -292,7 +319,8 @@ final class EditorJsVideoUpload extends Controller
             $media = FFMpeg::fromDisk('public')->open($originalPath);
 
             // Export to MP4 with H.264 codec for better compatibility
-            $media->export()
+            $media
+                ->export()
                 ->toDisk('public')
                 ->inFormat(new X264('libmp3lame'))
                 ->save($mp4Path);
@@ -309,7 +337,6 @@ final class EditorJsVideoUpload extends Controller
                 'conversion_performed' => true,
                 'message' => 'Video successfully converted to MP4',
             ];
-
         } catch (Exception $e) {
             Log::error('Failed to convert video to MP4', [
                 'original_path' => $originalPath,
@@ -332,11 +359,16 @@ final class EditorJsVideoUpload extends Controller
     /**
      * Clean up original file after successful conversion.
      */
-    private function cleanupOriginalFile(string $originalPath, string $convertedPath): void
-    {
+    private function cleanupOriginalFile(
+        string $originalPath,
+        string $convertedPath,
+    ): void {
         try {
             // Only delete if paths are different (conversion actually happened)
-            if ($originalPath !== $convertedPath && Storage::disk('public')->exists($originalPath)) {
+            if (
+                $originalPath !== $convertedPath
+                && Storage::disk('public')->exists($originalPath)
+            ) {
                 Storage::disk('public')->delete($originalPath);
 
                 Log::info('Original video file cleaned up after conversion', [
@@ -355,11 +387,13 @@ final class EditorJsVideoUpload extends Controller
     /**
      * Generate video thumbnail using Laravel FFmpeg.
      */
-    private function generateVideoThumbnail(string $videoPath, float $duration): ?string
-    {
+    private function generateVideoThumbnail(
+        string $videoPath,
+        float $duration,
+    ): null|string {
         try {
             // Calculate thumbnail extraction time (1 second or 10% of duration if video is shorter than 10 seconds)
-            $extractionTime = $duration < 10 ? ($duration * 0.1) : 1.0;
+            $extractionTime = $duration < 10 ? $duration * 0.1 : 1.0;
 
             // Generate thumbnail filename based on video filename
             $videoFilename = pathinfo($videoPath, PATHINFO_FILENAME);
@@ -368,7 +402,7 @@ final class EditorJsVideoUpload extends Controller
 
             // Ensure the thumbnail directory exists
             $thumbnailDir = 'documents/video-thumbnails';
-            if (! Storage::disk('public')->exists($thumbnailDir)) {
+            if (!Storage::disk('public')->exists($thumbnailDir)) {
                 Storage::disk('public')->makeDirectory($thumbnailDir);
             }
 
@@ -376,9 +410,7 @@ final class EditorJsVideoUpload extends Controller
             $media = FFMpeg::fromDisk('public')->open($videoPath);
 
             $frame = $media->getFrameFromSeconds($extractionTime);
-            $frame->export()
-                ->toDisk('public')
-                ->save($thumbnailPath);
+            $frame->export()->toDisk('public')->save($thumbnailPath);
 
             Log::info('Video thumbnail generated successfully', [
                 'video_path' => $videoPath,
@@ -387,7 +419,6 @@ final class EditorJsVideoUpload extends Controller
             ]);
 
             return $thumbnailPath;
-
         } catch (Exception $e) {
             Log::warning('Failed to generate video thumbnail', [
                 'video_path' => $videoPath,
@@ -405,23 +436,38 @@ final class EditorJsVideoUpload extends Controller
     private function validateVideoFile($file): void
     {
         $maxSize = config('video-upload.validation.max_file_size', 512000); // 500MB in KB
-        $allowedMimes = config('video-upload.validation.allowed_mimes', ['mp4', 'webm', 'mov']);
-        $allowedMimeTypes = config('video-upload.validation.allowed_mimetypes', ['video/mp4']);
-
-        $validator = Validator::make(['video' => $file], [
-            'video' => [
-                'required',
-                'file',
-                'mimes:' . implode(',', $allowedMimes),
-                'mimetypes:' . implode(',', $allowedMimeTypes),
-                'max:' . $maxSize,
-            ],
-        ], [
-            'video.required' => 'No file selected. Please choose a video to upload.',
-            'video.mimes' => 'Invalid file format. Supported formats: ' . strtoupper(implode(', ', $allowedMimes)),
-            'video.mimetypes' => 'File must be a valid video format.',
-            'video.max' => 'File is too large. Maximum size allowed is ' . round($maxSize / 1024) . 'MB.',
+        $allowedMimes = config('video-upload.validation.allowed_mimes', [
+            'mp4',
+            'webm',
+            'mov',
         ]);
+        $allowedMimeTypes = config('video-upload.validation.allowed_mimetypes', [
+            'video/mp4',
+        ]);
+
+        $validator = Validator::make(
+            ['video' => $file],
+            [
+                'video' => [
+                    'required',
+                    'file',
+                    'mimes:' . implode(',', $allowedMimes),
+                    'mimetypes:' . implode(',', $allowedMimeTypes),
+                    'max:' . $maxSize,
+                ],
+            ],
+            [
+                'video.required' => 'No file selected. Please choose a video to upload.',
+                'video.mimes' =>
+                    'Invalid file format. Supported formats: '
+                    . strtoupper(implode(', ', $allowedMimes)),
+                'video.mimetypes' => 'File must be a valid video format.',
+                'video.max' =>
+                    'File is too large. Maximum size allowed is '
+                    . round($maxSize / 1024)
+                    . 'MB.',
+            ],
+        );
 
         throw_if($validator->fails(), new ValidationException($validator));
     }
@@ -437,7 +483,9 @@ final class EditorJsVideoUpload extends Controller
 
         $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         $allowedExtensions = config('video-upload.validation.allowed_mimes', [
-            'mp4', 'webm', 'ogg',
+            'mp4',
+            'webm',
+            'ogg',
         ]);
 
         return in_array($extension, $allowedExtensions);
@@ -447,15 +495,16 @@ final class EditorJsVideoUpload extends Controller
      * Handle the incoming video upload requests from Editor.js.
      * Supports both chunked and direct uploads using new architecture.
      */
-    public function __invoke(DocumentVideoUploadRequest $request, string $document): JsonResponse
-    {
+    public function __invoke(
+        DocumentVideoUploadRequest $request,
+        string $document,
+    ): JsonResponse {
         try {
             if ($request->isChunkedUpload()) {
                 return $this->handleChunkedUpload($request, $document);
             }
 
             return $this->handleDirectUpload($request, $document);
-
         } catch (Exception $e) {
             Log::error('Failed to upload video', [
                 'error' => $e->getMessage(),

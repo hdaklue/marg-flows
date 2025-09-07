@@ -14,7 +14,6 @@ final class CreateInvitation
 
     public function handle(User $sender, User $receiver, array $role_data)
     {
-
         $invitation = new MemberInvitation([
             'role_data' => $role_data,
         ]);

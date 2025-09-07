@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 interface HasSystemRoleContract
 {
-    public function systemRoleByName(string $name): ?Role;
+    public function systemRoleByName(string $name): null|Role;
 
     public function getSystemRoles(): Collection;
 }

@@ -6,25 +6,21 @@ namespace App\Actions\Invitation;
 
 use App\Actions\User\GenerateUserAvatar;
 use App\DTOs\Invitation\InvitationDTO;
-use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\Tenant;
 use App\Models\TenantUser;
 use App\Models\User;
 use App\Notifications\Invitation\InvitationRecieved;
-
-use function bcrypt;
-use function config;
-
 use Exception;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
-
-use function Illuminate\Support\defer;
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
 
+use function bcrypt;
+use function config;
+use function Illuminate\Support\defer;
 use function request;
 
 final class InviteMember
@@ -41,7 +37,6 @@ final class InviteMember
 
     public function handle(InvitationDTO $dto)
     {
-
         $this->generatePassword();
         try {
             DB::transaction(function () use ($dto) {
@@ -49,14 +44,17 @@ final class InviteMember
                 // $this->attachMemberToTenant($dto);
                 $this->assingMemberRoles($dto);
             });
-
         } catch (Exception $e) {
             throw $e;
         }
 
         $this->notifyMember();
 
-        CreateInvitation::run(request()->user(), $this->member, $dto->role_data->toArray());
+        CreateInvitation::run(
+            request()->user(),
+            $this->member,
+            $dto->role_data->toArray(),
+        );
     }
 
     private function notifyMember()
@@ -66,7 +64,6 @@ final class InviteMember
 
     private function persistMember(InvitationDTO $dto)
     {
-
         $this->member = User::create([
             'name' => $dto->name,
             'email' => $dto->email,
@@ -74,7 +71,7 @@ final class InviteMember
             'timezone' => $dto->timezone,
         ]);
 
-        defer(fn () => GenerateUserAvatar::run($this->member));
+        defer(fn() => GenerateUserAvatar::run($this->member));
     }
 
     private function generatePassword(): string
@@ -89,8 +86,9 @@ final class InviteMember
         $tanentIds = $dto->role_data->pluck('id')->toArray();
         $tenants = Tenant::whereIn('id', $tanentIds)->get();
 
-        DB::table(config('role.table_names.model_has_roles'))
-            ->insert($this->prepareInsertAttr($dto->role_data, $this->member));
+        DB::table(config(
+            'role.table_names.model_has_roles',
+        ))->insert($this->prepareInsertAttr($dto->role_data, $this->member));
         RoleManager::bulkClearCache($tenants);
     }
 
@@ -106,9 +104,10 @@ final class InviteMember
     //     TenantUser::insert($data);
     // }
 
-    private function prepareInsertAttr(Collection $roles, User $invitedMember): array
-    {
-
+    private function prepareInsertAttr(
+        Collection $roles,
+        User $invitedMember,
+    ): array {
         return $roles->map(function ($role) use ($invitedMember) {
             return [
                 'roleable_id' => $role['tenant_id'],

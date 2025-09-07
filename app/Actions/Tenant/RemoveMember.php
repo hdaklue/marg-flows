@@ -8,9 +8,6 @@ use App\Events\Tenant\MemberRemoved;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
-
-use function config;
-
 use Exception;
 use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
 use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
@@ -20,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
+use function config;
+
 final class RemoveMember
 {
     use AsAction;
@@ -28,13 +27,11 @@ final class RemoveMember
     {
         try {
             DB::transaction(function () use ($tenant, $user) {
-
                 $tenant->removeParticipant($user, silently: true);
                 if ($tenant->getKey() === $user->getActiveTenantId()) {
                     $user->clearActiveTenant();
                 }
                 $this->revokeAssigmentsOnTanatFlow($user, $tenant);
-
             });
         } catch (Exception $exception) {
             Log::critical('Tenant removal failed', [
@@ -50,8 +47,10 @@ final class RemoveMember
         MemberRemoved::dispatch($tenant, $user, $by);
     }
 
-    public function revokeAssigmentsOnTanatFlow(AssignableEntity $entity, RoleableEntity $target)
-    {
+    public function revokeAssigmentsOnTanatFlow(
+        AssignableEntity $entity,
+        RoleableEntity $target,
+    ) {
         $flows = $target->loadMissing('flows')->flows;
 
         if ($flows->isEmpty()) {

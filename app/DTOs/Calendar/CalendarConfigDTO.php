@@ -11,7 +11,7 @@ use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 /**
  * Configuration DTO for Calendar Component
- * 
+ *
  * @property string $titleField The field name to use for event titles
  * @property string $dateField The field name to use for event dates
  * @property string|null $endDateField Optional field name for event end dates
@@ -29,15 +29,15 @@ final class CalendarConfigDTO extends ValidatedDTO
 {
     public string $titleField;
     public string $dateField;
-    public ?string $endDateField;
-    public ?string $colorField;
+    public null|string $endDateField;
+    public null|string $colorField;
     public string $defaultView;
     public array $availableViews;
     public bool $showWeekends;
     public bool $showNavigation;
     public bool $showToday;
     public bool $enableEventClick;
-    public ?string $timezone;
+    public null|string $timezone;
     public array $restrictions;
 
     protected function rules(): array
@@ -82,18 +82,18 @@ final class CalendarConfigDTO extends ValidatedDTO
     protected function casts(): array
     {
         return [
-            'titleField' => new StringCast,
-            'dateField' => new StringCast,
-            'endDateField' => new StringCast,
-            'colorField' => new StringCast,
-            'defaultView' => new StringCast,
-            'availableViews' => new ArrayCast,
-            'showWeekends' => new BooleanCast,
-            'showNavigation' => new BooleanCast,
-            'showToday' => new BooleanCast,
-            'enableEventClick' => new BooleanCast,
-            'timezone' => new StringCast,
-            'restrictions' => new ArrayCast,
+            'titleField' => new StringCast(),
+            'dateField' => new StringCast(),
+            'endDateField' => new StringCast(),
+            'colorField' => new StringCast(),
+            'defaultView' => new StringCast(),
+            'availableViews' => new ArrayCast(),
+            'showWeekends' => new BooleanCast(),
+            'showNavigation' => new BooleanCast(),
+            'showToday' => new BooleanCast(),
+            'enableEventClick' => new BooleanCast(),
+            'timezone' => new StringCast(),
+            'restrictions' => new ArrayCast(),
         ];
     }
 }

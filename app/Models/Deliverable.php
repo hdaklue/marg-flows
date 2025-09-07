@@ -7,10 +7,8 @@ namespace App\Models;
 use App\Casts\DeliverableSpecificationCast;
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Concerns\HasSideNotes;
-use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
 use App\Concerns\Stage\HasStagesTrait;
 use App\Concerns\Tenant\BelongsToTenant;
-use Hdaklue\Porter\Contracts\RoleableEntity;
 use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
@@ -19,6 +17,8 @@ use App\Enums\AssigneeRole;
 use App\Enums\Deliverable\DeliverableFormat;
 use App\Enums\Deliverable\DeliverableStatus;
 use App\ValueObjects\Deliverable\DeliverableSpecification;
+use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
+use Hdaklue\Porter\Contracts\RoleableEntity;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -63,17 +63,15 @@ use Illuminate\Support\Collection;
  *
  * @method static \Database\Factories\DeliverableFactory factory($count = null, $state = [])
  */
-final class Deliverable extends Model implements BelongsToTenantContract, HasStages, RoleableEntity, ScopedToTenant, Sidenoteable
+final class Deliverable extends Model implements
+    BelongsToTenantContract,
+    HasStages,
+    RoleableEntity,
+    ScopedToTenant,
+    Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DeliverableFactory> */
-    use BelongsToTenant,
-        HasFactory,
-        HasSideNotes,
-        HasStagesTrait,
-        HasUlids,
-        LivesInBusinessDB,
-        ReceivesRoleAssignments,
-        SoftDeletes;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInBusinessDB, ReceivesRoleAssignments, SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -121,14 +119,16 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
 
     public function currentVersion(): HasOne
     {
-        return $this->hasOne(DeliverableVersion::class)
-            ->latest('version_number');
+        return $this->hasOne(DeliverableVersion::class)->latest(
+            'version_number',
+        );
     }
 
     public function latestVersion(): HasOne
     {
-        return $this->hasOne(DeliverableVersion::class)
-            ->orderByDesc('version_number');
+        return $this->hasOne(DeliverableVersion::class)->orderByDesc(
+            'version_number',
+        );
     }
 
     // Status Management
@@ -169,7 +169,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
 
     public function transitionTo(DeliverableStatus $newStatus): bool
     {
-        if (! $this->canTransitionTo($newStatus)) {
+        if (!$this->canTransitionTo($newStatus)) {
             return false;
         }
 
@@ -183,7 +183,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     }
 
     // Format & Specifications
-    public function getFormatSpecifications(): ?DeliverableSpecification
+    public function getFormatSpecifications(): null|DeliverableSpecification
     {
         return $this->format_specifications;
     }
@@ -203,16 +203,20 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
 
     public function getSpecification(string $key, mixed $default = null): mixed
     {
-        if (! $this->format_specifications) {
+        if (!$this->format_specifications) {
             return $default;
         }
 
-        return data_get($this->format_specifications->toArray(), $key, $default);
+        return data_get(
+            $this->format_specifications->toArray(),
+            $key,
+            $default,
+        );
     }
 
     public function validateFile(array $fileData): bool
     {
-        if (! $this->format_specifications) {
+        if (!$this->format_specifications) {
             return true; // No specifications to validate against
         }
 
@@ -226,7 +230,9 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
 
     public function getSpecificationName(): string
     {
-        return $this->format_specifications?->getName() ?? 'Unknown Specification';
+        return (
+            $this->format_specifications?->getName() ?? 'Unknown Specification'
+        );
     }
 
     public function getSpecificationDescription(): string
@@ -242,23 +248,28 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     // Progress & Status Helpers
     public function isOverdue(): bool
     {
-        return $this->success_date &&
-               $this->success_date->isPast() &&
-               ! $this->status->isComplete();
+        return (
+            $this->success_date
+            && $this->success_date->isPast()
+            && !$this->status->isComplete()
+        );
     }
 
     public function isDue(): bool
     {
-        if (! $this->success_date) {
+        if (!$this->success_date) {
             return false;
         }
 
-        return $this->success_date->isToday() || $this->success_date->isTomorrow();
+        return (
+            $this->success_date->isToday()
+            || $this->success_date->isTomorrow()
+        );
     }
 
-    public function getDaysUntilDue(): ?int
+    public function getDaysUntilDue(): null|int
     {
-        if (! $this->success_date) {
+        if (!$this->success_date) {
             return null;
         }
 
@@ -327,8 +338,10 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
         return $this->getParticipantsByRole(AssigneeRole::OBSERVER);
     }
 
-    public function assignTo(string|User $user, AssigneeRole $role = AssigneeRole::ASSIGNEE): void
-    {
+    public function assignTo(
+        string|User $user,
+        AssigneeRole $role = AssigneeRole::ASSIGNEE,
+    ): void {
         $userId = $user instanceof User ? $user->id : $user;
         $this->assignParticipant($userId, $role);
     }
@@ -344,9 +357,14 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     {
         $userId = $user instanceof User ? $user->id : $user;
 
-        return $this->isAssignedTo($userId) ||
-               $this->creator_id === $userId ||
-               $this->flow->hasParticipantWithRole($userId, AssigneeRole::ASSIGNEE);
+        return (
+            $this->isAssignedTo($userId)
+            || $this->creator_id === $userId
+            || $this->flow->hasParticipantWithRole(
+                $userId,
+                AssigneeRole::ASSIGNEE,
+            )
+        );
     }
 
     // RoleableEntity Implementation
@@ -411,15 +429,20 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     #[Scope]
     protected function overdue($query)
     {
-        return $query->where('success_date', '<', now())
-            ->whereNotIn('status', [DeliverableStatus::COMPLETED]);
+        return $query->where(
+            'success_date',
+            '<',
+            now(),
+        )->whereNotIn('status', [DeliverableStatus::COMPLETED]);
     }
 
     #[Scope]
     protected function dueToday($query)
     {
-        return $query->whereDate('success_date', today())
-            ->whereNotIn('status', [DeliverableStatus::COMPLETED]);
+        return $query->whereDate(
+            'success_date',
+            today(),
+        )->whereNotIn('status', [DeliverableStatus::COMPLETED]);
     }
 
     #[Scope]

@@ -14,15 +14,15 @@ abstract class AbstractResolution implements ConversionContract
 
     protected string $quality = 'medium';
 
-    protected ?Dimension $dimension = null;
+    protected null|Dimension $dimension = null;
 
-    protected ?int $bitrate = null;
+    protected null|int $bitrate = null;
 
     protected bool $allowScaleUp = false;
 
-    protected ?Dimension $maxDimension = null;
+    protected null|Dimension $maxDimension = null;
 
-    protected ?Dimension $minDimension = null;
+    protected null|Dimension $minDimension = null;
 
     protected bool $maintainAspectRatio = true;
 
@@ -40,12 +40,12 @@ abstract class AbstractResolution implements ConversionContract
         return $this->quality;
     }
 
-    public function getDimension(): ?Dimension
+    public function getDimension(): null|Dimension
     {
         return $this->dimension;
     }
 
-    public function getTargetBitrate(): ?int
+    public function getTargetBitrate(): null|int
     {
         return $this->bitrate;
     }
@@ -55,12 +55,12 @@ abstract class AbstractResolution implements ConversionContract
         return $this->allowScaleUp;
     }
 
-    public function getMaxDimension(): ?Dimension
+    public function getMaxDimension(): null|Dimension
     {
         return $this->maxDimension;
     }
 
-    public function getMinDimension(): ?Dimension
+    public function getMinDimension(): null|Dimension
     {
         return $this->minDimension;
     }
@@ -88,11 +88,10 @@ abstract class AbstractResolution implements ConversionContract
     /**
      * Calculate the final dimension considering constraints and current video dimensions.
      */
-    public function calculateFinalDimension(Dimension $currentDimension): ?Dimension
-    {
+    public function calculateFinalDimension(Dimension $currentDimension): null|Dimension {
         $targetDimension = $this->getDimension();
 
-        if (! $targetDimension || ! $this->shouldConvert($currentDimension)) {
+        if (!$targetDimension || !$this->shouldConvert($currentDimension)) {
             return $currentDimension;
         }
 
@@ -101,8 +100,15 @@ abstract class AbstractResolution implements ConversionContract
             $maxWidth = $this->maxDimension->getWidth();
             $maxHeight = $this->maxDimension->getHeight();
 
-            if ($targetDimension->getWidth() > $maxWidth || $targetDimension->getHeight() > $maxHeight) {
-                $targetDimension = $targetDimension->scaleTo($maxWidth, $maxHeight, $this->maintainAspectRatio);
+            if (
+                $targetDimension->getWidth() > $maxWidth
+                || $targetDimension->getHeight() > $maxHeight
+            ) {
+                $targetDimension = $targetDimension->scaleTo(
+                    $maxWidth,
+                    $maxHeight,
+                    $this->maintainAspectRatio,
+                );
             }
         }
 
@@ -111,14 +117,20 @@ abstract class AbstractResolution implements ConversionContract
             $minWidth = $this->minDimension->getWidth();
             $minHeight = $this->minDimension->getHeight();
 
-            if ($targetDimension->getWidth() < $minWidth || $targetDimension->getHeight() < $minHeight) {
+            if (
+                $targetDimension->getWidth() < $minWidth
+                || $targetDimension->getHeight() < $minHeight
+            ) {
                 // Scale up to meet minimum requirements only if allowed
                 if ($this->allowScaleUp) {
-                    $scaleFactorWidth = $minWidth / $targetDimension->getWidth();
-                    $scaleFactorHeight = $minHeight / $targetDimension->getHeight();
+                    $scaleFactorWidth =
+                        $minWidth / $targetDimension->getWidth();
+                    $scaleFactorHeight =
+                        $minHeight / $targetDimension->getHeight();
                     $scaleFactor = max($scaleFactorWidth, $scaleFactorHeight);
 
-                    $targetDimension = $targetDimension->scaleByFactor($scaleFactor);
+                    $targetDimension =
+                        $targetDimension->scaleByFactor($scaleFactor);
                 }
             }
         }
@@ -135,11 +147,13 @@ abstract class AbstractResolution implements ConversionContract
     {
         $targetDimension = $this->getDimension();
 
-        if (! $targetDimension) {
+        if (!$targetDimension) {
             return false;
         }
 
-        return $targetDimension->getPixelCount() > $currentDimension->getPixelCount();
+        return (
+            $targetDimension->getPixelCount() > $currentDimension->getPixelCount()
+        );
     }
 
     /**
@@ -149,7 +163,7 @@ abstract class AbstractResolution implements ConversionContract
     {
         $targetDimension = $this->getDimension();
 
-        if (! $targetDimension) {
+        if (!$targetDimension) {
             return true;
         }
 
@@ -158,22 +172,26 @@ abstract class AbstractResolution implements ConversionContract
         $targetPixels = $targetDimension->getPixelCount();
 
         // If target has more pixels than current, it's a scale up
-        if ($targetPixels > $currentPixels && ! $this->allowScaleUp) {
+        if ($targetPixels > $currentPixels && !$this->allowScaleUp) {
             return false;
         }
 
         // Check max dimension constraints
         if ($this->maxDimension) {
-            if ($targetDimension->getWidth() > $this->maxDimension->getWidth() ||
-                $targetDimension->getHeight() > $this->maxDimension->getHeight()) {
+            if (
+                $targetDimension->getWidth() > $this->maxDimension->getWidth()
+                || $targetDimension->getHeight() > $this->maxDimension->getHeight()
+            ) {
                 return false;
             }
         }
 
         // Check min dimension constraints
         if ($this->minDimension) {
-            if ($targetDimension->getWidth() < $this->minDimension->getWidth() ||
-                $targetDimension->getHeight() < $this->minDimension->getHeight()) {
+            if (
+                $targetDimension->getWidth() < $this->minDimension->getWidth()
+                || $targetDimension->getHeight() < $this->minDimension->getHeight()
+            ) {
                 return false;
             }
         }

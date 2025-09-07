@@ -26,29 +26,28 @@ final class InvitationDTO extends ValidatedDTO
 
     protected function rules(): array
     {
-
         return [
             'sender' => ['required'],
             'name' => ['required'],
             'email' => ['email', 'required', Rule::notIn(User::pluck('email'))],
             'role_data' => ['required'],
-            'timezone' => ['required', Rule::in(Timezone::getTimezonesAsFlatList())],
-
+            'timezone' => [
+                'required',
+                Rule::in(Timezone::getTimezonesAsFlatList()),
+            ],
         ];
     }
 
     protected function defaults(): array
     {
-        return [
-
-        ];
+        return [];
     }
 
     protected function casts(): array
     {
         return [
-            'sender' => new ObjectCast,
-            'role_data' => new CollectionCast,
+            'sender' => new ObjectCast(),
+            'role_data' => new CollectionCast(),
         ];
     }
 }

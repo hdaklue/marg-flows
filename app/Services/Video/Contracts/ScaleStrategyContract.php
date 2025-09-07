@@ -9,6 +9,6 @@ use App\Services\Video\ValueObjects\Dimension;
 interface ScaleStrategyContract
 {
     public function apply(Dimension $current, Dimension $target): Dimension;
-    
+
     public function getDescription(): string;
 }

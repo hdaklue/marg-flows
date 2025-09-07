@@ -40,7 +40,7 @@ final class DocumentPolicy
      */
     public function update(User $user, Document $document): bool
     {
-        return $user->isAtLeastOn(RoleFactory::contributer(), $document);
+        return $user->isAtLeastOn(RoleFactory::editor(), $document);
     }
 
     /**
@@ -67,9 +67,8 @@ final class DocumentPolicy
         return false;
     }
 
-    public function manageMembers(User $user, Document $document): bool
+    public function manage(User $user, Document $document): bool
     {
-
         return $user->isAtLeastOn(RoleFactory::manager(), $document);
     }
 }

@@ -7,7 +7,8 @@ namespace App\Services\Document\ConfigBuilder\Blocks\DTO;
 use App\Services\Document\Contratcs\BlockConfigContract;
 use WendellAdriel\ValidatedDTO\SimpleDTO;
 
-final class VideoEmbedConfigData extends SimpleDTO implements BlockConfigContract
+final class VideoEmbedConfigData extends SimpleDTO implements
+    BlockConfigContract
 {
     public string $class;
 
@@ -32,8 +33,6 @@ final class VideoEmbedConfigData extends SimpleDTO implements BlockConfigContrac
 
     protected function casts(): array
     {
-        return [
-
-        ];
+        return [];
     }
 }

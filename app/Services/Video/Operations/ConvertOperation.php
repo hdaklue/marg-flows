@@ -13,7 +13,7 @@ final class ConvertOperation extends AbstractVideoOperation
 {
     public function __construct(
         private readonly VideoInterface $format,
-        private readonly ?BitrateEnum $bitrate = null
+        private readonly null|BitrateEnum $bitrate = null,
     ) {
         $this->metadata = [
             'format' => get_class($this->format),
@@ -25,12 +25,12 @@ final class ConvertOperation extends AbstractVideoOperation
     public function execute(MediaExporter $mediaExporter): MediaExporter
     {
         $format = clone $this->format;
-        
+
         // Apply bitrate if provided and format supports it
         if ($this->bitrate && method_exists($format, 'setKiloBitrate')) {
             $format->setKiloBitrate($this->bitrate->getKbps());
         }
-        
+
         return $mediaExporter->inFormat($format);
     }
 
@@ -54,11 +54,11 @@ final class ConvertOperation extends AbstractVideoOperation
     public function getFormat(): VideoInterface
     {
         $format = clone $this->format;
-        
+
         if ($this->bitrate && method_exists($format, 'setKiloBitrate')) {
             $format->setKiloBitrate($this->bitrate->getKbps());
         }
-        
+
         return $format;
     }
 

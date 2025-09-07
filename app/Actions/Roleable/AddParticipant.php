@@ -14,9 +14,11 @@ final class AddParticipant
 {
     use AsAction;
 
-    public function handle(RoleableEntity $roleable, AssignableEntity $user, RoleContract $role)
-    {
-
+    public function handle(
+        RoleableEntity $roleable,
+        AssignableEntity $user,
+        RoleContract $role,
+    ) {
         try {
             $roleable->assign($user, $role);
         } catch (Exception $e) {
@@ -29,8 +31,11 @@ final class AddParticipant
         }
     }
 
-    public function asJob(RoleableEntity $roleable, AssignableEntity $user, RoleContract $role)
-    {
+    public function asJob(
+        RoleableEntity $roleable,
+        AssignableEntity $user,
+        RoleContract $role,
+    ) {
         $this->handle($roleable, $user, $role);
     }
 }

@@ -16,14 +16,20 @@ final class DeliverableType
 
     private string $description;
 
-    public function __construct(private DeliverableFormat $format, private string $key)
-    {
-        throw_unless(array_key_exists($key, config($format->configPath())), new InvalidArgumentException("Deliverable type '{$key}' does not exist."));
+    public function __construct(
+        private DeliverableFormat $format,
+        private string $key,
+    ) {
+        throw_unless(
+            array_key_exists($key, config($format->configPath())),
+            new InvalidArgumentException(
+                "Deliverable type '{$key}' does not exist.",
+            ),
+        );
 
         $this->configPath = "{$format->configPath()}.{$key}";
         $this->name = config("{$this->configPath}.name");
         $this->description = config("{$this->configPath}.description");
-
     }
 
     public function specification(): DeliverableSpecification

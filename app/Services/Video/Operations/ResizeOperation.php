@@ -9,10 +9,9 @@ use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
 
 class ResizeOperation extends AbstractVideoOperation
 {
-
     public function __construct(
         private readonly Dimension $dimension,
-        private readonly string $mode = 'fit'
+        private readonly string $mode = 'fit',
     ) {
         $this->metadata = [
             'width' => $this->dimension->getWidth(),
@@ -28,9 +27,9 @@ class ResizeOperation extends AbstractVideoOperation
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(
                     $this->dimension->getWidth(),
-                    $this->dimension->getHeight()
+                    $this->dimension->getHeight(),
                 ),
-                $this->mode
+                $this->mode,
             );
         });
     }
@@ -42,31 +41,32 @@ class ResizeOperation extends AbstractVideoOperation
 
     public function canExecute(): bool
     {
-        return $this->dimension->getWidth() > 0 && $this->dimension->getHeight() > 0;
+        return (
+            $this->dimension->getWidth() > 0
+            && $this->dimension->getHeight() > 0
+        );
     }
 
-    public function applyToBuilder(\ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter $builder): \ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter
-    {
+    public function applyToBuilder(\ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter $builder): \ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter {
         return $builder->addFilter(function ($filters) {
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(
                     $this->dimension->getWidth(),
-                    $this->dimension->getHeight()
+                    $this->dimension->getHeight(),
                 ),
-                $this->mode
+                $this->mode,
             );
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener
-    {
+    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
         return $media->addFilter(function ($filters) {
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(
                     $this->dimension->getWidth(),
-                    $this->dimension->getHeight()
+                    $this->dimension->getHeight(),
                 ),
-                $this->mode
+                $this->mode,
             );
         });
     }

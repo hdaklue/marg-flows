@@ -28,10 +28,19 @@ final class Resolution720p extends AbstractResolution
 
         // Constraints for 720p HD - adjust based on orientation
         $this->maxDimension = $this->resolution->dimension;
-        $this->minDimension = match($orientation) {
-            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(480, 854),
-            'square' => \App\Services\Video\ValueObjects\Dimension::from(480, 480),
-            default => \App\Services\Video\ValueObjects\Dimension::from(854, 480),
+        $this->minDimension = match ($orientation) {
+            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(
+                480,
+                854,
+            ),
+            'square' => \App\Services\Video\ValueObjects\Dimension::from(
+                480,
+                480,
+            ),
+            default => \App\Services\Video\ValueObjects\Dimension::from(
+                854,
+                480,
+            ),
         };
     }
 
@@ -47,7 +56,7 @@ final class Resolution720p extends AbstractResolution
     {
         return new self('landscape', false);
     }
-    
+
     /**
      * Create portrait 720p without scale up.
      */
@@ -55,20 +64,24 @@ final class Resolution720p extends AbstractResolution
     {
         return new self('portrait', false);
     }
-    
+
     /**
      * Create Resolution720p based on source video orientation.
      */
-    public static function forOrientation(string $orientation, bool $allowScaleUp = true): self
-    {
+    public static function forOrientation(
+        string $orientation,
+        bool $allowScaleUp = true,
+    ): self {
         return new self($orientation, $allowScaleUp);
     }
-    
+
     /**
      * Create Resolution720p that matches source video dimension orientation.
      */
-    public static function matchingOrientation(\App\Services\Video\ValueObjects\Dimension $sourceDimension, bool $allowScaleUp = true): self
-    {
+    public static function matchingOrientation(
+        \App\Services\Video\ValueObjects\Dimension $sourceDimension,
+        bool $allowScaleUp = true,
+    ): self {
         return new self($sourceDimension->getOrientation(), $allowScaleUp);
     }
 
@@ -83,9 +96,12 @@ final class Resolution720p extends AbstractResolution
     {
         // Create ResizeFilter directly instead of using closure
         return new ResizeFilter(
-            new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
+            new Dimension(
+                $this->dimension->getWidth(),
+                $this->dimension->getHeight(),
+            ),
             $this->resizeMode,
-            false  // Disable standard aspect ratio enforcement to prevent black bars
+            false, // Disable standard aspect ratio enforcement to prevent black bars
         );
     }
 

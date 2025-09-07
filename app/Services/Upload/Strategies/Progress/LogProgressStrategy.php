@@ -18,8 +18,10 @@ final class LogProgressStrategy implements ProgressStrategyContract
         ]);
     }
 
-    public function updateProgress(string $sessionId, ProgressData $progress): void
-    {
+    public function updateProgress(
+        string $sessionId,
+        ProgressData $progress,
+    ): void {
         Log::info('Upload progress updated', [
             'sessionId' => $sessionId,
             'progress' => $progress->toArray(),
@@ -42,7 +44,7 @@ final class LogProgressStrategy implements ProgressStrategyContract
         ]);
     }
 
-    public function getProgress(string $sessionId): ?ProgressData
+    public function getProgress(string $sessionId): null|ProgressData
     {
         // Log strategy doesn't store progress data for retrieval
         return null;

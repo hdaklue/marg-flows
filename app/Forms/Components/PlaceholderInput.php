@@ -31,7 +31,6 @@ final class PlaceholderInput extends TextInput
 
     public function getShowLabel(): bool
     {
-
         return $this->evaluate($this->showLabel);
     }
 

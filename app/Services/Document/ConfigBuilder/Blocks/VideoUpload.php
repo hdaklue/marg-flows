@@ -43,7 +43,8 @@ final class VideoUpload implements DocumentBlockConfigContract
         // Default endpoints - will be overridden by forDocument() method
         $this->config['endpoints']['byFile'] = null;
         $this->config['endpoints']['delete'] = null;
-        $this->config['types'] = FileTypes::getStreamVideoFormatsAsValidationString();
+        $this->config['types'] =
+            FileTypes::getStreamVideoFormatsAsValidationString();
         $this->config['maxFileSize'] = $chunkConfig->maxFileSize;
         $this->config['chunkSize'] = $chunkConfig->chunkSize;
 
@@ -53,7 +54,10 @@ final class VideoUpload implements DocumentBlockConfigContract
 
     public function endpoints(array $endpoints): self
     {
-        $this->config['endpoints'] = array_merge($this->config['endpoints'], $endpoints);
+        $this->config['endpoints'] = array_merge(
+            $this->config['endpoints'],
+            $endpoints,
+        );
 
         return $this;
     }
@@ -86,21 +90,21 @@ final class VideoUpload implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function maxFileSize(?int $size): self
+    public function maxFileSize(null|int $size): self
     {
         $this->config['maxFileSize'] = $size;
 
         return $this;
     }
 
-    public function chunkSize(?int $size): self
+    public function chunkSize(null|int $size): self
     {
         $this->config['chunkSize'] = $size;
 
         return $this;
     }
 
-    public function useChunkedUpload(?bool $enabled): self
+    public function useChunkedUpload(null|bool $enabled): self
     {
         $this->config['useChunkedUpload'] = $enabled;
 
@@ -109,7 +113,10 @@ final class VideoUpload implements DocumentBlockConfigContract
 
     public function additionalRequestHeaders(array $headers): self
     {
-        $this->config['additionalRequestHeaders'] = array_merge($this->config['additionalRequestHeaders'], $headers);
+        $this->config['additionalRequestHeaders'] = array_merge(
+            $this->config['additionalRequestHeaders'],
+            $headers,
+        );
 
         return $this;
     }
@@ -123,15 +130,18 @@ final class VideoUpload implements DocumentBlockConfigContract
 
     public function forDocument(string $documentId): self
     {
-        $this->config['endpoints']['byFile'] = route('editorjs.upload-video', ['document' => $documentId]);
-        $this->config['endpoints']['delete'] = route('editorjs.document.delete-video', ['document' => $documentId]);
+        $this->config['endpoints']['byFile'] = route('editorjs.upload-video', [
+            'document' => $documentId,
+        ]);
+        $this->config['endpoints']['delete'] = route('editorjs.document.delete-video', [
+            'document' => $documentId,
+        ]);
 
         return $this;
     }
 
     public function baseDirectory(string $baseDirectory): self
     {
-
         $this->config['baseDirectory'] = Storage::url($baseDirectory);
 
         return $this;

@@ -15,19 +15,25 @@ final class DocumentFeedbackSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('Creating document feedback in business database...');
+        $this->command->info(
+            'Creating document feedback in business database...',
+        );
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
         if (!$testUser) {
-            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
+            $this->command->warn(
+                'Test user not found. Please run main DatabaseSeeder first.',
+            );
             return;
         }
 
         // Get documents from business database to associate feedback with
         $documents = Document::limit(5)->get();
         if ($documents->isEmpty()) {
-            $this->command->warn('No documents found in business database. Please run DocumentSeeder first.');
+            $this->command->warn(
+                'No documents found in business database. Please run DocumentSeeder first.',
+            );
             return;
         }
 
@@ -46,41 +52,61 @@ final class DocumentFeedbackSeeder extends Seeder
         ];
 
         $elementTypes = [
-            'paragraph', 'header', 'list', 'quote', 'code', 
-            'table', 'image', 'embed', 'delimiter', 'warning', 'checklist'
+            'paragraph',
+            'header',
+            'list',
+            'quote',
+            'code',
+            'table',
+            'image',
+            'embed',
+            'delimiter',
+            'warning',
+            'checklist',
         ];
 
         // Create document feedback for each document
         foreach ($documents as $document) {
             // Create 6-10 feedback entries per document
             $feedbackCount = rand(6, 10);
-            
+
             for ($i = 1; $i <= $feedbackCount; $i++) {
                 $elementType = fake()->randomElement($elementTypes);
                 $blockId = $this->generateBlockId();
                 $hasTextSelection = fake()->boolean(40); // 40% chance of text selection
-                
+
                 DocumentFeedback::create([
                     'creator_id' => $testUser->id,
-                    'content' => $this->generateDocumentComment($elementType, $hasTextSelection),
+                    'content' => $this->generateDocumentComment(
+                        $elementType,
+                        $hasTextSelection,
+                    ),
                     'feedbackable_type' => $document->getMorphClass(),
                     'feedbackable_id' => $document->id,
                     'status' => fake()->randomElement($statuses),
                     'urgency' => fake()->randomElement($urgencies),
                     'block_id' => $blockId,
                     'element_type' => $elementType,
-                    'position_data' => $this->generatePositionData($elementType),
+                    'position_data' =>
+                        $this->generatePositionData($elementType),
                     'block_version' => $this->generateBlockVersion(),
-                    'selection_data' => $hasTextSelection ? $this->generateSelectionData() : null,
+                    'selection_data' => $hasTextSelection
+                        ? $this->generateSelectionData()
+                        : null,
                 ]);
             }
         }
 
         // Create specialized document feedback for testing
-        $this->createSpecializedDocumentFeedback($testUser, $documents->first());
+        $this->createSpecializedDocumentFeedback(
+            $testUser,
+            $documents->first(),
+        );
 
         $totalDocumentFeedback = DocumentFeedback::count();
-        $this->command->info("✅ Created {$totalDocumentFeedback} document feedback entries in business database");
+        $this->command->info(
+            "✅ Created {$totalDocumentFeedback} document feedback entries in business database",
+        );
     }
 
     private function generateBlockId(): string
@@ -89,17 +115,26 @@ final class DocumentFeedbackSeeder extends Seeder
         return 'block_' . fake()->uuid();
     }
 
-    private function generateBlockVersion(): ?string
+    private function generateBlockVersion(): null|string
     {
         if (!fake()->boolean(70)) { // 70% chance of having version info
             return null;
         }
 
-        return 'v' . fake()->numberBetween(1, 10) . '.' . fake()->numberBetween(0, 9) . '.' . fake()->sha1();
+        return (
+            'v'
+            . fake()->numberBetween(1, 10)
+            . '.'
+            . fake()->numberBetween(0, 9)
+            . '.'
+            . fake()->sha1()
+        );
     }
 
-    private function generateDocumentComment(string $elementType, bool $hasTextSelection): string
-    {
+    private function generateDocumentComment(
+        string $elementType,
+        bool $hasTextSelection,
+    ): string {
         $blockComments = [
             'paragraph' => [
                 'This paragraph could be restructured for better flow.',
@@ -170,7 +205,7 @@ final class DocumentFeedbackSeeder extends Seeder
         return fake()->randomElement($elementComments);
     }
 
-    private function generatePositionData(string $elementType): ?array
+    private function generatePositionData(string $elementType): null|array
     {
         if (!fake()->boolean(60)) { // 60% chance of having position data
             return null;
@@ -199,7 +234,13 @@ final class DocumentFeedbackSeeder extends Seeder
                 'sectionNumber' => fake()->numberBetween(1, 10),
             ]),
             'code' => array_merge($baseData, [
-                'language' => fake()->randomElement(['javascript', 'php', 'python', 'html', 'css']),
+                'language' => fake()->randomElement([
+                    'javascript',
+                    'php',
+                    'python',
+                    'html',
+                    'css',
+                ]),
                 'lineNumber' => fake()->numberBetween(1, 50),
             ]),
             default => $baseData,
@@ -224,7 +265,7 @@ final class DocumentFeedbackSeeder extends Seeder
         $selectedText = fake()->randomElement($sampleTexts);
         $start = fake()->numberBetween(0, 500);
         $length = mb_strlen($selectedText);
-        
+
         return [
             'selectedText' => $selectedText,
             'start' => $start,
@@ -234,12 +275,19 @@ final class DocumentFeedbackSeeder extends Seeder
                 'before' => fake()->sentence(),
                 'after' => fake()->sentence(),
             ],
-            'selectionType' => fake()->randomElement(['word', 'sentence', 'phrase', 'paragraph']),
+            'selectionType' => fake()->randomElement([
+                'word',
+                'sentence',
+                'phrase',
+                'paragraph',
+            ]),
         ];
     }
 
-    private function createSpecializedDocumentFeedback(User $user, Document $document): void
-    {
+    private function createSpecializedDocumentFeedback(
+        User $user,
+        Document $document,
+    ): void {
         // Header hierarchy feedback
         DocumentFeedback::create([
             'creator_id' => $user->id,

@@ -24,16 +24,16 @@ final class WebMFormat implements VideoFormatContract
     {
         return new self();
     }
-    public function getDriverFormat(?BitrateEnum $bitrate = null): VideoInterface
-    {
+
+    public function getDriverFormat(null|BitrateEnum $bitrate = null): VideoInterface {
         $format = new WebM();
-        
+
         if ($bitrate) {
             $format->setKiloBitrate($bitrate->getKbps());
         } elseif ($this->getDefaultBitrate()) {
             $format->setKiloBitrate($this->getDefaultBitrate());
         }
-        
+
         return $format;
     }
 
@@ -47,7 +47,7 @@ final class WebMFormat implements VideoFormatContract
         return 'WebM (VP8/VP9)';
     }
 
-    public function getDefaultBitrate(): ?int
+    public function getDefaultBitrate(): null|int
     {
         return BitrateEnum::HIGH_720P->getKbps(); // 2500 kbps - good for web
     }

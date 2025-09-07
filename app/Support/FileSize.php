@@ -47,7 +47,6 @@ final class FileSize
     public static function toGBDecimal(int $bytes): float
     {
         return $bytes / (1000 * 1000 * 1000);
-
     }
 
     public static function toKBDecimal(int $bytes): float
@@ -58,6 +57,5 @@ final class FileSize
     public static function format(int $bytes, int $precision = 3): string
     {
         return Number::fileSize($bytes, $precision);
-
     }
 }

@@ -15,7 +15,9 @@ final class UploadProgressController extends Controller
      */
     public function show(Request $request, string $sessionId): JsonResponse
     {
-        $progress = UploadSessionManager::driver('redis')->getProgress($sessionId);
+        $progress = UploadSessionManager::driver('redis')->getProgress(
+            $sessionId,
+        );
 
         if (!$progress) {
             return response()->json([

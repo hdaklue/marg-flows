@@ -14,7 +14,7 @@ final class EditorJSBlockDto extends ValidatedDTO
 
     public array $data;
 
-    public ?array $tunes;
+    public null|array $tunes;
 
     protected function rules(): array
     {
@@ -34,7 +34,6 @@ final class EditorJSBlockDto extends ValidatedDTO
         ];
     }
 
-
     protected function casts(): array
     {
         return [];
@@ -51,7 +50,7 @@ final class EditorJSBlockDto extends ValidatedDTO
     /**
      * Get text content from the block if it has any
      */
-    public function getText(): ?string
+    public function getText(): null|string
     {
         return match ($this->type) {
             'paragraph', 'header', 'quote' => $this->data['text'] ?? null,
@@ -71,7 +70,7 @@ final class EditorJSBlockDto extends ValidatedDTO
     /**
      * Get block level for header blocks
      */
-    public function getLevel(): ?int
+    public function getLevel(): null|int
     {
         if ($this->type === 'header') {
             return $this->data['level'] ?? null;
@@ -112,7 +111,7 @@ final class EditorJSBlockDto extends ValidatedDTO
     /**
      * Create new block with updated tunes
      */
-    public function withTunes(?array $tunes): self
+    public function withTunes(null|array $tunes): self
     {
         return static::fromArray([
             'id' => $this->id,

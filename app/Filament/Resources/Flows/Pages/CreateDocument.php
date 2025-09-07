@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Flows\Pages;
 
 use App\DTOs\Document\CreateDocumentDto;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Forms\Components\EditorJs;
 use App\Forms\Components\PlaceholderInput;
@@ -20,6 +19,7 @@ use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Illuminate\Validation\ValidationException;
 use Log;
 
@@ -32,7 +32,7 @@ final class CreateDocument extends Page implements HasForms
 
     protected static string $resource = FlowResource::class;
 
-    public ?array $data = [];
+    public null|array $data = [];
 
     public Flow $flow;
 
@@ -55,8 +55,21 @@ final class CreateDocument extends Page implements HasForms
                 ->preload()
                 ->multiple()
                 ->searchable()
-                ->options(fn () => $this->flow->getParticipants()->filter(fn (ModelHasRole $item) => $item->model->getKey() !== filamentUser()->getKey())
-                    ->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => $item->model->getAttribute('name') . ' - ' . RoleEnum::from($item->role->getAttribute('name'))->getLabel()]))
+                ->options(fn() => $this->flow
+                    ->getParticipants()
+                    ->filter(
+                        fn(ModelHasRole $item) => (
+                            $item->model->getKey() !== filamentUser()->getKey()
+                        ),
+                    )
+                    ->mapWithKeys(fn(ModelHasRole $item) => [
+                        $item->model->getKey() =>
+                            $item->model->getAttribute('name')
+                            . ' - '
+                            . RoleEnum::from($item->role->getAttribute(
+                                'name',
+                            ))->getLabel(),
+                    ]))
                 ->columnSpan(1),
             Section::make([
                 PlaceholderInput::make('name')
@@ -64,14 +77,12 @@ final class CreateDocument extends Page implements HasForms
                     ->minLength(10)
                     ->columnSpanFull()
                     ->Placeholder('name'),
-                EditorJs::make('blocks')
-                    ->required()
-                    ->columnSpanFull(),
+                EditorJs::make('blocks')->required()->columnSpanFull(),
             ])->columns(3),
             Actions::make([
                 Action::make('save')
                     ->color('primary')
-                    ->action(fn () => $this->createDocument()),
+                    ->action(fn() => $this->createDocument()),
             ]),
         ])->statePath('data');
     }
@@ -84,15 +95,21 @@ final class CreateDocument extends Page implements HasForms
             // Create DTO without validation first
             $dto = CreateDocumentDto::fromArray([
                 'name' => $data['name'],
-                'blocks' => json_decode($data['blocks'])]);
+                'blocks' => json_decode($data['blocks']),
+            ]);
 
-            \App\Actions\Flow\CreateDocument::run(filamentUser(), $this->flow, $dto);
+            \App\Actions\Flow\CreateDocument::run(
+                filamentUser(),
+                $this->flow,
+                $dto,
+            );
 
             Notification::make()
                 ->body('Document Created Successfully')
                 ->success()
                 ->send();
-            $this->redirect(FlowResource::getUrl('pages', ['record' => $this->flow]));
+            $this->redirect(FlowResource::getUrl('pages', ['record' =>
+                $this->flow]));
         } catch (ValidationException $e) {
             Log::error('DTO Validation failed', $e->errors());
             Notification::make()

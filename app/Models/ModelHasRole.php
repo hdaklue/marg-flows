@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\Database\LivesInOriginalDB;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Eloquent;
+use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;

@@ -9,7 +9,7 @@ use Illuminate\Validation\Validator;
 
 /**
  * Custom exception for DTO validation failures.
- * 
+ *
  * Provides enhanced error information and context for debugging
  * DTO validation issues.
  */
@@ -20,18 +20,22 @@ class DTOException extends Exception
         private readonly Validator $validator,
         private readonly array $inputData,
         private readonly array $rules,
-        ?string $customMessage = null
+        null|string $customMessage = null,
     ) {
         $errors = $this->validator->errors();
         $className = class_basename($this->dtoClass);
         $firstError = $errors->first();
         $failedFields = implode(', ', array_keys($errors->toArray()));
-        
-        $message = $customMessage ?? $this->buildDefaultMessage($className, $failedFields, $firstError);
-        
+
+        $message = $customMessage ?? $this->buildDefaultMessage(
+            $className,
+            $failedFields,
+            $firstError,
+        );
+
         parent::__construct($message, 422); // 422 Unprocessable Entity
     }
-    
+
     /**
      * Get the DTO class that failed validation.
      */
@@ -39,7 +43,7 @@ class DTOException extends Exception
     {
         return $this->dtoClass;
     }
-    
+
     /**
      * Get the validator instance with all validation errors.
      */
@@ -47,7 +51,7 @@ class DTOException extends Exception
     {
         return $this->validator;
     }
-    
+
     /**
      * Get all validation errors.
      */
@@ -55,7 +59,7 @@ class DTOException extends Exception
     {
         return $this->validator->errors()->toArray();
     }
-    
+
     /**
      * Get the input data that failed validation.
      */
@@ -63,7 +67,7 @@ class DTOException extends Exception
     {
         return $this->inputData;
     }
-    
+
     /**
      * Get the validation rules that were applied.
      */
@@ -71,15 +75,15 @@ class DTOException extends Exception
     {
         return $this->rules;
     }
-    
+
     /**
      * Get the first validation error message.
      */
-    public function getFirstError(): ?string
+    public function getFirstError(): null|string
     {
         return $this->validator->errors()->first();
     }
-    
+
     /**
      * Get all failed field names.
      */
@@ -87,27 +91,30 @@ class DTOException extends Exception
     {
         return array_keys($this->validator->errors()->toArray());
     }
-    
+
     /**
      * Build a detailed error message for debugging.
      */
-    private function buildDefaultMessage(string $className, string $failedFields, ?string $firstError): string
-    {
+    private function buildDefaultMessage(
+        string $className,
+        string $failedFields,
+        null|string $firstError,
+    ): string {
         $message = "DTO validation failed for {$className}.";
-        
+
         if (!empty($failedFields)) {
             $message .= " Failed fields: [{$failedFields}].";
         }
-        
+
         if ($firstError) {
             $message .= " First error: {$firstError}.";
         }
-        
-        $message .= " Check logs for detailed information.";
-        
+
+        $message .= ' Check logs for detailed information.';
+
         return $message;
     }
-    
+
     /**
      * Convert the exception to an array for JSON responses.
      */
@@ -122,7 +129,7 @@ class DTOException extends Exception
             'code' => $this->getCode(),
         ];
     }
-    
+
     /**
      * Convert the exception to JSON.
      */

@@ -23,9 +23,10 @@ final class SimpleFilterStrategy implements DocumentBlockFilterStrategy
         'videoEmbed', // Embed only, no uploads
     ];
 
-    public function filter(DocumentBlocksDto $blocks, array $context = []): DocumentBlocksDto
-    {
-
+    public function filter(
+        DocumentBlocksDto $blocks,
+        array $context = [],
+    ): DocumentBlocksDto {
         return $blocks->applyBlockFilter(self::ALLOWED_BLOCKS);
     }
 
@@ -34,8 +35,10 @@ final class SimpleFilterStrategy implements DocumentBlockFilterStrategy
         return 'simple';
     }
 
-    public function isBlockTypeAllowed(string $blockType, array $context = []): bool
-    {
+    public function isBlockTypeAllowed(
+        string $blockType,
+        array $context = [],
+    ): bool {
         return in_array($blockType, self::ALLOWED_BLOCKS, true);
     }
 

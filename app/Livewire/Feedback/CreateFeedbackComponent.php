@@ -20,9 +20,9 @@ final class CreateFeedbackComponent extends Component
 
     public array $pendingComment = [];
 
-    public ?string $comment = null;
+    public null|string $comment = null;
 
-    public ?string $commentText = null;
+    public null|string $commentText = null;
 
     #[Locked]
     public array $mentionables = [];
@@ -60,7 +60,7 @@ final class CreateFeedbackComponent extends Component
 
     public function getCanSaveProperty()
     {
-        return ! empty(trim($this->commentText)) || $this->hasVoiceNotes;
+        return !empty(trim($this->commentText)) || $this->hasVoiceNotes;
     }
 
     public function mount(int|string|null $feedbackableId = null)
@@ -94,7 +94,10 @@ final class CreateFeedbackComponent extends Component
         dd($this->urgency);
         // Check for unuploaded voice notes first
         if ($this->hasUnuploadedVoiceNotes) {
-            $this->addError('form', 'Please wait for voice notes to finish uploading.');
+            $this->addError(
+                'form',
+                'Please wait for voice notes to finish uploading.',
+            );
 
             return;
         }
@@ -102,7 +105,7 @@ final class CreateFeedbackComponent extends Component
         $this->validate();
 
         // Additional check using computed property
-        if (! $this->canSave) {
+        if (!$this->canSave) {
             $this->addError('form', 'Please add a comment or voice note.');
 
             return;
@@ -142,15 +145,21 @@ final class CreateFeedbackComponent extends Component
     #[Renderless]
     public function isDirty(): bool
     {
-        return ! empty($this->commentText) || ! empty($this->pendingComment) || $this->hasUnuploadedVoiceNotes || $this->hasVoiceNotes;
+        return (
+            !empty($this->commentText)
+            || !empty($this->pendingComment)
+            || $this->hasUnuploadedVoiceNotes
+            || $this->hasVoiceNotes
+        );
     }
 
     public function cancelComment()
     {
         // Check if there are unsaved changes
-        $hasUnsavedChanges = ! empty(trim($this->commentText)) ||
-                           $this->hasVoiceNotes ||
-                           $this->hasUnuploadedVoiceNotes;
+        $hasUnsavedChanges =
+            !empty(trim($this->commentText))
+            || $this->hasVoiceNotes
+            || $this->hasUnuploadedVoiceNotes;
 
         logger()->info('cancelComment called', [
             'commentText' => $this->commentText,
@@ -162,7 +171,8 @@ final class CreateFeedbackComponent extends Component
         if ($hasUnsavedChanges) {
             logger()->info('Dispatching confirmation event');
             $this->dispatch('feedback:show-cancel-confirmation');
-            logger()->info('After dispatch, commentText is: ' . $this->commentText);
+            logger()->info('After dispatch, commentText is: '
+            . $this->commentText);
 
             return;
         }
@@ -192,7 +202,7 @@ final class CreateFeedbackComponent extends Component
     public function onVoiceNoteUploaded($url)
     {
         $this->voiceNoteUrls[] = $url;
-        $this->hasVoiceNotes = ! empty($this->voiceNoteUrls);
+        $this->hasVoiceNotes = !empty($this->voiceNoteUrls);
         $this->hasUnuploadedVoiceNotes = false;
     }
 
@@ -203,7 +213,7 @@ final class CreateFeedbackComponent extends Component
             array_splice($this->voiceNoteUrls, $index, 1);
             $this->voiceNoteUrls = array_values($this->voiceNoteUrls);
         }
-        $this->hasVoiceNotes = ! empty($this->voiceNoteUrls);
+        $this->hasVoiceNotes = !empty($this->voiceNoteUrls);
     }
 
     #[On('voice-note:recording-started')]
@@ -224,7 +234,7 @@ final class CreateFeedbackComponent extends Component
     #[On('mentionable:mention-added')]
     public function addCurrentMention($id)
     {
-        if (! in_array($id, $this->currentMentions)) {
+        if (!in_array($id, $this->currentMentions)) {
             $this->currentMentions[] = $id;
         }
         logger()->info('mentioned', $this->currentMentions);
@@ -234,7 +244,7 @@ final class CreateFeedbackComponent extends Component
     #[On('mentionable:hash-added')]
     public function addCurrentHashtag($id)
     {
-        if (! in_array($id, $this->currentHashtags)) {
+        if (!in_array($id, $this->currentHashtags)) {
             $this->currentHashtags[] = $id;
         }
         logger()->info('hashed', $this->currentHashtags);
@@ -243,13 +253,19 @@ final class CreateFeedbackComponent extends Component
     #[Renderless]
     public function removeCurrentMention($mentionId)
     {
-        $this->currentMentions = array_values(array_filter($this->currentMentions, fn ($id) => $id !== $mentionId));
+        $this->currentMentions = array_values(array_filter(
+            $this->currentMentions,
+            fn($id) => $id !== $mentionId,
+        ));
     }
 
     #[Renderless]
     public function removeCurrentHashtag($hashtagId)
     {
-        $this->currentHashtags = array_values(array_filter($this->currentHashtags, fn ($id) => $id !== $hashtagId));
+        $this->currentHashtags = array_values(array_filter(
+            $this->currentHashtags,
+            fn($id) => $id !== $hashtagId,
+        ));
     }
 
     public function render()

@@ -13,7 +13,7 @@ use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 /**
  * Event DTO for Calendar Component
- * 
+ *
  * @property string $id Unique identifier for the event
  * @property string $title Event title/name
  * @property Carbon $startDate Event start date
@@ -28,10 +28,10 @@ final class CalendarEventDTO extends ValidatedDTO
     public string $id;
     public string $title;
     public Carbon $startDate;
-    public ?Carbon $endDate;
-    public ?string $color;
+    public null|Carbon $endDate;
+    public null|string $color;
     public array $meta;
-    public ?string $url;
+    public null|string $url;
     public bool $allDay;
 
     protected function rules(): array
@@ -62,14 +62,14 @@ final class CalendarEventDTO extends ValidatedDTO
     protected function casts(): array
     {
         return [
-            'id' => new StringCast,
-            'title' => new StringCast,
-            'startDate' => new CarbonCast,
-            'endDate' => new CarbonCast,
-            'color' => new StringCast,
-            'meta' => new ArrayCast,
-            'url' => new StringCast,
-            'allDay' => new BooleanCast,
+            'id' => new StringCast(),
+            'title' => new StringCast(),
+            'startDate' => new CarbonCast(),
+            'endDate' => new CarbonCast(),
+            'color' => new StringCast(),
+            'meta' => new ArrayCast(),
+            'url' => new StringCast(),
+            'allDay' => new BooleanCast(),
         ];
     }
 
@@ -94,7 +94,11 @@ final class CalendarEventDTO extends ValidatedDTO
             return 1;
         }
 
-        return $this->startDate->startOfDay()->diffInDays($this->endDate->endOfDay()) + 1;
+        return (
+            $this->startDate
+                ->startOfDay()
+                ->diffInDays($this->endDate->endOfDay()) + 1
+        );
     }
 
     /**
@@ -103,14 +107,14 @@ final class CalendarEventDTO extends ValidatedDTO
     public function occursOnDate(Carbon $date): bool
     {
         $checkDate = $date->startOfDay();
-        
+
         if (!$this->endDate) {
             return $this->startDate->startOfDay()->eq($checkDate);
         }
 
         return $checkDate->between(
             $this->startDate->startOfDay(),
-            $this->endDate->endOfDay()
+            $this->endDate->endOfDay(),
         );
     }
 

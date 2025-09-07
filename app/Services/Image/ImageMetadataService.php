@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Image\Enums\AlignPosition;
 use Spatie\Image\Enums\Fit;
-use Spatie\Image\Image;
 use Spatie\Image\Exceptions\InvalidImageDriver;
+use Spatie\Image\Image;
 
 final class ImageMetadataService
 {
@@ -27,12 +27,24 @@ final class ImageMetadataService
     public function extractMetadata(
         string $imageUrlOrPath,
         int $maxContainerWidth = self::DEFAULT_MAX_WIDTH,
-        int $maxContainerHeight = self::DEFAULT_MAX_HEIGHT
+        int $maxContainerHeight = self::DEFAULT_MAX_HEIGHT,
     ): ImageMetadataDTO {
-        $cacheKey = $this->getCacheKey($imageUrlOrPath, $maxContainerWidth, $maxContainerHeight);
+        $cacheKey = $this->getCacheKey(
+            $imageUrlOrPath,
+            $maxContainerWidth,
+            $maxContainerHeight,
+        );
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($imageUrlOrPath, $maxContainerWidth, $maxContainerHeight) {
-            return $this->doExtractMetadata($imageUrlOrPath, $maxContainerWidth, $maxContainerHeight);
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use (
+            $imageUrlOrPath,
+            $maxContainerWidth,
+            $maxContainerHeight,
+        ) {
+            return $this->doExtractMetadata(
+                $imageUrlOrPath,
+                $maxContainerWidth,
+                $maxContainerHeight,
+            );
         });
     }
 
@@ -42,9 +54,13 @@ final class ImageMetadataService
     public function extractMetadataFresh(
         string $imageUrlOrPath,
         int $maxContainerWidth = self::DEFAULT_MAX_WIDTH,
-        int $maxContainerHeight = self::DEFAULT_MAX_HEIGHT
+        int $maxContainerHeight = self::DEFAULT_MAX_HEIGHT,
     ): ImageMetadataDTO {
-        return $this->doExtractMetadata($imageUrlOrPath, $maxContainerWidth, $maxContainerHeight);
+        return $this->doExtractMetadata(
+            $imageUrlOrPath,
+            $maxContainerWidth,
+            $maxContainerHeight,
+        );
     }
 
     /**
@@ -53,10 +69,17 @@ final class ImageMetadataService
     public function clearCache(string $imageUrlOrPath): void
     {
         $baseKey = self::CACHE_PREFIX . md5($imageUrlOrPath);
-        
+
         try {
             // Clear cache keys with common suffixes
-            $suffixes = ['', '_width', '_height', '_size', '_type', '_dimensions'];
+            $suffixes = [
+                '',
+                '_width',
+                '_height',
+                '_size',
+                '_type',
+                '_dimensions',
+            ];
             foreach ($suffixes as $suffix) {
                 Cache::forget($baseKey . $suffix);
             }
@@ -66,7 +89,7 @@ final class ImageMetadataService
                 'image' => $imageUrlOrPath,
                 'error' => $e->getMessage(),
             ]);
-            
+
             // Clear some common container size combinations
             $commonSizes = [
                 [self::DEFAULT_MAX_WIDTH, self::DEFAULT_MAX_HEIGHT],
@@ -75,9 +98,13 @@ final class ImageMetadataService
                 [800, 600],
                 [1200, 800],
             ];
-            
+
             foreach ($commonSizes as [$width, $height]) {
-                Cache::forget($this->getCacheKey($imageUrlOrPath, $width, $height));
+                Cache::forget($this->getCacheKey(
+                    $imageUrlOrPath,
+                    $width,
+                    $height,
+                ));
             }
         }
     }
@@ -88,22 +115,33 @@ final class ImageMetadataService
     private function doExtractMetadata(
         string $imageUrlOrPath,
         int $maxContainerWidth,
-        int $maxContainerHeight
+        int $maxContainerHeight,
     ): ImageMetadataDTO {
         try {
             $imagePath = $this->resolveImagePath($imageUrlOrPath);
-            
+
             if (!$imagePath || !File::exists($imagePath)) {
-                return $this->createErrorMetadata($imageUrlOrPath, 'Image file not found', $maxContainerWidth, $maxContainerHeight);
+                return $this->createErrorMetadata(
+                    $imageUrlOrPath,
+                    'Image file not found',
+                    $maxContainerWidth,
+                    $maxContainerHeight,
+                );
             }
 
             if (!$this->isValidImageFile($imagePath)) {
-                return $this->createErrorMetadata($imageUrlOrPath, 'Invalid image file format', $maxContainerWidth, $maxContainerHeight);
+                return $this->createErrorMetadata(
+                    $imageUrlOrPath,
+                    'Invalid image file format',
+                    $maxContainerWidth,
+                    $maxContainerHeight,
+                );
             }
 
             $image = Image::load($imagePath);
             $fileSize = File::size($imagePath);
-            $mimeType = File::mimeType($imagePath) ?? 'application/octet-stream';
+            $mimeType =
+                File::mimeType($imagePath) ?? 'application/octet-stream';
             $extension = File::extension($imagePath) ?: 'unknown';
 
             $width = $image->getWidth();
@@ -115,11 +153,16 @@ final class ImageMetadataService
                 $width,
                 $height,
                 $maxContainerWidth,
-                $maxContainerHeight
+                $maxContainerHeight,
             );
 
             // Calculate maximum zoom level based on image vs container size
-            $maxZoomLevel = $this->calculateMaxZoomLevel($width, $height, $optimal['width'], $optimal['height']);
+            $maxZoomLevel = $this->calculateMaxZoomLevel(
+                $width,
+                $height,
+                $optimal['width'],
+                $optimal['height'],
+            );
 
             return new ImageMetadataDTO([
                 'url' => $imageUrlOrPath,
@@ -138,7 +181,6 @@ final class ImageMetadataService
                 'error' => null,
                 'hasError' => false,
             ]);
-
         } catch (InvalidImageDriver $e) {
             Log::warning('Invalid image driver for metadata extraction', [
                 'image' => $imageUrlOrPath,
@@ -149,9 +191,8 @@ final class ImageMetadataService
                 $imageUrlOrPath,
                 'Unsupported image format or corrupted file',
                 $maxContainerWidth,
-                $maxContainerHeight
+                $maxContainerHeight,
             );
-
         } catch (\Exception $e) {
             Log::error('Failed to extract image metadata', [
                 'image' => $imageUrlOrPath,
@@ -163,7 +204,7 @@ final class ImageMetadataService
                 $imageUrlOrPath,
                 'Failed to process image: ' . $e->getMessage(),
                 $maxContainerWidth,
-                $maxContainerHeight
+                $maxContainerHeight,
             );
         }
     }
@@ -171,7 +212,7 @@ final class ImageMetadataService
     /**
      * Resolve an image URL or path to a local file path
      */
-    private function resolveImagePath(string $imageUrlOrPath): ?string
+    private function resolveImagePath(string $imageUrlOrPath): null|string
     {
         // If it's already a local path and exists
         if (File::exists($imageUrlOrPath)) {
@@ -215,7 +256,7 @@ final class ImageMetadataService
     private function isValidImageFile(string $path): bool
     {
         $mimeType = File::mimeType($path);
-        
+
         $validMimeTypes = [
             'image/jpeg',
             'image/jpg',
@@ -237,7 +278,7 @@ final class ImageMetadataService
         int $imageWidth,
         int $imageHeight,
         int $maxWidth,
-        int $maxHeight
+        int $maxHeight,
     ): array {
         if ($imageWidth <= 0 || $imageHeight <= 0) {
             return [
@@ -253,47 +294,58 @@ final class ImageMetadataService
         if ($imageAspectRatio > $containerAspectRatio) {
             // Image is wider - fit to width
             $optimalWidth = min($imageWidth, $maxWidth);
-            $optimalHeight = (int)round($optimalWidth / $imageAspectRatio);
+            $optimalHeight = (int) round($optimalWidth / $imageAspectRatio);
         } else {
             // Image is taller - fit to height
             $optimalHeight = min($imageHeight, $maxHeight);
-            $optimalWidth = (int)round($optimalHeight * $imageAspectRatio);
+            $optimalWidth = (int) round($optimalHeight * $imageAspectRatio);
         }
 
         // Ensure we don't exceed maximum dimensions
         if ($optimalWidth > $maxWidth) {
             $optimalWidth = $maxWidth;
-            $optimalHeight = (int)round($maxWidth / $imageAspectRatio);
+            $optimalHeight = (int) round($maxWidth / $imageAspectRatio);
         }
 
         if ($optimalHeight > $maxHeight) {
             $optimalHeight = $maxHeight;
-            $optimalWidth = (int)round($maxHeight * $imageAspectRatio);
+            $optimalWidth = (int) round($maxHeight * $imageAspectRatio);
         }
 
         return [
             'width' => $optimalWidth,
             'height' => $optimalHeight,
-            'aspectRatio' => $optimalHeight > 0 ? $optimalWidth / $optimalHeight : 1.0,
+            'aspectRatio' => $optimalHeight > 0
+                ? $optimalWidth / $optimalHeight
+                : 1.0,
         ];
     }
 
     /**
      * Calculate maximum zoom level based on image and container dimensions
      */
-    private function calculateMaxZoomLevel(int $imageWidth, int $imageHeight, int $containerWidth, int $containerHeight): float
-    {
-        if ($imageWidth <= 0 || $imageHeight <= 0 || $containerWidth <= 0 || $containerHeight <= 0) {
+    private function calculateMaxZoomLevel(
+        int $imageWidth,
+        int $imageHeight,
+        int $containerWidth,
+        int $containerHeight,
+    ): float {
+        if (
+            $imageWidth <= 0
+            || $imageHeight <= 0
+            || $containerWidth <= 0
+            || $containerHeight <= 0
+        ) {
             return 1.0;
         }
 
         // Calculate zoom levels at which the image would reach the edges of a larger container
         $widthRatio = $imageWidth / $containerWidth;
         $heightRatio = $imageHeight / $containerHeight;
-        
+
         // Use the larger ratio as the maximum zoom level, but cap it at a reasonable limit
         $maxZoom = max($widthRatio, $heightRatio, 1.0);
-        
+
         // Cap at 5x for performance and UX reasons
         return min($maxZoom, 5.0);
     }
@@ -305,7 +357,7 @@ final class ImageMetadataService
         string $imageUrl,
         string $error,
         int $maxWidth,
-        int $maxHeight
+        int $maxHeight,
     ): ImageMetadataDTO {
         return new ImageMetadataDTO([
             'url' => $imageUrl,
@@ -347,8 +399,15 @@ final class ImageMetadataService
     /**
      * Generate cache key for the given parameters
      */
-    private function getCacheKey(string $imageUrl, int $maxWidth, int $maxHeight): string
-    {
-        return self::CACHE_PREFIX . md5($imageUrl) . ":{$maxWidth}x{$maxHeight}";
+    private function getCacheKey(
+        string $imageUrl,
+        int $maxWidth,
+        int $maxHeight,
+    ): string {
+        return (
+            self::CACHE_PREFIX
+            . md5($imageUrl)
+            . ":{$maxWidth}x{$maxHeight}"
+        );
     }
 }

@@ -17,7 +17,7 @@ final class HyperlinkConfigData extends SimpleDTO implements BlockConfigContract
 
     public array $config;
 
-    public ?string $shortcut;
+    public null|string $shortcut;
 
     protected function defaults(): array
     {
@@ -38,8 +38,6 @@ final class HyperlinkConfigData extends SimpleDTO implements BlockConfigContract
 
     protected function casts(): array
     {
-        return [
-
-        ];
+        return [];
     }
 }

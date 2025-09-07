@@ -18,7 +18,10 @@ trait HasSideNotes
 
     public function getSideNotesBy(User $user): Collection
     {
-        return $this->sideNotes()->whereBelongsTo($user, 'creator')->latest()->get();
+        return $this->sideNotes()
+            ->whereBelongsTo($user, 'creator')
+            ->latest()
+            ->get();
     }
 
     public function hasSideNotesBy(User $user): bool
@@ -33,7 +36,6 @@ trait HasSideNotes
 
     public function addSideNote(SideNote $sidenote): SideNote
     {
-
         $this->sideNotes()->save($sidenote);
 
         /** @var SideNote */
@@ -43,7 +45,7 @@ trait HasSideNotes
     /**
      * @return SideNote|null
      */
-    public function getSideNote(int|string $id): ?SideNote
+    public function getSideNote(int|string $id): null|SideNote
     {
         /** @var SideNote|null */
         return $this->sideNotes()->whereKey($id)->first();

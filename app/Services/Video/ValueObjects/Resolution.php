@@ -13,18 +13,24 @@ readonly class Resolution
         public AspectRatio $aspectRatio,
         public BitrateEnum $bitrate,
         public string $name,
-        public string $qualityTier = 'medium'
+        public string $qualityTier = 'medium',
     ) {}
 
     /**
      * Get dimension for a resolution based on orientation.
      * Base dimensions are assumed to be landscape (width > height).
      */
-    private static function getDimensionForResolution(int $baseWidth, int $baseHeight, string $orientation): Dimension
-    {
+    private static function getDimensionForResolution(
+        int $baseWidth,
+        int $baseHeight,
+        string $orientation,
+    ): Dimension {
         return match ($orientation) {
             'portrait' => Dimension::from($baseHeight, $baseWidth), // Flip dimensions
-            'square' => Dimension::from(min($baseWidth, $baseHeight), min($baseWidth, $baseHeight)), // Use smaller dimension
+            'square' => Dimension::from(
+                min($baseWidth, $baseHeight),
+                min($baseWidth, $baseHeight),
+            ), // Use smaller dimension
             default => Dimension::from($baseWidth, $baseHeight), // Keep as-is for 'landscape' and others
         };
     }
@@ -32,156 +38,156 @@ readonly class Resolution
     public static function create144p(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(256, 144, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::ULTRA_LOW_144P,
             name: '144p',
-            qualityTier: 'ultra_low'
+            qualityTier: 'ultra_low',
         );
     }
 
     public static function create240p(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(426, 240, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::LOW_240P,
             name: '240p',
-            qualityTier: 'low'
+            qualityTier: 'low',
         );
     }
 
     public static function create360p(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(640, 360, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::LOW_360P,
             name: '360p',
-            qualityTier: 'low'
+            qualityTier: 'low',
         );
     }
 
     public static function create480p(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(854, 480, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::MEDIUM_480P,
             name: '480p',
-            qualityTier: 'medium'
+            qualityTier: 'medium',
         );
     }
 
     public static function create720p(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(1280, 720, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::HIGH_720P,
             name: '720p',
-            qualityTier: 'high'
+            qualityTier: 'high',
         );
     }
 
     public static function create1080p(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(1920, 1080, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::HIGH_1080P,
             name: '1080p',
-            qualityTier: 'high'
+            qualityTier: 'high',
         );
     }
 
     public static function create1440p(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(2560, 1440, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::VERY_HIGH_1440P,
             name: '1440p',
-            qualityTier: 'very_high'
+            qualityTier: 'very_high',
         );
     }
 
     public static function create2K(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(2560, 1440, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::VERY_HIGH_2K,
             name: '2K',
-            qualityTier: 'very_high'
+            qualityTier: 'very_high',
         );
     }
 
     public static function create4K(string $orientation): self
     {
         $dimension = self::getDimensionForResolution(3840, 2160, $orientation);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::ULTRA_HIGH_4K,
             name: '4K',
-            qualityTier: 'ultra_high'
+            qualityTier: 'ultra_high',
         );
     }
 
     public static function createMobilePortrait(): self
     {
         $dimension = Dimension::from(1080, 1920);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::MOBILE_PORTRAIT,
             name: 'Mobile Portrait',
-            qualityTier: 'mobile_optimized'
+            qualityTier: 'mobile_optimized',
         );
     }
 
     public static function createMobileLandscape(): self
     {
         $dimension = Dimension::from(1920, 1080);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::MOBILE_LANDSCAPE,
             name: 'Mobile Landscape',
-            qualityTier: 'mobile_optimized'
+            qualityTier: 'mobile_optimized',
         );
     }
 
     public static function createMobileSquare(): self
     {
         $dimension = Dimension::from(1080, 1080);
-        
+
         return new self(
             dimension: $dimension,
             aspectRatio: $dimension->getAspectRatio(),
             bitrate: BitrateEnum::MOBILE_PORTRAIT,
             name: 'Mobile Square',
-            qualityTier: 'mobile_optimized'
+            qualityTier: 'mobile_optimized',
         );
     }
 
@@ -247,7 +253,7 @@ readonly class Resolution
             $this->getWidth(),
             $this->getHeight(),
             $this->aspectRatio->getRatio(),
-            $this->getBitrateKbps()
+            $this->getBitrateKbps(),
         );
     }
 }

@@ -13,9 +13,7 @@ final class OptimizeEditorJsImage
 
     public function handle(string $image)
     {
-        Image::load($image)
-            ->optimize()
-            ->save();
+        Image::load($image)->optimize()->save();
     }
 
     public function asJob(string $image): void

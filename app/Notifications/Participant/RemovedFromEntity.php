@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Notifications\Participant;
 
-use Hdaklue\MargRbac\Notifications\Participant\RemovedFromEntity as PackageRemovedFromEntity;
+use Exception;
 use Filament\Notifications\Notification as FilamentNotification;
 use Hdaklue\MargRbac\Contracts\HasStaticType;
-use Exception;
+use Hdaklue\MargRbac\Notifications\Participant\RemovedFromEntity as PackageRemovedFromEntity;
 
 final class RemovedFromEntity extends PackageRemovedFromEntity
 {
@@ -26,7 +26,10 @@ final class RemovedFromEntity extends PackageRemovedFromEntity
      */
     public function toDatabase(object $notifiable): array
     {
-        throw_unless($this->roleable instanceof HasStaticType, new Exception('Entity must implement HasStaticType'));
+        throw_unless(
+            $this->roleable instanceof HasStaticType,
+            new Exception('Entity must implement HasStaticType'),
+        );
         $message = "You've been removed from ({$this->roleable->getTypeTitle()}) {$this->roleable->getTypeName()}";
 
         return FilamentNotification::make()

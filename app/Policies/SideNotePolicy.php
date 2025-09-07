@@ -46,7 +46,6 @@ class SideNotePolicy
      */
     public function delete(User $user, SideNote $sideNote): bool
     {
-
         return $sideNote->owner_id === $user->id;
     }
 

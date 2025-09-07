@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\DTOs\Task;
 
-use Hdaklue\MargRbac\Facades\RoleManager;
 use App\Models\User;
+use Hdaklue\MargRbac\Facades\RoleManager;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 final class TaskApproverDto extends ValidatedDTO
@@ -16,7 +16,7 @@ final class TaskApproverDto extends ValidatedDTO
 
     public string $user_email;
 
-    public ?string $role;
+    public null|string $role;
 
     public string $assignment_type;
 
@@ -41,7 +41,7 @@ final class TaskApproverDto extends ValidatedDTO
     public function initials(): string
     {
         $nameInitials = collect(explode(' ', $this->user_name))
-            ->map(fn ($name) => substr($name, 0, 1))
+            ->map(fn($name) => substr($name, 0, 1))
             ->implode('');
 
         return $this->role ? "{$nameInitials} ({$this->role})" : $nameInitials;
@@ -49,7 +49,7 @@ final class TaskApproverDto extends ValidatedDTO
 
     public function hasRole(): bool
     {
-        return ! is_null($this->role);
+        return !is_null($this->role);
     }
 
     public function canApprove(): bool

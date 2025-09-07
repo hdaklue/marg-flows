@@ -38,7 +38,9 @@ final class DocumentImageUploadRequest extends FormRequest
         return [
             'image.required' => 'No file selected. Please choose an image to upload.',
             'image.image' => 'File must be a valid image.',
-            'image.mimes' => 'Invalid file format. Supported formats: ' . $this->getSupportedFormatsText(),
+            'image.mimes' =>
+                'Invalid file format. Supported formats: '
+                . $this->getSupportedFormatsText(),
             'image.max' => "File is too large. Maximum size allowed is {$maxSizeMB}MB for your {$userPlan} plan.",
         ];
     }
@@ -85,10 +87,10 @@ final class DocumentImageUploadRequest extends FormRequest
     private function getMaxFileSizeKBForPlan(string $plan): int
     {
         $bytes = match ($plan) {
-            'simple' => FileSize::fromMB(5),   // 5MB
+            'simple' => FileSize::fromMB(5), // 5MB
             'advanced' => FileSize::fromMB(15), // 15MB
             'ultimate' => FileSize::fromMB(25), // 25MB
-            default => FileSize::fromMB(10),    // 10MB default
+            default => FileSize::fromMB(10), // 10MB default
         };
 
         return (int) FileSize::toKB($bytes);

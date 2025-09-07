@@ -11,9 +11,9 @@ use Illuminate\Support\Str;
 
 /**
  * Base Storage Strategy
- * 
+ *
  * Abstract base class providing common file storage operations for all storage strategies.
- * Implements the StorageStrategyContract with shared functionality while allowing 
+ * Implements the StorageStrategyContract with shared functionality while allowing
  * concrete strategies to customize specific behaviors.
  */
 abstract class BaseStorageStrategy implements StorageStrategyContract
@@ -57,20 +57,20 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      * @param string $fileName The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): ?string
+    public function get(string $fileName): null|string
     {
         return Storage::get($this->getDirectory() . "/{$fileName}");
     }
 
     /**
      * Get absolute or storage-relative path for a file.
-     * 
+     *
      * Returns absolute filesystem path for local storage, or storage path for cloud storage.
      *
      * @param string $fileName The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): ?string
+    public function getPath(string $fileName): null|string
     {
         $fullPath = $this->getDirectory() . "/{$fileName}";
 
@@ -96,8 +96,8 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
 
     /**
      * Get storage-relative path for a file.
-     * 
-     * Used by form components and file management systems that need 
+     *
+     * Used by form components and file management systems that need
      * storage paths relative to the disk root.
      *
      * @param string $fileName The filename to get relative path for
@@ -110,7 +110,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
 
     /**
      * Extract filename from a relative storage path.
-     * 
+     *
      * Utility method to get just the filename portion from a path like "directory/filename.ext".
      *
      * @param string $path The relative storage path
@@ -123,7 +123,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
 
     /**
      * Build full file path with directory.
-     * 
+     *
      * Protected helper method for strategies with complex directory structures.
      *
      * @param string $fileName The filename to build path for

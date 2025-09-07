@@ -36,7 +36,8 @@ enum DeliverableVersionStatus: string implements HasLabel, HasColor
         return match ($this) {
             self::DRAFT => 'Version is being prepared, not yet submitted',
             self::SUBMITTED => 'Version has been submitted for review',
-            self::REVISION_NEEDED => 'Version needs to be revised based on feedback',
+            self::REVISION_NEEDED
+                => 'Version needs to be revised based on feedback',
         };
     }
 
@@ -54,15 +55,12 @@ enum DeliverableVersionStatus: string implements HasLabel, HasColor
         return match ([$this, $newStatus]) {
             // From DRAFT
             [self::DRAFT, self::SUBMITTED] => true,
-            
             // From SUBMITTED
             [self::SUBMITTED, self::REVISION_NEEDED] => true,
             [self::SUBMITTED, self::DRAFT] => true, // Back to draft if needed
-            
             // From REVISION_NEEDED
             [self::REVISION_NEEDED, self::DRAFT] => true,
             [self::REVISION_NEEDED, self::SUBMITTED] => true, // Resubmit after revision
-            
             default => false,
         };
     }

@@ -57,12 +57,19 @@ final class SideNote extends Model
     }
 
     #[Scope]
-    protected function for(Builder $builder, Sidenoteable $entity, User $owner): Builder
-    {
-        return $builder->where('owner_id', $owner->getKey())
-            ->whereHas('sidenoteable', function ($query) use ($entity) {
-                $query->where('sidenoteable_id', $entity->getKey())
-                    ->where('sidenoteable_type', $entity->getMorphClass());
-            });
+    protected function for(
+        Builder $builder,
+        Sidenoteable $entity,
+        User $owner,
+    ): Builder {
+        return $builder->where(
+            'owner_id',
+            $owner->getKey(),
+        )->whereHas('sidenoteable', function ($query) use ($entity) {
+            $query->where('sidenoteable_id', $entity->getKey())->where(
+                'sidenoteable_type',
+                $entity->getMorphClass(),
+            );
+        });
     }
 }

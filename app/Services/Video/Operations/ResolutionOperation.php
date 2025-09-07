@@ -50,7 +50,7 @@ final class ResolutionOperation extends AbstractVideoOperation
      */
     public function getFormat(): X264
     {
-        $format = new X264;
+        $format = new X264();
         $format->setKiloBitrate($this->resolution->getTargetBitrate());
 
         return $format;

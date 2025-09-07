@@ -25,16 +25,15 @@ final class MP4Format implements VideoFormatContract
         return new self();
     }
 
-    public function getDriverFormat(?BitrateEnum $bitrate = null): VideoInterface
-    {
+    public function getDriverFormat(null|BitrateEnum $bitrate = null): VideoInterface {
         $format = new X264();
-        
+
         if ($bitrate) {
             $format->setKiloBitrate($bitrate->getKbps());
         } elseif ($this->getDefaultBitrate()) {
             $format->setKiloBitrate($this->getDefaultBitrate());
         }
-        
+
         return $format;
     }
 
@@ -48,7 +47,7 @@ final class MP4Format implements VideoFormatContract
         return 'MP4 (H.264)';
     }
 
-    public function getDefaultBitrate(): ?int
+    public function getDefaultBitrate(): null|int
     {
         return BitrateEnum::HIGH_1080P->getKbps(); // 4500 kbps - high quality default
     }

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Contracts;
 
-use App\Models\User;
 use App\Models\SideNote;
-use Illuminate\Support\Collection;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Collection;
 
 interface Sidenoteable
 {
@@ -24,7 +24,7 @@ interface Sidenoteable
 
     public function getSideNotesBy(User $user): Collection;
 
-    public function getSideNote(string|int $id): ?SideNote;
+    public function getSideNote(string|int $id): null|SideNote;
 
     public function deleteSideNote(int|string|SideNote $entity);
 }

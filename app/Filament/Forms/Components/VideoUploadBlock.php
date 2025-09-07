@@ -35,7 +35,7 @@ final class VideoUploadBlock extends RichContentCustomBlock
         return true;
     }
 
-    public static function getEditAction(): ?string
+    public static function getEditAction(): null|string
     {
         return 'edit';
     }
@@ -60,22 +60,23 @@ final class VideoUploadBlock extends RichContentCustomBlock
                     ->visibility('public')
                     ->preserveFilenames()
                     ->required()
-                    ->helperText(__('app.file_upload.supported_formats', ['formats' => 'MP4, WebM, OGG, MOV, AVI']) . ' ' . __('app.file_upload.max_size', ['size' => '50MB']))
+                    ->helperText(__('app.file_upload.supported_formats', [
+                        'formats' => 'MP4, WebM, OGG, MOV, AVI',
+                    ])
+                    . ' '
+                    . __('app.file_upload.max_size', ['size' => '50MB']))
                     ->extraAttributes([
                         'accept' => 'video/*',
                     ]),
-
                 TextInput::make('caption')
                     ->label(__('app.title'))
                     ->placeholder(__('app.enter_description'))
                     ->maxLength(255),
-
                 TextInput::make('width')
                     ->label('Display Width (optional)')
                     ->placeholder('e.g., 640')
                     ->numeric()
                     ->helperText('Leave empty for responsive width'),
-
                 TextInput::make('height')
                     ->label('Display Height (optional)')
                     ->placeholder('e.g., 360')
@@ -90,14 +91,17 @@ final class VideoUploadBlock extends RichContentCustomBlock
         if (isset($config['video']) && !isset($config['url'])) {
             $videoPath = $config['video'];
             $videoUrl = Storage::url($videoPath);
-            
+
             // Get video metadata
             $fullPath = Storage::path($videoPath);
             $metadata = static::extractVideoMetadata($fullPath);
-            
+
             // Generate thumbnail if possible
-            $thumbnailUrl = static::generateVideoThumbnail($fullPath, $videoPath);
-            
+            $thumbnailUrl = static::generateVideoThumbnail(
+                $fullPath,
+                $videoPath,
+            );
+
             // Transform the config to the expected format
             $config = [
                 'url' => $videoUrl,
@@ -120,20 +124,23 @@ final class VideoUploadBlock extends RichContentCustomBlock
         ])->render();
     }
 
-    public static function toHtml(array $config, array $data): ?string
+    public static function toHtml(array $config, array $data): null|string
     {
         // Process the raw form data if it contains a file path instead of URL
         if (isset($config['video']) && !isset($config['url'])) {
             $videoPath = $config['video'];
             $videoUrl = Storage::url($videoPath);
-            
+
             // Get video metadata
             $fullPath = Storage::path($videoPath);
             $metadata = static::extractVideoMetadata($fullPath);
-            
+
             // Generate thumbnail if possible
-            $thumbnailUrl = static::generateVideoThumbnail($fullPath, $videoPath);
-            
+            $thumbnailUrl = static::generateVideoThumbnail(
+                $fullPath,
+                $videoPath,
+            );
+
             // Transform the config to the expected format
             $config = [
                 'url' => $videoUrl,
@@ -155,8 +162,8 @@ final class VideoUploadBlock extends RichContentCustomBlock
 
         $videoUrl = $config['url'];
         $caption = $config['caption'] ?? null;
-        $width = ! empty($config['width']) ? (int) $config['width'] : null;
-        $height = ! empty($config['height']) ? (int) $config['height'] : null;
+        $width = !empty($config['width']) ? (int) $config['width'] : null;
+        $height = !empty($config['height']) ? (int) $config['height'] : null;
 
         // Generate unique ID for Video.js
         $videoId = 'video-' . Str::random(8);
@@ -178,7 +185,7 @@ final class VideoUploadBlock extends RichContentCustomBlock
         }
 
         // Build poster attribute if thumbnail exists
-        if (! empty($config['thumbnail'])) {
+        if (!empty($config['thumbnail'])) {
             $videoAttributes['poster'] = $config['thumbnail'];
         }
 
@@ -188,13 +195,14 @@ final class VideoUploadBlock extends RichContentCustomBlock
             if (is_bool($value)) {
                 $attributesString .= $value ? " {$key}" : '';
             } else {
-                $attributesString .= " {$key}=\"" . htmlspecialchars($value) . '"';
+                $attributesString .=
+                    " {$key}=\"" . htmlspecialchars($value) . '"';
             }
         }
 
         // Container styling
         $containerClass = 'video-upload-block my-4';
-        if (! $width || ! $height) {
+        if (!$width || !$height) {
             $containerClass .= ' aspect-video';
         }
 
@@ -205,7 +213,7 @@ final class VideoUploadBlock extends RichContentCustomBlock
             'attributesString' => $attributesString,
             'mimeType' => self::getVideoMimeType($videoUrl),
             'videoId' => $videoId,
-            'fluid' => ! $width || ! $height,
+            'fluid' => !$width || !$height,
         ])->render();
     }
 
@@ -228,38 +236,54 @@ final class VideoUploadBlock extends RichContentCustomBlock
                     $gcd = self::gcd($info[0], $info[1]);
                     $simplifiedWidth = $info[0] / $gcd;
                     $simplifiedHeight = $info[1] / $gcd;
-                    $metadata['aspect_ratio'] = $simplifiedWidth . ':' . $simplifiedHeight;
+                    $metadata['aspect_ratio'] =
+                        $simplifiedWidth . ':' . $simplifiedHeight;
                 }
 
                 // Get file extension for format
-                $metadata['format'] = strtoupper(pathinfo($filePath, PATHINFO_EXTENSION));
+                $metadata['format'] = strtoupper(pathinfo(
+                    $filePath,
+                    PATHINFO_EXTENSION,
+                ));
             }
         } catch (Exception $e) {
-            Log::warning('Failed to extract video metadata: ' . $e->getMessage());
+            Log::warning('Failed to extract video metadata: '
+            . $e->getMessage());
         }
 
         return $metadata;
     }
 
-    protected static function generateVideoThumbnail(string $videoPath, string $storagePath): ?string
-    {
+    protected static function generateVideoThumbnail(
+        string $videoPath,
+        string $storagePath,
+    ): null|string {
         try {
             // Only generate thumbnail if ffmpeg is available (optional)
-            if (! function_exists('exec')) {
+            if (!function_exists('exec')) {
                 return null;
             }
 
-            $thumbnailPath = str_replace(['.mp4', '.webm', '.ogg', '.mov', '.avi'], '_thumb.jpg', $storagePath);
+            $thumbnailPath = str_replace(
+                ['.mp4', '.webm', '.ogg', '.mov', '.avi'],
+                '_thumb.jpg',
+                $storagePath,
+            );
             $thumbnailFullPath = Storage::path($thumbnailPath);
 
             // Create directory if it doesn't exist
             $thumbnailDir = dirname($thumbnailFullPath);
-            if (! is_dir($thumbnailDir)) {
+            if (!is_dir($thumbnailDir)) {
                 mkdir($thumbnailDir, 0755, true);
             }
 
             // Try to generate thumbnail using ffmpeg (if available)
-            $command = 'ffmpeg -i ' . escapeshellarg($videoPath) . ' -ss 00:00:01.000 -vframes 1 -f image2 ' . escapeshellarg($thumbnailFullPath) . ' 2>/dev/null';
+            $command =
+                'ffmpeg -i '
+                . escapeshellarg($videoPath)
+                . ' -ss 00:00:01.000 -vframes 1 -f image2 '
+                . escapeshellarg($thumbnailFullPath)
+                . ' 2>/dev/null';
             exec($command, $output, $returnCode);
 
             if ($returnCode === 0 && file_exists($thumbnailFullPath)) {

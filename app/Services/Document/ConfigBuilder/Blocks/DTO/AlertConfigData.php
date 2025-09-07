@@ -17,7 +17,7 @@ final class AlertConfigData extends SimpleDTO implements BlockConfigContract
 
     public array $config;
 
-    public ?string $shortcut;
+    public null|string $shortcut;
 
     protected function defaults(): array
     {
@@ -27,7 +27,16 @@ final class AlertConfigData extends SimpleDTO implements BlockConfigContract
             'inlineToolBar' => false,
             'shortcut' => 'CMD+SHIFT+A',
             'config' => [
-                'alertTypes' => ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'light', 'dark'],
+                'alertTypes' => [
+                    'primary',
+                    'secondary',
+                    'info',
+                    'success',
+                    'warning',
+                    'danger',
+                    'light',
+                    'dark',
+                ],
                 'defaultType' => 'primary',
                 'messagePlaceholder' => 'Enter something',
             ],
@@ -36,8 +45,6 @@ final class AlertConfigData extends SimpleDTO implements BlockConfigContract
 
     protected function casts(): array
     {
-        return [
-
-        ];
+        return [];
     }
 }

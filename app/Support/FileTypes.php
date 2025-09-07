@@ -14,12 +14,12 @@ use Symfony\Component\Mime\MimeTypes;
  */
 final class FileTypes
 {
-    private static ?MimeTypes $mimeTypes = null;
+    private static null|MimeTypes $mimeTypes = null;
 
     /**
      * Get the MIME type for a given filename.
      */
-    public static function getMimeType(string $filename): ?string
+    public static function getMimeType(string $filename): null|string
     {
         return self::getMimeTypes()->guessMimeType($filename);
     }
@@ -27,7 +27,7 @@ final class FileTypes
     /**
      * Get the primary file extension for a given MIME type.
      */
-    public static function getExtension(string $mimeType): ?string
+    public static function getExtension(string $mimeType): null|string
     {
         $extensions = self::getMimeTypes()->getExtensions($mimeType);
 
@@ -292,8 +292,8 @@ final class FileTypes
 
     /**
      * Get SVG format for document handling (requires sanitization before use).
-     * 
-     * Note: SVGs should be treated as documents due to XSS risks. 
+     *
+     * Note: SVGs should be treated as documents due to XSS risks.
      * Always sanitize SVGs using libraries like enshrined/svg-sanitize
      * and serve with proper CSP headers.
      *
@@ -373,6 +373,6 @@ final class FileTypes
 
     private static function getMimeTypes(): MimeTypes
     {
-        return self::$mimeTypes ??= new MimeTypes;
+        return self::$mimeTypes ??= new MimeTypes();
     }
 }

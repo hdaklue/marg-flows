@@ -11,11 +11,10 @@ final class Ultimate
 {
     private string $tenantId;
 
-    public function build(?string $documentId = null): array
+    public function build(null|string $documentId = null): array
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
-        $imagesConfig = EditorConfigBuilder::images()
-            ->forPlan('ultimate');
+        $imagesConfig = EditorConfigBuilder::images()->forPlan('ultimate');
         $baseDirectory = DirectoryManager::document($this->tenantId)
             ->forDocument($documentId)
             ->images()
@@ -40,14 +39,16 @@ final class Ultimate
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
+            'videoUpload' =>
+                $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
     }
 
-    private function buildVideoUploadConfig(?string $documentId)
+    private function buildVideoUploadConfig(null|string $documentId)
     {
-        $videoUploadConfig = EditorConfigBuilder::videoUpload()
-            ->forPlan('ultimate');
+        $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan(
+            'ultimate',
+        );
 
         $baseDirectory = DirectoryManager::document($this->tenantId)
             ->forDocument($documentId)

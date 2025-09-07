@@ -32,8 +32,7 @@ final class ImageMetadataDTO extends ValidatedDTO
 
     public string $extension;
 
-
-    public ?string $error;
+    public null|string $error;
 
     public bool $hasError;
 
@@ -64,15 +63,18 @@ final class ImageMetadataDTO extends ValidatedDTO
         ];
     }
 
-
     /**
      * Check if image is valid and usable
      */
     public function isValid(): bool
     {
-        return $this->exists && !$this->hasError && $this->width > 0 && $this->height > 0;
+        return (
+            $this->exists
+            && !$this->hasError
+            && $this->width > 0
+            && $this->height > 0
+        );
     }
-
 
     protected function casts(): array
     {

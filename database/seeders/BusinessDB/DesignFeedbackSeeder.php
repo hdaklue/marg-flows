@@ -15,12 +15,16 @@ final class DesignFeedbackSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('Creating design feedback in business database...');
+        $this->command->info(
+            'Creating design feedback in business database...',
+        );
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (! $testUser) {
-            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
+        if (!$testUser) {
+            $this->command->warn(
+                'Test user not found. Please run main DatabaseSeeder first.',
+            );
 
             return;
         }
@@ -28,7 +32,9 @@ final class DesignFeedbackSeeder extends Seeder
         // Get documents from business database to associate feedback with
         $documents = Document::limit(5)->get();
         if ($documents->isEmpty()) {
-            $this->command->warn('No documents found in business database. Please run DocumentSeeder first.');
+            $this->command->warn(
+                'No documents found in business database. Please run DocumentSeeder first.',
+            );
 
             return;
         }
@@ -48,13 +54,28 @@ final class DesignFeedbackSeeder extends Seeder
         ];
 
         $annotationTypes = [
-            'point', 'rectangle', 'circle', 'arrow',
-            'text', 'polygon', 'area', 'line', 'freehand',
+            'point',
+            'rectangle',
+            'circle',
+            'arrow',
+            'text',
+            'polygon',
+            'area',
+            'line',
+            'freehand',
         ];
 
         $colors = [
-            'red', 'blue', 'green', 'yellow', 'orange',
-            'purple', 'pink', 'black', 'white', 'gray',
+            'red',
+            'blue',
+            'green',
+            'yellow',
+            'orange',
+            'purple',
+            'pink',
+            'black',
+            'white',
+            'gray',
         ];
 
         // Create design feedback for each document
@@ -77,7 +98,11 @@ final class DesignFeedbackSeeder extends Seeder
                     'x_coordinate' => $x,
                     'y_coordinate' => $y,
                     'annotation_type' => $annotationType,
-                    'annotation_data' => $this->generateAnnotationData($annotationType, $x, $y),
+                    'annotation_data' => $this->generateAnnotationData(
+                        $annotationType,
+                        $x,
+                        $y,
+                    ),
                     'area_bounds' => $this->generateAreaBounds($annotationType),
                     'color' => fake()->randomElement($colors),
                     'zoom_level' => fake()->randomFloat(2, 0.25, 3.0), // 25% to 300% zoom
@@ -89,7 +114,9 @@ final class DesignFeedbackSeeder extends Seeder
         $this->createSpecializedDesignFeedback($testUser, $documents->first());
 
         $totalDesignFeedback = DesignFeedback::count();
-        $this->command->info("✅ Created {$totalDesignFeedback} design feedback entries in business database");
+        $this->command->info(
+            "✅ Created {$totalDesignFeedback} design feedback entries in business database",
+        );
     }
 
     private function generateDesignComment(string $annotationType): string
@@ -163,9 +190,12 @@ final class DesignFeedbackSeeder extends Seeder
         return fake()->randomElement($typeComments);
     }
 
-    private function generateAnnotationData(string $annotationType, int $x, int $y): ?array
-    {
-        if (! fake()->boolean(70)) { // 70% chance of having annotation data
+    private function generateAnnotationData(
+        string $annotationType,
+        int $x,
+        int $y,
+    ): null|array {
+        if (!fake()->boolean(70)) { // 70% chance of having annotation data
             return null;
         }
 
@@ -181,7 +211,11 @@ final class DesignFeedbackSeeder extends Seeder
                 'startY' => $y,
                 'endX' => $x + rand(-200, 200),
                 'endY' => $y + rand(-200, 200),
-                'arrowStyle' => fake()->randomElement(['straight', 'curved', 'stepped']),
+                'arrowStyle' => fake()->randomElement([
+                    'straight',
+                    'curved',
+                    'stepped',
+                ]),
                 'lineWidth' => rand(2, 8),
                 'arrowHeadSize' => rand(8, 16),
             ]),
@@ -201,9 +235,22 @@ final class DesignFeedbackSeeder extends Seeder
             ]),
             'text' => array_merge($baseData, [
                 'fontSize' => rand(12, 24),
-                'fontFamily' => fake()->randomElement(['Arial', 'Helvetica', 'Times', 'Georgia']),
-                'fontWeight' => fake()->randomElement(['normal', 'bold', '600']),
-                'textAlign' => fake()->randomElement(['left', 'center', 'right']),
+                'fontFamily' => fake()->randomElement([
+                    'Arial',
+                    'Helvetica',
+                    'Times',
+                    'Georgia',
+                ]),
+                'fontWeight' => fake()->randomElement([
+                    'normal',
+                    'bold',
+                    '600',
+                ]),
+                'textAlign' => fake()->randomElement([
+                    'left',
+                    'center',
+                    'right',
+                ]),
                 'maxWidth' => rand(100, 300),
             ]),
             'line' => array_merge($baseData, [
@@ -211,7 +258,11 @@ final class DesignFeedbackSeeder extends Seeder
                 'startY' => $y,
                 'endX' => $x + rand(-150, 150),
                 'endY' => $y + rand(-150, 150),
-                'lineStyle' => fake()->randomElement(['solid', 'dashed', 'dotted']),
+                'lineStyle' => fake()->randomElement([
+                    'solid',
+                    'dashed',
+                    'dotted',
+                ]),
                 'lineWidth' => rand(1, 6),
             ]),
             'freehand' => array_merge($baseData, [
@@ -223,11 +274,11 @@ final class DesignFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateAreaBounds(string $annotationType): ?array
+    private function generateAreaBounds(string $annotationType): null|array
     {
         $areaTypes = ['rectangle', 'circle', 'polygon', 'area'];
 
-        if (! in_array($annotationType, $areaTypes) || ! fake()->boolean(80)) {
+        if (!in_array($annotationType, $areaTypes) || !fake()->boolean(80)) {
             return null;
         }
 
@@ -263,8 +314,8 @@ final class DesignFeedbackSeeder extends Seeder
             $noise = rand(-10, 10);
 
             $points[] = [
-                'x' => $centerX + ($radius + $noise) * cos($angle),
-                'y' => $centerY + ($radius + $noise) * sin($angle),
+                'x' => $centerX + (($radius + $noise) * cos($angle)),
+                'y' => $centerY + (($radius + $noise) * sin($angle)),
                 'pressure' => fake()->randomFloat(2, 0.3, 1.0),
             ];
         }
@@ -287,8 +338,10 @@ final class DesignFeedbackSeeder extends Seeder
         return $vertices;
     }
 
-    private function createSpecializedDesignFeedback(User $user, Document $document): void
-    {
+    private function createSpecializedDesignFeedback(
+        User $user,
+        Document $document,
+    ): void {
         // High-precision point annotation
         DesignFeedback::create([
             'creator_id' => $user->id,
@@ -330,7 +383,12 @@ final class DesignFeedbackSeeder extends Seeder
             ],
             'annotation_data' => [
                 'severity' => 'major_redesign',
-                'affected_elements' => ['header', 'navigation', 'content_area', 'sidebar'],
+                'affected_elements' => [
+                    'header',
+                    'navigation',
+                    'content_area',
+                    'sidebar',
+                ],
                 'priority' => 'high',
             ],
         ]);
@@ -369,11 +427,18 @@ final class DesignFeedbackSeeder extends Seeder
         for ($i = 0; $i < 5; $i++) {
             DesignFeedback::create([
                 'creator_id' => $user->id,
-                'content' => 'Multiple issues in this area - concern #' . ($i + 1) . '.',
+                'content' =>
+                    'Multiple issues in this area - concern #' . ($i + 1) . '.',
                 'feedbackable_type' => $document->getMorphClass(),
                 'feedbackable_id' => $document->id,
-                'status' => fake()->randomElement([FeedbackStatus::OPEN, FeedbackStatus::IN_PROGRESS]),
-                'urgency' => fake()->randomElement([FeedbackUrgency::NORMAL, FeedbackUrgency::HIGH]),
+                'status' => fake()->randomElement([
+                    FeedbackStatus::OPEN,
+                    FeedbackStatus::IN_PROGRESS,
+                ]),
+                'urgency' => fake()->randomElement([
+                    FeedbackUrgency::NORMAL,
+                    FeedbackUrgency::HIGH,
+                ]),
                 'x_coordinate' => $baseX + rand(-30, 30),
                 'y_coordinate' => $baseY + rand(-30, 30),
                 'annotation_type' => 'point',
@@ -381,7 +446,13 @@ final class DesignFeedbackSeeder extends Seeder
                 'zoom_level' => 1.5,
                 'annotation_data' => [
                     'cluster_id' => 'cluster_1',
-                    'issue_type' => fake()->randomElement(['spacing', 'alignment', 'color', 'typography', 'usability']),
+                    'issue_type' => fake()->randomElement([
+                        'spacing',
+                        'alignment',
+                        'color',
+                        'typography',
+                        'usability',
+                    ]),
                     'related_annotations' => 4, // Total in cluster
                 ],
             ]);
@@ -420,7 +491,7 @@ final class DesignFeedbackSeeder extends Seeder
             'status' => FeedbackStatus::URGENT,
             'urgency' => FeedbackUrgency::URGENT,
             'x_coordinate' => 1900, // Near right edge
-            'y_coordinate' => 50,   // Near top edge
+            'y_coordinate' => 50, // Near top edge
             'annotation_type' => 'point',
             'color' => 'red',
             'zoom_level' => 2.0,

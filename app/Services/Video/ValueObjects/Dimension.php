@@ -16,7 +16,12 @@ final class Dimension implements Arrayable, Jsonable
 
     public function __construct(int $width, int $height)
     {
-        throw_if($width <= 0 || $height <= 0, new InvalidArgumentException('Width and height should be positive integers'));
+        throw_if(
+            $width <= 0 || $height <= 0,
+            new InvalidArgumentException(
+                'Width and height should be positive integers',
+            ),
+        );
 
         $this->width = $width;
         $this->height = $height;
@@ -57,11 +62,17 @@ final class Dimension implements Arrayable, Jsonable
         return $this->width === $this->height;
     }
 
-    public function scaleTo(int $targetWidth, int $targetHeight, bool $maintainAspectRatio = true): self
-    {
-        throw_if($targetWidth <= 0 || $targetHeight <= 0, new InvalidArgumentException('Target dimensions must be positive'));
+    public function scaleTo(
+        int $targetWidth,
+        int $targetHeight,
+        bool $maintainAspectRatio = true,
+    ): self {
+        throw_if(
+            $targetWidth <= 0 || $targetHeight <= 0,
+            new InvalidArgumentException('Target dimensions must be positive'),
+        );
 
-        if (! $maintainAspectRatio) {
+        if (!$maintainAspectRatio) {
             return new self($targetWidth, $targetHeight);
         }
 
@@ -83,7 +94,10 @@ final class Dimension implements Arrayable, Jsonable
 
     public function scaleByFactor(float $factor): self
     {
-        throw_if($factor <= 0, new InvalidArgumentException('Scale factor must be positive'));
+        throw_if(
+            $factor <= 0,
+            new InvalidArgumentException('Scale factor must be positive'),
+        );
 
         return new self(
             (int) round($this->width * $factor),
@@ -115,7 +129,10 @@ final class Dimension implements Arrayable, Jsonable
 
     public function equals(self $other): bool
     {
-        return $this->width === $other->width && $this->height === $other->height;
+        return (
+            $this->width === $other->width
+            && $this->height === $other->height
+        );
     }
 
     public function getOrientation(): string

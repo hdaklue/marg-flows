@@ -20,7 +20,10 @@ final class ChunkAssembler
         string $storeDirectory,
     ): string {
         // Validate inputs
-        throw_if($totalChunks <= 0, new RuntimeException('Total chunks must be greater than 0'));
+        throw_if(
+            $totalChunks <= 0,
+            new RuntimeException('Total chunks must be greater than 0'),
+        );
 
         // Pre-validate all chunks exist
         self::validateAllChunksExist($chunkDirectory, $totalChunks);
@@ -37,10 +40,17 @@ final class ChunkAssembler
         $finalFullPath = Storage::path($finalPath);
         $finalHandle = fopen($finalFullPath, 'wb');
 
-        throw_unless($finalHandle, new RuntimeException('Cannot create final file: ' . $finalPath));
+        throw_unless(
+            $finalHandle,
+            new RuntimeException('Cannot create final file: ' . $finalPath),
+        );
 
         try {
-            self::streamChunksToFile($finalHandle, $chunkDirectory, $totalChunks);
+            self::streamChunksToFile(
+                $finalHandle,
+                $chunkDirectory,
+                $totalChunks,
+            );
 
             return $finalPath;
         } catch (Exception $e) {
@@ -54,22 +64,31 @@ final class ChunkAssembler
         }
     }
 
-    private static function validateAllChunksExist(string $chunkDirectory, int $totalChunks): void
-    {
+    private static function validateAllChunksExist(
+        string $chunkDirectory,
+        int $totalChunks,
+    ): void {
         $missingChunks = [];
 
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDirectory}/chunk_{$i}";
-            if (! Storage::exists($chunkPath)) {
+            if (!Storage::exists($chunkPath)) {
                 $missingChunks[] = $i;
             }
         }
 
-        throw_unless(empty($missingChunks), new RuntimeException('Missing chunks: ' . implode(', ', $missingChunks)));
+        throw_unless(
+            empty($missingChunks),
+            new RuntimeException('Missing chunks: '
+            . implode(', ', $missingChunks)),
+        );
     }
 
-    private static function streamChunksToFile($finalHandle, string $chunkDirectory, int $totalChunks): void
-    {
+    private static function streamChunksToFile(
+        $finalHandle,
+        string $chunkDirectory,
+        int $totalChunks,
+    ): void {
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDirectory}/chunk_{$i}";
             $chunkFullPath = Storage::path($chunkPath);
@@ -78,22 +97,40 @@ final class ChunkAssembler
         }
     }
 
-    private static function copyChunkToFile($finalHandle, string $chunkFullPath, int $chunkIndex): void
-    {
+    private static function copyChunkToFile(
+        $finalHandle,
+        string $chunkFullPath,
+        int $chunkIndex,
+    ): void {
         $chunkHandle = fopen($chunkFullPath, 'rb');
 
-        throw_unless($chunkHandle, new RuntimeException("Cannot read chunk {$chunkIndex}: {$chunkFullPath}"));
+        throw_unless(
+            $chunkHandle,
+            new RuntimeException(
+                "Cannot read chunk {$chunkIndex}: {$chunkFullPath}",
+            ),
+        );
 
         try {
             // Use optimized buffer size for better I/O performance
-            while (! feof($chunkHandle)) {
+            while (!feof($chunkHandle)) {
                 $data = fread($chunkHandle, self::BUFFER_SIZE);
 
-                throw_if($data === false, new RuntimeException("Failed to read from chunk {$chunkIndex}"));
+                throw_if(
+                    $data === false,
+                    new RuntimeException(
+                        "Failed to read from chunk {$chunkIndex}",
+                    ),
+                );
 
                 $bytesWritten = fwrite($finalHandle, $data);
 
-                throw_if($bytesWritten === false || $bytesWritten !== strlen($data), new RuntimeException("Failed to write chunk {$chunkIndex} data"));
+                throw_if(
+                    $bytesWritten === false || $bytesWritten !== strlen($data),
+                    new RuntimeException(
+                        "Failed to write chunk {$chunkIndex} data",
+                    ),
+                );
             }
         } finally {
             fclose($chunkHandle);

@@ -25,9 +25,10 @@ class DeliverableSeeder extends Seeder
 
     private function createDeliverablesForFlow(Flow $flow): void
     {
-        $users = User::whereHas('tenantMemberships', fn($query) => 
-            $query->where('tenant_id', $flow->tenant_id)
-        )->take(5)->get();
+        $users = User::whereHas('tenantMemberships', fn($query) => $query->where(
+            'tenant_id',
+            $flow->tenant_id,
+        ))->take(5)->get();
 
         if ($users->isEmpty()) {
             return;
@@ -35,22 +36,31 @@ class DeliverableSeeder extends Seeder
 
         // Create design deliverables
         $this->createDesignDeliverables($flow, $users);
-        
+
         // Create video deliverables
         $this->createVideoDeliverables($flow, $users);
-        
-        // Create audio deliverables  
+
+        // Create audio deliverables
         $this->createAudioDeliverables($flow, $users);
-        
+
         // Create document deliverables
         $this->createDocumentDeliverables($flow, $users);
     }
 
     private function createDesignDeliverables(Flow $flow, $users): void
     {
-        $designTypes = ['video_cover', 'square', 'story', 'Portrait', 'land_scape'];
-        
-        foreach (fake()->randomElements($designTypes, fake()->numberBetween(1, 3)) as $type) {
+        $designTypes = [
+            'video_cover',
+            'square',
+            'story',
+            'Portrait',
+            'land_scape',
+        ];
+
+        foreach (fake()->randomElements($designTypes, fake()->numberBetween(
+            1,
+            3,
+        )) as $type) {
             $deliverable = Deliverable::create([
                 'title' => $this->getDesignTitle($type),
                 'description' => $this->getDesignDescription($type),
@@ -59,9 +69,16 @@ class DeliverableSeeder extends Seeder
                 'status' => fake()->randomElement(DeliverableStatus::cases()),
                 'priority' => fake()->numberBetween(1, 5),
                 'order_column' => fake()->numberBetween(1, 10),
-                'start_date' => fake()->optional(0.7)->dateTimeBetween('-2 weeks', '+1 week'),
-                'success_date' => fake()->optional(0.8)->dateTimeBetween('+1 week', '+2 months'),
-                'format_specifications' => config("deliverables.design.{$type}", []),
+                'start_date' => fake()
+                    ->optional(0.7)
+                    ->dateTimeBetween('-2 weeks', '+1 week'),
+                'success_date' => fake()
+                    ->optional(0.8)
+                    ->dateTimeBetween('+1 week', '+2 months'),
+                'format_specifications' => config(
+                    "deliverables.design.{$type}",
+                    [],
+                ),
                 'settings' => [
                     'auto_save' => true,
                     'notifications' => fake()->boolean(),
@@ -79,8 +96,11 @@ class DeliverableSeeder extends Seeder
     private function createVideoDeliverables(Flow $flow, $users): void
     {
         $videoTypes = ['promotional', 'tutorial'];
-        
-        foreach (fake()->randomElements($videoTypes, fake()->numberBetween(1, 2)) as $type) {
+
+        foreach (fake()->randomElements($videoTypes, fake()->numberBetween(
+            1,
+            2,
+        )) as $type) {
             $deliverable = Deliverable::create([
                 'title' => $this->getVideoTitle($type),
                 'description' => $this->getVideoDescription($type),
@@ -89,9 +109,16 @@ class DeliverableSeeder extends Seeder
                 'status' => fake()->randomElement(DeliverableStatus::cases()),
                 'priority' => fake()->numberBetween(2, 5),
                 'order_column' => fake()->numberBetween(1, 10),
-                'start_date' => fake()->optional(0.7)->dateTimeBetween('-2 weeks', '+1 week'),
-                'success_date' => fake()->optional(0.8)->dateTimeBetween('+2 weeks', '+3 months'),
-                'format_specifications' => config("deliverables.video.{$type}", []),
+                'start_date' => fake()
+                    ->optional(0.7)
+                    ->dateTimeBetween('-2 weeks', '+1 week'),
+                'success_date' => fake()
+                    ->optional(0.8)
+                    ->dateTimeBetween('+2 weeks', '+3 months'),
+                'format_specifications' => config(
+                    "deliverables.video.{$type}",
+                    [],
+                ),
                 'settings' => [
                     'auto_save' => true,
                     'backup_enabled' => true,
@@ -111,7 +138,7 @@ class DeliverableSeeder extends Seeder
         if (fake()->boolean(30)) { // 30% chance of audio deliverables
             $audioTypes = ['podcast_episode', 'voiceover'];
             $type = fake()->randomElement($audioTypes);
-            
+
             $deliverable = Deliverable::create([
                 'title' => $this->getAudioTitle($type),
                 'description' => $this->getAudioDescription($type),
@@ -120,9 +147,16 @@ class DeliverableSeeder extends Seeder
                 'status' => fake()->randomElement(DeliverableStatus::cases()),
                 'priority' => fake()->numberBetween(1, 4),
                 'order_column' => fake()->numberBetween(1, 10),
-                'start_date' => fake()->optional(0.7)->dateTimeBetween('-2 weeks', '+1 week'),
-                'success_date' => fake()->optional(0.8)->dateTimeBetween('+1 week', '+2 months'),
-                'format_specifications' => config("deliverables.audio.{$type}", []),
+                'start_date' => fake()
+                    ->optional(0.7)
+                    ->dateTimeBetween('-2 weeks', '+1 week'),
+                'success_date' => fake()
+                    ->optional(0.8)
+                    ->dateTimeBetween('+1 week', '+2 months'),
+                'format_specifications' => config(
+                    "deliverables.audio.{$type}",
+                    [],
+                ),
                 'settings' => [
                     'auto_save' => true,
                     'quality_check' => true,
@@ -146,9 +180,14 @@ class DeliverableSeeder extends Seeder
             'status' => fake()->randomElement(DeliverableStatus::cases()),
             'priority' => 4, // High priority for project briefs
             'order_column' => 1, // Usually first deliverable
-            'start_date' => fake()->optional(0.9)->dateTimeBetween('-1 week', 'now'),
-            'success_date' => fake()->optional(0.9)->dateTimeBetween('+3 days', '+2 weeks'),
-            'format_specifications' => config('deliverables.document.project_brief', []),
+            'start_date' => fake()
+                ->optional(0.9)
+                ->dateTimeBetween('-1 week', 'now'),
+            'success_date' => fake()
+                ->optional(0.9)
+                ->dateTimeBetween('+3 days', '+2 weeks'),
+            'format_specifications' => config('deliverables.document.project_brief', [
+            ]),
             'settings' => [
                 'auto_save' => true,
                 'version_control' => true,
@@ -168,11 +207,17 @@ class DeliverableSeeder extends Seeder
         $reviewers = $users->random(fake()->numberBetween(1, 2));
 
         foreach ($assignees as $assignee) {
-            $deliverable->assignParticipant($assignee->id, AssigneeRole::ASSIGNEE);
+            $deliverable->assignParticipant(
+                $assignee->id,
+                AssigneeRole::ASSIGNEE,
+            );
         }
 
         foreach ($reviewers as $reviewer) {
-            $deliverable->assignParticipant($reviewer->id, AssigneeRole::REVIEWER);
+            $deliverable->assignParticipant(
+                $reviewer->id,
+                AssigneeRole::REVIEWER,
+            );
         }
     }
 
@@ -211,11 +256,16 @@ class DeliverableSeeder extends Seeder
     private function getDesignDescription(string $type): string
     {
         return match ($type) {
-            'video_cover' => 'Create an engaging video cover that captures attention and represents the brand effectively with proper 16:9 aspect ratio.',
-            'square' => 'Design a balanced square format perfect for social media posts with clear messaging and brand consistency.',
-            'story' => 'Develop a vertical story format optimized for mobile viewing with engaging visual hierarchy.',
-            'Portrait' => 'Create a portrait-oriented design ideal for mobile applications and vertical content display.',
-            'land_scape' => 'Design a wide landscape format perfect for presentations and web headers with cinematic appeal.',
+            'video_cover'
+                => 'Create an engaging video cover that captures attention and represents the brand effectively with proper 16:9 aspect ratio.',
+            'square'
+                => 'Design a balanced square format perfect for social media posts with clear messaging and brand consistency.',
+            'story'
+                => 'Develop a vertical story format optimized for mobile viewing with engaging visual hierarchy.',
+            'Portrait'
+                => 'Create a portrait-oriented design ideal for mobile applications and vertical content display.',
+            'land_scape'
+                => 'Design a wide landscape format perfect for presentations and web headers with cinematic appeal.',
             default => 'Custom design deliverable with specific requirements.',
         };
     }
@@ -240,8 +290,10 @@ class DeliverableSeeder extends Seeder
     private function getVideoDescription(string $type): string
     {
         return match ($type) {
-            'promotional' => 'Create a compelling promotional video that showcases the brand and drives engagement within the specified duration.',
-            'tutorial' => 'Develop an educational tutorial video with clear instructions, proper pacing, and engaging visual elements.',
+            'promotional'
+                => 'Create a compelling promotional video that showcases the brand and drives engagement within the specified duration.',
+            'tutorial'
+                => 'Develop an educational tutorial video with clear instructions, proper pacing, and engaging visual elements.',
             default => 'Professional video content with high production value.',
         };
     }
@@ -266,8 +318,10 @@ class DeliverableSeeder extends Seeder
     private function getAudioDescription(string $type): string
     {
         return match ($type) {
-            'podcast_episode' => 'Record a professional podcast episode with high audio quality, proper intro/outro, and engaging content.',
-            'voiceover' => 'Create professional voiceover recording with clear diction, proper pacing, and studio-quality audio.',
+            'podcast_episode'
+                => 'Record a professional podcast episode with high audio quality, proper intro/outro, and engaging content.',
+            'voiceover'
+                => 'Create professional voiceover recording with clear diction, proper pacing, and studio-quality audio.',
             default => 'High-quality audio content with professional production standards.',
         };
     }

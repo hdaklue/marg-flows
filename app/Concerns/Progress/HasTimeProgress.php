@@ -18,12 +18,22 @@ trait HasTimeProgress
     {
         static::saving(function ($model) {
             // $this refers to the model
-            throw_unless($model->hasValidProgressDates(), new InvalidArgumentException('Model must have valid progress dates'));
+            throw_unless(
+                $model->hasValidProgressDates(),
+                new InvalidArgumentException(
+                    'Model must have valid progress dates',
+                ),
+            );
         });
 
         static::updating(function ($model) {
             // $this refers to the model
-            throw_unless($model->hasValidProgressDates(), new InvalidArgumentException('Model must have valid progress dates'));
+            throw_unless(
+                $model->hasValidProgressDates(),
+                new InvalidArgumentException(
+                    'Model must have valid progress dates',
+                ),
+            );
         });
     }
 
@@ -35,10 +45,15 @@ trait HasTimeProgress
     {
         $startDateAttribute = $this->getProgressStartDateAttribute();
 
-        throw_unless($this->hasAttribute($startDateAttribute), new InvalidArgumentException(
-            'Model ' . static::class . " does not have attribute '{$startDateAttribute}' for progress start date. " .
-            'Override getProgressStartDateAttribute() to specify the correct attribute name.',
-        ));
+        throw_unless(
+            $this->hasAttribute($startDateAttribute),
+            new InvalidArgumentException(
+                'Model '
+                . static::class
+                . " does not have attribute '{$startDateAttribute}' for progress start date. "
+                . 'Override getProgressStartDateAttribute() to specify the correct attribute name.',
+            ),
+        );
 
         return $this->{$startDateAttribute};
     }
@@ -51,10 +66,15 @@ trait HasTimeProgress
     {
         $dueDateAttribute = $this->getProgressDueDateAttribute();
 
-        throw_unless($this->hasAttribute($dueDateAttribute), new InvalidArgumentException(
-            'Model ' . static::class . " does not have attribute '{$dueDateAttribute}' for progress due date. " .
-            'Override getProgressDueDateAttribute() to specify the correct attribute name.',
-        ));
+        throw_unless(
+            $this->hasAttribute($dueDateAttribute),
+            new InvalidArgumentException(
+                'Model '
+                . static::class
+                . " does not have attribute '{$dueDateAttribute}' for progress due date. "
+                . 'Override getProgressDueDateAttribute() to specify the correct attribute name.',
+            ),
+        );
 
         return $this->{$dueDateAttribute};
     }
@@ -63,14 +83,19 @@ trait HasTimeProgress
      * Get the due date for progress calculation
      * Override this method if your due date attribute has a different name.
      */
-    public function getProgressCompletedDate(): ?Carbon
+    public function getProgressCompletedDate(): null|Carbon
     {
         $completedDateAttribute = $this->getProgressCompletedDateAttribute();
 
-        throw_unless($this->hasAttribute($completedDateAttribute), new InvalidArgumentException(
-            'Model ' . static::class . " does not have attribute '{$completedDateAttribute}' for progress due date. " .
-            'Override getProgressDueDateAttribute() to specify the correct attribute name.',
-        ));
+        throw_unless(
+            $this->hasAttribute($completedDateAttribute),
+            new InvalidArgumentException(
+                'Model '
+                . static::class
+                . " does not have attribute '{$completedDateAttribute}' for progress due date. "
+                . 'Override getProgressDueDateAttribute() to specify the correct attribute name.',
+            ),
+        );
 
         return $this->{$completedDateAttribute};
     }
@@ -88,7 +113,7 @@ trait HasTimeProgress
             // Basic validation: start and due dates must exist and be valid
             $hasValidBasicDates = $dueDate->gte($startDate);
 
-            if (! $hasValidBasicDates) {
+            if (!$hasValidBasicDates) {
                 return false;
             }
 

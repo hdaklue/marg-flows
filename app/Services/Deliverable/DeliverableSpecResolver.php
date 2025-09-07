@@ -21,23 +21,33 @@ final class DeliverableSpecResolver
 
     private const string SUPPORTED_FORMATS = 'formats';
 
-    public static function resolve(DeliverableFormat $format, DeliverableType $type): DeliverableSpecification
-    {
-
+    public static function resolve(
+        DeliverableFormat $format,
+        DeliverableType $type,
+    ): DeliverableSpecification {
         return match ($format->key()) {
             'design' => self::handelDesignType($format, $type),
-            default => throw new InvalidArgumentException("Unsupported format [{$format->key()}]."),
+            default => throw new InvalidArgumentException(
+                "Unsupported format [{$format->key()}].",
+            ),
         };
-
     }
 
     public static function getSupportedFormats(): array
     {
-        return collect(array_keys(config(self::CONFIG_PATH . '.' . self::SUPPORTED_FORMATS, [])))->mapWithKeys((fn ($item) => [$item => str($item)->title()->toString()]))->toArray();
+        return collect(array_keys(config(self::CONFIG_PATH
+        . '.'
+        . self::SUPPORTED_FORMATS, [])))
+            ->mapWithKeys(fn($item) => [$item => str(
+                $item,
+            )->title()->toString()])
+            ->toArray();
     }
 
-    protected static function handelDesignType(DeliverableFormat $format, DeliverableType $type): DesignSpecification
-    {
+    protected static function handelDesignType(
+        DeliverableFormat $format,
+        DeliverableType $type,
+    ): DesignSpecification {
         $config = config($type->configPath());
 
         return new DesignSpecification(
@@ -47,6 +57,5 @@ final class DeliverableSpecResolver
             constraints: $config['constraints'] ?? [],
             requirements: $config['requirements'] ?? [],
         );
-
     }
 }

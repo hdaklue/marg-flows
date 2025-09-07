@@ -107,7 +107,7 @@ final class DeliverableVersion extends Model
 
     public function transitionTo(DeliverableVersionStatus $newStatus): bool
     {
-        if (! $this->canTransitionTo($newStatus)) {
+        if (!$this->canTransitionTo($newStatus)) {
             return false;
         }
 
@@ -139,7 +139,10 @@ final class DeliverableVersion extends Model
     public function removeFile(string $fileId): void
     {
         $files = $this->files ?? [];
-        $files = array_filter($files, fn ($file) => ($file['id'] ?? null) !== $fileId);
+        $files = array_filter(
+            $files,
+            fn($file) => ($file['id'] ?? null) !== $fileId,
+        );
         $this->update(['files' => array_values($files)]);
     }
 
@@ -162,7 +165,7 @@ final class DeliverableVersion extends Model
 
     public function hasFiles(): bool
     {
-        return ! empty($this->files);
+        return !empty($this->files);
     }
 
     public function getFileCount(): int
@@ -174,7 +177,10 @@ final class DeliverableVersion extends Model
     {
         $files = $this->files ?? [];
 
-        return array_filter($files, fn ($file) => ($file['type'] ?? null) === $type);
+        return array_filter(
+            $files,
+            fn($file) => ($file['type'] ?? null) === $type,
+        );
     }
 
     // Status Helpers
@@ -206,20 +212,26 @@ final class DeliverableVersion extends Model
     // Version Helpers
     public function isLatest(): bool
     {
-        return $this->version_number === $this->deliverable->versions()->max('version_number');
+        return (
+            $this->version_number === $this->deliverable->versions()->max(
+                'version_number',
+            )
+        );
     }
 
-    public function getPreviousVersion(): ?self
+    public function getPreviousVersion(): null|self
     {
-        return $this->deliverable->versions()
+        return $this->deliverable
+            ->versions()
             ->where('version_number', '<', $this->version_number)
             ->orderByDesc('version_number')
             ->first();
     }
 
-    public function getNextVersion(): ?self
+    public function getNextVersion(): null|self
     {
-        return $this->deliverable->versions()
+        return $this->deliverable
+            ->versions()
             ->where('version_number', '>', $this->version_number)
             ->orderBy('version_number')
             ->first();
@@ -247,7 +259,7 @@ final class DeliverableVersion extends Model
 
     public function hasNotes(): bool
     {
-        return ! empty(trim($this->notes ?? ''));
+        return !empty(trim($this->notes ?? ''));
     }
 
     // Comparison
@@ -255,8 +267,11 @@ final class DeliverableVersion extends Model
     {
         $previous = $this->getPreviousVersion();
 
-        if (! $previous) {
-            return ['changes' => 'Initial version', 'files_added' => $this->getFileCount()];
+        if (!$previous) {
+            return [
+                'changes' => 'Initial version',
+                'files_added' => $this->getFileCount(),
+            ];
         }
 
         $changes = [];
@@ -264,7 +279,9 @@ final class DeliverableVersion extends Model
         $previousFiles = $previous->getFiles();
 
         $changes['files_added'] = count($currentFiles) - count($previousFiles);
-        $changes['has_new_files'] = count($currentFiles) > count($previousFiles);
+        $changes['has_new_files'] = count($currentFiles) > count(
+            $previousFiles,
+        );
         $changes['notes_changed'] = $this->notes !== $previous->notes;
 
         return $changes;
@@ -297,21 +314,27 @@ final class DeliverableVersion extends Model
 
     protected function scopeNeedingRevision($query)
     {
-        return $query->where('status', DeliverableVersionStatus::REVISION_NEEDED);
+        return $query->where(
+            'status',
+            DeliverableVersionStatus::REVISION_NEEDED,
+        );
     }
 
     protected function scopeWithFiles($query)
     {
-        return $query->whereNotNull('files')
-            ->where('files', '!=', '[]');
+        return $query->whereNotNull('files')->where('files', '!=', '[]');
     }
 
     protected function scopeLatestVersions($query)
     {
         return $query->whereIn('id', function ($subquery) {
-            $subquery->select('id')
+            $subquery
+                ->select('id')
                 ->from('deliverable_versions as dv2')
-                ->whereColumn('dv2.deliverable_id', 'deliverable_versions.deliverable_id')
+                ->whereColumn(
+                    'dv2.deliverable_id',
+                    'deliverable_versions.deliverable_id',
+                )
                 ->orderByDesc('version_number')
                 ->limit(1);
         });

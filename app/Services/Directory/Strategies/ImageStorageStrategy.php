@@ -17,19 +17,19 @@ use InvalidArgumentException;
  */
 final class ImageStorageStrategy implements StorageStrategyContract
 {
-    private ?UploadedFile $file = null;
+    private null|UploadedFile $file = null;
 
-    private ?string $storedPath = null;
+    private null|string $storedPath = null;
 
-    private ?string $variant = null;
+    private null|string $variant = null;
 
     // Obfuscated directory names - don't expose actual purpose
     private const VARIANT_DIRECTORIES = [
-        'original' => 'raw',         // raw/original files
-        'thumbnails' => 'sm',        // small/thumbnail files
-        'optimized' => 'opt',        // optimized files
-        'resized' => 'adj',          // adjusted/resized files
-        'watermarked' => 'mark',     // marked/watermarked files
+        'original' => 'raw', // raw/original files
+        'thumbnails' => 'sm', // small/thumbnail files
+        'optimized' => 'opt', // optimized files
+        'resized' => 'adj', // adjusted/resized files
+        'watermarked' => 'mark', // marked/watermarked files
     ];
 
     /**
@@ -37,7 +37,9 @@ final class ImageStorageStrategy implements StorageStrategyContract
      *
      * @param  string  $baseDirectory  The full path to the image storage directory
      */
-    public function __construct(private readonly string $baseDirectory) {}
+    public function __construct(
+        private readonly string $baseDirectory,
+    ) {}
 
     /**
      * Set variant for original/raw image files.
@@ -105,7 +107,9 @@ final class ImageStorageStrategy implements StorageStrategyContract
         $this->file = $file;
 
         $filename = $this->generateFilename();
-        $directory = $this->variant ? $this->buildVariantDirectory() : $this->baseDirectory;
+        $directory = $this->variant
+            ? $this->buildVariantDirectory()
+            : $this->baseDirectory;
         $this->storedPath = $file->storeAs($directory, $filename);
 
         return $this->storedPath;
@@ -120,7 +124,12 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     public function getUrl(): string
     {
-        throw_unless($this->storedPath, new InvalidArgumentException('Cannot generate URL: File must be stored first.'));
+        throw_unless(
+            $this->storedPath,
+            new InvalidArgumentException(
+                'Cannot generate URL: File must be stored first.',
+            ),
+        );
 
         return Storage::url($this->storedPath);
     }
@@ -143,11 +152,14 @@ final class ImageStorageStrategy implements StorageStrategyContract
     private function buildVariantDirectory(): string
     {
         $directory = $this->baseDirectory;
-        
-        if ($this->variant && isset(self::VARIANT_DIRECTORIES[$this->variant])) {
+
+        if (
+            $this->variant
+            && isset(self::VARIANT_DIRECTORIES[$this->variant])
+        ) {
             $directory .= '/' . self::VARIANT_DIRECTORIES[$this->variant];
         }
-        
+
         return $directory;
     }
 
@@ -179,7 +191,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): ?string
+    public function get(string $fileName): null|string
     {
         return Storage::get($this->baseDirectory . "/{$fileName}");
     }
@@ -190,7 +202,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function getVariant(string $fileName): ?string
+    public function getVariant(string $fileName): null|string
     {
         return Storage::get($this->buildVariantDirectory() . "/{$fileName}");
     }
@@ -201,7 +213,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): ?string
+    public function getPath(string $fileName): null|string
     {
         $fullPath = $this->baseDirectory . "/{$fileName}";
 
@@ -218,7 +230,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getVariantPath(string $fileName): ?string
+    public function getVariantPath(string $fileName): null|string
     {
         $fullPath = $this->buildVariantDirectory() . "/{$fileName}";
 
