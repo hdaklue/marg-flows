@@ -6,14 +6,16 @@ namespace App\Providers\Filament;
 
 use App\Filament\Auth\Login;
 use App\Filament\Auth\Register;
+use App\Filament\Pages\Dashboard;
+// Language switch plugin removed - using custom solution
 use App\Filament\Pages\UserSettings;
+use App\Filament\Widgets\RecentInteractionsWidget;
 use App\Http\Middleware\Filament\ConfigureDateTimePickers;
 use App\Http\Middleware\SetLocale;
 use App\Models\Tenant;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
-// Language switch plugin removed - using custom solution
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
@@ -42,17 +44,15 @@ final class PortalPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset()
             ->registration(Register::class)
-            ->databaseNotificationsPolling(fn() => app()->isProduction()
-                ? '60s'
-                : '90s')
+            ->databaseNotificationsPolling(fn() => app()->isProduction() ? '60s' : '90s')
             ->tenant(Tenant::class)
-            ->homeUrl(fn() => filament()->getTenant()
-                ? route('filament.portal.pages.dashboard', ['tenant' =>
-                    filament()->getTenant()])
-                : '/')
+            // ->homeUrl(fn() => filament()->getTenant()
+            //     ? route('filament.portal.pages.dashboard', ['tenant' => filament()->getTenant()])
+            //     : '/')
             ->colors([
                 'primary' => Color::Sky,
             ])
+            ->spa(true)
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
             // ->breadcrumbs(false)
@@ -90,9 +90,6 @@ final class PortalPanelProvider extends PanelProvider
                 in: app_path('Filament/Pages'),
                 for: 'App\\Filament\\Pages',
             )
-            ->pages([
-                // Pages\Dashboard::class,
-            ])
             ->discoverWidgets(
                 in: app_path('Filament/Widgets'),
                 for: 'App\\Filament\\Widgets',
@@ -100,7 +97,9 @@ final class PortalPanelProvider extends PanelProvider
             ->widgets([
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
+                RecentInteractionsWidget::class,
             ])
+            ->pages([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

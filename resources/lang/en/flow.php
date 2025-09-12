@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'actions' => [
-        'create' => 'Create Flow',
+        'create' => 'Create',
         'edit' => 'Edit Flow',
         'delete' => 'Delete Flow',
         'view' => 'View Flow',
@@ -13,6 +13,8 @@ return [
         'restore' => 'Restore Flow',
         'publish' => 'Publish Flow',
         'unpublish' => 'Unpublish Flow',
+        'stream' => 'Stream',
+        'checkpoint' => 'Checkpoint',
     ],
 
     'labels' => [
@@ -86,6 +88,9 @@ return [
         'active' => 'Active',
         'blocked' => 'Blocked',
         'all' => 'All',
+        'streams' => 'Streams',
+        'documents' => 'Documents',
+        'members' => 'Members',
     ],
 
     'table' => [

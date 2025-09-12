@@ -8,6 +8,7 @@ use App\Contracts\Document\Documentable;
 use App\DTOs\Document\CreateDocumentDto;
 use App\Events\Document\DocumentCreated;
 use App\Facades\DocumentManager;
+use App\Models\Document;
 use App\Models\User;
 use App\Services\Document\Contracts\DocumentTemplateContract;
 use Exception;
@@ -23,21 +24,15 @@ final class CreateDocument
         AssignableEntity|User $creator,
         Documentable $targetDocumentable,
         DocumentTemplateContract $template,
-    ) {
+    ): Document {
         try {
             $documentDto = CreateDocumentDto::fromTemplate($name, $template);
 
-            $createdDocument = DocumentManager::create(
-                $documentDto,
-                $targetDocumentable,
-                $creator,
-            );
+            $createdDocument = DocumentManager::create($documentDto, $targetDocumentable, $creator);
 
-            DocumentCreated::dispatch(
-                $createdDocument,
-                $targetDocumentable,
-                $creator,
-            );
+            DocumentCreated::dispatch($createdDocument, $targetDocumentable, $creator);
+
+            return $createdDocument;
         } catch (Exception $e) {
             logger()->error('Error creating new document', [
                 'documentable' => $targetDocumentable,

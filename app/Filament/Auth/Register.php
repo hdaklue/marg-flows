@@ -17,10 +17,10 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Hdaklue\MargRbac\Rules\Username\UsernameAvailable;
+use Hdaklue\MargRbac\Rules\Username\UsernameFormat;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Propaganistas\LaravelDisposableEmail\Validation\Indisposable;
 
 final class Register extends BaseRegister
 {
@@ -60,7 +60,7 @@ final class Register extends BaseRegister
         ])->statePath('data');
     }
 
-    public function register(): null|RegistrationResponseContract
+    public function register(): ?RegistrationResponseContract
     {
         try {
             $this->rateLimit(2);
@@ -72,11 +72,7 @@ final class Register extends BaseRegister
         $data = $this->form->getState();
 
         try {
-            $user = RegisterUser::run(
-                $data['email'],
-                $data['username'],
-                $data['password'],
-            );
+            $user = RegisterUser::run($data['email'], $data['username'], $data['password']);
 
             $this->sendEmailVerificationNotification($user);
 
@@ -84,7 +80,7 @@ final class Register extends BaseRegister
 
             session()->regenerate();
 
-            return new RegistrationResponse();
+            return new RegistrationResponse;
         } catch (Exception $e) {
             throw $e;
         }
@@ -105,11 +101,11 @@ final class Register extends BaseRegister
             ->placeholder(__('auth.register.username_placeholder'))
             ->required()
             ->live(onBlur: true)
-            ->afterStateUpdated(fn(
+            ->afterStateUpdated(fn (
                 $livewire,
                 Field $component,
             ) => $livewire->validateOnly($component->getStatePath()))
-            ->rules([new UsernameAvailable()])
+            ->rules([new UsernameAvailable, new UsernameFormat])
             ->maxLength(255)
             ->autofocus();
     }
@@ -123,7 +119,7 @@ final class Register extends BaseRegister
             ->required()
             ->rule('indisposable')
             ->live(onBlur: true)
-            ->afterStateUpdated(fn(
+            ->afterStateUpdated(fn (
                 $livewire,
                 Field $component,
             ) => $livewire->validateOnly($component->getStatePath()))
@@ -141,7 +137,7 @@ final class Register extends BaseRegister
             ->required()
             ->rule(Password::default())
             ->showAllValidationMessages()
-            ->dehydrateStateUsing(fn($state) => Hash::make($state))
+            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
             ->validationAttribute(__('auth.register.password'));
     }
 

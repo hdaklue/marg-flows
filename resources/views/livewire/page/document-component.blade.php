@@ -51,7 +51,7 @@
                 }"
                 class="ml-3 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors">
                 <span x-show="!isSaving" class="flex items-center space-x-1">
-                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12">
                         </path>
@@ -59,7 +59,7 @@
                     <span>{{ __('document.editor.save') }}</span>
                 </span>
                 <span x-show="isSaving" class="flex items-center space-x-1">
-                    <svg class="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                             stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor"
@@ -71,10 +71,10 @@
             </button>
 
             <!-- Auto-save Toggle -->
-            <div class="ml-3 flex items-center space-x-2" x-data="{
+            <div class="flex items-center ml-3 space-x-2" x-data="{
                 autoSaveEnabled: false,
                 autoSaveInterval: null,
-            
+
                 init() {
                     // Disable the document editor's automatic autosave initially
                     this.$nextTick(() => {
@@ -85,22 +85,22 @@
                         }
                     });
                 },
-            
+
                 toggleAutoSave() {
                     this.autoSaveEnabled = !this.autoSaveEnabled;
                     console.log('Auto-save toggled:', this.autoSaveEnabled);
-            
+
                     if (this.autoSaveEnabled) {
                         this.startAutoSave();
                     } else {
                         this.stopAutoSave();
                     }
                 },
-            
+
                 startAutoSave() {
                     // Always clear existing interval first
                     this.stopAutoSave();
-            
+
                     console.log('Starting auto-save interval');
                     this.autoSaveInterval = setInterval(() => {
                         console.log('Auto-save interval fired, checking conditions...');
@@ -112,16 +112,16 @@
                             console.log('Auto-save skipped - conditions not met');
                         }
                     }, 30000); // 30 seconds
-            
+
                     // Also enable the document editor's autosave
                     if (this.startAutosave) {
                         this.autosaveInterval = 30000; // 30 seconds
                         this.startAutosave();
                     }
-            
+
                     console.log('Auto-save interval ID:', this.autoSaveInterval);
                 },
-            
+
                 stopAutoSave() {
                     console.log('Stopping auto-save, current interval ID:', this.autoSaveInterval);
                     if (this.autoSaveInterval) {
@@ -131,7 +131,7 @@
                     } else {
                         console.log('No interval to clear');
                     }
-            
+
                     // Also disable the document editor's autosave
                     if (this.autosaveTimer) {
                         clearInterval(this.autosaveTimer);
@@ -146,11 +146,11 @@
                 <button @click="toggleAutoSave()" :aria-pressed="autoSaveEnabled.toString()"
                     :aria-label="'{{ __('document.editor.auto_save') }} ' + (autoSaveEnabled ?
                         '{{ __('document.editor.enabled') }}' : '{{ __('document.editor.disabled') }}')"
-                    class="relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900"
+                    class="relative inline-flex flex-shrink-0 h-4 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer w-7 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900"
                     :class="autoSaveEnabled ? 'bg-sky-600' : 'bg-zinc-300 dark:bg-zinc-600'">
                     <span class="sr-only">{{ __('document.editor.toggle_auto_save') }}</span>
                     <span aria-hidden="true"
-                        class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                        class="inline-block w-3 h-3 transition duration-200 ease-in-out transform bg-white rounded-full shadow pointer-events-none ring-0"
                         :class="autoSaveEnabled ? 'translate-x-3' : 'translate-x-0'">
                     </span>
                 </button>
@@ -167,7 +167,7 @@
                     x-transition:leave="transition ease-in duration-150"
                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                     class="flex items-center">
-                    <svg class="h-3 w-3 text-sky-500" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-3 h-3 text-sky-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                             clip-rule="evenodd"></path>
@@ -182,7 +182,7 @@
     </div>
 
     <div id="editor-wrap" wire:ignore @keydown.window.ctrl.k.prevent="saveDoument()" @keydown.meta.k="saveDocument()"
-        class="w-full rounded-2xl bg-zinc-100 p-4 dark:bg-zinc-900">
+        class="w-full p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900">
     </div>
 
     <!-- Navigation Modal -->

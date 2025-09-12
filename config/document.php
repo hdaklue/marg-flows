@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Services\Document\Templates\General;
+use App\Services\Document\Templates\CreativeBrief\CreativeBrief;
+use App\Services\Document\Templates\General\General;
+use App\Services\Document\Templates\MediaPlanBrief\MediaPlanBrief;
 
 return [
     /*
@@ -19,6 +21,8 @@ return [
     'should_cache' => env('DOCUMENT_CACHE_ENABLED', true),
     'templates' => [
         'general' => General::class,
+        'creative_brief' => CreativeBrief::class,
+        'media_plan_brief' => MediaPlanBrief::class,
     ],
     /*
      |--------------------------------------------------------------------------

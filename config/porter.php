@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+use Hdaklue\Porter\Models\Roster;
+
 return [
     /*
      |--------------------------------------------------------------------------
@@ -21,7 +25,7 @@ return [
      |
      */
     'models' => [
-        'roster' => Hdaklue\Porter\Models\Roster::class,
+        'roster' => Roster::class,
     ],
     /*
      |--------------------------------------------------------------------------
@@ -84,7 +88,7 @@ return [
          | - 'hashed': One-way hash using Laravel's Hash facade (requires role verification).
          | - 'plain': Plain text, only allowed in local/testing environments.
          */
-        'key_storage' => env('PORTER_KEY_STORAGE', 'encrypted'),
+        'key_storage' => env('PORTER_KEY_STORAGE', 'hashed'),
         /*
          | Hash rounds for bcrypt when using 'hashed' storage mode.
          | Higher values increase security but also CPU usage.

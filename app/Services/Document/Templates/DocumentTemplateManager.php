@@ -5,27 +5,57 @@ declare(strict_types=1);
 namespace App\Services\Document\Templates;
 
 use App\Services\Document\Contracts\DocumentTemplateContract;
-use Exception;
-use Illuminate\Support\Manager;
+use InvalidArgumentException;
 
-final class DocumentTemplateManager extends Manager
+final class DocumentTemplateManager
 {
-    public function getDefaultDriver(): DocumentTemplateContract
+    private array $templateInstances = [];
+
+    public function __construct()
     {
-        throw new Exception('Select a Template type');
+        // Public constructor for Laravel container
     }
 
     public function templatesAsSelectArray(): array
     {
-        $template = config('document.templates');
-        return collect($template)->mapWithKeys(fn(
-            $value,
+        $templates = config('document.templates');
+
+        return collect($templates)->mapWithKeys(fn (
+            $class,
             $key,
-        ) => [$key => $value::getName()])->toArray();
+        ) => [$key => $class::getName()])->toArray();
     }
 
-    public function general()
+    public function make(string $templateKey): DocumentTemplateContract
     {
-        return General::make();
+        // Return cached instance if exists
+        if (isset($this->templateInstances[$templateKey])) {
+            return $this->templateInstances[$templateKey];
+        }
+
+        $templates = config('document.templates');
+
+        if (! isset($templates[$templateKey])) {
+            throw new InvalidArgumentException(
+                "Template '{$templateKey}' not found in configuration.",
+            );
+        }
+
+        $templateClass = $templates[$templateKey];
+
+        if (! class_exists($templateClass)) {
+            throw new InvalidArgumentException("Template class '{$templateClass}' does not exist.");
+        }
+
+        // Create and cache the instance
+        $this->templateInstances[$templateKey] = $templateClass::make();
+
+        return $this->templateInstances[$templateKey];
+    }
+
+    public function __call(string $method, array $arguments): DocumentTemplateContract
+    {
+        // Support calling templates by key: DocumentTemplate::general(), DocumentTemplate::media_plan_brief(), etc.
+        return $this->make($method);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'actions' => [
-        'create' => 'إنشاء تدفق',
+        'create' => 'إنشاء',
         'edit' => 'تحرير التدفق',
         'delete' => 'حذف التدفق',
         'view' => 'عرض التدفق',
@@ -13,6 +13,8 @@ return [
         'restore' => 'استعادة التدفق',
         'publish' => 'نشر التدفق',
         'unpublish' => 'إلغاء نشر التدفق',
+        'stream' => 'التدفق',
+        'checkpoint' => 'نقطة تفتيش',
     ],
 
     'labels' => [
@@ -86,6 +88,9 @@ return [
         'active' => 'نشط',
         'draft' => 'معطل',
         'all' => 'الكل',
+        'streams' => 'التدفقات',
+        'documents' => 'المستندات',
+        'members' => 'الأعضاء',
     ],
 
     'table' => [

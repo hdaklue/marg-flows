@@ -21,11 +21,11 @@
     @endif
 
     @if ($enabled)
-        <textarea x-autosize style="resize: none" placeholder="{{ $getPlaceholder() }}"
+        <input type="text" x-autosize style="resize: none" placeholder="{{ $getPlaceholder() }}"
             {{ $applyStateBindingModifiers('wire:model') . '=' . $getStatePath() }} x-data="{ focused: false, erros: null }"
             id="{{ $getId() }}" autocomplete="off" autofocus
-            class="disabled:bg-transperant max-w-full border-0 bg-transparent p-0 text-3xl font-bold leading-tight tracking-tight text-gray-900 placeholder-gray-300 outline-none transition-all duration-200 focus:ring-0 disabled:border-0 disabled:text-3xl dark:text-gray-300 dark:placeholder-gray-800 dark:focus:ring-0 lg:text-4xl">
-        </textarea>
+            class="disabled:bg-transperant line rounded-non max-w-full items-center border-0 bg-transparent px-2 py-2 text-2xl font-bold leading-none tracking-tight text-gray-900 placeholder-gray-300 outline-none transition-all duration-200 focus:ring-0 disabled:border-0 disabled:text-3xl lg:text-2xl dark:border-b dark:border-zinc-900 dark:text-gray-300 dark:placeholder-gray-800 dark:focus:ring-0">
+        </input>
     @endif
 
 </x-dynamic-component>

@@ -8,7 +8,6 @@ use App\Casts\DeliverableSpecificationCast;
 use App\Concerns\Database\LivesInBusinessDB;
 use App\Concerns\HasSideNotes;
 use App\Concerns\Stage\HasStagesTrait;
-use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\ScopedToTenant;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Stage\HasStages;
@@ -17,6 +16,7 @@ use App\Enums\AssigneeRole;
 use App\Enums\Deliverable\DeliverableFormat;
 use App\Enums\Deliverable\DeliverableStatus;
 use App\ValueObjects\Deliverable\DeliverableSpecification;
+use Hdaklue\MargRbac\Concerns\Tenant\BelongsToTenant;
 use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
 use Hdaklue\Porter\Contracts\RoleableEntity;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -119,16 +119,12 @@ final class Deliverable extends Model implements
 
     public function currentVersion(): HasOne
     {
-        return $this->hasOne(DeliverableVersion::class)->latest(
-            'version_number',
-        );
+        return $this->hasOne(DeliverableVersion::class)->latest('version_number');
     }
 
     public function latestVersion(): HasOne
     {
-        return $this->hasOne(DeliverableVersion::class)->orderByDesc(
-            'version_number',
-        );
+        return $this->hasOne(DeliverableVersion::class)->orderByDesc('version_number');
     }
 
     // Status Management
@@ -207,11 +203,7 @@ final class Deliverable extends Model implements
             return $default;
         }
 
-        return data_get(
-            $this->format_specifications->toArray(),
-            $key,
-            $default,
-        );
+        return data_get($this->format_specifications->toArray(), $key, $default);
     }
 
     public function validateFile(array $fileData): bool
@@ -230,9 +222,7 @@ final class Deliverable extends Model implements
 
     public function getSpecificationName(): string
     {
-        return (
-            $this->format_specifications?->getName() ?? 'Unknown Specification'
-        );
+        return $this->format_specifications?->getName() ?? 'Unknown Specification';
     }
 
     public function getSpecificationDescription(): string
@@ -248,11 +238,7 @@ final class Deliverable extends Model implements
     // Progress & Status Helpers
     public function isOverdue(): bool
     {
-        return (
-            $this->success_date
-            && $this->success_date->isPast()
-            && !$this->status->isComplete()
-        );
+        return $this->success_date && $this->success_date->isPast() && !$this->status->isComplete();
     }
 
     public function isDue(): bool
@@ -261,10 +247,7 @@ final class Deliverable extends Model implements
             return false;
         }
 
-        return (
-            $this->success_date->isToday()
-            || $this->success_date->isTomorrow()
-        );
+        return $this->success_date->isToday() || $this->success_date->isTomorrow();
     }
 
     public function getDaysUntilDue(): null|int
@@ -338,10 +321,8 @@ final class Deliverable extends Model implements
         return $this->getParticipantsByRole(AssigneeRole::OBSERVER);
     }
 
-    public function assignTo(
-        string|User $user,
-        AssigneeRole $role = AssigneeRole::ASSIGNEE,
-    ): void {
+    public function assignTo(string|User $user, AssigneeRole $role = AssigneeRole::ASSIGNEE): void
+    {
         $userId = $user instanceof User ? $user->id : $user;
         $this->assignParticipant($userId, $role);
     }
@@ -360,10 +341,7 @@ final class Deliverable extends Model implements
         return (
             $this->isAssignedTo($userId)
             || $this->creator_id === $userId
-            || $this->flow->hasParticipantWithRole(
-                $userId,
-                AssigneeRole::ASSIGNEE,
-            )
+            || $this->flow->hasParticipantWithRole($userId, AssigneeRole::ASSIGNEE)
         );
     }
 

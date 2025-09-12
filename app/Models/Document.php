@@ -7,13 +7,15 @@ namespace App\Models;
 use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\HasSideNotes;
 use App\Concerns\SentInNotificationTrait;
-use App\Concerns\Tenant\BelongsToTenant;
 use App\Contracts\SentInNotification;
 use App\Contracts\Sidenoteable;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Services\Document\Collections\DocumentBlocksCollection;
+use App\Services\Recency\Concerns\RecentableModel;
+use App\Services\Recency\Contracts\Recentable;
 use Eloquent;
 use Exception;
+use Hdaklue\MargRbac\Concerns\Tenant\BelongsToTenant;
 use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
 use Hdaklue\Porter\Contracts\RoleableEntity;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -76,10 +78,11 @@ final class Document extends Model implements
     BelongsToTenantContract,
     RoleableEntity,
     SentInNotification,
-    Sidenoteable
+    Sidenoteable,
+    Recentable
 {
     /** @use HasFactory<\Database\Factories\DocumentFactory> */
-    use BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, SentInNotificationTrait;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, SentInNotificationTrait, RecentableModel;
 
     protected $fillable = [
         'name',
@@ -95,6 +98,11 @@ final class Document extends Model implements
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function getRecentLabel(): string|null
+    {
+        return $this->getAttribute('name');
     }
 
     public function updateBlocks(array|string $data)

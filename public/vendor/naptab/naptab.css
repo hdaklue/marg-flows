@@ -1,0 +1,126 @@
+/**
+ * NapTab - Essential CSS for Laravel Tabs Component
+ * This file contains core styles that work with your Tailwind setup
+ * Import this in your CSS file alongside the safelist
+ */
+
+/* ==========================================================================
+   Core Component Styles
+   ========================================================================== */
+
+/* Mobile scrollbar hiding and snap behavior */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Snap to tab items on mobile */
+.snap-x {
+    scroll-snap-type: x mandatory;
+}
+
+.snap-mandatory {
+    scroll-snap-type: x mandatory;
+}
+
+.tab-button {
+    scroll-snap-align: center;
+    scroll-snap-stop: normal;
+    min-width: fit-content;
+    flex-shrink: 0;
+    scroll-snap-align: center;
+}
+
+/* Tab styling for all screen sizes */
+.tab-button {
+    min-width: fit-content;
+    flex-shrink: 0;
+    scroll-snap-align: center;
+}
+
+/* Simple content transitions - opacity only */
+.nap-tab-content {
+    opacity: 1;
+    transition: opacity 200ms ease-in-out;
+}
+
+.nap-tab-content.loading {
+    opacity: 0.6;
+}
+
+/* Tab button smooth transitions */
+.tab-button {
+    transition: background-color 200ms ease-in-out, 
+               color 200ms ease-in-out,
+               border-color 200ms ease-in-out,
+               opacity 200ms ease-in-out;
+}
+
+/* Active tab underline smooth transition */
+.tab-active-premium::after {
+    transition: opacity 250ms ease-in-out;
+}
+
+/* Simple hover effects */
+.tab-hover-simple {
+    transition: background-color 150ms ease-in-out;
+}
+
+/* Clean Active tab styling - simple underline */
+.tab-active-premium {
+    position: relative;
+    contain: layout;
+    overflow: hidden;
+}
+
+.tab-active-premium::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    inset-inline: 8px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 1px;
+    opacity: 0.9;
+}
+
+/* Anti-flicker optimization */
+.tab-button {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: auto;
+    isolation: isolate;
+}
+
+/* Smooth focus states */
+.tab-focus-ring:focus-visible {
+    outline: none;
+    ring-offset: 2px;
+    ring-color: rgb(59 130 246 / 0.5);
+    ring-width: 2px;
+}
+
+/* ==========================================================================
+   Accessibility Support
+   ========================================================================== */
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .nap-tab-content,
+    .tab-button,
+    .tab-hover-simple {
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .tab-active-premium::after {
+        opacity: 1;
+        height: 3px;
+    }
+}

@@ -16,9 +16,9 @@ use Filament\Resources\Resource;
 
 final class FlowResource extends Resource
 {
-    protected static null|string $model = Flow::class;
+    protected static ?string $model = Flow::class;
 
-    protected static null|string $slug = 'f';
+    protected static ?string $slug = 'f';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -54,7 +54,7 @@ final class FlowResource extends Resource
         return [
             'index' => ListFlows::route('/'),
             'create' => CreateFlow::route('/create'),
-            'view' => ViewFlow::route('/{record}'),
+            'view' => ViewFlow::route('/{record}/{activeTab?}'),
             'pages' => FlowDocuments::route('{record}/ps'),
             'createDocument' => CreateDocument::route('{flow}/p/c'),
         ];

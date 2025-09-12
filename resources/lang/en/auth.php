@@ -16,7 +16,6 @@ return [
         'no_account' => 'Don\'t have an account?',
         'sign_up' => 'Sign up',
     ],
-
     'register' => [
         'title' => 'Register',
         'page_title' => 'Create your account',
@@ -36,14 +35,12 @@ return [
         'already_have_account' => 'Already have an account?',
         'sign_in' => 'Sign in',
     ],
-
     'forgot_password' => [
         'title' => 'Forgot Password',
         'description' => 'Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.',
         'email' => 'Email',
         'submit' => 'Email Password Reset Link',
     ],
-
     'reset_password' => [
         'title' => 'Reset Password',
         'email' => 'Email',
@@ -51,7 +48,6 @@ return [
         'password_confirmation' => 'Confirm Password',
         'submit' => 'Reset Password',
     ],
-
     'verify_email' => [
         'title' => 'Email Verification',
         'description' => 'Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.',
@@ -59,14 +55,12 @@ return [
         'resend' => 'Resend Verification Email',
         'logout' => 'Log Out',
     ],
-
     'confirm_password' => [
         'title' => 'Confirm Password',
         'description' => 'This is a secure area of the application. Please confirm your password before continuing.',
         'password' => 'Password',
         'submit' => 'Confirm',
     ],
-
     'messages' => [
         'failed' => 'These credentials do not match our records.',
         'password_reset_sent' => 'We have emailed your password reset link!',
@@ -75,7 +69,6 @@ return [
         'verified' => 'Your email has been verified.',
         'verification_sent' => 'A fresh verification link has been sent to your email address.',
     ],
-
     'profile' => [
         'title' => 'Profile',
         'sections' => [
@@ -86,7 +79,7 @@ return [
             'edit' => 'Edit',
         ],
         'fields' => [
-            'email' => 'Email',
+            'name' => 'Name',
             'avatar' => 'Avatar',
             'timezone' => 'Timezone',
         ],

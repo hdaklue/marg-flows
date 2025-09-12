@@ -61,7 +61,8 @@ final class UserSettings extends Page implements HasTable
                         )->imageSize(50),
                         Grid::make(1)
                             ->schema([
-                                Text::make(fn() => filamentUser()->name)->weight(FontWeight::Bold),
+                                Text::make(fn () => filamentUser()->name)->weight(FontWeight::Bold),
+                                Text::make('@' . filamentUser()->username),
                                 Text::make(filamentUser()->email),
                                 Text::make(filamentUser()->displayTimeZone()),
                             ])
@@ -73,22 +74,19 @@ final class UserSettings extends Page implements HasTable
                         ->label(__('auth.profile.actions.edit'))
                         ->color('primary')
                         ->outlined()
-                        ->fillForm(fn() => [
-                            'email' => filamentUser()->getAttribute('email'),
-                            'avatar' =>
-                                AvatarService::getAvatarPath(filamentUser())
-                                ?: null,
+                        ->fillForm(fn () => [
+                            'name' => filamentUser()->getAttribute('name'),
+                            'avatar' => AvatarService::getAvatarPath(filamentUser()) ?: null,
                             'timezone' => filamentUser()->getTimeZone(),
                         ])
                         ->form([
-                            TextInput::make('email')
-                                ->label(__('auth.profile.fields.email'))
-                                ->email(),
+                            TextInput::make('name')->label(__('auth.profile.fields.name')),
                             FileUpload::make('avatar')
+                                ->imageEditorViewportWidth(100)
+                                ->imageEditorViewportHeight(100)
+                                ->imagePreviewHeight('250')
                                 ->label(__('auth.profile.fields.avatar'))
                                 ->image()
-                                ->imageEditorViewportWidth(600)
-                                ->imageEditorViewportHeight(400)
                                 ->avatar()
                                 ->imageEditor()
                                 ->circleCropper()
@@ -98,11 +96,7 @@ final class UserSettings extends Page implements HasTable
                                 ->searchable()
                                 ->options(Timezone::getTimezonesAsSelectList()),
                         ])
-                        ->action(
-                            fn(array $data) => $this->updateUserBasicData(
-                                $data,
-                            ),
-                        ),
+                        ->action(fn (array $data) => $this->updateUserBasicData($data)),
                 ]),
             Section::make(__('auth.profile.sections.teams'))->schema([
                 EmbeddedTable::make(),

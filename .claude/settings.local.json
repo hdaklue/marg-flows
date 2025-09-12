@@ -18,7 +18,9 @@
       "mcp__laravel-boost__read-log-entries",
       "Bash(mkdir:*)",
       "mcp__laravel-boost__browser-logs",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(vendor/bin/pint:*)"
     ],
     "deny": []
   },

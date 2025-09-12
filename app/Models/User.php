@@ -108,7 +108,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         'remember_token',
     ];
 
-    protected $with = ['profile'];
+    // protected $with = ['profile'];
 
     public function canAccessPanel(Panel $panel): bool
     {
@@ -137,7 +137,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
      */
     public function profile(): HasOne
     {
-        return $this->hasOne(Profile::class, 'user_id', 'id');
+        return $this->hasOne(Profile::class, 'user_id', 'id')->chaperone();
     }
 
     /**

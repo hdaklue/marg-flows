@@ -164,6 +164,7 @@ final class AppServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'user' => User::class,
             'tenant' => Tenant::class,
+            'rbac_tenant' => \Hdaklue\MargRbac\Models\RbacTenant::class,
             'flow' => Flow::class,
             'document' => Document::class,
         ]);

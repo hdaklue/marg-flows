@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use App\Services\Document\Templates\Translation\BaseTranslation;
+
+class En extends BaseTranslation
+{
+    public static function getLocaleCode(): string
+    {
+        return 'en';
+    }
+
+    public function getTranslations(): array
+    {
+        return [
+            'meta' => [
+                'name' => '{{ templateName }}',
+                'description' => '{{ templateDescription }}',
+            ],
+            'blocks' => [
+                'header' => '{{ templateName }} Template',
+                'description' => 'This is a new {{ templateName }} template. Customize it to meet your needs.',
+            ],
+        ];
+    }
+}

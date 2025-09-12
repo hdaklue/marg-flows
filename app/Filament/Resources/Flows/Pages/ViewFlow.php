@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Flows\Pages;
 
 use App\Concerns\Filament\Pages\DisableBreadcrumb;
+use App\Filament\Actions\Document\CreateDocumentAction;
+use App\Filament\Resources\Documents\DocumentResource;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Livewire\Flow\FlowDocumentsTable;
-use App\Livewire\Role\ManageMemebersTable;
+use App\Livewire\Flow\FlowTabs;
+use App\Livewire\Participants\ManageParticipantsTable;
 use App\Livewire\SortableDemo;
 use App\Models\Flow;
 use App\Services\Document\Actions\CreateDocument;
@@ -15,6 +18,7 @@ use App\Services\Document\Facades\DocumentTemplate;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -30,7 +34,6 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
-use Nette\Schema\Expect;
 
 /**
  * @property-read Collection $stages
@@ -53,46 +56,50 @@ final class ViewFlow extends ViewRecord
         return [
             ActionGroup::make([
                 Action::make('add_stream')
-                    ->label('Stream')
+                    ->label(__('flow.actions.stream'))
                     ->size(Size::ExtraSmall),
-                Action::make('add_document')
-                    ->label('Add Document')
-                    ->form([
-                        TextInput::make('name')->required()->maxLength(100),
-                        Select::make(
-                            'template',
-                        )->options(DocumentTemplate::templatesAsSelectArray()),
-                    ])
-                    ->action(function (array $data) {
-                        try {
-                            $driver = (string) $data['template'];
+                // Action::make('add_document')
+                //     ->label('Add Document')
+                //     ->form([
+                //         TextInput::make('name')->required()->maxLength(100),
+                //         Select::make(
+                //             'template',
+                //         )->options(DocumentTemplate::templatesAsSelectArray()),
+                //     ])
+                //     ->action(function (array $data) {
+                //         try {
+                //             $driver = (string) $data['template'];
 
-                            $template = DocumentTemplate::$driver();
-                            CreateDocument::run(
-                                $data['name'],
-                                filamentUser(),
-                                $this->record,
-                                $template,
-                            );
-                            Notification::make()
-                                ->body(__(
-                                    'common.messages.operation_completed',
-                                ))
-                                ->success()
-                                ->send();
-                        } catch (Exception $e) {
-                            logger()->error($e->getMessage());
-                            Notification::make()
-                                ->body(__('common.messages.operation_failed'))
-                                ->danger()
-                                ->send();
-                        }
-                    }),
+                //             $template = DocumentTemplate::$driver();
+                //             $createdDocument = CreateDocument::run(
+                //                 $data['name'],
+                //                 filamentUser(),
+                //                 $this->record,
+                //                 $template,
+                //             );
+                //             $this->redirect(DocumentResource::getUrl('view', [
+                //                 'record' => $createdDocument->getKey(),
+                //             ]), true);
+
+                //             // Notification::make()
+                //             //     ->body(__('common.messages.operation_completed'))
+                //             //     ->success()
+                //             //     ->send();
+                //         } catch (Exception $e) {
+                //             logger()->error($e->getMessage());
+                //             Notification::make()
+                //                 ->body(__('common.messages.operation_failed'))
+                //                 ->danger()
+                //                 ->send();
+                //         }
+                //     }),
+                CreateDocumentAction::make($this->record),
                 Action::make('add_check')
-                    ->label('Checkpoint')
+                    ->label(__('flow.actions.checkpoint'))
                     ->size(Size::ExtraSmall),
             ])
-                ->label('Create')
+                ->dropdownPlacement('bottom-start')
+                ->label(__('flow.actions.create'))
                 ->icon('heroicon-m-plus')
                 ->outlined()
                 ->size(Size::ExtraSmall)
@@ -100,15 +107,19 @@ final class ViewFlow extends ViewRecord
                 ->button(),
             ActionGroup::make([
                 // Action::make('view'),
-                Action::make('edit')
+                EditAction::make('edit')
                     ->visible(filamentUser()->can('update', $this->record))
                     ->record($this->record)
+                    ->fillForm([
+                        'title' => $this->record->getAttribute('title'),
+                        'description' => $this->record->getAttribute('description'),
+                    ])
                     ->schema([
                         TextInput::make('title'),
                         Textarea::make('description'),
                     ]),
                 // Action::make('delete'),
-            ]),
+            ])->dropdownPlacement('bottom-end'),
         ];
     }
 
@@ -126,27 +137,7 @@ final class ViewFlow extends ViewRecord
     public function content(Schema $schema): Schema
     {
         return $schema->components([
-            // Livewire::make(SortableDemo::class),
-            Tabs::make('menu')
-                ->tabs([
-                    Tab::make('Streams')->schema([
-                        Text::make(
-                            'Modifying these permissions may give users access to sensitive information.',
-                        ),
-                    ]),
-                    Tab::make('Documents')->schema([
-                        Livewire::make(FlowDocumentsTable::class, [
-                            'flow' => $this->record,
-                        ]),
-                    ]),
-                    Tab::make('Checkpoints')->schema([]),
-                    Tab::make('Memebers')->schema([
-                        Livewire::make(ManageMemebersTable::class, [
-                            'roleableEntity' => $this->record,
-                        ]),
-                    ]),
-                ])
-                ->contained(),
+            Livewire::make(FlowTabs::class, ['flowId' => $this->record->getKey()]),
         ]);
     }
 
@@ -181,9 +172,7 @@ final class ViewFlow extends ViewRecord
 
     public function getSubheading(): string|Htmlable|null
     {
-        return $this->record->description
-            ? ucfirst($this->record->description)
-            : '';
+        return $this->record->description ? ucfirst($this->record->description) : '';
     }
 
     public function getTitle(): string|Htmlable

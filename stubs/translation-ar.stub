@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use App\Services\Document\Templates\Translation\BaseTranslation;
+
+class Ar extends BaseTranslation
+{
+    public static function getLocaleCode(): string
+    {
+        return 'ar';
+    }
+
+    public function getTranslations(): array
+    {
+        return [
+            'meta' => [
+                'name' => '{{ templateNameAr }}',
+                'description' => '{{ templateDescriptionAr }}',
+            ],
+            'blocks' => [
+                'header' => 'قالب {{ templateNameAr }}',
+                'description' => 'هذا قالب {{ templateNameAr }} جديد. يمكنك تخصيصه لتلبية احتياجاتك.',
+            ],
+        ];
+    }
+}

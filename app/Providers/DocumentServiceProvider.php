@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Contracts\Document\DocumentManagerInterface;
+use App\Contracts\Document\DocumentTemplateTranslatorInterface;
 use App\Services\Document\ConfigBuilder\EditorConfigManager;
 use App\Services\Document\ConfigBuilder\EditorManager;
+use App\Services\Document\CustomBlocks\ListBlock;
 use App\Services\Document\DocumentService;
 use App\Services\Document\Facades\DocumentResolver;
 use App\Services\Document\Facades\EditorBuilder;
 use App\Services\Document\Facades\EditorConfigBuilder;
 use App\Services\Document\Resolver\DocumentStrategyResolver;
 use App\Services\Document\Templates\DocumentTemplateManager;
+use App\Services\Document\Templates\Translation\DocumentTemplateTranslator;
+use BumpCore\EditorPhp\EditorPhp;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -29,21 +33,17 @@ final class DocumentServiceProvider extends ServiceProvider
             EditorConfigBuilder::class,
             fn($app) => new EditorConfigManager($app),
         );
-        $this->app->bind(
-            DocumentManagerInterface::class,
-            DocumentService::class,
-        );
+        $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
         $this->app->singleton('document.template', function ($app) {
-            return new DocumentTemplateManager($app);
+            return new DocumentTemplateManager();
         });
 
+        $this->app->singleton(EditorBuilder::class, fn($app) => new EditorManager($app));
+        $this->app->singleton(DocumentResolver::class, fn($app) => new DocumentStrategyResolver());
+
         $this->app->singleton(
-            EditorBuilder::class,
-            fn($app) => new EditorManager($app),
-        );
-        $this->app->singleton(
-            DocumentResolver::class,
-            fn($app) => new DocumentStrategyResolver(),
+            DocumentTemplateTranslatorInterface::class,
+            DocumentTemplateTranslator::class,
         );
     }
 
@@ -52,6 +52,8 @@ final class DocumentServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        EditorPhp::register([
+            'nestedList' => ListBlock::class,
+        ]);
     }
 }

@@ -6,6 +6,7 @@ namespace App\Livewire\Components;
 
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Models\Document;
+use App\Services\Recency\RecencyService;
 use Hdaklue\MargRbac\Collections\Role\ParticipantsCollection;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -37,17 +38,9 @@ final class DocumentCard extends Component
 
     public function mount(string $pageId, string $pageableId): void
     {
-        $this->page = Document::where('id', $pageId)
-            ->with('documentable')
-            ->firstOrFail();
-        $this->createdAt = toUserDateTime(
-            $this->page->created_at,
-            filamentUser(),
-        );
-        $this->updatedAt = toUserDateTime(
-            $this->page->updated_at,
-            filamentUser(),
-        );
+        $this->page = Document::where('id', $pageId)->with('documentable')->firstOrFail();
+        $this->createdAt = toUserDateTime($this->page->created_at, filamentUser());
+        $this->updatedAt = toUserDateTime($this->page->updated_at, filamentUser());
     }
 
     #[Computed]
@@ -66,10 +59,7 @@ final class DocumentCard extends Component
     public function userPermissions(): array
     {
         return [
-            'canManageMembers' => filamentUser()->can(
-                'manageMembers',
-                $this->page,
-            ),
+            'canManageMembers' => filamentUser()->can('manageMembers', $this->page),
             'canEdit' => filamentUser()->can('update', $this->page),
         ];
     }
@@ -93,8 +83,7 @@ final class DocumentCard extends Component
 
     public function openPage(): void
     {
-        $this->redirect(DocumentResource::getUrl('view', ['record' =>
-            $this->page->getKey()]));
+        $this->redirect(DocumentResource::getUrl('view', ['record' => $this->page->getKey()]));
         $this->dispatch('open-page', $this->pageId);
     }
 

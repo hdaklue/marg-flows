@@ -7,6 +7,8 @@ namespace App\Filament\Resources\Documents\Pages;
 use App\Facades\DocumentManager;
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
+use App\Services\Recency\Actions\RecordRecency;
+use App\Services\Recency\RecencyService;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
@@ -14,6 +16,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Queue;
 
 /**
  * @property-read bool $canEdit
@@ -39,6 +42,7 @@ final class ViewDocument extends ViewRecord
         $this->form->fill([
             'title' => $this->record->getAttribute('name'),
         ]);
+        RecordRecency::dispatch(filamentUser(), $this->record);
     }
 
     public function resolveRecord(int|string $key): Model

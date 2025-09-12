@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="w-full mx-auto md:w-2/3 lg:w-4/5 xl:w-4/5">
+    <div class="mx-auto w-full max-w-7xl lg:w-4/5 xl:w-4/5 2xl:w-3/5">
         {{ $this->form }}
         <livewire:document.document-component :documentId="$this->record->getKey()" />
     </div>

@@ -72,15 +72,10 @@ final class DocumentResource extends Resource
         return 'heroicon-o-clipboard-document-list';
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
-    }
-
     public static function getPages(): array
     {
         return [
-            // 'index' => ListDocuments::route('/'),
+            'index' => ListDocuments::route('/'),
             'view' => ViewDocument::route('/{record}'),
             // 'edit' => Pages\EditPage::route('/{record}/edit'),
         ];
