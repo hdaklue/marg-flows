@@ -3,7 +3,7 @@
 <div>
     <h2 class="text-xl font-semibold mb-4">Video Annotation Example</h2>
     
-    <x-video-annotation 
+    <x-video-annotaion.index 
         video-src="{{ $videoUrl ?? 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }}"
         :comments="$comments ?? '[]'"
         :on-comment="'handleComment'"
