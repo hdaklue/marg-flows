@@ -17,6 +17,8 @@ use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\FlowStage;
 use App\Facades\MentionService;
+use App\Services\Recency\Concerns\RecentableModel;
+use App\Services\Recency\Contracts\Recentable;
 use Hdaklue\MargRbac\Concerns\Tenant\BelongsToTenant;
 use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
 use Hdaklue\Porter\Contracts\RoleableEntity;
@@ -95,9 +97,10 @@ final class Flow extends Model implements
     RoleableEntity,
     ScopedToTenant,
     SentInNotification,
+    Recentable,
     Sidenoteable
 {
-    use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInOriginalDB, ManagesDocuments, ReceivesRoleAssignments, SentInNotificationTrait, SoftDeletes;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInOriginalDB, ManagesDocuments, ReceivesRoleAssignments, SentInNotificationTrait, SoftDeletes, RecentableModel;
 
     // protected $connection = 'mysql';
 
@@ -278,5 +281,13 @@ final class Flow extends Model implements
             'completed_at' => 'date',
             'canceled_at' => 'date',
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRecentLabel(): null|string
+    {
+        return $this->title;
     }
 }

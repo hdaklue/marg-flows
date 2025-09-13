@@ -20,9 +20,7 @@ final class Simple
             ->images()
             ->getDirectory();
         if ($documentId) {
-            $imagesConfig
-                ->forDocument($documentId)
-                ->baseDirectory($baseDirectory);
+            $imagesConfig->forDocument($documentId)->baseDirectory($baseDirectory);
         }
 
         return [
@@ -31,21 +29,17 @@ final class Simple
             'table' => EditorConfigBuilder::table()->toArray(),
             'nestedList' => EditorConfigBuilder::nestedList()->toArray(),
             'alert' => EditorConfigBuilder::alert()->toArray(),
-            'linkTool' => EditorConfigBuilder::linkTool()
-                ->enablePreview(false)
-                ->toArray(),
+            'linkTool' => EditorConfigBuilder::linkTool()->enablePreview(false)->toArray(),
             'images' => $imagesConfig->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' =>
-                $this->buildVideoUploadConfig($documentId)->toArray(),
+            // 'videoUpload' =>
+            //     $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
     }
 
     private function buildVideoUploadConfig(null|string $documentId)
     {
-        $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan(
-            'simple',
-        );
+        $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan('simple');
 
         $baseDirectory = DirectoryManager::document($this->tenantId)
             ->forDocument($documentId)
@@ -53,9 +47,7 @@ final class Simple
             ->getDirectory();
 
         if ($documentId) {
-            $videoUploadConfig
-                ->forDocument($documentId)
-                ->baseDirectory($baseDirectory);
+            $videoUploadConfig->forDocument($documentId)->baseDirectory($baseDirectory);
         }
 
         return $videoUploadConfig;

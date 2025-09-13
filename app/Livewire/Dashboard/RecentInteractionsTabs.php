@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Models\Document;
+use App\Models\Flow;
 use App\Models\Recent;
 use App\Services\Recency\RecencyService;
 use App\Services\Recency\RecentableCollection;
@@ -24,9 +26,15 @@ class RecentInteractionsTabs extends NapTab
     {
         return [
             // Controller method approach (recommended for dynamic content)
-            Tab::make('all')->livewire(RecentableList::class, ['recents' => $this->getData()]),
-            Tab::make('documents')->livewire(RecentableList::class, ['recents' =>
-                $this->getData()]),
+            // Tab::make('all')->livewire(RecentableList::class, ['recents' => $this->getData()]),
+            Tab::make('documents')->icon(
+                'clipboard-document-list',
+            )->livewire(RecentableList::class, [
+                'recents' => $this->getData()->whereTypeIs((new Document())->getRecentType()),
+            ]),
+            Tab::make('flows')->icon('rectangle-stack')->livewire(RecentableList::class, [
+                'recents' => $this->getData()->whereTypeIs((new Flow())->getRecentType()),
+            ]),
             // Tab::make('workflows')->content(new HtmlString('Workflows')),
             // Tab::make('analytics'),
             // Livewire component integration

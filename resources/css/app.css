@@ -5,6 +5,7 @@
 @tailwind components;
 @tailwind utilities; */
 @import "tailwindcss";
+@import "./safelist.css";
 
 /* Source content paths for Tailwind v4 */
 @source "./app/Filament/**/*.php";

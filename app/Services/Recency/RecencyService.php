@@ -1,19 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Recency;
 
 use App\Models\Recent;
 use App\Models\User;
 use App\Services\Recency\Contracts\Recentable;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 
-//TODO:should skip if the last update is less than an hour
-class RecencyService
+final class RecencyService
 {
     public static function tap(User $user, Recentable $recentable)
     {
         try {
+            // Skip if recently updated - check before any DB operations
+            $recent = Recent::query()
+                ->where('user_id', $user->id)
+                ->where('recentable_type', $recentable->getRecentType())
+                ->where('recentable_id', $recentable->getRecentKey())
+                ->where('tenant_id', $user->activeTenant()->getKey())
+                ->where('interacted_at', '>', now()->subMinutes(config('recency.throttle_minutes')))
+                ->exists();
+
+            if ($recent) {
+                return; // Skip update if within throttle period
+            }
+
             Recent::query()->updateOrInsert([
                 'user_id' => $user->id,
                 'recentable_type' => $recentable->getRecentType(),
@@ -23,7 +36,13 @@ class RecencyService
                 'interacted_at' => now(),
             ]);
         } catch (Exception $e) {
-            throw $e;
+            // Log the error but don't throw it to prevent breaking the main flow
+            logger()->warning('Failed to tap recent interaction', [
+                'user_id' => $user->id,
+                'recentable_type' => $recentable->getRecentType(),
+                'recentable_id' => $recentable->getRecentKey(),
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -41,13 +60,13 @@ class RecencyService
             ->get(); // returns actual models
     }
 
-    public static function forUser(User $user, int $limit = 10): RecentableCollection
+    public static function forUser(User $user, ?int $limit = null): RecentableCollection
     {
         return Recent::query()
             ->forUser($user)
             ->byTenant($user->activeTenant())
             ->latest('interacted_at')
-            ->limit($limit)
+            ->limit($limit ?? config('recency.default_limit'))
             ->get();
     }
 }

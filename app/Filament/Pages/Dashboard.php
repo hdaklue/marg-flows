@@ -34,6 +34,6 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     public function getTitle(): Htmlable|string
     {
-        return 'Hello,' . str(filamentUser()->name)->beforeLast(' ')->toString();
+        return 'Hi, ' . str(filamentUser()->name)->beforeLast(' ')->toString();
     }
 }

@@ -21,7 +21,7 @@ final class RemoveMemberAction
             ->visible(filamentUser()->can('manage', $roleableEntity))
             ->color('danger')
             ->action(function (Component $livewire, $record) use ($roleableEntity) {
-                $user = User::where('id', $record['assignable']['id'])->first();
+                $user = User::where('id', $record['id'])->first();
                 RemoveParticipant::run($roleableEntity, $user);
                 $livewire->resetTable();
             })

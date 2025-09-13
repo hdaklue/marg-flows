@@ -15,6 +15,8 @@ class RecentableData extends SimpleDTO
     public string $type;
     public string $url;
 
+    public null|string $color;
+
     public static function fromRecentable(Recentable $recentable, Tenant $tenant): static
     {
         return static::fromArray([
@@ -22,6 +24,7 @@ class RecentableData extends SimpleDTO
             'key' => $recentable->getRecentKey(),
             'type' => $recentable->getRecentType(),
             'url' => static::resolveUrl($recentable, $tenant),
+            'color' => static::color($recentable->getRecentType()),
         ]);
     }
 
@@ -38,5 +41,10 @@ class RecentableData extends SimpleDTO
     protected function defaults(): array
     {
         return [];
+    }
+
+    public static function color(string $type): string
+    {
+        return match ($type) { default => 'zinc' };
     }
 }

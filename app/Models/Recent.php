@@ -46,13 +46,13 @@ class Recent extends Model
     #[Scope]
     protected function forUser(Builder $builder, Authenticatable $authenticatable)
     {
-        $builder->whereBelongsTo($authenticatable);
+        return $builder->whereBelongsTo($authenticatable);
     }
 
     #[Scope]
-    protected function forRecentable(Builder $builder, Recentable $recentable): void
+    protected function forRecentable(Builder $builder, Recentable $recentable)
     {
-        $builder->whereHasMorph(
+        return $builder->whereHasMorph(
             'recentable',
             $recentable->getRecentType(),
             fn(Builder $q) => $q->whereKey($recentable->getRecentKey()),

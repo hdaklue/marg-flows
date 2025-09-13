@@ -15,6 +15,7 @@ use App\Livewire\SortableDemo;
 use App\Models\Flow;
 use App\Services\Document\Actions\CreateDocument;
 use App\Services\Document\Facades\DocumentTemplate;
+use App\Services\Recency\Actions\RecordRecency;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -136,6 +137,7 @@ final class ViewFlow extends ViewRecord
 
     public function content(Schema $schema): Schema
     {
+        RecordRecency::dispatch(filamentUser(), $this->record);
         return $schema->components([
             Livewire::make(FlowTabs::class, ['flowId' => $this->record->getKey()]),
         ]);

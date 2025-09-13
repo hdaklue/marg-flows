@@ -23,14 +23,13 @@ use Log;
  * @property-read string  $updatedAtString
  * @property-read array $participantsArray;
  */
-#[Ds]
 final class DocumentComponent extends Component
 {
     public $canEdit = false;
 
     public array $content;
 
-    public string $userPlan = 'ultimate'; // Default plan - testing restrictions
+    public string $userPlan = 'advanced'; // Default plan - testing restrictions
 
     #[Locked]
     public string $documentId;
@@ -107,10 +106,7 @@ final class DocumentComponent extends Component
     public function userPermissions(): array
     {
         return [
-            'canManageMembers' => filamentUser()->can(
-                'manageMembers',
-                $this->document,
-            ),
+            'canManageMembers' => filamentUser()->can('manageMembers', $this->document),
             'canEdit' => filamentUser()->can('update', $this->document),
         ];
     }
