@@ -3,6 +3,14 @@ import laravel, { refreshPaths } from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: undefined // Disable automatic chunking for small files
+            }
+        },
+        chunkSizeWarningLimit: 1000
+    },
     plugins: [
         tailwindcss(),
         laravel({
@@ -16,7 +24,7 @@ export default defineConfig({
                 'resources/js/components/async/voice-recorder.js',
                 'resources/js/components/async/video-recorder.js',
                 'resources/js/components/async/audio-player.js',
-                'resources/js/components/async/chunked-file-upload.js',
+                'resources/js/components/ChunkedFileUpload/index.js',
                 // CSS files
                 'resources/css/components/editorjs/index.css',
                 'resources/css/components/editorjs/resizable-image.css',

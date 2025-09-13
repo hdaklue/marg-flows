@@ -24,3 +24,7 @@ yarn-error.log
 /.zed
 laradumps.yaml
 monitization.md
+
+# Development scripts
+*.sh
+deployment-check.php
