@@ -958,6 +958,8 @@ class VideoUpload {
                     responsive: true,
                     preload: 'metadata',
                     controls: true,
+                    playbackRates: [0.5, 1, 1.25, 1.5, 2],
+                    fluid: false,
                     html5: {
                         vhs: {
                             overrideNative: !window.videojs.browser.IS_SAFARI
@@ -965,12 +967,43 @@ class VideoUpload {
                         nativeVideoTracks: false,
                         nativeAudioTracks: false,
                         nativeTextTracks: false
-                    }
+                    },
+                    // Fix seeking issues
+                    techOrder: ['html5'],
+                    sources: [{
+                        src: videoUrl,
+                        type: this.getVideoMimeType(videoUrl)
+                    }]
                 });
 
                 // Handle Video.js errors
                 player.ready(() => {
                     console.log('Modal Video.js player ready with aspect ratio:', aspectRatio);
+
+                    // Fix seeking issues
+                    let seeking = false;
+                    let seekToTime = 0;
+
+                    player.on('seeking', () => {
+                        seeking = true;
+                        seekToTime = player.currentTime();
+                    });
+
+                    player.on('seeked', () => {
+                        if (seeking && Math.abs(player.currentTime() - seekToTime) > 1) {
+                            // If the current time is significantly different from where we wanted to seek,
+                            // try to seek again
+                            player.currentTime(seekToTime);
+                        }
+                        seeking = false;
+                    });
+
+                    // Prevent time jumping during seeking
+                    player.on('timeupdate', () => {
+                        if (seeking) {
+                            return; // Don't update time display while seeking
+                        }
+                    });
 
                     // Add error handler
                     player.on('error', () => {

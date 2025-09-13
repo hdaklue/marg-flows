@@ -11,6 +11,7 @@ use App\ValueObjects\Dimension\AspectRatio;
 use Exception;
 use FFMpeg\Format\Video\X264;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -453,6 +454,9 @@ final class EditorJsVideoUpload extends Controller
                 'extraction_time' => $extractionTime,
             ]);
 
+            // Warm the cache with the new thumbnail
+            $this->warmThumbnailCache($thumbnailPath, $disk);
+
             return $thumbnailPath;
         } catch (Exception $e) {
             Log::warning('Failed to generate video thumbnail', [
@@ -522,6 +526,34 @@ final class EditorJsVideoUpload extends Controller
         ]);
 
         return in_array($extension, $allowedExtensions);
+    }
+
+    /**
+     * Warm the cache with newly generated thumbnail.
+     */
+    private function warmThumbnailCache(string $thumbnailPath, string $disk): void
+    {
+        try {
+            // Get thumbnail content and metadata
+            $content = Storage::disk($disk)->get($thumbnailPath);
+            $lastModified = Storage::disk($disk)->lastModified($thumbnailPath);
+
+            // Create cache key (same format as FileServeController)
+            $cacheKey = 'file_content:' . md5($thumbnailPath . $lastModified);
+
+            // Cache the thumbnail content for 1 hour
+            Cache::put($cacheKey, $content, 3600);
+
+            Log::info('Thumbnail cached successfully', [
+                'thumbnail_path' => $thumbnailPath,
+                'cache_key' => $cacheKey,
+            ]);
+        } catch (Exception $e) {
+            Log::warning('Failed to cache thumbnail', [
+                'thumbnail_path' => $thumbnailPath,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

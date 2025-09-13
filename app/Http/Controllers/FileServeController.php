@@ -8,11 +8,21 @@ use App\Services\Directory\DirectoryManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class FileServeController extends Controller
 {
+    /**
+     * Clear cached file content when file is deleted/updated.
+     */
+    public static function clearFileCache(string $path, int $lastModified): void
+    {
+        $cacheKey = 'file_content:' . md5($path . $lastModified);
+        Cache::forget($cacheKey);
+    }
+
     /**
      * Check if file is small enough for direct response.
      */
@@ -28,6 +38,74 @@ final class FileServeController extends Controller
     private function isImageFile(string $mimeType): bool
     {
         return str_starts_with($mimeType, 'image/');
+    }
+
+    /**
+     * Get file content with server-side caching for small files.
+     */
+    private function getCachedFileContent(string $path, string $disk, int $lastModified): string
+    {
+        // Create cache key based on path and modification time
+        $cacheKey = 'file_content:' . md5($path . $lastModified);
+
+        // Try to get from cache first
+        $content = Cache::get($cacheKey);
+
+        if ($content === null) {
+            // Not in cache, load from storage
+            $content = Storage::disk($disk)->get($path);
+
+            // Cache for 1 hour (only cache small files to avoid memory issues)
+            $fileSize = Storage::disk($disk)->size($path);
+            if ($fileSize < 5 * 1024 * 1024) { // Only cache files under 5MB
+                Cache::put($cacheKey, $content, 3600); // 1 hour cache
+            }
+        }
+
+        return $content;
+    }
+
+    /**
+     * Handle HTTP range requests for video streaming.
+     */
+    private function handleRangeRequest(
+        Request $request,
+        string $disk,
+        string $path,
+        int $size,
+        string $mimeType,
+        array $headers,
+    ): Response|StreamedResponse {
+        $rangeHeader = $request->header('Range');
+
+        // Parse range header (e.g., "bytes=0-1024" or "bytes=1024-")
+        if (preg_match('/bytes=(\d*)-(\d*)/', $rangeHeader, $matches)) {
+            $start = $matches[1] === '' ? 0 : intval($matches[1]);
+            $end = $matches[2] === '' ? $size - 1 : intval($matches[2]);
+
+            // Ensure valid range
+            $start = max(0, min($start, $size - 1));
+            $end = max($start, min($end, $size - 1));
+
+            $contentLength = $end - $start + 1;
+
+            // Update headers for partial content
+            $headers['Content-Length'] = $contentLength;
+            $headers['Content-Range'] = "bytes {$start}-{$end}/{$size}";
+
+            // Stream the requested range
+            return response()->stream(function () use ($disk, $path, $start, $contentLength) {
+                $stream = Storage::disk($disk)->readStream($path);
+                if ($stream) {
+                    fseek($stream, $start);
+                    echo fread($stream, $contentLength);
+                    fclose($stream);
+                }
+            }, 206, $headers); // 206 Partial Content
+        }
+
+        // Invalid range, return full file
+        return Storage::disk($disk)->response($path, basename($path), $headers);
     }
 
     /**
@@ -80,17 +158,39 @@ final class FileServeController extends Controller
         $mimeType = Storage::disk($disk)->mimeType($path);
         $size = Storage::disk($disk)->size($path);
 
-        // Set appropriate headers
+        // Get file modification time for ETag and Last-Modified headers
+        $lastModified = Storage::disk($disk)->lastModified($path);
+        $etag = md5($path . $lastModified . $size);
+
+        // Check if client has cached version
+        $clientEtag = $request->header('If-None-Match');
+        $clientLastModified = $request->header('If-Modified-Since');
+
+        if ($clientEtag === $etag ||
+            ($clientLastModified && strtotime($clientLastModified) >= $lastModified)) {
+            return response('', 304);
+        }
+
+        // Set appropriate headers with improved caching
         $headers = [
             'Content-Type' => $mimeType,
             'Content-Length' => $size,
-            'Cache-Control' => 'private, max-age=3600', // 1 hour cache
+            'Cache-Control' => 'private, max-age=86400, must-revalidate', // 24 hour cache with validation
+            'ETag' => $etag,
+            'Last-Modified' => gmdate('D, d M Y H:i:s', $lastModified) . ' GMT',
             'X-Robots-Tag' => 'noindex, nofollow',
+            'Accept-Ranges' => 'bytes', // Enable range requests for video streaming
         ];
 
-        // For images and small files, return direct response
+        // Handle range requests for video streaming
+        $rangeHeader = $request->header('Range');
+        if ($rangeHeader && str_starts_with($mimeType, 'video/')) {
+            return $this->handleRangeRequest($request, $disk, $path, $size, $mimeType, $headers);
+        }
+
+        // For images and small files, return direct response with caching
         if ($this->isSmallFile($size) || $this->isImageFile($mimeType)) {
-            $content = Storage::disk($disk)->get($path);
+            $content = $this->getCachedFileContent($path, $disk, $lastModified);
 
             return response($content, 200, $headers);
         }
