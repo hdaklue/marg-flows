@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class OriginalMigrateCommand extends Command
+final class OriginalMigrateCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -34,9 +37,19 @@ class OriginalMigrateCommand extends Command
         );
 
         try {
+            // Get only main migrations (exclude rbac and business-db subdirectories)
+            $mainMigrations = $this->getMainMigrationPaths();
+
+            if (empty($mainMigrations)) {
+                $this->info('No main migrations found.');
+
+                return 0;
+            }
+
             // Run migrations on mysql connection, excluding RBAC migrations
             $exitCode = Artisan::call('migrate', array_filter([
                 '--database' => 'mysql',
+                '--path' => $mainMigrations,
                 '--force' => $this->option('force'),
                 '--pretend' => $this->option('pretend'),
             ]));
@@ -53,13 +66,35 @@ class OriginalMigrateCommand extends Command
                 }
             } else {
                 $this->error('❌ Original database migrations failed!');
+
                 return 1;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('❌ Migration failed: ' . $e->getMessage());
+
             return 1;
         }
 
         return 0;
+    }
+
+    /**
+     * Get migration paths for main database (excluding subdirectories).
+     */
+    private function getMainMigrationPaths(): array
+    {
+        $migrationsPath = database_path('migrations');
+
+        if (! is_dir($migrationsPath)) {
+            return [];
+        }
+
+        // Get all .php files in the main migrations directory
+        $files = glob($migrationsPath . '/*.php');
+
+        // Convert absolute paths to relative paths from Laravel root
+        return array_map(function ($file) {
+            return 'database/migrations/' . basename($file);
+        }, $files);
     }
 }
