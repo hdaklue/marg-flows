@@ -17,16 +17,15 @@ use InvalidArgumentException;
  * and support for images, videos, and document types. Both tenant IDs and
  * document IDs are MD5 hashed for security and privacy.
  */
-final class DocumentStorageStrategy extends BaseStorageStrategy implements
-    DocumentStorageStrategyContract
+final class DocumentStorageStrategy extends BaseStorageStrategy implements DocumentStorageStrategyContract
 {
-    private null|string $documentId = null;
+    private ?string $documentId = null;
 
-    private null|UploadedFile $file = null;
+    private ?UploadedFile $file = null;
 
-    private null|string $subdirectory = null;
+    private ?string $subdirectory = null;
 
-    private null|string $storedPath = null;
+    private ?string $storedPath = null;
 
     /**
      * Constructor receives the hashed tenant base directory from DirectoryManager.
@@ -94,7 +93,9 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements
         $directory = $this->buildDirectory();
         $filename = $this->generateFilename();
 
-        $this->storedPath = $file->storeAs($directory, $filename);
+        $disk = config('document.storage.disk', 'public');
+
+        $this->storedPath = $file->storeAs($directory, $filename, $disk);
 
         return $this->storedPath;
     }
@@ -108,7 +109,9 @@ final class DocumentStorageStrategy extends BaseStorageStrategy implements
             ),
         );
 
-        return Storage::url($this->storedPath);
+        $disk = config('document.storage.disk', 'public');
+
+        return Storage::disk($disk)->url($this->storedPath);
     }
 
     public function getDirectory(): string

@@ -58,7 +58,7 @@ interface StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): null|string;
+    public function get(string $fileName): ?string;
 
     /**
      * Get absolute or storage-relative path for a file.
@@ -66,7 +66,7 @@ interface StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): null|string;
+    public function getPath(string $fileName): ?string;
 
     /**
      * Get public URL for accessing a file.
@@ -75,4 +75,23 @@ interface StorageStrategyContract
      * @return string Public URL for file access
      */
     public function getFileUrl(string $fileName): string;
+
+    /**
+     * Get secure URL for accessing a file with authentication.
+     *
+     * @param  string  $fileName  The filename to get secure URL for
+     * @param  string  $tenantId  The tenant identifier
+     * @param  string  $type  The file type (documents, videos, etc.)
+     * @return string Secure URL requiring authentication
+     */
+    public function getSecureUrl(string $fileName, string $tenantId, string $type): string;
+
+    /**
+     * Get temporary URL for accessing a file.
+     *
+     * @param  string  $fileName  The filename to get temporary URL for
+     * @param  int  $expiresIn  Expiration time in seconds
+     * @return string Temporary URL with expiration
+     */
+    public function getTemporaryUrl(string $fileName, int $expiresIn = 1800): string;
 }

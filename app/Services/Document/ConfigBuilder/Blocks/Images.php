@@ -10,7 +10,8 @@ use App\Services\Document\Contratcs\DocumentBlockConfigContract;
 use App\Services\Upload\ChunkConfigManager;
 use App\Support\FileSize;
 use App\Support\FileTypes;
-use Storage;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\Facades\LaraPath;
 
 final class Images implements DocumentBlockConfigContract
 {
@@ -45,8 +46,7 @@ final class Images implements DocumentBlockConfigContract
         $this->config['endpoints']['byFile'] = null;
         $this->config['endpoints']['byUrl'] = null;
         $this->config['endpoints']['delete'] = null;
-        $this->config['types'] =
-            FileTypes::getWebImageFormatsAsValidationString();
+        $this->config['types'] = FileTypes::getWebImageFormatsAsValidationString();
         $this->config['maxFileSize'] = $chunkConfig->maxFileSize;
 
         // Add chunk configuration for frontend (even if not used, provides consistency)
@@ -55,10 +55,7 @@ final class Images implements DocumentBlockConfigContract
 
     public function endpoints(array $endpoints): self
     {
-        $this->config['endpoints'] = array_merge(
-            $this->config['endpoints'],
-            $endpoints,
-        );
+        $this->config['endpoints'] = array_merge($this->config['endpoints'], $endpoints);
 
         return $this;
     }
@@ -152,9 +149,16 @@ final class Images implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function baseDirectory(string $baseDirectory): self
+    public function baseDirectory(string $tenantId, string $documentId): self
     {
-        $this->config['baseDirectory'] = Storage::get($baseDirectory);
+        // Build the full path including document ID for the secure endpoint
+        $basePath = LaraPath::base($tenantId, SanitizationStrategy::HASHED)
+            ->add('documents')
+            ->add($documentId, SanitizationStrategy::HASHED)
+            ->toString();
+
+        // Use the secure file serving endpoint with full path
+        $this->config['secureFileEndpoint'] = rtrim(url('/files'), '/') . '/' . $basePath;
 
         return $this;
     }

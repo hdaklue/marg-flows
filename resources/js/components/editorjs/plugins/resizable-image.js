@@ -45,6 +45,18 @@ class ResizableImage {
             this.data.files = [this.data.file];
             delete this.data.file; // Remove old format
         }
+        
+        // Convert legacy URL-based data to filename-based data
+        if (this.data.files) {
+            this.data.files = this.data.files.map(file => {
+                if (file.url && !file.filename) {
+                    // Extract filename from URL for legacy data
+                    file.filename = file.url.split('/').pop();
+                    delete file.url; // Remove legacy URL field
+                }
+                return file;
+            });
+        }
 
         // Initialize files array if not present
         if (!this.data.files) {
@@ -147,9 +159,9 @@ class ResizableImage {
         // Add drag-drop functionality to the entire block wrapper
         this.setupBlockDragDrop(wrapper);
 
-        // Check if we have valid image data (support both old and new format)
+        // Check if we have valid image data
         const hasImages = (this.data.files && this.data.files.length > 0) ||
-            (this.data.file && this.data.file.url && this.data.file.url.trim() !== '');
+            (this.data.file && this.data.file.filename && this.data.file.filename.trim() !== '');
 
         if (hasImages) {
             // Always create upload interface (for adding more images)
@@ -312,7 +324,7 @@ class ResizableImage {
 
         const image = document.createElement('img');
         image.classList.add('resizable-image__img');
-        image.src = this.resolveImageUrl(this.data.file.url);
+        image.src = this.resolveImageUrl(this.data.file.filename);
         image.alt = this.data.caption || '';
         image.style.margin = '0';
 
@@ -381,8 +393,10 @@ class ResizableImage {
             const uploadEndpoint = this.config.endpoints.byUrl || this.config.endpoints.byFile;
             const response = await this.executeUrlUploadRequest(url, uploadEndpoint);
 
-            if (!response.url && !response.file?.url) {
-                throw new Error('No URL in response');
+            // Validate response - check for filename
+            const filename = response.file?.filename;
+            if (!filename) {
+                throw new Error('No filename in response');
             }
 
             // Add successful upload to data
@@ -510,9 +524,10 @@ class ResizableImage {
             // Perform the actual upload
             const response = await this.performUpload(uploadItem.file);
 
-            // Validate response
-            if (!response.url && !response.file?.url) {
-                throw new Error('No URL in response');
+            // Validate response - check for filename
+            const filename = response.file?.filename;
+            if (!filename) {
+                throw new Error('No filename in response');
             }
 
             // Add successful upload to data
@@ -549,9 +564,14 @@ class ResizableImage {
     }
 
     addUploadedFile(response) {
-        const fullUrl = response.url || response.file?.url;
+        // Handle the new filename-based response format
+        const filename = response.file?.filename;
+        if (!filename) {
+            throw new Error('No filename in response');
+        }
+        
         const fileData = {
-            url: this.extractRelativePath(fullUrl),
+            filename: filename,
             caption: response.caption || '',
             width: response.width || null,
             height: response.height || null
@@ -560,61 +580,30 @@ class ResizableImage {
     }
 
     /**
-     * Extract relative path from full URL for storage
+     * Extract filename from full URL - kept for legacy support
+     * @deprecated Use filename-based responses instead
      */
     extractRelativePath(fullUrl) {
-        if (!fullUrl || !this.config.baseDirectory) {
-            return fullUrl; // Fallback to full URL if no baseDirectory
-        }
-
-        // If URL starts with baseDirectory, extract relative path
-        const normalizedBaseDir = this.config.baseDirectory.endsWith('/') 
-            ? this.config.baseDirectory 
-            : this.config.baseDirectory + '/';
-            
-        if (fullUrl.startsWith(normalizedBaseDir)) {
-            return fullUrl.substring(normalizedBaseDir.length);
-        }
-
-        // If URL starts with just a slash and contains only filename, it's already relative
-        if (fullUrl.startsWith('/') && !fullUrl.includes('/storage/') && !fullUrl.substring(1).includes('/')) {
-            return fullUrl.substring(1); // Remove leading slash
-        }
-
-        // If URL starts with /storage/, extract path relative to baseDirectory
-        if (fullUrl.startsWith('/storage/') && this.config.baseDirectory.includes('/storage/')) {
-            const baseWithoutSlash = this.config.baseDirectory.replace(/\/$/, '');
-            if (fullUrl.startsWith(baseWithoutSlash)) {
-                const relativePath = fullUrl.substring(baseWithoutSlash.length);
-                return relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
-            }
-        }
-
-        return fullUrl; // Return as-is if doesn't match any pattern
+        if (!fullUrl) return '';
+        
+        // Simply extract the filename from any URL format
+        return fullUrl.split('/').pop() || fullUrl;
     }
 
     /**
-     * Resolve relative path to full URL for display
+     * Resolve filename to secure URL for display
      */
-    resolveImageUrl(relativePath) {
-        if (!relativePath) return '';
-        
-        // If no baseDirectory configured, return as-is
-        if (!this.config.baseDirectory) {
-            return relativePath;
+    resolveImageUrl(filename) {
+        if (!filename) return '';
+
+        // Use the secure file serving endpoint (requires authentication)
+        if (this.config.secureFileEndpoint) {
+            return `${this.config.secureFileEndpoint}/images/${encodeURIComponent(filename)}`;
         }
 
-        // If already a full URL (legacy data), return as-is
-        if (relativePath.startsWith('http') || relativePath.startsWith('/storage/')) {
-            return relativePath;
-        }
-
-        // Combine baseDirectory with relative path
-        const baseDir = this.config.baseDirectory.endsWith('/') 
-            ? this.config.baseDirectory 
-            : this.config.baseDirectory + '/';
-        
-        return baseDir + relativePath;
+        // Should not happen if properly configured
+        console.error('No secure file endpoint configured for ResizableImage plugin');
+        return '';
     }
 
     completeUpload() {
@@ -751,7 +740,7 @@ class ResizableImage {
         thumbnail.classList.add('resizable-image__thumbnail');
 
         const img = document.createElement('img');
-        img.src = this.resolveImageUrl(fileData.url);
+        img.src = this.resolveImageUrl(fileData.filename);
         img.alt = fileData.caption || `Image ${index + 1}`;
         img.classList.add('resizable-image__thumbnail-image');
         img.style.margin = '0';
@@ -841,9 +830,9 @@ class ResizableImage {
         document.dispatchEvent(new CustomEvent('editor:busy'));
 
         try {
-            // Delete from server if URL exists
-            if (file.url) {
-                const fullUrl = this.resolveImageUrl(file.url);
+            // Delete from server if filename exists
+            if (file.filename) {
+                const fullUrl = this.resolveImageUrl(file.filename);
                 await this.executeDeleteRequest(fullUrl);
             }
 
@@ -905,7 +894,7 @@ class ResizableImage {
         // Create image element
         const modalImage = document.createElement('img');
         modalImage.classList.add('resizable-image__modal-image');
-        modalImage.src = this.resolveImageUrl(this.data.files[this.currentModalIndex].url);
+        modalImage.src = this.resolveImageUrl(this.data.files[this.currentModalIndex].filename);
         modalImage.alt = this.data.files[this.currentModalIndex].caption || `Image ${this.currentModalIndex + 1}`;
         modalImage.style.margin = '0';
 
@@ -975,7 +964,7 @@ class ResizableImage {
         };
 
         const updateModalImage = () => {
-            modalImage.src = this.resolveImageUrl(this.data.files[this.currentModalIndex].url);
+            modalImage.src = this.resolveImageUrl(this.data.files[this.currentModalIndex].filename);
             modalImage.alt = this.data.files[this.currentModalIndex].caption || `Image ${this.currentModalIndex + 1}`;
             if (counter) {
                 counter.textContent = `${this.currentModalIndex + 1} / ${this.data.files.length}`;
@@ -1093,10 +1082,15 @@ class ResizableImage {
     }
 
     onUploadSuccess(response) {
-        const fullUrl = response.url || response.file?.url;
+        // Handle the new filename-based response format
+        const filename = response.file?.filename;
+        if (!filename) {
+            throw new Error('No filename in response');
+        }
+        
         this.data = {
             file: {
-                url: this.extractRelativePath(fullUrl)
+                filename: filename
             },
             caption: response.caption || this.data.caption || '',
             width: response.width || null,
@@ -1464,8 +1458,8 @@ class ResizableImage {
             return true; // Allow both empty and populated arrays
         }
 
-        // Support legacy single file format
-        if (savedData.file && savedData.file.url) return true;
+        // Support legacy single file format (both old URL and new filename format)
+        if (savedData.file && (savedData.file.url || savedData.file.filename)) return true;
 
         return false;
     }
@@ -1574,8 +1568,8 @@ class ResizableImage {
             try {
                 // Delete all images from server
                 const deletePromises = this.data.files.map(file => {
-                    if (file.url) {
-                        const fullUrl = this.resolveImageUrl(file.url);
+                    if (file.filename) {
+                        const fullUrl = this.resolveImageUrl(file.filename);
                         return this.executeDeleteRequest(fullUrl);
                     }
                     return Promise.resolve();

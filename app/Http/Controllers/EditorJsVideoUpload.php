@@ -67,7 +67,7 @@ final class EditorJsVideoUpload extends Controller
                 $sessionManager->cleanupSession($sessionId);
 
                 // Process the completed video file
-                return $this->processVideoFile($finalPath, $sessionId);
+                return $this->processVideoFile($finalPath, $sessionId, $tenantId, $document);
             }
 
             // Return chunk upload success response
@@ -117,7 +117,7 @@ final class EditorJsVideoUpload extends Controller
             ]);
 
             // Process the uploaded video file
-            return $this->processVideoFile($path, $request->getFileKey());
+            return $this->processVideoFile($path, $request->getFileKey(), $tenantId, $document);
         } catch (Exception $e) {
             Log::error('Direct upload failed', [
                 'fileKey' => $request->getFileKey(),
@@ -135,6 +135,8 @@ final class EditorJsVideoUpload extends Controller
     protected function processVideoFile(
         string $videoPath,
         string $fileKey,
+        string $tenantId,
+        string $documentId,
     ): JsonResponse {
         try {
             $extension = pathinfo($videoPath, PATHINFO_EXTENSION);
@@ -163,29 +165,27 @@ final class EditorJsVideoUpload extends Controller
                     $thumbnailPath = $this->generateVideoThumbnail(
                         $videoPath,
                         $duration,
+                        $tenantId,
+                        $documentId,
                     );
                     if ($thumbnailPath) {
-                        $thumbnailUrl = Storage::disk(config(
-                            'video-upload.storage.disk',
-                            'public',
-                        ))->url($thumbnailPath);
+                        $disk = config('chunked-upload.storage.disk', 'public');
+                        $thumbnailUrl = Storage::disk($disk)->url($thumbnailPath);
                     }
                 }
             }
+
+            $disk = config('chunked-upload.storage.disk', 'public');
+
+            // Extract just the filename from the full path for frontend resolution
+            $filename = basename($videoPath);
 
             $response = [
                 'success' => true,
                 'completed' => true,
                 'fileKey' => $fileKey,
-                'url' => Storage::disk(config(
-                    'video-upload.storage.disk',
-                    'public',
-                ))->url($videoPath),
                 'file' => [
-                    'url' => Storage::disk(config(
-                        'video-upload.storage.disk',
-                        'public',
-                    ))->url($videoPath),
+                    'filename' => $filename,
                 ],
                 'width' => $videoData['width'] ?? null,
                 'height' => $videoData['height'] ?? null,
@@ -206,10 +206,10 @@ final class EditorJsVideoUpload extends Controller
                 'message' => 'Video uploaded and processed successfully',
             ];
 
-            // Add thumbnail URL to response if available
-            if ($thumbnailUrl) {
-                $response['thumbnail'] = $thumbnailUrl;
-                $response['file']['thumbnail'] = $thumbnailUrl;
+            // Add thumbnail filename to response if available
+            if ($thumbnailPath) {
+                $thumbnailFilename = basename($thumbnailPath);
+                $response['file']['thumbnail'] = $thumbnailFilename;
             }
 
             return response()->json($response);
@@ -233,11 +233,13 @@ final class EditorJsVideoUpload extends Controller
     private function extractVideoMetadata(string $path): array
     {
         try {
+            $disk = config('chunked-upload.storage.disk', 'public');
+
             // Get file size
-            $fileSize = Storage::disk('public')->size($path);
+            $fileSize = Storage::disk($disk)->size($path);
 
             // Use Laravel FFmpeg to extract metadata
-            $media = FFMpeg::fromDisk('public')->open($path);
+            $media = FFMpeg::fromDisk($disk)->open($path);
 
             // Get duration in seconds
             $duration = $media->getDurationInSeconds();
@@ -274,11 +276,13 @@ final class EditorJsVideoUpload extends Controller
             ]);
 
             // Return basic file size if FFmpeg extraction fails
+            $disk = config('chunked-upload.storage.disk', 'public');
+
             return [
                 'width' => null,
                 'height' => null,
                 'duration' => null,
-                'size' => Storage::disk('public')->size($path),
+                'size' => Storage::disk($disk)->size($path),
                 'aspect_ratio' => '16:9', // Default fallback
                 'aspect_ratio_data' => null,
             ];
@@ -315,13 +319,15 @@ final class EditorJsVideoUpload extends Controller
                 'original_extension' => $originalExtension,
             ]);
 
+            $disk = config('chunked-upload.storage.disk', 'public');
+
             // Convert video using Laravel FFmpeg
-            $media = FFMpeg::fromDisk('public')->open($originalPath);
+            $media = FFMpeg::fromDisk($disk)->open($originalPath);
 
             // Export to MP4 with H.264 codec for better compatibility
             $media
                 ->export()
-                ->toDisk('public')
+                ->toDisk($disk)
                 ->inFormat(new X264('libmp3lame'))
                 ->save($mp4Path);
 
@@ -364,12 +370,14 @@ final class EditorJsVideoUpload extends Controller
         string $convertedPath,
     ): void {
         try {
+            $disk = config('chunked-upload.storage.disk', 'public');
+
             // Only delete if paths are different (conversion actually happened)
             if (
                 $originalPath !== $convertedPath
-                && Storage::disk('public')->exists($originalPath)
+                && Storage::disk($disk)->exists($originalPath)
             ) {
-                Storage::disk('public')->delete($originalPath);
+                Storage::disk($disk)->delete($originalPath);
 
                 Log::info('Original video file cleaned up after conversion', [
                     'original_path' => $originalPath,
@@ -390,7 +398,9 @@ final class EditorJsVideoUpload extends Controller
     private function generateVideoThumbnail(
         string $videoPath,
         float $duration,
-    ): null|string {
+        string $tenantId,
+        string $documentId,
+    ): ?string {
         try {
             // Calculate thumbnail extraction time (1 second or 10% of duration if video is shorter than 10 seconds)
             $extractionTime = $duration < 10 ? $duration * 0.1 : 1.0;
@@ -398,19 +408,25 @@ final class EditorJsVideoUpload extends Controller
             // Generate thumbnail filename based on video filename
             $videoFilename = pathinfo($videoPath, PATHINFO_FILENAME);
             $thumbnailFilename = $videoFilename . '_thumb.jpg';
-            $thumbnailPath = 'documents/video-thumbnails/' . $thumbnailFilename;
+
+            // Use the proper thumbnail directory structure: {tenant}/documents/{documentId}/videos/prev/
+            $thumbnailStrategy = DirectoryManager::document($tenantId)
+                ->forDocument($documentId)
+                ->videos()
+                ->asThumbnails();
+
+            $thumbnailPath = $thumbnailStrategy->getDirectory() . '/' . $thumbnailFilename;
+
+            $disk = config('chunked-upload.storage.disk', 'public');
 
             // Ensure the thumbnail directory exists
-            $thumbnailDir = 'documents/video-thumbnails';
-            if (!Storage::disk('public')->exists($thumbnailDir)) {
-                Storage::disk('public')->makeDirectory($thumbnailDir);
-            }
+            Storage::disk($disk)->makeDirectory($thumbnailStrategy->getDirectory());
 
             // Extract thumbnail frame using Laravel FFmpeg
-            $media = FFMpeg::fromDisk('public')->open($videoPath);
+            $media = FFMpeg::fromDisk($disk)->open($videoPath);
 
             $frame = $media->getFrameFromSeconds($extractionTime);
-            $frame->export()->toDisk('public')->save($thumbnailPath);
+            $frame->export()->toDisk($disk)->save($thumbnailPath);
 
             Log::info('Video thumbnail generated successfully', [
                 'video_path' => $videoPath,
@@ -458,12 +474,10 @@ final class EditorJsVideoUpload extends Controller
             ],
             [
                 'video.required' => 'No file selected. Please choose a video to upload.',
-                'video.mimes' =>
-                    'Invalid file format. Supported formats: '
+                'video.mimes' => 'Invalid file format. Supported formats: '
                     . strtoupper(implode(', ', $allowedMimes)),
                 'video.mimetypes' => 'File must be a valid video format.',
-                'video.max' =>
-                    'File is too large. Maximum size allowed is '
+                'video.max' => 'File is too large. Maximum size allowed is '
                     . round($maxSize / 1024)
                     . 'MB.',
             ],

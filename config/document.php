@@ -75,4 +75,17 @@ return [
         'min_query_length' => 3,
         'max_results' => 50,
     ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Document Storage Configuration
+     |--------------------------------------------------------------------------
+     |
+     | Disk configuration for document-related file storage.
+     |
+     */
+
+    'storage' => [
+        'disk' => env('DOCUMENT_STORAGE_DISK', 'public'),
+    ],
 ];

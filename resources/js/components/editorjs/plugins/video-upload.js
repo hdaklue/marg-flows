@@ -574,9 +574,28 @@ class VideoUpload {
 
         // Use thumbnail from server or fallback to video icon
         if (this.data.file.thumbnail) {
-            thumbnail.src = this.data.file.thumbnail;
-            thumbnail.alt = 'Video thumbnail';
-            thumbnailContainer.appendChild(thumbnail);
+            // Resolve thumbnail filename to secure URL
+            const thumbnailUrl = this.resolveThumbnailUrl(this.data.file.thumbnail);
+            if (thumbnailUrl) {
+                thumbnail.src = thumbnailUrl;
+                thumbnail.alt = 'Video thumbnail';
+                
+                // Handle thumbnail load error by trying fallback path
+                thumbnail.onerror = () => {
+                    const fallbackUrl = this.resolveThumbnailUrlFallback(this.data.file.thumbnail);
+                    if (fallbackUrl && thumbnail.src !== fallbackUrl) {
+                        thumbnail.src = fallbackUrl;
+                    } else {
+                        // If both paths fail, show video icon
+                        this.showThumbnailFallback(thumbnailContainer);
+                    }
+                };
+                
+                thumbnailContainer.appendChild(thumbnail);
+            } else {
+                // Fallback to video icon if thumbnail URL cannot be resolved
+                this.showThumbnailFallback(thumbnailContainer);
+            }
         } else {
             // Fallback: use a default video icon
             thumbnailContainer.style.display = 'flex';
@@ -873,11 +892,22 @@ class VideoUpload {
         console.log('Aspect ratio container classes:', aspectRatioContainer.className);
         console.log('Video element ID:', uniqueId);
 
-        // Set video source
+        // Set video source with fallback handling
         const source = document.createElement('source');
         source.src = videoUrl;
         source.type = this.getVideoMimeType(videoUrl);
         modalVideo.appendChild(source);
+
+        // Handle video load errors by trying fallback path
+        modalVideo.onerror = () => {
+            if (this.data.file.filename) {
+                const fallbackUrl = this.resolveVideoUrlFallback(this.data.file.filename);
+                if (fallbackUrl && source.src !== fallbackUrl) {
+                    source.src = fallbackUrl;
+                    modalVideo.load(); // Reload the video with new source
+                }
+            }
+        };
 
         // Create close button
         const closeBtn = document.createElement('button');
@@ -1173,9 +1203,10 @@ class VideoUpload {
             // Perform the actual upload
             const response = await this.performUpload(fileToUpload);
 
-            // Validate response
-            if (!response.url && !response.file?.url) {
-                throw new Error('No URL in response');
+            // Validate response - check for filename
+            const filename = response.file?.filename;
+            if (!filename) {
+                throw new Error('No filename in response');
             }
 
             // Add successful upload to data
@@ -1382,28 +1413,77 @@ class VideoUpload {
     resolveVideoUrl(filename) {
         if (!filename) return null;
         
-        // If it's already a full URL (backward compatibility), return as-is
-        if (filename.includes('://') || filename.startsWith('/')) {
-            return filename;
+        // Use the secure file serving endpoint (requires authentication)
+        // Try new path structure first (videos/), fallback to old structure (videos/videos/)
+        if (this.config.secureFileEndpoint) {
+            // Return new correct path structure  
+            return `${this.config.secureFileEndpoint}/videos/${encodeURIComponent(filename)}`;
         }
+
+        // Should not happen if properly configured
+        console.error('No secure file endpoint configured for VideoUpload plugin');
+        return null;
+    }
+
+    resolveVideoUrlFallback(filename) {
+        if (!filename) return null;
         
-        // Build URL using config baseDirectory
-        if (this.config.baseDirectory) {
-            return `${this.config.baseDirectory}/${filename}`;
+        // Fallback for old videos with double videos path
+        if (this.config.secureFileEndpoint) {
+            return `${this.config.secureFileEndpoint}/videos/videos/${encodeURIComponent(filename)}`;
         }
+
+        return null;
+    }
+
+    resolveThumbnailUrl(filename) {
+        if (!filename) return null;
         
-        // Fallback to default pattern
-        return `/storage/documents/videos/${filename}`;
+        // Use the secure file serving endpoint for thumbnails (requires authentication)
+        // Try new path structure first (videos/prev/), fallback to old structure (videos/videos/prev/)
+        if (this.config.secureFileEndpoint) {
+            // Return new correct path structure
+            return `${this.config.secureFileEndpoint}/videos/prev/${encodeURIComponent(filename)}`;
+        }
+
+        // Should not happen if properly configured
+        console.error('No secure file endpoint configured for VideoUpload plugin');
+        return null;
+    }
+
+    resolveThumbnailUrlFallback(filename) {
+        if (!filename) return null;
+        
+        // Fallback for old thumbnails with double videos path
+        if (this.config.secureFileEndpoint) {
+            return `${this.config.secureFileEndpoint}/videos/videos/prev/${encodeURIComponent(filename)}`;
+        }
+
+        return null;
+    }
+
+    showThumbnailFallback(thumbnailContainer) {
+        thumbnailContainer.innerHTML = '';
+        thumbnailContainer.style.display = 'flex';
+        thumbnailContainer.style.alignItems = 'center';
+        thumbnailContainer.style.justifyContent = 'center';
+        thumbnailContainer.innerHTML = `
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path stroke="#9ca3af" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0-2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/>
+            </svg>
+        `;
     }
 
     addUploadedFile(response) {
-        // Extract filename from the full URL for storage
-        const fullUrl = response.url || response.file?.url;
-        const filename = this.extractFilenameFromUrl(fullUrl);
+        // Handle the new filename-based response format
+        const filename = response.file?.filename;
+        if (!filename) {
+            throw new Error('No filename in response');
+        }
         
         const fileData = {
             filename: filename,  // Store only filename
-            thumbnail: response.thumbnail || response.file?.thumbnail || null,
+            thumbnail: response.file?.thumbnail || null,
             caption: response.caption || '',
             width: response.width || null,
             height: response.height || null,

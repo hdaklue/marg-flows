@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Directory\Strategies;
 
-use App\Services\Directory\Contracts\StorageStrategyContract;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -42,7 +41,7 @@ final class AvatarStorageStrategy extends BaseStorageStrategy
     // Override to add caching for avatar URLs
     public function getFileUrl(string $fileName): string
     {
-        return Cache::rememberForever(md5($fileName), fn() => Storage::url(
+        return Cache::rememberForever(md5($fileName), fn () => Storage::url(
             $this->getDirectory() . "/{$fileName}",
         ));
     }

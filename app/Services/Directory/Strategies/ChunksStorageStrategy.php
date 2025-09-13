@@ -16,10 +16,9 @@ use InvalidArgumentException;
  * Handles temporary chunk storage for file upload sessions with tenant isolation.
  * Each upload session creates its own subdirectory for chunk management.
  */
-final class ChunksStorageStrategy extends BaseStorageStrategy implements
-    ChunksStorageStrategyContract
+final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksStorageStrategyContract
 {
-    private null|string $sessionId = null;
+    private ?string $sessionId = null;
 
     /**
      * Constructor receives the hashed tenant base directory from DirectoryManager.

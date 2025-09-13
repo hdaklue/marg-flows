@@ -11,7 +11,7 @@ final class Advanced
 {
     private string $tenantId;
 
-    public function build(null|string $documentId = null): array
+    public function build(?string $documentId = null): array
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
         $imagesConfig = EditorConfigBuilder::images()->forPlan('advanced');
@@ -22,7 +22,7 @@ final class Advanced
         if ($documentId) {
             $imagesConfig
                 ->forDocument($documentId)
-                ->baseDirectory($baseDirectory);
+                ->baseDirectory($this->tenantId, $documentId);
         }
 
         return [
@@ -34,12 +34,11 @@ final class Advanced
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
-            'videoUpload' =>
-                $this->buildVideoUploadConfig($documentId)->toArray(),
+            'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
     }
 
-    private function buildVideoUploadConfig(null|string $documentId)
+    private function buildVideoUploadConfig(?string $documentId)
     {
         $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan(
             'advanced',

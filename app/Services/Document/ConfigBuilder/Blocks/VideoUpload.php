@@ -10,7 +10,6 @@ use App\Services\Document\Contratcs\DocumentBlockConfigContract;
 use App\Services\Upload\ChunkConfigManager;
 use App\Services\Upload\DTOs\ChunkConfig;
 use App\Support\FileTypes;
-use Illuminate\Support\Facades\Storage;
 
 final class VideoUpload implements DocumentBlockConfigContract
 {
@@ -90,21 +89,21 @@ final class VideoUpload implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function maxFileSize(null|int $size): self
+    public function maxFileSize(?int $size): self
     {
         $this->config['maxFileSize'] = $size;
 
         return $this;
     }
 
-    public function chunkSize(null|int $size): self
+    public function chunkSize(?int $size): self
     {
         $this->config['chunkSize'] = $size;
 
         return $this;
     }
 
-    public function useChunkedUpload(null|bool $enabled): self
+    public function useChunkedUpload(?bool $enabled): self
     {
         $this->config['useChunkedUpload'] = $enabled;
 
@@ -142,7 +141,18 @@ final class VideoUpload implements DocumentBlockConfigContract
 
     public function baseDirectory(string $baseDirectory): self
     {
-        $this->config['baseDirectory'] = Storage::url($baseDirectory);
+        // baseDirectory format: "b6180afbf39e885769982d2eed007ee0/documents/2c2bd2408e0a1c665becde5256ce4999/videos"
+        // We need the path without the final "videos" part for the secure endpoint
+        $pathParts = explode('/', $baseDirectory);
+
+        if (count($pathParts) >= 3) {
+            // Remove the last part (videos) to get the document base path
+            array_pop($pathParts);
+            $documentBasePath = implode('/', $pathParts);
+
+            // Use the secure file serving endpoint with full document path
+            $this->config['secureFileEndpoint'] = rtrim(url('/files'), '/') . '/' . $documentBasePath;
+        }
 
         return $this;
     }

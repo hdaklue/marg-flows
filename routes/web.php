@@ -8,6 +8,9 @@ use App\Http\Controllers\DocumentImageUploadController;
 use App\Http\Controllers\EditorJsImageDelete;
 use App\Http\Controllers\EditorJsVideoDelete;
 use App\Http\Controllers\EditorJsVideoUpload;
+use App\Http\Controllers\FileResolverController;
+use App\Http\Controllers\FileServeController;
+use App\Http\Controllers\SecureFileController;
 use App\Http\Controllers\UploadProgressController;
 use App\Http\Controllers\UrlFetchController;
 use App\Livewire\CalendarTest;
@@ -60,6 +63,30 @@ Route::delete('documents/{document}/delete-video', EditorJsVideoDelete::class)
 Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])
     ->middleware(['auth'])
     ->name('editorjs.fetch-url');
+
+// Secure file access routes
+Route::get('secure-files/{tenantId}/{type}/{path}', [SecureFileController::class, 'show'])
+    ->middleware(['auth'])
+    ->where('path', '.*')
+    ->name('secure-files.show');
+
+Route::post('secure-files/temp-url', [SecureFileController::class, 'generateTemporaryUrl'])
+    ->middleware(['auth'])
+    ->name('secure-files.temp-url');
+
+// Authenticated file serving route (authentication handled in controller)
+Route::get('files/{path}', FileServeController::class)
+    ->where('path', '.*')
+    ->name('file.serve');
+
+// File URL resolver routes
+Route::get('file-resolver', [FileResolverController::class, 'resolve'])
+    ->middleware(['auth'])
+    ->name('file.resolver');
+
+Route::get('file-resolver/temporary', [FileResolverController::class, 'temporary'])
+    ->middleware(['auth'])
+    ->name('file.resolver.temporary');
 
 // Chunked upload routes
 Route::post('chunked-upload', [ChunkedUploadController::class, 'store'])

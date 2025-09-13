@@ -17,7 +17,9 @@ use Illuminate\Contracts\Support\Htmlable;
 
 final class DocumentResource extends Resource
 {
-    protected static null|string $model = Document::class;
+    protected static ?string $model = Document::class;
+
+    protected static ?string $slug = 'd';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 

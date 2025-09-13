@@ -31,7 +31,8 @@ final class DirectoryManager
      * @param  string  $tenantId  The tenant identifier
      * @return DocumentStorageStrategyContract Configured document storage strategy
      */
-    public static function document(string $tenantId): DocumentStorageStrategyContract {
+    public static function document(string $tenantId): DocumentStorageStrategyContract
+    {
         return new DocumentStorageStrategy(self::baseDirectiry($tenantId));
     }
 
@@ -41,7 +42,8 @@ final class DirectoryManager
      * @param  string  $tenantId  The tenant identifier
      * @return ChunksStorageStrategyContract Configured chunks storage strategy
      */
-    public static function chunks(string $tenantId): ChunksStorageStrategyContract {
+    public static function chunks(string $tenantId): ChunksStorageStrategyContract
+    {
         return new ChunksStorageStrategy(self::baseDirectiry($tenantId));
     }
 
@@ -54,7 +56,7 @@ final class DirectoryManager
      */
     public static function avatars(): StorageStrategyContract
     {
-        return new AvatarStorageStrategy();
+        return new AvatarStorageStrategy;
     }
 
     /**
@@ -64,7 +66,7 @@ final class DirectoryManager
      */
     public static function temp(): StorageStrategyContract
     {
-        return new TempStorageStrategy();
+        return new TempStorageStrategy;
     }
 
     public static function video(
@@ -103,5 +105,40 @@ final class DirectoryManager
     public static function getAllFiles(string $tenantId): array
     {
         return Storage::allFiles(self::baseDirectiry($tenantId));
+    }
+
+    /**
+     * Get secure URL for a file requiring authentication.
+     *
+     * @param  string  $tenantId  The tenant identifier
+     * @param  string  $type  The file type (images, videos, documents)
+     * @param  string  $fileName  The filename
+     * @return string Secure URL requiring authentication
+     */
+    public static function getSecureUrl(string $tenantId, string $type, string $fileName): string
+    {
+        return route('file.serve', [
+            'tenant' => $tenantId,
+            'type' => $type,
+            'filename' => $fileName,
+        ]);
+    }
+
+    /**
+     * Get temporary URL for a file with expiration.
+     *
+     * @param  string  $tenantId  The tenant identifier
+     * @param  string  $type  The file type (images, videos, documents)
+     * @param  string  $fileName  The filename
+     * @param  int  $expiresIn  Expiration time in seconds (default 30 minutes)
+     * @return string Temporary URL with expiration
+     */
+    public static function getTemporaryUrl(string $tenantId, string $type, string $fileName, int $expiresIn = 1800): string
+    {
+        $basePath = self::baseDirectiry($tenantId);
+        $path = "{$basePath}/{$type}/{$fileName}";
+        $disk = config('document.storage.disk', 'public');
+
+        return Storage::disk($disk)->temporaryUrl($path, now()->addSeconds($expiresIn));
     }
 }

@@ -16,11 +16,11 @@ use Symfony\Component\HttpFoundation\File\File;
 
 final class UploadSessionService
 {
-    private null|string $tenantId = null;
+    private ?string $tenantId = null;
 
-    private null|string $chunkDirectory = null;
+    private ?string $chunkDirectory = null;
 
-    private null|string $storeDirectory = null;
+    private ?string $storeDirectory = null;
 
     public function __construct(
         private readonly ProgressStrategyContract $progressStrategy,
@@ -63,7 +63,7 @@ final class UploadSessionService
     public function initSession(
         string $fileName,
         int $totalChunks,
-        null|int $totalSize = null,
+        ?int $totalSize = null,
     ): string {
         $this->validateConfiguration();
 
@@ -91,18 +91,21 @@ final class UploadSessionService
         $this->validateConfiguration();
 
         $chunkDirectory = $this->getChunkDirectory($sessionId);
+        $disk = config('chunked-upload.storage.disk', 'public');
 
         // Ensure chunk directory exists
-        Storage::makeDirectory($chunkDirectory);
+        Storage::disk($disk)->makeDirectory($chunkDirectory);
 
         // Store the chunk file
         $chunkFilename = "chunk_{$chunkIndex}";
         if ($chunk instanceof UploadedFile) {
-            $chunk->storeAs($chunkDirectory, $chunkFilename);
+            $chunk->storeAs($chunkDirectory, $chunkFilename, [
+                'disk' => $disk,
+            ]);
         } else {
             // For regular File instances, copy to storage
             $chunkPath = $chunkDirectory . '/' . $chunkFilename;
-            Storage::put($chunkPath, file_get_contents($chunk->getPathname()));
+            Storage::disk($disk)->put($chunkPath, file_get_contents($chunk->getPathname()));
         }
 
         // Update progress
@@ -139,7 +142,7 @@ final class UploadSessionService
 
             // Process chunks sequentially
             foreach ($chunkData->chunks as $chunk) {
-                if (!$chunk->uploaded) {
+                if (! $chunk->uploaded) {
                     $this->processChunk(
                         $chunkData->sessionId,
                         $chunk,
@@ -190,10 +193,11 @@ final class UploadSessionService
     public function isComplete(string $sessionId, int $totalChunks): bool
     {
         $chunkDirectory = $this->getChunkDirectory($sessionId);
+        $disk = config('chunked-upload.storage.disk', 'public');
 
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDirectory}/chunk_{$i}";
-            if (!Storage::exists($chunkPath)) {
+            if (! Storage::disk($disk)->exists($chunkPath)) {
                 return false;
             }
         }
@@ -219,10 +223,12 @@ final class UploadSessionService
             $this->storeDirectory,
         );
 
+        $disk = config('chunked-upload.storage.disk', 'public');
+
         // Mark as completed
         $this->progressStrategy->complete($sessionId, [
             'path' => $finalPath,
-            'url' => Storage::url($finalPath),
+            'url' => Storage::disk($disk)->url($finalPath),
         ]);
 
         return $finalPath;
@@ -233,7 +239,7 @@ final class UploadSessionService
      */
     public function cleanupSession(string $sessionId): void
     {
-        if (!$this->tenantId) {
+        if (! $this->tenantId) {
             return;
         }
 
@@ -249,7 +255,7 @@ final class UploadSessionService
     /**
      * Get progress information for a session.
      */
-    public function getProgress(string $sessionId): null|ProgressData
+    public function getProgress(string $sessionId): ?ProgressData
     {
         return $this->progressStrategy->getProgress($sessionId);
     }
@@ -302,42 +308,46 @@ final class UploadSessionService
         $chunk,
         string $chunkDirectory,
     ): void {
+        $disk = config('chunked-upload.storage.disk', 'public');
+
         // Ensure chunk directory exists
-        Storage::makeDirectory($chunkDirectory);
+        Storage::disk($disk)->makeDirectory($chunkDirectory);
 
         // Store chunk - this is placeholder for actual chunk processing
         $chunkPath = "{$chunkDirectory}/chunk_{$chunk->index}";
-        Storage::put($chunkPath, "chunk_data_placeholder_{$chunk->index}");
+        Storage::disk($disk)->put($chunkPath, "chunk_data_placeholder_{$chunk->index}");
     }
 
     private function assembleChunks(
         ChunkData $chunkData,
         string $chunkDirectory,
     ): string {
+        $disk = config('chunked-upload.storage.disk', 'public');
+
         $extension = pathinfo($chunkData->fileName, PATHINFO_EXTENSION);
         $uniqueFileName = uniqid() . '_' . time() . '.' . $extension;
         $finalPath = $this->storeDirectory . '/' . $uniqueFileName;
 
         // Ensure final directory exists
-        Storage::makeDirectory($this->storeDirectory);
+        Storage::disk($disk)->makeDirectory($this->storeDirectory);
 
         // Assemble chunks into final file
         $finalContent = '';
         for ($i = 0; $i < $chunkData->getTotalChunks(); $i++) {
             $chunkPath = "{$chunkDirectory}/chunk_{$i}";
-            if (Storage::exists($chunkPath)) {
-                $finalContent .= Storage::get($chunkPath);
+            if (Storage::disk($disk)->exists($chunkPath)) {
+                $finalContent .= Storage::disk($disk)->get($chunkPath);
             }
         }
 
-        Storage::put($finalPath, $finalContent);
+        Storage::disk($disk)->put($finalPath, $finalContent);
 
         return $finalPath;
     }
 
     private function cleanupChunks(string $chunkDirectory): void
     {
-        if (!$this->tenantId) {
+        if (! $this->tenantId) {
             return;
         }
 

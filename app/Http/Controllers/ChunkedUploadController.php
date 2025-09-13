@@ -62,6 +62,7 @@ final class ChunkedUploadController extends Controller
                 'fileKey' => $fileKey ?? 'unknown',
                 'fileName' => $fileName ?? 'unknown',
             ]);
+
             return ChunkedUploadResponse::error($e->getMessage());
         }
     }
@@ -122,20 +123,23 @@ final class ChunkedUploadController extends Controller
         $fileKey = $request->input('fileKey');
         $path = $request->input('path');
 
+        $disk = config('chunked-upload.storage.disk', 'public');
+
         // Debug logging
         Log::info('Delete request received', [
             'fileKey' => $fileKey,
             'path' => $path,
-            'exists' => Storage::disk('public')->exists($path),
+            'disk' => $disk,
+            'exists' => Storage::disk($disk)->exists($path),
         ]);
 
         try {
-            // Delete from public storage
-            if (Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->delete($path);
-                Log::info('File deleted successfully', ['path' => $path]);
+            // Delete from configured storage disk
+            if (Storage::disk($disk)->exists($path)) {
+                Storage::disk($disk)->delete($path);
+                Log::info('File deleted successfully', ['path' => $path, 'disk' => $disk]);
             } else {
-                Log::warning('File not found for deletion', ['path' => $path]);
+                Log::warning('File not found for deletion', ['path' => $path, 'disk' => $disk]);
             }
 
             // Clean up any remaining chunk directories for this file
@@ -168,7 +172,7 @@ final class ChunkedUploadController extends Controller
         );
         $chunkUploadsDir = storage_path("app/{$chunkDir}");
 
-        if (!is_dir($chunkUploadsDir)) {
+        if (! is_dir($chunkUploadsDir)) {
             return response()->json([
                 'success' => true,
                 'message' => 'No chunks to clean up',
@@ -229,7 +233,7 @@ final class ChunkedUploadController extends Controller
         $chunkDir = $this->getChunkDirectory($fileKey);
 
         // Create chunk directory if it doesn't exist
-        if (!is_dir($chunkDir)) {
+        if (! is_dir($chunkDir)) {
             mkdir($chunkDir, 0755, true);
         }
 
@@ -249,11 +253,13 @@ final class ChunkedUploadController extends Controller
             // Clean up chunks
             $this->cleanupChunks($fileKey);
 
+            $disk = config('chunked-upload.storage.disk', 'public');
+
             return ChunkedUploadResponse::assemblySuccess([
                 'completed' => true,
                 'fileKey' => $fileKey,
                 'path' => $finalPath,
-                'url' => Storage::url($finalPath),
+                'url' => Storage::disk($disk)->url($finalPath),
             ]);
         }
 
@@ -282,14 +288,17 @@ final class ChunkedUploadController extends Controller
             . '.'
             . $extension;
 
+        $disk = config('chunked-upload.storage.disk', 'public');
+        $finalDirectory = config('chunked-upload.storage.final_directory', 'uploads');
+
         // Store the file
-        $path = $uploadedFile->storeAs('uploads', $uniqueFileName, 'public');
+        $path = $uploadedFile->storeAs($finalDirectory, $uniqueFileName, $disk);
 
         return ChunkedUploadResponse::success([
             'completed' => true,
             'fileKey' => $fileKey,
             'path' => $path,
-            'url' => Storage::disk('public')->url($path),
+            'url' => Storage::disk($disk)->url($path),
         ]);
     }
 
@@ -302,13 +311,13 @@ final class ChunkedUploadController extends Controller
     ): bool {
         $chunkDir = $this->getChunkDirectory($fileKey);
 
-        if (!is_dir($chunkDir)) {
+        if (! is_dir($chunkDir)) {
             return false;
         }
 
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDir}/chunk_{$i}";
-            if (!file_exists($chunkPath)) {
+            if (! file_exists($chunkPath)) {
                 return false;
             }
         }
@@ -325,6 +334,8 @@ final class ChunkedUploadController extends Controller
         int $totalChunks,
     ): string {
         $chunkDir = $this->getChunkDirectory($fileKey);
+        $disk = config('chunked-upload.storage.disk', 'public');
+        $finalDirectory = config('chunked-upload.storage.final_directory', 'uploads');
 
         // Generate unique filename
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -335,13 +346,14 @@ final class ChunkedUploadController extends Controller
             . '.'
             . $extension;
 
-        // Create final file path
-        $finalPath = 'uploads/' . $uniqueFileName;
-        $fullFinalPath = storage_path("app/public/{$finalPath}");
+        // Create final file path using configured disk
+        $finalPath = $finalDirectory . '/' . $uniqueFileName;
+        $diskInstance = Storage::disk($disk);
+        $fullFinalPath = $diskInstance->path($finalPath);
 
         // Ensure directory exists
         $finalDir = dirname($fullFinalPath);
-        if (!is_dir($finalDir)) {
+        if (! is_dir($finalDir)) {
             mkdir($finalDir, 0755, true);
         }
 
@@ -357,19 +369,19 @@ final class ChunkedUploadController extends Controller
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDir}/chunk_{$i}";
 
-            if (!file_exists($chunkPath)) {
+            if (! file_exists($chunkPath)) {
                 fclose($finalHandle);
                 throw new Exception("Chunk {$i} not found");
             }
 
             $chunkHandle = fopen($chunkPath, 'rb');
-            if (!$chunkHandle) {
+            if (! $chunkHandle) {
                 fclose($finalHandle);
                 throw new Exception("Could not read chunk {$i}");
             }
 
             // Copy chunk to final file
-            while (!feof($chunkHandle)) {
+            while (! feof($chunkHandle)) {
                 $data = fread($chunkHandle, 8192);
                 fwrite($finalHandle, $data);
             }

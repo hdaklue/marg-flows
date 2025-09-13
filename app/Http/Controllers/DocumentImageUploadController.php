@@ -41,18 +41,25 @@ final class DocumentImageUploadController extends Controller
                 ->storeIn($storageDirectory)
                 ->upload($file);
 
-            // Get URL using Storage facade
-            $url = Storage::url($path);
-
             logger()->info("Saved image to: {$path}");
 
-            OptimizeEditorJsImage::dispatch(Storage::path($path));
+            // For optimization, only run for local storage
+            $disk = config('document.storage.disk', 'public');
+            $diskDriver = Storage::disk($disk);
+
+            // Only optimize images on local storage (cloud storage optimization requires different approach)
+            if ($disk === 'public' && config('filesystems.disks.public.driver') === 'local') {
+                OptimizeEditorJsImage::dispatch($diskDriver->path($path));
+            }
+
+            // Extract just the filename from the full path
+            // The frontend will resolve URLs dynamically using DirectoryManager
+            $filename = basename($path);
 
             return response()->json([
                 'success' => 1,
-                'url' => $url,
                 'file' => [
-                    'url' => $url,
+                    'filename' => $filename,
                 ],
             ]);
         } catch (ValidationException $e) {

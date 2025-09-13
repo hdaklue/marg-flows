@@ -11,6 +11,7 @@ use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use InvalidArgumentException;
 
 /**
@@ -23,9 +24,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
 {
     private const string ROOT_DIRECTORY = 'videos';
 
-    private null|UploadedFile $file = null;
+    private ?UploadedFile $file = null;
 
-    private null|string $storedPath = null;
+    private ?string $storedPath = null;
 
     private PathBuilder $pathBuilder;
 
@@ -39,9 +40,14 @@ final class VideoStorageStrategy implements StorageStrategyContract
         if ($basePath instanceof PathBuilder) {
             $this->pathBuilder = $basePath;
         } else {
-            $this->pathBuilder = LaraPath::base(
-                $basePath,
-            )->add(self::ROOT_DIRECTORY)->validate();
+            // Check if the base path already ends with 'videos' to avoid duplication
+            if (str_ends_with($basePath, '/videos') || str_ends_with($basePath, 'videos')) {
+                $this->pathBuilder = LaraPath::base($basePath)->validate();
+            } else {
+                $this->pathBuilder = LaraPath::base(
+                    $basePath,
+                )->add(self::ROOT_DIRECTORY)->validate();
+            }
         }
     }
 
@@ -97,7 +103,11 @@ final class VideoStorageStrategy implements StorageStrategyContract
 
         $filename = $this->generateFilename();
         $directory = $this->pathBuilder->toString();
-        $this->storedPath = $file->storeAs($directory, $filename);
+        $disk = config('document.storage.disk', 'public');
+
+        $this->storedPath = $file->storeAs($directory, $filename, [
+            'disk' => $disk,
+        ]);
 
         return $this->storedPath;
     }
@@ -122,7 +132,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
         $thumbnailDirectory = $this->pathBuilder->toString();
         $filename = $this->generateThumbnailFilename($filePath);
 
-        $this->storedPath = Storage::putFileAs(
+        $disk = config('document.storage.disk', 'public');
+
+        $this->storedPath = Storage::disk($disk)->putFileAs(
             $thumbnailDirectory,
             new File($filePath),
             $filename,
@@ -147,7 +159,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
             ),
         );
 
-        return Storage::url($this->storedPath);
+        $disk = config('document.storage.disk', 'public');
+
+        return Storage::disk($disk)->url($this->storedPath);
     }
 
     /**
@@ -193,11 +207,12 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): null|string
+    public function get(string $fileName): ?string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
 
-        return Storage::get($path);
+        return Storage::disk($disk)->get($path);
     }
 
     /**
@@ -206,11 +221,12 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function getVariant(string $fileName): null|string
+    public function getVariant(string $fileName): ?string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
 
-        return Storage::get($path);
+        return Storage::disk($disk)->get($path);
     }
 
     /**
@@ -219,12 +235,13 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): null|string
+    public function getPath(string $fileName): ?string
     {
         $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
 
-        if (Storage::getDefaultDriver() === 'local') {
-            return Storage::path($fullPath);
+        if (Storage::disk($disk)->getDriver()->getName() === 'local') {
+            return Storage::disk($disk)->path($fullPath);
         }
 
         return $fullPath;
@@ -236,12 +253,13 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getVariantPath(string $fileName): null|string
+    public function getVariantPath(string $fileName): ?string
     {
         $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
 
-        if (Storage::getDefaultDriver() === 'local') {
-            return Storage::path($fullPath);
+        if (Storage::disk($disk)->getDriver()->getName() === 'local') {
+            return Storage::disk($disk)->path($fullPath);
         }
 
         return $fullPath;
@@ -256,8 +274,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function delete(string $fileName): bool
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
 
-        return Storage::delete($path);
+        return Storage::disk($disk)->delete($path);
     }
 
     /**
@@ -269,8 +288,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function deleteVariant(string $fileName): bool
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
 
-        return Storage::delete($path);
+        return Storage::disk($disk)->delete($path);
     }
 
     /**
@@ -282,8 +302,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function getFileUrl(string $fileName): string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
 
-        return Storage::url($path);
+        return Storage::disk($disk)->url($path);
     }
 
     /**
@@ -295,8 +316,44 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function getVariantFileUrl(string $fileName): string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
 
-        return Storage::url($path);
+        return Storage::disk($disk)->url($path);
+    }
+
+    /**
+     * Get secure URL for accessing a file with authentication.
+     *
+     * @param  string  $fileName  The filename to get secure URL for
+     * @param  string  $tenantId  The tenant identifier
+     * @param  string  $type  The file type (documents, videos, etc.)
+     * @return string Secure URL requiring authentication
+     */
+    public function getSecureUrl(string $fileName, string $tenantId, string $type): string
+    {
+        return route('file.serve', [
+            'tenant' => $tenantId,
+            'type' => $type,
+            'filename' => $fileName,
+        ]);
+    }
+
+    /**
+     * Get temporary URL for accessing a file.
+     *
+     * @param  string  $fileName  The filename to get temporary URL for
+     * @param  int  $expiresIn  Expiration time in seconds
+     * @return string Temporary URL with expiration
+     */
+    public function getTemporaryUrl(string $fileName, int $expiresIn = 1800): string
+    {
+        $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
+        $disk = config('document.storage.disk', 'public');
+
+        return Storage::disk($disk)->temporaryUrl(
+            $fullPath,
+            now()->addSeconds($expiresIn),
+        );
     }
 
     /**

@@ -7,10 +7,11 @@ namespace App\Services\Directory\Strategies;
 use App\Services\Directory\Contracts\StorageStrategyContract;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 /**
- * Base Storage Strategy
+ * Base Storage Strategy.
  *
  * Abstract base class providing common file storage operations for all storage strategies.
  * Implements the StorageStrategyContract with shared functionality while allowing
@@ -21,7 +22,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
     /**
      * Store uploaded file in the strategy's directory.
      *
-     * @param UploadedFile $file The file to store
+     * @param  UploadedFile  $file  The file to store
      * @return string The stored file identifier/path
      */
     abstract public function store(UploadedFile $file): string;
@@ -43,7 +44,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
     /**
      * Delete a file from storage.
      *
-     * @param string $fileName The filename to delete
+     * @param  string  $fileName  The filename to delete
      * @return bool True if deletion was successful
      */
     public function delete(string $fileName): bool
@@ -54,10 +55,10 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
     /**
      * Get file contents as string.
      *
-     * @param string $fileName The filename to retrieve
+     * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): null|string
+    public function get(string $fileName): ?string
     {
         return Storage::get($this->getDirectory() . "/{$fileName}");
     }
@@ -67,10 +68,10 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      *
      * Returns absolute filesystem path for local storage, or storage path for cloud storage.
      *
-     * @param string $fileName The filename to get path for
+     * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): null|string
+    public function getPath(string $fileName): ?string
     {
         $fullPath = $this->getDirectory() . "/{$fileName}";
 
@@ -86,7 +87,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
     /**
      * Get public URL for accessing a file.
      *
-     * @param string $fileName The filename to get URL for
+     * @param  string  $fileName  The filename to get URL for
      * @return string Public URL for file access
      */
     public function getFileUrl(string $fileName): string
@@ -100,7 +101,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      * Used by form components and file management systems that need
      * storage paths relative to the disk root.
      *
-     * @param string $fileName The filename to get relative path for
+     * @param  string  $fileName  The filename to get relative path for
      * @return string Storage-relative path (directory/filename)
      */
     public function getRelativePath(string $fileName): string
@@ -113,7 +114,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      *
      * Utility method to get just the filename portion from a path like "directory/filename.ext".
      *
-     * @param string $path The relative storage path
+     * @param  string  $path  The relative storage path
      * @return string Just the filename portion
      */
     public function getFileNameFromRelativePath(string $path): string
@@ -122,11 +123,45 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
     }
 
     /**
+     * Get secure URL for accessing a file with authentication.
+     *
+     * @param  string  $fileName  The filename to get secure URL for
+     * @param  string  $tenantId  The tenant identifier
+     * @param  string  $type  The file type (documents, videos, etc.)
+     * @return string Secure URL requiring authentication
+     */
+    public function getSecureUrl(string $fileName, string $tenantId, string $type): string
+    {
+        return route('secure-files.show', [
+            'tenantId' => $tenantId,
+            'type' => $type,
+            'path' => $fileName,
+        ]);
+    }
+
+    /**
+     * Get temporary URL for accessing a file.
+     *
+     * @param  string  $fileName  The filename to get temporary URL for
+     * @param  int  $expiresIn  Expiration time in seconds
+     * @return string Temporary URL with expiration
+     */
+    public function getTemporaryUrl(string $fileName, int $expiresIn = 1800): string
+    {
+        $fullPath = $this->getDirectory() . "/{$fileName}";
+
+        return Storage::temporaryUrl(
+            $fullPath,
+            now()->addSeconds($expiresIn),
+        );
+    }
+
+    /**
      * Build full file path with directory.
      *
      * Protected helper method for strategies with complex directory structures.
      *
-     * @param string $fileName The filename to build path for
+     * @param  string  $fileName  The filename to build path for
      * @return string Full path (directory/filename)
      */
     protected function buildFilePath(string $fileName): string
