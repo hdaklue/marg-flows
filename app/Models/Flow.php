@@ -113,6 +113,7 @@ final class Flow extends Model implements
         'is_default',
         'completed_at',
         'canceled_at',
+        'started_at',
     ];
 
     /* The model's default values for attributes.
