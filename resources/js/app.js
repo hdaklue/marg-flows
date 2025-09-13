@@ -6,8 +6,8 @@ import AsyncAlpine from 'async-alpine';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
 // Import TOAST UI Calendar CSS and make it globally available
-import '@toast-ui/calendar/dist/toastui-calendar.min.css';
 import Calendar from '@toast-ui/calendar';
+import '@toast-ui/calendar/dist/toastui-calendar.min.css';
 
 // Make TOAST UI Calendar available globally
 window.ToastUICalendar = Calendar;
@@ -16,8 +16,8 @@ window.ToastUICalendar = Calendar;
 // Only keep lightweight or critical components as direct imports here if needed
 
 import anchor from "@alpinejs/anchor";
-import Hammer from 'hammerjs';
 import Draggabilly from 'draggabilly';
+import Hammer from 'hammerjs';
 import './dist/components/alpine-sortable';
 
 
@@ -34,15 +34,15 @@ window.ui = ui;
 Alpine.plugin(AsyncAlpine);
 
 // Register async components with Alpine.asyncData
-Alpine.asyncData('audioAnnotation', () => import('./components/audio-annotation'));
-Alpine.asyncData('designAnnotationApp', () => import('./components/design-annotation'));
-Alpine.asyncData('designReviewApp', () => import('./components/image-review'));
-Alpine.asyncData('videoAnnotation', () => import('./components/video-annotation'));
-Alpine.asyncData('audioPlayer', () => import('./components/audio-player'));
+// Alpine.asyncData('audioAnnotation', () => import('./components/audio-annotation'));
+// Alpine.asyncData('designAnnotationApp', () => import('./components/design-annotation'));
+// Alpine.asyncData('designReviewApp', () => import('./components/image-review'));
+// Alpine.asyncData('videoAnnotation', () => import('./components/video-annotation'));
+// Alpine.asyncData('audioPlayer', () => import('./components/audio-player'));
 Alpine.asyncData('document', () => import('./components/document'));
-Alpine.asyncData('mentionableText', () => import('./components/mentionable'));
-Alpine.asyncData('videoRecorder', () => import('./components/video-recorder'));
-Alpine.asyncData('recorder', () => import('./components/voice-recorder'));
+// Alpine.asyncData('mentionableText', () => import('./components/mentionable'));
+// Alpine.asyncData('videoRecorder', () => import('./components/video-recorder'));
+// Alpine.asyncData('recorder', () => import('./components/voice-recorder'));
 Alpine.asyncData('chunkedFileUpload', () => import('./components/ChunkedFileUpload/index.js'));
 
 // Keep global assignments for components that need it

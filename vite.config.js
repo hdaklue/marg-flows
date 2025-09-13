@@ -9,7 +9,8 @@ export default defineConfig({
                 manualChunks: undefined // Disable automatic chunking for small files
             }
         },
-        chunkSizeWarningLimit: 1000
+        chunkSizeWarningLimit: 1000,
+        minify: 'esbuild' // Use esbuild minifier (faster, less memory)
     },
     plugins: [
         tailwindcss(),
@@ -18,22 +19,17 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/css/filament/portal/theme.css',
-                // Async Alpine components
+                // Core components only - reduce memory usage
                 'resources/js/components/async/audio-annotation.js',
                 'resources/js/components/async/video-annotation.js',
                 'resources/js/components/async/voice-recorder.js',
                 'resources/js/components/async/video-recorder.js',
                 'resources/js/components/async/audio-player.js',
                 'resources/js/components/ChunkedFileUpload/index.js',
-                // CSS files
+                // Essential CSS only
                 'resources/css/components/editorjs/index.css',
-                'resources/css/components/editorjs/resizable-image.css',
-                'resources/css/components/editorjs/comment-tune.css',
                 'resources/css/components/document/document.css',
                 'resources/css/audio-annotation.css',
-                'resources/css/components/mentionable-text.css',
-                'resources/css/components/voice-recorder.css',
-                'resources/css/components/video-recorder.css',
             ],
             refresh: [
                 ...refreshPaths,
