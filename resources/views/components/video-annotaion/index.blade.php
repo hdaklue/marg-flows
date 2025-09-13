@@ -4,7 +4,12 @@
 {{-- <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
 <script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script> --}}
 
-<div x-data="videoAnnotation(@js($config ?? null), @js($comments ?? []), @js($regions ?? []))" class="relative h-full w-full overflow-hidden bg-zinc-950" tabindex="0"
+<div 
+    x-load
+    x-load-src="/build/resources/js/components/async/video-annotation.js"
+    x-data="videoAnnotation(@js($config ?? null), @js($comments ?? []), @js($regions ?? []))" 
+    class="relative h-full w-full overflow-hidden bg-zinc-950" 
+    tabindex="0"
     @destroy.window="destroy()" @keydown.arrow-left.window.prevent="isCreatingRegion ? shrinkRegionEnd() : stepBackward()"
     @keydown.arrow-right.window.prevent="isCreatingRegion ? expandRegionEnd() : stepForward()"
     @keydown.arrow-up.window.prevent="isCreatingRegion && expandRegionStart()"

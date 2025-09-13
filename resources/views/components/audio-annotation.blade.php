@@ -9,8 +9,14 @@
 
 
 
-<div x-data="audioAnnotation(@js($config), @js($comments))" x-init="init()" @keydown.window="handleKeydown($event)"
-    class="audio-annotation-container" data-audio-src="{{ $audioSrc }}">
+<div 
+    x-load 
+    x-load-src="/build/resources/js/components/async/audio-annotation.js"
+    x-data="audioAnnotation(@js($config), @js($comments))" 
+    x-init="init()" 
+    @keydown.window="handleKeydown($event)"
+    class="audio-annotation-container" 
+    data-audio-src="{{ $audioSrc }}">
     <!-- Safari Warning -->
     <div x-show="isSafari" x-cloak class="flex items-center justify-center p-8 min-h-96">
         <div class="max-w-2xl mx-auto space-y-6 text-center">

@@ -2,6 +2,7 @@ import { sort } from '@alpinejs/sort';
 import ui from '@alpinejs/ui';
 import Autosize from '@marcreichel/alpine-autosize';
 import Tooltip from '@ryangjchandler/alpine-tooltip';
+import AsyncAlpine from 'async-alpine';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
 // Import TOAST UI Calendar CSS and make it globally available
@@ -11,19 +12,8 @@ import Calendar from '@toast-ui/calendar';
 // Make TOAST UI Calendar available globally
 window.ToastUICalendar = Calendar;
 
-import audioAnnotation from "./components/audio-annotation";
-
-import designAnnotationApp from "./components/design-annotation";
-import designReviewApp from "./components/image-review";
-import videoAnnotationComponent from "./components/video-annotation";
-
-import audioPlayer from './components/audio-player';
-import documentEditor from './components/document';
-import mentionableText from './components/mentionable';
-
-import videoRecorder from './components/video-recorder';
-import recorder from './components/voice-recorder';
-import chunkedFileUploadComponent from './components/ChunkedFileUpload/index.js';
+// Heavy components will be loaded asynchronously
+// Only keep lightweight or critical components as direct imports here if needed
 
 import anchor from "@alpinejs/anchor";
 import Hammer from 'hammerjs';
@@ -40,21 +30,31 @@ window.Draggabilly = Draggabilly;
 window.ui = ui;
 
 
-// Make video annotation available globally for Blade component
-window.videoAnnotationComponent = videoAnnotationComponent;
-// Make chunked file upload available globally for Blade component  
-window.chunkedFileUploadComponent = chunkedFileUploadComponent;
+// Configure AsyncAlpine plugin
+Alpine.plugin(AsyncAlpine);
 
-Alpine.data('designReviewApp', designReviewApp)
-Alpine.data('designAnnotationApp', designAnnotationApp)
-Alpine.data('videoAnnotation', videoAnnotationComponent)
-Alpine.data('audioAnnotation', audioAnnotation)
-Alpine.data('document', documentEditor);
-Alpine.data('mentionableText', mentionableText);
-Alpine.data('recorder', recorder);
-Alpine.data('audioPlayer', audioPlayer);
-Alpine.data('videoRecorder', videoRecorder);
-Alpine.data('chunkedFileUpload', chunkedFileUploadComponent);
+// Register async components with Alpine.asyncData
+Alpine.asyncData('audioAnnotation', () => import('./components/audio-annotation'));
+Alpine.asyncData('designAnnotationApp', () => import('./components/design-annotation'));
+Alpine.asyncData('designReviewApp', () => import('./components/image-review'));
+Alpine.asyncData('videoAnnotation', () => import('./components/video-annotation'));
+Alpine.asyncData('audioPlayer', () => import('./components/audio-player'));
+Alpine.asyncData('document', () => import('./components/document'));
+Alpine.asyncData('mentionableText', () => import('./components/mentionable'));
+Alpine.asyncData('videoRecorder', () => import('./components/video-recorder'));
+Alpine.asyncData('recorder', () => import('./components/voice-recorder'));
+Alpine.asyncData('chunkedFileUpload', () => import('./components/ChunkedFileUpload/index.js'));
+
+// Keep global assignments for components that need it
+Alpine.asyncData('videoAnnotationComponent', () => import('./components/video-annotation').then(module => {
+    window.videoAnnotationComponent = module.default;
+    return module;
+}));
+Alpine.asyncData('chunkedFileUploadComponent', () => import('./components/ChunkedFileUpload/index.js').then(module => {
+    window.chunkedFileUploadComponent = module.default;
+    return module;
+}));
+
 Alpine.plugin(ui);
 Alpine.plugin(Autosize);
 Alpine.plugin(Tooltip);
