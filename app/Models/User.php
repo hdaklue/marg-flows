@@ -20,9 +20,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
@@ -118,8 +118,8 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     public function updateProfileAvatar(string $avatarFileName)
     {
         $this->loadMissing('profile')->profile->update([
-                'avatar' => $avatarFileName,
-            ]);
+            'avatar' => $avatarFileName,
+        ]);
     }
 
     public function getTimeZone(): string
@@ -127,7 +127,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return $this->loadMissing('profile')->profile->getAttribute('timezone');
     }
 
-    public function getDefaultTenant(Panel $panel): null|Model
+    public function getDefaultTenant(Panel $panel): ?Model
     {
         return $this->activeTenant() ?? $this->getAssignedTenants()->first();
     }
@@ -180,12 +180,12 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return $this->hasAssignmentOn($flow, $role);
     }
 
-    public function getAvatar(): null|string
+    public function getAvatar(): ?string
     {
         return $this->load('profile')->profile?->avatar;
     }
 
-    public function getAvatarFileName(): null|string
+    public function getAvatarFileName(): ?string
     {
         return $this->load('profile')->profile?->avatar;
     }
@@ -216,6 +216,15 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     // {
     //     return RoleManager::getAssignedEntitiesByType($this, Relation::getMorphAlias(Tenant::class));
     // }
+
+    /**
+     * Get the user's notifications using the main database connection.
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable')
+            ->orderBy('created_at', 'desc');
+    }
 
     /**
      * Get the model's morph class.
