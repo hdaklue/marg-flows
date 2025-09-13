@@ -154,23 +154,42 @@ final class EditorJsVideoUpload extends Controller
             // Extract video metadata if enabled
             $videoData = [];
             if (config('video-upload.processing.extract_metadata', true)) {
-                $videoData = $this->extractVideoMetadata($videoPath);
+                try {
+                    $videoData = $this->extractVideoMetadata($videoPath);
+                } catch (Exception $e) {
+                    Log::warning('Failed to extract video metadata', [
+                        'path' => $videoPath,
+                        'error' => $e->getMessage(),
+                    ]);
+                    // Continue without metadata - not critical for video upload success
+                    $videoData = [];
+                }
             }
 
             // Generate thumbnail if enabled
             $thumbnailUrl = null;
+            $thumbnailPath = null;
             if (config('video-upload.processing.generate_thumbnails', true)) {
                 $duration = $videoData['duration'] ?? null;
                 if ($duration && $duration > 0) {
-                    $thumbnailPath = $this->generateVideoThumbnail(
-                        $videoPath,
-                        $duration,
-                        $tenantId,
-                        $documentId,
-                    );
-                    if ($thumbnailPath) {
-                        $disk = config('chunked-upload.storage.disk', 'public');
-                        $thumbnailUrl = Storage::disk($disk)->url($thumbnailPath);
+                    try {
+                        $thumbnailPath = $this->generateVideoThumbnail(
+                            $videoPath,
+                            $duration,
+                            $tenantId,
+                            $documentId,
+                        );
+                        if ($thumbnailPath) {
+                            $disk = config('chunked-upload.storage.disk', 'public');
+                            $thumbnailUrl = Storage::disk($disk)->url($thumbnailPath);
+                        }
+                    } catch (Exception $e) {
+                        Log::warning('Failed to generate video thumbnail', [
+                            'path' => $videoPath,
+                            'error' => $e->getMessage(),
+                        ]);
+                        // Continue without thumbnail - not critical for video upload success
+                        $thumbnailPath = null;
                     }
                 }
             }
