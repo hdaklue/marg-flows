@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\FileServing\System;
 
-use App\Contracts\File\HasFiles;
 use App\Models\User;
 use App\Services\Directory\Managers\SystemDirectoryManager;
 use App\Services\FileServing\AbstractFileResolver;
@@ -39,7 +38,7 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return bool True if file exists, false otherwise
      */
-    public function fileExists(HasFiles $entity, string $type, string $filename): bool
+    public function fileExists($entity, string $type, string $filename): bool
     {
         $disk = config('directory-system.storage.disk', 'public');
         $basePath = $this->directoryManager->getBaseDirectory($type);
@@ -56,7 +55,7 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return int|null File size in bytes, null if file doesn't exist
      */
-    public function getFileSize(HasFiles $entity, string $type, string $filename): ?int
+    public function getFileSize($entity, string $type, string $filename): ?int
     {
         if (! $this->fileExists($entity, $type, $filename)) {
             return null;
@@ -119,7 +118,7 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  User  $user  The user requesting access
      * @return bool Always returns true for system files
      */
-    protected function validateAccess(HasFiles $entity, User $user): bool
+    protected function validateAccess($entity): bool
     {
         // System files are accessible to any authenticated user
         return true;
@@ -133,7 +132,7 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return string Secure URL requiring authentication
      */
-    protected function generateSecureUrl(HasFiles $entity, string $type, string $filename): string
+    protected function generateSecureUrl($entity, string $type, string $filename): string
     {
         return route('system.files.serve', [
             'type' => $type,
@@ -150,7 +149,7 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  int|null  $expires  Expiration time in seconds
      * @return string Temporary URL with expiration
      */
-    protected function generateTemporaryUrl(HasFiles $entity, string $type, string $filename, ?int $expires = null): string
+    protected function generateTemporaryUrl($entity, string $type, string $filename, ?int $expires = null): string
     {
         $expires ??= config('directory-system.public_access.default_expiry', 3600);
 
@@ -165,7 +164,7 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return bool True if deletion was successful, false otherwise
      */
-    protected function performFileDelete(HasFiles $entity, string $type, string $filename): bool
+    protected function performFileDelete($entity, string $type, string $filename): bool
     {
         if (! $this->fileExists($entity, $type, $filename)) {
             return false;

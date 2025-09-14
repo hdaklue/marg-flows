@@ -52,7 +52,7 @@ final class Simple
                     ->videos()
                     ->getDirectory();
 
-                $videoUploadConfig->forDocument($documentId)->baseDirectory($baseDirectory);
+                $videoUploadConfig->forDocument($documentId)->baseDirectory($this->tenantId, $documentId);
             }
         }
 

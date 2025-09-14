@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\Directory\Managers\DocumentDirectoryManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -27,15 +26,19 @@ final class FileResolverController extends Controller
         $request->validate([
             'type' => 'required|string|in:images,videos,documents,prev',
             'filename' => 'required|string',
+            'document_id' => 'required|string', // Add document_id requirement
         ]);
 
         $type = $request->input('type');
         $filename = $request->input('filename');
-        $tenantId = auth()->user()->getActiveTenantId();
+        $documentId = $request->input('document_id');
 
-        // Generate secure URL using DocumentDirectoryManager
-        // Temporary implementation - this should use FileResolver services
-        $secureUrl = url("/files/documents/{$tenantId}/{$type}/{$filename}");
+        // Generate secure URL using the correct document serve route
+        $secureUrl = route('documents.serve', [
+            'document' => $documentId,
+            'type' => $type,
+            'filename' => $filename,
+        ]);
 
         return response($secureUrl, 200, [
             'Content-Type' => 'text/plain',
@@ -57,17 +60,21 @@ final class FileResolverController extends Controller
         $request->validate([
             'type' => 'required|string|in:images,videos,documents,prev',
             'filename' => 'required|string',
+            'document_id' => 'required|string', // Add document_id requirement
             'expires_in' => 'sometimes|integer|min:60|max:7200', // 1 minute to 2 hours
         ]);
 
         $type = $request->input('type');
         $filename = $request->input('filename');
+        $documentId = $request->input('document_id');
         $expiresIn = $request->input('expires_in', 1800); // Default 30 minutes
-        $tenantId = auth()->user()->getActiveTenantId();
 
-        // Generate temporary URL using DocumentDirectoryManager
-        // Temporary implementation - this should use FileResolver services
-        $tempUrl = url("/files/documents/{$tenantId}/{$type}/{$filename}");
+        // Generate temporary URL using the correct document serve route
+        $tempUrl = route('documents.serve', [
+            'document' => $documentId,
+            'type' => $type,
+            'filename' => $filename,
+        ]);
 
         return response($tempUrl, 200, [
             'Content-Type' => 'text/plain',

@@ -18,7 +18,9 @@ final class DocumentsTable
     public static function configure(Table $table, Documentable $documentable): Table
     {
         return $table
-            ->records(fn (): array => self::getDocuments($documentable))
+            ->records(function ($search) use ($documentable) {
+                return self::getDocuments($documentable, $search);
+            })
             ->recordUrl(fn ($record) => DocumentResource::getUrl('view', [
                 'record' => $record['id'],
             ]))
@@ -52,9 +54,14 @@ final class DocumentsTable
             ]);
     }
 
-    private static function getDocuments($documentable): array
+    private static function getDocuments($documentable, $search): array
     {
         return DocumentManager::getDocumentsForUser($documentable, filamentUser())
+            ->when($search, function ($collection, $term) {
+                return $collection->filter(
+                    fn ($item): bool => stripos($item->name, $term) !== false,
+                );
+            })
             ->keyBy(fn ($item) => $item->getKey())
             ->toArray();
     }

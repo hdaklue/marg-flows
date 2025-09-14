@@ -59,7 +59,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function asOriginal(): self
     {
-        return new self($this->pathBuilder->add('src'));
+        return new self($this->pathBuilder->add('src'), $this->disk);
     }
 
     /**
@@ -67,7 +67,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function asConversions(): self
     {
-        return new self($this->pathBuilder->add('proc'));
+        return new self($this->pathBuilder->add('proc'), $this->disk);
     }
 
     /**
@@ -75,7 +75,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function asThumbnails(): self
     {
-        return new self($this->pathBuilder->add('prev'));
+        return new self($this->pathBuilder->add('prev'), $this->disk);
     }
 
     /**
@@ -83,7 +83,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function asPreviews(): self
     {
-        return new self($this->pathBuilder->add('temp'));
+        return new self($this->pathBuilder->add('temp'), $this->disk);
     }
 
     /**
@@ -91,7 +91,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      */
     public function asClips(): self
     {
-        return new self($this->pathBuilder->add('seg'));
+        return new self($this->pathBuilder->add('seg'), $this->disk);
     }
 
     /**
@@ -328,18 +328,18 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * Get secure URL for accessing a file with authentication.
      *
      * @param  string  $fileName  The filename to get secure URL for
-     * @param  string  $tenantId  The tenant identifier
+     * @param  string  $documentId  The document identifier
      * @param  string  $type  The file type (documents, videos, etc.)
      * @return string Secure URL requiring authentication
      */
     public function getSecureUrl(
         string $route,
         string $fileName,
-        string $tenantId,
+        string $documentId,
         string $type,
     ): string {
         return route($route, [
-            'tenant' => $tenantId,
+            'document' => $documentId,
             'type' => $type,
             'filename' => $fileName,
         ]);

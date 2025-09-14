@@ -55,6 +55,17 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
         );
     }
 
+    public function getSecureUrl(
+        string $route,
+        string $fileName,
+        string $tenantId,
+        string $type,
+    ): string {
+        throw new InvalidArgumentException(
+            'Secure URL generation not supported for chunk files. Chunks are temporary storage.',
+        );
+    }
+
     public function getDirectory(): string
     {
         $this->validateConfiguration();

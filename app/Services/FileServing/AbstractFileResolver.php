@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\FileServing;
 
+use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 
@@ -40,7 +41,7 @@ abstract class AbstractFileResolver
     /**
      * Resolve temporary URL with access validation.
      *
-     * @param  HasFiles  $entity  The entity that owns the file
+     * @param  mixed  $entity  The entity that owns the file
      * @param  string  $type  The file type (images, videos, documents)
      * @param  string  $filename  The filename
      * @param  int|null  $expires  Expiration time in seconds
@@ -49,11 +50,11 @@ abstract class AbstractFileResolver
      *
      * @throws HttpResponseException When access is denied
      */
-    public function resolveTemporaryUrl(HasFiles $entity, string $type, string $filename, ?int $expires = null, ?User $user = null): string
+    public function resolveTemporaryUrl($entity, string $type, string $filename, ?int $expires = null, ?User $user = null): string
     {
         $user ??= auth()->user();
 
-        if (! $user || ! $this->validateAccess($entity, $user)) {
+        if (! $user || ! $this->validateAccess($entity)) {
             throw new HttpResponseException(
                 response()->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN),
             );
@@ -65,27 +66,27 @@ abstract class AbstractFileResolver
     /**
      * Check if file exists for the entity.
      *
-     * @param  HasFiles  $entity  The entity that owns the file
+     * @param  mixed  $entity  The entity that owns the file
      * @param  string  $type  The file type (images, videos, documents)
      * @param  string  $filename  The filename
      * @return bool True if file exists, false otherwise
      */
-    abstract public function fileExists(HasFiles $entity, string $type, string $filename): bool;
+    abstract public function fileExists($entity, string $type, string $filename): bool;
 
     /**
      * Get file size for the entity.
      *
-     * @param  HasFiles  $entity  The entity that owns the file
+     * @param  mixed  $entity  The entity that owns the file
      * @param  string  $type  The file type (images, videos, documents)
      * @param  string  $filename  The filename
      * @return int|null File size in bytes, null if file doesn't exist
      */
-    abstract public function getFileSize(HasFiles $entity, string $type, string $filename): ?int;
+    abstract public function getFileSize($entity, string $type, string $filename): ?int;
 
     /**
      * Delete file for the entity.
      *
-     * @param  HasFiles  $entity  The entity that owns the file
+     * @param  mixed  $entity  The entity that owns the file
      * @param  string  $type  The file type (images, videos, documents)
      * @param  string  $filename  The filename
      * @param  User|null  $user  The user requesting deletion (defaults to authenticated user)
@@ -93,11 +94,11 @@ abstract class AbstractFileResolver
      *
      * @throws HttpResponseException When access is denied
      */
-    public function deleteFile(HasFiles $entity, string $type, string $filename, ?User $user = null): bool
+    public function deleteFile($entity, string $type, string $filename, ?User $user = null): bool
     {
         $user ??= auth()->user();
 
-        if (! $user || ! $this->validateAccess($entity, $user)) {
+        if (! $user || ! $this->validateAccess($entity)) {
             throw new HttpResponseException(
                 response()->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN),
             );
@@ -145,10 +146,10 @@ abstract class AbstractFileResolver
     /**
      * Perform the actual file deletion.
      *
-     * @param  HasFiles  $entity  The entity that owns the file
+     * @param  mixed  $entity  The entity that owns the file
      * @param  string  $type  The file type (images, videos, documents)
      * @param  string  $filename  The filename
      * @return bool True if deletion was successful, false otherwise
      */
-    abstract protected function performFileDelete(HasFiles $entity, string $type, string $filename): bool;
+    abstract protected function performFileDelete($entity, string $type, string $filename): bool;
 }

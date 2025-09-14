@@ -980,28 +980,22 @@ class VideoUpload {
                 player.ready(() => {
                     console.log('Modal Video.js player ready with aspect ratio:', aspectRatio);
 
-                    // Fix seeking issues
-                    let seeking = false;
-                    let seekToTime = 0;
+                    // Fix seeking issues - prevent jumping back to start
+                    let isSeeking = false;
 
                     player.on('seeking', () => {
-                        seeking = true;
-                        seekToTime = player.currentTime();
+                        isSeeking = true;
                     });
 
                     player.on('seeked', () => {
-                        if (seeking && Math.abs(player.currentTime() - seekToTime) > 1) {
-                            // If the current time is significantly different from where we wanted to seek,
-                            // try to seek again
-                            player.currentTime(seekToTime);
-                        }
-                        seeking = false;
+                        isSeeking = false;
                     });
 
                     // Prevent time jumping during seeking
                     player.on('timeupdate', () => {
-                        if (seeking) {
-                            return; // Don't update time display while seeking
+                        // Don't interfere with seeking operations
+                        if (isSeeking) {
+                            return;
                         }
                     });
 

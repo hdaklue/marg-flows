@@ -59,7 +59,7 @@ final class Ultimate
         if ($documentId) {
             $videoUploadConfig
                 ->forDocument($documentId)
-                ->baseDirectory($baseDirectory);
+                ->baseDirectory($this->tenantId, $documentId);
         }
 
         return $videoUploadConfig;

@@ -9,6 +9,7 @@ use App\Http\Controllers\EditorJsVideoUpload;
 use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\FileServing\Document\DocumentFileResolver;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -144,7 +145,7 @@ Route::get('documents/{document}/serve/{type}/{filename}', function (
     $resolver = DocumentFileResolver::make($documentModel);
 
     // Validate access
-    if (!auth()->user() || !$resolver->validateAccess($documentModel)) {
+    if (! auth()->user() || ! $resolver->validateAccess($documentModel)) {
         abort(403, 'Access denied');
     }
 
@@ -160,12 +161,50 @@ Route::get('documents/{document}/serve/{type}/{filename}', function (
     $disk = config('directory-document.storage.disk', 'public');
     $path = $directory . "/{$filename}";
 
-    if (!Storage::disk($disk)->exists($path)) {
-        Illuminate\Support\Facades\Log::error('File not found at path: ' . $path);
+    // Log detailed debugging information
+    Log::info('Document serve request', [
+        'document_id' => $document,
+        'tenant_id' => $documentModel->getTenant()->getKey(),
+        'type' => $type,
+        'filename' => $filename,
+        'directory' => $directory,
+        'disk' => $disk,
+        'full_path' => $path,
+        'user_id' => auth()->id(),
+        'request_url' => request()->fullUrl(),
+    ]);
+
+    if (! Storage::disk($disk)->exists($path)) {
+        // Log available files for debugging
+        $availableFiles = Storage::disk($disk)->exists($directory)
+            ? Storage::disk($disk)->files($directory)
+            : [];
+
+        Log::error('File not found', [
+            'requested_path' => $path,
+            'directory_exists' => Storage::disk($disk)->exists($directory),
+            'available_files' => $availableFiles,
+            'disk' => $disk,
+        ]);
         abort(404, 'File not found');
     }
 
-    return Storage::disk($disk)->response($path);
+    // Get file info for proper headers
+    $size = Storage::disk($disk)->size($path);
+    $mimeType = Storage::disk($disk)->mimeType($path) ?: 'application/octet-stream';
+    
+    // Create streaming response with proper headers for video playback
+    $response = Storage::disk($disk)->response($path, basename($path), [
+        'Content-Type' => $mimeType,
+        'Content-Length' => $size,
+        'Accept-Ranges' => 'bytes',
+        'Cache-Control' => 'public, max-age=3600',
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+        'Access-Control-Allow-Headers' => 'Range, If-Range',
+    ]);
+
+    return $response;
 })
     ->where('filename', '.*')
     ->middleware(['auth'])

@@ -58,7 +58,7 @@ final class Advanced
 
                 $videoUploadConfig
                     ->forDocument($documentId)
-                    ->baseDirectory($baseDirectory);
+                    ->baseDirectory($this->tenantId, $documentId);
             }
         }
 

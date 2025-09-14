@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Requests\DocumentVideoUploadRequest;
 use App\Services\Upload\UploadSessionManager;
@@ -27,7 +28,8 @@ final class EditorJsVideoUpload extends Controller
         DocumentVideoUploadRequest $request,
         string $document,
     ): JsonResponse {
-        // Get tenant and session info
+        // Get document model and session info
+        $documentModel = Document::findOrFail($document);
         $tenantId = auth()->user()->getActiveTenantId();
         $sessionId = $request->getFileKey();
         $chunkIndex = $request->getChunkIndex();
@@ -35,14 +37,12 @@ final class EditorJsVideoUpload extends Controller
         $file = $request->file('video');
 
         try {
-            // Configure session manager for this tenant and document-specific storage
+            // Configure session manager for this document-specific storage
             $sessionManager = UploadSessionManager::start(
                 'http',
                 $tenantId,
             )->storeIn(
-                DocumentDirectoryManager::forTenant($tenantId)
-                    ->document($tenantId)
-                    ->forDocument($document)
+                DocumentDirectoryManager::make($documentModel)
                     ->videos()
                     ->getDirectory(),
             );
@@ -99,11 +99,10 @@ final class EditorJsVideoUpload extends Controller
         DocumentVideoUploadRequest $request,
         string $document,
     ): JsonResponse {
-        // Get tenant and directory configuration for direct upload
+        // Get document model and directory configuration for direct upload
+        $documentModel = Document::findOrFail($document);
         $tenantId = auth()->user()->getActiveTenantId();
-        $directory = DocumentDirectoryManager::forTenant($tenantId)
-            ->document($tenantId)
-            ->forDocument($document)
+        $directory = DocumentDirectoryManager::make($documentModel)
             ->videos()
             ->getDirectory();
 
@@ -432,9 +431,8 @@ final class EditorJsVideoUpload extends Controller
             $thumbnailFilename = $videoFilename . '_thumb.jpg';
 
             // Use the proper thumbnail directory structure: {tenant}/documents/{documentId}/videos/prev/
-            $thumbnailStrategy = DocumentDirectoryManager::forTenant($tenantId)
-                ->document($tenantId)
-                ->forDocument($documentId)
+            $documentModel = Document::findOrFail($documentId);
+            $thumbnailStrategy = DocumentDirectoryManager::make($documentModel)
                 ->videos()
                 ->asThumbnails();
 

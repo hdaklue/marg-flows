@@ -139,20 +139,11 @@ final class VideoUpload implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function baseDirectory(string $baseDirectory): self
+    public function baseDirectory(string $tenantId, string $documentId): self
     {
-        // baseDirectory format: "b6180afbf39e885769982d2eed007ee0/documents/2c2bd2408e0a1c665becde5256ce4999/videos"
-        // We need the path without the final "videos" part for the secure endpoint
-        $pathParts = explode('/', $baseDirectory);
-
-        if (count($pathParts) >= 3) {
-            // Remove the last part (videos) to get the document base path
-            array_pop($pathParts);
-            $documentBasePath = implode('/', $pathParts);
-
-            // Use the secure file serving endpoint with full document path
-            $this->config['secureFileEndpoint'] = rtrim(url('/files'), '/') . '/' . $documentBasePath;
-        }
+        // Use document-specific serving route instead of generic file serving
+        $baseUrl = rtrim(url(''), '/');
+        $this->config['secureFileEndpoint'] = "{$baseUrl}/documents/{$documentId}/serve";
 
         return $this;
     }

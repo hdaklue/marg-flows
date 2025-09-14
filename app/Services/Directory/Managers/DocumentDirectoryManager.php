@@ -115,7 +115,8 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
     {
         $strategy = $this->{$type}();
 
-        return $strategy->getSecureUrl('documents.serve', $fileName, $identifier, $type);
+        // For document serve route, we need document ID, not tenant ID
+        return $strategy->getSecureUrl('documents.serve', $fileName, $this->document->getKey(), $type);
     }
 
     /**

@@ -28,11 +28,11 @@ final class ImageStorageStrategy implements StorageStrategyContract
         'watermarked' => 'mark', // marked/watermarked files
     ];
 
-    private null|UploadedFile $file = null;
+    private ?UploadedFile $file = null;
 
-    private null|string $storedPath = null;
+    private ?string $storedPath = null;
 
-    private null|string $variant = null;
+    private ?string $variant = null;
 
     /**
      * Constructor receives the full base directory path for images.
@@ -169,7 +169,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): null|string
+    public function get(string $fileName): ?string
     {
         return Storage::disk($this->disk)->get($this->baseDirectory . "/{$fileName}");
     }
@@ -180,7 +180,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function getVariant(string $fileName): null|string
+    public function getVariant(string $fileName): ?string
     {
         return Storage::disk($this->disk)->get($this->buildVariantDirectory() . "/{$fileName}");
     }
@@ -191,7 +191,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): null|string
+    public function getPath(string $fileName): ?string
     {
         $fullPath = $this->baseDirectory . "/{$fileName}";
 
@@ -208,7 +208,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getVariantPath(string $fileName): null|string
+    public function getVariantPath(string $fileName): ?string
     {
         $fullPath = $this->buildVariantDirectory() . "/{$fileName}";
 
@@ -267,18 +267,18 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * Get secure URL for accessing a file with authentication.
      *
      * @param  string  $fileName  The filename to get secure URL for
-     * @param  string  $tenantId  The tenant identifier
+     * @param  string  $documentId  The document identifier
      * @param  string  $type  The file type (documents, videos, etc.)
      * @return string Secure URL requiring authentication
      */
     public function getSecureUrl(
         string $route,
         string $fileName,
-        string $tenantId,
+        string $documentId,
         string $type,
     ): string {
         return route($route, [
-            'tenant' => $tenantId,
+            'document' => $documentId,
             'type' => $type,
             'filename' => $fileName,
         ]);
