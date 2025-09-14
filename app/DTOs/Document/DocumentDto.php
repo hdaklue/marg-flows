@@ -34,10 +34,10 @@ final class DocumentDto extends ValidatedDTO
     protected function casts(): array
     {
         return [
-            'documentable' => new MorphCast(),
+            'documentable' => new MorphCast,
             'creator' => new DTOCast(UserDto::class),
-            'created_at' => new CarbonCast(),
-            'updated_at' => new CarbonCast(),
+            'created_at' => new CarbonCast,
+            'updated_at' => new CarbonCast,
         ];
     }
 

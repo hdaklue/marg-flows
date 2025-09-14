@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\Directory\DirectoryManager;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\Facades\LaraPath;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -129,12 +130,13 @@ final class FileServeController extends Controller
         }
 
         $tenantFromPath = $pathParts[0];
+        $documentId = $pathParts[2]; // extract document ID from path
         $type = $pathParts[count($pathParts) - 2]; // second to last part
         $filename = $pathParts[count($pathParts) - 1]; // last part
 
         // Verify user has access to this tenant
         $userTenantId = auth()->user()->getActiveTenantId();
-        $hashedUserTenantId = DirectoryManager::baseDirectiry($userTenantId);
+        $hashedUserTenantId = (string) LaraPath::base($userTenantId, SanitizationStrategy::HASHED);
 
         if ($hashedUserTenantId !== $tenantFromPath) {
             abort(403, 'Access denied to this tenant');
@@ -146,21 +148,23 @@ final class FileServeController extends Controller
             abort(400, 'Invalid file type');
         }
 
-        // Use the full path directly
+        // Build the actual storage path using hashed document ID (to match DocumentStorageStrategy)
+        $hashedDocumentId = md5($documentId);
+        $actualPath = "{$tenantFromPath}/documents/{$hashedDocumentId}/{$type}/{$filename}";
         $disk = config('document.storage.disk', 'public');
 
         // Check if file exists
-        if (! Storage::disk($disk)->exists($path)) {
+        if (! Storage::disk($disk)->exists($actualPath)) {
             abort(404, 'File not found');
         }
 
         // Get file details
-        $mimeType = Storage::disk($disk)->mimeType($path);
-        $size = Storage::disk($disk)->size($path);
+        $mimeType = Storage::disk($disk)->mimeType($actualPath);
+        $size = Storage::disk($disk)->size($actualPath);
 
         // Get file modification time for ETag and Last-Modified headers
-        $lastModified = Storage::disk($disk)->lastModified($path);
-        $etag = md5($path . $lastModified . $size);
+        $lastModified = Storage::disk($disk)->lastModified($actualPath);
+        $etag = md5($actualPath . $lastModified . $size);
 
         // Check if client has cached version
         $clientEtag = $request->header('If-None-Match');
@@ -185,17 +189,17 @@ final class FileServeController extends Controller
         // Handle range requests for video streaming
         $rangeHeader = $request->header('Range');
         if ($rangeHeader && str_starts_with($mimeType, 'video/')) {
-            return $this->handleRangeRequest($request, $disk, $path, $size, $mimeType, $headers);
+            return $this->handleRangeRequest($request, $disk, $actualPath, $size, $mimeType, $headers);
         }
 
         // For images and small files, return direct response with caching
         if ($this->isSmallFile($size) || $this->isImageFile($mimeType)) {
-            $content = $this->getCachedFileContent($path, $disk, $lastModified);
+            $content = $this->getCachedFileContent($actualPath, $disk, $lastModified);
 
             return response($content, 200, $headers);
         }
 
         // For large files (videos), use streamed response for better performance
-        return Storage::disk($disk)->response($path, $filename, $headers);
+        return Storage::disk($disk)->response($actualPath, $filename, $headers);
     }
 }

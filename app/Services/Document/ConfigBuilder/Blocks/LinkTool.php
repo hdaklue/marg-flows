@@ -18,35 +18,39 @@ final class LinkTool implements DocumentBlockConfigContract
         'enablePreview' => true,
     ];
 
+    private array $tunes = ['commentTune'];
+
     public function __construct(
         private bool $inlineToolBar = false,
     ) {
         $this->config['endpoint'] = route('editorjs.fetch-url');
     }
 
-    private array $tunes = ['commentTune'];
-
     public function endpoint(string $endpoint): self
     {
         $this->config['endpoint'] = $endpoint;
+
         return $this;
     }
 
     public function headers(array $headers): self
     {
         $this->config['headers'] = $headers;
+
         return $this;
     }
 
     public function inlineToolBar(bool $enabled = true): self
     {
         $this->inlineToolBar = $enabled;
+
         return $this;
     }
 
     public function enablePreview(bool $enabled = true): self
     {
         $this->config['enablePreview'] = $enabled;
+
         return $this;
     }
 

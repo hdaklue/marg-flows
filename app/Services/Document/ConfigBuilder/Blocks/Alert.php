@@ -29,7 +29,7 @@ final class Alert implements DocumentBlockConfigContract
 
     private array $tunes = ['commentTune'];
 
-    private null|string $shortcut = 'CMD+SHIFT+A';
+    private ?string $shortcut = 'CMD+SHIFT+A';
 
     public function __construct(
         private bool $inlineToolBar = false,
@@ -38,30 +38,35 @@ final class Alert implements DocumentBlockConfigContract
     public function alertTypes(array $types): self
     {
         $this->config['alertTypes'] = $types;
+
         return $this;
     }
 
     public function defaultType(string $type): self
     {
         $this->config['defaultType'] = $type;
+
         return $this;
     }
 
     public function messagePlaceholder(string $placeholder): self
     {
         $this->config['messagePlaceholder'] = $placeholder;
+
         return $this;
     }
 
-    public function shortcut(null|string $shortcut): self
+    public function shortcut(?string $shortcut): self
     {
         $this->shortcut = $shortcut;
+
         return $this;
     }
 
     public function inlineToolBar(bool $enabled = true): self
     {
         $this->inlineToolBar = $enabled;
+
         return $this;
     }
 

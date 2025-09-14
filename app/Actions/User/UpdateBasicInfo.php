@@ -7,7 +7,7 @@ namespace App\Actions\User;
 use App\DTOs\User\UserDto;
 use App\Models\User;
 use App\Services\Avatar\AvatarService;
-use App\Services\Directory\DirectoryManager;
+use App\Services\Directory\Managers\SystemDirectoryManager;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 final class UpdateBasicInfo
@@ -23,7 +23,7 @@ final class UpdateBasicInfo
 
         // Get new data from DTO (normalize avatar to filename only)
         $newData = collect($dto->toArray())->except('id')->toArray();
-        $newData['avatar'] = DirectoryManager::avatars()->getFileNameFromRelativePath(
+        $newData['avatar'] = SystemDirectoryManager::instance()->avatars()->getFileNameFromRelativePath(
             $newData['avatar'],
         );
 
@@ -53,7 +53,7 @@ final class UpdateBasicInfo
         $extension = str($newAvatarPath)->afterLast('/')->afterLast('.')->toString();
         $newFileName = AvatarService::generateFileName($user);
 
-        DirectoryManager::avatars()->fromPath($newAvatarPath, "{$newFileName}.{$extension}");
+        SystemDirectoryManager::instance()->avatars()->fromPath($newAvatarPath, "{$newFileName}.{$extension}");
 
         return "{$newFileName}.{$extension}";
     }

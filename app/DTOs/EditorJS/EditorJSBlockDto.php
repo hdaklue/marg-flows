@@ -14,7 +14,107 @@ final class EditorJSBlockDto extends ValidatedDTO
 
     public array $data;
 
-    public null|array $tunes;
+    public ?array $tunes;
+
+    /**
+     * Check if block is empty based on its type.
+     */
+    public function isEmpty(): bool
+    {
+        return empty($this->data) || $this->isEmptyByType();
+    }
+
+    /**
+     * Get text content from the block if it has any.
+     */
+    public function getText(): ?string
+    {
+        return match ($this->type) {
+            'paragraph', 'header', 'quote' => $this->data['text'] ?? null,
+            'code' => $this->data['code'] ?? null,
+            default => null,
+        };
+    }
+
+    /**
+     * Check if block has text content.
+     */
+    public function hasText(): bool
+    {
+        return ! empty(trim($this->getText() ?? ''));
+    }
+
+    /**
+     * Get block level for header blocks.
+     */
+    public function getLevel(): ?int
+    {
+        if ($this->type === 'header') {
+            return $this->data['level'] ?? null;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get block ID.
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    /**
+     * Check if block is of specific type.
+     */
+    public function isType(string $type): bool
+    {
+        return $this->type === $type;
+    }
+
+    /**
+     * Create new block with updated data.
+     */
+    public function withData(array $data): self
+    {
+        return self::fromArray([
+            'id' => $this->id,
+            'type' => $this->type,
+            'data' => $data,
+            'tunes' => $this->tunes,
+        ]);
+    }
+
+    /**
+     * Create new block with updated tunes.
+     */
+    public function withTunes(?array $tunes): self
+    {
+        return self::fromArray([
+            'id' => $this->id,
+            'type' => $this->type,
+            'data' => $this->data,
+            'tunes' => $tunes,
+        ]);
+    }
+
+    /**
+     * Convert to array for JSON serialization.
+     */
+    public function toArray(): array
+    {
+        $array = [
+            'id' => $this->id,
+            'type' => $this->type,
+            'data' => $this->data,
+        ];
+
+        if ($this->tunes !== null) {
+            $array['tunes'] = $this->tunes;
+        }
+
+        return $array;
+    }
 
     protected function rules(): array
     {
@@ -40,107 +140,7 @@ final class EditorJSBlockDto extends ValidatedDTO
     }
 
     /**
-     * Check if block is empty based on its type
-     */
-    public function isEmpty(): bool
-    {
-        return empty($this->data) || $this->isEmptyByType();
-    }
-
-    /**
-     * Get text content from the block if it has any
-     */
-    public function getText(): null|string
-    {
-        return match ($this->type) {
-            'paragraph', 'header', 'quote' => $this->data['text'] ?? null,
-            'code' => $this->data['code'] ?? null,
-            default => null,
-        };
-    }
-
-    /**
-     * Check if block has text content
-     */
-    public function hasText(): bool
-    {
-        return !empty(trim($this->getText() ?? ''));
-    }
-
-    /**
-     * Get block level for header blocks
-     */
-    public function getLevel(): null|int
-    {
-        if ($this->type === 'header') {
-            return $this->data['level'] ?? null;
-        }
-
-        return null;
-    }
-
-    /**
-     * Get block ID
-     */
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    /**
-     * Check if block is of specific type
-     */
-    public function isType(string $type): bool
-    {
-        return $this->type === $type;
-    }
-
-    /**
-     * Create new block with updated data
-     */
-    public function withData(array $data): self
-    {
-        return static::fromArray([
-            'id' => $this->id,
-            'type' => $this->type,
-            'data' => $data,
-            'tunes' => $this->tunes,
-        ]);
-    }
-
-    /**
-     * Create new block with updated tunes
-     */
-    public function withTunes(null|array $tunes): self
-    {
-        return static::fromArray([
-            'id' => $this->id,
-            'type' => $this->type,
-            'data' => $this->data,
-            'tunes' => $tunes,
-        ]);
-    }
-
-    /**
-     * Convert to array for JSON serialization
-     */
-    public function toArray(): array
-    {
-        $array = [
-            'id' => $this->id,
-            'type' => $this->type,
-            'data' => $this->data,
-        ];
-
-        if ($this->tunes !== null) {
-            $array['tunes'] = $this->tunes;
-        }
-
-        return $array;
-    }
-
-    /**
-     * Generate a random block ID
+     * Generate a random block ID.
      */
     private function generateId(): string
     {
@@ -148,7 +148,7 @@ final class EditorJSBlockDto extends ValidatedDTO
     }
 
     /**
-     * Check if block is empty based on its type
+     * Check if block is empty based on its type.
      */
     private function isEmptyByType(): bool
     {

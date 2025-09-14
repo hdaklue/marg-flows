@@ -10,13 +10,13 @@ use WendellAdriel\ValidatedDTO\Casting\CollectionCast;
 use WendellAdriel\ValidatedDTO\Casting\DTOCast;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-class FlowTemplateDto extends ValidatedDTO
+final class FlowTemplateDto extends ValidatedDTO
 {
     public string $name;
 
     public string $slug;
 
-    public null|string $id;
+    public ?string $id;
 
     public string $description;
 

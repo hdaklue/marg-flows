@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 final class Previewtest extends Component

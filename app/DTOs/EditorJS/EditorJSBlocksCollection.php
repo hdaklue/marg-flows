@@ -89,7 +89,7 @@ final class EditorJSBlocksCollection extends Collection
     public function byType(string $type): self
     {
         return $this->filter(
-            fn(EditorJSBlockDto $block) => $block->isType($type),
+            fn (EditorJSBlockDto $block) => $block->isType($type),
         );
     }
 
@@ -106,7 +106,7 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function getTypes(): array
     {
-        return $this->map(fn(EditorJSBlockDto $block) => $block->type)
+        return $this->map(fn (EditorJSBlockDto $block) => $block->type)
             ->unique()
             ->values()
             ->toArray();
@@ -119,13 +119,13 @@ final class EditorJSBlocksCollection extends Collection
     {
         return $this->filter(function ($block) {
             if ($block instanceof EditorJSBlockDto) {
-                return !$block->isEmpty();
+                return ! $block->isEmpty();
             }
             // If somehow we get arrays, convert them
             if (is_array($block)) {
                 $blockDto = EditorJSBlockDto::fromArray($block);
 
-                return !$blockDto->isEmpty();
+                return ! $blockDto->isEmpty();
             }
 
             return false;
@@ -137,7 +137,7 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function nonEmpty(): self
     {
-        return $this->reject(fn(EditorJSBlockDto $block) => $block->isEmpty());
+        return $this->reject(fn (EditorJSBlockDto $block) => $block->isEmpty());
     }
 
     /**
@@ -145,7 +145,7 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function withText(): self
     {
-        return $this->filter(fn(EditorJSBlockDto $block) => $block->hasText());
+        return $this->filter(fn (EditorJSBlockDto $block) => $block->hasText());
     }
 
     /**
@@ -153,7 +153,7 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function extractText(): array
     {
-        return $this->map(fn(EditorJSBlockDto $block) => $block->getText())
+        return $this->map(fn (EditorJSBlockDto $block) => $block->getText())
             ->filter()
             ->values()
             ->toArray();
@@ -162,9 +162,9 @@ final class EditorJSBlocksCollection extends Collection
     /**
      * Find block by ID.
      */
-    public function findById(string $id): null|EditorJSBlockDto
+    public function findById(string $id): ?EditorJSBlockDto
     {
-        return $this->first(fn(EditorJSBlockDto $block) => $block->id === $id);
+        return $this->first(fn (EditorJSBlockDto $block) => $block->id === $id);
     }
 
     /**
@@ -172,7 +172,7 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function removeById(string $id): self
     {
-        return $this->reject(fn(EditorJSBlockDto $block) => $block->id === $id);
+        return $this->reject(fn (EditorJSBlockDto $block) => $block->id === $id);
     }
 
     /**
@@ -180,7 +180,7 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function replaceById(string $id, EditorJSBlockDto $newBlock): self
     {
-        return $this->map(fn(EditorJSBlockDto $block) => $block->id === $id
+        return $this->map(fn (EditorJSBlockDto $block) => $block->id === $id
             ? $newBlock
             : $block);
     }
@@ -196,7 +196,7 @@ final class EditorJSBlocksCollection extends Collection
             }
             // If it's already an array, ensure it has the required structure
             if (is_array($block)) {
-                if (!isset($block['id'])) {
+                if (! isset($block['id'])) {
                     $block['id'] = bin2hex(random_bytes(5));
                 }
 
@@ -221,7 +221,7 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function groupByType(): Collection
     {
-        return $this->groupBy(fn(EditorJSBlockDto $block) => $block->type);
+        return $this->groupBy(fn (EditorJSBlockDto $block) => $block->type);
     }
 
     /**
@@ -229,7 +229,7 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function countByType(): Collection
     {
-        return $this->groupByType()->map(fn($blocks) => $blocks->count());
+        return $this->groupByType()->map(fn ($blocks) => $blocks->count());
     }
 
     /**
@@ -237,26 +237,26 @@ final class EditorJSBlocksCollection extends Collection
      */
     public function sortByType(): self
     {
-        return $this->sortBy(fn(EditorJSBlockDto $block) => $block->type);
+        return $this->sortBy(fn (EditorJSBlockDto $block) => $block->type);
     }
 
     /**
      * Get first block of specific type.
      */
-    public function firstOfType(string $type): null|EditorJSBlockDto
+    public function firstOfType(string $type): ?EditorJSBlockDto
     {
         return $this->first(
-            fn(EditorJSBlockDto $block) => $block->isType($type),
+            fn (EditorJSBlockDto $block) => $block->isType($type),
         );
     }
 
     /**
      * Get last block of specific type.
      */
-    public function lastOfType(string $type): null|EditorJSBlockDto
+    public function lastOfType(string $type): ?EditorJSBlockDto
     {
         return $this->last(
-            fn(EditorJSBlockDto $block) => $block->isType($type),
+            fn (EditorJSBlockDto $block) => $block->isType($type),
         );
     }
 
@@ -266,7 +266,7 @@ final class EditorJSBlocksCollection extends Collection
     public function allOfType(string $type): bool
     {
         return $this->every(
-            fn(EditorJSBlockDto $block) => $block->isType($type),
+            fn (EditorJSBlockDto $block) => $block->isType($type),
         );
     }
 

@@ -20,7 +20,7 @@ enum UrgencyEnum: int implements HasColor, HasLabel
         ];
     }
 
-    public function getLabel(): null|string
+    public function getLabel(): ?string
     {
         return match ($this) {
             self::NORMAL => 'Normal',
@@ -28,7 +28,7 @@ enum UrgencyEnum: int implements HasColor, HasLabel
         };
     }
 
-    public function getColor(): null|string
+    public function getColor(): ?string
     {
         return match ($this) {
             self::NORMAL => 'zinc',

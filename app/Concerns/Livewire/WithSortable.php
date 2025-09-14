@@ -29,8 +29,8 @@ trait WithSortable
      */
     abstract public function onSort(
         array $itemIds,
-        null|string $from = null,
-        null|string $to = null,
+        ?string $from = null,
+        ?string $to = null,
     ): mixed;
 
     public function initializeWithSortable(): void
@@ -40,7 +40,7 @@ trait WithSortable
 
     public function handleSort(
         array $itemIds,
-        null|array $eventData = null,
+        ?array $eventData = null,
     ): void {
         try {
             $this->validateSortableOperation($itemIds, $eventData);
@@ -78,9 +78,9 @@ trait WithSortable
 
     protected function validateSortableOperation(
         array $itemIds,
-        null|array $eventData = null,
+        ?array $eventData = null,
     ): void {
-        if (!$this->sortableConfig['validate_items']) {
+        if (! $this->sortableConfig['validate_items']) {
             return;
         }
 
@@ -105,7 +105,7 @@ trait WithSortable
 
         if (
             property_exists($this, 'sortableRules')
-            && !empty($this->sortableRules)
+            && ! empty($this->sortableRules)
         ) {
             $this->validate(
                 [
@@ -129,8 +129,8 @@ trait WithSortable
 
     protected function performSort(
         array $itemIds,
-        null|string $from,
-        null|string $to,
+        ?string $from,
+        ?string $to,
     ): mixed {
         if ($from !== null && $to !== null && $from !== $to) {
             return $this->handleCrossGroupSort($itemIds, $from, $to);
@@ -141,8 +141,8 @@ trait WithSortable
 
     protected function handleSameGroupSort(
         array $itemIds,
-        null|string $from,
-        null|string $to,
+        ?string $from,
+        ?string $to,
     ): mixed {
         return $this->onSort($itemIds, $from, $to);
     }
@@ -168,8 +168,8 @@ trait WithSortable
 
     protected function beforeSort(
         array $itemIds,
-        null|string $from,
-        null|string $to,
+        ?string $from,
+        ?string $to,
     ): void {
         if (method_exists($this, 'beforeSortable')) {
             $this->beforeSortable($itemIds, $from, $to);
@@ -178,8 +178,8 @@ trait WithSortable
 
     protected function afterSort(
         $result,
-        null|string $from,
-        null|string $to,
+        ?string $from,
+        ?string $to,
     ): void {
         if (method_exists($this, 'afterSortable')) {
             $this->afterSortable($result, $from, $to);
@@ -195,7 +195,7 @@ trait WithSortable
     protected function handleSortError(
         Exception $e,
         array $itemIds,
-        null|array $eventData = null,
+        ?array $eventData = null,
     ): void {
         if (method_exists($this, 'onSortError')) {
             $this->onSortError($e, $itemIds, $eventData);

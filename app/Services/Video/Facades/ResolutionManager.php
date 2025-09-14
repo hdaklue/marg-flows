@@ -6,7 +6,6 @@ namespace App\Services\Video\Facades;
 
 use App\Services\Video\Enums\NamingPattern;
 use App\Services\Video\Services\ResolutionManager as ResolutionManagerService;
-use App\Services\Video\Video;
 
 /**
  * @method static ResolutionManagerService from(string $sourcePath, string $disk = 'local', ?\App\Services\Video\Enums\NamingPattern $namingStrategy = null)
@@ -14,7 +13,7 @@ use App\Services\Video\Video;
  *
  * @see ResolutionManagerService
  */
-class ResolutionManager
+final class ResolutionManager
 {
     /**
      * Create a new ResolutionManager instance from path.
@@ -22,7 +21,7 @@ class ResolutionManager
     public static function from(
         string $sourcePath,
         string $disk = 'local',
-        null|NamingPattern $namingStrategy = null,
+        ?NamingPattern $namingStrategy = null,
     ): ResolutionManagerService {
         return ResolutionManagerService::from(
             $sourcePath,
@@ -37,7 +36,7 @@ class ResolutionManager
     public static function fromDisk(
         string $sourcePath,
         string $disk = 'local',
-        null|NamingPattern $namingStrategy = null,
+        ?NamingPattern $namingStrategy = null,
     ): ResolutionManagerService {
         return ResolutionManagerService::fromDisk(
             $sourcePath,

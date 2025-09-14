@@ -19,7 +19,7 @@ final class VoiceRecorderComponent extends Component
 
     public string $size = 'sm';
 
-    public null|int $maxDuration = null;
+    public ?int $maxDuration = null;
 
     public int $maxDurationInSeconds;
 

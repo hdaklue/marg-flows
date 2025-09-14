@@ -7,7 +7,7 @@ namespace App\Policies;
 use App\Models\SideNote;
 use App\Models\User;
 
-class SideNotePolicy
+final class SideNotePolicy
 {
     /**
      * Determine whether the user can view any models.

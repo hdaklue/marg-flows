@@ -26,7 +26,7 @@ it('demonstrates complete video service API workflow', function () {
     $editor
         ->trim(10, 30)
         ->resize(new Dimension(1280, 720))
-        ->convert(new Conversion720p()); // Trim from 10s to 30s duration // Resize to 720p dimensions // Apply 720p conversion
+        ->convert(new Conversion720p); // Trim from 10s to 30s duration // Resize to 720p dimensions // Apply 720p conversion
 
     // Verify all operations were queued
     $operations = $editor->getOperations();
@@ -46,8 +46,8 @@ it('demonstrates multiple conversion workflow', function () {
 
     // Create multiple conversions from the same source
     $conversions = [
-        new Conversion720p(),
-        new Conversion480p(),
+        new Conversion720p,
+        new Conversion480p,
     ];
 
     $results = [];
@@ -94,7 +94,7 @@ it('demonstrates complex video manipulation chain', function () {
         ->resize(new Dimension(1920, 1080))
         ->crop(100, 100, new Dimension(1720, 880))
         ->watermark($watermarkPath, 'bottom-right', 0.8)
-        ->convert(new Conversion720p())
+        ->convert(new Conversion720p)
         ->setFrameRate(30); // Extract 40 seconds starting at 5s // Resize to Full HD // Crop with 100px margin // Add watermark // Convert to 720p // Set frame rate
 
     $operations = $editor->getOperations();
@@ -168,8 +168,8 @@ it('demonstrates dimension calculations and constraints', function () {
 
 it('demonstrates conversion constraints and quality settings', function () {
     $conversions = [
-        new Conversion720p(),
-        new Conversion480p(),
+        new Conversion720p,
+        new Conversion480p,
     ];
 
     // Test scale-up prevention
@@ -204,7 +204,7 @@ it('can simulate video processing with operation pipeline', function () {
     $editor
         ->trim(0, 60)
         ->resize(new Dimension(1280, 720))
-        ->convert(new Conversion720p()); // First minute // Standardize to 720p // Apply quality conversion
+        ->convert(new Conversion720p); // First minute // Standardize to 720p // Apply quality conversion
 
     // Get the operations that would be executed
     $operations = $editor->getOperations();

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Foreign keys: deliverable_id references deliverables table, created_by references main DB users
-            
+
             $table->unique(['deliverable_id', 'version_number']);
             $table->index(['deliverable_id', 'status']);
             $table->index(['created_by']);

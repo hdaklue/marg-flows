@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Audio-specific feedback model
@@ -31,14 +32,14 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $feedbackable_id
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property float $start_time Start time in seconds
  * @property float $end_time End time in seconds
  * @property array<array-key, mixed>|null $waveform_data Waveform visualization data
  * @property float|null $peak_amplitude Peak amplitude in the selection (0.0-1.0)
  * @property array<array-key, mixed>|null $frequency_data Frequency analysis data
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read Model|Eloquent $feedbackable
  *
  * @method static Builder<static>|AudioFeedback atTimestamp(float $timestamp)
@@ -131,11 +132,10 @@ final class AudioFeedback extends Model implements HasMentionsContract
 
     public function getTimeDisplay(): string
     {
-        return (
+        return
             $this->formatTime($this->start_time)
             . ' - '
-            . $this->formatTime($this->end_time)
-        );
+            . $this->formatTime($this->end_time);
     }
 
     public function getDurationDisplay(): string
@@ -179,12 +179,12 @@ final class AudioFeedback extends Model implements HasMentionsContract
 
     public function hasWaveformData(): bool
     {
-        return !empty($this->waveform_data);
+        return ! empty($this->waveform_data);
     }
 
     public function hasFrequencyData(): bool
     {
-        return !empty($this->frequency_data);
+        return ! empty($this->frequency_data);
     }
 
     public function hasAmplitudeData(): bool
@@ -194,18 +194,16 @@ final class AudioFeedback extends Model implements HasMentionsContract
 
     public function isHighAmplitude(float $threshold = 0.7): bool
     {
-        return (
+        return
             $this->peak_amplitude !== null
-            && $this->peak_amplitude >= $threshold
-        );
+            && $this->peak_amplitude >= $threshold;
     }
 
     public function isLowAmplitude(float $threshold = 0.3): bool
     {
-        return (
+        return
             $this->peak_amplitude !== null
-            && $this->peak_amplitude <= $threshold
-        );
+            && $this->peak_amplitude <= $threshold;
     }
 
     public function getAmplitudeLevel(): string
@@ -288,7 +286,7 @@ final class AudioFeedback extends Model implements HasMentionsContract
     protected function scopeByDuration(
         Builder $query,
         float $minDuration,
-        null|float $maxDuration = null,
+        ?float $maxDuration = null,
     ): Builder {
         $query->whereRaw('(end_time - start_time) >= ?', [$minDuration]);
 

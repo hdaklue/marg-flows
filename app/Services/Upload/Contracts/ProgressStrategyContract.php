@@ -9,12 +9,12 @@ use App\Services\Upload\DTOs\ProgressData;
 interface ProgressStrategyContract
 {
     /**
-     * Initialize progress tracking for a session
+     * Initialize progress tracking for a session.
      */
     public function init(string $sessionId, array $metadata): void;
 
     /**
-     * Update progress for a session
+     * Update progress for a session.
      */
     public function updateProgress(
         string $sessionId,
@@ -22,22 +22,22 @@ interface ProgressStrategyContract
     ): void;
 
     /**
-     * Mark session as completed
+     * Mark session as completed.
      */
     public function complete(string $sessionId, mixed $result): void;
 
     /**
-     * Mark session as failed
+     * Mark session as failed.
      */
     public function error(string $sessionId, string $error): void;
 
     /**
-     * Get current progress for a session
+     * Get current progress for a session.
      */
-    public function getProgress(string $sessionId): null|ProgressData;
+    public function getProgress(string $sessionId): ?ProgressData;
 
     /**
-     * Clean up session data
+     * Clean up session data.
      */
     public function cleanup(string $sessionId): void;
 }

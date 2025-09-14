@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Directory\Strategies;
 
 use Exception;
+use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,7 +23,11 @@ final class TempStorageStrategy extends BaseStorageStrategy
 
     public function deleteAll(): bool
     {
-        return Storage::deleteDirectory($this->getDirectory());
+        $secureDirectory = PathBuilder::base($this->getDirectory())
+            ->validate()
+            ->toString();
+
+        return Storage::deleteDirectory($secureDirectory);
     }
 
     /**

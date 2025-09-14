@@ -22,11 +22,11 @@ final class VideoOperationPipeline
 
     private bool $forceTranscoding = false;
 
-    private null|VideoFormatContract $convertFormat = null;
+    private ?VideoFormatContract $convertFormat = null;
 
-    private null|BitrateEnum $convertBitrate = null;
+    private ?BitrateEnum $convertBitrate = null;
 
-    private null|int $forcedBitrate = null;
+    private ?int $forcedBitrate = null;
 
     public function __construct(
         private readonly string $sourcePath,
@@ -52,7 +52,7 @@ final class VideoOperationPipeline
     public function addOperations(array $operations): self
     {
         foreach ($operations as $operation) {
-            if (!$operation instanceof VideoOperationContract) {
+            if (! $operation instanceof VideoOperationContract) {
                 throw new InvalidArgumentException(
                     'All operations must implement VideoOperationContract',
                 );
@@ -69,7 +69,7 @@ final class VideoOperationPipeline
      */
     public function setConvertFormat(
         VideoFormatContract $format,
-        null|BitrateEnum $bitrate = null,
+        ?BitrateEnum $bitrate = null,
     ): self {
         $this->convertFormat = $format;
         $this->convertBitrate = $bitrate;
@@ -130,13 +130,13 @@ final class VideoOperationPipeline
      */
     public function getOperationsMetadata(): array
     {
-        return array_map(fn($op) => $op->getMetadata(), $this->operations);
+        return array_map(fn ($op) => $op->getMetadata(), $this->operations);
     }
 
     /**
      * Force transcoding even if operations might not require it.
      */
-    public function forceTranscoding(null|int $bitrate = null): self
+    public function forceTranscoding(?int $bitrate = null): self
     {
         $this->forceTranscoding = true;
         if ($bitrate) {
@@ -156,8 +156,7 @@ final class VideoOperationPipeline
         $this->executionLog[] = [
             'operation' => $operation->getName(),
             'status' => 'success',
-            'execution_time' =>
-                round((microtime(true) - $startTime) * 1000, 2) . 'ms',
+            'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
             'metadata' => $operation->getMetadata(),
             'timestamp' => now()->toISOString(),
         ];
@@ -175,8 +174,7 @@ final class VideoOperationPipeline
             'operation' => $operation->getName(),
             'status' => 'failed',
             'error' => $e->getMessage(),
-            'execution_time' =>
-                round((microtime(true) - $startTime) * 1000, 2) . 'ms',
+            'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
             'metadata' => $operation->getMetadata(),
             'timestamp' => now()->toISOString(),
         ];

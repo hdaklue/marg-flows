@@ -21,10 +21,11 @@ final class GeneralFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (!$testUser) {
+        if (! $testUser) {
             $this->command->warn(
                 'Test user not found. Please run main DatabaseSeeder first.',
             );
+
             return;
         }
 
@@ -34,6 +35,7 @@ final class GeneralFeedbackSeeder extends Seeder
             $this->command->warn(
                 'No documents found in business database. Please run DocumentSeeder first.',
             );
+
             return;
         }
 
@@ -196,9 +198,9 @@ final class GeneralFeedbackSeeder extends Seeder
         return fake()->randomElement($categoryComments);
     }
 
-    private function generateMetadata(string $category): null|array
+    private function generateMetadata(string $category): ?array
     {
-        if (!fake()->boolean(80)) { // 80% chance of having metadata
+        if (! fake()->boolean(80)) { // 80% chance of having metadata
             return null;
         }
 
@@ -321,9 +323,9 @@ final class GeneralFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateCustomData(string $category): null|array
+    private function generateCustomData(string $category): ?array
     {
-        if (!fake()->boolean(60)) { // 60% chance of having custom data
+        if (! fake()->boolean(60)) { // 60% chance of having custom data
             return null;
         }
 

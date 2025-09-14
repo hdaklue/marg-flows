@@ -18,29 +18,6 @@ enum BitrateEnum: int
     case MOBILE_PORTRAIT = 3500;
     case MOBILE_LANDSCAPE = 3000;
 
-    public function getKbps(): int
-    {
-        return $this->value;
-    }
-
-    public function getMbps(): float
-    {
-        return round($this->value / 1000, 1);
-    }
-
-    public function getQualityTier(): string
-    {
-        return match ($this) {
-            self::ULTRA_LOW_144P => 'ultra_low',
-            self::LOW_240P, self::LOW_360P => 'low',
-            self::MEDIUM_480P => 'medium',
-            self::HIGH_720P, self::HIGH_1080P => 'high',
-            self::VERY_HIGH_1440P, self::VERY_HIGH_2K => 'very_high',
-            self::ULTRA_HIGH_4K => 'ultra_high',
-            self::MOBILE_PORTRAIT, self::MOBILE_LANDSCAPE => 'mobile_optimized',
-        };
-    }
-
     /**
      * Calculate optimal bitrate based on pixels and target quality.
      */
@@ -86,6 +63,29 @@ enum BitrateEnum: int
             'mobile_portrait' => self::MOBILE_PORTRAIT,
             'mobile_landscape' => self::MOBILE_LANDSCAPE,
             default => self::HIGH_1080P,
+        };
+    }
+
+    public function getKbps(): int
+    {
+        return $this->value;
+    }
+
+    public function getMbps(): float
+    {
+        return round($this->value / 1000, 1);
+    }
+
+    public function getQualityTier(): string
+    {
+        return match ($this) {
+            self::ULTRA_LOW_144P => 'ultra_low',
+            self::LOW_240P, self::LOW_360P => 'low',
+            self::MEDIUM_480P => 'medium',
+            self::HIGH_720P, self::HIGH_1080P => 'high',
+            self::VERY_HIGH_1440P, self::VERY_HIGH_2K => 'very_high',
+            self::ULTRA_HIGH_4K => 'ultra_high',
+            self::MOBILE_PORTRAIT, self::MOBILE_LANDSCAPE => 'mobile_optimized',
         };
     }
 }

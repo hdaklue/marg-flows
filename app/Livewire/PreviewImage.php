@@ -19,10 +19,10 @@ final class PreviewImage extends Component
 
     public int $maxContainerHeight = 600;
 
-    private null|ImageMetadataDTO $imageMetadata = null;
+    private ?ImageMetadataDTO $imageMetadata = null;
 
     public function mount(
-        null|string $image = null,
+        ?string $image = null,
         array $comments = [],
         int $maxContainerWidth = 800,
         int $maxContainerHeight = 600,

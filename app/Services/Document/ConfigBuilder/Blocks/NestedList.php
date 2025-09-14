@@ -28,30 +28,35 @@ final class NestedList implements DocumentBlockConfigContract
     public function defaultStyle(string $style): self
     {
         $this->config['defaultStyle'] = $style;
+
         return $this;
     }
 
     public function placeholder(string $placeholder): self
     {
         $this->config['placeholder'] = $placeholder;
+
         return $this;
     }
 
     public function maxLevel(int $level): self
     {
         $this->config['maxLevel'] = $level;
+
         return $this;
     }
 
     public function counterTypes(array $types): self
     {
         $this->config['counterTypes'] = $types;
+
         return $this;
     }
 
     public function inlineToolBar(bool $enabled = true): self
     {
         $this->inlineToolBar = $enabled;
+
         return $this;
     }
 

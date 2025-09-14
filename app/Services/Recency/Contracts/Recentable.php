@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Recency\Contracts;
 
 interface Recentable
@@ -18,6 +20,5 @@ interface Recentable
     /**
      * Optional: label or title for displaying in a dashboard widget.
      */
-
-    public function getRecentLabel(): null|string;
+    public function getRecentLabel(): ?string;
 }

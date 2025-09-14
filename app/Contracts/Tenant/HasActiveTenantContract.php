@@ -8,11 +8,11 @@ use App\Models\Tenant;
 
 interface HasActiveTenantContract
 {
-    public function activeTenant(): null|Tenant;
+    public function activeTenant(): ?Tenant;
 
     public function switchActiveTenant(Tenant $tenant);
 
     public function clearActiveTenant();
 
-    public function getActiveTenantId(): null|string;
+    public function getActiveTenantId(): ?string;
 }

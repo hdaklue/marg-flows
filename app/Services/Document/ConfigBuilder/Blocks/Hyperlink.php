@@ -22,7 +22,7 @@ final class Hyperlink implements DocumentBlockConfigContract
 
     private array $tunes = ['commentTune'];
 
-    private null|string $shortcut = 'CMD+L';
+    private ?string $shortcut = 'CMD+L';
 
     public function __construct(
         private bool $inlineToolBar = false,
@@ -31,42 +31,49 @@ final class Hyperlink implements DocumentBlockConfigContract
     public function target(string $target): self
     {
         $this->config['target'] = $target;
+
         return $this;
     }
 
     public function rel(string $rel): self
     {
         $this->config['rel'] = $rel;
+
         return $this;
     }
 
     public function availableTargets(array $targets): self
     {
         $this->config['availableTargets'] = $targets;
+
         return $this;
     }
 
     public function availableRels(array $rels): self
     {
         $this->config['availableRels'] = $rels;
+
         return $this;
     }
 
     public function validate(bool $enabled = true): self
     {
         $this->config['validate'] = $enabled;
+
         return $this;
     }
 
-    public function shortcut(null|string $shortcut): self
+    public function shortcut(?string $shortcut): self
     {
         $this->shortcut = $shortcut;
+
         return $this;
     }
 
     public function inlineToolBar(bool $enabled = true): self
     {
         $this->inlineToolBar = $enabled;
+
         return $this;
     }
 

@@ -15,21 +15,21 @@ use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 
 final class Video
 {
-    private null|Dimension $dimension = null;
+    private ?Dimension $dimension = null;
 
-    private null|float $duration = null;
+    private ?float $duration = null;
 
-    private null|int $bitrate = null;
+    private ?int $bitrate = null;
 
-    private null|string $extension = null;
+    private ?string $extension = null;
 
-    private null|string $relativePath = null;
+    private ?string $relativePath = null;
 
-    private null|string $directory = null;
+    private ?string $directory = null;
 
-    private null|string $filename = null;
+    private ?string $filename = null;
 
-    private null|int $fileSize = null;
+    private ?int $fileSize = null;
 
     public function __construct(
         private readonly string $path,
@@ -164,7 +164,7 @@ final class Video
         return $this->duration;
     }
 
-    public function getBitrate(): null|int
+    public function getBitrate(): ?int
     {
         if ($this->bitrate === null) {
             $this->loadVideoMetadata();
@@ -281,13 +281,13 @@ final class Video
     private function validatePath(): void
     {
         if ($this->isUrl) {
-            if (!filter_var($this->path, FILTER_VALIDATE_URL)) {
+            if (! filter_var($this->path, FILTER_VALIDATE_URL)) {
                 throw new InvalidArgumentException(
                     "Invalid URL: {$this->path}",
                 );
             }
         } else {
-            if (!Storage::disk($this->disk)->exists($this->path)) {
+            if (! Storage::disk($this->disk)->exists($this->path)) {
                 throw new InvalidArgumentException(
                     "Video file not found: {$this->path} on disk: {$this->disk}",
                 );

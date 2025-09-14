@@ -88,7 +88,7 @@ interface RoleAssignmentManagerInterface
     public function getRoleOn(
         AssignableEntity $user,
         RoleableEntity $target,
-    ): null|Role;
+    ): ?Role;
 
     public function getAssignedEntitiesByType(
         AssignableEntity $entity,

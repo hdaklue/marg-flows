@@ -93,7 +93,7 @@ final class TimeProgressService
         $cacheKey = $this->getCacheKey($item);
         $ttl = (int) now()->diffInSeconds(now()->endOfDay());
 
-        return Cache::remember($cacheKey, $ttl, fn() => [
+        return Cache::remember($cacheKey, $ttl, fn () => [
             'percentage' => $percentage->toArray(),
             'color' => $color,
             'status' => $status,
@@ -284,7 +284,7 @@ final class TimeProgressService
             return self::STATUS_OVERDUE;
         }
 
-        if (!$this->hasStarted($item)) {
+        if (! $this->hasStarted($item)) {
             return self::STATUS_SCHEDULED;
         }
 
@@ -299,9 +299,10 @@ final class TimeProgressService
             : Percentage::zero();
     }
 
-    private function calculateProgressPercentage(TimeProgressable $item): Percentage {
+    private function calculateProgressPercentage(TimeProgressable $item): Percentage
+    {
         // Project hasn't started
-        if (!$this->hasStarted($item)) {
+        if (! $this->hasStarted($item)) {
             return Percentage::zero();
         }
 

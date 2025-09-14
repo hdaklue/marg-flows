@@ -11,17 +11,12 @@ use JsonSerializable;
 use Livewire\Wireable;
 use Stringable;
 
-final class Percentage implements
-    Arrayable,
-    Jsonable,
-    JsonSerializable,
-    Stringable,
-    Wireable
+final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringable, Wireable
 {
     private readonly float $value;
 
     /**
-     * Create a new Percentage instance from a ratio (0.0 - 1.0)
+     * Create a new Percentage instance from a ratio (0.0 - 1.0).
      */
     private function __construct(float $ratio)
     {
@@ -30,7 +25,7 @@ final class Percentage implements
     }
 
     /**
-     * Create from ratio (0.0 - 1.0)
+     * Create from ratio (0.0 - 1.0).
      */
     public static function fromRatio(float $ratio): self
     {
@@ -38,7 +33,7 @@ final class Percentage implements
     }
 
     /**
-     * Create from percentage value (0 - 100)
+     * Create from percentage value (0 - 100).
      */
     public static function fromPercentage(float $percentage): self
     {
@@ -57,7 +52,7 @@ final class Percentage implements
     }
 
     /**
-     * Create from integer percentage (0 - 100)
+     * Create from integer percentage (0 - 100).
      */
     public static function fromInt(int $percentage): self
     {
@@ -71,7 +66,7 @@ final class Percentage implements
     }
 
     /**
-     * Create from string percentage (supports "90%", "90.5%", "0.9", etc.)
+     * Create from string percentage (supports "90%", "90.5%", "0.9", etc.).
      */
     public static function fromString(string $percentage): self
     {
@@ -106,7 +101,7 @@ final class Percentage implements
     }
 
     /**
-     * Create zero percentage
+     * Create zero percentage.
      */
     public static function zero(): self
     {
@@ -114,7 +109,7 @@ final class Percentage implements
     }
 
     /**
-     * Create complete percentage (100%)
+     * Create complete percentage (100%).
      */
     public static function complete(): self
     {
@@ -122,7 +117,7 @@ final class Percentage implements
     }
 
     /**
-     * Wire deserialization for Livewire
+     * Wire deserialization for Livewire.
      */
     public static function fromLivewire($value): self
     {
@@ -140,7 +135,7 @@ final class Percentage implements
     }
 
     /**
-     * Get as ratio (0.0 - 1.0)
+     * Get as ratio (0.0 - 1.0).
      */
     public function asRatio(): float
     {
@@ -148,7 +143,7 @@ final class Percentage implements
     }
 
     /**
-     * Get as percentage (0.0 - 100.0)
+     * Get as percentage (0.0 - 100.0).
      */
     public function asPercentage(): float
     {
@@ -156,7 +151,7 @@ final class Percentage implements
     }
 
     /**
-     * Get as integer percentage (0 - 100), rounded
+     * Get as integer percentage (0 - 100), rounded.
      */
     public function asInt(): int
     {
@@ -164,7 +159,7 @@ final class Percentage implements
     }
 
     /**
-     * Get formatted string with specified decimal places
+     * Get formatted string with specified decimal places.
      */
     public function format(int $decimals = 1, bool $showSymbol = true): string
     {
@@ -174,7 +169,7 @@ final class Percentage implements
     }
 
     /**
-     * Get display string (default formatting)
+     * Get display string (default formatting).
      */
     public function display(): string
     {
@@ -182,7 +177,7 @@ final class Percentage implements
     }
 
     /**
-     * Check if percentage is zero
+     * Check if percentage is zero.
      */
     public function isZero(): bool
     {
@@ -190,7 +185,7 @@ final class Percentage implements
     }
 
     /**
-     * Check if percentage is complete (100%)
+     * Check if percentage is complete (100%).
      */
     public function isComplete(): bool
     {
@@ -198,7 +193,7 @@ final class Percentage implements
     }
 
     /**
-     * Check if percentage is greater than given percentage
+     * Check if percentage is greater than given percentage.
      */
     public function gt(Percentage $other): bool
     {
@@ -206,7 +201,7 @@ final class Percentage implements
     }
 
     /**
-     * Check if percentage is less than given percentage
+     * Check if percentage is less than given percentage.
      */
     public function ls(Percentage $other): bool
     {
@@ -214,7 +209,7 @@ final class Percentage implements
     }
 
     /**
-     * Check if percentage equals given percentage
+     * Check if percentage equals given percentage.
      */
     public function eq(Percentage $other): bool
     {
@@ -222,7 +217,7 @@ final class Percentage implements
     }
 
     /**
-     * Add percentage (returns new instance)
+     * Add percentage (returns new instance).
      */
     public function add(Percentage $other): self
     {
@@ -232,7 +227,7 @@ final class Percentage implements
     }
 
     /**
-     * Subtract percentage (returns new instance)
+     * Subtract percentage (returns new instance).
      */
     public function subtract(Percentage $other): self
     {
@@ -242,7 +237,7 @@ final class Percentage implements
     }
 
     /**
-     * Multiply by factor (returns new instance)
+     * Multiply by factor (returns new instance).
      */
     public function multiply(float $factor): self
     {
@@ -257,7 +252,7 @@ final class Percentage implements
     }
 
     /**
-     * Get the inverse percentage (100% - this%)
+     * Get the inverse percentage (100% - this%).
      */
     public function inverse(): self
     {
@@ -265,7 +260,7 @@ final class Percentage implements
     }
 
     /**
-     * JSON serialization
+     * JSON serialization.
      */
     public function jsonSerialize(): float
     {
@@ -273,7 +268,7 @@ final class Percentage implements
     }
 
     /**
-     * Array representation
+     * Array representation.
      */
     public function toArray(): array
     {
@@ -285,7 +280,7 @@ final class Percentage implements
     }
 
     /**
-     * JSON string representation
+     * JSON string representation.
      */
     public function toJson($options = 0): string
     {
@@ -293,7 +288,7 @@ final class Percentage implements
     }
 
     /**
-     * Wire serialization for Livewire
+     * Wire serialization for Livewire.
      */
     public function toLivewire(): array
     {
@@ -301,7 +296,7 @@ final class Percentage implements
     }
 
     /**
-     * Validate ratio value
+     * Validate ratio value.
      */
     private function validateRatio(float $ratio): void
     {
@@ -318,7 +313,7 @@ final class Percentage implements
     }
 
     /**
-     * String representation (for __toString)
+     * String representation (for __toString).
      */
     public function __toString(): string
     {

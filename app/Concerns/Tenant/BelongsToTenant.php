@@ -60,9 +60,6 @@ trait BelongsToTenant
         return $this->belongsto(Tenant::class);
     }
 
-    /**
-     * @return Tenant
-     */
     public function getTenant(): Tenant
     {
         /** @var Tenant */

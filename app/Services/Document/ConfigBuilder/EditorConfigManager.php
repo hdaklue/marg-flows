@@ -26,51 +26,51 @@ final class EditorConfigManager extends Manager
 
     public function paragraph(): DocumentBlockConfigContract
     {
-        return new Paragraph();
+        return new Paragraph;
     }
 
     public function header(): DocumentBlockConfigContract
     {
-        return new Header();
+        return new Header;
     }
 
     public function images(): DocumentBlockConfigContract
     {
-        return new Images();
+        return new Images;
     }
 
     public function table(): DocumentBlockConfigContract
     {
-        return new Table();
+        return new Table;
     }
 
     public function videoEmbed(): DocumentBlockConfigContract
     {
-        return new VideoEmbed();
+        return new VideoEmbed;
     }
 
     public function nestedList(): DocumentBlockConfigContract
     {
-        return new NestedList();
+        return new NestedList;
     }
 
     public function alert(): DocumentBlockConfigContract
     {
-        return new Alert();
+        return new Alert;
     }
 
     public function hyperlink(): DocumentBlockConfigContract
     {
-        return new Hyperlink();
+        return new Hyperlink;
     }
 
     public function videoUpload(): DocumentBlockConfigContract
     {
-        return new VideoUpload();
+        return new VideoUpload;
     }
 
     public function linkTool(): DocumentBlockConfigContract
     {
-        return new LinkTool();
+        return new LinkTool;
     }
 }

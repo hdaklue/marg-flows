@@ -21,7 +21,7 @@ final class DesignFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (!$testUser) {
+        if (! $testUser) {
             $this->command->warn(
                 'Test user not found. Please run main DatabaseSeeder first.',
             );
@@ -194,8 +194,8 @@ final class DesignFeedbackSeeder extends Seeder
         string $annotationType,
         int $x,
         int $y,
-    ): null|array {
-        if (!fake()->boolean(70)) { // 70% chance of having annotation data
+    ): ?array {
+        if (! fake()->boolean(70)) { // 70% chance of having annotation data
             return null;
         }
 
@@ -274,11 +274,11 @@ final class DesignFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateAreaBounds(string $annotationType): null|array
+    private function generateAreaBounds(string $annotationType): ?array
     {
         $areaTypes = ['rectangle', 'circle', 'polygon', 'area'];
 
-        if (!in_array($annotationType, $areaTypes) || !fake()->boolean(80)) {
+        if (! in_array($annotationType, $areaTypes) || ! fake()->boolean(80)) {
             return null;
         }
 
@@ -427,8 +427,7 @@ final class DesignFeedbackSeeder extends Seeder
         for ($i = 0; $i < 5; $i++) {
             DesignFeedback::create([
                 'creator_id' => $user->id,
-                'content' =>
-                    'Multiple issues in this area - concern #' . ($i + 1) . '.',
+                'content' => 'Multiple issues in this area - concern #' . ($i + 1) . '.',
                 'feedbackable_type' => $document->getMorphClass(),
                 'feedbackable_id' => $document->id,
                 'status' => fake()->randomElement([

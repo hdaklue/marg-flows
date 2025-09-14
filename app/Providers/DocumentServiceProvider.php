@@ -31,15 +31,15 @@ final class DocumentServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             EditorConfigBuilder::class,
-            fn($app) => new EditorConfigManager($app),
+            fn ($app) => new EditorConfigManager($app),
         );
         $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
         $this->app->singleton('document.template', function ($app) {
-            return new DocumentTemplateManager();
+            return new DocumentTemplateManager;
         });
 
-        $this->app->singleton(EditorBuilder::class, fn($app) => new EditorManager($app));
-        $this->app->singleton(DocumentResolver::class, fn($app) => new DocumentStrategyResolver());
+        $this->app->singleton(EditorBuilder::class, fn ($app) => new EditorManager($app));
+        $this->app->singleton(DocumentResolver::class, fn ($app) => new DocumentStrategyResolver);
 
         $this->app->singleton(
             DocumentTemplateTranslatorInterface::class,

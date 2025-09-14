@@ -7,7 +7,7 @@ namespace App\Console\Commands\BusinessDB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class MigrateCommand extends Command
+final class MigrateCommand extends Command
 {
     protected $signature = 'business-db:migrate 
                             {--fresh : Drop all tables and re-run all migrations}
@@ -39,6 +39,7 @@ class MigrateCommand extends Command
             $this->info(
                 'Create the folder and add your business database migrations there.',
             );
+
             return 0;
         }
 
@@ -63,10 +64,11 @@ class MigrateCommand extends Command
             );
 
             if (
-                !$this->option('force')
-                && !$this->confirm('Do you really wish to run this command?')
+                ! $this->option('force')
+                && ! $this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
+
                 return 1;
             }
         } elseif ($this->option('rollback')) {
@@ -76,10 +78,11 @@ class MigrateCommand extends Command
             $this->warn('⚠️  This will rollback ALL migrations!');
 
             if (
-                !$this->option('force')
-                && !$this->confirm('Do you really wish to run this command?')
+                ! $this->option('force')
+                && ! $this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
+
                 return 1;
             }
         } elseif ($this->option('refresh')) {
@@ -87,10 +90,11 @@ class MigrateCommand extends Command
             $this->warn('⚠️  This will reset and re-run all migrations!');
 
             if (
-                !$this->option('force')
-                && !$this->confirm('Do you really wish to run this command?')
+                ! $this->option('force')
+                && ! $this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
+
                 return 1;
             }
         }
@@ -163,7 +167,7 @@ class MigrateCommand extends Command
                 foreach ($value as $item) {
                     $parts[] = "{$key}={$item}";
                 }
-            } elseif (!is_bool($value)) {
+            } elseif (! is_bool($value)) {
                 $parts[] = "{$key}={$value}";
             }
         }
@@ -175,7 +179,7 @@ class MigrateCommand extends Command
     {
         $businessDbPath = database_path('migrations/business-db');
 
-        if (!is_dir($businessDbPath)) {
+        if (! is_dir($businessDbPath)) {
             return [];
         }
 

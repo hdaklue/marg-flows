@@ -13,25 +13,10 @@ final readonly class ProgressData
         public int $totalBytes,
         public float $percentage,
         public string $status = 'uploading', // uploading, completed, error
-        public null|array $currentChunk = null,
-        public null|int $estimatedTimeRemaining = null,
-        public null|string $error = null,
+        public ?array $currentChunk = null,
+        public ?int $estimatedTimeRemaining = null,
+        public ?string $error = null,
     ) {}
-
-    public function toArray(): array
-    {
-        return [
-            'completedChunks' => $this->completedChunks,
-            'totalChunks' => $this->totalChunks,
-            'bytesUploaded' => $this->bytesUploaded,
-            'totalBytes' => $this->totalBytes,
-            'percentage' => $this->percentage,
-            'status' => $this->status,
-            'currentChunk' => $this->currentChunk,
-            'estimatedTimeRemaining' => $this->estimatedTimeRemaining,
-            'error' => $this->error,
-        ];
-    }
 
     public static function fromArray(array $data): self
     {
@@ -46,5 +31,20 @@ final readonly class ProgressData
             estimatedTimeRemaining: $data['estimatedTimeRemaining'] ?? null,
             error: $data['error'] ?? null,
         );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'completedChunks' => $this->completedChunks,
+            'totalChunks' => $this->totalChunks,
+            'bytesUploaded' => $this->bytesUploaded,
+            'totalBytes' => $this->totalBytes,
+            'percentage' => $this->percentage,
+            'status' => $this->status,
+            'currentChunk' => $this->currentChunk,
+            'estimatedTimeRemaining' => $this->estimatedTimeRemaining,
+            'error' => $this->error,
+        ];
     }
 }

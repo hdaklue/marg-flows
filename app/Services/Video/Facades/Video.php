@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Video\Facades;
 
 use App\Services\Video\Services\VideoEditor;
+use App\Services\Video\VideoManager;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -13,9 +14,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static VideoEditor fromUrl(string $url, string $disk = 'local')
  * @method static VideoEditor fromPublic(string $path)
  *
- * @see \App\Services\Video\VideoManager
+ * @see VideoManager
  */
-class Video extends Facade
+final class Video extends Facade
 {
     /**
      * Get the registered name of the component.

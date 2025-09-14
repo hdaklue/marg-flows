@@ -8,7 +8,7 @@ use App\Services\Video\Contracts\ScaleStrategyContract;
 use App\Services\Video\ValueObjects\Dimension;
 use InvalidArgumentException;
 
-class ScaleProportional implements ScaleStrategyContract
+final class ScaleProportional implements ScaleStrategyContract
 {
     public function __construct(
         private readonly float $factor,
@@ -19,17 +19,6 @@ class ScaleProportional implements ScaleStrategyContract
         );
     }
 
-    public function apply(Dimension $current, Dimension $target): Dimension
-    {
-        return $current->scaleByFactor($this->factor);
-    }
-
-    public function getDescription(): string
-    {
-        $percentage = round($this->factor * 100);
-        return "Scale proportionally by {$percentage}%";
-    }
-
     public static function make(float $factor): self
     {
         return new self($factor);
@@ -38,5 +27,17 @@ class ScaleProportional implements ScaleStrategyContract
     public static function by(float $percentage): self
     {
         return new self($percentage / 100);
+    }
+
+    public function apply(Dimension $current, Dimension $target): Dimension
+    {
+        return $current->scaleByFactor($this->factor);
+    }
+
+    public function getDescription(): string
+    {
+        $percentage = round($this->factor * 100);
+
+        return "Scale proportionally by {$percentage}%";
     }
 }

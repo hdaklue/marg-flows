@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Recency\Actions;
 
 use App\Models\User;
 use App\Services\Recency\Contracts\Recentable;
 use App\Services\Recency\RecencyService;
-use Filament\Actions\Concerns\HasAction;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RecordRecency
+final class RecordRecency
 {
     use AsAction;
 

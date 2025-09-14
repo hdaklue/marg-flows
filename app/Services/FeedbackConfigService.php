@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Illuminate\Support\Collection;
-
 /**
  * Service for working with feedback configuration
- * Provides centralized access to feedback settings and validation
+ * Provides centralized access to feedback settings and validation.
  */
 final class FeedbackConfigService
 {
     /**
-     * Get all concrete feedback model classes
+     * Get all concrete feedback model classes.
      */
     public static function getConcreteModels(): array
     {
@@ -21,15 +19,15 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get concrete model class for a specific type
+     * Get concrete model class for a specific type.
      */
-    public static function getModelClass(string $type): null|string
+    public static function getModelClass(string $type): ?string
     {
         return config("feedback.concrete_models.{$type}");
     }
 
     /**
-     * Get all available feedback types
+     * Get all available feedback types.
      */
     public static function getAvailableTypes(): array
     {
@@ -37,7 +35,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Check if a feedback type is supported
+     * Check if a feedback type is supported.
      */
     public static function isValidType(string $type): bool
     {
@@ -45,7 +43,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get default feedback settings
+     * Get default feedback settings.
      */
     public static function getDefaults(): array
     {
@@ -53,7 +51,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get default value for a specific setting
+     * Get default value for a specific setting.
      */
     public static function getDefault(
         string $key,
@@ -63,7 +61,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get settings for a specific feedback type
+     * Get settings for a specific feedback type.
      */
     public static function getTypeSettings(string $type): array
     {
@@ -71,7 +69,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get specific setting for a feedback type
+     * Get specific setting for a feedback type.
      */
     public static function getTypeSetting(
         string $type,
@@ -82,7 +80,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get supported formats for a media type
+     * Get supported formats for a media type.
      */
     public static function getSupportedFormats(string $type): array
     {
@@ -90,7 +88,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get validation rules for a feedback type
+     * Get validation rules for a feedback type.
      */
     public static function getValidationRules(string $type): array
     {
@@ -101,7 +99,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get factory settings
+     * Get factory settings.
      */
     public static function getFactorySettings(): array
     {
@@ -109,7 +107,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get type detection rules for the factory
+     * Get type detection rules for the factory.
      */
     public static function getTypeDetectionRules(): array
     {
@@ -117,7 +115,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get migration settings
+     * Get migration settings.
      */
     public static function getMigrationSettings(): array
     {
@@ -125,7 +123,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get legacy metadata mapping
+     * Get legacy metadata mapping.
      */
     public static function getLegacyMapping(): array
     {
@@ -133,7 +131,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get performance settings
+     * Get performance settings.
      */
     public static function getPerformanceSettings(): array
     {
@@ -141,7 +139,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Check if a feature is enabled
+     * Check if a feature is enabled.
      */
     public static function isFeatureEnabled(string $feature): bool
     {
@@ -149,16 +147,17 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get all enabled features
+     * Get all enabled features.
      */
     public static function getEnabledFeatures(): array
     {
         $features = config('feedback.features', []);
+
         return array_keys(array_filter($features));
     }
 
     /**
-     * Get integration settings
+     * Get integration settings.
      */
     public static function getIntegrationSettings(string $integration): array
     {
@@ -166,7 +165,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get content limits for validation
+     * Get content limits for validation.
      */
     public static function getContentLimits(): array
     {
@@ -174,7 +173,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get coordinate limits for design feedback
+     * Get coordinate limits for design feedback.
      */
     public static function getCoordinateLimits(): array
     {
@@ -182,7 +181,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Get time limits for video/audio feedback
+     * Get time limits for video/audio feedback.
      */
     public static function getTimeLimits(): array
     {
@@ -190,7 +189,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Validate feedback attributes against configuration rules
+     * Validate feedback attributes against configuration rules.
      */
     public static function validateAttributes(
         string $type,
@@ -201,7 +200,7 @@ final class FeedbackConfigService
         // Check required fields
         $requiredFields = self::getValidationRules($type);
         foreach ($requiredFields as $field) {
-            if (!isset($attributes[$field]) || $attributes[$field] === null) {
+            if (! isset($attributes[$field]) || $attributes[$field] === null) {
                 $errors[] = "Required field '{$field}' is missing";
             }
         }
@@ -250,7 +249,58 @@ final class FeedbackConfigService
     }
 
     /**
-     * Validate design feedback attributes
+     * Get configuration summary for debugging.
+     */
+    public static function getConfigSummary(): array
+    {
+        return [
+            'concrete_models' => count(self::getConcreteModels()),
+            'available_types' => self::getAvailableTypes(),
+            'enabled_features' => count(self::getEnabledFeatures()),
+            'factory_enabled' => self::getFactorySettings()['auto_detect_type'] ?? false,
+            'validation_enabled' => self::getFactorySettings()['strict_validation'] ?? false,
+            'caching_enabled' => self::getPerformanceSettings()['caching']['enabled'] ?? false,
+        ];
+    }
+
+    /**
+     * Get type-specific configuration for frontend.
+     */
+    public static function getFrontendConfig(string $type): array
+    {
+        return [
+            'type' => $type,
+            'model_class' => self::getModelClass($type),
+            'settings' => self::getTypeSettings($type),
+            'validation' => [
+                'required_fields' => self::getValidationRules($type),
+                'content_limits' => self::getContentLimits(),
+            ],
+            'features' => array_intersect_key(
+                config('feedback.features', []),
+                array_flip(["{$type}_*"]),
+            ),
+        ];
+    }
+
+    /**
+     * Export configuration for external tools.
+     */
+    public static function exportConfiguration(): array
+    {
+        return [
+            'version' => '1.0',
+            'timestamp' => now()->toISOString(),
+            'concrete_models' => self::getConcreteModels(),
+            'defaults' => self::getDefaults(),
+            'validation' => config('feedback.validation', []),
+            'features' => config('feedback.features', []),
+            'performance' => self::getPerformanceSettings(),
+        ];
+    }
+
+    /**
+     * Validate design feedback attributes.
      */
     private static function validateDesignAttributes(array $attributes): array
     {
@@ -284,7 +334,7 @@ final class FeedbackConfigService
                 'supported_annotation_types',
                 [],
             );
-            if (!in_array($attributes['annotation_type'], $supportedTypes)) {
+            if (! in_array($attributes['annotation_type'], $supportedTypes)) {
                 $errors[] = 'Unsupported annotation type';
             }
         }
@@ -293,7 +343,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Validate time-based attributes for video/audio feedback
+     * Validate time-based attributes for video/audio feedback.
      */
     private static function validateTimeAttributes(array $attributes): array
     {
@@ -332,7 +382,7 @@ final class FeedbackConfigService
     }
 
     /**
-     * Validate document feedback attributes
+     * Validate document feedback attributes.
      */
     private static function validateDocumentAttributes(array $attributes): array
     {
@@ -340,7 +390,7 @@ final class FeedbackConfigService
 
         if (isset($attributes['block_id'])) {
             $pattern = self::getTypeSetting('document', 'block_id_pattern');
-            if ($pattern && !preg_match($pattern, $attributes['block_id'])) {
+            if ($pattern && ! preg_match($pattern, $attributes['block_id'])) {
                 $errors[] = 'Invalid block ID format';
             }
         }
@@ -351,65 +401,11 @@ final class FeedbackConfigService
                 'supported_block_types',
                 [],
             );
-            if (!in_array($attributes['element_type'], $supportedTypes)) {
+            if (! in_array($attributes['element_type'], $supportedTypes)) {
                 $errors[] = 'Unsupported block element type';
             }
         }
 
         return $errors;
-    }
-
-    /**
-     * Get configuration summary for debugging
-     */
-    public static function getConfigSummary(): array
-    {
-        return [
-            'concrete_models' => count(self::getConcreteModels()),
-            'available_types' => self::getAvailableTypes(),
-            'enabled_features' => count(self::getEnabledFeatures()),
-            'factory_enabled' =>
-                self::getFactorySettings()['auto_detect_type'] ?? false,
-            'validation_enabled' =>
-                self::getFactorySettings()['strict_validation'] ?? false,
-            'caching_enabled' =>
-                self::getPerformanceSettings()['caching']['enabled'] ?? false,
-        ];
-    }
-
-    /**
-     * Get type-specific configuration for frontend
-     */
-    public static function getFrontendConfig(string $type): array
-    {
-        return [
-            'type' => $type,
-            'model_class' => self::getModelClass($type),
-            'settings' => self::getTypeSettings($type),
-            'validation' => [
-                'required_fields' => self::getValidationRules($type),
-                'content_limits' => self::getContentLimits(),
-            ],
-            'features' => array_intersect_key(
-                config('feedback.features', []),
-                array_flip(["{$type}_*"]),
-            ),
-        ];
-    }
-
-    /**
-     * Export configuration for external tools
-     */
-    public static function exportConfiguration(): array
-    {
-        return [
-            'version' => '1.0',
-            'timestamp' => now()->toISOString(),
-            'concrete_models' => self::getConcreteModels(),
-            'defaults' => self::getDefaults(),
-            'validation' => config('feedback.validation', []),
-            'features' => config('feedback.features', []),
-            'performance' => self::getPerformanceSettings(),
-        ];
     }
 }

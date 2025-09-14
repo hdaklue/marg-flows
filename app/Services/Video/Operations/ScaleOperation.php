@@ -7,8 +7,9 @@ namespace App\Services\Video\Operations;
 use App\Services\Video\Contracts\ScaleStrategyContract;
 use App\Services\Video\ValueObjects\Dimension;
 use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
+use ProtoneMedia\LaravelFFMpeg\MediaOpener;
 
-class ScaleOperation extends AbstractVideoOperation
+final class ScaleOperation extends AbstractVideoOperation
 {
     public function __construct(
         private readonly ScaleStrategyContract $strategy,
@@ -68,7 +69,8 @@ class ScaleOperation extends AbstractVideoOperation
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
+    public function applyToMedia(MediaOpener $media): MediaOpener
+    {
         $finalDimension = $this->strategy->apply(
             $this->currentDimension,
             $this->currentDimension,

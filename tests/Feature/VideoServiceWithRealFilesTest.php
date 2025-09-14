@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 use App\Services\Video\Conversions\Conversion480p;
-use App\Services\Video\Conversions\Conversion720p;
 use App\Services\Video\Facades\Video;
-use App\Services\Video\Services\VideoEditor;
 use App\Services\Video\ValueObjects\Dimension;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,7 +17,7 @@ it('works with actual video files in storage', function () {
     $testVideoPath = 'videos/temp/test-video.mp4';
     $fullPath = Storage::disk('local')->path($testVideoPath);
 
-    if (!Storage::disk('local')->exists($testVideoPath)) {
+    if (! Storage::disk('local')->exists($testVideoPath)) {
         // Create the test video using FFmpeg
         $command = sprintf(
             'ffmpeg -f lavfi -i testsrc2=duration=3:size=320x240:rate=30 -c:v libx264 -pix_fmt yuv420p "%s" -y 2>/dev/null',
@@ -28,7 +26,7 @@ it('works with actual video files in storage', function () {
 
         exec($command, $output, $returnCode);
 
-        if ($returnCode !== 0 || !file_exists($fullPath)) {
+        if ($returnCode !== 0 || ! file_exists($fullPath)) {
             $this->markTestSkipped('Could not create test video file');
         }
     }
@@ -42,7 +40,7 @@ it('works with actual video files in storage', function () {
     // Now use our video service with the real file
     $editor = Video::fromDisk($testVideoPath)
         ->resize(new Dimension(160, 120))
-        ->convert(new Conversion480p());
+        ->convert(new Conversion480p);
 
     // Verify operations were queued
     $operations = $editor->getOperations();
@@ -97,7 +95,7 @@ it('can create multiple real video files', function () {
     foreach ($createdFiles as $file) {
         $editor = Video::fromDisk($file)
             ->resize(new Dimension(80, 60))
-            ->convert(new Conversion480p()); // Very small
+            ->convert(new Conversion480p); // Very small
 
         expect($editor->getOperations())->toHaveCount(2);
     }
@@ -134,7 +132,7 @@ it('demonstrates real video processing workflow', function () {
         // Use our video service
         $editor = Video::fromDisk($sourceVideo)
             ->resize(new Dimension(320, 240))
-            ->convert(new Conversion480p());
+            ->convert(new Conversion480p);
 
         // Verify operations
         expect($editor->getOperations())->toHaveCount(2);

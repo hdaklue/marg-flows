@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void cleanupSession(string $sessionId)
  * @method static \App\Services\Upload\DTOs\ProgressData|null getProgress(string $sessionId)
  *
- * @see \App\Services\Upload\UploadSessionManager
+ * @see UploadSessionManagerService
  */
 final class UploadSessionManager extends Facade
 {

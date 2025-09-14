@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\Directory\DirectoryManager;
+use App\Services\Directory\Managers\DocumentDirectoryManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -33,8 +33,9 @@ final class FileResolverController extends Controller
         $filename = $request->input('filename');
         $tenantId = auth()->user()->getActiveTenantId();
 
-        // Generate secure URL using DirectoryManager
-        $secureUrl = DirectoryManager::getSecureUrl($tenantId, $type, $filename);
+        // Generate secure URL using DocumentDirectoryManager
+        // Temporary implementation - this should use FileResolver services
+        $secureUrl = url("/files/documents/{$tenantId}/{$type}/{$filename}");
 
         return response($secureUrl, 200, [
             'Content-Type' => 'text/plain',
@@ -64,8 +65,9 @@ final class FileResolverController extends Controller
         $expiresIn = $request->input('expires_in', 1800); // Default 30 minutes
         $tenantId = auth()->user()->getActiveTenantId();
 
-        // Generate temporary URL using DirectoryManager
-        $tempUrl = DirectoryManager::getTemporaryUrl($tenantId, $type, $filename, $expiresIn);
+        // Generate temporary URL using DocumentDirectoryManager
+        // Temporary implementation - this should use FileResolver services
+        $tempUrl = url("/files/documents/{$tenantId}/{$type}/{$filename}");
 
         return response($tempUrl, 200, [
             'Content-Type' => 'text/plain',

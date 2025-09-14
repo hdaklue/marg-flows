@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Security;
 
 use App\Services\Directory\Contracts\StorageStrategyContract;
-use App\Services\Directory\DirectoryManager;
+use App\Services\Directory\Managers\DocumentDirectoryManager;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\Facades\LaraPath;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -47,7 +49,7 @@ final class SecureFileService
     public function getSecureUrl(string $fileName, string $tenantId, string $fileType): string
     {
         $mappedType = self::FILE_TYPE_MAPPINGS[$fileType] ?? 'documents';
-        $hashedTenantId = DirectoryManager::baseDirectiry($tenantId);
+        $hashedTenantId = LaraPath::base($tenantId, SanitizationStrategy::HASHED)->toString();
 
         return route('secure-files.show', [
             'tenantId' => $hashedTenantId,
@@ -93,8 +95,8 @@ final class SecureFileService
         string $userTenantId,
     ): bool {
         // Check tenant access
-        $hashedTenantId = DirectoryManager::baseDirectiry($tenantId);
-        $hashedUserTenantId = DirectoryManager::baseDirectiry($userTenantId);
+        $hashedTenantId = LaraPath::base($tenantId, SanitizationStrategy::HASHED)->toString();
+        $hashedUserTenantId = LaraPath::base($userTenantId, SanitizationStrategy::HASHED)->toString();
 
         if ($hashedTenantId !== $hashedUserTenantId) {
             return false;
@@ -152,11 +154,13 @@ final class SecureFileService
      */
     private function getStorageStrategy(string $tenantId, string $fileType): StorageStrategyContract
     {
+        $documentManager = DocumentDirectoryManager::forTenant($tenantId);
+
         return match ($fileType) {
-            'avatars' => DirectoryManager::avatars(),
-            'videos' => DirectoryManager::video($tenantId, 'documents'),
-            'documents', 'images' => DirectoryManager::document($tenantId),
-            default => DirectoryManager::document($tenantId),
+            'videos' => $documentManager->document($tenantId)->videos(),
+            'documents', 'images' => $documentManager->document($tenantId),
+            'avatars' => $documentManager->document($tenantId), // Temporary - should have separate manager
+            default => $documentManager->document($tenantId),
         };
     }
 

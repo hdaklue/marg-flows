@@ -38,8 +38,7 @@ final class DocumentImageUploadRequest extends FormRequest
         return [
             'image.required' => 'No file selected. Please choose an image to upload.',
             'image.image' => 'File must be a valid image.',
-            'image.mimes' =>
-                'Invalid file format. Supported formats: '
+            'image.mimes' => 'Invalid file format. Supported formats: '
                 . $this->getSupportedFormatsText(),
             'image.max' => "File is too large. Maximum size allowed is {$maxSizeMB}MB for your {$userPlan} plan.",
         ];

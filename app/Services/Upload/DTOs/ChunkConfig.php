@@ -15,6 +15,18 @@ final readonly class ChunkConfig
         public int $timeoutSeconds = 300, // 5 minutes
     ) {}
 
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            maxFileSize: $data['maxFileSize'],
+            chunkSize: $data['chunkSize'],
+            useChunkedUpload: $data['useChunkedUpload'],
+            maxConcurrentUploads: $data['maxConcurrentUploads'] ?? 3,
+            retryAttempts: $data['retryAttempts'] ?? 3,
+            timeoutSeconds: $data['timeoutSeconds'] ?? 300,
+        );
+    }
+
     public function toArray(): array
     {
         return [
@@ -40,17 +52,5 @@ final readonly class ChunkConfig
             'maxFileSizeMB' => round($this->maxFileSize / (1024 * 1024), 2),
             'chunkSizeMB' => round($this->chunkSize / (1024 * 1024), 2),
         ];
-    }
-
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            maxFileSize: $data['maxFileSize'],
-            chunkSize: $data['chunkSize'],
-            useChunkedUpload: $data['useChunkedUpload'],
-            maxConcurrentUploads: $data['maxConcurrentUploads'] ?? 3,
-            retryAttempts: $data['retryAttempts'] ?? 3,
-            timeoutSeconds: $data['timeoutSeconds'] ?? 300,
-        );
     }
 }

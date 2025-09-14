@@ -19,6 +19,7 @@ final class CreateDocumentDto extends ValidatedDTO
         DocumentTemplateContract $documentTemplateContract,
     ): self {
         EditorPhp::make($documentTemplateContract->toJson());
+
         return self::fromArray([
             'name' => $name,
             'blocks' => $documentTemplateContract->toArray(),

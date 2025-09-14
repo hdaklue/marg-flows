@@ -7,11 +7,16 @@ namespace App\Services\Video\Strategies;
 use App\Services\Video\Contracts\ScaleStrategyContract;
 use App\Services\Video\ValueObjects\Dimension;
 
-class ScaleToFit implements ScaleStrategyContract
+final class ScaleToFit implements ScaleStrategyContract
 {
     public function __construct(
         private readonly Dimension $target,
     ) {}
+
+    public static function make(Dimension $target): self
+    {
+        return new self($target);
+    }
 
     public function apply(Dimension $current, Dimension $target): Dimension
     {
@@ -25,10 +30,5 @@ class ScaleToFit implements ScaleStrategyContract
     public function getDescription(): string
     {
         return "Scale to fit within {$this->target} maintaining aspect ratio";
-    }
-
-    public static function make(Dimension $target): self
-    {
-        return new self($target);
     }
 }

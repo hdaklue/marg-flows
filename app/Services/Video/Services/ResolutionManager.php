@@ -23,19 +23,19 @@ use InvalidArgumentException;
 
 final class ResolutionManager
 {
-    private null|NamingPattern $namingStrategy;
+    private ?NamingPattern $namingStrategy;
 
     private array $conversions = [];
 
     private array $results = [];
 
-    private null|Closure $onStepSuccess = null;
+    private ?Closure $onStepSuccess = null;
 
-    private null|Closure $onStepFailure = null;
+    private ?Closure $onStepFailure = null;
 
     public function __construct(
         private readonly Video $video,
-        null|NamingPattern $namingStrategy = null,
+        ?NamingPattern $namingStrategy = null,
     ) {
         $this->namingStrategy =
             $namingStrategy ?? NamingPattern::ResolutionLabel;
@@ -47,9 +47,10 @@ final class ResolutionManager
     public static function from(
         string $sourcePath,
         string $disk = 'local',
-        null|NamingPattern $namingStrategy = null,
+        ?NamingPattern $namingStrategy = null,
     ): self {
         $video = Video::fromPath($sourcePath, $disk);
+
         return new self($video, $namingStrategy);
     }
 
@@ -59,9 +60,10 @@ final class ResolutionManager
     public static function fromDisk(
         string $sourcePath,
         string $disk = 'local',
-        null|NamingPattern $namingStrategy = null,
+        ?NamingPattern $namingStrategy = null,
     ): self {
         $video = Video::fromPath($sourcePath, $disk);
+
         return new self($video, $namingStrategy);
     }
 
@@ -70,7 +72,7 @@ final class ResolutionManager
      */
     public static function fromVideo(
         Video $video,
-        null|NamingPattern $namingStrategy = null,
+        ?NamingPattern $namingStrategy = null,
     ): self {
         return new self($video, $namingStrategy);
     }
@@ -190,7 +192,7 @@ final class ResolutionManager
     public function addConversions(array $conversions): self
     {
         foreach ($conversions as $conversion) {
-            if (!$conversion instanceof ConversionContract) {
+            if (! $conversion instanceof ConversionContract) {
                 throw new InvalidArgumentException(
                     'All conversions must implement ConversionContract',
                 );

@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Flow;
 
-use App\Filament\Schemas\ParticipantsInfolist;
 use App\Livewire\Participants\ManageParticipantsTable;
 use App\Models\Flow;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
-use Filament\Schemas\Schema;
 use Hdaklue\NapTab\Livewire\NapTab;
 use Hdaklue\NapTab\UI\Tab;
 use Illuminate\Support\HtmlString;
@@ -28,7 +24,7 @@ final class FlowTabs extends NapTab
             Tab::make('streams')->icon('arrows-right-left')->label(__('flow.tabs.streams')),
             Tab::make('documents')
                 ->badge('40')
-                ->visible(fn() => filamentUser()->can('manage', $flow))
+                ->visible(fn () => filamentUser()->can('manage', $flow))
                 ->icon('clipboard-document-list')
                 ->label(__('flow.tabs.documents'))
                 ->livewire(FlowDocumentsTable::class, [

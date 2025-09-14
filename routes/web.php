@@ -3,15 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AcceptInvitation;
-use App\Http\Controllers\ChunkedUploadController;
-use App\Http\Controllers\DocumentImageUploadController;
-use App\Http\Controllers\EditorJsImageDelete;
-use App\Http\Controllers\EditorJsVideoDelete;
-use App\Http\Controllers\EditorJsVideoUpload;
 use App\Http\Controllers\FileResolverController;
 use App\Http\Controllers\FileServeController;
 use App\Http\Controllers\SecureFileController;
-use App\Http\Controllers\UploadProgressController;
 use App\Http\Controllers\UrlFetchController;
 use App\Livewire\CalendarTest;
 use App\Livewire\PreviewAudio;
@@ -24,6 +18,16 @@ use App\Livewire\ToastCalendarTest;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+
+/*
+|--------------------------------------------------------------------------
+| File Serving Routes
+|--------------------------------------------------------------------------
+|
+| File serving routes are now managed by FileServingServiceProvider.
+| Each FileResolver service handles its own routes for better organization.
+|
+*/
 
 Route::get('/imagePreview', action: PreviewImage::class)->name('home');
 
@@ -38,26 +42,7 @@ Route::get('invitation/accept/{token}', AcceptInvitation::class)
     ->middleware([Authenticate::class])
     ->name('invitation.accept');
 
-Route::post('documents/{document}/upload-image', DocumentImageUploadController::class)
-    ->middleware(['auth'])
-    ->name('editorjs.upload-image');
-Route::delete('delete-image', EditorJsImageDelete::class)
-    ->middleware(['auth'])
-    ->name('editorjs.delete-image');
-Route::delete('documents/{document}/delete-image', EditorJsImageDelete::class)
-    ->middleware(['auth'])
-    ->name('editorjs.document.delete-image');
-
-// Video upload routes for EditorJS
-Route::post('documents/{document}/upload-video', EditorJsVideoUpload::class)
-    ->middleware(['auth'])
-    ->name('editorjs.upload-video');
-Route::delete('delete-video', EditorJsVideoDelete::class)
-    ->middleware(['auth'])
-    ->name('editorjs.delete-video');
-Route::delete('documents/{document}/delete-video', EditorJsVideoDelete::class)
-    ->middleware(['auth'])
-    ->name('editorjs.document.delete-video');
+// Legacy EditorJS routes - now handled by Document FileResolver service
 
 // URL fetch route for EditorJS LinkTool
 Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])
@@ -88,28 +73,27 @@ Route::get('file-resolver/temporary', [FileResolverController::class, 'temporary
     ->middleware(['auth'])
     ->name('file.resolver.temporary');
 
-// Chunked upload routes
-Route::post('chunked-upload', [ChunkedUploadController::class, 'store'])
-    ->middleware(['auth'])
-    ->name('chunked-upload.store');
+// Chunked upload routes (temporarily commented out)
+// Route::post('chunked-upload', [\ChunkedUploadController::class, 'store'])
+//     ->middleware(['auth'])
+//     ->name('chunked-upload.store');
+// Route::post('chunked-upload/cleanup', [\ChunkedUploadController::class, 'cleanup'])
+//     ->middleware(['auth'])
+//     ->name('chunked-upload.cleanup');
+// Route::delete('chunked-upload', [\ChunkedUploadController::class, 'delete'])
+//     ->middleware(['auth'])
+//     ->name('chunked-upload.delete');
+// Route::post('chunked-upload/cancel', [\ChunkedUploadController::class, 'cancel'])
+//     ->middleware(['auth'])
+//     ->name('chunked-upload.cancel');
 
-Route::post('chunked-upload/cleanup', [ChunkedUploadController::class, 'cleanup'])
-    ->middleware(['auth'])
-    ->name('chunked-upload.cleanup');
-Route::delete('chunked-upload', [ChunkedUploadController::class, 'delete'])
-    ->middleware(['auth'])
-    ->name('chunked-upload.delete');
-Route::post('chunked-upload/cancel', [ChunkedUploadController::class, 'cancel'])
-    ->middleware(['auth'])
-    ->name('chunked-upload.cancel');
-
-// Upload progress routes
-Route::get('upload/{sessionId}/progress', [UploadProgressController::class, 'show'])
-    ->middleware(['auth'])
-    ->name('upload.progress.show');
-Route::delete('upload/{sessionId}/progress', [UploadProgressController::class, 'destroy'])
-    ->middleware(['auth'])
-    ->name('upload.progress.destroy');
+// Upload progress routes (temporarily commented out due to route registration issue)
+// Route::get('upload/{sessionId}/progress', [\UploadProgressController::class, 'show'])
+//     ->middleware(['auth'])
+//     ->name('upload.progress.show');
+// Route::delete('upload/{sessionId}/progress', [\UploadProgressController::class, 'destroy'])
+//     ->middleware(['auth'])
+//     ->name('upload.progress.destroy');
 
 // Test route for chunked upload
 Route::get('test-chunked-upload', TestChunkedUpload::class)

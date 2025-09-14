@@ -28,7 +28,7 @@ final class DocumentBlocksCollection extends Collection
 
     public function filterBlocks(array $allowedBlocks): self
     {
-        $this->reject(fn($item): bool => in_array(
+        $this->reject(fn ($item): bool => in_array(
             $item['type'],
             $allowedBlocks,
         ));
@@ -80,24 +80,24 @@ final class DocumentBlocksCollection extends Collection
     public function hasNonEmptyBlocks(): bool
     {
         return $this->contains(function ($block) {
-            if (!is_array($block) || !isset($block['type'], $block['data'])) {
+            if (! is_array($block) || ! isset($block['type'], $block['data'])) {
                 return false;
             }
 
             $data = $block['data'];
 
             return match ($block['type']) {
-                'paragraph' => !empty($data['text']),
-                'header' => !empty($data['text']),
-                'list' => !empty($data['items']),
-                'table' => !empty($data['content']),
-                'image', 'images' => !empty($data['file']['url'])
-                    || !empty($data['files']),
-                'video' => !empty($data['file']['url']),
-                'embed' => !empty($data['source']),
-                'quote' => !empty($data['text']),
-                'alert' => !empty($data['message']),
-                default => !empty($data),
+                'paragraph' => ! empty($data['text']),
+                'header' => ! empty($data['text']),
+                'list' => ! empty($data['items']),
+                'table' => ! empty($data['content']),
+                'image', 'images' => ! empty($data['file']['url'])
+                    || ! empty($data['files']),
+                'video' => ! empty($data['file']['url']),
+                'embed' => ! empty($data['source']),
+                'quote' => ! empty($data['text']),
+                'alert' => ! empty($data['message']),
+                default => ! empty($data),
             };
         });
     }
@@ -108,7 +108,7 @@ final class DocumentBlocksCollection extends Collection
     public function byType(string $type): self
     {
         return $this->filter(
-            fn($block) => (
+            fn ($block) => (
                 is_array($block)
                 && isset($block['type'])
                 && $block['type'] === $type
@@ -130,7 +130,7 @@ final class DocumentBlocksCollection extends Collection
     public function getTextContent(): string
     {
         return $this->map(function ($block) {
-            if (!is_array($block) || !isset($block['type'], $block['data'])) {
+            if (! is_array($block) || ! isset($block['type'], $block['data'])) {
                 return '';
             }
 

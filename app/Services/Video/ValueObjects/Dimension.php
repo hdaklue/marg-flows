@@ -72,7 +72,7 @@ final class Dimension implements Arrayable, Jsonable
             new InvalidArgumentException('Target dimensions must be positive'),
         );
 
-        if (!$maintainAspectRatio) {
+        if (! $maintainAspectRatio) {
             return new self($targetWidth, $targetHeight);
         }
 
@@ -129,10 +129,9 @@ final class Dimension implements Arrayable, Jsonable
 
     public function equals(self $other): bool
     {
-        return (
+        return
             $this->width === $other->width
-            && $this->height === $other->height
-        );
+            && $this->height === $other->height;
     }
 
     public function getOrientation(): string

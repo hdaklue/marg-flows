@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Document\ConfigBuilder\Builders;
 
-use App\Services\Directory\DirectoryManager;
+use App\Models\Document;
+use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Facades\EditorConfigBuilder;
 
 final class Advanced
@@ -15,14 +16,18 @@ final class Advanced
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
         $imagesConfig = EditorConfigBuilder::images()->forPlan('advanced');
-        $baseDirectory = DirectoryManager::document($this->tenantId)
-            ->forDocument($documentId)
-            ->images()
-            ->getDirectory();
+
         if ($documentId) {
-            $imagesConfig
-                ->forDocument($documentId)
-                ->baseDirectory($this->tenantId, $documentId);
+            $document = Document::find($documentId);
+            if ($document) {
+                $baseDirectory = DocumentDirectoryManager::make($document)
+                    ->images()
+                    ->getDirectory();
+
+                $imagesConfig
+                    ->forDocument($documentId)
+                    ->baseDirectory($this->tenantId, $documentId);
+            }
         }
 
         return [
@@ -44,15 +49,17 @@ final class Advanced
             'advanced',
         );
 
-        $baseDirectory = DirectoryManager::document($this->tenantId)
-            ->forDocument($documentId)
-            ->videos()
-            ->getDirectory();
-
         if ($documentId) {
-            $videoUploadConfig
-                ->forDocument($documentId)
-                ->baseDirectory($baseDirectory);
+            $document = Document::find($documentId);
+            if ($document) {
+                $baseDirectory = DocumentDirectoryManager::make($document)
+                    ->videos()
+                    ->getDirectory();
+
+                $videoUploadConfig
+                    ->forDocument($documentId)
+                    ->baseDirectory($baseDirectory);
+            }
         }
 
         return $videoUploadConfig;

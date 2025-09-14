@@ -7,7 +7,7 @@ namespace App\Enums\Deliverable;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum DeliverableVersionStatus: string implements HasLabel, HasColor
+enum DeliverableVersionStatus: string implements HasColor, HasLabel
 {
     case DRAFT = 'draft';
     case SUBMITTED = 'submitted';
@@ -36,8 +36,7 @@ enum DeliverableVersionStatus: string implements HasLabel, HasColor
         return match ($this) {
             self::DRAFT => 'Version is being prepared, not yet submitted',
             self::SUBMITTED => 'Version has been submitted for review',
-            self::REVISION_NEEDED
-                => 'Version needs to be revised based on feedback',
+            self::REVISION_NEEDED => 'Version needs to be revised based on feedback',
         };
     }
 

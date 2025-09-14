@@ -26,7 +26,7 @@ it('can load video from URL and process it', function () {
     $editor
         ->trim(0, 30)
         ->resize(new Dimension(640, 360))
-        ->convert(new Conversion480p()); // First 30 seconds // Resize to smaller // Apply 480p conversion
+        ->convert(new Conversion480p); // First 30 seconds // Resize to smaller // Apply 480p conversion
 
     // Verify the editor was created and operations queued
     expect($editor->getSourcePath())->toBe($videoUrl);
@@ -51,7 +51,7 @@ it('demonstrates complete URL to storage workflow', function () {
     $editor = new VideoEditor($sourceUrl, true);
 
     // Step 3: Apply processing operations
-    $editor->trim(10, 60)->convert(new Conversion720p()); // Extract 1 minute starting at 10s // Convert to 720p
+    $editor->trim(10, 60)->convert(new Conversion720p); // Extract 1 minute starting at 10s // Convert to 720p
 
     // Step 4: Verify setup before processing
     $operations = $editor->getOperations();
@@ -77,8 +77,8 @@ it('can chain complex operations from URL to multiple outputs', function () {
 
     // Create different quality versions
     $conversions = [
-        '720p' => new Conversion720p(),
-        '480p' => new Conversion480p(),
+        '720p' => new Conversion720p,
+        '480p' => new Conversion480p,
     ];
 
     $processingChains = [];
@@ -122,7 +122,7 @@ it('demonstrates saveAs workflow with URL source', function () {
 
     // Create editor and apply operations
     $editor = new VideoEditor($videoUrl, true);
-    $conversion = new Conversion720p();
+    $conversion = new Conversion720p;
 
     $editor->trim(5, 45)->convert($conversion); // 40 seconds starting at 5s
 
@@ -182,7 +182,7 @@ it('validates URL and storage path handling', function () {
         expect($editor->getSourcePath())->toBe($case['source']);
 
         // Apply a simple operation to verify it works
-        $editor->convert(new Conversion720p());
+        $editor->convert(new Conversion720p);
 
         $operations = $editor->getOperations();
         expect(count($operations))->toBe(1);
@@ -200,7 +200,7 @@ it('simulates real-world URL processing pipeline', function () {
         'operations' => [
             'trim' => ['start' => 0, 'duration' => 30],
             'resize' => new Dimension(1280, 720),
-            'conversion' => new Conversion720p(),
+            'conversion' => new Conversion720p,
         ],
     ];
 

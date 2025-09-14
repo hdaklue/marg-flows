@@ -6,10 +6,9 @@ namespace App\Services\Video;
 
 use App\Services\Video\Services\ResolutionManager;
 use App\Services\Video\Services\VideoEditor;
-use App\Services\Video\Video;
 use Illuminate\Contracts\Foundation\Application;
 
-class VideoManager
+final class VideoManager
 {
     public function __construct(
         private readonly Application $app,
@@ -72,6 +71,7 @@ class VideoManager
     public function edit(string $path, string $disk = 'local'): VideoEditor
     {
         $video = $this->fromDisk($path, $disk);
+
         return $this->editor($video);
     }
 
@@ -83,6 +83,7 @@ class VideoManager
         string $disk = 'local',
     ): ResolutionManager {
         $video = $this->fromDisk($path, $disk);
+
         return $this->resolutions($video);
     }
 }

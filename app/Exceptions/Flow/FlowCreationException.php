@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exceptions\Flow;
 
 use Exception;
 
-class FlowCreationException extends Exception
+final class FlowCreationException extends Exception
 {
     //
 }

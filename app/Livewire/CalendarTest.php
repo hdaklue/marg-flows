@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\DTOs\Calendar\CalendarConfigDTO;
 use Carbon\Carbon;
 use Livewire\Component;
 
-class CalendarTest extends Component
+final class CalendarTest extends Component
 {
     public function render()
     {

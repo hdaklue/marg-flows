@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Document\ConfigBuilder\Builders;
 
-use App\Services\Directory\DirectoryManager;
+use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Facades\EditorConfigBuilder;
 
 final class Ultimate
@@ -15,7 +15,8 @@ final class Ultimate
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
         $imagesConfig = EditorConfigBuilder::images()->forPlan('ultimate');
-        $baseDirectory = DirectoryManager::document($this->tenantId)
+        $baseDirectory = DocumentDirectoryManager::forTenant($this->tenantId)
+            ->document($this->tenantId)
             ->forDocument($documentId)
             ->images()
             ->getDirectory();
@@ -49,7 +50,8 @@ final class Ultimate
             'ultimate',
         );
 
-        $baseDirectory = DirectoryManager::document($this->tenantId)
+        $baseDirectory = DocumentDirectoryManager::forTenant($this->tenantId)
+            ->document($this->tenantId)
             ->forDocument($documentId)
             ->videos()
             ->getDirectory();

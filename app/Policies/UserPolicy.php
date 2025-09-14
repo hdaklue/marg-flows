@@ -6,7 +6,7 @@ namespace App\Policies;
 
 use App\Models\User;
 
-class UserPolicy
+final class UserPolicy
 {
     public function viewAny(): bool
     {

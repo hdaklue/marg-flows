@@ -13,14 +13,14 @@ use Illuminate\Validation\Validator;
  * Provides enhanced error information and context for debugging
  * DTO validation issues.
  */
-class DTOException extends Exception
+final class DTOException extends Exception
 {
     public function __construct(
         private readonly string $dtoClass,
         private readonly Validator $validator,
         private readonly array $inputData,
         private readonly array $rules,
-        null|string $customMessage = null,
+        ?string $customMessage = null,
     ) {
         $errors = $this->validator->errors();
         $className = class_basename($this->dtoClass);
@@ -79,7 +79,7 @@ class DTOException extends Exception
     /**
      * Get the first validation error message.
      */
-    public function getFirstError(): null|string
+    public function getFirstError(): ?string
     {
         return $this->validator->errors()->first();
     }
@@ -90,29 +90,6 @@ class DTOException extends Exception
     public function getFailedFields(): array
     {
         return array_keys($this->validator->errors()->toArray());
-    }
-
-    /**
-     * Build a detailed error message for debugging.
-     */
-    private function buildDefaultMessage(
-        string $className,
-        string $failedFields,
-        null|string $firstError,
-    ): string {
-        $message = "DTO validation failed for {$className}.";
-
-        if (!empty($failedFields)) {
-            $message .= " Failed fields: [{$failedFields}].";
-        }
-
-        if ($firstError) {
-            $message .= " First error: {$firstError}.";
-        }
-
-        $message .= ' Check logs for detailed information.';
-
-        return $message;
     }
 
     /**
@@ -136,5 +113,28 @@ class DTOException extends Exception
     public function toJson(): string
     {
         return json_encode($this->toArray(), JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Build a detailed error message for debugging.
+     */
+    private function buildDefaultMessage(
+        string $className,
+        string $failedFields,
+        ?string $firstError,
+    ): string {
+        $message = "DTO validation failed for {$className}.";
+
+        if (! empty($failedFields)) {
+            $message .= " Failed fields: [{$failedFields}].";
+        }
+
+        if ($firstError) {
+            $message .= " First error: {$firstError}.";
+        }
+
+        $message .= ' Check logs for detailed information.';
+
+        return $message;
     }
 }

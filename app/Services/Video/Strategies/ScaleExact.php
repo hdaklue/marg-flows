@@ -7,11 +7,16 @@ namespace App\Services\Video\Strategies;
 use App\Services\Video\Contracts\ScaleStrategyContract;
 use App\Services\Video\ValueObjects\Dimension;
 
-class ScaleExact implements ScaleStrategyContract
+final class ScaleExact implements ScaleStrategyContract
 {
     public function __construct(
         private readonly Dimension $target,
     ) {}
+
+    public static function make(Dimension $target): self
+    {
+        return new self($target);
+    }
 
     public function apply(Dimension $current, Dimension $target): Dimension
     {
@@ -21,10 +26,5 @@ class ScaleExact implements ScaleStrategyContract
     public function getDescription(): string
     {
         return "Scale to exactly {$this->target} (ignoring aspect ratio)";
-    }
-
-    public static function make(Dimension $target): self
-    {
-        return new self($target);
     }
 }

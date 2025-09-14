@@ -58,20 +58,20 @@ return new class extends Migration
             // Video-specific indexes
             $table->index('feedback_type');
             $table->index(['feedback_type', 'status']);
-            
+
             // Frame feedback indexes
             $table->index('timestamp');
             $table->index(['feedback_type', 'timestamp']);
             $table->index(['x_coordinate', 'y_coordinate']);
-            
+
             // Region feedback indexes
             $table->index(['start_time', 'end_time']);
             $table->index(['feedback_type', 'start_time', 'end_time']);
-            
+
             // Time range queries
             $table->index(['feedbackable_type', 'feedbackable_id', 'start_time'], 'vf_feedbackable_start_time');
             $table->index(['feedbackable_type', 'feedbackable_id', 'timestamp'], 'vf_feedbackable_timestamp');
-            
+
             // Coordinate-based queries
             $table->index(['feedbackable_type', 'feedbackable_id', 'x_coordinate', 'y_coordinate'], 'vf_feedbackable_coords');
         });

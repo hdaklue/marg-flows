@@ -13,7 +13,6 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Livewire\Component;
 
 final class CreateDocumentAction
 {
@@ -29,10 +28,7 @@ final class CreateDocumentAction
                     ->placeholder('Select a template'),
             ])
             ->visible(fn () => filamentUser()->can('manage', $documentable))
-            ->action(function (array $data, Component $livewire) use (
-                $documentable,
-                $shouldRedirect,
-            ) {
+            ->action(function (array $data) use ($documentable) {
                 try {
                     $driver = (string) $data['template'];
 
@@ -47,11 +43,11 @@ final class CreateDocumentAction
                         $documentable,
                         $template,
                     );
-                    if ($shouldRedirect) {
-                        $livewire->redirect(DocumentResource::getUrl('view', [
-                            'record' => $createdDocument->getKey(),
-                        ]), true);
-                    }
+                    // if ($shouldRedirect) {
+                    //     $livewire->redirect(DocumentResource::getUrl('view', [
+                    //         'record' => $createdDocument->getKey(),
+                    //     ]), true);
+                    // }
 
                     Notification::make()
                         ->body(__('common.messages.operation_completed'))

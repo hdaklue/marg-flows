@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\Directory\DirectoryManager;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\Facades\LaraPath;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -35,7 +36,7 @@ final class SecureFileController extends Controller
         }
 
         $user = auth()->user();
-        $userTenantId = DirectoryManager::baseDirectiry($user->getActiveTenantId());
+        $userTenantId = LaraPath::base($user->getActiveTenantId(), SanitizationStrategy::HASHED)->toString();
 
         // Validate tenant access - user must belong to the tenant
         if ($tenantId !== $userTenantId) {
@@ -86,7 +87,7 @@ final class SecureFileController extends Controller
         }
 
         $user = auth()->user();
-        $userTenantId = DirectoryManager::baseDirectiry($user->getActiveTenantId());
+        $userTenantId = LaraPath::base($user->getActiveTenantId(), SanitizationStrategy::HASHED)->toString();
 
         // Validate tenant access
         if ($request->input('tenant_id') !== $userTenantId) {

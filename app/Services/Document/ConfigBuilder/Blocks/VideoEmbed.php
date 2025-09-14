@@ -26,18 +26,21 @@ final class VideoEmbed implements DocumentBlockConfigContract
     public function placeholder(string $placeholder): self
     {
         $this->config['placeholder'] = $placeholder;
+
         return $this;
     }
 
     public function allowDirectUrls(bool $enabled = true): self
     {
         $this->config['allowDirectUrls'] = $enabled;
+
         return $this;
     }
 
     public function inlineToolBar(bool $enabled = true): self
     {
         $this->inlineToolBar = $enabled;
+
         return $this;
     }
 

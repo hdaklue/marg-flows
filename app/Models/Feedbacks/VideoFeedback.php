@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Video-specific feedback model
@@ -32,7 +33,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $feedbackable_id
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property string $feedback_type
  * @property float|null $timestamp Frame timestamp in seconds (for frame feedback)
  * @property float|null $start_time Start time in seconds (for region feedback)
@@ -40,8 +41,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int|null $x_coordinate X coordinate on video frame
  * @property int|null $y_coordinate Y coordinate on video frame
  * @property array<array-key, mixed>|null $region_data Additional region metadata
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read User|null $creator
  * @property-read Model|Eloquent $feedbackable
  * @property-read User|null $resolver
@@ -166,16 +167,15 @@ final class VideoFeedback extends Model
 
     public function hasTimeRange(): bool
     {
-        return (
+        return
             $this->isRegionComment()
             && $this->start_time !== null
-            && $this->end_time !== null
-        );
+            && $this->end_time !== null;
     }
 
-    public function getDuration(): null|float
+    public function getDuration(): ?float
     {
-        if (!$this->hasTimeRange()) {
+        if (! $this->hasTimeRange()) {
             return null;
         }
 
@@ -189,11 +189,10 @@ final class VideoFeedback extends Model
         }
 
         if ($this->isRegionComment() && $this->hasTimeRange()) {
-            return (
+            return
                 $this->formatTime($this->start_time)
                 . ' - '
-                . $this->formatTime($this->end_time)
-            );
+                . $this->formatTime($this->end_time);
         }
 
         return 'No time specified';
@@ -201,7 +200,7 @@ final class VideoFeedback extends Model
 
     public function getCoordinatesDisplay(): string
     {
-        if (!$this->hasCoordinates()) {
+        if (! $this->hasCoordinates()) {
             return 'No coordinates';
         }
 
@@ -215,10 +214,9 @@ final class VideoFeedback extends Model
         }
 
         if ($this->isRegionComment()) {
-            return (
+            return
                 $timestamp >= $this->start_time
-                && $timestamp <= $this->end_time
-            );
+                && $timestamp <= $this->end_time;
         }
 
         return false;

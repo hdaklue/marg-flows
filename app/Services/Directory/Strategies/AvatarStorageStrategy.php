@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Directory\Strategies;
 
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -12,17 +14,22 @@ final class AvatarStorageStrategy extends BaseStorageStrategy
 {
     public function store(UploadedFile $file): string
     {
+        $secureFilename = PathBuilder::base('')
+            ->addFile($file->getClientOriginalName(), SanitizationStrategy::SLUG)
+            ->getFilename();
+
         $path = $file->storeAs(
             $this->getDirectory(),
-            $file->getClientOriginalName(),
+            $secureFilename,
         );
 
-        return $file->getClientOriginalName();
+        return $secureFilename;
     }
 
     public function fromPath(string $copyFrom, $toFileName)
     {
-        Storage::move($copyFrom, $this->getDirectory() . "/{$toFileName}");
+        $securePath = $this->buildSecurePath($toFileName);
+        Storage::move($copyFrom, $securePath);
     }
 
     public function getDirectory(): string
@@ -41,8 +48,8 @@ final class AvatarStorageStrategy extends BaseStorageStrategy
     // Override to add caching for avatar URLs
     public function getFileUrl(string $fileName): string
     {
-        return Cache::rememberForever(md5($fileName), fn () => Storage::url(
-            $this->getDirectory() . "/{$fileName}",
-        ));
+        $securePath = $this->buildSecurePath($fileName);
+
+        return Cache::rememberForever(md5($fileName), fn () => Storage::url($securePath));
     }
 }

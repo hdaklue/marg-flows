@@ -61,10 +61,9 @@ final class VoiceNoteComponent extends Component
         ]);
 
         $this->voiceNoteUrls[] = $url;
-        $this->hasRecording = !empty($this->voiceNoteUrls);
+        $this->hasRecording = ! empty($this->voiceNoteUrls);
 
-        logger()->info('VoiceNote updated URLs', ['voiceNoteUrls' =>
-            $this->voiceNoteUrls]);
+        logger()->info('VoiceNote updated URLs', ['voiceNoteUrls' => $this->voiceNoteUrls]);
 
         unset($this->getNotesUrls);
 
@@ -117,7 +116,7 @@ final class VoiceNoteComponent extends Component
             $this->voiceNoteUrls = array_values($this->voiceNoteUrls); // Reindex array
         }
 
-        $this->hasRecording = !empty($this->voiceNoteUrls);
+        $this->hasRecording = ! empty($this->voiceNoteUrls);
 
         // Dispatch event to notify parent component
         $this->dispatch('voice-note:removed', $index);

@@ -6,6 +6,8 @@ namespace App\Services\Directory\Strategies;
 
 use App\Services\Directory\Contracts\ChunksStorageStrategyContract;
 use Exception;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
@@ -14,19 +16,19 @@ use InvalidArgumentException;
  * Chunks Storage Strategy.
  *
  * Handles temporary chunk storage for file upload sessions with tenant isolation.
- * Each upload session creates its own subdirectory for chunk management.
+ * Uses LaraPath for secure directory structure and hashed tenant/session IDs.
  */
 final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksStorageStrategyContract
 {
     private ?string $sessionId = null;
 
     /**
-     * Constructor receives the hashed tenant base directory from DirectoryManager.
+     * Constructor receives the tenant ID for secure path building.
      *
-     * @param  string  $tenantBaseDirectory  The MD5-hashed tenant base directory
+     * @param  string  $tenantId  The tenant identifier (will be hashed for security)
      */
     public function __construct(
-        private readonly string $tenantBaseDirectory,
+        private readonly string $tenantId,
     ) {}
 
     public function forSession(string $sessionId): self
@@ -41,7 +43,7 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
         $this->validateConfiguration();
 
         $directory = $this->getDirectory();
-        $filename = $this->generateChunkFilename();
+        $filename = $this->generateSecureChunkFilename();
 
         return $file->storeAs($directory, $filename);
     }
@@ -57,18 +59,23 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
     {
         $this->validateConfiguration();
 
-        return $this->buildDirectory();
+        return $this->buildSecureDirectory();
     }
 
     public function deleteSession(): bool
     {
         $this->validateConfiguration();
-        $directory = $this->buildDirectory();
+        $directory = $this->buildSecureDirectory();
 
         return Storage::deleteDirectory($directory);
     }
 
-    private function buildDirectory(): string
+    /**
+     * Build secure directory path using LaraPath.
+     *
+     * @return string Secure directory path for chunks
+     */
+    private function buildSecureDirectory(): string
     {
         throw_unless(
             $this->sessionId,
@@ -77,15 +84,28 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
             ),
         );
 
-        return "{$this->tenantBaseDirectory}/chunks/{$this->sessionId}";
+        return PathBuilder::base('tenants')
+            ->add($this->tenantId, SanitizationStrategy::HASHED)
+            ->add('chunks')
+            ->add($this->sessionId, SanitizationStrategy::HASHED)
+            ->validate()
+            ->toString();
     }
 
-    private function generateChunkFilename(): string
+    /**
+     * Generate secure chunk filename using LaraPath sanitization.
+     *
+     * @return string Secure chunk filename
+     */
+    private function generateSecureChunkFilename(): string
     {
         $timestamp = time();
         $unique = uniqid();
+        $filename = "chunk_{$unique}_{$timestamp}";
 
-        return "chunk_{$unique}_{$timestamp}";
+        return PathBuilder::base('')
+            ->add($filename, SanitizationStrategy::SLUG)
+            ->toString();
     }
 
     private function validateConfiguration(): void

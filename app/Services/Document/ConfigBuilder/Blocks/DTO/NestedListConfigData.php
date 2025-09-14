@@ -7,8 +7,7 @@ namespace App\Services\Document\ConfigBuilder\Blocks\DTO;
 use App\Services\Document\Contratcs\BlockConfigContract;
 use WendellAdriel\ValidatedDTO\SimpleDTO;
 
-final class NestedListConfigData extends SimpleDTO implements
-    BlockConfigContract
+final class NestedListConfigData extends SimpleDTO implements BlockConfigContract
 {
     public string $class;
 

@@ -11,12 +11,7 @@ use JsonSerializable;
 use Livewire\Wireable;
 use Stringable;
 
-final class Rectangle implements
-    Arrayable,
-    Jsonable,
-    JsonSerializable,
-    Stringable,
-    Wireable
+final class Rectangle implements Arrayable, Jsonable, JsonSerializable, Stringable, Wireable
 {
     public function __construct(
         private readonly int $x,
@@ -86,19 +81,18 @@ final class Rectangle implements
 
     public function contains(int $x, int $y): bool
     {
-        return (
+        return
             $x >= $this->x
             && $x
             <= ($this->x + $this->width)
             && $y >= $this->y
             && $y
-            <= ($this->y + $this->height)
-        );
+            <= ($this->y + $this->height);
     }
 
     public function overlaps(Rectangle $other): bool
     {
-        return !(
+        return ! (
             ($this->x + $this->width)
             < $other->x
             || ($other->x + $other->width)
@@ -143,11 +137,6 @@ final class Rectangle implements
         return $this->jsonSerialize();
     }
 
-    public function __toString(): string
-    {
-        return "Rectangle({$this->x}, {$this->y}, {$this->width}x{$this->height})";
-    }
-
     private function validateDimensions(): void
     {
         throw_if(
@@ -159,5 +148,10 @@ final class Rectangle implements
             $this->height < 0,
             new InvalidArgumentException('Height cannot be negative'),
         );
+    }
+
+    public function __toString(): string
+    {
+        return "Rectangle({$this->x}, {$this->y}, {$this->width}x{$this->height})";
     }
 }

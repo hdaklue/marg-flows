@@ -25,58 +25,6 @@ final class DocumentVideoUploadRequest extends FormRequest
         return $this->directUploadRules();
     }
 
-    private function directUploadRules(): array
-    {
-        return [
-            'video' => [
-                'required',
-                'file',
-                FileTypes::getStreamVideoForLaravelValidation(),
-                'max:' . $this->getMaxFileSizeKB(),
-            ],
-            'fileKey' => 'sometimes|string|max:255',
-            'fileName' => 'sometimes|string|max:255',
-        ];
-    }
-
-    private function chunkedUploadRules(): array
-    {
-        return [
-            'video' => [
-                'required',
-                'file',
-                'max:' . $this->getMaxChunkSizeKB(), // Max chunk size
-            ],
-            'fileKey' => 'required|string|max:255',
-            'fileName' => [
-                'required',
-                'string',
-                'max:255',
-                function ($attribute, $value, $fail) {
-                    if (!FileTypes::isStreamableVideo($value)) {
-                        $fail(
-                            'File must have a valid video extension (mp4, webm, ogg).',
-                        );
-                    }
-                },
-            ],
-            'chunk' => 'required|integer|min:0',
-            'chunks' => 'required|integer|min:2', // Must be chunked if chunks > 1
-        ];
-    }
-
-    private function getMaxFileSizeKB(): int
-    {
-        // Default to 500MB in KB - should be overridden by plan-based config
-        return config('video-upload.validation.max_file_size', 512000);
-    }
-
-    private function getMaxChunkSizeKB(): int
-    {
-        // Default to 50MB per chunk in KB
-        return config('video-upload.validation.max_chunk_size', 51200);
-    }
-
     public function messages(): array
     {
         return [
@@ -119,5 +67,57 @@ final class DocumentVideoUploadRequest extends FormRequest
     public function getTotalChunks(): int
     {
         return (int) $this->input('chunks', 1);
+    }
+
+    private function directUploadRules(): array
+    {
+        return [
+            'video' => [
+                'required',
+                'file',
+                FileTypes::getStreamVideoForLaravelValidation(),
+                'max:' . $this->getMaxFileSizeKB(),
+            ],
+            'fileKey' => 'sometimes|string|max:255',
+            'fileName' => 'sometimes|string|max:255',
+        ];
+    }
+
+    private function chunkedUploadRules(): array
+    {
+        return [
+            'video' => [
+                'required',
+                'file',
+                'max:' . $this->getMaxChunkSizeKB(), // Max chunk size
+            ],
+            'fileKey' => 'required|string|max:255',
+            'fileName' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if (! FileTypes::isStreamableVideo($value)) {
+                        $fail(
+                            'File must have a valid video extension (mp4, webm, ogg).',
+                        );
+                    }
+                },
+            ],
+            'chunk' => 'required|integer|min:0',
+            'chunks' => 'required|integer|min:2', // Must be chunked if chunks > 1
+        ];
+    }
+
+    private function getMaxFileSizeKB(): int
+    {
+        // Default to 500MB in KB - should be overridden by plan-based config
+        return config('video-upload.validation.max_file_size', 512000);
+    }
+
+    private function getMaxChunkSizeKB(): int
+    {
+        // Default to 50MB per chunk in KB
+        return config('video-upload.validation.max_chunk_size', 51200);
     }
 }

@@ -14,34 +14,60 @@ final class EditorJSDocumentDto extends ValidatedDTO
 
     public string $version;
 
-    protected function rules(): array
-    {
-        return [
-            'time' => ['required', 'integer', 'min:0'],
-            'blocks' => ['required', 'array'],
-            'version' => ['required', 'string', 'min:1'],
-        ];
+    /**
+     * Create a new document with blocks array.
+     */
+    public static function createWithBlocks(
+        array $blocks,
+        ?string $version = null,
+    ): self {
+        return self::fromArray([
+            'time' => time(),
+            'blocks' => $blocks,
+            'version' => $version ?? config('editor.version', '2.28.2'),
+        ]);
     }
 
-    protected function defaults(): array
+    /**
+     * Create from nested structure (current database format).
+     */
+    public static function fromNestedArray(array $data): self
     {
-        return [
-            'time' => fn() => time(),
-            'version' => fn() => config('editor.version', '2.28.2'),
-            'blocks' => [],
-        ];
-    }
+        // Handle the nested structure with top-level time/blocks/version
+        if (isset($data['blocks']) && is_array($data['blocks'])) {
+            // Check if blocks contains the nested structure with inner blocks
+            if (
+                isset($data['blocks']['blocks'])
+                && is_array($data['blocks']['blocks'])
+            ) {
+                // Use the inner blocks array
+                return self::fromArray([
+                    'time' => $data['time'] ?? time(),
+                    'blocks' => $data['blocks']['blocks'], // Use the inner blocks
+                    'version' => $data['version'] ?? config(
+                        'editor.version',
+                        '2.28.2',
+                    ),
+                ]);
+            }
 
-    protected function casts(): array
-    {
-        return [];
-    }
-
-    protected function afterValidation(): void
-    {
-        if (is_array($this->blocks)) {
-            $this->blocks = EditorJSBlocksCollection::fromArray($this->blocks);
+            // Direct blocks array
+            return self::fromArray([
+                'time' => $data['time'] ?? time(),
+                'blocks' => $data['blocks'],
+                'version' => $data['version'] ?? config(
+                    'editor.version',
+                    '2.28.2',
+                ),
+            ]);
         }
+
+        // Handle flat structure (legacy format) - treat entire data as blocks
+        return self::fromArray([
+            'time' => time(),
+            'blocks' => $data,
+            'version' => config('editor.version', '2.28.2'),
+        ]);
     }
 
     public function getBlocks(): EditorJSBlocksCollection
@@ -56,63 +82,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Create a new document with blocks array
-     */
-    public static function createWithBlocks(
-        array $blocks,
-        null|string $version = null,
-    ): self {
-        return static::fromArray([
-            'time' => time(),
-            'blocks' => $blocks,
-            'version' => $version ?? config('editor.version', '2.28.2'),
-        ]);
-    }
-
-    /**
-     * Create from nested structure (current database format)
-     */
-    public static function fromNestedArray(array $data): self
-    {
-        // Handle the nested structure with top-level time/blocks/version
-        if (isset($data['blocks']) && is_array($data['blocks'])) {
-            // Check if blocks contains the nested structure with inner blocks
-            if (
-                isset($data['blocks']['blocks'])
-                && is_array($data['blocks']['blocks'])
-            ) {
-                // Use the inner blocks array
-                return static::fromArray([
-                    'time' => $data['time'] ?? time(),
-                    'blocks' => $data['blocks']['blocks'], // Use the inner blocks
-                    'version' => $data['version'] ?? config(
-                        'editor.version',
-                        '2.28.2',
-                    ),
-                ]);
-            }
-
-            // Direct blocks array
-            return static::fromArray([
-                'time' => $data['time'] ?? time(),
-                'blocks' => $data['blocks'],
-                'version' => $data['version'] ?? config(
-                    'editor.version',
-                    '2.28.2',
-                ),
-            ]);
-        }
-
-        // Handle flat structure (legacy format) - treat entire data as blocks
-        return static::fromArray([
-            'time' => time(),
-            'blocks' => $data,
-            'version' => config('editor.version', '2.28.2'),
-        ]);
-    }
-
-    /**
-     * Check if document has any content blocks
+     * Check if document has any content blocks.
      */
     public function isEmpty(): bool
     {
@@ -120,7 +90,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Check if document has content (non-empty blocks)
+     * Check if document has content (non-empty blocks).
      */
     public function hasContent(): bool
     {
@@ -128,7 +98,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Get blocks as array for frontend consumption
+     * Get blocks as array for frontend consumption.
      */
     public function getBlocksAsArray(): array
     {
@@ -136,7 +106,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Get blocks as JSON string for frontend consumption
+     * Get blocks as JSON string for frontend consumption.
      */
     public function getBlocksAsJson(): string
     {
@@ -144,7 +114,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Get the complete EditorJS format for frontend
+     * Get the complete EditorJS format for frontend.
      */
     public function toEditorJSFormat(): array
     {
@@ -156,11 +126,11 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Create new document with updated blocks
+     * Create new document with updated blocks.
      */
     public function withBlocks(EditorJSBlocksCollection $blocks): self
     {
-        return static::fromArray([
+        return self::fromArray([
             'time' => time(), // Update time when blocks change
             'blocks' => $blocks->toArray(),
             'version' => $this->version,
@@ -168,11 +138,11 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Create new document with updated time
+     * Create new document with updated time.
      */
     public function withUpdatedTime(): self
     {
-        return static::fromArray([
+        return self::fromArray([
             'time' => time(),
             'blocks' => $this->getBlocks()->toArray(),
             'version' => $this->version,
@@ -180,7 +150,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Get blocks by type
+     * Get blocks by type.
      */
     public function getBlocksByType(string $type): EditorJSBlocksCollection
     {
@@ -188,7 +158,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Check if document has blocks of specific type
+     * Check if document has blocks of specific type.
      */
     public function hasBlockType(string $type): bool
     {
@@ -196,7 +166,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Get all block types present in document
+     * Get all block types present in document.
      */
     public function getBlockTypes(): array
     {
@@ -204,7 +174,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Add a block to the document
+     * Add a block to the document.
      */
     public function addBlock(EditorJSBlockDto $block): self
     {
@@ -212,10 +182,40 @@ final class EditorJSDocumentDto extends ValidatedDTO
     }
 
     /**
-     * Filter blocks by callback
+     * Filter blocks by callback.
      */
     public function filterBlocks(callable $callback): self
     {
         return $this->withBlocks($this->getBlocks()->filter($callback));
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'time' => ['required', 'integer', 'min:0'],
+            'blocks' => ['required', 'array'],
+            'version' => ['required', 'string', 'min:1'],
+        ];
+    }
+
+    protected function defaults(): array
+    {
+        return [
+            'time' => fn () => time(),
+            'version' => fn () => config('editor.version', '2.28.2'),
+            'blocks' => [],
+        ];
+    }
+
+    protected function casts(): array
+    {
+        return [];
+    }
+
+    protected function afterValidation(): void
+    {
+        if (is_array($this->blocks)) {
+            $this->blocks = EditorJSBlocksCollection::fromArray($this->blocks);
+        }
     }
 }

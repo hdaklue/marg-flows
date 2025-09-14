@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Route;
 
 // All authentication routes (login, register, password reset) are now handled by Filament panel
@@ -11,5 +14,5 @@ Route::middleware('auth')->group(function () {
         ->name('verification.verify');
 });
 
-Route::post('logout', App\Livewire\Actions\Logout::class)
+Route::post('logout', Logout::class)
     ->name('logout');

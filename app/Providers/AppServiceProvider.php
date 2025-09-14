@@ -11,6 +11,9 @@ use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Deliverable\DeliverablesManager;
+use App\Services\Directory\Managers\ChunksDirectoryManager;
+use App\Services\Directory\Managers\DocumentDirectoryManager;
+use App\Services\Directory\Managers\SystemDirectoryManager;
 use App\Services\Document\DocumentService;
 use App\Services\Flow\TimeProgressService;
 use App\Services\MentionService;
@@ -22,6 +25,10 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Enums\Size;
 use Filament\Support\Facades\FilamentAsset;
+use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
+use Hdaklue\Actioncrumb\Enums\SeparatorType;
+use Hdaklue\Actioncrumb\Enums\TailwindColor;
+use Hdaklue\Actioncrumb\Enums\ThemeStyle;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -50,6 +57,11 @@ final class AppServiceProvider extends ServiceProvider
             fn ($app) => new UploadSessionManager($app),
         );
 
+        // Register independent directory managers
+        $this->app->singleton(DocumentDirectoryManager::class);
+        $this->app->singleton(SystemDirectoryManager::class);
+        $this->app->singleton(ChunksDirectoryManager::class);
+
         $this->configureGate();
 
         // $this->configureVite();
@@ -69,6 +81,14 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureModel();
+
+        ActioncrumbConfig::make()
+            ->themeStyle(ThemeStyle::Simple) // Simple, Rounded, Square
+            ->separatorType(SeparatorType::Line) // Chevron, Line
+            ->primaryColor(TailwindColor::Emerald) // Any Tailwind color
+            ->secondaryColor(TailwindColor::Zinc) // Secondary accents
+            ->compactMenuOnMobile()
+            ->bind();
 
         Event::subscribe(TenantEventSubscriber::class);
         FilamentAsset::register([

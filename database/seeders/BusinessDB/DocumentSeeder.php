@@ -18,7 +18,7 @@ final class DocumentSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (!$testUser) {
+        if (! $testUser) {
             $this->command->warn(
                 'Test user not found. Please run main DatabaseSeeder first.',
             );
@@ -32,6 +32,7 @@ final class DocumentSeeder extends Seeder
             $this->command->warn(
                 'Test user has no assigned tenants. Please run main DatabaseSeeder first.',
             );
+
             return;
         }
 

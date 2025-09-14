@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\Directory\DirectoryManager;
+use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Requests\DocumentVideoUploadRequest;
 use App\Services\Upload\UploadSessionManager;
 use App\ValueObjects\Dimension\AspectRatio;
@@ -40,7 +40,8 @@ final class EditorJsVideoUpload extends Controller
                 'http',
                 $tenantId,
             )->storeIn(
-                DirectoryManager::document($tenantId)
+                DocumentDirectoryManager::forTenant($tenantId)
+                    ->document($tenantId)
                     ->forDocument($document)
                     ->videos()
                     ->getDirectory(),
@@ -100,7 +101,8 @@ final class EditorJsVideoUpload extends Controller
     ): JsonResponse {
         // Get tenant and directory configuration for direct upload
         $tenantId = auth()->user()->getActiveTenantId();
-        $directory = DirectoryManager::document($tenantId)
+        $directory = DocumentDirectoryManager::forTenant($tenantId)
+            ->document($tenantId)
             ->forDocument($document)
             ->videos()
             ->getDirectory();
@@ -430,7 +432,8 @@ final class EditorJsVideoUpload extends Controller
             $thumbnailFilename = $videoFilename . '_thumb.jpg';
 
             // Use the proper thumbnail directory structure: {tenant}/documents/{documentId}/videos/prev/
-            $thumbnailStrategy = DirectoryManager::document($tenantId)
+            $thumbnailStrategy = DocumentDirectoryManager::forTenant($tenantId)
+                ->document($tenantId)
                 ->forDocument($documentId)
                 ->videos()
                 ->asThumbnails();

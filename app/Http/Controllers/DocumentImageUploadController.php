@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\EditorJs\OptimizeEditorJsImage;
-use App\Services\Directory\DirectoryManager;
+use App\Models\Document;
+use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Requests\DocumentImageUploadRequest;
 use App\Services\Upload\UploadSessionManager;
 use Illuminate\Http\JsonResponse;
@@ -25,11 +26,9 @@ final class DocumentImageUploadController extends Controller
             // Validation is automatically handled by DocumentImageUploadRequest
             $file = $request->getValidatedFile();
 
-            // Get organized directory from DirectoryManager
-            $storageDirectory = DirectoryManager::document(
-                auth()->user()->getActiveTenantId(),
-            )
-                ->forDocument($document)
+            // Get the document model and organized directory from DocumentDirectoryManager
+            $documentModel = Document::findOrFail($document);
+            $storageDirectory = DocumentDirectoryManager::make($documentModel)
                 ->images()
                 ->getDirectory();
 
@@ -44,7 +43,7 @@ final class DocumentImageUploadController extends Controller
             logger()->info("Saved image to: {$path}");
 
             // For optimization, only run for local storage
-            $disk = config('document.storage.disk', 'public');
+            $disk = config('directory-document.storage.disk', 'public');
             $diskDriver = Storage::disk($disk);
 
             // Only optimize images on local storage (cloud storage optimization requires different approach)
@@ -53,12 +52,19 @@ final class DocumentImageUploadController extends Controller
             }
 
             // Extract just the filename from the full path
-            // The frontend will resolve URLs dynamically using DirectoryManager
             $filename = basename($path);
+
+            // Generate proper URL using document-specific serving route
+            $url = route('documents.serve', [
+                'document' => $document,
+                'type' => 'images',
+                'filename' => $filename,
+            ]);
 
             return response()->json([
                 'success' => 1,
                 'file' => [
+                    'url' => $url,
                     'filename' => $filename,
                 ],
             ]);

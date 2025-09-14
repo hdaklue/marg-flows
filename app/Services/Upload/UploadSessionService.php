@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Upload;
 
-use App\Services\Directory\DirectoryManager;
+use App\Services\Directory\Managers\ChunksDirectoryManager;
 use App\Services\Upload\Contracts\ProgressStrategyContract;
 use App\Services\Upload\DTOs\ChunkData;
 use App\Services\Upload\DTOs\ProgressData;
@@ -244,7 +244,7 @@ final class UploadSessionService
         }
 
         // Clean up file chunks
-        DirectoryManager::chunks($this->tenantId)
+        ChunksDirectoryManager::forTenant($this->tenantId)->chunks($this->tenantId)
             ->forSession($sessionId)
             ->deleteSession();
 
@@ -298,7 +298,7 @@ final class UploadSessionService
         }
 
         // Use DirectoryManager chunks strategy for organized chunk storage
-        return DirectoryManager::chunks($this->tenantId)
+        return ChunksDirectoryManager::forTenant($this->tenantId)->chunks($this->tenantId)
             ->forSession($sessionId)
             ->getDirectory();
     }
@@ -352,7 +352,7 @@ final class UploadSessionService
         }
 
         $sessionId = basename($chunkDirectory);
-        DirectoryManager::chunks($this->tenantId)
+        ChunksDirectoryManager::forTenant($this->tenantId)->chunks($this->tenantId)
             ->forSession($sessionId)
             ->deleteSession();
     }

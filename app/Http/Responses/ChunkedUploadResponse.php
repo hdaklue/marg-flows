@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 final class ChunkedUploadResponse
 {
     /**
-     * Return a successful upload response
+     * Return a successful upload response.
      */
     public static function success(array $data = []): JsonResponse
     {
@@ -26,7 +26,7 @@ final class ChunkedUploadResponse
     }
 
     /**
-     * Return a successful chunk upload response
+     * Return a successful chunk upload response.
      */
     public static function chunkSuccess(array $data = []): JsonResponse
     {
@@ -43,7 +43,7 @@ final class ChunkedUploadResponse
     }
 
     /**
-     * Return a final assembly success response
+     * Return a final assembly success response.
      */
     public static function assemblySuccess(array $fileData): JsonResponse
     {
@@ -60,7 +60,7 @@ final class ChunkedUploadResponse
     }
 
     /**
-     * Return a validation error response
+     * Return a validation error response.
      */
     public static function validationError(array $errors): JsonResponse
     {
@@ -77,7 +77,7 @@ final class ChunkedUploadResponse
     }
 
     /**
-     * Return a generic error response
+     * Return a generic error response.
      */
     public static function error(
         string $message,
@@ -97,7 +97,7 @@ final class ChunkedUploadResponse
     }
 
     /**
-     * Return a cancellation success response
+     * Return a cancellation success response.
      */
     public static function cancelled(): JsonResponse
     {
@@ -113,7 +113,7 @@ final class ChunkedUploadResponse
     }
 
     /**
-     * Return a deletion success response
+     * Return a deletion success response.
      */
     public static function deleted(): JsonResponse
     {
@@ -129,15 +129,14 @@ final class ChunkedUploadResponse
     }
 
     /**
-     * Check if the request expects JSON response
+     * Check if the request expects JSON response.
      */
     public static function expectsJson(): bool
     {
-        return (
+        return
             request()->expectsJson()
             || request()->ajax()
             || request()->header('Content-Type') === 'application/json'
-            || str_contains(request()->header('Accept', ''), 'application/json')
-        );
+            || str_contains(request()->header('Accept', ''), 'application/json');
     }
 }

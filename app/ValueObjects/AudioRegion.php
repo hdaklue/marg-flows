@@ -79,30 +79,28 @@ final class AudioRegion extends MediaTimestamp
         return $this->endTime->subtract($this->startTime);
     }
 
-    public function getFrameRate(): null|float
+    public function getFrameRate(): ?float
     {
         return null; // Audio regions don't have frame rates
     }
 
     public function contains(CommentTime $time): bool
     {
-        return (
+        return
             $time->asSeconds() >= $this->startTime->asSeconds()
-            && $time->asSeconds() <= $this->endTime->asSeconds()
-        );
+            && $time->asSeconds() <= $this->endTime->asSeconds();
     }
 
     public function overlaps(AudioRegion $other): bool
     {
-        return (
+        return
             $this->startTime->asSeconds() < $other->endTime->asSeconds()
-            && $other->startTime->asSeconds() < $this->endTime->asSeconds()
-        );
+            && $other->startTime->asSeconds() < $this->endTime->asSeconds();
     }
 
-    public function getOverlapDuration(AudioRegion $other): null|CommentTime
+    public function getOverlapDuration(AudioRegion $other): ?CommentTime
     {
-        if (!$this->overlaps($other)) {
+        if (! $this->overlaps($other)) {
             return null;
         }
 
@@ -139,8 +137,7 @@ final class AudioRegion extends MediaTimestamp
                 'start' => [
                     'seconds' => $this->startTime->asSeconds(),
                     'formatted' => $this->startTime->asFormatted(),
-                    'formatted_precise' =>
-                        $this->startTime->asFormattedPrecise(),
+                    'formatted_precise' => $this->startTime->asFormattedPrecise(),
                 ],
                 'end' => [
                     'seconds' => $this->endTime->asSeconds(),
@@ -150,8 +147,7 @@ final class AudioRegion extends MediaTimestamp
                 'duration' => [
                     'seconds' => $this->getDuration()->asSeconds(),
                     'formatted' => $this->getDuration()->asFormatted(),
-                    'formatted_precise' =>
-                        $this->getDuration()->asFormattedPrecise(),
+                    'formatted_precise' => $this->getDuration()->asFormattedPrecise(),
                 ],
             ],
         ];

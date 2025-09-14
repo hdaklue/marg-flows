@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -37,7 +37,7 @@ return new class() extends Migration
                     default => [  // 'ulid' or any other strategy
                         $table->ulid('assignable_id'),             // For ULID/string IDs
                         $table->ulid('roleable_id'),               // For ULID/string IDs
-                    ]
+                    ],
                 };
 
                 $table->string('role_key', 64); // Encrypted/hashed role key (64 chars for SHA-256)
@@ -46,7 +46,7 @@ return new class() extends Migration
                 // Composite unique constraint - optimized column order for MySQL
                 $table->unique(
                     ['assignable_type', 'assignable_id', 'roleable_type', 'roleable_id', 'role_key'],
-                    'porter_unique'
+                    'porter_unique',
                 );
 
                 // Performance indexes

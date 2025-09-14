@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
-class Timezone
+final class Timezone
 {
     public static function getTimezones(): array
     {
@@ -16,10 +17,10 @@ class Timezone
             //     ->sort()->toArray();
             return collect(countries(hydrate: true))
                 ->flatten()
-                ->mapWithKeys(fn($item) => [
+                ->mapWithKeys(fn ($item) => [
                     $item->getName() => $item->getTimezones(),
                 ])
-                ->map(fn($value, $key) => $value)
+                ->map(fn ($value, $key) => $value)
                 ->sortKeys()
                 ->toArray();
         });
@@ -27,7 +28,7 @@ class Timezone
 
     public static function getTimezonesAsSelectList(): array
     {
-        return collect(static::getTimezones())
+        return collect(self::getTimezones())
             ->flatten(1)
             ->mapWithKeys(function ($timezone) {
                 return [$timezone => static::displayTimezone($timezone)];
@@ -38,15 +39,15 @@ class Timezone
 
     public static function getTimezonesAsFlatList(): array
     {
-        return \collect(static::getTimezones())->flatten()->toArray();
+        return \collect(self::getTimezones())->flatten()->toArray();
     }
 
     public static function displayTimezone(string $timezone): string
     {
-        $offset = \Illuminate\Support\Carbon::now($timezone)->format('P');
+        $offset = Carbon::now($timezone)->format('P');
 
         // Get localized timezone name
-        $localizedTimezone = static::getLocalizedTimezoneName($timezone);
+        $localizedTimezone = self::getLocalizedTimezoneName($timezone);
 
         $label = __('common.labels.timezone_format', [
             'timezone' => $localizedTimezone,

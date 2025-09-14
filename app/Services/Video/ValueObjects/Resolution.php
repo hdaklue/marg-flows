@@ -6,7 +6,7 @@ namespace App\Services\Video\ValueObjects;
 
 use App\Services\Video\Enums\BitrateEnum;
 
-readonly class Resolution
+final readonly class Resolution
 {
     public function __construct(
         public Dimension $dimension,
@@ -15,25 +15,6 @@ readonly class Resolution
         public string $name,
         public string $qualityTier = 'medium',
     ) {}
-
-    /**
-     * Get dimension for a resolution based on orientation.
-     * Base dimensions are assumed to be landscape (width > height).
-     */
-    private static function getDimensionForResolution(
-        int $baseWidth,
-        int $baseHeight,
-        string $orientation,
-    ): Dimension {
-        return match ($orientation) {
-            'portrait' => Dimension::from($baseHeight, $baseWidth), // Flip dimensions
-            'square' => Dimension::from(
-                min($baseWidth, $baseHeight),
-                min($baseWidth, $baseHeight),
-            ), // Use smaller dimension
-            default => Dimension::from($baseWidth, $baseHeight), // Keep as-is for 'landscape' and others
-        };
-    }
 
     public static function create144p(string $orientation): self
     {
@@ -189,6 +170,25 @@ readonly class Resolution
             name: 'Mobile Square',
             qualityTier: 'mobile_optimized',
         );
+    }
+
+    /**
+     * Get dimension for a resolution based on orientation.
+     * Base dimensions are assumed to be landscape (width > height).
+     */
+    private static function getDimensionForResolution(
+        int $baseWidth,
+        int $baseHeight,
+        string $orientation,
+    ): Dimension {
+        return match ($orientation) {
+            'portrait' => Dimension::from($baseHeight, $baseWidth), // Flip dimensions
+            'square' => Dimension::from(
+                min($baseWidth, $baseHeight),
+                min($baseWidth, $baseHeight),
+            ), // Use smaller dimension
+            default => Dimension::from($baseWidth, $baseHeight), // Keep as-is for 'landscape' and others
+        };
     }
 
     public function getPixelCount(): int

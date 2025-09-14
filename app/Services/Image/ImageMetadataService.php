@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Image;
 
 use App\DTOs\Image\ImageMetadataDTO;
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Image\Enums\AlignPosition;
 use Spatie\Image\Enums\Fit;
 use Spatie\Image\Exceptions\InvalidImageDriver;
 use Spatie\Image\Image;
@@ -17,12 +17,15 @@ use Spatie\Image\Image;
 final class ImageMetadataService
 {
     private const CACHE_PREFIX = 'image_metadata:';
+
     private const CACHE_TTL = 3600; // 1 hour in seconds
+
     private const DEFAULT_MAX_WIDTH = 800;
+
     private const DEFAULT_MAX_HEIGHT = 600;
 
     /**
-     * Extract comprehensive metadata from an image URL or path
+     * Extract comprehensive metadata from an image URL or path.
      */
     public function extractMetadata(
         string $imageUrlOrPath,
@@ -49,7 +52,7 @@ final class ImageMetadataService
     }
 
     /**
-     * Extract metadata without caching (useful for testing or one-time operations)
+     * Extract metadata without caching (useful for testing or one-time operations).
      */
     public function extractMetadataFresh(
         string $imageUrlOrPath,
@@ -64,7 +67,7 @@ final class ImageMetadataService
     }
 
     /**
-     * Clear cached metadata for a specific image
+     * Clear cached metadata for a specific image.
      */
     public function clearCache(string $imageUrlOrPath): void
     {
@@ -83,7 +86,7 @@ final class ImageMetadataService
             foreach ($suffixes as $suffix) {
                 Cache::forget($baseKey . $suffix);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log warning if cache clearing fails
             Log::warning('Failed to clear image metadata cache', [
                 'image' => $imageUrlOrPath,
@@ -110,7 +113,7 @@ final class ImageMetadataService
     }
 
     /**
-     * Perform the actual metadata extraction
+     * Perform the actual metadata extraction.
      */
     private function doExtractMetadata(
         string $imageUrlOrPath,
@@ -120,7 +123,7 @@ final class ImageMetadataService
         try {
             $imagePath = $this->resolveImagePath($imageUrlOrPath);
 
-            if (!$imagePath || !File::exists($imagePath)) {
+            if (! $imagePath || ! File::exists($imagePath)) {
                 return $this->createErrorMetadata(
                     $imageUrlOrPath,
                     'Image file not found',
@@ -129,7 +132,7 @@ final class ImageMetadataService
                 );
             }
 
-            if (!$this->isValidImageFile($imagePath)) {
+            if (! $this->isValidImageFile($imagePath)) {
                 return $this->createErrorMetadata(
                     $imageUrlOrPath,
                     'Invalid image file format',
@@ -193,7 +196,7 @@ final class ImageMetadataService
                 $maxContainerWidth,
                 $maxContainerHeight,
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to extract image metadata', [
                 'image' => $imageUrlOrPath,
                 'error' => $e->getMessage(),
@@ -210,9 +213,9 @@ final class ImageMetadataService
     }
 
     /**
-     * Resolve an image URL or path to a local file path
+     * Resolve an image URL or path to a local file path.
      */
-    private function resolveImagePath(string $imageUrlOrPath): null|string
+    private function resolveImagePath(string $imageUrlOrPath): ?string
     {
         // If it's already a local path and exists
         if (File::exists($imageUrlOrPath)) {
@@ -251,7 +254,7 @@ final class ImageMetadataService
     }
 
     /**
-     * Check if the file is a valid image format
+     * Check if the file is a valid image format.
      */
     private function isValidImageFile(string $path): bool
     {
@@ -272,7 +275,7 @@ final class ImageMetadataService
     }
 
     /**
-     * Calculate optimal container dimensions that fit within max bounds while preserving aspect ratio
+     * Calculate optimal container dimensions that fit within max bounds while preserving aspect ratio.
      */
     private function calculateOptimalContainerDimensions(
         int $imageWidth,
@@ -322,7 +325,7 @@ final class ImageMetadataService
     }
 
     /**
-     * Calculate maximum zoom level based on image and container dimensions
+     * Calculate maximum zoom level based on image and container dimensions.
      */
     private function calculateMaxZoomLevel(
         int $imageWidth,
@@ -351,7 +354,7 @@ final class ImageMetadataService
     }
 
     /**
-     * Create error metadata for failed operations
+     * Create error metadata for failed operations.
      */
     private function createErrorMetadata(
         string $imageUrl,
@@ -379,7 +382,7 @@ final class ImageMetadataService
     }
 
     /**
-     * Format file size in human readable format
+     * Format file size in human readable format.
      */
     private function formatFileSize(int $bytes): string
     {
@@ -397,17 +400,16 @@ final class ImageMetadataService
     }
 
     /**
-     * Generate cache key for the given parameters
+     * Generate cache key for the given parameters.
      */
     private function getCacheKey(
         string $imageUrl,
         int $maxWidth,
         int $maxHeight,
     ): string {
-        return (
+        return
             self::CACHE_PREFIX
             . md5($imageUrl)
-            . ":{$maxWidth}x{$maxHeight}"
-        );
+            . ":{$maxWidth}x{$maxHeight}";
     }
 }

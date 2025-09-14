@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Directory\Strategies;
 
 use App\Services\Directory\Contracts\StorageStrategyContract;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
@@ -12,8 +14,8 @@ use InvalidArgumentException;
 /**
  * Image Storage Strategy.
  *
- * Handles image file storage with potential for image-specific operations
- * like thumbnail generation, resizing, etc.
+ * Handles image file storage with secure path building using LaraPath.
+ * Supports variants (original, thumbnails, optimized, etc.) with obfuscated directories.
  */
 final class ImageStorageStrategy implements StorageStrategyContract
 {
@@ -101,9 +103,9 @@ final class ImageStorageStrategy implements StorageStrategyContract
     {
         $this->file = $file;
 
-        $filename = $this->generateFilename();
+        $filename = $this->generateSecureFilename();
         $directory = $this->variant
-            ? $this->buildVariantDirectory()
+            ? $this->buildSecureVariantDirectory()
             : $this->baseDirectory;
         $disk = config('document.storage.disk', 'public');
 
@@ -142,7 +144,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     public function getDirectory(): string
     {
-        return $this->buildVariantDirectory();
+        return $this->buildSecureVariantDirectory();
     }
 
     /**
@@ -322,16 +324,43 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     private function buildVariantDirectory(): string
     {
-        $directory = $this->baseDirectory;
+        return $this->buildSecureVariantDirectory();
+    }
+
+    /**
+     * Build secure directory path using LaraPath including variant subdirectory.
+     *
+     * @return string The complete secure directory path with variant
+     */
+    private function buildSecureVariantDirectory(): string
+    {
+        $builder = PathBuilder::base($this->baseDirectory);
 
         if (
             $this->variant
             && isset(self::VARIANT_DIRECTORIES[$this->variant])
         ) {
-            $directory .= '/' . self::VARIANT_DIRECTORIES[$this->variant];
+            $builder->add(self::VARIANT_DIRECTORIES[$this->variant], SanitizationStrategy::SLUG);
         }
 
-        return $directory;
+        return $builder->validate()->toString();
+    }
+
+    /**
+     * Build secure file path using LaraPath.
+     *
+     * @param  string  $fileName  The filename to build secure path for
+     * @return string Secure file path
+     */
+    private function buildSecurePath(string $fileName): string
+    {
+        $builder = $this->variant
+            ? PathBuilder::base($this->buildSecureVariantDirectory())
+            : PathBuilder::base($this->baseDirectory);
+
+        return $builder->addFile($fileName, SanitizationStrategy::SLUG)
+            ->validate()
+            ->toString();
     }
 
     /**
@@ -341,10 +370,25 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     private function generateFilename(): string
     {
+        return $this->generateSecureFilename();
+    }
+
+    /**
+     * Generate secure unique filename using LaraPath.
+     *
+     * @return string The secure generated filename
+     */
+    private function generateSecureFilename(): string
+    {
         $extension = $this->file->extension();
         $timestamp = time();
         $unique = uniqid();
+        $originalName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
 
-        return "{$unique}_{$timestamp}.{$extension}";
+        $filename = "{$originalName}_{$unique}_{$timestamp}.{$extension}";
+
+        return PathBuilder::base('')
+            ->addFile($filename, SanitizationStrategy::SLUG)
+            ->getFilename();
     }
 }

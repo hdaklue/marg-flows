@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use Exception;
 use Livewire\Component;
 
 final class ChunkedFileUpload extends Component
@@ -40,7 +41,7 @@ final class ChunkedFileUpload extends Component
 
     public string $tempDir = 'uploads/temp';
 
-    public null|string $importUrlEndpoint = null;
+    public ?string $importUrlEndpoint = null;
 
     // Component state
     public array $uploadedFiles = [];
@@ -52,25 +53,25 @@ final class ChunkedFileUpload extends Component
 
     public bool $uploading = false;
 
-    public null|string $error = null;
+    public ?string $error = null;
 
-    public null|string $success = null;
+    public ?string $success = null;
 
     // Props for external configuration
     public function mount(
-        null|bool $modalMode = false,
-        null|bool $allowUrlImport = false,
-        null|bool $multiple = true,
-        null|array $acceptedFileTypes = null,
-        null|int $maxFiles = null,
-        null|int $maxFileSize = null,
-        null|int $minFileSize = null,
-        null|int $maxParallelUploads = null,
-        null|string $statePath = null,
-        null|string $disk = null,
-        null|string $finalDir = null,
-        null|string $tempDir = null,
-        null|string $importUrlEndpoint = null,
+        ?bool $modalMode = false,
+        ?bool $allowUrlImport = false,
+        ?bool $multiple = true,
+        ?array $acceptedFileTypes = null,
+        ?int $maxFiles = null,
+        ?int $maxFileSize = null,
+        ?int $minFileSize = null,
+        ?int $maxParallelUploads = null,
+        ?string $statePath = null,
+        ?string $disk = null,
+        ?string $finalDir = null,
+        ?string $tempDir = null,
+        ?string $importUrlEndpoint = null,
     ): void {
         $this->modalMode = $modalMode ?? false;
         $this->allowUrlImport = $allowUrlImport ?? false;
@@ -130,14 +131,15 @@ final class ChunkedFileUpload extends Component
         $fileToRemove = collect($this->uploadedFiles)
             ->firstWhere('key', $fileKey);
 
-        if (!$fileToRemove) {
+        if (! $fileToRemove) {
             $this->showError('File not found');
+
             return;
         }
 
         $this->uploadedFiles = array_values(array_filter(
             $this->uploadedFiles,
-            fn($file) => $file['key'] !== $fileKey,
+            fn ($file) => $file['key'] !== $fileKey,
         ));
 
         $this->showSuccess(
@@ -218,7 +220,7 @@ final class ChunkedFileUpload extends Component
 
     public function updateUploadProgress(string $fileId, array $updates): void
     {
-        if (!isset($this->activeUploads[$fileId])) {
+        if (! isset($this->activeUploads[$fileId])) {
             return;
         }
 
@@ -251,12 +253,9 @@ final class ChunkedFileUpload extends Component
             // Move to uploaded files
             $this->addUploadedFile([
                 'key' => $fileId,
-                'name' =>
-                    $fileData['name'] ?? $this->activeUploads[$fileId]['name'],
-                'size' =>
-                    $fileData['size'] ?? $this->activeUploads[$fileId]['size'],
-                'type' =>
-                    $fileData['type'] ?? $this->activeUploads[$fileId]['type'],
+                'name' => $fileData['name'] ?? $this->activeUploads[$fileId]['name'],
+                'size' => $fileData['size'] ?? $this->activeUploads[$fileId]['size'],
+                'type' => $fileData['type'] ?? $this->activeUploads[$fileId]['type'],
                 'url' => $fileData['url'] ?? '',
                 'path' => $fileData['path'] ?? '',
                 'imported' => $fileData['imported'] ?? false,
@@ -291,18 +290,12 @@ final class ChunkedFileUpload extends Component
         $this->dispatch('upload-cancelled', ['fileId' => $fileId]);
     }
 
-    private function checkUploadingStatus(): void
-    {
-        $this->uploading = collect($this->activeUploads)->contains(function ($upload) {
-            return in_array($upload['status'], ['pending', 'uploading']);
-        });
-    }
-
     // URL Import functionality
     public function importFromUrl(string $url): void
     {
-        if (empty($url) || !$this->importUrlEndpoint) {
+        if (empty($url) || ! $this->importUrlEndpoint) {
             $this->showError('Invalid URL or import endpoint not configured');
+
             return;
         }
 
@@ -321,7 +314,7 @@ final class ChunkedFileUpload extends Component
 
             $this->addUploadedFile($fileData);
             $this->showSuccess('File imported successfully from URL');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->showError('Failed to import from URL: ' . $e->getMessage());
         }
     }
@@ -343,31 +336,6 @@ final class ChunkedFileUpload extends Component
     {
         $this->error = null;
         $this->success = null;
-    }
-
-    // Utility methods
-    private function extractFilenameFromUrl(string $url): string
-    {
-        $path = parse_url($url, PHP_URL_PATH);
-        return basename($path) ?: 'imported-file';
-    }
-
-    private function guessTypeFromUrl(string $url): string
-    {
-        $ext = strtolower(pathinfo($url, PATHINFO_EXTENSION));
-        $mimeMap = [
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-            'gif' => 'image/gif',
-            'mp4' => 'video/mp4',
-            'webm' => 'video/webm',
-            'pdf' => 'application/pdf',
-            'doc' => 'application/msword',
-            'zip' => 'application/zip',
-        ];
-
-        return $mimeMap[$ext] ?? 'application/octet-stream';
     }
 
     // Get configuration for Alpine component
@@ -402,5 +370,38 @@ final class ChunkedFileUpload extends Component
     public function render()
     {
         return view('livewire.chunked-file-upload');
+    }
+
+    private function checkUploadingStatus(): void
+    {
+        $this->uploading = collect($this->activeUploads)->contains(function ($upload) {
+            return in_array($upload['status'], ['pending', 'uploading']);
+        });
+    }
+
+    // Utility methods
+    private function extractFilenameFromUrl(string $url): string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+
+        return basename($path) ?: 'imported-file';
+    }
+
+    private function guessTypeFromUrl(string $url): string
+    {
+        $ext = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+        $mimeMap = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'mp4' => 'video/mp4',
+            'webm' => 'video/webm',
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'zip' => 'application/zip',
+        ];
+
+        return $mimeMap[$ext] ?? 'application/octet-stream';
     }
 }

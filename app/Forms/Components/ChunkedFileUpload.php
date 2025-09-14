@@ -95,7 +95,7 @@ final class ChunkedFileUpload extends BaseFileUpload
             );
 
             // Set chunk size for images
-            if (!isset($this->chunkSize)) {
+            if (! isset($this->chunkSize)) {
                 $this->chunkSize = $imageConfig['chunk_size'] ?? config(
                     'chunked-upload.default_chunk_size',
                 );
@@ -129,7 +129,7 @@ final class ChunkedFileUpload extends BaseFileUpload
             );
 
             // Set chunk size for videos
-            if (!isset($this->chunkSize)) {
+            if (! isset($this->chunkSize)) {
                 $this->chunkSize = $videoConfig['chunk_size'] ?? config(
                     'chunked-upload.default_chunk_size',
                 );
@@ -180,15 +180,14 @@ final class ChunkedFileUpload extends BaseFileUpload
 
     public function getMaxParallelUploads(): int
     {
-        return (
+        return
             $this->evaluate($this->maxParallelUploads) ?? config(
                 'chunked-upload.max_parallel_uploads',
                 3,
-            )
-        );
+            );
     }
 
-    public function getAlignment(): null|string
+    public function getAlignment(): ?string
     {
         return $this->evaluate($this->alignment);
     }

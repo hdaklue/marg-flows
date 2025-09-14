@@ -7,6 +7,7 @@ use App\Services\Video\Operations\ResizeOperation;
 use App\Services\Video\Operations\TrimOperation;
 use App\Services\Video\Operations\WatermarkOperation;
 use App\Services\Video\Pipeline\VideoOperationPipeline;
+use App\Services\Video\ValueObjects\AspectRatio;
 use App\Services\Video\ValueObjects\Dimension;
 
 it('creates resize operation with correct metadata', function () {
@@ -182,7 +183,7 @@ it('pipeline validates operation contracts', function () {
             new TrimOperation(0, 30),
             'not an operation', // This should cause an error
         ]);
-    })->toThrow(InvalidArgumentException::class);
+    })->toThrow(\InvalidArgumentException::class);
 });
 
 it('operations can be skipped based on canExecute', function () {
@@ -204,7 +205,7 @@ it('dimension operations work correctly', function () {
 
     // Test aspect ratio calculation (16:9 = 1.777...)
     expect($dimension->getAspectRatio())
-        ->toBeInstanceOf(\App\Services\Video\ValueObjects\AspectRatio::class);
+        ->toBeInstanceOf(AspectRatio::class);
 
     // Test scaling to smaller dimensions
     $smaller = new Dimension(960, 540);

@@ -18,15 +18,17 @@ final class AVIFormat implements VideoFormatContract
 
     /**
      * Internal factory method for FormatFactory use only.
+     *
      * @internal
      */
     public static function createInstance(): self
     {
-        return new self();
+        return new self;
     }
 
-    public function getDriverFormat(null|BitrateEnum $bitrate = null): VideoInterface {
-        $format = new WMV();
+    public function getDriverFormat(?BitrateEnum $bitrate = null): VideoInterface
+    {
+        $format = new WMV;
 
         if ($bitrate) {
             $format->setKiloBitrate($bitrate->getKbps());
@@ -47,7 +49,7 @@ final class AVIFormat implements VideoFormatContract
         return 'AVI (WMV)';
     }
 
-    public function getDefaultBitrate(): null|int
+    public function getDefaultBitrate(): ?int
     {
         return BitrateEnum::HIGH_1080P->getKbps(); // 4500 kbps
     }

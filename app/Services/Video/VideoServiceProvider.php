@@ -7,18 +7,18 @@ namespace App\Services\Video;
 use App\Services\Video\Services\VideoNamingService;
 use Illuminate\Support\ServiceProvider;
 
-class VideoServiceProvider extends ServiceProvider
+final class VideoServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
      */
     public function register(): void
     {
-        $this->app->bind('video', fn($app) => new VideoManager($app));
+        $this->app->bind('video', fn ($app) => new VideoManager($app));
 
         $this->app->bind(
             VideoNamingService::class,
-            fn() => new VideoNamingService(),
+            fn () => new VideoNamingService,
         );
     }
 

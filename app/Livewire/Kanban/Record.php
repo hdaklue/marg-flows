@@ -43,7 +43,7 @@ final class Record extends Component
         $this->color = cache()->remember(
             "flow_color_{$this->record->stage}",
             3600,
-            fn(): array|string|null => FlowStage::from($this->record->stage)->getColor(),
+            fn (): array|string|null => FlowStage::from($this->record->stage)->getColor(),
         );
         unset($this->participants);
 

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 final class UploadProgressController extends Controller
 {
     /**
-     * Get upload progress for a session
+     * Get upload progress for a session.
      */
     public function show(Request $request, string $sessionId): JsonResponse
     {
@@ -19,7 +19,7 @@ final class UploadProgressController extends Controller
             $sessionId,
         );
 
-        if (!$progress) {
+        if (! $progress) {
             return response()->json([
                 'success' => false,
                 'message' => 'Upload session not found',
@@ -33,7 +33,7 @@ final class UploadProgressController extends Controller
     }
 
     /**
-     * Clean up upload session
+     * Clean up upload session.
      */
     public function destroy(Request $request, string $sessionId): JsonResponse
     {

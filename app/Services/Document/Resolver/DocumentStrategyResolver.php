@@ -28,7 +28,8 @@ final class DocumentStrategyResolver
     /**
      * Register a filtering strategy.
      */
-    public function registerStrategy(DocumentBlockFilterStrategy $strategy): self {
+    public function registerStrategy(DocumentBlockFilterStrategy $strategy): self
+    {
         $this->strategies[$strategy->getName()] = $strategy;
 
         return $this;
@@ -96,8 +97,8 @@ final class DocumentStrategyResolver
      */
     private function registerDefaultStrategies(): void
     {
-        $this->registerStrategy(new SimpleFilterStrategy());
-        $this->registerStrategy(new AdvancedFilterStrategy());
-        $this->registerStrategy(new UltimateFilterStrategy());
+        $this->registerStrategy(new SimpleFilterStrategy);
+        $this->registerStrategy(new AdvancedFilterStrategy);
+        $this->registerStrategy(new UltimateFilterStrategy);
     }
 }

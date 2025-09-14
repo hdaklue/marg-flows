@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use FFMpeg\Coordinate\Dimension;
 use Illuminate\Support\Facades\Storage;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 
@@ -15,7 +16,7 @@ it('can directly process video with Laravel FFmpeg', function () {
 
     $fullOutputPath = Storage::disk('local')->path($outputPath);
     $outputDir = dirname($fullOutputPath);
-    if (!is_dir($outputDir)) {
+    if (! is_dir($outputDir)) {
         mkdir($outputDir, 0755, true);
     }
 
@@ -26,7 +27,7 @@ it('can directly process video with Laravel FFmpeg', function () {
             ->export()
             ->addFilter(function ($filters) {
                 $filters->resize(
-                    new \FFMpeg\Coordinate\Dimension(320, 240),
+                    new Dimension(320, 240),
                     'fit',
                 );
             })
@@ -48,7 +49,7 @@ it('can directly process video with Laravel FFmpeg', function () {
             // Clean up
             unlink($fullOutputPath);
         }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $this->fail('Direct Laravel FFmpeg failed: ' . $e->getMessage());
     }
 });

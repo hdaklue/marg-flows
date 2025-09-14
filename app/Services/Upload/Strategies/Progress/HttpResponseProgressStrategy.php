@@ -92,11 +92,11 @@ final class HttpResponseProgressStrategy implements ProgressStrategyContract
         ]);
     }
 
-    public function getProgress(string $sessionId): null|ProgressData
+    public function getProgress(string $sessionId): ?ProgressData
     {
         $sessionData = Cache::get("upload_session_{$sessionId}");
 
-        if (!$sessionData || !isset($sessionData['progress'])) {
+        if (! $sessionData || ! isset($sessionData['progress'])) {
             return null;
         }
 
@@ -123,9 +123,9 @@ final class HttpResponseProgressStrategy implements ProgressStrategyContract
     }
 
     /**
-     * Get raw session data for HTTP response
+     * Get raw session data for HTTP response.
      */
-    public function getSessionData(string $sessionId): null|array
+    public function getSessionData(string $sessionId): ?array
     {
         return Cache::get("upload_session_{$sessionId}");
     }

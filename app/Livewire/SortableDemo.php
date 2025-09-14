@@ -298,7 +298,7 @@ final class SortableDemo extends Component
     public function getAvailableColumnsFor(string $currentColumnId): array
     {
         return collect($this->columns)
-            ->reject(fn($column) => $column['id'] === $currentColumnId)
+            ->reject(fn ($column) => $column['id'] === $currentColumnId)
             ->values()
             ->toArray();
     }
@@ -312,8 +312,8 @@ final class SortableDemo extends Component
 
     public function onSort(
         array $itemIds,
-        null|string $from = null,
-        null|string $to = null,
+        ?string $from = null,
+        ?string $to = null,
     ): mixed {
         return true;
     }
@@ -478,23 +478,22 @@ final class SortableDemo extends Component
             $oldDone = count($this->done);
 
             $this->todos = collect($this->todos)
-                ->reject(fn($item) => $item['id'] === $itemId)
+                ->reject(fn ($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
             $this->inProgress = collect($this->inProgress)
-                ->reject(fn($item) => $item['id'] === $itemId)
+                ->reject(fn ($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
             $this->done = collect($this->done)
-                ->reject(fn($item) => $item['id'] === $itemId)
+                ->reject(fn ($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
 
             logger()->info('removeItem completed', [
                 'itemId' => $itemId,
                 'todos_removed' => $oldTodos - count($this->todos),
-                'inProgress_removed' =>
-                    $oldInProgress - count($this->inProgress),
+                'inProgress_removed' => $oldInProgress - count($this->inProgress),
                 'done_removed' => $oldDone - count($this->done),
                 'new_counts' => [
                     'todos' => count($this->todos),
@@ -545,7 +544,7 @@ final class SortableDemo extends Component
         ]);
 
         $movedItemId = $itemIds[0] ?? null;
-        if (!$movedItemId) {
+        if (! $movedItemId) {
             logger()->error('handleCrossGroupMove failed - no item ID');
             throw new InvalidArgumentException(
                 'No item ID provided for cross-group sort',
@@ -584,7 +583,8 @@ final class SortableDemo extends Component
         return $this->$toProperty;
     }
 
-    private function determinePropertyFromContainer(string $containerData): string {
+    private function determinePropertyFromContainer(string $containerData): string
+    {
         return $this->getPropertyFromContainer($containerData);
     }
 
@@ -646,13 +646,13 @@ final class SortableDemo extends Component
     private function findAndRemoveItem(
         string $property,
         string $itemId,
-    ): null|array {
+    ): ?array {
         $items = collect($this->$property);
         $item = $items->firstWhere('id', $itemId);
 
         if ($item) {
             $this->$property = $items
-                ->reject(fn($i) => $i['id'] === $itemId)
+                ->reject(fn ($i) => $i['id'] === $itemId)
                 ->values()
                 ->toArray();
         }

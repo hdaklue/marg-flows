@@ -14,15 +14,15 @@ abstract class AbstractResolution implements ConversionContract
 
     protected string $quality = 'medium';
 
-    protected null|Dimension $dimension = null;
+    protected ?Dimension $dimension = null;
 
-    protected null|int $bitrate = null;
+    protected ?int $bitrate = null;
 
     protected bool $allowScaleUp = false;
 
-    protected null|Dimension $maxDimension = null;
+    protected ?Dimension $maxDimension = null;
 
-    protected null|Dimension $minDimension = null;
+    protected ?Dimension $minDimension = null;
 
     protected bool $maintainAspectRatio = true;
 
@@ -40,12 +40,12 @@ abstract class AbstractResolution implements ConversionContract
         return $this->quality;
     }
 
-    public function getDimension(): null|Dimension
+    public function getDimension(): ?Dimension
     {
         return $this->dimension;
     }
 
-    public function getTargetBitrate(): null|int
+    public function getTargetBitrate(): ?int
     {
         return $this->bitrate;
     }
@@ -55,12 +55,12 @@ abstract class AbstractResolution implements ConversionContract
         return $this->allowScaleUp;
     }
 
-    public function getMaxDimension(): null|Dimension
+    public function getMaxDimension(): ?Dimension
     {
         return $this->maxDimension;
     }
 
-    public function getMinDimension(): null|Dimension
+    public function getMinDimension(): ?Dimension
     {
         return $this->minDimension;
     }
@@ -88,10 +88,11 @@ abstract class AbstractResolution implements ConversionContract
     /**
      * Calculate the final dimension considering constraints and current video dimensions.
      */
-    public function calculateFinalDimension(Dimension $currentDimension): null|Dimension {
+    public function calculateFinalDimension(Dimension $currentDimension): ?Dimension
+    {
         $targetDimension = $this->getDimension();
 
-        if (!$targetDimension || !$this->shouldConvert($currentDimension)) {
+        if (! $targetDimension || ! $this->shouldConvert($currentDimension)) {
             return $currentDimension;
         }
 
@@ -147,13 +148,11 @@ abstract class AbstractResolution implements ConversionContract
     {
         $targetDimension = $this->getDimension();
 
-        if (!$targetDimension) {
+        if (! $targetDimension) {
             return false;
         }
 
-        return (
-            $targetDimension->getPixelCount() > $currentDimension->getPixelCount()
-        );
+        return $targetDimension->getPixelCount() > $currentDimension->getPixelCount();
     }
 
     /**
@@ -163,7 +162,7 @@ abstract class AbstractResolution implements ConversionContract
     {
         $targetDimension = $this->getDimension();
 
-        if (!$targetDimension) {
+        if (! $targetDimension) {
             return true;
         }
 
@@ -172,7 +171,7 @@ abstract class AbstractResolution implements ConversionContract
         $targetPixels = $targetDimension->getPixelCount();
 
         // If target has more pixels than current, it's a scale up
-        if ($targetPixels > $currentPixels && !$this->allowScaleUp) {
+        if ($targetPixels > $currentPixels && ! $this->allowScaleUp) {
             return false;
         }
 

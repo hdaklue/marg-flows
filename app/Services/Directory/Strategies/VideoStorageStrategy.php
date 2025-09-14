@@ -6,6 +6,7 @@ namespace App\Services\Directory\Strategies;
 
 use App\Services\Directory\Contracts\StorageStrategyContract;
 use App\Services\Video\Video;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
 use Hdaklue\PathBuilder\Facades\LaraPath;
 use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\File;
@@ -357,31 +358,41 @@ final class VideoStorageStrategy implements StorageStrategyContract
     }
 
     /**
-     * Generate a unique filename for the video file.
+     * Generate a secure unique filename for the video file.
      *
-     * @return string The generated filename
+     * @return string The generated secure filename
      */
     private function generateFilename(): string
     {
         $extension = $this->file->extension();
         $timestamp = time();
         $unique = uniqid();
+        $originalName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
 
-        return "{$unique}_{$timestamp}.{$extension}";
+        $filename = "{$originalName}_{$unique}_{$timestamp}.{$extension}";
+
+        return PathBuilder::base('')
+            ->addFile($filename, SanitizationStrategy::SLUG)
+            ->getFilename();
     }
 
     /**
-     * Generate a unique filename for the thumbnail file.
+     * Generate a secure unique filename for the thumbnail file.
      *
      * @param  string  $filePath  The original file path
-     * @return string The generated thumbnail filename
+     * @return string The generated secure thumbnail filename
      */
     private function generateThumbnailFilename(string $filePath): string
     {
         $extension = pathinfo($filePath, PATHINFO_EXTENSION);
         $timestamp = time();
         $unique = uniqid();
+        $originalName = pathinfo($filePath, PATHINFO_FILENAME);
 
-        return "thumb_{$unique}_{$timestamp}.{$extension}";
+        $filename = "thumb_{$originalName}_{$unique}_{$timestamp}.{$extension}";
+
+        return PathBuilder::base('')
+            ->addFile($filename, SanitizationStrategy::SLUG)
+            ->getFilename();
     }
 }

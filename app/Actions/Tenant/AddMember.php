@@ -9,6 +9,9 @@ use App\Models\Flow;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+
+use function config;
+
 use Exception;
 use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use Hdaklue\MargRbac\Enums\Role\RoleEnum;
@@ -18,8 +21,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
-
-use function config;
 
 final class AddMember
 {
@@ -44,7 +45,7 @@ final class AddMember
             ) {
                 $tenant->addParticipant($user, $assignedRole->name, $silently);
 
-                if (!empty($flows)) {
+                if (! empty($flows)) {
                     $this->assignFlowsRole(
                         $tenant,
                         $user,

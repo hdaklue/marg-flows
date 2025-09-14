@@ -41,7 +41,7 @@ interface DocumentManagerInterface
     /**
      * Get a specific document by ID with content-based caching.
      */
-    public function getDocument(string $documentId): null|Document;
+    public function getDocument(string $documentId): ?Document;
 
     /**
      * Get documents created by a specific user.

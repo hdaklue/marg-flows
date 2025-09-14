@@ -11,17 +11,12 @@ use JsonSerializable;
 use Livewire\Wireable;
 use Stringable;
 
-final class CommentTime implements
-    Arrayable,
-    Jsonable,
-    JsonSerializable,
-    Stringable,
-    Wireable
+final class CommentTime implements Arrayable, Jsonable, JsonSerializable, Stringable, Wireable
 {
     private readonly float $seconds;
 
     /**
-     * Create a new CommentTime instance from seconds
+     * Create a new CommentTime instance from seconds.
      */
     private function __construct(float $seconds)
     {
@@ -30,7 +25,7 @@ final class CommentTime implements
     }
 
     /**
-     * Create from seconds (float for precision)
+     * Create from seconds (float for precision).
      */
     public static function fromSeconds(float $seconds): self
     {
@@ -38,7 +33,7 @@ final class CommentTime implements
     }
 
     /**
-     * Create from frame number and frame rate
+     * Create from frame number and frame rate.
      */
     public static function fromFrame(int $frameNumber, float $frameRate): self
     {
@@ -55,11 +50,12 @@ final class CommentTime implements
         );
 
         $seconds = $frameNumber / $frameRate;
+
         return new self($seconds);
     }
 
     /**
-     * Create from formatted time string (auto-detects MM:SS or HH:MM:SS)
+     * Create from formatted time string (auto-detects MM:SS or HH:MM:SS).
      */
     public static function fromFormatted(string $time): self
     {
@@ -107,7 +103,7 @@ final class CommentTime implements
     }
 
     /**
-     * Create from string (auto-detects seconds or formatted time)
+     * Create from string (auto-detects seconds or formatted time).
      */
     public static function fromString(string $input): self
     {
@@ -134,7 +130,7 @@ final class CommentTime implements
     }
 
     /**
-     * Create zero time
+     * Create zero time.
      */
     public static function zero(): self
     {
@@ -142,7 +138,7 @@ final class CommentTime implements
     }
 
     /**
-     * Wire deserialization for Livewire
+     * Wire deserialization for Livewire.
      */
     public static function fromLivewire($value): self
     {
@@ -159,7 +155,7 @@ final class CommentTime implements
     }
 
     /**
-     * Get as seconds (with decimal precision)
+     * Get as seconds (with decimal precision).
      */
     public function asSeconds(): float
     {
@@ -167,7 +163,7 @@ final class CommentTime implements
     }
 
     /**
-     * Get as rounded seconds (integer)
+     * Get as rounded seconds (integer).
      */
     public function asSecondsInt(): int
     {
@@ -175,7 +171,7 @@ final class CommentTime implements
     }
 
     /**
-     * Get as frame number for given frame rate
+     * Get as frame number for given frame rate.
      */
     public function getFrame(float $frameRate): int
     {
@@ -189,16 +185,17 @@ final class CommentTime implements
     }
 
     /**
-     * Get frame-aligned timestamp for given frame rate
+     * Get frame-aligned timestamp for given frame rate.
      */
     public function getFrameAlignedTime(float $frameRate): self
     {
         $frameNumber = $this->getFrame($frameRate);
+
         return self::fromFrame($frameNumber, $frameRate);
     }
 
     /**
-     * Get formatted time string (auto-detects if hours needed)
+     * Get formatted time string (auto-detects if hours needed).
      */
     public function asFormatted(bool $forceHours = false): string
     {
@@ -215,7 +212,7 @@ final class CommentTime implements
     }
 
     /**
-     * Get formatted with decimal precision for seconds
+     * Get formatted with decimal precision for seconds.
      */
     public function asFormattedPrecise(
         int $decimals = 1,
@@ -243,7 +240,7 @@ final class CommentTime implements
     }
 
     /**
-     * Get display string (default formatting)
+     * Get display string (default formatting).
      */
     public function display(): string
     {
@@ -251,7 +248,7 @@ final class CommentTime implements
     }
 
     /**
-     * Get display string with precision
+     * Get display string with precision.
      */
     public function displayPrecise(int $decimals = 1): string
     {
@@ -259,16 +256,17 @@ final class CommentTime implements
     }
 
     /**
-     * Get display string with frame information
+     * Get display string with frame information.
      */
     public function displayWithFrame(float $frameRate): string
     {
         $frameNumber = $this->getFrame($frameRate);
+
         return "Frame {$frameNumber} ({$this->display()})";
     }
 
     /**
-     * Check if time is zero
+     * Check if time is zero.
      */
     public function isZero(): bool
     {
@@ -276,7 +274,7 @@ final class CommentTime implements
     }
 
     /**
-     * Check if time has hours (>= 1 hour)
+     * Check if time has hours (>= 1 hour).
      */
     public function hasHours(): bool
     {
@@ -284,7 +282,7 @@ final class CommentTime implements
     }
 
     /**
-     * Check if time is greater than given time
+     * Check if time is greater than given time.
      */
     public function gt(CommentTime $other): bool
     {
@@ -292,7 +290,7 @@ final class CommentTime implements
     }
 
     /**
-     * Check if time is less than given time
+     * Check if time is less than given time.
      */
     public function lt(CommentTime $other): bool
     {
@@ -300,7 +298,7 @@ final class CommentTime implements
     }
 
     /**
-     * Check if time equals given time (with float precision tolerance)
+     * Check if time equals given time (with float precision tolerance).
      */
     public function eq(CommentTime $other): bool
     {
@@ -308,7 +306,7 @@ final class CommentTime implements
     }
 
     /**
-     * Add time (returns new instance)
+     * Add time (returns new instance).
      */
     public function add(CommentTime $other): self
     {
@@ -316,7 +314,7 @@ final class CommentTime implements
     }
 
     /**
-     * Subtract time (returns new instance, minimum 0)
+     * Subtract time (returns new instance, minimum 0).
      */
     public function subtract(CommentTime $other): self
     {
@@ -324,7 +322,7 @@ final class CommentTime implements
     }
 
     /**
-     * Get difference between times (absolute value)
+     * Get difference between times (absolute value).
      */
     public function diff(CommentTime $other): self
     {
@@ -332,7 +330,7 @@ final class CommentTime implements
     }
 
     /**
-     * JSON serialization (returns seconds for API compatibility)
+     * JSON serialization (returns seconds for API compatibility).
      */
     public function jsonSerialize(): float
     {
@@ -340,7 +338,7 @@ final class CommentTime implements
     }
 
     /**
-     * Array representation
+     * Array representation.
      */
     public function toArray(): array
     {
@@ -355,20 +353,19 @@ final class CommentTime implements
     }
 
     /**
-     * Array representation with frame data
+     * Array representation with frame data.
      */
     public function toArrayWithFrames(float $frameRate): array
     {
         return array_merge($this->toArray(), [
             'frame_number' => $this->getFrame($frameRate),
             'frame_rate' => $frameRate,
-            'frame_aligned' =>
-                $this->getFrameAlignedTime($frameRate)->asSeconds(),
+            'frame_aligned' => $this->getFrameAlignedTime($frameRate)->asSeconds(),
         ]);
     }
 
     /**
-     * JSON string representation
+     * JSON string representation.
      */
     public function toJson($options = 0): string
     {
@@ -376,7 +373,7 @@ final class CommentTime implements
     }
 
     /**
-     * Wire serialization for Livewire
+     * Wire serialization for Livewire.
      */
     public function toLivewire(): array
     {
@@ -384,7 +381,7 @@ final class CommentTime implements
     }
 
     /**
-     * Validate seconds value
+     * Validate seconds value.
      */
     private function validateSeconds(float $seconds): void
     {
@@ -401,7 +398,7 @@ final class CommentTime implements
     }
 
     /**
-     * String representation (for __toString)
+     * String representation (for __toString).
      */
     public function __toString(): string
     {

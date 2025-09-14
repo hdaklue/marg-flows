@@ -22,7 +22,8 @@ trait EnumSelectArrays
         })->toArray();
     }
 
-    public static function colorfulArray(string|int|null $selected = null): array {
+    public static function colorfulArray(string|int|null $selected = null): array
+    {
         return collect(static::cases())->map(function ($case) use ($selected) {
             $item = [
                 'value' => $case->value,

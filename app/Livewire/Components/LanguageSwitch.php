@@ -7,7 +7,7 @@ namespace App\Livewire\Components;
 use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 
-class LanguageSwitch extends Component
+final class LanguageSwitch extends Component
 {
     public string $currentLocale;
 
@@ -18,7 +18,7 @@ class LanguageSwitch extends Component
 
     public function changeLanguage(string $locale): void
     {
-        if (!array_key_exists($locale, config('app.available_locales'))) {
+        if (! array_key_exists($locale, config('app.available_locales'))) {
             return;
         }
 

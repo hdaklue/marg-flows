@@ -30,42 +30,49 @@ final class Table implements DocumentBlockConfigContract
     public function rows(int $rows): self
     {
         $this->config['rows'] = $rows;
+
         return $this;
     }
 
     public function cols(int $cols): self
     {
         $this->config['cols'] = $cols;
+
         return $this;
     }
 
     public function maxRows(int $maxRows): self
     {
         $this->config['maxRows'] = $maxRows;
+
         return $this;
     }
 
     public function maxCols(int $maxCols): self
     {
         $this->config['maxCols'] = $maxCols;
+
         return $this;
     }
 
     public function withHeadings(bool $enabled = true): self
     {
         $this->config['withHeadings'] = $enabled;
+
         return $this;
     }
 
     public function stretched(bool $enabled = true): self
     {
         $this->config['stretched'] = $enabled;
+
         return $this;
     }
 
     public function inlineToolBar(bool $enabled = true): self
     {
         $this->inlineToolBar = $enabled;
+
         return $this;
     }
 

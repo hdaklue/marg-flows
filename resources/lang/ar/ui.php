@@ -8,14 +8,14 @@ return [
             'label' => 'اللغة',
             'placeholder' => 'اختر لغة',
         ],
-        
+
         'calendar' => [
             'today' => 'اليوم',
             'previous_month' => 'الشهر السابق',
             'next_month' => 'الشهر التالي',
             'no_events' => 'لا توجد أحداث',
         ],
-        
+
         'file_upload' => [
             'drag_drop' => 'اسحب وأفلت الملفات هنا أو انقر للتصفح',
             'browse' => 'تصفح الملفات',
@@ -29,27 +29,27 @@ return [
             'video_upload' => 'رفع فيديو',
             'video_file' => 'ملف فيديو',
         ],
-        
+
         'pagination' => [
             'previous' => 'السابق',
             'next' => 'التالي',
             'showing' => 'عرض :from إلى :to من أصل :total نتيجة',
             'per_page' => 'لكل صفحة',
         ],
-        
+
         'search' => [
             'placeholder' => 'بحث...',
             'no_results' => 'لم يتم العثور على نتائج',
             'searching' => 'جاري البحث...',
             'clear' => 'مسح البحث',
         ],
-        
+
         'modal' => [
             'close' => 'إغلاق',
             'confirm' => 'تأكيد',
             'cancel' => 'إلغاء',
         ],
-        
+
         'tooltip' => [
             'copy' => 'نسخ',
             'copied' => 'تم النسخ!',
@@ -57,7 +57,7 @@ return [
             'delete' => 'حذف',
             'view' => 'عرض',
         ],
-        
+
         'side_notes' => [
             'tooltip' => 'الملاحظات الجانبية [Alt + S]',
             'title' => 'الملاحظات الجانبية',
@@ -65,7 +65,7 @@ return [
             'placeholder' => 'اكتب ملاحظتك .. واضغط Enter',
         ],
     ],
-    
+
     'panels' => [
         'admin' => [
             'title' => 'لوحة الإدارة',
@@ -76,7 +76,7 @@ return [
             'description' => 'بوابة التطبيق الرئيسية',
         ],
     ],
-    
+
     'themes' => [
         'light' => 'فاتح',
         'dark' => 'داكن',

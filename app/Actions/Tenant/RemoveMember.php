@@ -8,6 +8,9 @@ use App\Events\Tenant\MemberRemoved;
 use App\Models\Flow;
 use App\Models\Tenant;
 use App\Models\User;
+
+use function config;
+
 use Exception;
 use Hdaklue\MargRbac\Contracts\Role\AssignableEntity;
 use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
@@ -16,8 +19,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
-
-use function config;
 
 final class RemoveMember
 {

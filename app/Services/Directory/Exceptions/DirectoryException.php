@@ -7,11 +7,11 @@ namespace App\Services\Directory\Exceptions;
 use Exception;
 
 /**
- * Directory Service Exception
+ * Directory Service Exception.
  *
  * Base exception for all directory service operations
  */
-class DirectoryException extends Exception
+final class DirectoryException extends Exception
 {
     public static function fileNotFound(string $path): self
     {

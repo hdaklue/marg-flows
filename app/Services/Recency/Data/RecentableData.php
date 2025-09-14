@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Recency\Data;
 
 use App\Models\Tenant;
@@ -7,25 +9,34 @@ use App\Services\Recency\Contracts\Recentable;
 use App\Services\Recency\UrlResolver;
 use WendellAdriel\ValidatedDTO\SimpleDTO;
 
-class RecentableData extends SimpleDTO
+final class RecentableData extends SimpleDTO
 {
     public string $title;
+
     public string|int $key;
 
     public string $type;
+
     public string $url;
 
-    public null|string $color;
+    public ?string $color;
 
     public static function fromRecentable(Recentable $recentable, Tenant $tenant): static
     {
-        return static::fromArray([
+        return self::fromArray([
             'title' => $recentable->getRecentLabel(),
             'key' => $recentable->getRecentKey(),
             'type' => $recentable->getRecentType(),
-            'url' => static::resolveUrl($recentable, $tenant),
-            'color' => static::color($recentable->getRecentType()),
+            'url' => self::resolveUrl($recentable, $tenant),
+            'color' => self::color($recentable->getRecentType()),
         ]);
+    }
+
+    public static function color(string $type): string
+    {
+        return match ($type) {
+            default => 'zinc',
+        };
     }
 
     protected static function resolveUrl(Recentable $recentable, Tenant $tenant)
@@ -41,10 +52,5 @@ class RecentableData extends SimpleDTO
     protected function defaults(): array
     {
         return [];
-    }
-
-    public static function color(string $type): string
-    {
-        return match ($type) { default => 'zinc' };
     }
 }

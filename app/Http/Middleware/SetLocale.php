@@ -29,9 +29,9 @@ final class SetLocale
         return $next($request);
     }
 
-    private function getBrowserLocale(Request $request): null|string
+    private function getBrowserLocale(Request $request): ?string
     {
-        $agent = new Agent();
+        $agent = new Agent;
 
         // $agent->setHttpHeaders($request->headers->all());
         // $agent->setUserAgent($request->header('User-Agent'));

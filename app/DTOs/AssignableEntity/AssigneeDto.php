@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\DTOs\AssignableEntity;
 
 use App\Models\User;
-use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Hdaklue\MargRbac\Facades\RoleManager;
 use Illuminate\Database\Eloquent\Model;
@@ -15,13 +14,13 @@ final class AssigneeDto extends ValidatedDTO
 {
     public string $user_id;
 
-    public null|string $role;
+    public ?string $role;
 
     public string $assignment_type;
 
-    public null|string $entity_type;
+    public ?string $entity_type;
 
-    public null|string $entity_id;
+    public ?string $entity_id;
 
     public static function fromUserAssignment(
         User $user,
@@ -44,7 +43,7 @@ final class AssigneeDto extends ValidatedDTO
     {
         $user = User::find($this->user_id);
         $nameInitials = collect(explode(' ', $user->name ?? ''))
-            ->map(fn($name) => substr($name, 0, 1))
+            ->map(fn ($name) => substr($name, 0, 1))
             ->implode('');
 
         return $this->role
@@ -52,17 +51,17 @@ final class AssigneeDto extends ValidatedDTO
             : $nameInitials;
     }
 
-    public function getRoleEnum(): null|RoleEnum
+    public function getRoleEnum(): ?RoleEnum
     {
         return $this->role ? RoleEnum::from($this->role) : null;
     }
 
-    public function getRoleLabel(): null|string
+    public function getRoleLabel(): ?string
     {
         return $this->getRoleEnum()?->getLabel();
     }
 
-    public function getRoleDescription(): null|string
+    public function getRoleDescription(): ?string
     {
         return $this->getRoleEnum()?->getDescription();
     }
@@ -75,7 +74,7 @@ final class AssigneeDto extends ValidatedDTO
     public function hasPermission(string $permission): bool
     {
         $roleEnum = $this->getRoleEnum();
-        if (!$roleEnum) {
+        if (! $roleEnum) {
             return false;
         }
 
@@ -129,15 +128,14 @@ final class AssigneeDto extends ValidatedDTO
     public function canAssignRole(RoleEnum $targetRole): bool
     {
         $currentRole = $this->getRoleEnum();
-        if (!$currentRole) {
+        if (! $currentRole) {
             return false;
         }
 
-        return (
+        return
             $currentRole->isHigherThan($targetRole)
             || $currentRole === RoleEnum::MANAGER
-            && $targetRole->isLowerThanOrEqual(RoleEnum::EDITOR)
-        );
+            && $targetRole->isLowerThanOrEqual(RoleEnum::EDITOR);
     }
 
     protected function rules(): array

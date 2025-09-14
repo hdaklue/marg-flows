@@ -10,7 +10,7 @@ use App\Support\FileSize;
 final class ChunkConfigManager
 {
     /**
-     * Simple plan configuration - conservative settings for basic users
+     * Simple plan configuration - conservative settings for basic users.
      */
     public static function simple(): ChunkConfig
     {
@@ -25,7 +25,7 @@ final class ChunkConfigManager
     }
 
     /**
-     * Advanced plan configuration - balanced settings for power users
+     * Advanced plan configuration - balanced settings for power users.
      */
     public static function advanced(): ChunkConfig
     {
@@ -40,7 +40,7 @@ final class ChunkConfigManager
     }
 
     /**
-     * Ultimate plan configuration - high-performance settings for enterprise users
+     * Ultimate plan configuration - high-performance settings for enterprise users.
      */
     public static function ultimate(): ChunkConfig
     {
@@ -55,7 +55,7 @@ final class ChunkConfigManager
     }
 
     /**
-     * Get configuration for a specific plan
+     * Get configuration for a specific plan.
      */
     public static function forPlan(string $plan): ChunkConfig
     {
@@ -68,7 +68,7 @@ final class ChunkConfigManager
     }
 
     /**
-     * Get configuration optimized for images (smaller chunks, faster processing)
+     * Get configuration optimized for images (smaller chunks, faster processing).
      */
     public static function forImages(string $plan = 'simple'): ChunkConfig
     {
@@ -90,7 +90,7 @@ final class ChunkConfigManager
     }
 
     /**
-     * Get configuration optimized for videos (larger chunks, longer timeouts)
+     * Get configuration optimized for videos (larger chunks, longer timeouts).
      */
     public static function forVideos(string $plan = 'simple'): ChunkConfig
     {

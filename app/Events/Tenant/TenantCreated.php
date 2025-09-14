@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Events\Tenant;
 
 use App\Models\Tenant;
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TenantCreated
+final class TenantCreated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

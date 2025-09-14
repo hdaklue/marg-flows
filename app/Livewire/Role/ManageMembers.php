@@ -39,18 +39,18 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
     // public ?Collection $manageableMembers;
 
-    public null|RoleableEntity $roleableEntity = null;
+    public ?RoleableEntity $roleableEntity = null;
 
-    public null|RoleableEntity $scopeTo = null;
+    public ?RoleableEntity $scopeTo = null;
 
-    public null|array $data = [];
+    public ?array $data = [];
 
     #[Locked]
     public bool $canEdit = false;
 
     public function mount(
-        null|RoleableEntity $roleableEntity,
-        null|RoleableEntity $scopeToEntity,
+        ?RoleableEntity $roleableEntity,
+        ?RoleableEntity $scopeToEntity,
     ) {
         if ($roleableEntity) {
             $this->canEdit = $this->authorize(
@@ -75,14 +75,14 @@ final class ManageMembers extends Component implements HasActions, HasForms
             ->components([
                 Select::make('member')
                     ->label(__('app.users'))
-                    ->options(fn() => $this->assignableEntities)
+                    ->options(fn () => $this->assignableEntities)
                     ->required(),
                 Select::make('role')
                     ->label(__('app.role'))
                     ->required()
                     ->native(false)
                     ->options(function () {
-                        if (!$this->roleableEntity) {
+                        if (! $this->roleableEntity) {
                             return [];
                         }
                         $userRole = filamentUser()->getAssignmentOn($this->roleableEntity);
@@ -98,8 +98,8 @@ final class ManageMembers extends Component implements HasActions, HasForms
     #[Computed]
     public function manageableMembers(): ParticipantsCollection
     {
-        if (!$this->roleableEntity) {
-            return new ParticipantsCollection();
+        if (! $this->roleableEntity) {
+            return new ParticipantsCollection;
         }
 
         return $this->roleableEntity
@@ -133,7 +133,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
     #[Computed]
     public function authedUserAssignableRoles(): Collection
     {
-        if (!$this->roleableEntity) {
+        if (! $this->roleableEntity) {
             return collect();
         }
         $role = filamentUser()->getAssignmentOn($this->roleableEntity);
@@ -145,7 +145,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
     {
         $this->authorize('manageMembers', $this->roleableEntity);
         $targetModel = $this->roleableEntity->getParticipant($target_id);
-        if (!$targetModel) {
+        if (! $targetModel) {
             return;
         }
 
@@ -185,7 +185,7 @@ final class ManageMembers extends Component implements HasActions, HasForms
 
     protected function resolveAssignableEntities(): array
     {
-        if (!$this->roleableEntity) {
+        if (! $this->roleableEntity) {
             return [];
         }
 

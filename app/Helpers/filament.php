@@ -6,7 +6,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 
-if (!function_exists('filamentUser')) {
+if (! function_exists('filamentUser')) {
     /**
      * Get the currently authenticated user from the Filament panel.
      *
@@ -32,7 +32,7 @@ if (!function_exists('filamentUser')) {
  *
  * @throws \Exception
  */
-if (!function_exists('filamentTenant')) {
+if (! function_exists('filamentTenant')) {
     /**
      * Get the currently resolved Filament tenant, if any.
      */
@@ -48,7 +48,7 @@ if (!function_exists('filamentTenant')) {
     }
 }
 
-if (!function_exists('viteBuiltPath')) {
+if (! function_exists('viteBuiltPath')) {
     /**
      * Get the physical disk path of a built Vite asset from the manifest.
      *

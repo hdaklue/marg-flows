@@ -46,7 +46,7 @@ abstract class AbstractVideoOperation implements VideoOperationContract
         MediaExporter $mediaExporter,
         Closure $next,
     ): MediaExporter {
-        if (!$this->canExecute()) {
+        if (! $this->canExecute()) {
             // Skip this operation and pass to next
             return $next($mediaExporter);
         }

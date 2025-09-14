@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * General feedback model for simple cases that don't fit specialized models
@@ -32,12 +33,12 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $feedbackable_id
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property array<array-key, mixed>|null $metadata Flexible metadata storage for various feedback types
  * @property string|null $feedback_category Optional category for organization
  * @property array<array-key, mixed>|null $custom_data Additional custom data as needed
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read User|null $creator
  * @property-read Model|Eloquent $feedbackable
  * @property-read User|null $resolver
@@ -117,17 +118,17 @@ final class GeneralFeedback extends Model
     // Type-specific methods
     public function hasCategory(): bool
     {
-        return !empty($this->feedback_category);
+        return ! empty($this->feedback_category);
     }
 
     public function hasMetadata(): bool
     {
-        return !empty($this->metadata);
+        return ! empty($this->metadata);
     }
 
     public function hasCustomData(): bool
     {
-        return !empty($this->custom_data);
+        return ! empty($this->custom_data);
     }
 
     public function getMetadataValue(string $key, mixed $default = null): mixed
@@ -174,7 +175,7 @@ final class GeneralFeedback extends Model
 
     public function getCategoryDisplay(): string
     {
-        if (!$this->hasCategory()) {
+        if (! $this->hasCategory()) {
             return 'Uncategorized';
         }
 
@@ -253,10 +254,10 @@ final class GeneralFeedback extends Model
         return 'general';
     }
 
-    public function convertToSpecializedModel(): null|Model
+    public function convertToSpecializedModel(): ?Model
     {
         // Attempt to convert to specialized model based on metadata
-        if (!$this->hasMetadata()) {
+        if (! $this->hasMetadata()) {
             return null;
         }
 
@@ -267,8 +268,7 @@ final class GeneralFeedback extends Model
             'audio_region' => $this->convertToAudioFeedback(),
             'document_block' => $this->convertToDocumentFeedback(),
             'image_annotation',
-            'design_annotation',
-                => $this->convertToDesignFeedback(),
+            'design_annotation', => $this->convertToDesignFeedback(),
             default => null,
         };
     }
@@ -343,7 +343,7 @@ final class GeneralFeedback extends Model
         ];
     }
 
-    private function convertToVideoFeedback(): null|VideoFeedback
+    private function convertToVideoFeedback(): ?VideoFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -370,7 +370,7 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToAudioFeedback(): null|AudioFeedback
+    private function convertToAudioFeedback(): ?AudioFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -393,7 +393,7 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToDocumentFeedback(): null|DocumentFeedback
+    private function convertToDocumentFeedback(): ?DocumentFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -415,11 +415,11 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToDesignFeedback(): null|DesignFeedback
+    private function convertToDesignFeedback(): ?DesignFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
-        if (!isset($data['x_coordinate']) || !isset($data['y_coordinate'])) {
+        if (! isset($data['x_coordinate']) || ! isset($data['y_coordinate'])) {
             return null;
         }
 

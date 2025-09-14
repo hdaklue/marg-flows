@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\DTOs\Roles;
 
-use App\DTOs\BaseDto;
-use App\DTOs\User\UserDto;
-use Hdaklue\Porter\Contracts\RoleContract;
-use WendellAdriel\ValidatedDTO\SimpleDTO;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 final class SingleParticipantDto extends ValidatedDTO
 {
     public string $avatarUrl;
+
     public string $username;
 
     public string $id;
@@ -45,7 +42,7 @@ final class SingleParticipantDto extends ValidatedDTO
         return $this->role->getDescription();
     }
 
-    public function participantAvatar(): null|string
+    public function participantAvatar(): ?string
     {
         return $this->avatarUrl;
     }

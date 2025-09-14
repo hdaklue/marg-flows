@@ -6,8 +6,9 @@ namespace App\Services\Video\Operations;
 
 use App\Services\Video\ValueObjects\Dimension;
 use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
+use ProtoneMedia\LaravelFFMpeg\MediaOpener;
 
-class ResizeOperation extends AbstractVideoOperation
+final class ResizeOperation extends AbstractVideoOperation
 {
     public function __construct(
         private readonly Dimension $dimension,
@@ -41,13 +42,13 @@ class ResizeOperation extends AbstractVideoOperation
 
     public function canExecute(): bool
     {
-        return (
+        return
             $this->dimension->getWidth() > 0
-            && $this->dimension->getHeight() > 0
-        );
+            && $this->dimension->getHeight() > 0;
     }
 
-    public function applyToBuilder(\ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter $builder): \ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter {
+    public function applyToBuilder(MediaExporter $builder): MediaExporter
+    {
         return $builder->addFilter(function ($filters) {
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(
@@ -59,7 +60,8 @@ class ResizeOperation extends AbstractVideoOperation
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
+    public function applyToMedia(MediaOpener $media): MediaOpener
+    {
         return $media->addFilter(function ($filters) {
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(

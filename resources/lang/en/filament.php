@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Page titles
     'dashboard' => 'Dashboard',
     'profile' => 'Profile',
     'settings' => 'Settings',
-    
+
     // Actions
     'create' => 'Create',
     'edit' => 'Edit',
@@ -26,7 +28,7 @@ return [
     'next' => 'Next',
     'previous' => 'Previous',
     'close' => 'Close',
-    
+
     // Table headers
     'name' => 'Name',
     'email' => 'Email',
@@ -34,7 +36,7 @@ return [
     'created_at' => 'Created',
     'updated_at' => 'Updated',
     'actions' => 'Actions',
-    
+
     // Form labels
     'title' => 'Title',
     'description' => 'Description',
@@ -47,32 +49,32 @@ return [
     'city' => 'City',
     'country' => 'Country',
     'timezone' => 'Timezone',
-    
+
     // Notifications
     'saved' => 'Saved successfully',
     'created' => 'Created successfully',
     'updated' => 'Updated successfully',
     'deleted' => 'Deleted successfully',
     'error' => 'An error occurred',
-    
+
     // Confirmations
     'confirm_delete' => 'Are you sure you want to delete this?',
     'confirm_action' => 'Are you sure you want to perform this action?',
-    
+
     // Pagination
     'showing' => 'Showing',
     'to' => 'to',
     'of' => 'of',
     'results' => 'results',
     'per_page' => 'per page',
-    
+
     // Filters
     'all' => 'All',
     'active' => 'Active',
     'inactive' => 'Inactive',
     'published' => 'Published',
     'draft' => 'Draft',
-    
+
     // Additional actions
     'retry' => 'Retry',
 ];

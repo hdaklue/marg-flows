@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Operations;
 
+use FFMpeg\Coordinate\Dimension;
 use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
+use ProtoneMedia\LaravelFFMpeg\MediaOpener;
 
-class ResizeToWidthOperation extends AbstractVideoOperation
+final class ResizeToWidthOperation extends AbstractVideoOperation
 {
     public function __construct(
         private readonly int $width,
@@ -22,7 +24,7 @@ class ResizeToWidthOperation extends AbstractVideoOperation
         // Use addFilter with scale that maintains aspect ratio based on width
         return $mediaExporter->addFilter(function ($filters) {
             $filters->resize(
-                new \FFMpeg\Coordinate\Dimension($this->width, -1),
+                new Dimension($this->width, -1),
                 'fit',
             ); // -1 means maintain aspect ratio
         });
@@ -42,16 +44,17 @@ class ResizeToWidthOperation extends AbstractVideoOperation
     {
         return $builder->addFilter(function ($filters) {
             $filters->resize(
-                new \FFMpeg\Coordinate\Dimension($this->width, -1),
+                new Dimension($this->width, -1),
                 'fit',
             ); // -1 means maintain aspect ratio
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
+    public function applyToMedia(MediaOpener $media): MediaOpener
+    {
         return $media->addFilter(function ($filters) {
             $filters->resize(
-                new \FFMpeg\Coordinate\Dimension($this->width, -1),
+                new Dimension($this->width, -1),
                 'fit',
             ); // -1 means maintain aspect ratio
         });

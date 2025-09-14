@@ -22,7 +22,7 @@ final class RegisterUser
         string $email,
         string $username,
         string $password,
-    ): null|User {
+    ): ?User {
         $ip = app()->isProduction() ? request()->ip() : '41.43.60.242';
         $timezone = GetUserLocation::run($ip)->timezone;
 
@@ -33,7 +33,7 @@ final class RegisterUser
                 $password,
                 $timezone,
             ) {
-                $user = new User();
+                $user = new User;
 
                 $user->username = $username;
                 $user->email = $email;

@@ -38,7 +38,7 @@ final class MentionService
         return $entity
             ->getParticipants()
             ->pluck('model')
-            ->map(fn($participant) => [
+            ->map(fn ($participant) => [
                 'id' => $participant->getModel()->getKey(),
                 'name' => $participant->getModel()->name,
                 'avatar' => $participant->getModel()->avatar,
@@ -51,13 +51,12 @@ final class MentionService
     ): string {
         $ids = $participants->pluck('model')->pluck('id')->toArray();
 
-        return (
+        return
             'mentions_'
             . md5(serialize($ids))
             . '_'
             . $entity->getMorphClass()
             . '_'
-            . $entity->getKey()
-        );
+            . $entity->getKey();
     }
 }

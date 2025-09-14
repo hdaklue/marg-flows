@@ -90,17 +90,9 @@ use Illuminate\Support\Collection;
  *
  * @mixin \Eloquent
  */
-final class Flow extends Model implements
-    BelongsToTenantContract,
-    Documentable,
-    HasStages,
-    RoleableEntity,
-    ScopedToTenant,
-    SentInNotification,
-    Recentable,
-    Sidenoteable
+final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, Recentable, RoleableEntity, ScopedToTenant, SentInNotification, Sidenoteable
 {
-    use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInOriginalDB, ManagesDocuments, ReceivesRoleAssignments, SentInNotificationTrait, SoftDeletes, RecentableModel;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInOriginalDB, ManagesDocuments, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait, SoftDeletes;
 
     // protected $connection = 'mysql';
 
@@ -257,6 +249,14 @@ final class Flow extends Model implements
         return $this->getActiveDeliverablesCount() === 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function getRecentLabel(): ?string
+    {
+        return $this->title;
+    }
+
     #[Scope]
     protected function assignable(Builder $builder)
     {
@@ -282,13 +282,5 @@ final class Flow extends Model implements
             'completed_at' => 'date',
             'canceled_at' => 'date',
         ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRecentLabel(): null|string
-    {
-        return $this->title;
     }
 }

@@ -23,10 +23,10 @@ final class DocumentSpecification
         private readonly array $sections,
         private readonly array $requirements,
         private readonly array $constraints = [],
-        private readonly null|string $language = null,
-        private readonly null|int $minWords = null,
-        private readonly null|int $maxWords = null,
-        private readonly null|array $styles = null,
+        private readonly ?string $language = null,
+        private readonly ?int $minWords = null,
+        private readonly ?int $maxWords = null,
+        private readonly ?array $styles = null,
     ) {
         throw_if(
             $this->maxPages < 0,
@@ -112,22 +112,22 @@ final class DocumentSpecification
         return $this->constraints;
     }
 
-    public function getLanguage(): null|string
+    public function getLanguage(): ?string
     {
         return $this->language;
     }
 
-    public function getMinWords(): null|int
+    public function getMinWords(): ?int
     {
         return $this->minWords;
     }
 
-    public function getMaxWords(): null|int
+    public function getMaxWords(): ?int
     {
         return $this->maxWords;
     }
 
-    public function getStyles(): null|array
+    public function getStyles(): ?array
     {
         return $this->styles;
     }
@@ -153,12 +153,12 @@ final class DocumentSpecification
 
     public function hasSections(): bool
     {
-        return !empty($this->sections);
+        return ! empty($this->sections);
     }
 
     public function getRequiredSections(): array
     {
-        if (!$this->hasSections()) {
+        if (! $this->hasSections()) {
             return [];
         }
 
@@ -169,7 +169,7 @@ final class DocumentSpecification
 
     public function getOptionalSections(): array
     {
-        if (!$this->hasSections()) {
+        if (! $this->hasSections()) {
             return [];
         }
 
@@ -267,7 +267,7 @@ final class DocumentSpecification
 
     public function matchesPageCount(int $pages): bool
     {
-        return !$this->hasPageLimit() || $pages <= $this->maxPages;
+        return ! $this->hasPageLimit() || $pages <= $this->maxPages;
     }
 
     public function matchesWordCount(int $words): bool
@@ -326,18 +326,16 @@ final class DocumentSpecification
 
     public function hasRequirement(string $requirement): bool
     {
-        return (
+        return
             isset($this->requirements[$requirement])
-            || in_array($requirement, $this->requirements)
-        );
+            || in_array($requirement, $this->requirements);
     }
 
     public function getTemplateDetails(): array
     {
         return [
             'template' => $this->template,
-            'has_template' =>
-                !empty($this->template) && $this->template !== 'none',
+            'has_template' => ! empty($this->template) && $this->template !== 'none',
             'template_display' => ucfirst(str_replace(
                 '_',
                 ' ',
@@ -346,7 +344,7 @@ final class DocumentSpecification
         ];
     }
 
-    public function getEstimatedReadingTime(): null|array
+    public function getEstimatedReadingTime(): ?array
     {
         if ($this->maxWords === null && $this->minWords === null) {
             return null;
@@ -410,14 +408,13 @@ final class DocumentSpecification
 
     public function equals(self $other): bool
     {
-        return (
+        return
             $this->name === $other->name
             && $this->format === $other->format
             && $this->maxPages === $other->maxPages
             && $this->template === $other->template
             && $this->minWords === $other->minWords
-            && $this->maxWords === $other->maxWords
-        );
+            && $this->maxWords === $other->maxWords;
     }
 
     private function formatReadingTime(int $minutes): string

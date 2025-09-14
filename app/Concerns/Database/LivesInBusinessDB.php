@@ -9,7 +9,7 @@ trait LivesInBusinessDB
     /**
      * Get the database connection for the model.
      */
-    public function getConnectionName(): null|string
+    public function getConnectionName(): ?string
     {
         return 'business_db';
     }
@@ -21,7 +21,7 @@ trait LivesInBusinessDB
     {
         $businessDatabase = config('database.connections.business_db.database');
 
-        if (!isset($this->table)) {
+        if (! isset($this->table)) {
             return $businessDatabase . '.' . parent::getTable();
         }
 

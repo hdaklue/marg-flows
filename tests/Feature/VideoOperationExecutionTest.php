@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Services\Video\Conversions\Conversion480p;
 use App\Services\Video\Facades\Video;
-use App\Services\Video\Services\VideoEditor;
 use App\Services\Video\ValueObjects\Dimension;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,7 +22,7 @@ it('actually executes resize operations on real files', function () {
 
     // Ensure output directory exists
     $outputDir = dirname($fullOutputPath);
-    if (!is_dir($outputDir)) {
+    if (! is_dir($outputDir)) {
         mkdir($outputDir, 0755, true);
     }
 
@@ -41,7 +40,7 @@ it('actually executes resize operations on real files', function () {
         // Now use our video service to resize it
         $editor = Video::fromDisk($inputPath)
             ->resize(new Dimension(320, 240))
-            ->convert(new Conversion480p()); // Half size
+            ->convert(new Conversion480p); // Half size
 
         // Execute the operations by calling save
         try {
@@ -78,16 +77,18 @@ it('actually executes resize operations on real files', function () {
                 dump('❌ Output file was not created');
                 $this->fail('Save operation did not create output file');
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             dump('❌ Save operation failed: ' . $e->getMessage());
             $this->fail('Save operation threw exception: ' . $e->getMessage());
         }
 
         // Clean up
-        if (file_exists($fullInputPath))
+        if (file_exists($fullInputPath)) {
             unlink($fullInputPath);
-        if (file_exists($fullOutputPath))
+        }
+        if (file_exists($fullOutputPath)) {
             unlink($fullOutputPath);
+        }
     } else {
         $this->markTestSkipped('Could not create test video for resize test');
     }
@@ -103,7 +104,7 @@ it('executes trim operations on real files', function () {
 
     // Ensure output directory exists
     $outputDir = dirname($fullOutputPath);
-    if (!is_dir($outputDir)) {
+    if (! is_dir($outputDir)) {
         mkdir($outputDir, 0755, true);
     }
 
@@ -121,7 +122,7 @@ it('executes trim operations on real files', function () {
         // Use our video service to trim it (first 2 seconds)
         $editor = Video::fromDisk($inputPath)
             ->trim(0, 2)
-            ->convert(new Conversion480p()); // First 2 seconds only
+            ->convert(new Conversion480p); // First 2 seconds only
 
         try {
             $editor->save($fullOutputPath); // Use full path instead of relative
@@ -158,15 +159,17 @@ it('executes trim operations on real files', function () {
             } else {
                 $this->fail('Trim operation did not create output file');
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->fail('Trim operation failed: ' . $e->getMessage());
         }
 
         // Clean up
-        if (file_exists($fullInputPath))
+        if (file_exists($fullInputPath)) {
             unlink($fullInputPath);
-        if (file_exists($fullOutputPath))
+        }
+        if (file_exists($fullOutputPath)) {
             unlink($fullOutputPath);
+        }
     } else {
         $this->markTestSkipped('Could not create test video for trim test');
     }

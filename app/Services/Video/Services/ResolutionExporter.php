@@ -7,6 +7,7 @@ namespace App\Services\Video\Services;
 use App\Services\Video\Contracts\ConversionContract;
 use App\Services\Video\DTOs\ResolutionData;
 use Exception;
+use FFMpeg\Coordinate\Dimension;
 use FFMpeg\Filters\Video\ResizeFilter;
 use FFMpeg\Format\Video\WebM;
 use FFMpeg\Format\Video\WMV;
@@ -44,7 +45,7 @@ final class ResolutionExporter
 
             // Apply resize filter using FFMpeg's Dimension class
             $media->addFilter(function ($filters) use ($dimension) {
-                $ffmpegDimension = new \FFMpeg\Coordinate\Dimension(
+                $ffmpegDimension = new Dimension(
                     $dimension->getWidth(),
                     $dimension->getHeight(),
                 );
@@ -57,10 +58,10 @@ final class ResolutionExporter
 
             // Create the appropriate FFMpeg format object
             $format = match ($formatString) {
-                'mp4', 'mov' => new X264(),
-                'webm' => new WebM(),
-                'avi' => new WMV(),
-                default => new X264(),
+                'mp4', 'mov' => new X264,
+                'webm' => new WebM,
+                'avi' => new WMV,
+                default => new X264,
             };
 
             // Set bitrate if specified

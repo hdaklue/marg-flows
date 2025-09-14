@@ -17,7 +17,8 @@ use Illuminate\Support\Carbon;
  * @property string $user_agent
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \App\Models\User $user
+ * @property-read User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog query()
@@ -27,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog whereUserAgent($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoginLog whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 final class LoginLog extends Model

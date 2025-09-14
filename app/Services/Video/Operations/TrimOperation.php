@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Operations;
 
+use FFMpeg\Coordinate\TimeCode;
 use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
+use ProtoneMedia\LaravelFFMpeg\MediaOpener;
 
-class TrimOperation extends AbstractVideoOperation
+final class TrimOperation extends AbstractVideoOperation
 {
     public function __construct(
         private readonly float $start,
@@ -24,8 +26,8 @@ class TrimOperation extends AbstractVideoOperation
         // Use Laravel FFMpeg's clip functionality
         return $mediaExporter->addFilter(function ($filters) {
             $filters->clip(
-                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->start),
-                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration),
+                TimeCode::fromSeconds($this->start),
+                TimeCode::fromSeconds($this->duration),
             );
         });
     }
@@ -44,17 +46,18 @@ class TrimOperation extends AbstractVideoOperation
     {
         return $builder->addFilter(function ($filters) {
             $filters->clip(
-                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->start),
-                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration),
+                TimeCode::fromSeconds($this->start),
+                TimeCode::fromSeconds($this->duration),
             );
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
+    public function applyToMedia(MediaOpener $media): MediaOpener
+    {
         return $media->addFilter(function ($filters) {
             $filters->clip(
-                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->start),
-                \FFMpeg\Coordinate\TimeCode::fromSeconds($this->duration),
+                TimeCode::fromSeconds($this->start),
+                TimeCode::fromSeconds($this->duration),
             );
         });
     }

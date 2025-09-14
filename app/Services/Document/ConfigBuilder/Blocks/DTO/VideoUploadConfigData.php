@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder\Blocks\DTO;
 
 use App\Services\Document\Contratcs\BlockConfigContract;
-use App\Support\FileSize;
 use App\Support\FileTypes;
 use WendellAdriel\ValidatedDTO\SimpleDTO;
 
-final class VideoUploadConfigData extends SimpleDTO implements
-    BlockConfigContract
+final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContract
 {
     public string $class;
 

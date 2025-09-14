@@ -59,11 +59,11 @@ return new class extends Migration
             $table->index('element_type');
             $table->index(['element_type', 'status']);
             $table->index('block_version');
-            
+
             // Document and block combination queries
             $table->index(['feedbackable_type', 'feedbackable_id', 'block_id'], 'df_feedbackable_block');
             $table->index(['feedbackable_type', 'feedbackable_id', 'element_type'], 'df_feedbackable_element');
-            
+
             // Text selection queries
             $table->index(['block_id', 'created_at']);
         });

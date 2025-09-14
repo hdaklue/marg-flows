@@ -32,7 +32,7 @@ final class CreateDocument extends Page implements HasForms
 
     protected static string $resource = FlowResource::class;
 
-    public null|array $data = [];
+    public ?array $data = [];
 
     public Flow $flow;
 
@@ -55,16 +55,15 @@ final class CreateDocument extends Page implements HasForms
                 ->preload()
                 ->multiple()
                 ->searchable()
-                ->options(fn() => $this->flow
+                ->options(fn () => $this->flow
                     ->getParticipants()
                     ->filter(
-                        fn(ModelHasRole $item) => (
+                        fn (ModelHasRole $item) => (
                             $item->model->getKey() !== filamentUser()->getKey()
                         ),
                     )
-                    ->mapWithKeys(fn(ModelHasRole $item) => [
-                        $item->model->getKey() =>
-                            $item->model->getAttribute('name')
+                    ->mapWithKeys(fn (ModelHasRole $item) => [
+                        $item->model->getKey() => $item->model->getAttribute('name')
                             . ' - '
                             . RoleEnum::from($item->role->getAttribute(
                                 'name',
@@ -82,7 +81,7 @@ final class CreateDocument extends Page implements HasForms
             Actions::make([
                 Action::make('save')
                     ->color('primary')
-                    ->action(fn() => $this->createDocument()),
+                    ->action(fn () => $this->createDocument()),
             ]),
         ])->statePath('data');
     }
@@ -108,8 +107,7 @@ final class CreateDocument extends Page implements HasForms
                 ->body('Document Created Successfully')
                 ->success()
                 ->send();
-            $this->redirect(FlowResource::getUrl('pages', ['record' =>
-                $this->flow]));
+            $this->redirect(FlowResource::getUrl('pages', ['record' => $this->flow]));
         } catch (ValidationException $e) {
             Log::error('DTO Validation failed', $e->errors());
             Notification::make()

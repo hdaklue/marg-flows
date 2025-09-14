@@ -11,13 +11,13 @@ final class ResolutionData extends SimpleDTO
 {
     public string $conversion;
 
-    public null|string $output_path;
+    public ?string $output_path;
 
     public string $status;
 
     public int $size;
 
-    public null|string $error;
+    public ?string $error;
 
     /**
      * Create successful conversion result.
@@ -41,7 +41,7 @@ final class ResolutionData extends SimpleDTO
     public static function failed(
         string $conversion,
         string $error,
-        null|string $outputPath = null,
+        ?string $outputPath = null,
     ): self {
         return new self([
             'conversion' => $conversion,
@@ -87,7 +87,7 @@ final class ResolutionData extends SimpleDTO
     /**
      * Get output filename from path.
      */
-    public function getOutputFilename(): null|string
+    public function getOutputFilename(): ?string
     {
         return $this->output_path ? basename($this->output_path) : null;
     }

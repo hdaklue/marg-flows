@@ -137,18 +137,16 @@ final class VideoRegion extends MediaTimestamp
 
     public function containsTime(CommentTime $time): bool
     {
-        return (
+        return
             $time->asSeconds() >= $this->startTime->asSeconds()
-            && $time->asSeconds() <= $this->endTime->asSeconds()
-        );
+            && $time->asSeconds() <= $this->endTime->asSeconds();
     }
 
     public function containsFrame(int $frameNumber): bool
     {
-        return (
+        return
             $frameNumber >= $this->getStartFrame()
-            && $frameNumber <= $this->getEndFrame()
-        );
+            && $frameNumber <= $this->getEndFrame();
     }
 
     public function containsPoint(int $x, int $y): bool
@@ -158,10 +156,9 @@ final class VideoRegion extends MediaTimestamp
 
     public function overlapsTime(VideoRegion $other): bool
     {
-        return (
+        return
             $this->startTime->asSeconds() < $other->endTime->asSeconds()
-            && $other->startTime->asSeconds() < $this->endTime->asSeconds()
-        );
+            && $other->startTime->asSeconds() < $this->endTime->asSeconds();
     }
 
     public function overlapsSpace(VideoRegion $other): bool
@@ -174,9 +171,9 @@ final class VideoRegion extends MediaTimestamp
         return $this->overlapsTime($other) && $this->overlapsSpace($other);
     }
 
-    public function getTimeOverlapDuration(VideoRegion $other): null|CommentTime
+    public function getTimeOverlapDuration(VideoRegion $other): ?CommentTime
     {
-        if (!$this->overlapsTime($other)) {
+        if (! $this->overlapsTime($other)) {
             return null;
         }
 
@@ -230,25 +227,21 @@ final class VideoRegion extends MediaTimestamp
                 'start' => [
                     'seconds' => $this->startTime->asSeconds(),
                     'formatted' => $this->startTime->asFormatted(),
-                    'formatted_precise' =>
-                        $this->startTime->asFormattedPrecise(),
+                    'formatted_precise' => $this->startTime->asFormattedPrecise(),
                     'frame' => $this->getStartFrame(),
-                    'frame_aligned' =>
-                        $this->getFrameAlignedStartTime()->asSeconds(),
+                    'frame_aligned' => $this->getFrameAlignedStartTime()->asSeconds(),
                 ],
                 'end' => [
                     'seconds' => $this->endTime->asSeconds(),
                     'formatted' => $this->endTime->asFormatted(),
                     'formatted_precise' => $this->endTime->asFormattedPrecise(),
                     'frame' => $this->getEndFrame(),
-                    'frame_aligned' =>
-                        $this->getFrameAlignedEndTime()->asSeconds(),
+                    'frame_aligned' => $this->getFrameAlignedEndTime()->asSeconds(),
                 ],
                 'duration' => [
                     'seconds' => $this->getDuration()->asSeconds(),
                     'formatted' => $this->getDuration()->asFormatted(),
-                    'formatted_precise' =>
-                        $this->getDuration()->asFormattedPrecise(),
+                    'formatted_precise' => $this->getDuration()->asFormattedPrecise(),
                     'frames' => $this->getFrameCount(),
                 ],
             ],

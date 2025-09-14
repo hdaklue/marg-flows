@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class AcceptInvitation extends Controller
+final class AcceptInvitation extends Controller
 {
     /**
      * Handle the incoming request.

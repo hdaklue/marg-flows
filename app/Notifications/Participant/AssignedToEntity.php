@@ -12,11 +12,12 @@ use App\Models\Tenant;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
+
+use function get_class;
+
 use Hdaklue\Porter\Contracts\RoleableEntity;
 use Hdaklue\Porter\Contracts\RoleContract;
 use Notification;
-
-use function get_class;
 
 final class AssignedToEntity extends Notification
 {
@@ -50,7 +51,7 @@ final class AssignedToEntity extends Notification
             ->body($message)
             ->actions([
                 Action::make('visit')->button()->url(
-                    fn() => $this->generateVisitUrl(),
+                    fn () => $this->generateVisitUrl(),
                 ),
             ])
             ->success()
@@ -62,8 +63,7 @@ final class AssignedToEntity extends Notification
         $class = get_class($this->roleable);
 
         return match ($class) {
-            Flow::class => FlowResource::getUrl('index', ['tenant' =>
-                $this->roleable->getTenant()]),
+            Flow::class => FlowResource::getUrl('index', ['tenant' => $this->roleable->getTenant()]),
             Tenant::class => Dashboard::getUrl(['tenant' => $this->roleable]),
             default => null,
         };

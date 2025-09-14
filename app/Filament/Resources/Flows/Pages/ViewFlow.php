@@ -8,10 +8,7 @@ use App\Concerns\Filament\Pages\DisableBreadcrumb;
 use App\Filament\Actions\Document\CreateDocumentAction;
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Filament\Resources\Flows\FlowResource;
-use App\Livewire\Flow\FlowDocumentsTable;
 use App\Livewire\Flow\FlowTabs;
-use App\Livewire\Participants\ManageParticipantsTable;
-use App\Livewire\SortableDemo;
 use App\Models\Flow;
 use App\Services\Document\Actions\CreateDocument;
 use App\Services\Document\Facades\DocumentTemplate;
@@ -26,11 +23,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Size;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
+use Hdaklue\Actioncrumb\ValueObjects\Action as CrumbAction;
+use Hdaklue\Actioncrumb\ValueObjects\Step;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -41,7 +38,7 @@ use Livewire\Attributes\On;
  */
 final class ViewFlow extends ViewRecord
 {
-    use DisableBreadcrumb;
+    use DisableBreadcrumb, HasActionCrumbs;
 
     protected static string $resource = FlowResource::class;
 
@@ -138,6 +135,7 @@ final class ViewFlow extends ViewRecord
     public function content(Schema $schema): Schema
     {
         RecordRecency::dispatch(filamentUser(), $this->record);
+
         return $schema->components([
             Livewire::make(FlowTabs::class, ['flowId' => $this->record->getKey()]),
         ]);
@@ -180,5 +178,22 @@ final class ViewFlow extends ViewRecord
     public function getTitle(): string|Htmlable
     {
         return ucfirst($this->record->title);
+    }
+
+    protected function actioncrumbs(): array
+    {
+        return [
+            Step::make('Dashboard')->icon('heroicon-o-home')->url('/dashboard'),
+            Step::make('Users')
+                ->icon('heroicon-o-users')
+                ->current()
+                ->actions([
+                    CrumbAction::make('Export Users')->icon('heroicon-o-arrow-down-tray')->url('/'),
+                    CrumbAction::make('Import Users')->icon('heroicon-o-arrow-up-tray')->url('/'),
+                    CrumbAction::make('User Settings')->icon('heroicon-o-cog-6-tooth')->url(
+                        '/admin/users/settings',
+                    ),
+                ]),
+        ];
     }
 }

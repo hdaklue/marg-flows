@@ -38,7 +38,7 @@ final class DeliverableSpecResolver
         return collect(array_keys(config(self::CONFIG_PATH
         . '.'
         . self::SUPPORTED_FORMATS, [])))
-            ->mapWithKeys(fn($item) => [$item => str(
+            ->mapWithKeys(fn ($item) => [$item => str(
                 $item,
             )->title()->toString()])
             ->toArray();

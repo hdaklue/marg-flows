@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6182540d7e32b943686ea0587149d6e6",
+    "content-hash": "fcdfa506be3f8d15265edfaa61ab52fa",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2290,6 +2290,69 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
+        },
+        {
+            "name": "hdaklue/actioncrumb",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hdaklue/actioncrumb.git",
+                "reference": "da519b0fc3884ee095455449202ff5925012f061"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hdaklue/actioncrumb/zipball/da519b0fc3884ee095455449202ff5925012f061",
+                "reference": "da519b0fc3884ee095455449202ff5925012f061",
+                "shasum": ""
+            },
+            "require": {
+                "blade-ui-kit/blade-heroicons": "^2.0",
+                "blade-ui-kit/blade-icons": "^1.0",
+                "illuminate/support": "^11.0|^12.0",
+                "jenssegers/agent": "^2.6",
+                "livewire/livewire": "^3.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^9.0",
+                "pestphp/pest": "^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Hdaklue\\Actioncrumb\\Providers\\ActioncrumbServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Hdaklue\\Actioncrumb\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hassan Ibrahim",
+                    "email": "hassan@daklue.com"
+                }
+            ],
+            "description": "A fluent breadcrumb builder with dropdown actions for Laravel Livewire",
+            "keywords": [
+                "breadcrumb",
+                "laravel",
+                "livewire",
+                "navigation",
+                "tailwind"
+            ],
+            "support": {
+                "issues": "https://github.com/hdaklue/actioncrumb/issues",
+                "source": "https://github.com/hdaklue/actioncrumb/tree/1.0.2"
+            },
+            "time": "2025-09-13T21:05:47+00:00"
         },
         {
             "name": "hdaklue/larapath",

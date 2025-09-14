@@ -14,6 +14,11 @@ enum AssigneeRole: string implements HasDescription, HasLabel
     case REVIEWER = 'reviewer';
     case OBSERVER = 'observer';
 
+    public static function getDefault(): self
+    {
+        return self::ASSIGNEE;
+    }
+
     public function getLevel(): int
     {
         return match ($this) {
@@ -128,10 +133,5 @@ enum AssigneeRole: string implements HasDescription, HasLabel
             self::REVIEWER => false,
             self::OBSERVER => false,
         };
-    }
-
-    public static function getDefault(): self
-    {
-        return self::ASSIGNEE;
     }
 }

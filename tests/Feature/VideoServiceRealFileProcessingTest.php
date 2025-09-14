@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Services\Video\Conversions\Conversion480p;
-use App\Services\Video\Conversions\Conversion720p;
 use App\Services\Video\Facades\Video;
 use App\Services\Video\Services\VideoEditor;
 use App\Services\Video\ValueObjects\Dimension;
@@ -21,7 +20,7 @@ it('creates actual video files using FFmpeg and processes them', function () {
     // Skip if FFmpeg is not available
     try {
         $ffmpeg = FFMpeg::create();
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $this->markTestSkipped('FFmpeg not available: ' . $e->getMessage());
     }
 
@@ -41,10 +40,10 @@ it('creates actual video files using FFmpeg and processes them', function () {
         $inputDir = dirname($fullInputPath);
         $outputDir = dirname($fullOutputPath);
 
-        if (!is_dir($inputDir)) {
+        if (! is_dir($inputDir)) {
             mkdir($inputDir, 0755, true);
         }
-        if (!is_dir($outputDir)) {
+        if (! is_dir($outputDir)) {
             mkdir($outputDir, 0755, true);
         }
 
@@ -69,7 +68,7 @@ it('creates actual video files using FFmpeg and processes them', function () {
             // Apply operations but don't actually process yet (just queue them)
             $editor
                 ->resize(new Dimension(320, 240))
-                ->convert(new Conversion480p());
+                ->convert(new Conversion480p);
 
             // Verify operations are queued
             $operations = $editor->getOperations();
@@ -116,7 +115,7 @@ it('creates actual video files using FFmpeg and processes them', function () {
         } else {
             $this->markTestSkipped('Could not create test video with FFmpeg');
         }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $this->markTestSkipped('FFmpeg processing failed: ' . $e->getMessage());
     }
 });
@@ -139,7 +138,7 @@ it('downloads real video from URL and processes it', function () {
         $fullDownloadPath = Storage::disk('local')->path($downloadPath);
         $downloadDir = dirname($fullDownloadPath);
 
-        if (!is_dir($downloadDir)) {
+        if (! is_dir($downloadDir)) {
             mkdir($downloadDir, 0755, true);
         }
 
@@ -165,7 +164,7 @@ it('downloads real video from URL and processes it', function () {
             // Now process with our video service
             $editor = Video::fromDisk($downloadPath)
                 ->resize(new Dimension(480, 270))
-                ->convert(new Conversion480p());
+                ->convert(new Conversion480p);
 
             // Verify operations
             $operations = $editor->getOperations();
@@ -178,7 +177,7 @@ it('downloads real video from URL and processes it', function () {
         } else {
             $this->markTestSkipped('Could not download sample video from URL');
         }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $this->markTestSkipped('Download failed: ' . $e->getMessage());
     }
 });
@@ -195,7 +194,7 @@ it('creates multiple video files and batch processes them', function () {
         $fullSourcePath = Storage::disk('local')->path($sourcePath);
         $sourceDir = dirname($fullSourcePath);
 
-        if (!is_dir($sourceDir)) {
+        if (! is_dir($sourceDir)) {
             mkdir($sourceDir, 0755, true);
         }
 
@@ -222,7 +221,7 @@ it('creates multiple video files and batch processes them', function () {
         foreach ($sourceFiles as $index => $sourceFile) {
             $editor = Video::fromDisk($sourceFile)
                 ->resize(new Dimension(160, 120))
-                ->convert(new Conversion480p()); // Very small
+                ->convert(new Conversion480p); // Very small
 
             $operations = $editor->getOperations();
             expect(count($operations))->toBe(2);

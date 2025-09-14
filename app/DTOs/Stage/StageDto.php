@@ -6,7 +6,7 @@ namespace App\DTOs\Stage;
 
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
-class StageDto extends ValidatedDTO
+final class StageDto extends ValidatedDTO
 {
     public string $name;
 
@@ -18,7 +18,7 @@ class StageDto extends ValidatedDTO
 
     public string $slug;
 
-    public null|string $id;
+    public ?string $id;
 
     protected function rules(): array
     {

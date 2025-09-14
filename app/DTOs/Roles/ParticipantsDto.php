@@ -9,7 +9,8 @@ use App\DTOs\ItemableDto;
 
 final class ParticipantsDto extends ItemableDto
 {
-    public static function fromParticipantsCollection(ParticipantsCollection $data): self {
+    public static function fromParticipantsCollection(ParticipantsCollection $data): self
+    {
         return new self([
             'items' => $data->toDto(),
         ]);

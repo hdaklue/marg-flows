@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use DOMDocument;
+use DOMXPath;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
-class UrlFetchController extends Controller
+final class UrlFetchController extends Controller
 {
     public function fetchUrl(Request $request): JsonResponse
     {
@@ -32,7 +35,7 @@ class UrlFetchController extends Controller
                 'User-Agent' => 'Mozilla/5.0 (compatible; KluePortal/1.0; +https://klueportal.com)',
             ])->get($url);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return response()->json([
                     'success' => 0,
                     'message' => 'Failed to fetch URL content',
@@ -47,7 +50,7 @@ class UrlFetchController extends Controller
                 'link' => $url,
                 'meta' => $meta,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => 0,
                 'message' => 'Error fetching URL: ' . $e->getMessage(),
@@ -64,13 +67,13 @@ class UrlFetchController extends Controller
         ];
 
         // Create a DOM document to parse HTML
-        $dom = new \DOMDocument();
+        $dom = new DOMDocument;
         $previousSetting = libxml_use_internal_errors(true);
         $dom->loadHTML($html);
         libxml_clear_errors();
         libxml_use_internal_errors($previousSetting);
 
-        $xpath = new \DOMXPath($dom);
+        $xpath = new DOMXPath($dom);
 
         // Extract title
         $titleNodes = $xpath->query('//title');
@@ -143,13 +146,12 @@ class UrlFetchController extends Controller
             $basePath = '/';
         }
 
-        return (
+        return
             $scheme
             . '://'
             . $host
             . rtrim($basePath, '/')
             . '/'
-            . ltrim($url, '/')
-        );
+            . ltrim($url, '/');
     }
 }

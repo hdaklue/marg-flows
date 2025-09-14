@@ -8,14 +8,14 @@ return [
             'label' => 'Language',
             'placeholder' => 'Select a language',
         ],
-        
+
         'calendar' => [
             'today' => 'Today',
             'previous_month' => 'Previous Month',
             'next_month' => 'Next Month',
             'no_events' => 'No events',
         ],
-        
+
         // Migrated from app.php file_upload
         'file_upload' => [
             'drag_drop' => 'Drag and drop files here or click to browse',
@@ -30,27 +30,27 @@ return [
             'video_upload' => 'Video Upload',
             'video_file' => 'Video File',
         ],
-        
+
         'pagination' => [
             'previous' => 'Previous',
             'next' => 'Next',
             'showing' => 'Showing :from to :to of :total results',
             'per_page' => 'Per page',
         ],
-        
+
         'search' => [
             'placeholder' => 'Search...',
             'no_results' => 'No results found',
             'searching' => 'Searching...',
             'clear' => 'Clear search',
         ],
-        
+
         'modal' => [
             'close' => 'Close',
             'confirm' => 'Confirm',
             'cancel' => 'Cancel',
         ],
-        
+
         'tooltip' => [
             'copy' => 'Copy',
             'copied' => 'Copied!',
@@ -58,7 +58,7 @@ return [
             'delete' => 'Delete',
             'view' => 'View',
         ],
-        
+
         'side_notes' => [
             'tooltip' => 'Sidenotes [Alt + S]',
             'title' => 'Side Notes',
@@ -66,7 +66,7 @@ return [
             'placeholder' => 'write your note .. and hit Enter',
         ],
     ],
-    
+
     'panels' => [
         'admin' => [
             'title' => 'Admin Panel',
@@ -77,7 +77,7 @@ return [
             'description' => 'Main application portal',
         ],
     ],
-    
+
     'themes' => [
         'light' => 'Light',
         'dark' => 'Dark',

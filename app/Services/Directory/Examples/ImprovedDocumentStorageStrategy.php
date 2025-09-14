@@ -10,12 +10,13 @@ use App\Services\Directory\Strategies\BaseStorageStrategy;
 use App\Services\Directory\Strategies\ImageStorageStrategy;
 use App\Services\Directory\Strategies\VideoStorageStrategy;
 use App\Services\Directory\Utils\FilenameGenerator;
+use Exception;
 use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Improved Document Storage Strategy
+ * Improved Document Storage Strategy.
  *
  * Example implementation showing all improvements applied:
  * - File facade usage
@@ -23,13 +24,15 @@ use Illuminate\Support\Facades\Storage;
  * - Better error handling
  * - Consistent naming and structure
  */
-final class ImprovedDocumentStorageStrategy extends
-    BaseStorageStrategy implements DocumentStorageStrategyContract
+final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implements DocumentStorageStrategyContract
 {
-    private null|string $documentId = null;
-    private null|UploadedFile $file = null;
-    private null|string $subdirectory = null;
-    private null|string $storedPath = null;
+    private ?string $documentId = null;
+
+    private ?UploadedFile $file = null;
+
+    private ?string $subdirectory = null;
+
+    private ?string $storedPath = null;
 
     public function __construct(
         private readonly string $tenantBaseDirectory,
@@ -42,6 +45,7 @@ final class ImprovedDocumentStorageStrategy extends
     public function forDocument(string $documentId): self
     {
         $this->documentId = hash('md5', $documentId);
+
         return $this;
     }
 
@@ -55,6 +59,7 @@ final class ImprovedDocumentStorageStrategy extends
         );
 
         $baseDirectory = $this->buildDirectoryPath('images');
+
         return new ImageStorageStrategy($baseDirectory);
     }
 
@@ -68,12 +73,14 @@ final class ImprovedDocumentStorageStrategy extends
         );
 
         $baseDirectory = $this->buildDirectoryPath('videos');
+
         return new VideoStorageStrategy($baseDirectory);
     }
 
     public function documents(): self
     {
         $this->subdirectory = 'documents';
+
         return $this;
     }
 
@@ -86,8 +93,9 @@ final class ImprovedDocumentStorageStrategy extends
 
         try {
             $this->storedPath = $file->storeAs($directory, $filename);
+
             return $this->storedPath;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw DirectoryException::storageError(
                 'file upload',
                 $e->getMessage(),

@@ -20,7 +20,7 @@ final class ResolutionMobile extends AbstractResolution
     protected Resolution $resolution;
 
     public function __construct(
-        null|Resolution $resolution = null,
+        ?Resolution $resolution = null,
         bool $allowScaleUp = true,
     ) {
         $this->resolution = $resolution ?? Resolution::createMobilePortrait(); // Portrait by default

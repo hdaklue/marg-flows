@@ -32,14 +32,14 @@ final class ImageMetadataDTO extends ValidatedDTO
 
     public string $extension;
 
-    public null|string $error;
+    public ?string $error;
 
     public bool $hasError;
 
     public float $maxZoomLevel;
 
     /**
-     * Convert to array format optimized for JavaScript consumption
+     * Convert to array format optimized for JavaScript consumption.
      */
     public function toJavaScriptFormat(): array
     {
@@ -64,28 +64,27 @@ final class ImageMetadataDTO extends ValidatedDTO
     }
 
     /**
-     * Check if image is valid and usable
+     * Check if image is valid and usable.
      */
     public function isValid(): bool
     {
-        return (
+        return
             $this->exists
-            && !$this->hasError
+            && ! $this->hasError
             && $this->width > 0
-            && $this->height > 0
-        );
+            && $this->height > 0;
     }
 
     protected function casts(): array
     {
         return [
-            'exists' => new BooleanCast(),
-            'width' => new IntegerCast(),
-            'height' => new IntegerCast(),
-            'aspectRatio' => new FloatCast(),
-            'fileSizeBytes' => new IntegerCast(),
-            'hasError' => new BooleanCast(),
-            'maxZoomLevel' => new FloatCast(),
+            'exists' => new BooleanCast,
+            'width' => new IntegerCast,
+            'height' => new IntegerCast,
+            'aspectRatio' => new FloatCast,
+            'fileSizeBytes' => new IntegerCast,
+            'hasError' => new BooleanCast,
+            'maxZoomLevel' => new FloatCast,
         ];
     }
 

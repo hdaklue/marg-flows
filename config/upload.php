@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -37,11 +39,11 @@ return [
             'http' => [
                 'cache_ttl' => 7200, // 2 hours in seconds
             ],
-            
+
             'websocket' => [
                 'channel_prefix' => 'upload-session.',
             ],
-            
+
             'log' => [
                 'channel' => 'single',
             ],

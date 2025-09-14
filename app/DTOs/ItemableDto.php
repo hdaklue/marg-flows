@@ -7,7 +7,6 @@ namespace App\DTOs;
 use Illuminate\Support\Collection;
 use WendellAdriel\ValidatedDTO\Casting\CollectionCast;
 use WendellAdriel\ValidatedDTO\Casting\DTOCast;
-use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 abstract class ItemableDto extends BaseDto
 {

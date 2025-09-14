@@ -7,25 +7,27 @@ namespace App\Filament\Resources\Documents\Pages;
 use App\Facades\DocumentManager;
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
+use App\Services\Breadcrum\DocumentCrumbFactory;
 use App\Services\Recency\Actions\RecordRecency;
-use App\Services\Recency\RecencyService;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
-use Queue;
 
 /**
  * @property-read bool $canEdit
  */
 final class ViewDocument extends ViewRecord
 {
+    use HasActionCrumbs;
+
     protected static string $resource = DocumentResource::class;
 
-    public null|array $data = [];
+    public ?array $data = [];
 
     public Width|string|null $maxContentWidth = 'full';
 
@@ -77,7 +79,7 @@ final class ViewDocument extends ViewRecord
                 ->afterStateUpdated(function ($state, $livewire) {
                     $livewire->validate();
 
-                    if (!$this->canEdit() || blank($state)) {
+                    if (! $this->canEdit() || blank($state)) {
                         return;
                     }
 
@@ -98,5 +100,10 @@ final class ViewDocument extends ViewRecord
     public function canEdit(): bool
     {
         return filamentUser()->can('update', $this->record);
+    }
+
+    protected function actioncrumbs(): array
+    {
+        return DocumentCrumbFactory::make()->view($this->record);
     }
 }

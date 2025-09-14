@@ -6,7 +6,6 @@ namespace App\Livewire\Components;
 
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Models\Document;
-use App\Services\Recency\RecencyService;
 use Hdaklue\MargRbac\Collections\Role\ParticipantsCollection;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -31,7 +30,7 @@ final class DocumentCard extends Component
 
     public string $name;
 
-    public null|string $updatedAt;
+    public ?string $updatedAt;
 
     #[Locked]
     public string $pageableId;

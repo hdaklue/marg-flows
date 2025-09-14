@@ -1,6 +1,8 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
 @import "../../../../vendor/hdaklue/naptab/resources/css/naptab-safelist.css";
 @import "../../../../vendor/hdaklue/naptab/resources/css/naptab.css";
+@import "../../../../vendor/hdaklue/actioncrumb/resources/css/actioncrumb.css";
+
 
 @plugin "@tailwindcss/typography";
 @source '../../../../app/Filament';

@@ -22,11 +22,11 @@ return new class extends Migration
             $table->timestamp('start_date')->nullable();
             $table->timestamp('success_date')->nullable();
             $table->timestamp('completed_at')->nullable();
-            
+
             // Store config specs in database for independence
             $table->json('format_specifications');
             $table->json('settings')->nullable();
-            
+
             $table->ulid('flow_id');
             $table->ulid('stage_id')->nullable();
             $table->ulid('creator_id');
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->softDeletes();
 
             // Foreign keys reference tables in main database, stored as ULIDs only
-            
+
             $table->index(['flow_id', 'status']);
             $table->index(['tenant_id', 'status']);
             $table->index(['success_date']);

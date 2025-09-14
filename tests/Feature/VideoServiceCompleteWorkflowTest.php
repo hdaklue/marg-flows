@@ -33,7 +33,7 @@ it('demonstrates the complete video service workflow as requested', function () 
     $urlEditor
         ->trim(10, 60)
         ->resize(new Dimension(1280, 720))
-        ->convert(new Conversion720p()); // Extract 1 minute from 10s mark // Resize to 720p // Apply 720p conversion
+        ->convert(new Conversion720p); // Extract 1 minute from 10s mark // Resize to 720p // Apply 720p conversion
 
     // Step 3: Verify setup (in real usage: $urlEditor->save($outputPath))
     expect($urlEditor->getSourcePath())->toBe($videoUrl);
@@ -42,7 +42,7 @@ it('demonstrates the complete video service workflow as requested', function () 
 
     // ========== SCENARIO 2: Load from storage, process, and saveAs ==========
     $storagePath = 'videos/uploads/user-video.mp4';
-    $conversion = new Conversion480p();
+    $conversion = new Conversion480p;
 
     // Step 1: Create VideoEditor from storage
     $storageEditor = new VideoEditor($storagePath);
@@ -62,9 +62,9 @@ it('demonstrates multiple quality processing from single source', function () {
 
     // Different quality conversions
     $qualityVersions = [
-        '720p' => new Conversion720p(),
-        '480p' => new Conversion480p(),
-        '360p' => new Conversion360p(),
+        '720p' => new Conversion720p,
+        '480p' => new Conversion480p,
+        '360p' => new Conversion360p,
     ];
 
     $processedVideos = [];
@@ -120,7 +120,7 @@ it('demonstrates advanced processing chain with operations and saveAs', function
         ->resize(new Dimension(1920, 1080))
         ->crop(100, 100, new Dimension(1720, 880))
         ->setFrameRate(30)
-        ->convert(new Conversion720p()); // 3 minutes starting at 30s // Upscale to Full HD // Crop with margins // Standardize frame rate // Final conversion
+        ->convert(new Conversion720p); // 3 minutes starting at 30s // Upscale to Full HD // Crop with margins // Standardize frame rate // Final conversion
 
     // Verify the complex chain
     $operations = $editor->getOperations();
@@ -159,7 +159,7 @@ it('demonstrates batch processing workflow', function () {
         'https://example.com/video3.mp4', // URL source
     ];
 
-    $conversion = new Conversion720p();
+    $conversion = new Conversion720p;
     $processedBatch = [];
 
     foreach ($sourceVideos as $index => $source) {
@@ -209,7 +209,7 @@ it('demonstrates the complete API as requested in user prompt', function () {
     // Example 1: Storage file + operations + saveAs
     $storageFile = 'videos/uploads/source.mp4';
     $editor1 = new VideoEditor($storageFile);
-    $conversion1 = new Conversion720p();
+    $conversion1 = new Conversion720p;
 
     $editor1->trim(0, 45)->convert($conversion1);
 
@@ -219,13 +219,13 @@ it('demonstrates the complete API as requested in user prompt', function () {
     $urlFile = 'https://example.com/source.mp4';
     $editor2 = new VideoEditor($urlFile, true);
 
-    $editor2->resize(new Dimension(854, 480))->convert(new Conversion480p());
+    $editor2->resize(new Dimension(854, 480))->convert(new Conversion480p);
 
     // Real usage: $editor2->save('videos/processed/output2.mp4');
 
     // Example 3: Complex operations + saveAs
     $editor3 = new VideoEditor('videos/uploads/complex.mp4');
-    $conversion3 = new Conversion360p();
+    $conversion3 = new Conversion360p;
 
     $editor3
         ->trim(10, 90)

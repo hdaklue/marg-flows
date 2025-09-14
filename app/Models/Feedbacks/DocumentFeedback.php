@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Document-specific feedback model
@@ -29,14 +30,14 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $feedbackable_id
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property string $block_id Editor.js block identifier
  * @property string|null $element_type Type of block element (paragraph, header, list, etc.)
  * @property array<array-key, mixed>|null $position_data Position metadata (selection, offset, etc.)
  * @property string|null $block_version Version/hash of the block content when feedback was created
  * @property array<array-key, mixed>|null $selection_data Text selection data (start, end, selected text)
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read Model|Eloquent $feedbackable
  *
  * @method static Builder<static>|DocumentFeedback byElementTypes(array $elementTypes)
@@ -155,31 +156,30 @@ final class DocumentFeedback extends Model
     // Type-specific methods
     public function hasTextSelection(): bool
     {
-        return (
-            !empty($this->selection_data)
+        return
+            ! empty($this->selection_data)
             && isset($this->selection_data['selectedText'])
-            && !empty($this->selection_data['selectedText'])
-        );
+            && ! empty($this->selection_data['selectedText']);
     }
 
-    public function getSelectedText(): null|string
+    public function getSelectedText(): ?string
     {
         return $this->selection_data['selectedText'] ?? null;
     }
 
-    public function getSelectionStart(): null|int
+    public function getSelectionStart(): ?int
     {
         return $this->selection_data['start'] ?? null;
     }
 
-    public function getSelectionEnd(): null|int
+    public function getSelectionEnd(): ?int
     {
         return $this->selection_data['end'] ?? null;
     }
 
     public function getSelectionLength(): int
     {
-        if (!$this->hasTextSelection()) {
+        if (! $this->hasTextSelection()) {
             return 0;
         }
 
@@ -193,19 +193,19 @@ final class DocumentFeedback extends Model
         return $end - $start;
     }
 
-    public function getBlockIndex(): null|int
+    public function getBlockIndex(): ?int
     {
         return $this->position_data['blockIndex'] ?? null;
     }
 
-    public function getBlockPosition(): null|array
+    public function getBlockPosition(): ?array
     {
         return $this->position_data['position'] ?? null;
     }
 
     public function isBlockLevelFeedback(): bool
     {
-        return !$this->hasTextSelection();
+        return ! $this->hasTextSelection();
     }
 
     public function isTextLevelFeedback(): bool
@@ -277,7 +277,7 @@ final class DocumentFeedback extends Model
 
     public function hasBlockVersion(): bool
     {
-        return !empty($this->block_version);
+        return ! empty($this->block_version);
     }
 
     public function isBlockVersionCurrent(string $currentVersion): bool

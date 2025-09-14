@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Filament\Forms\Components\VideoUploadBlock;
 use App\Models\Flow;
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
-use Illuminate\Http\Request;
 
 final class ExampleController extends Controller
 {

@@ -6,7 +6,7 @@ namespace App\Actions\User;
 
 use App\Models\User;
 use App\Services\Avatar\AvatarService;
-use App\Services\Directory\DirectoryManager;
+use App\Services\Directory\Managers\SystemDirectoryManager;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -47,7 +47,7 @@ final class GenerateUserAvatar
         }
 
         $file = UploadedFile::fake()->createWithContent($fileName, $content);
-        $avatarFileName = DirectoryManager::avatars()->store($file);
+        $avatarFileName = SystemDirectoryManager::instance()->avatars()->store($file);
         $user->updateProfileAvatar($avatarFileName);
     }
 
@@ -65,12 +65,10 @@ final class GenerateUserAvatar
         if ($contentType) {
             $extension = match (true) {
                 str_contains($contentType, 'image/svg+xml')
-                    || str_contains($contentType, 'image/svg')
-                    => 'svg',
+                    || str_contains($contentType, 'image/svg') => 'svg',
                 str_contains($contentType, 'image/png') => 'png',
                 str_contains($contentType, 'image/jpeg')
-                    || str_contains($contentType, 'image/jpg')
-                    => 'jpg',
+                    || str_contains($contentType, 'image/jpg') => 'jpg',
                 str_contains($contentType, 'image/gif') => 'gif',
                 str_contains($contentType, 'image/webp') => 'webp',
                 default => null,
@@ -114,8 +112,8 @@ final class GenerateUserAvatar
 
         // Basic SVG validation - should start with XML declaration or <svg tag
         throw_if(
-            !str_starts_with($content, '<?xml')
-            && !str_starts_with($content, '<svg'),
+            ! str_starts_with($content, '<?xml')
+            && ! str_starts_with($content, '<svg'),
             new Exception(
                 'Invalid SVG content: does not start with XML declaration or <svg> tag',
             ),
@@ -128,7 +126,7 @@ final class GenerateUserAvatar
         if ($doc === false) {
             $errors = libxml_get_errors();
             $errorMessages = array_map(
-                fn($error) => trim($error->message),
+                fn ($error) => trim($error->message),
                 $errors,
             );
             libxml_clear_errors();

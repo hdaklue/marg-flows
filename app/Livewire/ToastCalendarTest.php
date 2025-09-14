@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Component;
 
-class ToastCalendarTest extends Component implements CalendarInterface
+final class ToastCalendarTest extends Component implements CalendarInterface
 {
     use HasCalendarEvents;
 
@@ -28,11 +28,11 @@ class ToastCalendarTest extends Component implements CalendarInterface
     }
 
     /**
-     * Toggle view-only mode for testing
+     * Toggle view-only mode for testing.
      */
     public function toggleViewOnly(): void
     {
-        $this->viewOnly = !$this->viewOnly;
+        $this->viewOnly = ! $this->viewOnly;
         $this->dispatch('show-notification', [
             'message' => $this->viewOnly
                 ? 'Calendar is now in view-only mode'
@@ -138,8 +138,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
     {
         // Test implementation - you can show a modal, create event, etc.
         $this->dispatch('show-notification', [
-            'message' =>
-                'Date selected: ' . $data['start'] . ' to ' . $data['end'],
+            'message' => 'Date selected: ' . $data['start'] . ' to ' . $data['end'],
             'type' => 'info',
         ]);
     }
@@ -160,6 +159,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
             'message' => 'Event created successfully!',
             'type' => 'success',
         ]);
+
         return ['success' => true, 'id' => uniqid()];
     }
 
@@ -170,6 +170,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
             'message' => "Event {$eventId} updated successfully!",
             'type' => 'success',
         ]);
+
         return ['success' => true];
     }
 
@@ -180,6 +181,7 @@ class ToastCalendarTest extends Component implements CalendarInterface
             'message' => "Event {$eventId} deleted successfully!",
             'type' => 'success',
         ]);
+
         return true;
     }
 

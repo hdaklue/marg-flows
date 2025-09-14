@@ -39,8 +39,8 @@ final class VideoPipelineExporter
      */
     public function export(
         string $outputPath,
-        null|VideoFormatContract $convertFormat = null,
-        null|BitrateEnum $convertBitrate = null,
+        ?VideoFormatContract $convertFormat = null,
+        ?BitrateEnum $convertBitrate = null,
     ): string {
         $media = $this->openSourceMedia();
         $media = $this->applyOperations($media);
@@ -90,8 +90,8 @@ final class VideoPipelineExporter
     private function applyFormat(
         $exporter,
         string $outputPath,
-        null|VideoFormatContract $convertFormat,
-        null|BitrateEnum $convertBitrate,
+        ?VideoFormatContract $convertFormat,
+        ?BitrateEnum $convertBitrate,
     ): string {
         if ($convertFormat) {
             return $this->applyConvertFormat(
@@ -105,7 +105,7 @@ final class VideoPipelineExporter
         if ($this->hasOperationsRequiringTranscoding()) {
             $this->applyTranscodingFormat($exporter, $outputPath);
         } else {
-            $exporter->inFormat(new CopyFormat());
+            $exporter->inFormat(new CopyFormat);
         }
 
         return $outputPath;
@@ -118,10 +118,10 @@ final class VideoPipelineExporter
         $exporter,
         string $outputPath,
         VideoFormatContract $convertFormat,
-        null|BitrateEnum $convertBitrate,
+        ?BitrateEnum $convertBitrate,
     ): string {
         $bitrate = $convertBitrate ?: null;
-        if (!$bitrate) {
+        if (! $bitrate) {
             $this->getOriginalBitrate(); // Get original bitrate but don't convert to enum
         }
 
@@ -141,10 +141,10 @@ final class VideoPipelineExporter
     {
         $extension = strtolower(pathinfo($outputPath, PATHINFO_EXTENSION));
         $format = match ($extension) {
-            'mp4', 'mov' => new X264(),
-            'webm' => new WebM(),
-            'avi' => new WMV(),
-            default => new X264(),
+            'mp4', 'mov' => new X264,
+            'webm' => new WebM,
+            'avi' => new WMV,
+            default => new X264,
         };
 
         $originalBitrate = $this->getOriginalBitrate();
@@ -185,13 +185,12 @@ final class VideoPipelineExporter
         $filename = $pathInfo['filename'] ?? '';
 
         if ($directory && $directory !== '.') {
-            return (
+            return
                 $directory
                 . DIRECTORY_SEPARATOR
                 . $filename
                 . '.'
-                . $newExtension
-            );
+                . $newExtension;
         }
 
         return $filename . '.' . $newExtension;
@@ -200,7 +199,7 @@ final class VideoPipelineExporter
     /**
      * Get original video bitrate to preserve quality.
      */
-    private function getOriginalBitrate(): null|int
+    private function getOriginalBitrate(): ?int
     {
         try {
             $media = FFMpeg::fromDisk($this->disk)->open($this->sourcePath);

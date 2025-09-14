@@ -7,7 +7,7 @@ namespace App\ValueObjects;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-class FeedbackMetadata implements Castable
+final class FeedbackMetadata implements Castable
 {
     public function __construct(
         private array $data,
@@ -15,13 +15,14 @@ class FeedbackMetadata implements Castable
 
     public static function castUsing(array $arguments): CastsAttributes
     {
-        return new class implements CastsAttributes {
+        return new class implements CastsAttributes
+        {
             public function get(
                 $model,
                 string $key,
                 $value,
                 array $attributes,
-            ): null|FeedbackMetadata {
+            ): ?FeedbackMetadata {
                 if ($value === null) {
                     return null;
                 }
@@ -65,9 +66,9 @@ class FeedbackMetadata implements Castable
         return $this->data['searchable'] ?? [];
     }
 
-    public function getTimeRange(): null|array
+    public function getTimeRange(): ?array
     {
-        if (!$this->isMediaTimestamp()) {
+        if (! $this->isMediaTimestamp()) {
             return null;
         }
 

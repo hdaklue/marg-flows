@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Services\Video\Conversions\Conversion720p;
 use App\Services\Video\Services\VideoEditor;
+use App\Services\Video\ValueObjects\AspectRatio;
 use App\Services\Video\ValueObjects\Dimension;
 use Illuminate\Support\Facades\Storage;
 
@@ -36,7 +37,7 @@ it('can apply conversion to video editor', function () {
     $videoPath = 'videos/test-video.mp4';
     $editor = new VideoEditor($videoPath);
 
-    $conversion = new Conversion720p();
+    $conversion = new Conversion720p;
     $result = $editor->convert($conversion);
 
     expect($result)->toBeInstanceOf(VideoEditor::class);
@@ -60,7 +61,7 @@ it('can chain multiple operations', function () {
     $result = $editor
         ->trim(5, 25)
         ->resize($dimension)
-        ->convert(new Conversion720p());
+        ->convert(new Conversion720p);
 
     expect($result)->toBeInstanceOf(VideoEditor::class);
 });
@@ -85,7 +86,7 @@ it('can build pipeline and get operations count', function () {
     $editor
         ->resize(new Dimension(1920, 1080))
         ->trim(0, 60)
-        ->convert(new Conversion720p());
+        ->convert(new Conversion720p);
 
     $operations = $editor->getOperations();
 
@@ -126,7 +127,7 @@ it('correctly calculates dimension properties', function () {
         ->and($dimension->getPixelCount())
         ->toBe(2073600)
         ->and($dimension->getAspectRatio())
-        ->toBeInstanceOf(\App\Services\Video\ValueObjects\AspectRatio::class);
+        ->toBeInstanceOf(AspectRatio::class);
 });
 
 it('can scale dimensions correctly', function () {

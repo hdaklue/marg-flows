@@ -7,7 +7,7 @@ namespace App\Enums\Deliverable;
 use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 
-enum DeliverableFormat: string implements HasLabel, HasDescription
+enum DeliverableFormat: string implements HasDescription, HasLabel
 {
     case DESIGN = 'design';
     case VIDEO = 'video';
@@ -27,14 +27,10 @@ enum DeliverableFormat: string implements HasLabel, HasDescription
     public function getDescription(): string
     {
         return match ($this) {
-            self::DESIGN
-                => 'Visual design deliverables including graphics, layouts, and UI elements',
-            self::VIDEO
-                => 'Video content including promotional videos, tutorials, and presentations',
-            self::AUDIO
-                => 'Audio content including podcasts, voiceovers, and sound effects',
-            self::DOCUMENT
-                => 'Written content including reports, specifications, and documentation',
+            self::DESIGN => 'Visual design deliverables including graphics, layouts, and UI elements',
+            self::VIDEO => 'Video content including promotional videos, tutorials, and presentations',
+            self::AUDIO => 'Audio content including podcasts, voiceovers, and sound effects',
+            self::DOCUMENT => 'Written content including reports, specifications, and documentation',
         };
     }
 

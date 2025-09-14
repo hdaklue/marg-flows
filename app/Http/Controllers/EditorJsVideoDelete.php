@@ -13,6 +13,28 @@ use Log;
 final class EditorJsVideoDelete extends Controller
 {
     /**
+     * Convert URL path to storage path for deletion.
+     */
+    private function convertUrlToStoragePath(string $path): string
+    {
+        // Remove storage URL prefix if present
+        $path = str_replace('/storage/', '', $path);
+
+        // Ensure it starts with documents/videos/
+        if (! str_starts_with($path, 'documents/videos/')) {
+            // If path doesn't contain documents/videos, assume it's just the filename
+            if (str_contains($path, '/')) {
+                $filename = basename($path);
+                $path = 'documents/videos/' . $filename;
+            } else {
+                $path = 'documents/videos/' . $path;
+            }
+        }
+
+        return $path;
+    }
+
+    /**
      * Handle the incoming video delete requests from Editor.js.
      */
     public function __invoke(Request $request): JsonResponse
@@ -56,27 +78,5 @@ final class EditorJsVideoDelete extends Controller
                 'message' => 'Failed to delete video',
             ], 500);
         }
-    }
-
-    /**
-     * Convert URL path to storage path for deletion.
-     */
-    private function convertUrlToStoragePath(string $path): string
-    {
-        // Remove storage URL prefix if present
-        $path = str_replace('/storage/', '', $path);
-
-        // Ensure it starts with documents/videos/
-        if (!str_starts_with($path, 'documents/videos/')) {
-            // If path doesn't contain documents/videos, assume it's just the filename
-            if (str_contains($path, '/')) {
-                $filename = basename($path);
-                $path = 'documents/videos/' . $filename;
-            } else {
-                $path = 'documents/videos/' . $path;
-            }
-        }
-
-        return $path;
     }
 }

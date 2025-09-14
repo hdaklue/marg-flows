@@ -74,15 +74,10 @@ use Illuminate\Support\Carbon;
  *
  * @mixin Eloquent
  */
-final class Document extends Model implements
-    BelongsToTenantContract,
-    RoleableEntity,
-    SentInNotification,
-    Sidenoteable,
-    Recentable
+final class Document extends Model implements BelongsToTenantContract, Recentable, RoleableEntity, SentInNotification, Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DocumentFactory> */
-    use BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, SentInNotificationTrait, RecentableModel;
+    use BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait;
 
     protected $fillable = [
         'name',
@@ -100,7 +95,7 @@ final class Document extends Model implements
         return $this->belongsTo(User::class, 'creator_id');
     }
 
-    public function getRecentLabel(): string|null
+    public function getRecentLabel(): ?string
     {
         return $this->getAttribute('name');
     }
@@ -118,7 +113,7 @@ final class Document extends Model implements
 
     public function isArchived(): bool
     {
-        return !empty($this->getAttribute('archived_at'));
+        return ! empty($this->getAttribute('archived_at'));
     }
 
     public function casts(): array
@@ -127,6 +122,15 @@ final class Document extends Model implements
             'blocks' => 'json',
         ];
     }
+
+    /**
+     * Get the file storage identifier for this document.
+     * Uses the tenant ID as the storage identifier.
+     */
+    // public function getFileStorageIdentifier(): string
+    // {
+    //     return (string) $this->getTenantId();
+    // }
 
     #[Scope]
     protected function archived(Builder $builder): Builder
@@ -153,7 +157,7 @@ final class Document extends Model implements
      */
     protected function blockCollection(): Attribute
     {
-        return Attribute::make(get: fn() => DocumentBlocksCollection::fromEditorJS($this->getAttribute(
+        return Attribute::make(get: fn () => DocumentBlocksCollection::fromEditorJS($this->getAttribute(
             'blocks',
         )));
     }

@@ -51,9 +51,10 @@ final class TenantEventSubscriber
     }
 
     /**
-     * Handle package tenant created event
+     * Handle package tenant created event.
      */
-    public function handlePackageTenantCreated(PackageTenantCreated $event): void {
+    public function handlePackageTenantCreated(PackageTenantCreated $event): void
+    {
         $users = User::appAdmin()->where('id', '!=', $event->user->id)->get();
 
         foreach ($users as $user) {
@@ -62,24 +63,26 @@ final class TenantEventSubscriber
     }
 
     /**
-     * Handle package member added event
+     * Handle package member added event.
      */
-    public function handlePackageMemberAdded(PackageTanantMemberAdded $event): void {
+    public function handlePackageMemberAdded(PackageTanantMemberAdded $event): void
+    {
         RoleManager::clearCache($event->tenant);
 
         // Handle any app-specific logic for member addition
     }
 
     /**
-     * Handle package member removed event
+     * Handle package member removed event.
      */
-    public function handlePackageMemberRemoved(PackageTenantMemberRemoved $event): void {
+    public function handlePackageMemberRemoved(PackageTenantMemberRemoved $event): void
+    {
         RoleManager::clearCache($event->tenant);
         $event->memberRemoved->notify(new RemovedFromEntity($event->tenant));
     }
 
     /**
-     * Handle package tenant member invited event
+     * Handle package tenant member invited event.
      */
     public function handleTenantMemberInvited(TenantMemberInvited $event): void
     {
@@ -88,7 +91,7 @@ final class TenantEventSubscriber
     }
 
     /**
-     * Handle package tenant switched event
+     * Handle package tenant switched event.
      */
     public function handleTenantSwitched(TenantSwitched $event): void
     {
@@ -97,7 +100,7 @@ final class TenantEventSubscriber
     }
 
     /**
-     * Handle package entity role assigned event
+     * Handle package entity role assigned event.
      */
     public function handleEntityRoleAssigned(EntityRoleAssigned $event): void
     {
@@ -106,7 +109,7 @@ final class TenantEventSubscriber
     }
 
     /**
-     * Handle package entity role removed event
+     * Handle package entity role removed event.
      */
     public function handleEntityRoleRemoved(EntityRoleRemoved $event): void
     {

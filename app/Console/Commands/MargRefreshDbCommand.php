@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class MargRefreshDbCommand extends Command
+final class MargRefreshDbCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -29,11 +32,12 @@ class MargRefreshDbCommand extends Command
     public function handle(): int
     {
         // SAFETY CHECK: Only allow in local environment
-        if (!app()->environment('local', 'testing')) {
+        if (! app()->environment('local', 'testing')) {
             $this->error(
                 '❌ This command is only allowed in local/testing environments for safety!',
             );
             $this->warn('Current environment: ' . app()->environment());
+
             return 1;
         }
 
@@ -49,6 +53,7 @@ class MargRefreshDbCommand extends Command
 
             if ($exitCode !== 0) {
                 $this->error('❌ RBAC database refresh failed!');
+
                 return 1;
             }
             $this->info('✅ RBAC database refreshed successfully!');
@@ -66,6 +71,7 @@ class MargRefreshDbCommand extends Command
 
                 if ($exitCode !== 0) {
                     $this->error('❌ Business database refresh failed!');
+
                     return 1;
                 }
 
@@ -89,6 +95,7 @@ class MargRefreshDbCommand extends Command
 
             if ($exitCode !== 0) {
                 $this->error('❌ Original database refresh failed!');
+
                 return 1;
             }
 
@@ -116,8 +123,9 @@ class MargRefreshDbCommand extends Command
             $this->info(
                 '  - Original Database (mysql): Main application data, Flows, Profiles',
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('❌ Database refresh failed: ' . $e->getMessage());
+
             return 1;
         }
 

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Design-specific feedback model
@@ -30,7 +31,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $feedbackable_id
  * @property string|null $resolution
  * @property string|null $resolved_by
- * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property int $x_coordinate X coordinate on the design/image
  * @property int $y_coordinate Y coordinate on the design/image
  * @property string $width
@@ -39,8 +40,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property array<array-key, mixed>|null $area_bounds Bounds for area-based annotations (x, y, width, height)
  * @property string|null $color Annotation color/theme
  * @property float|null $zoom_level Zoom level when annotation was created
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read Model|Eloquent $feedbackable
  *
  * @method static Builder<static>|DesignFeedback areaAnnotations()
@@ -254,25 +255,24 @@ final class DesignFeedback extends Model
 
     public function hasAreaBounds(): bool
     {
-        return (
-            !empty($this->area_bounds)
-            && isset($this->area_bounds['width'], $this->area_bounds['height'])
-        );
+        return
+            ! empty($this->area_bounds)
+            && isset($this->area_bounds['width'], $this->area_bounds['height']);
     }
 
-    public function getAreaWidth(): null|int
+    public function getAreaWidth(): ?int
     {
         return $this->area_bounds['width'] ?? null;
     }
 
-    public function getAreaHeight(): null|int
+    public function getAreaHeight(): ?int
     {
         return $this->area_bounds['height'] ?? null;
     }
 
-    public function getAreaSize(): null|int
+    public function getAreaSize(): ?int
     {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             return null;
         }
 
@@ -293,20 +293,19 @@ final class DesignFeedback extends Model
 
     public function containsPoint(int $x, int $y): bool
     {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             return false;
         }
 
         $bounds = $this->area_bounds;
 
-        return (
+        return
             $x >= $this->x_coordinate
             && $x
             <= ($this->x_coordinate + $bounds['width'])
             && $y >= $this->y_coordinate
             && $y
-            <= ($this->y_coordinate + $bounds['height'])
-        );
+            <= ($this->y_coordinate + $bounds['height']);
     }
 
     public function overlapsWithArea(
@@ -315,22 +314,21 @@ final class DesignFeedback extends Model
         int $width,
         int $height,
     ): bool {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             // For point annotations, check if the point is within the area
-            return (
+            return
                 $this->x_coordinate >= $x
                 && $this->x_coordinate
                 <= ($x + $width)
                 && $this->y_coordinate >= $y
                 && $this->y_coordinate
-                <= ($y + $height)
-            );
+                <= ($y + $height);
         }
 
         $bounds = $this->area_bounds;
 
         // Check if rectangles overlap
-        return !(
+        return ! (
             $this->x_coordinate
             > ($x + $width)
             || $x
@@ -361,17 +359,16 @@ final class DesignFeedback extends Model
 
     public function hasCustomColor(): bool
     {
-        return (
+        return
             $this->color !== null
-            && !in_array($this->color, [
+            && ! in_array($this->color, [
                 'red',
                 'blue',
                 'green',
                 'yellow',
                 'orange',
                 'purple',
-            ])
-        );
+            ]);
     }
 
     public function getZoomLevelDisplay(): string

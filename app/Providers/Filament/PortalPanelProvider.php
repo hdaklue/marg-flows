@@ -50,7 +50,7 @@ final class PortalPanelProvider extends PanelProvider
             //     ? route('filament.portal.pages.dashboard', ['tenant' => filament()->getTenant()])
             //     : '/')
             ->colors([
-                'primary' => Color::Sky,
+                'primary' => Color::Emerald,
             ])
             ->spa(true)
             ->topNavigation(false)

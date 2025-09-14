@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<Deliverable>
  */
-class DeliverableFactory extends Factory
+final class DeliverableFactory extends Factory
 {
     protected $model = Deliverable::class;
 
@@ -52,7 +52,7 @@ class DeliverableFactory extends Factory
                 ]),
             'flow_id' => Flow::factory(),
             'creator_id' => User::factory(),
-            'tenant_id' => fn(array $attributes) => Flow::find(
+            'tenant_id' => fn (array $attributes) => Flow::find(
                 $attributes['flow_id'],
             )->tenant_id,
         ];
@@ -60,7 +60,7 @@ class DeliverableFactory extends Factory
 
     public function design(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'format' => DeliverableFormat::DESIGN,
             'type' => fake()->randomElement([
                 'video_cover',
@@ -74,7 +74,7 @@ class DeliverableFactory extends Factory
 
     public function video(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'format' => DeliverableFormat::VIDEO,
             'type' => fake()->randomElement(['promotional', 'tutorial']),
         ]);
@@ -82,7 +82,7 @@ class DeliverableFactory extends Factory
 
     public function audio(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'format' => DeliverableFormat::AUDIO,
             'type' => fake()->randomElement(['podcast_episode', 'voiceover']),
         ]);
@@ -90,7 +90,7 @@ class DeliverableFactory extends Factory
 
     public function document(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'format' => DeliverableFormat::DOCUMENT,
             'type' => fake()->randomElement(['project_brief']),
         ]);
@@ -98,7 +98,7 @@ class DeliverableFactory extends Factory
 
     public function draft(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => DeliverableStatus::DRAFT,
             'completed_at' => null,
         ]);
@@ -106,7 +106,7 @@ class DeliverableFactory extends Factory
 
     public function inProgress(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => DeliverableStatus::IN_PROGRESS,
             'start_date' => fake()->dateTimeBetween('-1 week', 'now'),
             'completed_at' => null,
@@ -115,7 +115,7 @@ class DeliverableFactory extends Factory
 
     public function completed(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => DeliverableStatus::COMPLETED,
             'completed_at' => fake()->dateTimeBetween('-1 month', 'now'),
         ]);
@@ -123,21 +123,21 @@ class DeliverableFactory extends Factory
 
     public function highPriority(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'priority' => fake()->numberBetween(4, 5),
         ]);
     }
 
     public function lowPriority(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'priority' => fake()->numberBetween(1, 2),
         ]);
     }
 
     public function overdue(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'success_date' => fake()->dateTimeBetween('-2 weeks', '-1 day'),
             'status' => fake()->randomElement([
                 DeliverableStatus::DRAFT,

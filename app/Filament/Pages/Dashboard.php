@@ -1,21 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\RecentInteractionsWidget;
-use Filament\Pages\Page;
-use Filament\Support\Icons\Heroicon;
+use BackedEnum;
 use Illuminate\Contracts\Support\Htmlable;
 
-class Dashboard extends \Filament\Pages\Dashboard
+final class Dashboard extends \Filament\Pages\Dashboard
 {
-    protected string $view = 'filament.pages.dashboard';
-
-    protected static null|int $navigationSort = 1;
+    protected static ?int $navigationSort = 1;
 
     protected static bool $shouldRegisterNavigation = true;
 
-    public static function getNavigationIcon(): string|\BackedEnum|Htmlable|null
+    protected string $view = 'filament.pages.dashboard';
+
+    public static function getNavigationIcon(): string|BackedEnum|Htmlable|null
     {
         return 'heroicon-o-home';
     }

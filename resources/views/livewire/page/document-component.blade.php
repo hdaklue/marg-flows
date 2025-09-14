@@ -1,6 +1,6 @@
 <div wire:ignore x-load
     x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('documentEditor') }}"
-    x-data="documentEditor(@js($content), '{{ route('editorjs.upload-image', ['document' => $documentId]) }}', @js($canEdit), $wire.saveDocument, 0, '{{ $this->updatedAtString }}', @js($this->getFullToolsConfig()), @js($this->getAllowedTools()))" class="w-full">
+    x-data="documentEditor(@js($content), '{{ route('documents.upload-image', ['document' => $documentId]) }}', @js($canEdit), $wire.saveDocument, 0, '{{ $this->updatedAtString }}', @js($this->getFullToolsConfig()), @js($this->getAllowedTools()))" class="w-full">
 
     <!-- Intersection Observer Target -->
     <div x-intersect:leave.margin.-80px="isSticky = true" x-intersect:enter.margin.-80px="isSticky = false" class="h-4">

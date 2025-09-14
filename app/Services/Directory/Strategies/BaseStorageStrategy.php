@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Directory\Strategies;
 
 use App\Services\Directory\Contracts\StorageStrategyContract;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -49,7 +51,9 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      */
     public function delete(string $fileName): bool
     {
-        return Storage::delete($this->getDirectory() . "/{$fileName}");
+        $path = $this->buildSecurePath($fileName);
+
+        return Storage::delete($path);
     }
 
     /**
@@ -60,7 +64,9 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      */
     public function get(string $fileName): ?string
     {
-        return Storage::get($this->getDirectory() . "/{$fileName}");
+        $path = $this->buildSecurePath($fileName);
+
+        return Storage::get($path);
     }
 
     /**
@@ -73,7 +79,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      */
     public function getPath(string $fileName): ?string
     {
-        $fullPath = $this->getDirectory() . "/{$fileName}";
+        $fullPath = $this->buildSecurePath($fileName);
 
         // Only return path for local disks
         if (Storage::getDefaultDriver() === 'local') {
@@ -92,7 +98,9 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      */
     public function getFileUrl(string $fileName): string
     {
-        return Storage::url($this->getDirectory() . "/{$fileName}");
+        $path = $this->buildSecurePath($fileName);
+
+        return Storage::url($path);
     }
 
     /**
@@ -106,7 +114,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      */
     public function getRelativePath(string $fileName): string
     {
-        return $this->getDirectory() . "/{$fileName}";
+        return $this->buildSecurePath($fileName);
     }
 
     /**
@@ -148,7 +156,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      */
     public function getTemporaryUrl(string $fileName, int $expiresIn = 1800): string
     {
-        $fullPath = $this->getDirectory() . "/{$fileName}";
+        $fullPath = $this->buildSecurePath($fileName);
 
         return Storage::temporaryUrl(
             $fullPath,
@@ -166,6 +174,23 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
      */
     protected function buildFilePath(string $fileName): string
     {
-        return $this->getDirectory() . "/{$fileName}";
+        return $this->buildSecurePath($fileName);
+    }
+
+    /**
+     * Build secure file path using LaraPath.
+     *
+     * Creates a secure path by sanitizing the filename and validating the path structure.
+     * Uses slug sanitization for filenames to ensure cross-platform compatibility.
+     *
+     * @param  string  $fileName  The filename to build secure path for
+     * @return string Secure, sanitized file path
+     */
+    protected function buildSecurePath(string $fileName): string
+    {
+        return PathBuilder::base($this->getDirectory())
+            ->addFile($fileName, SanitizationStrategy::SLUG)
+            ->validate()
+            ->toString();
     }
 }

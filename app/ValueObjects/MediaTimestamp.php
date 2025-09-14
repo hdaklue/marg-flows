@@ -11,12 +11,7 @@ use JsonSerializable;
 use Livewire\Wireable;
 use Stringable;
 
-abstract class MediaTimestamp implements
-    Arrayable,
-    Jsonable,
-    JsonSerializable,
-    Stringable,
-    Wireable
+abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, Stringable, Wireable
 {
     /**
      * Wire deserialization for Livewire.
@@ -24,7 +19,7 @@ abstract class MediaTimestamp implements
     public static function fromLivewire($value): self
     {
         throw_if(
-            !is_array($value) || !isset($value['type']),
+            ! is_array($value) || ! isset($value['type']),
             new InvalidArgumentException(
                 'Invalid Livewire value for MediaTimestamp',
             ),
@@ -48,7 +43,7 @@ abstract class MediaTimestamp implements
 
     abstract public function getDuration(): CommentTime;
 
-    abstract public function getFrameRate(): null|float;
+    abstract public function getFrameRate(): ?float;
 
     /**
      * JSON serialization.

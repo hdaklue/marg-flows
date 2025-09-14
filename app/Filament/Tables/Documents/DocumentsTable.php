@@ -18,8 +18,8 @@ final class DocumentsTable
     public static function configure(Table $table, Documentable $documentable): Table
     {
         return $table
-            ->records(fn(): array => self::getDocuments($documentable))
-            ->recordUrl(fn($record) => DocumentResource::getUrl('view', [
+            ->records(fn (): array => self::getDocuments($documentable))
+            ->recordUrl(fn ($record) => DocumentResource::getUrl('view', [
                 'record' => $record['id'],
             ]))
             ->columns([
@@ -27,7 +27,7 @@ final class DocumentsTable
                 TextColumn::make('description')->grow(),
                 TextColumn::make('updated_at')
                     ->label('Last Update')
-                    ->getStateUsing(fn($record) => toUserDateTime(
+                    ->getStateUsing(fn ($record) => toUserDateTime(
                         $record['updated_at'],
                         filamentUser(),
                     )),
@@ -55,7 +55,7 @@ final class DocumentsTable
     private static function getDocuments($documentable): array
     {
         return DocumentManager::getDocumentsForUser($documentable, filamentUser())
-            ->keyBy(fn($item) => $item->getKey())
+            ->keyBy(fn ($item) => $item->getKey())
             ->toArray();
     }
 }

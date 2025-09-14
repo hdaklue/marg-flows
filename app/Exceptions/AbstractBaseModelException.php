@@ -7,9 +7,9 @@ namespace App\Exceptions;
 use Exception;
 
 /**
- * Exception thrown when attempting to perform operations on abstract base models
+ * Exception thrown when attempting to perform operations on abstract base models.
  */
-class AbstractBaseModelException extends Exception
+final class AbstractBaseModelException extends Exception
 {
     public static function cannotCreate(string $modelClass): self
     {
@@ -60,7 +60,7 @@ class AbstractBaseModelException extends Exception
     ): self {
         $message = "Invalid operation [{$operation}] on abstract base model [{$modelClass}].";
 
-        if (!empty($availableModels)) {
+        if (! empty($availableModels)) {
             $modelList = implode(', ', $availableModels);
             $message .= " Available concrete models: {$modelList}";
         }

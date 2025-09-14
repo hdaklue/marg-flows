@@ -129,10 +129,10 @@ final class VideoUpload implements DocumentBlockConfigContract
 
     public function forDocument(string $documentId): self
     {
-        $this->config['endpoints']['byFile'] = route('editorjs.upload-video', [
+        $this->config['endpoints']['byFile'] = route('documents.upload-video', [
             'document' => $documentId,
         ]);
-        $this->config['endpoints']['delete'] = route('editorjs.document.delete-video', [
+        $this->config['endpoints']['delete'] = route('documents.delete-video', [
             'document' => $documentId,
         ]);
 

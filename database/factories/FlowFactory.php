@@ -391,7 +391,7 @@ final class FlowFactory extends Factory
     /**
      * Get predictable project settings.
      */
-    private function getProjectSettings(): null|array
+    private function getProjectSettings(): ?array
     {
         if (fake()->boolean(30)) {
             return null; // 30% chance of no settings

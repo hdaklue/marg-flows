@@ -19,21 +19,21 @@ final class EditorManager extends Manager
 
     public function base(): Base
     {
-        return new Base();
+        return new Base;
     }
 
     public function simple(): Simple
     {
-        return new Simple();
+        return new Simple;
     }
 
     public function advanced(): Advanced
     {
-        return new Advanced();
+        return new Advanced;
     }
 
     public function ultimate(): Ultimate
     {
-        return new Ultimate();
+        return new Ultimate;
     }
 }

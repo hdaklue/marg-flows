@@ -44,7 +44,7 @@ final class DocumentBlocksDto extends SimpleDTO
     protected function casts(): array
     {
         return [
-            'blocks' => new DocumentBlocksCast(),
+            'blocks' => new DocumentBlocksCast,
         ];
     }
 

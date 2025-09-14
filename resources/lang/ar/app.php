@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'dashboard' => 'لوحة التحكم',
@@ -9,7 +11,7 @@ return [
     'tenants' => 'المستأجرون',
     'settings' => 'الإعدادات',
     'profile' => 'الملف الشخصي',
-    
+
     // Actions
     'create' => 'إنشاء',
     'edit' => 'تعديل',
@@ -28,7 +30,7 @@ return [
     'reject' => 'رفض',
     'publish' => 'نشر',
     'draft' => 'مسودة',
-    
+
     // Labels
     'name' => 'الاسم',
     'email' => 'البريد الإلكتروني',
@@ -45,7 +47,7 @@ return [
     'account_type' => 'نوع الحساب',
     'last_login' => 'آخر تسجيل دخول',
     'invited_by' => 'دعوة من',
-    
+
     // Status
     'active' => 'نشط',
     'inactive' => 'غير نشط',
@@ -56,7 +58,7 @@ return [
     'in_progress' => 'قيد التنفيذ',
     'draft' => 'مسودة',
     'published' => 'منشور',
-    
+
     // Messages
     'success' => 'نجح',
     'error' => 'خطأ',
@@ -68,7 +70,7 @@ return [
     'operation_completed' => 'تمت العملية بنجاح',
     'no_records_found' => 'لا توجد سجلات',
     'confirm_delete' => 'هل أنت متأكد من أنك تريد حذف هذا العنصر؟',
-    
+
     // Form placeholders
     'enter_name' => 'أدخل الاسم',
     'enter_email' => 'أدخل عنوان البريد الإلكتروني',
@@ -76,7 +78,7 @@ return [
     'enter_description' => 'أدخل الوصف',
     'search_placeholder' => 'بحث...',
     'select_option' => 'اختر خياراً',
-    
+
     // Flow stages
     'flow_stages' => [
         'draft' => 'مسودة',
@@ -90,7 +92,7 @@ return [
         'published' => 'منشور',
         'archived' => 'مؤرشف',
     ],
-    
+
     // Roles
     'roles' => [
         'assignee' => 'المُعيَّن',
@@ -98,7 +100,7 @@ return [
         'reviewer' => 'المُراجِع',
         'observer' => 'المُراقِب',
     ],
-    
+
     // File upload
     'file_upload' => [
         'drag_drop' => 'اسحب وأسقط الملفات هنا أو انقر للتصفح',
@@ -110,14 +112,14 @@ return [
         'video_upload' => 'رفع فيديو',
         'video_file' => 'ملف الفيديو',
     ],
-    
+
     // Account types
     'account_types' => [
         'admin' => 'مدير',
         'manager' => 'مشرف',
         'user' => 'مستخدم',
     ],
-    
+
     // Role descriptions
     'role_descriptions' => [
         'assignee' => 'مسؤول عن إكمال المهمة',
@@ -125,7 +127,7 @@ return [
         'reviewer' => 'يقدم التعليقات والاقتراحات',
         'observer' => 'يراقب التقدم دون تدخل مباشر',
     ],
-    
+
     // Feedback status
     'feedback_status' => [
         'open' => 'مفتوح',
@@ -133,14 +135,14 @@ return [
         'resolved' => 'تم الحل',
         'rejected' => 'مرفوض',
     ],
-    
+
     // Feedback urgency
     'feedback_urgency' => [
         'normal' => 'عادي',
         'suggestion' => 'اقتراح',
         'urgent' => 'عاجل',
     ],
-    
+
     // System roles
     'system_roles' => [
         'admin' => 'مدير النظام',
@@ -150,7 +152,7 @@ return [
         'viewer' => 'مشاهد',
         'guest' => 'ضيف',
     ],
-    
+
     // System role descriptions
     'system_role_descriptions' => [
         'admin' => 'وصول إداري كامل للكيانات المعينة',
@@ -160,7 +162,7 @@ return [
         'viewer' => 'وصول للقراءة فقط للمحتوى',
         'guest' => 'وصول محدود للمحتوى العام',
     ],
-    
+
     // EditorJS tool titles
     'editor_tools' => [
         'paragraph' => 'نص',
@@ -174,7 +176,7 @@ return [
         'videoUpload' => 'رفع فيديو',
         'commentTune' => 'إضافة تعليق',
     ],
-    
+
     // EditorJS interface translations (EditorJS format)
     'editor_ui' => [
         'ui' => [

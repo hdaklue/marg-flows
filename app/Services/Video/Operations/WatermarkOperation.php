@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Operations;
 
-use InvalidArgumentException;
 use ProtoneMedia\LaravelFFMpeg\Exporters\MediaExporter;
+use ProtoneMedia\LaravelFFMpeg\MediaOpener;
 
-class WatermarkOperation extends AbstractVideoOperation
+final class WatermarkOperation extends AbstractVideoOperation
 {
     public function __construct(
         private readonly string $watermarkPath,
@@ -38,7 +38,7 @@ class WatermarkOperation extends AbstractVideoOperation
 
     public function canExecute(): bool
     {
-        if (!file_exists($this->watermarkPath)) {
+        if (! file_exists($this->watermarkPath)) {
             return false;
         }
 
@@ -59,7 +59,8 @@ class WatermarkOperation extends AbstractVideoOperation
         });
     }
 
-    public function applyToMedia(\ProtoneMedia\LaravelFFMpeg\MediaOpener $media): \ProtoneMedia\LaravelFFMpeg\MediaOpener {
+    public function applyToMedia(MediaOpener $media): MediaOpener
+    {
         return $media->addFilter(function ($filters) {
             $filters->watermark($this->watermarkPath, [
                 'position' => $this->position,
