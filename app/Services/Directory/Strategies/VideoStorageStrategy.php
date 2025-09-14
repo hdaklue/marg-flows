@@ -36,8 +36,10 @@ final class VideoStorageStrategy implements StorageStrategyContract
      *
      * @param  PathBuilder|string  $basePath  PathBuilder instance or base directory string
      */
-    public function __construct(PathBuilder|string $basePath)
-    {
+    public function __construct(
+        PathBuilder|string $basePath,
+        private readonly string $disk,
+    ) {
         if ($basePath instanceof PathBuilder) {
             $this->pathBuilder = $basePath;
         } else {
@@ -104,7 +106,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
 
         $filename = $this->generateFilename();
         $directory = $this->pathBuilder->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         $this->storedPath = $file->storeAs($directory, $filename, [
             'disk' => $disk,
@@ -133,7 +135,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
         $thumbnailDirectory = $this->pathBuilder->toString();
         $filename = $this->generateThumbnailFilename($filePath);
 
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         $this->storedPath = Storage::disk($disk)->putFileAs(
             $thumbnailDirectory,
@@ -160,7 +162,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
             ),
         );
 
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         return Storage::disk($disk)->url($this->storedPath);
     }
@@ -211,7 +213,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function get(string $fileName): ?string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         return Storage::disk($disk)->get($path);
     }
@@ -225,7 +227,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function getVariant(string $fileName): ?string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         return Storage::disk($disk)->get($path);
     }
@@ -239,7 +241,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function getPath(string $fileName): ?string
     {
         $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         if (Storage::disk($disk)->getDriver()->getName() === 'local') {
             return Storage::disk($disk)->path($fullPath);
@@ -257,7 +259,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function getVariantPath(string $fileName): ?string
     {
         $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         if (Storage::disk($disk)->getDriver()->getName() === 'local') {
             return Storage::disk($disk)->path($fullPath);
@@ -275,7 +277,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function delete(string $fileName): bool
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         return Storage::disk($disk)->delete($path);
     }
@@ -289,7 +291,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function deleteVariant(string $fileName): bool
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         return Storage::disk($disk)->delete($path);
     }
@@ -303,7 +305,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function getFileUrl(string $fileName): string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         return Storage::disk($disk)->url($path);
     }
@@ -317,7 +319,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function getVariantFileUrl(string $fileName): string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         return Storage::disk($disk)->url($path);
     }
@@ -330,9 +332,13 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $type  The file type (documents, videos, etc.)
      * @return string Secure URL requiring authentication
      */
-    public function getSecureUrl(string $fileName, string $tenantId, string $type): string
-    {
-        return route('file.serve', [
+    public function getSecureUrl(
+        string $route,
+        string $fileName,
+        string $tenantId,
+        string $type,
+    ): string {
+        return route($route, [
             'tenant' => $tenantId,
             'type' => $type,
             'filename' => $fileName,
@@ -349,7 +355,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     public function getTemporaryUrl(string $fileName, int $expiresIn = 1800): string
     {
         $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
-        $disk = config('document.storage.disk', 'public');
+        $disk = $this->disk;
 
         return Storage::disk($disk)->temporaryUrl(
             $fullPath,

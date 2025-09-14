@@ -52,7 +52,7 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
     {
         $baseDirectory = $this->getDocumentBaseDirectory('images');
 
-        return new ImageStorageStrategy($baseDirectory);
+        return new ImageStorageStrategy($baseDirectory, $this->getDisk());
     }
 
     /**
@@ -64,7 +64,7 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
     {
         $baseDirectory = $this->getDocumentBaseDirectory('videos');
 
-        return new VideoStorageStrategy($baseDirectory);
+        return new VideoStorageStrategy($baseDirectory, $this->getDisk());
     }
 
     /**
@@ -87,7 +87,7 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
     {
         $rootDirectory = $this->getDocumentBaseDirectory($baseDirectory);
 
-        return new VideoStorageStrategy($rootDirectory);
+        return new VideoStorageStrategy($rootDirectory, $this->getDisk());
     }
 
     /**
@@ -113,7 +113,9 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
      */
     public function getSecureUrl(string $identifier, string $type, string $fileName): string
     {
-        return parent::getSecureUrl($identifier, $type, $fileName);
+        $strategy = $this->{$type}();
+
+        return $strategy->getSecureUrl('documents.serve', $fileName, $identifier, $type);
     }
 
     /**

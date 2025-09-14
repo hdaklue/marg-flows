@@ -53,7 +53,7 @@ Route::prefix('documents/{document}/files')
             string $filename,
         ) {
             $documentModel = Document::findOrFail($document);
-            $resolver = app(DocumentFileResolver::class);
+            $resolver = DocumentFileResolver::make($documentModel);
 
             return response()->json([
                 'url' => $resolver->resolveSecureUrl($documentModel, $type, $filename),
@@ -83,7 +83,7 @@ Route::prefix('documents/{document}/files')
             string $filename,
         ) {
             $documentModel = Document::findOrFail($document);
-            $resolver = app(DocumentFileResolver::class);
+            $resolver = DocumentFileResolver::make($documentModel);
 
             return response()->json([
                 'exists' => $resolver->fileExists($documentModel, $type, $filename),
@@ -97,7 +97,7 @@ Route::prefix('documents/{document}/files')
             string $filename,
         ) {
             $documentModel = Document::findOrFail($document);
-            $resolver = app(DocumentFileResolver::class);
+            $resolver = DocumentFileResolver::make($documentModel);
 
             return response()->json([
                 'exists' => $resolver->fileExists($documentModel, $type, $filename),
@@ -114,7 +114,7 @@ Route::prefix('documents/{document}/files')
             string $filename,
         ) {
             $documentModel = Document::findOrFail($document);
-            $resolver = app(DocumentFileResolver::class);
+            $resolver = DocumentFileResolver::make($documentModel);
 
             $deleted = $resolver->deleteFile($documentModel, $type, $filename);
 
@@ -126,7 +126,7 @@ Route::prefix('documents/{document}/files')
         // List all files of a specific type for document
         Route::get('{type}', function (string $document, string $type) {
             $documentModel = Document::findOrFail($document);
-            $resolver = app(DocumentFileResolver::class);
+            $resolver = DocumentFileResolver::make($documentModel);
 
             return response()->json([
                 'files' => $resolver->getDocumentFiles($documentModel, $type),
@@ -141,7 +141,7 @@ Route::get('documents/{document}/serve/{type}/{filename}', function (
     string $filename,
 ) {
     $documentModel = Document::findOrFail($document);
-    $resolver = app(DocumentFileResolver::class);
+    $resolver = DocumentFileResolver::make($documentModel);
 
     // Validate access
     if (!auth()->user() || !$resolver->validateAccess($documentModel)) {
@@ -161,6 +161,7 @@ Route::get('documents/{document}/serve/{type}/{filename}', function (
     $path = $directory . "/{$filename}";
 
     if (!Storage::disk($disk)->exists($path)) {
+        Illuminate\Support\Facades\Log::error('File not found at path: ' . $path);
         abort(404, 'File not found');
     }
 

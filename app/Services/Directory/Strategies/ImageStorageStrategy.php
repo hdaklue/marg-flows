@@ -28,11 +28,11 @@ final class ImageStorageStrategy implements StorageStrategyContract
         'watermarked' => 'mark', // marked/watermarked files
     ];
 
-    private ?UploadedFile $file = null;
+    private null|UploadedFile $file = null;
 
-    private ?string $storedPath = null;
+    private null|string $storedPath = null;
 
-    private ?string $variant = null;
+    private null|string $variant = null;
 
     /**
      * Constructor receives the full base directory path for images.
@@ -41,6 +41,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     public function __construct(
         private readonly string $baseDirectory,
+        private readonly string $disk,
     ) {}
 
     /**
@@ -104,13 +105,10 @@ final class ImageStorageStrategy implements StorageStrategyContract
         $this->file = $file;
 
         $filename = $this->generateSecureFilename();
-        $directory = $this->variant
-            ? $this->buildSecureVariantDirectory()
-            : $this->baseDirectory;
-        $disk = config('document.storage.disk', 'public');
+        $directory = $this->variant ? $this->buildSecureVariantDirectory() : $this->baseDirectory;
 
         $this->storedPath = $file->storeAs($directory, $filename, [
-            'disk' => $disk,
+            'disk' => $this->disk,
         ]);
 
         return $this->storedPath;
@@ -127,14 +125,10 @@ final class ImageStorageStrategy implements StorageStrategyContract
     {
         throw_unless(
             $this->storedPath,
-            new InvalidArgumentException(
-                'Cannot generate URL: File must be stored first.',
-            ),
+            new InvalidArgumentException('Cannot generate URL: File must be stored first.'),
         );
 
-        $disk = config('document.storage.disk', 'public');
-
-        return Storage::disk($disk)->url($this->storedPath);
+        return Storage::disk($this->disk)->url($this->storedPath);
     }
 
     /**
@@ -175,11 +169,9 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): ?string
+    public function get(string $fileName): null|string
     {
-        $disk = config('document.storage.disk', 'public');
-
-        return Storage::disk($disk)->get($this->baseDirectory . "/{$fileName}");
+        return Storage::disk($this->disk)->get($this->baseDirectory . "/{$fileName}");
     }
 
     /**
@@ -188,11 +180,9 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function getVariant(string $fileName): ?string
+    public function getVariant(string $fileName): null|string
     {
-        $disk = config('document.storage.disk', 'public');
-
-        return Storage::disk($disk)->get($this->buildVariantDirectory() . "/{$fileName}");
+        return Storage::disk($this->disk)->get($this->buildVariantDirectory() . "/{$fileName}");
     }
 
     /**
@@ -201,13 +191,12 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): ?string
+    public function getPath(string $fileName): null|string
     {
         $fullPath = $this->baseDirectory . "/{$fileName}";
-        $disk = config('document.storage.disk', 'public');
 
-        if (Storage::disk($disk)->getDriver()->getName() === 'local') {
-            return Storage::disk($disk)->path($fullPath);
+        if (Storage::disk($this->disk)->getDriver()->getName() === 'local') {
+            return Storage::disk($this->disk)->path($fullPath);
         }
 
         return $fullPath;
@@ -219,13 +208,12 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getVariantPath(string $fileName): ?string
+    public function getVariantPath(string $fileName): null|string
     {
         $fullPath = $this->buildVariantDirectory() . "/{$fileName}";
-        $disk = config('document.storage.disk', 'public');
 
-        if (Storage::disk($disk)->getDriver()->getName() === 'local') {
-            return Storage::disk($disk)->path($fullPath);
+        if (Storage::disk($this->disk)->getDriver()->getName() === 'local') {
+            return Storage::disk($this->disk)->path($fullPath);
         }
 
         return $fullPath;
@@ -239,9 +227,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     public function delete(string $fileName): bool
     {
-        $disk = config('document.storage.disk', 'public');
-
-        return Storage::disk($disk)->delete($this->baseDirectory . "/{$fileName}");
+        return Storage::disk($this->disk)->delete($this->baseDirectory . "/{$fileName}");
     }
 
     /**
@@ -252,9 +238,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     public function deleteVariant(string $fileName): bool
     {
-        $disk = config('document.storage.disk', 'public');
-
-        return Storage::disk($disk)->delete($this->buildVariantDirectory() . "/{$fileName}");
+        return Storage::disk($this->disk)->delete($this->buildVariantDirectory() . "/{$fileName}");
     }
 
     /**
@@ -265,9 +249,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     public function getFileUrl(string $fileName): string
     {
-        $disk = config('document.storage.disk', 'public');
-
-        return Storage::disk($disk)->url($this->baseDirectory . "/{$fileName}");
+        return Storage::disk($this->disk)->url($this->baseDirectory . "/{$fileName}");
     }
 
     /**
@@ -278,9 +260,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     public function getVariantFileUrl(string $fileName): string
     {
-        $disk = config('document.storage.disk', 'public');
-
-        return Storage::disk($disk)->url($this->buildVariantDirectory() . "/{$fileName}");
+        return Storage::disk($this->disk)->url($this->buildVariantDirectory() . "/{$fileName}");
     }
 
     /**
@@ -291,9 +271,13 @@ final class ImageStorageStrategy implements StorageStrategyContract
      * @param  string  $type  The file type (documents, videos, etc.)
      * @return string Secure URL requiring authentication
      */
-    public function getSecureUrl(string $fileName, string $tenantId, string $type): string
-    {
-        return route('file.serve', [
+    public function getSecureUrl(
+        string $route,
+        string $fileName,
+        string $tenantId,
+        string $type,
+    ): string {
+        return route($route, [
             'tenant' => $tenantId,
             'type' => $type,
             'filename' => $fileName,
@@ -309,12 +293,11 @@ final class ImageStorageStrategy implements StorageStrategyContract
      */
     public function getTemporaryUrl(string $fileName, int $expiresIn = 1800): string
     {
-        $disk = config('document.storage.disk', 'public');
         $path = $this->variant
             ? $this->buildVariantDirectory() . "/{$fileName}"
             : $this->baseDirectory . "/{$fileName}";
 
-        return Storage::disk($disk)->temporaryUrl($path, now()->addSeconds($expiresIn));
+        return Storage::disk($this->disk)->temporaryUrl($path, now()->addSeconds($expiresIn));
     }
 
     /**
@@ -336,10 +319,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
     {
         $builder = PathBuilder::base($this->baseDirectory);
 
-        if (
-            $this->variant
-            && isset(self::VARIANT_DIRECTORIES[$this->variant])
-        ) {
+        if ($this->variant && isset(self::VARIANT_DIRECTORIES[$this->variant])) {
             $builder->add(self::VARIANT_DIRECTORIES[$this->variant], SanitizationStrategy::SLUG);
         }
 
@@ -358,9 +338,7 @@ final class ImageStorageStrategy implements StorageStrategyContract
             ? PathBuilder::base($this->buildSecureVariantDirectory())
             : PathBuilder::base($this->baseDirectory);
 
-        return $builder->addFile($fileName, SanitizationStrategy::SLUG)
-            ->validate()
-            ->toString();
+        return $builder->addFile($fileName, SanitizationStrategy::SLUG)->validate()->toString();
     }
 
     /**
@@ -387,8 +365,6 @@ final class ImageStorageStrategy implements StorageStrategyContract
 
         $filename = "{$originalName}_{$unique}_{$timestamp}.{$extension}";
 
-        return PathBuilder::base('')
-            ->addFile($filename, SanitizationStrategy::SLUG)
-            ->getFilename();
+        return PathBuilder::base('')->addFile($filename, SanitizationStrategy::SLUG)->getFilename();
     }
 }

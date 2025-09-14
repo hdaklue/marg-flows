@@ -32,28 +32,24 @@ final class FileServingServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register Document File Resolver
-        $this->app->singleton(DocumentFileResolver::class, function ($app) {
-            return new DocumentFileResolver(
-                $app->make(DocumentDirectoryManager::class),
-            );
-        });
+        // $this->app->singleton(DocumentFileResolver::class, function ($app) {
+        //     return new DocumentFileResolver(
+        //         $app->make(DocumentDirectoryManager::class),
+        //     );
+        // });
 
         // Register System File Resolver
         $this->app->singleton(SystemFileResolver::class, function ($app) {
-            return new SystemFileResolver(
-                $app->make(SystemDirectoryManager::class),
-            );
+            return new SystemFileResolver($app->make(SystemDirectoryManager::class));
         });
 
         // Register Chunk File Resolver
         $this->app->singleton(ChunkFileResolver::class, function ($app) {
-            return new ChunkFileResolver(
-                $app->make(ChunksDirectoryManager::class),
-            );
+            return new ChunkFileResolver($app->make(ChunksDirectoryManager::class));
         });
 
         // Register aliases for easier access
-        $this->app->alias(DocumentFileResolver::class, 'file-resolver.document');
+        
         $this->app->alias(SystemFileResolver::class, 'file-resolver.system');
         $this->app->alias(ChunkFileResolver::class, 'file-resolver.chunks');
     }
@@ -78,10 +74,10 @@ final class FileServingServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return [
-            DocumentFileResolver::class,
+
             SystemFileResolver::class,
             ChunkFileResolver::class,
-            'file-resolver.document',
+            
             'file-resolver.system',
             'file-resolver.chunks',
         ];
@@ -97,16 +93,13 @@ final class FileServingServiceProvider extends ServiceProvider
     private function loadFileServingRoutes(): void
     {
         // Load Document FileResolver routes
-        Route::middleware('web')
-            ->group(base_path('app/Services/FileServing/Document/routes.php'));
+        Route::middleware('web')->group(base_path('app/Services/FileServing/Document/routes.php'));
 
         // Load System FileResolver routes
-        Route::middleware('web')
-            ->group(base_path('app/Services/FileServing/System/routes.php'));
+        Route::middleware('web')->group(base_path('app/Services/FileServing/System/routes.php'));
 
         // Load Chunks FileResolver routes
-        Route::middleware('web')
-            ->group(base_path('app/Services/FileServing/Chunks/routes.php'));
+        Route::middleware('web')->group(base_path('app/Services/FileServing/Chunks/routes.php'));
     }
 
     /**
@@ -182,7 +175,10 @@ final class FileServingServiceProvider extends ServiceProvider
     private function registerFileServingMiddleware(): void
     {
         // Register rate limiting for file uploads
-        $this->app['router']->aliasMiddleware('file-upload-throttle', ThrottleRequests::class . ':60,1');
+        $this->app['router']->aliasMiddleware(
+            'file-upload-throttle',
+            ThrottleRequests::class . ':60,1',
+        );
 
         // Register file access logging middleware if needed
         // $this->app['router']->aliasMiddleware('file-access-log', FileAccessLogMiddleware::class);
