@@ -7,15 +7,12 @@ namespace App\Filament\Resources\Documents\Pages;
 use App\Facades\DocumentManager;
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
-use App\Services\Breadcrum\DocumentCrumbFactory;
 use App\Services\Recency\Actions\RecordRecency;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
-use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 
 /**
@@ -23,8 +20,6 @@ use Livewire\Attributes\Computed;
  */
 final class ViewDocument extends ViewRecord
 {
-    use HasActionCrumbs;
-
     protected static string $resource = DocumentResource::class;
 
     public ?array $data = [];
@@ -100,10 +95,5 @@ final class ViewDocument extends ViewRecord
     public function canEdit(): bool
     {
         return filamentUser()->can('update', $this->record);
-    }
-
-    protected function actioncrumbs(): array
-    {
-        return DocumentCrumbFactory::make()->view($this->record);
     }
 }
