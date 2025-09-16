@@ -34,15 +34,15 @@ window.ui = ui;
 Alpine.plugin(AsyncAlpine);
 
 // Register async components with Alpine.asyncData
-// Alpine.asyncData('audioAnnotation', () => import('./components/audio-annotation'));
-// Alpine.asyncData('designAnnotationApp', () => import('./components/design-annotation'));
-// Alpine.asyncData('designReviewApp', () => import('./components/image-review'));
-// Alpine.asyncData('videoAnnotation', () => import('./components/video-annotation'));
-// Alpine.asyncData('audioPlayer', () => import('./components/audio-player'));
+Alpine.asyncData('audioAnnotation', () => import('./components/audio-annotation'));
+Alpine.asyncData('designAnnotationApp', () => import('./components/design-annotation'));
+Alpine.asyncData('designReviewApp', () => import('./components/image-review'));
+Alpine.asyncData('videoAnnotation', () => import('./components/video-annotation'));
+Alpine.asyncData('audioPlayer', () => import('./components/audio-player'));
 Alpine.asyncData('document', () => import('./components/document'));
-// Alpine.asyncData('mentionableText', () => import('./components/mentionable'));
-// Alpine.asyncData('videoRecorder', () => import('./components/video-recorder'));
-// Alpine.asyncData('recorder', () => import('./components/voice-recorder'));
+Alpine.asyncData('mentionableText', () => import('./components/mentionable'));
+Alpine.asyncData('videoRecorder', () => import('./components/video-recorder'));
+Alpine.asyncData('recorder', () => import('./components/voice-recorder'));
 Alpine.asyncData('chunkedFileUpload', () => import('./components/ChunkedFileUpload/index.js'));
 
 // Keep global assignments for components that need it

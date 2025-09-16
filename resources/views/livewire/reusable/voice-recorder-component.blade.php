@@ -1,12 +1,12 @@
 <div x-data="{ size: @js($size) }">
-    <div x-data="recorder({
+    <div x-load x-data="recorder({
         onSubmit: (blob) => $wire.call('uploadRecording', blob),
         instanceKey: @js($instanceKey),
         maxDuration: @js($maxDurationInSeconds),
         size: @js($size)
     })"
         x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('voiceRecorder') }}"
-        class="relative flex items-center w-full transition-all duration-300 border rounded-lg border-zinc-300 dark:border-zinc-600"
+        class="relative flex w-full items-center rounded-lg border border-zinc-300 transition-all duration-300 dark:border-zinc-600"
         :class="{
             'border-sky-400 bg-sky-50 dark:border-sky-500 dark:bg-sky-950/30 animate-pulse': isRecording,
             'bg-white dark:bg-zinc-900': !isRecording,
@@ -18,17 +18,17 @@
 
         <!-- Upload Progress Bar -->
         <div x-show="isUploading" x-cloak
-            class="absolute top-0 left-0 right-0 h-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
+            class="absolute left-0 right-0 top-0 h-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
             x-transition:enter="transition-opacity ease-out duration-300" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100">
-            <div class="h-full transition-all duration-300 ease-out rounded-full bg-amber-500"
+            <div class="h-full rounded-full bg-amber-500 transition-all duration-300 ease-out"
                 :style="`width: ${uploadProgress}%`"></div>
         </div>
 
         <!-- Record Button -->
         <div class="grow-0">
             <button @click="isRecording ? stopRecording() : startRecording()" :disabled="!isSupported || isUploading"
-                class="flex items-center justify-center font-semibold transition-all duration-300 rounded-lg shrink-0"
+                class="flex shrink-0 items-center justify-center rounded-lg font-semibold transition-all duration-300"
                 :class="{
                     // Size classes
                     'p-1.5 text-xs': size === 'sm',
@@ -115,7 +115,7 @@
                 <div class="flex items-center gap-2">
                     <!-- Play/Pause Button -->
                     <button @click="togglePlayback()"
-                        class="flex items-center justify-center transition-colors duration-200 rounded shrink-0"
+                        class="flex shrink-0 items-center justify-center rounded transition-colors duration-200"
                         :class="{
                             // Size classes
                             'w-5 h-5': size === 'sm',
@@ -155,7 +155,7 @@
                     </button>
 
                     <!-- Playback Waveform Container -->
-                    <div class="flex-1 min-w-0">
+                    <div class="min-w-0 flex-1">
                         <div x-ref="playbackWaveform" class="w-full rounded bg-zinc-50 dark:bg-zinc-800"
                             :class="{
                                 'h-6': size === 'sm',
@@ -177,7 +177,7 @@
             }">
             <!-- Submit Button -->
             <button @click="submitRecording()" :disabled="isUploading"
-                class="flex items-center justify-center font-semibold transition-all duration-300 rounded-lg shrink-0"
+                class="flex shrink-0 items-center justify-center rounded-lg font-semibold transition-all duration-300"
                 :class="{
                     // Size classes
                     'p-1.5': size === 'sm',
@@ -203,7 +203,7 @@
 
             <!-- Delete Button -->
             <button @click="deleteRecording()"
-                class="flex items-center justify-center font-semibold transition-all duration-300 rounded-lg shrink-0"
+                class="flex shrink-0 items-center justify-center rounded-lg font-semibold transition-all duration-300"
                 :class="{
                     // Size classes
                     'p-1.5': size === 'sm',

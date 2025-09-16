@@ -51,6 +51,7 @@ final class PreviewImage extends Component
     /**
      * Get image metadata in JavaScript-optimized format.
      */
+    #[Computed]
     public function getImageMetadataForJs(): array
     {
         // Mock data for testing until ImageMetadataService is fully implemented
@@ -87,6 +88,7 @@ final class PreviewImage extends Component
     /**
      * Get image width for JavaScript initialization.
      */
+    #[Computed]
     public function getImageWidth(): int
     {
         return 800; // Mock width
@@ -95,6 +97,7 @@ final class PreviewImage extends Component
     /**
      * Get image height for JavaScript initialization.
      */
+    #[Computed]
     public function getImageHeight(): int
     {
         return 600; // Mock height
@@ -128,8 +131,8 @@ final class PreviewImage extends Component
         $service->clearCache($this->image);
         $this->imageMetadata = null;
 
-        // Force re-computation
-        $this->imageMetadata();
+        // Force re-computation - this will be recalculated on next access
+        unset($this->computedPropertyCache['imageMetadata']);
     }
 
     public function render()
