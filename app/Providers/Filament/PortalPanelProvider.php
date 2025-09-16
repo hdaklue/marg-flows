@@ -40,11 +40,11 @@ final class PortalPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('portal')
-            ->path('')
+            ->path('/app')
             ->login(Login::class)
             ->passwordReset()
             ->registration(Register::class)
-            ->databaseNotificationsPolling(fn () => app()->isProduction() ? '60s' : '90s')
+            ->databaseNotificationsPolling(fn() => app()->isProduction() ? '60s' : '90s')
             ->tenant(Tenant::class)
             // ->homeUrl(fn() => filament()->getTenant()
             //     ? route('filament.portal.pages.dashboard', ['tenant' => filament()->getTenant()])
@@ -52,7 +52,6 @@ final class PortalPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Emerald,
             ])
-            ->spa(true)
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
             // ->breadcrumbs(false)
@@ -63,7 +62,7 @@ final class PortalPanelProvider extends PanelProvider
                 // Custom language switching will be added via render hooks
             ])
             ->maxContentWidth(Width::ScreenTwoExtraLarge)
-            ->renderHook(PanelsRenderHook::TOPBAR_END, fn (): string => Blade::render(
+            ->renderHook(PanelsRenderHook::TOPBAR_END, fn(): string => Blade::render(
                 '<x-language-switch />',
             ))
             // ->renderHook(
@@ -73,13 +72,13 @@ final class PortalPanelProvider extends PanelProvider
             // )
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,
-                fn (): string => Blade::render('<x-language-switch />'),
+                fn(): string => Blade::render('<x-language-switch />'),
                 scopes: [Login::class, Register::class],
             )
             ->userMenuItems([
                 Action::make('settings')
-                    ->label(fn (): string => __('auth.profile.title'))
-                    ->url(fn (): string => UserSettings::getUrl())
+                    ->label(fn(): string => __('auth.profile.title'))
+                    ->url(fn(): string => UserSettings::getUrl())
                     ->icon('heroicon-o-user-circle'),
             ])
             ->discoverResources(

@@ -18,22 +18,14 @@ final class RegisterUser
 {
     use AsAction;
 
-    public function handle(
-        string $email,
-        string $username,
-        string $password,
-    ): ?User {
+    public function handle(string $email, string $username, string $password): null|User
+    {
         $ip = app()->isProduction() ? request()->ip() : '41.43.60.242';
         $timezone = GetUserLocation::run($ip)->timezone;
 
         try {
-            return DB::transaction(function () use (
-                $username,
-                $email,
-                $password,
-                $timezone,
-            ) {
-                $user = new User;
+            return DB::transaction(function () use ($username, $email, $password, $timezone) {
+                $user = new User();
 
                 $user->username = $username;
                 $user->email = $email;
@@ -47,7 +39,8 @@ final class RegisterUser
 
                 $createdTenant = $this->createDefaultTenant($user);
 
-                $user->switchActiveTenant($createdTenant);
+                $user->setInitialTenant($createdTenant);
+                $createdTenant->assign($user, RoleFactory::admin());
                 event(new Registered($user));
 
                 return $user;
@@ -67,15 +60,13 @@ final class RegisterUser
 
     private function createDefaultTenant(User $user): Tenant
     {
-        $tenantName = str($user->getAttribute('username'))
-            ->lower()
-            ->explode(' ')
-            ->first() . ' team';
+        $tenantName = str($user->getAttribute('username'))->lower()->explode(' ')->first()
+        . ' team';
         $tenant = new Tenant(['name' => $tenantName]);
         $tenant->creator()->associate($user);
         $tenant->save();
 
-        $tenant->assign($user, RoleFactory::admin());
+        // $tenant->assign($user, RoleFactory::admin());
 
         $tenant->refresh();
 

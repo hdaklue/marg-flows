@@ -1,6 +1,7 @@
 <div>
     <div x-data>
-        {!! $this->renderActioncrumbs() !!}
+        {!! $renderedActioncrumbs !!}
     </div>
+    <livewire:participants.manage-participants-modal :roleableEntity="$this->document" />
     <x-filament-actions::modals />
 </div>

@@ -133,4 +133,18 @@ return [
         'participants_ttl' => env('PORTER_CACHE_PARTICIPANTS_TTL', 3600), // 1 hour
         'assigned_entities_ttl' => env('PORTER_CACHE_ASSIGNED_ENTITIES_TTL', 3600), // 1 hour
     ],
+    /*
+     |--------------------------------------------------------------------------
+     | Multitenancy Configuration
+     |--------------------------------------------------------------------------
+     |
+     | Configure multitenancy support for Porter. When enabled, all role
+     | assignments will be scoped to a specific tenant context.
+     |
+     */
+    'multitenancy' => [
+        'enabled' => false, // Disabled for now - env('PORTER_MULTITENANCY_ENABLED', false),
+        'tenant_column' => env('PORTER_TENANT_COLUMN', 'tenant_id'),
+        'tenant_key_type' => env('PORTER_TENANT_KEY_TYPE', 'ulid'),
+    ],
 ];

@@ -5,62 +5,42 @@ declare(strict_types=1);
 namespace App\Livewire\Breadcrumbs;
 
 use App\Filament\Actions\Document\CreateDocumentAction;
+use App\Filament\Actions\Flow\EditFlowInfoAction;
 use App\Filament\Resources\Flows\FlowResource;
+use App\Livewire\Breadcrumbs\Steps\FlowStep;
 use App\Models\Document;
+use App\Models\Flow;
 use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
 use Hdaklue\Actioncrumb\Components\WireCrumb;
 use Hdaklue\Actioncrumb\Step;
 use Hdaklue\Actioncrumb\Support\WireAction;
 use InvalidArgumentException;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 
 /**
  * Document-specific breadcrumb component with actions.
  */
 final class DocumentActionCrumb extends WireCrumb
 {
-    #[Locked]
     public null|Document $document = null;
+
+    public Flow $flow;
 
     public function mount($record = null, $parent = null)
     {
         parent::mount($record, $parent);
         $this->document = $record;
+        $this->flow = $record->loadMissing('documentable')->documentable;
     }
 
     public function render()
     {
-        return view('livewire.breadcrumbs.document-action-crumb');
-    }
-
-    // Common actions that breadcrumb factories can use
-    public function testAction(): Action
-    {
-        return Action::make('test')
-            ->label('Test Action')
-            ->icon('heroicon-o-bell')
-            ->action(function () {
-                Notification::make()
-                    ->title('Test Action Executed!')
-                    ->body('This action was executed from the DocumentActionCrumb component')
-                    ->success()
-                    ->send();
-            });
-    }
-
-    public function editDocumentAction(): Action
-    {
-        return Action::make('editDocument')
-            ->label('Edit Document')
-            ->icon('heroicon-o-pencil')
-            ->action(function () {
-                Notification::make()
-                    ->title('Edit Document')
-                    ->body('Edit document functionality')
-                    ->info()
-                    ->send();
-            });
+        return view('livewire.breadcrumbs.document-action-crumb', [
+            'renderedActioncrumbs' => $this->renderActioncrumbs(),
+        ]);
     }
 
     public function deleteDocumentAction(): Action
@@ -87,27 +67,40 @@ final class DocumentActionCrumb extends WireCrumb
         return CreateDocumentAction::make($this->document->documentable, shouldRedirect: true);
     }
 
+    public function editFlowAction(): EditAction
+    {
+        return EditFlowInfoAction::make($this->document->documentable)->after(
+            fn() => $this->dispatch('reload-data'),
+        );
+    }
+
     protected function actioncrumbs(): array
     {
         if (!$this->document) {
             return [];
         }
 
-        $flow = $this->document->loadMissing('documentable')->documentable;
-        $flowUrl = FlowResource::getUrl('view', [
-            'tenant' => filamentTenant(),
-            'record' => $flow,
-        ]);
-
         $flowDocsUrl = FlowResource::getUrl('view', [
             'tenant' => filamentTenant(),
-            'record' => $flow,
+            'record' => $this->flow,
             'activeTab' => 'documents',
         ]);
+        $flowUrl = FlowResource::getUrl('view', [
+            'tenant' => filamentTenant(),
+            'record' => $this->flow,
+        ]);
 
-        // Simple test steps first
         return [
-            Step::make($flow->title)->icon(FlowResource::getNavigationIcon())->url($flowUrl),
+            Step::make('flow')
+                ->label(fn() => $this->flow->title)
+                ->icon(FlowResource::getNavigationIcon())
+                ->url($flowUrl)
+                ->actions([
+                    WireAction::make('Edit Flow')
+                        ->livewire($this)
+                        ->icon('heroicon-o-plus')
+                        ->execute('editFlow'),
+                ]),
             Step::make('Documents')
                 ->url($flowDocsUrl)
                 ->icon('heroicon-o-folder')
@@ -120,21 +113,14 @@ final class DocumentActionCrumb extends WireCrumb
             Step::make($this->document->name)
                 ->current()
                 ->actions([
-                    // Regular actioncrumb action
-                    \Hdaklue\Actioncrumb\Action::make('Direct Action')
-                        ->icon('heroicon-o-bolt')
-                        ->execute(function () {
-                            Notification::make()
-                                ->title('Direct Action from DocumentActionCrumb!')
-                                ->success()
-                                ->send();
-                        }),
-                    // WireAction that calls this component's methods
-                    WireAction::make('Wire Action')
-                        ->livewire($this)
-                        ->icon('heroicon-o-bell')
-                        ->execute('test'),
                     // WireAction for create document
+                    \Hdaklue\Actioncrumb\Action::make('share')
+                        ->label('Share with ..')
+                        ->visible(fn() => filamentUser()->can('manage', $this->document))
+                        ->execute(fn() => $this->dispatch(
+                            'open-modal',
+                            id: 'manage-participants-modal',
+                        )),
                 ]),
         ];
     }

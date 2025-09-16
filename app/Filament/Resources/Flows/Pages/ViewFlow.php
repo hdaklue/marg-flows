@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Flows\Pages;
 
 use App\Concerns\Filament\Pages\DisableBreadcrumb;
 use App\Filament\Actions\Document\CreateDocumentAction;
+use App\Filament\Actions\Flow\EditFlowInfoAction;
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Livewire\Flow\FlowTabs;
@@ -105,17 +106,18 @@ final class ViewFlow extends ViewRecord
                 ->button(),
             ActionGroup::make([
                 // Action::make('view'),
-                EditAction::make('edit')
-                    ->visible(filamentUser()->can('update', $this->record))
-                    ->record($this->record)
-                    ->fillForm([
-                        'title' => $this->record->getAttribute('title'),
-                        'description' => $this->record->getAttribute('description'),
-                    ])
-                    ->schema([
-                        TextInput::make('title'),
-                        Textarea::make('description'),
-                    ]),
+                // EditAction::make('edit')
+                //     ->visible(filamentUser()->can('update', $this->record))
+                //     ->record($this->record)
+                //     ->fillForm([
+                //         'title' => $this->record->getAttribute('title'),
+                //         'description' => $this->record->getAttribute('description'),
+                //     ])
+                //     ->schema([
+                //         TextInput::make('title'),
+                //         Textarea::make('description'),
+                //     ]),
+                EditFlowInfoAction::make($this->record),
                 // Action::make('delete'),
             ])->dropdownPlacement('bottom-end'),
         ];

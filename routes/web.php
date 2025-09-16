@@ -20,14 +20,14 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
 /*
-|--------------------------------------------------------------------------
-| File Serving Routes
-|--------------------------------------------------------------------------
-|
-| File serving routes are now managed by FileServingServiceProvider.
-| Each FileResolver service handles its own routes for better organization.
-|
-*/
+ |--------------------------------------------------------------------------
+ | File Serving Routes
+ |--------------------------------------------------------------------------
+ |
+ | File serving routes are now managed by FileServingServiceProvider.
+ | Each FileResolver service handles its own routes for better organization.
+ |
+ */
 
 Route::get('/imagePreview', action: PreviewImage::class)->name('home');
 
@@ -38,16 +38,17 @@ Route::get('/videoPreview', PreviewVideo::class)->name('video.preview');
 Route::get('/audioPreview', PreviewAudio::class)->name('audio.preview');
 Route::get('/videoRecord', VideoRecorder::class)->name('video.record');
 
-Route::get('invitation/accept/{token}', AcceptInvitation::class)
-    ->middleware([Authenticate::class])
-    ->name('invitation.accept');
+Route::get(
+    'invitation/accept/{token}',
+    AcceptInvitation::class,
+)->middleware([Authenticate::class])->name('invitation.accept');
 
 // Legacy EditorJS routes - now handled by Document FileResolver service
 
 // URL fetch route for EditorJS LinkTool
-Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])
-    ->middleware(['auth'])
-    ->name('editorjs.fetch-url');
+Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])->middleware(['auth'])->name(
+    'editorjs.fetch-url',
+);
 
 // Secure file access routes
 Route::get('secure-files/{tenantId}/{type}/{path}', [SecureFileController::class, 'show'])
@@ -60,18 +61,16 @@ Route::post('secure-files/temp-url', [SecureFileController::class, 'generateTemp
     ->name('secure-files.temp-url');
 
 // Authenticated file serving route (authentication handled in controller)
-Route::get('files/{path}', FileServeController::class)
-    ->where('path', '.*')
-    ->name('file.serve');
+Route::get('files/{path}', FileServeController::class)->where('path', '.*')->name('file.serve');
 
 // File URL resolver routes
-Route::get('file-resolver', [FileResolverController::class, 'resolve'])
-    ->middleware(['auth'])
-    ->name('file.resolver');
+Route::get('file-resolver', [FileResolverController::class, 'resolve'])->middleware(['auth'])->name(
+    'file.resolver',
+);
 
-Route::get('file-resolver/temporary', [FileResolverController::class, 'temporary'])
-    ->middleware(['auth'])
-    ->name('file.resolver.temporary');
+Route::get('file-resolver/temporary', [FileResolverController::class, 'temporary'])->middleware([
+    'auth',
+])->name('file.resolver.temporary');
 
 // Chunked upload routes (temporarily commented out)
 // Route::post('chunked-upload', [\ChunkedUploadController::class, 'store'])
@@ -101,16 +100,13 @@ Route::get('test-chunked-upload', TestChunkedUpload::class)
     ->name('test-chunked-upload');
 
 // Demo route for sortable
-Route::get('sortable-demo', SortableDemo::class)
-    ->name('sortable-demo');
+Route::get('sortable-demo', SortableDemo::class)->name('sortable-demo');
 
 // Calendar test route
-Route::get('calendar-test', CalendarTest::class)
-    ->name('calendar-test');
+Route::get('calendar-test', CalendarTest::class)->name('calendar-test');
 
 // TOAST UI Calendar test route
-Route::get('toast-calendar-test', ToastCalendarTest::class)
-    ->name('toast-calendar-test');
+Route::get('toast-calendar-test', ToastCalendarTest::class)->name('toast-calendar-test');
 
 // Language switching route
 Route::get('/language/{locale}', function (string $locale) {

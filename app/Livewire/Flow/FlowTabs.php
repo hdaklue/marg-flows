@@ -23,8 +23,7 @@ final class FlowTabs extends NapTab
         return [
             Tab::make('streams')->icon('arrows-right-left')->label(__('flow.tabs.streams')),
             Tab::make('documents')
-                ->badge('40')
-                ->visible(fn () => filamentUser()->can('manage', $flow))
+                ->visible(fn() => filamentUser()->can('manage', $flow))
                 ->icon('clipboard-document-list')
                 ->label(__('flow.tabs.documents'))
                 ->livewire(FlowDocumentsTable::class, [

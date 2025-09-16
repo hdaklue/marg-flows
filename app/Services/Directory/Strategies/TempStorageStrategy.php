@@ -37,4 +37,26 @@ final class TempStorageStrategy extends BaseStorageStrategy
     {
         throw new Exception('fix this ');
     }
+
+    /**
+     * Get secure URL for accessing a file with authentication.
+     *
+     * @param  string  $route  The route name
+     * @param  string  $fileName  The filename to get secure URL for
+     * @param  string  $tenantId  The tenant identifier
+     * @param  string  $type  The file type (documents, videos, etc.)
+     * @return string Secure URL requiring authentication
+     */
+    public function getSecureUrl(
+        string $route,
+        string $fileName,
+        string $tenantId,
+        string $type,
+    ): string {
+        return route($route, [
+            'tenant' => $tenantId,
+            'type' => $type,
+            'filename' => $fileName,
+        ]);
+    }
 }

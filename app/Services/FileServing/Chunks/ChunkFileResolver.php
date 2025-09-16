@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\FileServing\Chunks;
 
 use App\Contracts\File\HasFiles;
-use App\Models\User;
 use App\Services\Directory\Managers\ChunksDirectoryManager;
 use App\Services\FileServing\AbstractFileResolver;
 use Illuminate\Support\Facades\Storage;
@@ -39,7 +38,7 @@ final class ChunkFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return bool True if file exists, false otherwise
      */
-    public function fileExists(HasFiles $entity, string $type, string $filename): bool
+    public function fileExists($entity, string $type, string $filename): bool
     {
         $disk = config('directory-chunks.storage.disk', 'local');
         $basePath = $this->directoryManager->getBaseDirectory($entity->getFileStorageIdentifier());
@@ -56,7 +55,7 @@ final class ChunkFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return int|null File size in bytes, null if file doesn't exist
      */
-    public function getFileSize(HasFiles $entity, string $type, string $filename): ?int
+    public function getFileSize($entity, string $type, string $filename): ?int
     {
         if (! $this->fileExists($entity, $type, $filename)) {
             return null;
@@ -120,12 +119,10 @@ final class ChunkFileResolver extends AbstractFileResolver
      * so this always returns true for simplicity.
      *
      * @param  HasFiles  $entity  The chunk entity
-     * @param  User  $user  The user requesting access
      * @return bool Always returns true for chunk files
      */
-    protected function validateAccess(HasFiles $entity, User $user): bool
+    protected function validateAccess($entity): bool
     {
-        // Chunk files are internal system files, always accessible
         return true;
     }
 
@@ -137,7 +134,7 @@ final class ChunkFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return string Secure URL requiring authentication
      */
-    protected function generateSecureUrl(HasFiles $entity, string $type, string $filename): string
+    protected function generateSecureUrl($entity, string $type, string $filename): string
     {
         return route('chunks.files.serve', [
             'identifier' => $entity->getFileStorageIdentifier(),
@@ -155,7 +152,7 @@ final class ChunkFileResolver extends AbstractFileResolver
      * @param  int|null  $expires  Expiration time in seconds
      * @return string Temporary URL with expiration
      */
-    protected function generateTemporaryUrl(HasFiles $entity, string $type, string $filename, ?int $expires = null): string
+    protected function generateTemporaryUrl($entity, string $type, string $filename, ?int $expires = null): string
     {
         $expires ??= config('directory-chunks.session_ttl', 3600);
 
@@ -174,7 +171,7 @@ final class ChunkFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return bool True if deletion was successful, false otherwise
      */
-    protected function performFileDelete(HasFiles $entity, string $type, string $filename): bool
+    protected function performFileDelete($entity, string $type, string $filename): bool
     {
         if (! $this->fileExists($entity, $type, $filename)) {
             return false;

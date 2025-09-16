@@ -18,6 +18,7 @@ use Exception;
 use Hdaklue\MargRbac\Concerns\Tenant\BelongsToTenant;
 use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
 use Hdaklue\Porter\Contracts\RoleableEntity;
+use Hdaklue\Porter\Multitenancy\Contracts\PorterRoleableContract;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -74,7 +75,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin Eloquent
  */
-final class Document extends Model implements BelongsToTenantContract, Recentable, RoleableEntity, SentInNotification, Sidenoteable
+final class Document extends Model implements
+    BelongsToTenantContract,
+    Recentable,
+    RoleableEntity,
+    SentInNotification,
+    Sidenoteable,
+    PorterRoleableContract
 {
     /** @use HasFactory<\Database\Factories\DocumentFactory> */
     use BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait;
@@ -84,6 +91,11 @@ final class Document extends Model implements BelongsToTenantContract, Recentabl
         'blocks',
         'archived_at',
     ];
+
+    public function getPorterTenantKey(): null|string
+    {
+        return $this->getTenantId();
+    }
 
     public function documentable(): MorphTo
     {
@@ -95,7 +107,7 @@ final class Document extends Model implements BelongsToTenantContract, Recentabl
         return $this->belongsTo(User::class, 'creator_id');
     }
 
-    public function getRecentLabel(): ?string
+    public function getRecentLabel(): null|string
     {
         return $this->getAttribute('name');
     }
@@ -113,7 +125,7 @@ final class Document extends Model implements BelongsToTenantContract, Recentabl
 
     public function isArchived(): bool
     {
-        return ! empty($this->getAttribute('archived_at'));
+        return !empty($this->getAttribute('archived_at'));
     }
 
     public function casts(): array
@@ -157,7 +169,7 @@ final class Document extends Model implements BelongsToTenantContract, Recentabl
      */
     protected function blockCollection(): Attribute
     {
-        return Attribute::make(get: fn () => DocumentBlocksCollection::fromEditorJS($this->getAttribute(
+        return Attribute::make(get: fn() => DocumentBlocksCollection::fromEditorJS($this->getAttribute(
             'blocks',
         )));
     }

@@ -181,18 +181,6 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
     }
 
     /**
-     * Get the storage disk to use for chunk operations.
-     *
-     * Uses the directory-chunks configuration.
-     *
-     * @return string The storage disk name
-     */
-    protected function getDisk(): string
-    {
-        return config('directory-chunks.storage.disk', 'local');
-    }
-
-    /**
      * Get the base directory path for tenant-specific chunk storage operations.
      *
      * Uses the configured hash strategy and base path for tenant isolation.
@@ -200,7 +188,7 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
      * @param  string|null  $identifier  The tenant identifier
      * @return string Base directory path (hashed tenant ID with base path)
      */
-    protected function getBaseDirectory(?string $identifier = null): string
+    public function getBaseDirectory(?string $identifier = null): string
     {
         if ($identifier === null) {
             throw new InvalidArgumentException('Tenant identifier is required for chunk storage operations.');
@@ -210,5 +198,17 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
         $hashedId = LaraPath::base($identifier, SanitizationStrategy::HASHED);
 
         return $basePath ? "{$basePath}/{$hashedId}" : (string) $hashedId;
+    }
+
+    /**
+     * Get the storage disk to use for chunk operations.
+     *
+     * Uses the directory-chunks configuration.
+     *
+     * @return string The storage disk name
+     */
+    protected function getDisk(): string
+    {
+        return config('directory-chunks.storage.disk', 'local');
     }
 }

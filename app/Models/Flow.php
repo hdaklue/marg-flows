@@ -22,6 +22,7 @@ use App\Services\Recency\Contracts\Recentable;
 use Hdaklue\MargRbac\Concerns\Tenant\BelongsToTenant;
 use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
 use Hdaklue\Porter\Contracts\RoleableEntity;
+use Hdaklue\Porter\Multitenancy\Contracts\PorterRoleableContract;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -90,7 +91,16 @@ use Illuminate\Support\Collection;
  *
  * @mixin \Eloquent
  */
-final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, Recentable, RoleableEntity, ScopedToTenant, SentInNotification, Sidenoteable
+final class Flow extends Model implements
+    BelongsToTenantContract,
+    Documentable,
+    HasStages,
+    Recentable,
+    RoleableEntity,
+    ScopedToTenant,
+    SentInNotification,
+    Sidenoteable,
+    PorterRoleableContract
 {
     use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInOriginalDB, ManagesDocuments, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait, SoftDeletes;
 
@@ -132,6 +142,11 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     public function participants()
     {
         return $this->roleAssignments()->where('assignable_type', 'user');
+    }
+
+    public function getPorterTenantKey(): null|string
+    {
+        return $this->getTenantId();
     }
 
     /**
@@ -252,7 +267,7 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     /**
      * {@inheritDoc}
      */
-    public function getRecentLabel(): ?string
+    public function getRecentLabel(): null|string
     {
         return $this->title;
     }

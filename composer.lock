@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "45e4210896a25a0cb867b5fb71069985",
+    "content-hash": "7feb4b0ed7fbcbd1426463d9faf5fb9e",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2293,16 +2293,16 @@
         },
         {
             "name": "hdaklue/actioncrumb",
-            "version": "1.0.5",
+            "version": "1.0.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/actioncrumb.git",
-                "reference": "7b2fb0b01ff53762bba23c5ee69b7bb6cfa27794"
+                "reference": "13e2243ecbbaee96c985050733299194a03c500a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/actioncrumb/zipball/7b2fb0b01ff53762bba23c5ee69b7bb6cfa27794",
-                "reference": "7b2fb0b01ff53762bba23c5ee69b7bb6cfa27794",
+                "url": "https://api.github.com/repos/hdaklue/actioncrumb/zipball/13e2243ecbbaee96c985050733299194a03c500a",
+                "reference": "13e2243ecbbaee96c985050733299194a03c500a",
                 "shasum": ""
             },
             "require": {
@@ -2351,9 +2351,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hdaklue/actioncrumb/issues",
-                "source": "https://github.com/hdaklue/actioncrumb/tree/1.0.5"
+                "source": "https://github.com/hdaklue/actioncrumb/tree/1.0.12"
             },
-            "time": "2025-09-14T22:21:10+00:00"
+            "time": "2025-09-16T05:41:05+00:00"
         },
         {
             "name": "hdaklue/larapath",
@@ -2483,20 +2483,20 @@
         },
         {
             "name": "hdaklue/marg-brac",
-            "version": "1.3.22",
+            "version": "2.0.6",
             "source": {
                 "type": "git",
                 "url": "git@github.com:hdaklue/marg-brac.git",
-                "reference": "20ecf29ef6655cccbcd7c9fa6b431004e811afd8"
+                "reference": "d38192755e931f9ff2cd5b78196cf17a879d476d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/marg-brac/zipball/20ecf29ef6655cccbcd7c9fa6b431004e811afd8",
-                "reference": "20ecf29ef6655cccbcd7c9fa6b431004e811afd8",
+                "url": "https://api.github.com/repos/hdaklue/marg-brac/zipball/d38192755e931f9ff2cd5b78196cf17a879d476d",
+                "reference": "d38192755e931f9ff2cd5b78196cf17a879d476d",
                 "shasum": ""
             },
             "require": {
-                "hdaklue/porter": "^1.0",
+                "hdaklue/porter": "^2.0.0",
                 "illuminate/auth": "^12.0",
                 "illuminate/cache": "^12.0",
                 "illuminate/database": "^12.0",
@@ -2561,23 +2561,23 @@
             ],
             "description": "Multi-tenant RBAC authentication package with shared database and Redis sessions",
             "support": {
-                "source": "https://github.com/hdaklue/marg-brac/tree/1.3.22",
+                "source": "https://github.com/hdaklue/marg-brac/tree/2.0.6",
                 "issues": "https://github.com/hdaklue/marg-brac/issues"
             },
-            "time": "2025-09-11T05:55:09+00:00"
+            "time": "2025-09-15T23:10:46+00:00"
         },
         {
             "name": "hdaklue/naptab",
-            "version": "1.0.21",
+            "version": "1.0.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/naptap.git",
-                "reference": "3adababd50a0bee078266976f22c2ec1f6d3a35f"
+                "reference": "2e18aa23c5f5c38cd7f299d8e019480f43a6b07b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/naptap/zipball/3adababd50a0bee078266976f22c2ec1f6d3a35f",
-                "reference": "3adababd50a0bee078266976f22c2ec1f6d3a35f",
+                "url": "https://api.github.com/repos/hdaklue/naptap/zipball/2e18aa23c5f5c38cd7f299d8e019480f43a6b07b",
+                "reference": "2e18aa23c5f5c38cd7f299d8e019480f43a6b07b",
                 "shasum": ""
             },
             "require": {
@@ -2626,22 +2626,22 @@
             ],
             "support": {
                 "issues": "https://github.com/hdaklue/naptap/issues",
-                "source": "https://github.com/hdaklue/naptap/tree/1.0.21"
+                "source": "https://github.com/hdaklue/naptap/tree/1.0.23"
             },
-            "time": "2025-09-12T15:21:56+00:00"
+            "time": "2025-09-15T07:40:35+00:00"
         },
         {
             "name": "hdaklue/porter",
-            "version": "1.0.44",
+            "version": "2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/porter.git",
-                "reference": "55b6504df18e07de8744e6e388347210754f6730"
+                "reference": "b116d345e2e80f8aea4e36a4da98f4004da420a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/porter/zipball/55b6504df18e07de8744e6e388347210754f6730",
-                "reference": "55b6504df18e07de8744e6e388347210754f6730",
+                "url": "https://api.github.com/repos/hdaklue/porter/zipball/b116d345e2e80f8aea4e36a4da98f4004da420a5",
+                "reference": "b116d345e2e80f8aea4e36a4da98f4004da420a5",
                 "shasum": ""
             },
             "require": {
@@ -2693,9 +2693,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hdaklue/porter/issues",
-                "source": "https://github.com/hdaklue/porter/tree/1.0.44"
+                "source": "https://github.com/hdaklue/porter/tree/2.0.4"
             },
-            "time": "2025-09-11T06:13:31+00:00"
+            "time": "2025-09-15T23:24:57+00:00"
         },
         {
             "name": "jaybizzle/crawler-detect",
