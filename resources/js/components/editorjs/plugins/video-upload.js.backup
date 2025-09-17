@@ -12,10 +12,6 @@ import {
 
 // Import the plugin styles
 import '../../../../css/components/editorjs/video-upload.css';
-import '../../../../css/components/editorjs/video-resize.css';
-
-// Import ResizableTune for block resizing functionality
-import ResizableTune from './ResizableTune.js';
 
 class VideoUpload {
     static get toolbox() {
@@ -46,7 +42,15 @@ class VideoUpload {
     }
 
     static get tunes() {
-        return [ResizableTune];
+        return [
+            {
+                name: 'resize',
+                icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 14v6m0 0h6m-6 0l6-6M10 10V4m0 0H4m6 0L4 10"/>
+                </svg>`,
+                title: 'Toggle resize mode'
+            }
+        ];
     }
 
     constructor({ data, config, api, readOnly, block }) {
@@ -62,17 +66,6 @@ class VideoUpload {
         // Initialize single file data
         if (!this.data.file) {
             this.data.file = null;
-        }
-
-        // Initialize resize data for ResizableTune integration
-        if (!this.data.resize) {
-            this.data.resize = {
-                width: null,
-                height: null,
-                maintainAspectRatio: true,
-                maxWidth: '100%',
-                minWidth: 200
-            };
         }
 
         // Initialize state flags
@@ -559,7 +552,7 @@ class VideoUpload {
         videoContainer.classList.add('ce-video-upload__container');
         
         // Apply custom dimensions if available
-        this.applyStoredResizeDimensions(videoContainer);
+        this.applyCustomDimensions(videoContainer);
 
         // Create thumbnail container with aspect ratio
         const thumbnailContainer = document.createElement('div');
@@ -714,9 +707,6 @@ class VideoUpload {
 
         wrapper.appendChild(videoContainer);
         wrapper.appendChild(captionInput);
-
-        // Apply stored resize dimensions if they exist
-        this.applyStoredResizeDimensions(videoContainer);
     }
 
     deleteVideo() {
@@ -725,9 +715,7 @@ class VideoUpload {
         // Delete from server if needed
         if (this.data.file && (this.data.file.url || this.data.file.filename)) {
             const videoUrl = this.data.file.url || this.resolveVideoUrl(this.data.file.filename);
-            // Note: Server-side deletion would be handled by the delete endpoint
-            // For now, we just clear the client-side data
-            console.log('Video file cleared:', videoUrl);
+            this.handleDeleteFile(videoUrl);
         }
 
         // Clear the data
@@ -930,7 +918,7 @@ class VideoUpload {
         modalVideo.controls = true;
         modalVideo.preload = 'metadata';
 
-        const uniqueId = `modal-video-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+        const uniqueId = `modal-video-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         modalVideo.id = uniqueId;
 
         console.log('Video element classes:', modalVideo.className);
@@ -1231,7 +1219,7 @@ class VideoUpload {
 
         // Initialize upload tracking for valid files only
         this.uploadProgress = validFiles.map((file, index) => ({
-            id: `upload-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+            id: `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             file,
             name: file.name,
             size: file.size,
@@ -1407,7 +1395,7 @@ class VideoUpload {
      * Generate a unique file key for chunked uploads
      */
     generateFileKey() {
-        return `video_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+        return `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
 
     /**
@@ -2164,36 +2152,6 @@ class VideoUpload {
                 }, 0);
             }
         }
-    }
-
-    /**
-     * Apply stored resize dimensions to video container
-     * Called when video element is created to restore custom sizing
-     */
-    applyStoredResizeDimensions(videoContainer) {
-        if (this.data.resize && (this.data.resize.width || this.data.resize.height)) {
-            if (this.data.resize.width) {
-                videoContainer.style.width = `${this.data.resize.width}px`;
-                videoContainer.style.maxWidth = 'none';
-            }
-            if (this.data.resize.height) {
-                videoContainer.style.height = `${this.data.resize.height}px`;
-            }
-        }
-    }
-
-    /**
-     * Get resize data for tune integration
-     */
-    getResizeData() {
-        return this.data.resize || {};
-    }
-
-    /**
-     * Update resize data from tune
-     */
-    updateResizeData(resizeData) {
-        this.data.resize = { ...this.data.resize, ...resizeData };
     }
 
     destroy() {

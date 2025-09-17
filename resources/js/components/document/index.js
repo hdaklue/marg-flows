@@ -8,6 +8,7 @@ import DragDrop from 'editorjs-drag-drop';
 import LinkTool from '../editorjs/plugins/link-tool';
 import Undo from 'editorjs-undo';
 import CommentTune from '../editorjs/plugins/comment-tune';
+import ResizableTune from '../editorjs/plugins/ResizableTune';
 import ResizableImage from '../editorjs/plugins/resizable-image';
 import VideoEmbed from '../editorjs/plugins/video-embed';
 import VideoUpload from '../editorjs/plugins/video-upload';
@@ -164,7 +165,8 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     'linkTool': 'Link',
                     'videoEmbed': 'Video Embed',
                     'videoUpload': 'Video Upload',
-                    'commentTune': 'Add Comment'
+                    'commentTune': 'Add Comment',
+                    'resizableTune': 'Resize'
                 },
                 'ar': {
                     'paragraph': 'نص',
@@ -176,7 +178,8 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     'linkTool': 'رابط',
                     'videoEmbed': 'تضمين فيديو',
                     'videoUpload': 'رفع فيديو',
-                    'commentTune': 'إضافة تعليق'
+                    'commentTune': 'إضافة تعليق',
+                    'resizableTune': 'تغيير الحجم'
                 }
             };
             
@@ -240,6 +243,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                             "Add Comment": "Add Comment",
                             "Comment": "Comment",
                             "Add a comment": "Add a comment"
+                        },
+                        "resizableTune": {
+                            "Resize Video": "Resize Video",
+                            "Toggle resize mode": "Toggle resize mode"
                         }
                     }
                 },
@@ -291,6 +298,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                             "Add Comment": "إضافة تعليق",
                             "Comment": "تعليق",
                             "Add a comment": "إضافة تعليق"
+                        },
+                        "resizableTune": {
+                            "Resize Video": "تغيير حجم الفيديو",
+                            "Toggle resize mode": "تبديل وضع تغيير الحجم"
                         }
                     }
                 }
@@ -629,7 +640,8 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         title: this.toolTranslations?.videoUpload || 'Video Upload'
                     }
                 },
-                commentTune: CommentTune
+                commentTune: CommentTune,
+                resizableTune: ResizableTune
             };
         },
 
@@ -730,8 +742,9 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 tools[toolName] = tool;
             });
 
-            // Always add commentTune
+            // Always add commentTune and resizableTune
             tools.commentTune = CommentTune;
+            tools.resizableTune = ResizableTune;
 
             console.log('Final tools configuration:', tools);
             return tools;

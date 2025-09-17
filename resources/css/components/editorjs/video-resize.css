@@ -1,0 +1,309 @@
+/**
+ * Video Resize Functionality Styles
+ * Styles for resizable video blocks in EditorJS
+ */
+
+/* Resize mode active state */
+.ce-block.resize-mode-active {
+    position: relative;
+    outline: 2px dashed #3b82f6;
+    outline-offset: 4px;
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Video resize handles container */
+.video-resize-handles {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Individual resize handles */
+.video-resize-handle {
+    position: absolute;
+    background: #3b82f6;
+    border: 2px solid #ffffff;
+    border-radius: 4px;
+    pointer-events: auto;
+    transition: all 0.2s ease;
+    z-index: 11;
+}
+
+/* Corner handles (with grip) */
+.video-resize-handle.resize-nw,
+.video-resize-handle.resize-ne,
+.video-resize-handle.resize-sw,
+.video-resize-handle.resize-se {
+    width: 12px;
+    height: 12px;
+}
+
+/* Edge handles */
+.video-resize-handle.resize-n,
+.video-resize-handle.resize-s {
+    width: 20px;
+    height: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.video-resize-handle.resize-e,
+.video-resize-handle.resize-w {
+    width: 8px;
+    height: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Handle positions */
+.video-resize-handle.resize-nw {
+    top: -6px;
+    left: -6px;
+    cursor: nw-resize;
+}
+
+.video-resize-handle.resize-n {
+    top: -4px;
+    cursor: n-resize;
+}
+
+.video-resize-handle.resize-ne {
+    top: -6px;
+    right: -6px;
+    cursor: ne-resize;
+}
+
+.video-resize-handle.resize-w {
+    left: -4px;
+    cursor: w-resize;
+}
+
+.video-resize-handle.resize-e {
+    right: -4px;
+    cursor: e-resize;
+}
+
+.video-resize-handle.resize-sw {
+    bottom: -6px;
+    left: -6px;
+    cursor: sw-resize;
+}
+
+.video-resize-handle.resize-s {
+    bottom: -4px;
+    cursor: s-resize;
+}
+
+.video-resize-handle.resize-se {
+    bottom: -6px;
+    right: -6px;
+    cursor: se-resize;
+}
+
+/* Handle hover effects */
+.video-resize-handle:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.video-resize-handle.resize-n:hover,
+.video-resize-handle.resize-s:hover {
+    transform: translateX(-50%) scale(1.1);
+}
+
+.video-resize-handle.resize-e:hover,
+.video-resize-handle.resize-w:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Grip decoration for corner handles */
+.resize-handle-grip {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    opacity: 0.7;
+}
+
+.resize-handle-grip::before,
+.resize-handle-grip::after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 1px;
+}
+
+/* Diagonal lines for corner grips */
+.resize-nw .resize-handle-grip::before,
+.resize-se .resize-handle-grip::before {
+    width: 1px;
+    height: 8px;
+    top: 2px;
+    left: 3px;
+    transform: rotate(45deg);
+}
+
+.resize-nw .resize-handle-grip::after,
+.resize-se .resize-handle-grip::after {
+    width: 1px;
+    height: 8px;
+    top: 2px;
+    right: 3px;
+    transform: rotate(-45deg);
+}
+
+.resize-ne .resize-handle-grip::before,
+.resize-sw .resize-handle-grip::before {
+    width: 1px;
+    height: 8px;
+    top: 2px;
+    left: 3px;
+    transform: rotate(-45deg);
+}
+
+.resize-ne .resize-handle-grip::after,
+.resize-sw .resize-handle-grip::after {
+    width: 1px;
+    height: 8px;
+    top: 2px;
+    right: 3px;
+    transform: rotate(45deg);
+}
+
+/* Body styles during resize */
+body.video-resizing {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+body.video-resizing * {
+    pointer-events: none;
+}
+
+body.video-resizing .video-resize-handle {
+    pointer-events: auto;
+}
+
+/* Custom video container styles when resizing */
+.resize-mode-active .ce-video-upload__container,
+.resize-mode-active .ce-video-upload__thumbnail-container {
+    position: relative;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.resize-mode-active .ce-video-upload__thumbnail-container img,
+.resize-mode-active .ce-video-upload__thumbnail-container video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
+
+/* Resize info tooltip */
+.video-resize-info {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 12;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.resize-mode-active .video-resize-info {
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .video-resize-handle {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .video-resize-handle.resize-nw,
+    .video-resize-handle.resize-ne,
+    .video-resize-handle.resize-sw,
+    .video-resize-handle.resize-se {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .video-resize-handle.resize-n,
+    .video-resize-handle.resize-s {
+        width: 24px;
+        height: 12px;
+    }
+    
+    .video-resize-handle.resize-e,
+    .video-resize-handle.resize-w {
+        width: 12px;
+        height: 24px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .ce-block.resize-mode-active {
+        outline-color: #60a5fa;
+        background-color: rgba(96, 165, 250, 0.05);
+    }
+    
+    .video-resize-handle {
+        background: #60a5fa;
+        border-color: #1f2937;
+    }
+    
+    .video-resize-handle:hover {
+        background: #3b82f6;
+    }
+    
+    .resize-mode-active .ce-video-upload__container,
+    .resize-mode-active .ce-video-upload__thumbnail-container {
+        border-color: #374151;
+    }
+}
+
+/* Animation for mode transition */
+.ce-block {
+    transition: outline 0.2s ease, background-color 0.2s ease;
+}
+
+.video-resize-handles {
+    animation: resizeHandlesAppear 0.2s ease-out;
+}
+
+@keyframes resizeHandlesAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Aspect ratio lock indicator */
+.aspect-ratio-locked::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 16px;
+    height: 16px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'/%3E%3C/svg%3E") no-repeat center;
+    background-size: contain;
+    opacity: 0.7;
+    z-index: 15;
+}

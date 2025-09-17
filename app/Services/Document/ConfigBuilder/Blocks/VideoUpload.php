@@ -30,7 +30,7 @@ final class VideoUpload implements DocumentBlockConfigContract
         'useChunkedUpload' => true,
     ];
 
-    private array $tunes = ['commentTune'];
+    private array $tunes = ['commentTune', 'resizableTune'];
 
     public function __construct(
         private bool $inlineToolBar = false,

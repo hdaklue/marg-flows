@@ -1,0 +1,128 @@
+{
+  "time": 1703097600000,
+  "blocks": [
+    {
+      "id": "video-example-block",
+      "type": "videoUpload",
+      "data": {
+        "file": {
+          "filename": "sample-video.mp4",
+          "thumbnail": "sample-video-thumb.jpg",
+          "width": 1920,
+          "height": 1080,
+          "duration": 120.5,
+          "size": 52428800,
+          "format": "mp4",
+          "original_format": "mp4",
+          "aspect_ratio": "16:9",
+          "aspect_ratio_data": {
+            "width": 16,
+            "height": 9,
+            "decimal": 1.7777777777777777
+          },
+          "conversion": {
+            "performed": false,
+            "success": true,
+            "message": "No conversion needed"
+          }
+        },
+        "caption": "Sample video demonstrating the resizable video block functionality",
+        "resize": {
+          "width": 640,
+          "height": 360,
+          "maintainAspectRatio": true,
+          "maxWidth": "100%",
+          "minWidth": 200
+        }
+      },
+      "tunes": {
+        "resizable": {
+          "width": 640,
+          "height": 360,
+          "maintainAspectRatio": true,
+          "maxWidth": "100%",
+          "minWidth": 200,
+          "isActive": false
+        }
+      }
+    }
+  ],
+  "version": "2.28.2"
+}
+
+/*
+Data Structure Explanation:
+
+1. file: Core video file information
+   - filename: The actual filename stored on server (used for secure URL generation)
+   - thumbnail: Thumbnail image filename (optional)
+   - width/height: Original video dimensions in pixels
+   - duration: Video duration in seconds
+   - size: File size in bytes
+   - format: Final video format (what user sees)
+   - original_format: Original uploaded format (for conversion tracking)
+   - aspect_ratio: String representation (e.g., "16:9", "4:3")
+   - aspect_ratio_data: Detailed aspect ratio information
+   - conversion: Information about video conversion process
+
+2. caption: User-provided caption text
+
+3. resize: Resize configuration for the video block
+   - width/height: Custom dimensions set by user (in pixels)
+   - maintainAspectRatio: Whether to lock aspect ratio during resize
+   - maxWidth: Maximum allowed width (CSS value or percentage)
+   - minWidth: Minimum allowed width in pixels
+
+4. tunes.resizable: Tune-specific data (EditorJS tune system)
+   - Same structure as resize but managed by the ResizableTune
+   - isActive: Whether resize mode is currently enabled
+
+Usage Examples:
+
+// Default video (no custom sizing)
+{
+  "file": { "filename": "video.mp4", ... },
+  "caption": "",
+  "resize": {
+    "width": null,
+    "height": null,
+    "maintainAspectRatio": true,
+    "maxWidth": "100%",
+    "minWidth": 200
+  }
+}
+
+// Resized video (custom dimensions)
+{
+  "file": { "filename": "video.mp4", ... },
+  "caption": "Custom sized video",
+  "resize": {
+    "width": 800,
+    "height": 450,
+    "maintainAspectRatio": true,
+    "maxWidth": "100%",
+    "minWidth": 200
+  }
+}
+
+// Video with aspect ratio unlocked
+{
+  "file": { "filename": "video.mp4", ... },
+  "caption": "Stretched video",
+  "resize": {
+    "width": 800,
+    "height": 600,
+    "maintainAspectRatio": false,
+    "maxWidth": "100%",
+    "minWidth": 200
+  }
+}
+
+Integration Notes:
+
+- The VideoUpload plugin reads from data.resize to apply custom dimensions
+- The ResizableTune manages the tune-specific data and syncs with data.resize
+- File serving uses data.file.filename to generate secure URLs
+- Thumbnail display uses data.file.thumbnail for preview images
+- Modal video player respects original dimensions while thumbnail shows custom size
+*/
