@@ -1,0 +1,79 @@
+{
+  "time": 1642684800000,
+  "blocks": [
+    {
+      "id": "video-embed-block-123",
+      "type": "videoEmbed",
+      "data": {
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "type": "youtube",
+        "videoId": "dQw4w9WgXcQ",
+        "embedUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+        "caption": "Sample YouTube video with custom sizing"
+      },
+      "tunes": {
+        "commentTune": {
+          "blockId": "block_1642684800000_abc123def456"
+        },
+        "videoEmbedResizableTune": {
+          "resize": {
+            "width": 640,
+            "height": 360,
+            "maintainAspectRatio": true,
+            "maxWidth": "100%",
+            "minWidth": 300
+          }
+        }
+      }
+    },
+    {
+      "id": "video-embed-block-456",
+      "type": "videoEmbed",
+      "data": {
+        "url": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+        "type": "direct",
+        "caption": "Direct video file with custom dimensions"
+      },
+      "tunes": {
+        "commentTune": {
+          "blockId": "block_1642684900000_xyz789ghi012"
+        },
+        "videoEmbedResizableTune": {
+          "resize": {
+            "width": 800,
+            "height": 450,
+            "maintainAspectRatio": true,
+            "maxWidth": "100%",
+            "minWidth": 300
+          }
+        }
+      }
+    },
+    {
+      "id": "video-embed-block-789",
+      "type": "videoEmbed",
+      "data": {
+        "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+        "type": "youtube",
+        "videoId": "ScMzIvxBSi4",
+        "embedUrl": "https://www.youtube.com/embed/ScMzIvxBSi4",
+        "caption": "Another YouTube video without custom sizing (uses default)"
+      },
+      "tunes": {
+        "commentTune": {
+          "blockId": "block_1642685000000_mno345pqr678"
+        },
+        "videoEmbedResizableTune": {
+          "resize": {
+            "width": null,
+            "height": null,
+            "maintainAspectRatio": true,
+            "maxWidth": "100%",
+            "minWidth": 300
+          }
+        }
+      }
+    }
+  ],
+  "version": "2.26.5"
+}

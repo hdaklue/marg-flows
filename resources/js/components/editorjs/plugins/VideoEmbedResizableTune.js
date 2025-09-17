@@ -1,9 +1,9 @@
 /**
- * ResizableTune - EditorJS Block Tune for Resizable Video Blocks
- * Allows users to resize video blocks by dragging edges/corners
+ * VideoEmbedResizableTune - EditorJS Block Tune for Resizable Video Embed Blocks
+ * Allows users to resize video embed blocks by dragging corners
  */
 
-class ResizableTune {
+class VideoEmbedResizableTune {
     static get isTune() {
         return true;
     }
@@ -29,7 +29,7 @@ class ResizableTune {
                 height: null,
                 maintainAspectRatio: true,
                 maxWidth: '100%',
-                minWidth: 200
+                minWidth: 300
             };
         }
 
@@ -43,11 +43,9 @@ class ResizableTune {
         this.startResize = this.startResize.bind(this);
         this.doResize = this.doResize.bind(this);
         this.stopResize = this.stopResize.bind(this);
-        this.onBlockFocus = this.onBlockFocus.bind(this);
-        this.onBlockBlur = this.onBlockBlur.bind(this);
         
         // Apply stored dimensions immediately when the tune is created
-        setTimeout(() => this.applyStoredDimensions(), 100);
+        setTimeout(() => this.applyStoredDimensions(), 200);
     }
 
     /**
@@ -101,9 +99,6 @@ class ResizableTune {
         
         // Add resize handles
         this.addResizeHandles();
-        
-        // Add event listeners
-        this.addEventListeners();
     }
 
     /**
@@ -115,52 +110,56 @@ class ResizableTune {
         
         // Remove resize handles
         this.removeResizeHandles();
-        
-        // Remove event listeners
-        this.removeEventListeners();
     }
 
     /**
-     * Add resize handles around the video block
+     * Add resize handles around the video embed container
      */
     addResizeHandles() {
         const blockElement = this.block.holder;
-        // Target specifically the thumbnail container (the actual video preview)
-        const thumbnailContainer = blockElement.querySelector('.ce-video-upload__thumbnail-container');
+        // Target the video embed container (the wrapper around iframe/video)
+        const videoContainer = blockElement.querySelector('.video-embed__video-wrapper') || 
+                              blockElement.querySelector('.video-embed__container');
         
-        if (!thumbnailContainer) {
+        if (!videoContainer) {
+            console.warn('VideoEmbedResizableTune: Video container not found');
             return;
         }
 
         // Remove existing handles
         this.removeResizeHandles();
 
-        // Create resize wrapper that will contain both thumbnail and handles
-        const resizeWrapper = document.createElement('div');
-        resizeWrapper.classList.add('video-resize-wrapper');
-        resizeWrapper.style.cssText = `
-            position: relative;
-            display: inline-block;
-        `;
+        // Don't create wrapper if already exists
+        let resizeWrapper = blockElement.querySelector('.video-embed-resize-wrapper');
+        if (!resizeWrapper) {
+            // Create resize wrapper that will contain both video container and handles
+            resizeWrapper = document.createElement('div');
+            resizeWrapper.classList.add('video-embed-resize-wrapper');
+            resizeWrapper.style.cssText = `
+                position: relative;
+                display: inline-block;
+                width: 100%;
+            `;
 
-        // Move thumbnail container inside the wrapper
-        const thumbnailParent = thumbnailContainer.parentNode;
-        thumbnailParent.insertBefore(resizeWrapper, thumbnailContainer);
-        resizeWrapper.appendChild(thumbnailContainer);
+            // Move video container inside the wrapper
+            const containerParent = videoContainer.parentNode;
+            containerParent.insertBefore(resizeWrapper, videoContainer);
+            resizeWrapper.appendChild(videoContainer);
+        }
 
         // Create resize handles container
         const handlesContainer = document.createElement('div');
-        handlesContainer.classList.add('video-resize-handles');
+        handlesContainer.classList.add('video-embed-resize-handles');
         
         // Define handle positions - only corners for aspect ratio preservation
         const handles = ['nw', 'ne', 'sw', 'se'];
 
         handles.forEach(position => {
             const handle = document.createElement('div');
-            handle.classList.add('video-resize-handle', `resize-${position}`);
+            handle.classList.add('video-embed-resize-handle', `resize-${position}`);
             handle.dataset.direction = position;
             
-            // Add inline styling for smooth, visible handles
+            // Add inline styling for smooth, visible handles with better interaction
             handle.style.cssText = `
                 position: absolute;
                 background: #3b82f6;
@@ -168,8 +167,8 @@ class ResizableTune {
                 border-radius: 50%;
                 pointer-events: auto;
                 z-index: 11;
-                width: 16px;
-                height: 16px;
+                width: 20px;
+                height: 20px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -177,7 +176,19 @@ class ResizableTune {
                 color: white;
                 user-select: none;
                 transition: none;
+                cursor: grab;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             `;
+            
+            // Add hover effect
+            handle.addEventListener('mouseenter', () => {
+                handle.style.background = '#2563eb';
+                handle.style.transform = 'scale(1.1)';
+            });
+            handle.addEventListener('mouseleave', () => {
+                handle.style.background = '#3b82f6';
+                handle.style.transform = 'scale(1)';
+            });
             
             // Position the handle based on direction
             this.positionHandle(handle, position);
@@ -188,7 +199,7 @@ class ResizableTune {
             handlesContainer.appendChild(handle);
         });
 
-        // Position handles container to wrap around the thumbnail
+        // Position handles container to wrap around the video container
         handlesContainer.style.cssText = `
             position: absolute;
             top: 0;
@@ -199,12 +210,12 @@ class ResizableTune {
             z-index: 10;
         `;
 
-        // Make handles draggable with both mouse and touch support
-        handlesContainer.querySelectorAll('.video-resize-handle').forEach(handle => {
+        // Make handles draggable with better event handling
+        handlesContainer.querySelectorAll('.video-embed-resize-handle').forEach(handle => {
             handle.style.pointerEvents = 'auto';
             handle.style.touchAction = 'none'; // Prevent touch scrolling
             
-            // Add both mouse and touch events for better device support
+            // Add both mouse and touch events for better reliability
             handle.addEventListener('mousedown', this.startResize, { passive: false });
             handle.addEventListener('touchstart', this.startResize, { passive: false });
             
@@ -212,7 +223,7 @@ class ResizableTune {
             handle.addEventListener('contextmenu', (e) => e.preventDefault());
         });
 
-        // Append handles to the wrapper (not inside thumbnail)
+        // Append handles to the wrapper (not inside video container)
         resizeWrapper.appendChild(handlesContainer);
         this.resizeHandles = handlesContainer;
     }
@@ -221,26 +232,26 @@ class ResizableTune {
      * Position a corner resize handle
      */
     positionHandle(handle, direction) {
-        // Position handles outside the thumbnail container for clear visibility
+        // Position handles outside the video container for clear visibility and better interaction
         switch (direction) {
             case 'nw':
-                handle.style.top = '-8px';
-                handle.style.left = '-8px';
+                handle.style.top = '-10px';
+                handle.style.left = '-10px';
                 handle.style.cursor = 'nw-resize';
                 break;
             case 'ne':
-                handle.style.top = '-8px';
-                handle.style.right = '-8px';
+                handle.style.top = '-10px';
+                handle.style.right = '-10px';
                 handle.style.cursor = 'ne-resize';
                 break;
             case 'sw':
-                handle.style.bottom = '-8px';
-                handle.style.left = '-8px';
+                handle.style.bottom = '-10px';
+                handle.style.left = '-10px';
                 handle.style.cursor = 'sw-resize';
                 break;
             case 'se':
-                handle.style.bottom = '-8px';
-                handle.style.right = '-8px';
+                handle.style.bottom = '-10px';
+                handle.style.right = '-10px';
                 handle.style.cursor = 'se-resize';
                 break;
         }
@@ -250,10 +261,17 @@ class ResizableTune {
      * Remove resize handles
      */
     removeResizeHandles() {
+        const blockElement = this.block.holder;
+        
+        // Only remove handles, not the wrapper
         if (this.resizeHandles) {
             this.resizeHandles.remove();
             this.resizeHandles = null;
         }
+        
+        // Also clean up any orphaned handles
+        const orphanedHandles = blockElement.querySelectorAll('.video-embed-resize-handles');
+        orphanedHandles.forEach(handle => handle.remove());
     }
 
     /**
@@ -270,22 +288,26 @@ class ResizableTune {
         if (!clientX || !clientY) return;
 
         this.isResizing = true;
-        const handle = e.target.closest('.video-resize-handle');
+        const handle = e.target.closest('.video-embed-resize-handle');
         if (!handle) return;
         
         const direction = handle.dataset.direction;
         
+        // Change cursor style during drag
+        handle.style.cursor = 'grabbing';
+        
         const blockElement = this.block.holder;
-        const thumbnailContainer = blockElement.querySelector('.ce-video-upload__thumbnail-container');
+        const videoContainer = blockElement.querySelector('.video-embed__video-wrapper') || 
+                              blockElement.querySelector('.video-embed__container');
         
-        if (!thumbnailContainer) return;
+        if (!videoContainer) return;
 
-        // Get the actual computed size of the thumbnail, not just the offset
-        const computedStyle = window.getComputedStyle(thumbnailContainer);
-        const currentWidth = parseFloat(computedStyle.width) || thumbnailContainer.offsetWidth;
-        const currentHeight = parseFloat(computedStyle.height) || thumbnailContainer.offsetHeight;
+        // Get the actual computed size of the video container, not just the offset
+        const computedStyle = window.getComputedStyle(videoContainer);
+        const currentWidth = parseFloat(computedStyle.width) || videoContainer.offsetWidth;
+        const currentHeight = parseFloat(computedStyle.height) || videoContainer.offsetHeight;
         
-        console.log('Starting resize from dimensions:', { currentWidth, currentHeight });
+        console.log('Starting video embed resize from dimensions:', { currentWidth, currentHeight });
         
         this.originalDimensions = {
             width: currentWidth,
@@ -299,17 +321,18 @@ class ResizableTune {
         this.aspectRatio = currentWidth / currentHeight;
 
         // Add resize cursor to body
-        document.body.classList.add('video-resizing');
+        document.body.classList.add('video-embed-resizing');
         document.body.style.cursor = this.getCursorForDirection(direction);
 
-        // Add event listeners for both mouse and touch events
+        // Add event listeners for resize - both mouse and touch
         document.addEventListener('mousemove', this.doResize, { passive: false });
         document.addEventListener('mouseup', this.stopResize, { passive: false });
         document.addEventListener('touchmove', this.doResize, { passive: false });
         document.addEventListener('touchend', this.stopResize, { passive: false });
 
-        // Prevent text selection during resize
+        // Prevent text selection and scrolling during resize
         document.body.style.userSelect = 'none';
+        document.body.style.overflow = 'hidden';
     }
 
     /**
@@ -337,25 +360,23 @@ class ResizableTune {
         // Always maintain aspect ratio for corner resizing
         switch (direction) {
             case 'se':
-                // Bottom-right: increase with both X and Y, use the larger delta
-                const deltaMax = Math.max(deltaX, deltaY);
-                newWidth = this.originalDimensions.width + deltaMax;
+                // Bottom-right: drag right/down = bigger, left/up = smaller
+                newWidth = this.originalDimensions.width + deltaX;
                 newHeight = newWidth / this.aspectRatio;
                 break;
             case 'sw':
-                // Bottom-left: decrease width, increase height
+                // Bottom-left: drag left/down = bigger, right/up = smaller
                 newWidth = this.originalDimensions.width - deltaX;
                 newHeight = newWidth / this.aspectRatio;
                 break;
             case 'ne':
-                // Top-right: increase width, decrease height
+                // Top-right: drag right/up = bigger, left/down = smaller
                 newWidth = this.originalDimensions.width + deltaX;
                 newHeight = newWidth / this.aspectRatio;
                 break;
             case 'nw':
-                // Top-left: decrease both
-                const deltaNW = Math.max(-deltaX, -deltaY);
-                newWidth = this.originalDimensions.width + deltaNW;
+                // Top-left: drag left/up = bigger, right/down = smaller
+                newWidth = this.originalDimensions.width - deltaX;
                 newHeight = newWidth / this.aspectRatio;
                 break;
         }
@@ -379,30 +400,30 @@ class ResizableTune {
 
         this.isResizing = false;
 
-        // Clean up both mouse and touch event listeners
+        // Clean up all event listeners
         document.removeEventListener('mousemove', this.doResize);
         document.removeEventListener('mouseup', this.stopResize);
         document.removeEventListener('touchmove', this.doResize);
         document.removeEventListener('touchend', this.stopResize);
-        document.body.classList.remove('video-resizing');
+        document.body.classList.remove('video-embed-resizing');
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+        document.body.style.overflow = '';
 
         // Save current dimensions to data - this keeps the size permanent
         const blockElement = this.block.holder;
-        const thumbnailContainer = blockElement.querySelector('.ce-video-upload__thumbnail-container');
+        const videoContainer = blockElement.querySelector('.video-embed__video-wrapper') || 
+                              blockElement.querySelector('.video-embed__container');
         
-        if (thumbnailContainer) {
-            const currentWidth = parseInt(thumbnailContainer.style.width);
-            const currentHeight = parseInt(thumbnailContainer.style.height);
+        if (videoContainer) {
+            const currentWidth = parseInt(videoContainer.style.width);
+            const currentHeight = parseInt(videoContainer.style.height);
             
             this.data.resize.width = currentWidth;
             this.data.resize.height = currentHeight;
             
-            // Make the size permanent by setting it as inline style
-            thumbnailContainer.style.width = `${currentWidth}px`;
-            thumbnailContainer.style.height = `${currentHeight}px`;
-            thumbnailContainer.style.maxWidth = 'none';
+            // Make the size permanent using applyDimensions to ensure embedded content is properly sized
+            this.applyDimensions(currentWidth, currentHeight);
         }
 
         // Hide resize handles after resizing
@@ -412,54 +433,52 @@ class ResizableTune {
     }
 
     /**
-     * Apply dimensions to thumbnail container
+     * Apply dimensions to video container and force embedded content to fit
      */
     applyDimensions(width, height) {
         const blockElement = this.block.holder;
-        const thumbnailContainer = blockElement.querySelector('.ce-video-upload__thumbnail-container');
+        const videoContainer = blockElement.querySelector('.video-embed__video-wrapper') || 
+                              blockElement.querySelector('.video-embed__container');
         
-        if (!thumbnailContainer) return;
+        if (!videoContainer) return;
 
-        // Apply dimensions smoothly without any delays
-        thumbnailContainer.style.width = `${width}px`;
-        thumbnailContainer.style.height = `${height}px`;
-        thumbnailContainer.style.maxWidth = 'none';
+        // Apply dimensions to container
+        videoContainer.style.width = `${width}px`;
+        videoContainer.style.height = `${height}px`;
+        videoContainer.style.maxWidth = 'none';
+        
+        // Force embedded iframe/video to take container size
+        const iframe = videoContainer.querySelector('iframe');
+        const video = videoContainer.querySelector('video');
+        
+        if (iframe) {
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.objectFit = 'contain';
+        }
+        
+        if (video) {
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'contain';
+        }
         
         // Force immediate layout update for smooth resize
-        thumbnailContainer.offsetHeight;
+        videoContainer.offsetHeight;
     }
 
     /**
-     * Update resize wrapper dimensions to match thumbnail
+     * Update resize wrapper dimensions to match video container
      */
     updateResizeWrapper(width, height) {
         const blockElement = this.block.holder;
-        const resizeWrapper = blockElement.querySelector('.video-resize-wrapper');
+        const resizeWrapper = blockElement.querySelector('.video-embed-resize-wrapper');
         
         if (!resizeWrapper) return;
 
-        // Ensure wrapper matches thumbnail dimensions
+        // Ensure wrapper matches video container dimensions
         resizeWrapper.style.width = `${width}px`;
         resizeWrapper.style.height = `${height}px`;
-    }
-
-    /**
-     * Update handles position to match video container
-     */
-    updateHandlesPosition() {
-        if (!this.resizeHandles) return;
-
-        // Since handles are now direct children of videoContainer,
-        // they automatically maintain correct positioning
-        this.resizeHandles.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        `;
     }
 
     /**
@@ -467,10 +486,6 @@ class ResizableTune {
      */
     getCursorForDirection(direction) {
         const cursors = {
-            n: 'n-resize',
-            s: 's-resize',
-            e: 'e-resize',
-            w: 'w-resize',
             ne: 'ne-resize',
             nw: 'nw-resize',
             se: 'se-resize',
@@ -490,66 +505,47 @@ class ResizableTune {
     }
 
     /**
-     * Add event listeners for block focus/blur
-     */
-    addEventListeners() {
-        // Listen for block selection changes
-        this.api.blocks.getCurrentBlockIndex(); // Trigger focus tracking
-    }
-
-    /**
-     * Remove event listeners
-     */
-    removeEventListeners() {
-        // Clean up any remaining listeners
-    }
-
-    /**
-     * Handle block focus
-     */
-    onBlockFocus() {
-        // Block is focused, keep handles visible
-    }
-
-    /**
-     * Handle block blur
-     */
-    onBlockBlur() {
-        // Block lost focus, you might want to hide handles here
-    }
-
-    /**
      * Apply stored dimensions when block is rendered
      */
     applyStoredDimensions() {
         if (this.data.resize && (this.data.resize.width && this.data.resize.height)) {
             const blockElement = this.block.holder;
-            const thumbnailContainer = blockElement.querySelector('.ce-video-upload__thumbnail-container');
             
-            if (thumbnailContainer) {
-                // Ensure stored dimensions don't exceed block width (prevent mobile overflow)
-                const maxWidth = this.getMaxWidth();
-                let width = this.data.resize.width;
-                let height = this.data.resize.height;
+            // Wait for video to be properly rendered
+            const checkAndApply = () => {
+                const videoContainer = blockElement.querySelector('.video-embed__video-wrapper') || 
+                                      blockElement.querySelector('.video-embed__container');
                 
-                if (width > maxWidth) {
-                    // Scale down proportionally to fit block width
-                    const aspectRatio = width / height;
-                    width = maxWidth;
-                    height = width / aspectRatio;
+                if (videoContainer) {
+                    // Ensure stored dimensions don't exceed block width (prevent mobile overflow)
+                    const maxWidth = this.getMaxWidth();
+                    let width = this.data.resize.width;
+                    let height = this.data.resize.height;
                     
-                    // Update stored data with corrected dimensions
-                    this.data.resize.width = width;
-                    this.data.resize.height = height;
+                    if (width > maxWidth) {
+                        // Scale down proportionally to fit block width
+                        const aspectRatio = width / height;
+                        width = maxWidth;
+                        height = width / aspectRatio;
+                        
+                        // Update stored data with corrected dimensions
+                        this.data.resize.width = width;
+                        this.data.resize.height = height;
+                    }
+                    
+                    console.log('Applying stored video embed dimensions:', width, 'x', height);
+                    
+                    // Use the same applyDimensions method to ensure embedded content is sized correctly
+                    this.applyDimensions(width, height);
+                } else {
+                    // Try again after a short delay if container not found
+                    setTimeout(checkAndApply, 100);
                 }
-                
-                console.log('Applying stored dimensions:', width, 'x', height);
-                thumbnailContainer.style.width = `${width}px`;
-                thumbnailContainer.style.height = `${height}px`;
-                thumbnailContainer.style.maxWidth = 'none';
-            }
+            };
+            
+            checkAndApply();
         } else {
-            console.log('No stored dimensions to apply');
+            console.log('No stored video embed dimensions to apply');
         }
     }
 
@@ -558,12 +554,13 @@ class ResizableTune {
      */
     resetDimensions() {
         const blockElement = this.block.holder;
-        const thumbnailContainer = blockElement.querySelector('.ce-video-upload__thumbnail-container');
+        const videoContainer = blockElement.querySelector('.video-embed__video-wrapper') || 
+                              blockElement.querySelector('.video-embed__container');
         
-        if (thumbnailContainer) {
-            thumbnailContainer.style.width = '';
-            thumbnailContainer.style.height = '';
-            thumbnailContainer.style.maxWidth = '';
+        if (videoContainer) {
+            videoContainer.style.width = '';
+            videoContainer.style.height = '';
+            videoContainer.style.maxWidth = '';
         }
 
         // Clear stored dimensions
@@ -572,12 +569,12 @@ class ResizableTune {
             height: null,
             maintainAspectRatio: true,
             maxWidth: '100%',
-            minWidth: 200
+            minWidth: 300
         };
 
         // Update handles if visible
         if (this.resizeHandles) {
-            this.updateHandlesPosition();
+            this.updateResizeWrapper();
         }
     }
 
@@ -589,4 +586,4 @@ class ResizableTune {
     }
 }
 
-export default ResizableTune;
+export default VideoEmbedResizableTune;

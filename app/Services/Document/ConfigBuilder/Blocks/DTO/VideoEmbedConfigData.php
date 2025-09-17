@@ -21,7 +21,7 @@ final class VideoEmbedConfigData extends SimpleDTO implements BlockConfigContrac
     {
         return [
             'class' => 'VideoEmbed',
-            'tunes' => ['commentTune'],
+            'tunes' => ['commentTune', 'videoEmbedResizableTune'],
             'inlineToolBar' => false,
             'config' => [
                 'placeholder' => 'Paste a YouTube URL...',

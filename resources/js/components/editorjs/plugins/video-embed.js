@@ -48,6 +48,17 @@ class VideoEmbed {
         this.config = config || {};
         this.data = data || {};
 
+        // Initialize resize data for VideoEmbedResizableTune integration
+        if (!this.data.resize) {
+            this.data.resize = {
+                width: null,
+                height: null,
+                maintainAspectRatio: true,
+                maxWidth: '100%',
+                minWidth: 300
+            };
+        }
+
         // Initialize localization
         this.t = this.initializeLocalization();
 
@@ -205,10 +216,20 @@ class VideoEmbed {
         const videoContainer = document.createElement('div');
         videoContainer.classList.add('video-embed__container');
 
-        // Create video element
+        // Create video element with initial sizing based on resize values
         const videoWrapper = document.createElement('div');
         videoWrapper.classList.add('video-embed__video-wrapper');
-        videoWrapper.style.aspectRatio = this.config.aspectRatio;
+        
+        // Use stored resize dimensions if available, otherwise use default aspect ratio
+        if (this.data.resize && this.data.resize.width && this.data.resize.height) {
+            // Use stored resize dimensions as the initial scale
+            videoWrapper.style.width = `${this.data.resize.width}px`;
+            videoWrapper.style.height = `${this.data.resize.height}px`;
+            videoWrapper.style.maxWidth = 'none';
+        } else {
+            // Use default aspect ratio sizing
+            videoWrapper.style.aspectRatio = this.config.aspectRatio;
+        }
 
         if (this.isYouTubeUrl(this.data.url)) {
             this.renderYouTubeVideo(videoWrapper);
@@ -558,6 +579,20 @@ class VideoEmbed {
 
     save() {
         return this.data;
+    }
+
+    /**
+     * Get resize data for tune integration
+     */
+    getResizeData() {
+        return this.data.resize || {};
+    }
+
+    /**
+     * Update resize data from tune
+     */
+    updateResizeData(resizeData) {
+        this.data.resize = { ...this.data.resize, ...resizeData };
     }
 
     validate(savedData) {

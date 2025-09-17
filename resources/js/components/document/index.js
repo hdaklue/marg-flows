@@ -9,6 +9,7 @@ import LinkTool from '../editorjs/plugins/link-tool';
 import Undo from 'editorjs-undo';
 import CommentTune from '../editorjs/plugins/comment-tune';
 import ResizableTune from '../editorjs/plugins/ResizableTune';
+import VideoEmbedResizableTune from '../editorjs/plugins/VideoEmbedResizableTune';
 import ResizableImage from '../editorjs/plugins/resizable-image';
 import VideoEmbed from '../editorjs/plugins/video-embed';
 import VideoUpload from '../editorjs/plugins/video-upload';
@@ -247,6 +248,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         "resizableTune": {
                             "Resize Video": "Resize Video",
                             "Toggle resize mode": "Toggle resize mode"
+                        },
+                        "videoEmbedResizableTune": {
+                            "Resize Video": "Resize Video",
+                            "Toggle resize mode": "Toggle resize mode"
                         }
                     }
                 },
@@ -300,6 +305,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                             "Add a comment": "إضافة تعليق"
                         },
                         "resizableTune": {
+                            "Resize Video": "تغيير حجم الفيديو",
+                            "Toggle resize mode": "تبديل وضع تغيير الحجم"
+                        },
+                        "videoEmbedResizableTune": {
                             "Resize Video": "تغيير حجم الفيديو",
                             "Toggle resize mode": "تبديل وضع تغيير الحجم"
                         }
@@ -608,17 +617,6 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         title: this.toolTranslations?.linkTool || 'Link'
                     }
                 },
-                videoEmbed: {
-                    class: VideoEmbed,
-                    config: {
-                        placeholder: 'Paste a YouTube URL...',
-                        allowDirectUrls: true
-                    },
-                    tunes: ['commentTune'],
-                    toolbox: {
-                        title: this.toolTranslations?.videoEmbed || 'Video Embed'
-                    }
-                },
                 videoUpload: {
                     class: VideoUpload,
                     config: {
@@ -641,7 +639,8 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     }
                 },
                 commentTune: CommentTune,
-                resizableTune: ResizableTune
+                resizableTune: ResizableTune,
+                videoEmbedResizableTune: VideoEmbedResizableTune
             };
         },
 
@@ -742,9 +741,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 tools[toolName] = tool;
             });
 
-            // Always add commentTune and resizableTune
+            // Always add commentTune, resizableTune and videoEmbedResizableTune
             tools.commentTune = CommentTune;
             tools.resizableTune = ResizableTune;
+            tools.videoEmbedResizableTune = VideoEmbedResizableTune;
 
             console.log('Final tools configuration:', tools);
             return tools;

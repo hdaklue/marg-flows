@@ -558,7 +558,7 @@ class VideoUpload {
         const videoContainer = document.createElement('div');
         videoContainer.classList.add('ce-video-upload__container');
         
-        // Apply custom dimensions if available
+        // Apply custom dimensions if available (but now initial sizing already uses resize values)
         this.applyStoredResizeDimensions(videoContainer);
 
         // Create thumbnail container with aspect ratio
@@ -570,19 +570,27 @@ class VideoUpload {
         const [width, height] = aspectRatio.split(':');
         const aspectRatioValue = parseFloat(width) / parseFloat(height);
 
-        // Set container dimensions based on aspect ratio but keep consistent max size
-        const maxWidth = 200;
-        const maxHeight = 120;
-
+        // Use stored resize dimensions if available, otherwise calculate default size
         let containerWidth, containerHeight;
-        if (aspectRatioValue > maxWidth / maxHeight) {
-            // Wide video - constrain by width
-            containerWidth = maxWidth;
-            containerHeight = maxWidth / aspectRatioValue;
+        
+        if (this.data.resize && this.data.resize.width && this.data.resize.height) {
+            // Use stored resize dimensions as the initial scale
+            containerWidth = this.data.resize.width;
+            containerHeight = this.data.resize.height;
         } else {
-            // Tall video - constrain by height
-            containerHeight = maxHeight;
-            containerWidth = maxHeight * aspectRatioValue;
+            // Calculate default size based on aspect ratio
+            const maxWidth = 200;
+            const maxHeight = 120;
+
+            if (aspectRatioValue > maxWidth / maxHeight) {
+                // Wide video - constrain by width
+                containerWidth = maxWidth;
+                containerHeight = maxWidth / aspectRatioValue;
+            } else {
+                // Tall video - constrain by height
+                containerHeight = maxHeight;
+                containerWidth = maxHeight * aspectRatioValue;
+            }
         }
 
         thumbnailContainer.style.cssText = `
@@ -715,8 +723,7 @@ class VideoUpload {
         wrapper.appendChild(videoContainer);
         wrapper.appendChild(captionInput);
 
-        // Apply stored resize dimensions if they exist
-        this.applyStoredResizeDimensions(videoContainer);
+        // Note: No need to apply stored dimensions again since initial sizing already uses them
     }
 
     deleteVideo() {

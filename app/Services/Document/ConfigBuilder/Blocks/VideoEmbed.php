@@ -17,7 +17,7 @@ final class VideoEmbed implements DocumentBlockConfigContract
         'allowDirectUrls' => true,
     ];
 
-    private array $tunes = ['commentTune'];
+    private array $tunes = ['commentTune', 'videoEmbedResizableTune'];
 
     public function __construct(
         private bool $inlineToolBar = false,
