@@ -19,7 +19,9 @@ final class AvatarStorageStrategy extends BaseStorageStrategy
             ->addFile($file->getClientOriginalName(), SanitizationStrategy::SLUG)
             ->getFilename();
 
-        $path = $file->storeAs($this->getDirectory(), $secureFilename);
+        $path = $file->storeAs($this->getDirectory(), $secureFilename, [
+            'disk' => $this->getDisk(),
+        ]);
 
         return $secureFilename;
     }
@@ -27,7 +29,7 @@ final class AvatarStorageStrategy extends BaseStorageStrategy
     public function fromPath(string $copyFrom, $toFileName)
     {
         $securePath = $this->buildSecurePath($toFileName);
-        Storage::move($copyFrom, $securePath);
+        Storage::disk($this->getDisk())->move($copyFrom, $securePath);
     }
 
     public function getDirectory(): string
@@ -52,11 +54,18 @@ final class AvatarStorageStrategy extends BaseStorageStrategy
         throw new Exception('No need for Security');
     }
 
+    public function getDisk()
+    {
+        return 'public';
+    }
+
     // Override to add caching for avatar URLs
     public function getFileUrl(string $fileName): string
     {
         $securePath = $this->buildSecurePath($fileName);
 
-        return Cache::rememberForever(md5($fileName), fn() => Storage::url($securePath));
+        return Cache::rememberForever(md5($fileName), fn() => Storage::disk($this->getDisk())->url(
+            $securePath,
+        ));
     }
 }
