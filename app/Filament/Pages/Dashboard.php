@@ -10,7 +10,7 @@ use Illuminate\Contracts\Support\Htmlable;
 
 final class Dashboard extends \Filament\Pages\Dashboard
 {
-    protected static ?int $navigationSort = 1;
+    protected static null|int $navigationSort = 1;
 
     protected static bool $shouldRegisterNavigation = true;
 
@@ -33,7 +33,7 @@ final class Dashboard extends \Filament\Pages\Dashboard
         return 2;
     }
 
-    public function getTitle(): Htmlable|string
+    public function getHeading(): Htmlable|string
     {
         return 'Hi, ' . str(filamentUser()->name)->beforeLast(' ')->toString();
     }

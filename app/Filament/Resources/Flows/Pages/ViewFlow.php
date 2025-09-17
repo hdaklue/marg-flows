@@ -31,6 +31,7 @@ use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Hdaklue\Actioncrumb\ValueObjects\Action as CrumbAction;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Blade;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 
@@ -43,7 +44,7 @@ final class ViewFlow extends ViewRecord
 
     protected static string $resource = FlowResource::class;
 
-    // protected string $view = 'filament.resources.flow-resource.pages.view-flow';
+    protected string $view = 'filament.resources.flow-resource.pages.view';
 
     protected array $sortableRules = [
         'items' => ['required', 'array', 'max:50'],

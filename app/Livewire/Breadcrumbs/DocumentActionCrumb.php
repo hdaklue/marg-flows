@@ -7,7 +7,6 @@ namespace App\Livewire\Breadcrumbs;
 use App\Filament\Actions\Document\CreateDocumentAction;
 use App\Filament\Actions\Flow\EditFlowInfoAction;
 use App\Filament\Resources\Flows\FlowResource;
-use App\Livewire\Breadcrumbs\Steps\FlowStep;
 use App\Models\Document;
 use App\Models\Flow;
 use Filament\Actions\Action;
@@ -17,23 +16,33 @@ use Hdaklue\Actioncrumb\Components\WireCrumb;
 use Hdaklue\Actioncrumb\Step;
 use Hdaklue\Actioncrumb\Support\WireAction;
 use InvalidArgumentException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\On;
 
 /**
  * Document-specific breadcrumb component with actions.
  */
 final class DocumentActionCrumb extends WireCrumb
 {
-    public null|Document $document = null;
-
-    public Flow $flow;
+    #[Locked]
+    public string $documentId;
 
     public function mount($record = null, $parent = null)
     {
         parent::mount($record, $parent);
-        $this->document = $record;
-        $this->flow = $record->loadMissing('documentable')->documentable;
+        $this->documentId = $record->id;
+    }
+
+    #[Computed]
+    public function document(): Document
+    {
+        return Document::with('documentable')->findOrFail($this->documentId);
+    }
+
+    #[Computed]
+    public function flow(): Flow
+    {
+        return $this->document->documentable;
     }
 
     public function render()
@@ -60,7 +69,7 @@ final class DocumentActionCrumb extends WireCrumb
 
     public function createDocumentAction(): Action
     {
-        if (!$this->document) {
+        if (! $this->document) {
             throw new InvalidArgumentException('Document is required for createDocumentAction');
         }
 
@@ -69,14 +78,12 @@ final class DocumentActionCrumb extends WireCrumb
 
     public function editFlowAction(): EditAction
     {
-        return EditFlowInfoAction::make($this->document->documentable)->after(
-            fn() => $this->dispatch('reload-data'),
-        );
+        return EditFlowInfoAction::make($this->flow);
     }
 
     protected function actioncrumbs(): array
     {
-        if (!$this->document) {
+        if (! $this->document) {
             return [];
         }
 
@@ -91,8 +98,8 @@ final class DocumentActionCrumb extends WireCrumb
         ]);
 
         return [
-            Step::make('flow')
-                ->label(fn() => $this->flow->title)
+            Step::make($this->flow->title)
+                ->label(fn () => $this->flow->title)
                 ->icon(FlowResource::getNavigationIcon())
                 ->url($flowUrl)
                 ->actions([
@@ -116,8 +123,8 @@ final class DocumentActionCrumb extends WireCrumb
                     // WireAction for create document
                     \Hdaklue\Actioncrumb\Action::make('share')
                         ->label('Share with ..')
-                        ->visible(fn() => filamentUser()->can('manage', $this->document))
-                        ->execute(fn() => $this->dispatch(
+                        ->visible(fn () => filamentUser()->can('manage', $this->document))
+                        ->execute(fn () => $this->dispatch(
                             'open-modal',
                             id: 'manage-participants-modal',
                         )),

@@ -6,7 +6,6 @@ namespace App\Providers\Filament;
 
 use App\Filament\Auth\Login;
 use App\Filament\Auth\Register;
-use App\Filament\Pages\Dashboard;
 // Language switch plugin removed - using custom solution
 use App\Filament\Pages\UserSettings;
 use App\Filament\Widgets\RecentInteractionsWidget;
@@ -18,7 +17,6 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -44,17 +42,15 @@ final class PortalPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset()
             ->registration(Register::class)
-            ->databaseNotificationsPolling(fn() => app()->isProduction() ? '60s' : '90s')
+            ->databaseNotificationsPolling(fn () => app()->isProduction() ? '60s' : '90s')
             ->tenant(Tenant::class)
-            // ->homeUrl(fn() => filament()->getTenant()
-            //     ? route('filament.portal.pages.dashboard', ['tenant' => filament()->getTenant()])
-            //     : '/')
             ->colors([
                 'primary' => Color::Emerald,
             ])
+            ->spa(hasPrefetching: true)
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
-            // ->breadcrumbs(false)
+            ->breadcrumbs(false)
             ->viteTheme('resources/css/filament/portal/theme.css')
             ->databaseNotifications()
             ->unsavedChangesAlerts(false)
@@ -62,23 +58,18 @@ final class PortalPanelProvider extends PanelProvider
                 // Custom language switching will be added via render hooks
             ])
             ->maxContentWidth(Width::ScreenTwoExtraLarge)
-            ->renderHook(PanelsRenderHook::TOPBAR_END, fn(): string => Blade::render(
+            ->renderHook(PanelsRenderHook::TOPBAR_END, fn (): string => Blade::render(
                 '<x-language-switch />',
             ))
-            // ->renderHook(
-            //     PanelsRenderHook::SIMPLE_LAYOUT_START,
-            //     fn (): string => '<div class="w-full min-h-screen lg:grid lg:grid-cols-2"><div class="flex flex-col justify-center flex-1 px-4 py-12 sm:px-6 lg:px-8"><div class="w-full max-w-sm mx-auto">',
-            //     scopes: [Login::class, Register::class],
-            // )
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,
-                fn(): string => Blade::render('<x-language-switch />'),
+                fn (): string => Blade::render('<x-language-switch />'),
                 scopes: [Login::class, Register::class],
             )
             ->userMenuItems([
                 Action::make('settings')
-                    ->label(fn(): string => __('auth.profile.title'))
-                    ->url(fn(): string => UserSettings::getUrl())
+                    ->label(fn (): string => __('auth.profile.title'))
+                    ->url(fn (): string => UserSettings::getUrl())
                     ->icon('heroicon-o-user-circle'),
             ])
             ->discoverResources(
