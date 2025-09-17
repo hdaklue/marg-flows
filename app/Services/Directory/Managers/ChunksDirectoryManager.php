@@ -30,7 +30,7 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
      */
     public static function forTenant(string $tenantId): static
     {
-        return new self;
+        return new self();
     }
 
     /**
@@ -52,7 +52,7 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
      * @param  string|null  $identifier  The tenant identifier
      * @return array<string> Array of file paths within the tenant chunk directory
      */
-    public function getAllFiles(?string $identifier = null): array
+    public function getAllFiles(null|string $identifier = null): array
     {
         return parent::getAllFiles($identifier);
     }
@@ -64,7 +64,7 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
      */
     public function cleanupExpiredSessions(): int
     {
-        if (! config('directory-chunks.cleanup.auto_cleanup', true)) {
+        if (!config('directory-chunks.cleanup.auto_cleanup', true)) {
             return 0;
         }
 
@@ -143,7 +143,7 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
         $tenantPath = $this->getBaseDirectory($tenantId);
         $disk = $this->getDisk();
 
-        if (! Storage::disk($disk)->exists($tenantPath)) {
+        if (!Storage::disk($disk)->exists($tenantPath)) {
             return [
                 'total_files' => 0,
                 'total_size' => 0,
@@ -188,10 +188,12 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
      * @param  string|null  $identifier  The tenant identifier
      * @return string Base directory path (hashed tenant ID with base path)
      */
-    public function getBaseDirectory(?string $identifier = null): string
+    public function getBaseDirectory(null|string $identifier = null): string
     {
         if ($identifier === null) {
-            throw new InvalidArgumentException('Tenant identifier is required for chunk storage operations.');
+            throw new InvalidArgumentException(
+                'Tenant identifier is required for chunk storage operations.',
+            );
         }
 
         $basePath = config('directory-chunks.storage.base_path', 'chunks');
@@ -207,7 +209,7 @@ final class ChunksDirectoryManager extends AbstractDirectoryManager
      *
      * @return string The storage disk name
      */
-    protected function getDisk(): string
+    public function getDisk(): string
     {
         return config('directory-chunks.storage.disk', 'local');
     }

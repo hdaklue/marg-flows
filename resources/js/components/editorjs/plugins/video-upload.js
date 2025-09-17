@@ -42,7 +42,15 @@ class VideoUpload {
     }
 
     static get tunes() {
-        return [];
+        return [
+            {
+                name: 'resize',
+                icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 14v6m0 0h6m-6 0l6-6M10 10V4m0 0H4m6 0L4 10"/>
+                </svg>`,
+                title: 'Toggle resize mode'
+            }
+        ];
     }
 
     constructor({ data, config, api, readOnly, block }) {
@@ -67,6 +75,22 @@ class VideoUpload {
         this.uploadContainer = null;
         this.eventHandlers = null;
         this.currentVideoId = null;
+        
+        // Initialize resize state
+        this.resizeMode = false;
+        this.resizeHandles = [];
+        this.isResizing = false;
+        this.aspectRatioLocked = true;
+        this.originalAspectRatio = null;
+        
+        // Initialize custom dimensions from data
+        if (!this.data.customDimensions) {
+            this.data.customDimensions = {
+                width: null,
+                height: null,
+                maxWidth: '100%'
+            };
+        }
 
         // Default configuration (fallback values, will be overridden by server config)
         this.defaultConfig = {
@@ -526,6 +550,9 @@ class VideoUpload {
     createVideoElement(wrapper) {
         const videoContainer = document.createElement('div');
         videoContainer.classList.add('ce-video-upload__container');
+        
+        // Apply custom dimensions if available
+        this.applyCustomDimensions(videoContainer);
 
         // Create thumbnail container with aspect ratio
         const thumbnailContainer = document.createElement('div');
@@ -643,7 +670,13 @@ class VideoUpload {
             position: relative;
             display: inline-block;
         `;
+        thumbnailWrapper.classList.add('ce-video-upload__thumbnail-wrapper');
         thumbnailWrapper.appendChild(thumbnailContainer);
+        
+        // Add resize handles if in resize mode
+        if (this.resizeMode) {
+            this.addResizeHandles(thumbnailWrapper);
+        }
 
         // Add delete button if not readonly
         if (!this.readOnly) {

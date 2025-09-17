@@ -22,7 +22,7 @@ abstract class AbstractDirectoryManager
      * @param  string|null  $identifier  The identifier (tenant ID, user ID, etc.)
      * @return array<string> Array of file paths within the directory
      */
-    public function getAllFiles(?string $identifier = null): array
+    public function getAllFiles(null|string $identifier = null): array
     {
         return Storage::disk($this->getDisk())->allFiles($this->getBaseDirectory($identifier));
     }
@@ -53,8 +53,12 @@ abstract class AbstractDirectoryManager
      * @param  int  $expiresIn  Expiration time in seconds (default 30 minutes)
      * @return string Temporary URL with expiration
      */
-    public function getTemporaryUrl(string $identifier, string $type, string $fileName, int $expiresIn = 1800): string
-    {
+    public function getTemporaryUrl(
+        string $identifier,
+        string $type,
+        string $fileName,
+        int $expiresIn = 1800,
+    ): string {
         $basePath = $this->getBaseDirectory($identifier);
         $path = "{$basePath}/{$type}/{$fileName}";
 
@@ -85,7 +89,7 @@ abstract class AbstractDirectoryManager
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function getFileContents(string $identifier, string $type, string $fileName): ?string
+    public function getFileContents(string $identifier, string $type, string $fileName): null|string
     {
         $basePath = $this->getBaseDirectory($identifier);
         $path = "{$basePath}/{$type}/{$fileName}";
@@ -119,7 +123,7 @@ abstract class AbstractDirectoryManager
      * @param  string  $fileName  The filename to check
      * @return int|null File size in bytes or null if not found
      */
-    public function getFileSize(string $identifier, string $type, string $fileName): ?int
+    public function getFileSize(string $identifier, string $type, string $fileName): null|int
     {
         $basePath = $this->getBaseDirectory($identifier);
         $path = "{$basePath}/{$type}/{$fileName}";
@@ -139,7 +143,7 @@ abstract class AbstractDirectoryManager
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getFilePath(string $identifier, string $type, string $fileName): ?string
+    public function getFilePath(string $identifier, string $type, string $fileName): null|string
     {
         $basePath = $this->getBaseDirectory($identifier);
         $fullPath = "{$basePath}/{$type}/{$fileName}";
@@ -160,7 +164,7 @@ abstract class AbstractDirectoryManager
      *
      * @return string The storage disk name
      */
-    abstract protected function getDisk(): string;
+    abstract public function getDisk(): string;
 
     /**
      * Get the base directory path for storage operations.
@@ -168,7 +172,7 @@ abstract class AbstractDirectoryManager
      * @param  string|null  $identifier  Optional identifier for directory customization
      * @return string Base directory path
      */
-    abstract protected function getBaseDirectory(?string $identifier = null): string;
+    abstract protected function getBaseDirectory(null|string $identifier = null): string;
 
     /**
      * Build full file path with directory structure.
@@ -198,7 +202,7 @@ abstract class AbstractDirectoryManager
         $basePath = $this->getBaseDirectory($identifier);
         $directory = "{$basePath}/{$type}";
 
-        if (! Storage::disk($this->getDisk())->exists($directory)) {
+        if (!Storage::disk($this->getDisk())->exists($directory)) {
             Storage::disk($this->getDisk())->makeDirectory($directory);
         }
     }

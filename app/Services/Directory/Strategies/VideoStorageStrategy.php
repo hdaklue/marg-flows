@@ -25,9 +25,9 @@ final class VideoStorageStrategy implements StorageStrategyContract
 {
     private const string ROOT_DIRECTORY = 'videos';
 
-    private ?UploadedFile $file = null;
+    private null|UploadedFile $file = null;
 
-    private ?string $storedPath = null;
+    private null|string $storedPath = null;
 
     private PathBuilder $pathBuilder;
 
@@ -127,9 +127,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     {
         throw_unless(
             file_exists($filePath),
-            new InvalidArgumentException(
-                "Thumbnail file does not exist: {$filePath}",
-            ),
+            new InvalidArgumentException("Thumbnail file does not exist: {$filePath}"),
         );
 
         $thumbnailDirectory = $this->pathBuilder->toString();
@@ -157,9 +155,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
     {
         throw_unless(
             $this->storedPath,
-            new InvalidArgumentException(
-                'Cannot generate URL: File must be stored first.',
-            ),
+            new InvalidArgumentException('Cannot generate URL: File must be stored first.'),
         );
 
         $disk = $this->disk;
@@ -210,7 +206,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function get(string $fileName): ?string
+    public function get(string $fileName): null|string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
         $disk = $this->disk;
@@ -224,7 +220,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to retrieve
      * @return string|null File contents or null if not found
      */
-    public function getVariant(string $fileName): ?string
+    public function getVariant(string $fileName): null|string
     {
         $path = (clone $this->pathBuilder)->add($fileName)->toString();
         $disk = $this->disk;
@@ -238,16 +234,12 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getPath(string $fileName): ?string
+    public function getPath(string $fileName): null|string
     {
         $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
         $disk = $this->disk;
 
-        if (Storage::disk($disk)->getDriver()->getName() === 'local') {
-            return Storage::disk($disk)->path($fullPath);
-        }
-
-        return $fullPath;
+        return Storage::disk($disk)->path($fullPath);
     }
 
     /**
@@ -256,7 +248,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
      * @param  string  $fileName  The filename to get path for
      * @return string|null File path or null if not accessible
      */
-    public function getVariantPath(string $fileName): ?string
+    public function getVariantPath(string $fileName): null|string
     {
         $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
         $disk = $this->disk;
@@ -357,10 +349,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
         $fullPath = (clone $this->pathBuilder)->add($fileName)->toString();
         $disk = $this->disk;
 
-        return Storage::disk($disk)->temporaryUrl(
-            $fullPath,
-            now()->addSeconds($expiresIn),
-        );
+        return Storage::disk($disk)->temporaryUrl($fullPath, now()->addSeconds($expiresIn));
     }
 
     /**
@@ -377,9 +366,7 @@ final class VideoStorageStrategy implements StorageStrategyContract
 
         $filename = "{$originalName}_{$unique}_{$timestamp}.{$extension}";
 
-        return PathBuilder::base('')
-            ->addFile($filename, SanitizationStrategy::SLUG)
-            ->getFilename();
+        return PathBuilder::base('')->addFile($filename, SanitizationStrategy::SLUG)->getFilename();
     }
 
     /**
@@ -397,8 +384,6 @@ final class VideoStorageStrategy implements StorageStrategyContract
 
         $filename = "thumb_{$originalName}_{$unique}_{$timestamp}.{$extension}";
 
-        return PathBuilder::base('')
-            ->addFile($filename, SanitizationStrategy::SLUG)
-            ->getFilename();
+        return PathBuilder::base('')->addFile($filename, SanitizationStrategy::SLUG)->getFilename();
     }
 }

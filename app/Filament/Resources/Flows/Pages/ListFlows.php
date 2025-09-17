@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Flows\Pages;
 use App\Actions\Flow\CreateFlow;
 use App\DTOs\Flow\CreateFlowDto;
 use App\Enums\FlowStage;
+use App\Filament\Resources\Flows\Actions\CreateFlowAction;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Filament\Resources\Flows\Schemas\FlowsTable;
 use App\Models\Flow;
@@ -36,10 +37,10 @@ final class ListFlows extends ListRecords
         return [
             'active' => Tab::make()
                 ->label(__('flow.tabs.active'))
-                ->modifyQueryUsing(fn (Builder $query) => $query->running()),
+                ->modifyQueryUsing(fn(Builder $query) => $query->running()),
             'blocked' => Tab::make()
                 ->label(__('flow.tabs.blocked'))
-                ->modifyQueryUsing(fn (Builder $query) => $query->where(
+                ->modifyQueryUsing(fn(Builder $query) => $query->where(
                     'stage',
                     FlowStage::BLOCKED->value,
                 )),
@@ -58,37 +59,7 @@ final class ListFlows extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('create')
-                ->visible(filamentUser()->can('create', [
-                    Flow::class,
-                    filamentTenant(),
-                ]))
-                ->label(__('flow.actions.create'))
-                ->outlined()
-                ->form([
-                    TextInput::make('title')->required()->maxLength(100),
-                    Textarea::make('description')->maxLength(255),
-                ])
-                ->action(function (array $data) {
-                    try {
-                        $dto = CreateFlowDto::fromArray([
-                            'title' => $data['title'],
-                            'description' => $data['description'],
-                        ]);
-
-                        CreateFlow::run($dto, filamentTenant(), filamentUser());
-                        Notification::make()
-                            ->body(__('common.messages.operation_completed'))
-                            ->success()
-                            ->send();
-                    } catch (Exception $e) {
-                        logger()->error($e->getMessage());
-                        Notification::make()
-                            ->body(__('common.messages.operation_failed'))
-                            ->danger()
-                            ->send();
-                    }
-                }),
+            CreateFlowAction::make($this),
         ];
     }
 }

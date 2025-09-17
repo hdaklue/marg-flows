@@ -29,7 +29,6 @@ final class DocumentActionCrumb extends WireCrumb
 
     public function mount($record = null, $parent = null)
     {
-        parent::mount($record, $parent);
         $this->documentId = $record->id;
     }
 
@@ -69,7 +68,7 @@ final class DocumentActionCrumb extends WireCrumb
 
     public function createDocumentAction(): Action
     {
-        if (! $this->document) {
+        if (!$this->document) {
             throw new InvalidArgumentException('Document is required for createDocumentAction');
         }
 
@@ -83,7 +82,7 @@ final class DocumentActionCrumb extends WireCrumb
 
     protected function actioncrumbs(): array
     {
-        if (! $this->document) {
+        if (!$this->document) {
             return [];
         }
 
@@ -99,7 +98,7 @@ final class DocumentActionCrumb extends WireCrumb
 
         return [
             Step::make($this->flow->title)
-                ->label(fn () => $this->flow->title)
+                ->label(fn() => $this->flow->title)
                 ->icon(FlowResource::getNavigationIcon())
                 ->url($flowUrl)
                 ->actions([
@@ -123,8 +122,8 @@ final class DocumentActionCrumb extends WireCrumb
                     // WireAction for create document
                     \Hdaklue\Actioncrumb\Action::make('share')
                         ->label('Share with ..')
-                        ->visible(fn () => filamentUser()->can('manage', $this->document))
-                        ->execute(fn () => $this->dispatch(
+                        ->visible(fn() => filamentUser()->can('manage', $this->document))
+                        ->execute(fn() => $this->dispatch(
                             'open-modal',
                             id: 'manage-participants-modal',
                         )),

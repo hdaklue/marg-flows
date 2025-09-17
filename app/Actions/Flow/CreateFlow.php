@@ -21,7 +21,7 @@ final class CreateFlow
 {
     use AsAction;
 
-    public function handle(CreateFlowDto $data, Tenant $tenant, User $creator)
+    public function handle(CreateFlowDto $data, Tenant $tenant, User $creator): Flow
     {
         try {
             return DB::transaction(function () use ($creator, $tenant, $data) {
@@ -46,18 +46,14 @@ final class CreateFlow
                 'error' => $e->getMessage(),
             ]);
 
-            throw new FlowCreationException(
-                'Failed to create flow due to database constraints',
-            );
+            throw new FlowCreationException('Failed to create flow due to database constraints');
         } catch (Exception $e) {
             Log::error('Unexpected error creating flow', [
                 'tenant_id' => $tenant->getKey(),
                 'creator_id' => $creator->id,
                 'error' => $e->getMessage(),
             ]);
-            throw new FlowCreationException(
-                'An unexpected error occurred while creating the flow',
-            );
+            throw new FlowCreationException('An unexpected error occurred while creating the flow');
         }
     }
 

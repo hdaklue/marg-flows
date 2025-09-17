@@ -23,7 +23,8 @@ use InvalidArgumentException;
  * videos, and associated utility methods. Provides centralized management for all
  * document-related file operations within tenant isolation.
  */
-final class DocumentDirectoryManager extends AbstractDirectoryManager implements DocumentDirectoryManagerContract
+final class DocumentDirectoryManager extends AbstractDirectoryManager implements
+    DocumentDirectoryManagerContract
 {
     private Document $document;
 
@@ -96,7 +97,7 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
      * @param  string|null  $identifier  Optional identifier (uses document's tenant if not provided)
      * @return array<string> Array of file paths within the document directory
      */
-    public function getAllFiles(?string $identifier = null): array
+    public function getAllFiles(null|string $identifier = null): array
     {
         $identifier ??= $this->document->getTenant()->getKey();
 
@@ -116,7 +117,12 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
         $strategy = $this->{$type}();
 
         // For document serve route, we need document ID, not tenant ID
-        return $strategy->getSecureUrl('documents.serve', $fileName, $this->document->getKey(), $type);
+        return $strategy->getSecureUrl(
+            'documents.serve',
+            $fileName,
+            $this->document->getKey(),
+            $type,
+        );
     }
 
     /**
@@ -140,8 +146,12 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
      * @param  int  $expiresIn  Expiration time in seconds
      * @return string Temporary URL with expiration
      */
-    public function getTemporaryUrl(string $identifier, string $type, string $fileName, int $expiresIn = 1800): string
-    {
+    public function getTemporaryUrl(
+        string $identifier,
+        string $type,
+        string $fileName,
+        int $expiresIn = 1800,
+    ): string {
         return parent::getTemporaryUrl($identifier, $type, $fileName, $expiresIn);
     }
 
@@ -156,7 +166,7 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
     public function getDocumentTemporaryUrl(
         string $type,
         string $fileName,
-        ?int $expiresIn = null,
+        null|int $expiresIn = null,
     ): string {
         $expiresIn ??= config('directory-document.urls.default_expiry', 1800);
 
@@ -175,7 +185,7 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
      *
      * @return string The storage disk name
      */
-    protected function getDisk(): string
+    public function getDisk(): string
     {
         return config('directory-document.storage.disk', 'public');
     }
@@ -188,7 +198,7 @@ final class DocumentDirectoryManager extends AbstractDirectoryManager implements
      * @param  string|null  $identifier  The tenant identifier
      * @return string Base directory path (hashed tenant ID with base path)
      */
-    protected function getBaseDirectory(?string $identifier = null): string
+    protected function getBaseDirectory(null|string $identifier = null): string
     {
         if ($identifier === null) {
             throw new InvalidArgumentException(

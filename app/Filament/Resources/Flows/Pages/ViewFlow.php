@@ -24,8 +24,10 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Size;
+use Filament\Support\Enums\TextSize;
 use Hdaklue\Actioncrumb\Step;
 use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Hdaklue\Actioncrumb\ValueObjects\Action as CrumbAction;
@@ -50,6 +52,11 @@ final class ViewFlow extends ViewRecord
         'items' => ['required', 'array', 'max:50'],
         'items.*' => ['required', 'string'],
     ];
+
+    public function getHeading(): Htmlable|string
+    {
+        return '';
+    }
 
     public function getHeaderActions(): array
     {
@@ -140,6 +147,7 @@ final class ViewFlow extends ViewRecord
         RecordRecency::dispatch(filamentUser(), $this->record);
 
         return $schema->components([
+            // Text::make(fn() => $this->record->getAttribute('title'))->size(TextSize::Large),
             Livewire::make(FlowTabs::class, ['flowId' => $this->record->getKey()]),
         ]);
     }

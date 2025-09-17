@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\Storage;
  * avatars and temporary files. Provides centralized management for all system-level
  * file operations with independent configuration.
  */
-final class SystemDirectoryManager extends AbstractDirectoryManager implements SystemDirectoryManagerContract
+final class SystemDirectoryManager extends AbstractDirectoryManager implements
+    SystemDirectoryManagerContract
 {
     /**
      * Create a static instance for system operations.
@@ -28,7 +29,7 @@ final class SystemDirectoryManager extends AbstractDirectoryManager implements S
      */
     public static function instance(): static
     {
-        return new self;
+        return new self();
     }
 
     /**
@@ -40,7 +41,7 @@ final class SystemDirectoryManager extends AbstractDirectoryManager implements S
      */
     public function avatars(): StorageStrategyContract
     {
-        return new AvatarStorageStrategy;
+        return new AvatarStorageStrategy();
     }
 
     /**
@@ -50,7 +51,7 @@ final class SystemDirectoryManager extends AbstractDirectoryManager implements S
      */
     public function temp(): StorageStrategyContract
     {
-        return new TempStorageStrategy;
+        return new TempStorageStrategy();
     }
 
     /**
@@ -59,7 +60,7 @@ final class SystemDirectoryManager extends AbstractDirectoryManager implements S
      * @param  string|null  $identifier  The file category (avatars, temp, etc.)
      * @return array<string> Array of file paths within the category directory
      */
-    public function getAllFiles(?string $identifier = null): array
+    public function getAllFiles(null|string $identifier = null): array
     {
         return parent::getAllFiles($identifier);
     }
@@ -73,8 +74,12 @@ final class SystemDirectoryManager extends AbstractDirectoryManager implements S
      * @param  int|null  $expiresIn  Expiration time in seconds (uses config default if null)
      * @return string Temporary URL with expiration
      */
-    public function getTemporaryUrl(string $category, string $type, string $fileName, ?int $expiresIn = null): string
-    {
+    public function getTemporaryUrl(
+        string $category,
+        string $type,
+        string $fileName,
+        null|int $expiresIn = null,
+    ): string {
         $expiresIn ??= config('directory-system.public_access.default_expiry', 3600);
 
         return parent::getTemporaryUrl($category, $type, $fileName, $expiresIn);
@@ -87,7 +92,7 @@ final class SystemDirectoryManager extends AbstractDirectoryManager implements S
      */
     public function cleanupTempFiles(): int
     {
-        if (! config('directory-system.temp.auto_cleanup', true)) {
+        if (!config('directory-system.temp.auto_cleanup', true)) {
             return 0;
         }
 
@@ -138,7 +143,7 @@ final class SystemDirectoryManager extends AbstractDirectoryManager implements S
      *
      * @return string The storage disk name
      */
-    protected function getDisk(): string
+    public function getDisk(): string
     {
         return config('directory-system.storage.disk', 'public');
     }
@@ -151,7 +156,7 @@ final class SystemDirectoryManager extends AbstractDirectoryManager implements S
      * @param  string|null  $identifier  Optional identifier for directory customization
      * @return string Base directory path
      */
-    protected function getBaseDirectory(?string $identifier = null): string
+    protected function getBaseDirectory(null|string $identifier = null): string
     {
         $basePath = config('directory-system.storage.base_path', 'system');
 
