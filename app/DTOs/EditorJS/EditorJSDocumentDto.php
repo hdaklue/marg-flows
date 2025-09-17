@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DTOs\EditorJS;
 
+use App\Services\Document\ContentBlocks\BlocksCollection;
+use BumpCore\EditorPhp\Block\Block;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 final class EditorJSDocumentDto extends ValidatedDTO
@@ -70,15 +72,15 @@ final class EditorJSDocumentDto extends ValidatedDTO
         ]);
     }
 
-    public function getBlocks(): EditorJSBlocksCollection
+    public function getBlocks(): BlocksCollection
     {
         if (is_array($this->blocks)) {
-            $this->blocks = EditorJSBlocksCollection::fromArray($this->blocks);
+            return BlocksCollection::fromArray($this->blocks);
         }
 
-        return $this->blocks instanceof EditorJSBlocksCollection
+        return $this->blocks instanceof BlocksCollection
             ? $this->blocks
-            : EditorJSBlocksCollection::empty();
+            : BlocksCollection::empty();
     }
 
     /**
@@ -128,7 +130,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     /**
      * Create new document with updated blocks.
      */
-    public function withBlocks(EditorJSBlocksCollection $blocks): self
+    public function withBlocks(BlocksCollection $blocks): self
     {
         return self::fromArray([
             'time' => time(), // Update time when blocks change
@@ -152,7 +154,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     /**
      * Get blocks by type.
      */
-    public function getBlocksByType(string $type): EditorJSBlocksCollection
+    public function getBlocksByType(string $type): BlocksCollection
     {
         return $this->getBlocks()->byType($type);
     }
@@ -176,7 +178,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     /**
      * Add a block to the document.
      */
-    public function addBlock(EditorJSBlockDto $block): self
+    public function addBlock(Block $block): self
     {
         return $this->withBlocks($this->getBlocks()->add($block));
     }
@@ -214,8 +216,6 @@ final class EditorJSDocumentDto extends ValidatedDTO
 
     protected function afterValidation(): void
     {
-        if (is_array($this->blocks)) {
-            $this->blocks = EditorJSBlocksCollection::fromArray($this->blocks);
-        }
+        // Let getBlocks() handle the conversion when needed
     }
 }

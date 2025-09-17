@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Document\CustomBlocks;
+namespace App\Services\Document\ContentBlocks;
 
 use BumpCore\EditorPhp\Block\Block;
 use Faker\Generator;

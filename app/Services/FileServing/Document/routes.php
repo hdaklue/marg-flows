@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\DocumentImageUploadController;
-use App\Http\Controllers\EditorJsImageDelete;
-use App\Http\Controllers\EditorJsVideoDelete;
-use App\Http\Controllers\EditorJsVideoUpload;
 use App\Models\Document;
-use App\Services\Directory\Managers\DocumentDirectoryManager;
+use App\Services\Document\Actions\FileServing\ServeDocumentFile;
+use App\Services\Document\Actions\Image\DeleteDocumentImage;
+use App\Services\Document\Actions\Image\UploadDocumentImage;
+use App\Services\Document\Actions\Video\DeleteDocumentVideo;
+use App\Services\Document\Actions\Video\UploadDocumentVideo;
 use App\Services\FileServing\Document\DocumentFileResolver;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 /*
  |--------------------------------------------------------------------------
@@ -29,18 +27,18 @@ Route::prefix('documents/{document}')
     ->middleware(['auth'])
     ->group(function () {
         // Upload image to document
-        Route::post('upload-image', DocumentImageUploadController::class)->name(
+        Route::post('upload-image', UploadDocumentImage::class)->name(
             'documents.upload-image',
         );
 
         // Delete image from document
-        Route::delete('delete-image', EditorJsImageDelete::class)->name('documents.delete-image');
+        Route::delete('delete-image', DeleteDocumentImage::class)->name('documents.delete-image');
 
         // Upload video to document
-        Route::post('upload-video', EditorJsVideoUpload::class)->name('documents.upload-video');
+        Route::post('upload-video', UploadDocumentVideo::class)->name('documents.upload-video');
 
         // Delete video from document
-        Route::delete('delete-video', EditorJsVideoDelete::class)->name('documents.delete-video');
+        Route::delete('delete-video', DeleteDocumentVideo::class)->name('documents.delete-video');
     });
 
 // Document file serving routes
@@ -136,76 +134,6 @@ Route::prefix('documents/{document}/files')
     });
 
 // Document file serving (actual file delivery)
-Route::get('documents/{document}/serve/{type}/{filename}', function (
-    string $document,
-    string $type,
-    string $filename,
-) {
-    $documentModel = Document::findOrFail($document);
-    $resolver = DocumentFileResolver::make($documentModel);
-
-    // Validate access
-    if (! auth()->user() || ! $resolver->validateAccess($documentModel)) {
-        abort(403, 'Access denied');
-    }
-
-    // Get file path using DocumentDirectoryManager
-    $directoryManager = DocumentDirectoryManager::make($documentModel);
-
-    // Get the specific directory for the file type
-    $directory = match ($type) {
-        'images' => $directoryManager->images()->getDirectory(),
-        'videos' => $directoryManager->videos()->getDirectory(),
-        default => throw new \InvalidArgumentException("Unsupported file type: {$type}"),
-    };
-    $disk = config('directory-document.storage.disk', 'public');
-    $path = $directory . "/{$filename}";
-
-    // Log detailed debugging information
-    Log::info('Document serve request', [
-        'document_id' => $document,
-        'tenant_id' => $documentModel->getTenant()->getKey(),
-        'type' => $type,
-        'filename' => $filename,
-        'directory' => $directory,
-        'disk' => $disk,
-        'full_path' => $path,
-        'user_id' => auth()->id(),
-        'request_url' => request()->fullUrl(),
-    ]);
-
-    if (! Storage::disk($disk)->exists($path)) {
-        // Log available files for debugging
-        $availableFiles = Storage::disk($disk)->exists($directory)
-            ? Storage::disk($disk)->files($directory)
-            : [];
-
-        Log::error('File not found', [
-            'requested_path' => $path,
-            'directory_exists' => Storage::disk($disk)->exists($directory),
-            'available_files' => $availableFiles,
-            'disk' => $disk,
-        ]);
-        abort(404, 'File not found');
-    }
-
-    // Get file info for proper headers
-    $size = Storage::disk($disk)->size($path);
-    $mimeType = Storage::disk($disk)->mimeType($path) ?: 'application/octet-stream';
-    
-    // Create streaming response with proper headers for video playback
-    $response = Storage::disk($disk)->response($path, basename($path), [
-        'Content-Type' => $mimeType,
-        'Content-Length' => $size,
-        'Accept-Ranges' => 'bytes',
-        'Cache-Control' => 'public, max-age=3600',
-        'Access-Control-Allow-Origin' => '*',
-        'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
-        'Access-Control-Allow-Headers' => 'Range, If-Range',
-    ]);
-
-    return $response;
-})
+Route::get('documents/{document}/serve/{type}/{filename}', ServeDocumentFile::class)
     ->where('filename', '.*')
-    ->middleware(['auth'])
     ->name('documents.serve');

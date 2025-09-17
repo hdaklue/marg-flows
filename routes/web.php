@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AcceptInvitation;
-use App\Http\Controllers\FileResolverController;
-use App\Http\Controllers\FileServeController;
 use App\Http\Controllers\SecureFileController;
 use App\Http\Controllers\UrlFetchController;
 use App\Livewire\CalendarTest;
@@ -15,6 +13,8 @@ use App\Livewire\Reusable\VideoRecorder;
 use App\Livewire\SortableDemo;
 use App\Livewire\TestChunkedUpload;
 use App\Livewire\ToastCalendarTest;
+use App\Services\Document\Actions\FileServing\ResolveDocumentFile;
+use App\Services\Document\Actions\FileServing\ServeDocumentFile;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -61,14 +61,14 @@ Route::post('secure-files/temp-url', [SecureFileController::class, 'generateTemp
     ->name('secure-files.temp-url');
 
 // Authenticated file serving route (authentication handled in controller)
-Route::get('files/{path}', FileServeController::class)->where('path', '.*')->name('file.serve');
+Route::get('files/{path}', ServeDocumentFile::class)->where('path', '.*')->name('file.serve');
 
 // File URL resolver routes
-Route::get('file-resolver', [FileResolverController::class, 'resolve'])->middleware(['auth'])->name(
+Route::get('file-resolver', [ResolveDocumentFile::class, 'resolve'])->middleware(['auth'])->name(
     'file.resolver',
 );
 
-Route::get('file-resolver/temporary', [FileResolverController::class, 'temporary'])->middleware([
+Route::get('file-resolver/temporary', [ResolveDocumentFile::class, 'temporary'])->middleware([
     'auth',
 ])->name('file.resolver.temporary');
 

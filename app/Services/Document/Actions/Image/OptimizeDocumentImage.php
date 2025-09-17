@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\EditorJs;
+namespace App\Services\Document\Actions\Image;
 
 use Lorisleiva\Actions\Concerns\AsAction;
 use Spatie\Image\Image;
 
-final class OptimizeEditorJsImage
+final class OptimizeDocumentImage
 {
     use AsAction;
 

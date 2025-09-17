@@ -34,7 +34,7 @@ Visit: `https://flows-stg.margineer.com/files/test/path`
 ## 5. If still 404, check deployment
 ```bash
 # Check if FileServeController exists
-ls -la app/Http/Controllers/FileServeController.php
+ls -la app/Services/Document/Controllers/FileServeController.php
 
 # Check if route exists in web.php
 grep -n "files/{path}" routes/web.php
