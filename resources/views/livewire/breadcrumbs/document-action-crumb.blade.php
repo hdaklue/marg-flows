@@ -3,5 +3,5 @@
         {!! $renderedActioncrumbs !!}
     </div>
     <livewire:participants.manage-participants-modal :roleableEntity="$this->document" />
-    {{-- <x-filament-actions::modals /> --}}
+    <x-filament-actions::modals />
 </div>

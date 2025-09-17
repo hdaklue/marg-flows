@@ -42,13 +42,13 @@ final class ListBlock extends Block
         foreach ($prefix as $num) {
             $part = match ($type) {
                 'numeric' => $num,
-                'lower-alpha' => strtolower(chr(96 + $num)), // a, b, c
-                'upper-alpha' => strtoupper(chr(64 + $num)), // A, B, C
-                'lower-roman' => strtolower(self::toRoman($num)), // Use self:: for static call
-                'upper-roman' => strtoupper(self::toRoman($num)), // Use self:: for static call
+                'lower-alpha' => $num <= 26 ? strtolower(chr(96 + $num)) : (string) $num,
+                'upper-alpha' => $num <= 26 ? strtoupper(chr(64 + $num)) : (string) $num,
+                'lower-roman' => $num <= 3999 ? strtolower(self::toRoman($num)) : (string) $num,
+                'upper-roman' => $num <= 3999 ? strtoupper(self::toRoman($num)) : (string) $num,
                 default => $num,
             };
-            $formattedParts[] = (string) $part; // Ensure part is a string for implode
+            $formattedParts[] = (string) $part;
         }
 
         return implode('.', $formattedParts);
@@ -102,7 +102,7 @@ final class ListBlock extends Block
         return [
             'style' => ['string', Rule::in(['ordered', 'unordered'])],
             'meta' => ['array'],
-            'meta.counterType' => ['nullable', 'string'],
+            'meta.counterType' => ['nullable', 'string', Rule::in(['numeric', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman'])],
             'items' => ['array'],
             'items.*.content' => ['string'],
             'items.*.meta' => ['array'],
@@ -117,7 +117,7 @@ final class ListBlock extends Block
         $meta = $this->data->get('meta', []); // Default to empty array for robustness
         $counterType = $style === 'ordered' ? $meta['counterType'] ?? 'numeric' : null;
 
-        return $this->renderNestedList($items, $style, [], $counterType); // Pass $counterType
+        return $this->renderNestedList($items, $style, [], $counterType, 0);
     }
 
     protected function renderNestedList(
@@ -125,35 +125,37 @@ final class ListBlock extends Block
         string $style = 'unordered',
         array $prefix = [],
         ?string $counterType = null,
+        int $depth = 0,
     ): string {
+        if ($depth >= 5) {
+            return '';
+        }
         $tag = $style === 'ordered' ? 'ol' : 'ul';
-        $cssClass = $tag === 'ol' ? 'list-inside list-none' : 'list-disc list-inside';
+        $cssClass = $tag === 'ol' ? 'list-decimal list-inside' : 'list-disc list-inside';
 
-        $html = "<{$tag} class=\"{$cssClass}\">";
+        $htmlParts = ["<{$tag} class=\"{$cssClass}\">"];
 
         foreach ($items as $index => $item) {
-            // Assuming $item is always an array based on rules and fake data
-            $content = $item['content'] ?? '';
+            $content = htmlspecialchars($item['content'] ?? '', ENT_QUOTES, 'UTF-8');
             $nested = $item['items'] ?? [];
-            $currentPrefix = array_merge($prefix, [$index + 1]);
+            $currentPrefix = [...$prefix, $index + 1];
 
             if ($style === 'ordered') {
-                $prefixString =
-                    self::formatCounter($currentPrefix, $counterType ?? 'numeric') . '. '; // Use self:: for static call
-                $html .= '<li>' . "<span class=\"mr-1\">{$prefixString}</span>" . $content;
+                $prefixString = self::formatCounter($currentPrefix, $counterType ?? 'numeric') . '. ';
+                $htmlParts[] = '<li><span class="mr-1">' . htmlspecialchars($prefixString, ENT_QUOTES, 'UTF-8') . '</span>' . $content;
             } else {
-                $html .= '<li>' . $content;
+                $htmlParts[] = '<li>' . $content;
             }
 
             if (! empty($nested)) {
-                $html .= $this->renderNestedList($nested, $style, $currentPrefix, $counterType);
+                $htmlParts[] = $this->renderNestedList($nested, $style, $currentPrefix, $counterType, $depth + 1);
             }
 
-            $html .= '</li>';
+            $htmlParts[] = '</li>';
         }
 
-        $html .= "</{$tag}>";
+        $htmlParts[] = "</{$tag}>";
 
-        return $html;
+        return implode('', $htmlParts);
     }
 }
