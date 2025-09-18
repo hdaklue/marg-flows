@@ -28,7 +28,7 @@ final class DocumentComponent extends Component
     public array $content;
 
     // Todo: filamentTenant()->subscription()->getName()
-    public string $userPlan = 'advanced'; // Default plan - testing restrictions
+    public string $userPlan = 'ultimate'; // Default plan - testing restrictions
 
     #[Locked]
     public string $documentId;

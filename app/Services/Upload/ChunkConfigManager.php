@@ -98,9 +98,9 @@ final class ChunkConfigManager
 
         return new ChunkConfig(
             maxFileSize: match ($plan) {
-                'simple' => FileSize::fromMB(100),
-                'advanced' => FileSize::fromMB(500),
-                'ultimate' => FileSize::fromGB(5),
+                'simple' => FileSize::fromMB(50),
+                'advanced' => FileSize::fromMB(100),
+                'ultimate' => FileSize::fromMB(200),
                 default => FileSize::fromMB(100),
             },
             chunkSize: $baseConfig->chunkSize,

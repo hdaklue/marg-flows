@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Document\ConfigBuilder\Builders;
 
+use App\Facades\DocumentManager;
 use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Facades\EditorConfigBuilder;
@@ -12,19 +13,22 @@ final class Simple
 {
     private string $tenantId;
 
-    public function build(?string $documentId = null): array
+    public function build(null|string $documentId = null): array
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
         $imagesConfig = EditorConfigBuilder::images()->forPlan('simple');
 
         if ($documentId) {
-            $document = Document::find($documentId);
+            $document = DocumentManager::getDocument($documentId);
             if ($document) {
                 $baseDirectory = DocumentDirectoryManager::make($document)
                     ->images()
                     ->getDirectory();
 
-                $imagesConfig->forDocument($documentId)->baseDirectory($this->tenantId, $documentId);
+                $imagesConfig->forDocument($documentId)->baseDirectory(
+                    $this->tenantId,
+                    $documentId,
+                );
             }
         }
 
@@ -41,18 +45,21 @@ final class Simple
         ];
     }
 
-    private function buildVideoUploadConfig(?string $documentId)
+    private function buildVideoUploadConfig(null|string $documentId)
     {
         $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan('simple');
 
         if ($documentId) {
-            $document = Document::find($documentId);
+            $document = DocumentManager::getDocument($documentId);
             if ($document) {
                 $baseDirectory = DocumentDirectoryManager::make($document)
                     ->videos()
                     ->getDirectory();
 
-                $videoUploadConfig->forDocument($documentId)->baseDirectory($this->tenantId, $documentId);
+                $videoUploadConfig->forDocument($documentId)->baseDirectory(
+                    $this->tenantId,
+                    $documentId,
+                );
             }
         }
 
