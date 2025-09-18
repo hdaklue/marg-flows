@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Actions\Flow;
 
-use App\Models\Document;
 use App\Models\Flow;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 
-class EditFlowInfoAction
+final class EditFlowInfoAction
 {
     public static function make(Flow $record)
     {

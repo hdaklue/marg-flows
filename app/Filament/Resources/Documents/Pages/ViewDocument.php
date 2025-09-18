@@ -7,16 +7,13 @@ namespace App\Filament\Resources\Documents\Pages;
 use App\Facades\DocumentManager;
 use App\Filament\Resources\Documents\DocumentResource;
 use App\Forms\Components\PlaceholderInput;
-use App\Livewire\Breadcrumbs\DocumentActionCrumb;
 use App\Services\Recency\Actions\RecordRecency;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Blade;
 use Livewire\Attributes\Computed;
-use Livewire\Livewire;
 
 /**
  * @property-read bool $canEdit
@@ -25,7 +22,7 @@ final class ViewDocument extends ViewRecord
 {
     protected static string $resource = DocumentResource::class;
 
-    public null|array $data = [];
+    public ?array $data = [];
 
     public Width|string|null $maxContentWidth = 'full';
 
@@ -77,7 +74,7 @@ final class ViewDocument extends ViewRecord
                 ->afterStateUpdated(function ($state, $livewire) {
                     $livewire->validate();
 
-                    if (!$this->canEdit() || blank($state)) {
+                    if (! $this->canEdit() || blank($state)) {
                         return;
                     }
 

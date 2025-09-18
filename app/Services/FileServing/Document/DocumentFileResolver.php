@@ -44,7 +44,7 @@ final class DocumentFileResolver extends AbstractFileResolver
      */
     public function fileExists($entity, string $type, string $filename): bool
     {
-        if (!$entity instanceof Document) {
+        if (! $entity instanceof Document) {
             return false;
         }
 
@@ -64,13 +64,13 @@ final class DocumentFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return int|null File size in bytes, null if file doesn't exist
      */
-    public function getFileSize($entity, string $type, string $filename): null|int
+    public function getFileSize($entity, string $type, string $filename): ?int
     {
-        if (!$entity instanceof Document) {
+        if (! $entity instanceof Document) {
             return null;
         }
 
-        if (!$this->fileExists($entity, $type, $filename)) {
+        if (! $this->fileExists($entity, $type, $filename)) {
             return null;
         }
 
@@ -93,11 +93,11 @@ final class DocumentFileResolver extends AbstractFileResolver
     public function getDocumentFiles(
         Document $document,
         string $type,
-        null|User $user = null,
+        ?User $user = null,
     ): array {
         $user ??= auth()->user();
 
-        if (!$user || !$this->validateAccess($document)) {
+        if (! $user || ! $this->validateAccess($document)) {
             return [];
         }
 
@@ -106,12 +106,12 @@ final class DocumentFileResolver extends AbstractFileResolver
 
         $directory = $strategy->forDocument($document->getKey())->getDirectory() . "/{$type}";
 
-        if (!Storage::disk($disk)->exists($directory)) {
+        if (! Storage::disk($disk)->exists($directory)) {
             return [];
         }
 
         return collect(Storage::disk($disk)->files($directory))->map(
-            fn($file) => basename($file),
+            fn ($file) => basename($file),
         )->toArray();
     }
 
@@ -126,12 +126,12 @@ final class DocumentFileResolver extends AbstractFileResolver
      */
     public function validateAccess($entity): bool
     {
-        if (!$entity instanceof Document) {
+        if (! $entity instanceof Document) {
             return false;
         }
 
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -155,7 +155,7 @@ final class DocumentFileResolver extends AbstractFileResolver
      */
     protected function generateSecureUrl($entity, string $type, string $filename): string
     {
-        if (!$entity instanceof Document) {
+        if (! $entity instanceof Document) {
             throw new InvalidArgumentException('Entity must be a Document instance');
         }
 
@@ -179,9 +179,9 @@ final class DocumentFileResolver extends AbstractFileResolver
         $entity,
         string $type,
         string $filename,
-        null|int $expires = null,
+        ?int $expires = null,
     ): string {
-        if (!$entity instanceof Document) {
+        if (! $entity instanceof Document) {
             throw new InvalidArgumentException('Entity must be a Document instance');
         }
 
@@ -203,11 +203,11 @@ final class DocumentFileResolver extends AbstractFileResolver
      */
     protected function performFileDelete($entity, string $type, string $filename): bool
     {
-        if (!$entity instanceof Document) {
+        if (! $entity instanceof Document) {
             return false;
         }
 
-        if (!$this->fileExists($entity, $type, $filename)) {
+        if (! $this->fileExists($entity, $type, $filename)) {
             return false;
         }
 

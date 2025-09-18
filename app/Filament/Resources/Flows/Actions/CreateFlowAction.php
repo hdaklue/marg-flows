@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Flows\Actions;
 
 use App\Actions\Flow\CreateFlow;
@@ -13,9 +15,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Livewire\Component;
 
-class CreateFlowAction
+final class CreateFlowAction
 {
-    public static function make(null|Component $component)
+    public static function make(?Component $component)
     {
         return Action::make('create')
             ->visible(filamentUser()->can('create', [

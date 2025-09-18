@@ -33,7 +33,7 @@ test('can clear video cache', function () {
     $cacheKey = 'video_metadata:test123';
     Cache::put($cacheKey, ['test' => 'data'], 3600);
     expect(Cache::has($cacheKey))->toBeTrue();
-    
+
     ServerVideoStream::clearVideoCache('test-path', 123);
     // The specific cache key might be different, but method should not throw errors
     expect(true)->toBeTrue();
@@ -44,7 +44,7 @@ test('can preload video metadata', function () {
     try {
         ServerVideoStream::preloadVideoMetadata($this->videoPath, 'public');
         expect(true)->toBeTrue(); // Test passes if no exception thrown
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         expect(false)->toBeTrue(); // Test fails if exception thrown
     }
 });

@@ -49,7 +49,7 @@ final class FileServingServiceProvider extends ServiceProvider
         });
 
         // Register aliases for easier access
-        
+
         $this->app->alias(SystemFileResolver::class, 'file-resolver.system');
         $this->app->alias(ChunkFileResolver::class, 'file-resolver.chunks');
     }
@@ -77,7 +77,7 @@ final class FileServingServiceProvider extends ServiceProvider
 
             SystemFileResolver::class,
             ChunkFileResolver::class,
-            
+
             'file-resolver.system',
             'file-resolver.chunks',
         ];

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Support\Htmlable;
 
 final class Dashboard extends \Filament\Pages\Dashboard
 {
-    protected static null|int $navigationSort = 1;
+    protected static ?int $navigationSort = 1;
 
     protected static bool $shouldRegisterNavigation = true;
 

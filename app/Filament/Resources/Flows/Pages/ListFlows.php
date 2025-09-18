@@ -4,18 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Flows\Pages;
 
-use App\Actions\Flow\CreateFlow;
-use App\DTOs\Flow\CreateFlowDto;
 use App\Enums\FlowStage;
 use App\Filament\Resources\Flows\Actions\CreateFlowAction;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Filament\Resources\Flows\Schemas\FlowsTable;
-use App\Models\Flow;
-use Exception;
-use Filament\Actions\Action;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\EmbeddedTable;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -37,10 +29,10 @@ final class ListFlows extends ListRecords
         return [
             'active' => Tab::make()
                 ->label(__('flow.tabs.active'))
-                ->modifyQueryUsing(fn(Builder $query) => $query->running()),
+                ->modifyQueryUsing(fn (Builder $query) => $query->running()),
             'blocked' => Tab::make()
                 ->label(__('flow.tabs.blocked'))
-                ->modifyQueryUsing(fn(Builder $query) => $query->where(
+                ->modifyQueryUsing(fn (Builder $query) => $query->where(
                     'stage',
                     FlowStage::BLOCKED->value,
                 )),

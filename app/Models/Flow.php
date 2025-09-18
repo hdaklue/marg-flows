@@ -91,16 +91,7 @@ use Illuminate\Support\Collection;
  *
  * @mixin \Eloquent
  */
-final class Flow extends Model implements
-    BelongsToTenantContract,
-    Documentable,
-    HasStages,
-    Recentable,
-    RoleableEntity,
-    ScopedToTenant,
-    SentInNotification,
-    Sidenoteable,
-    PorterRoleableContract
+final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, PorterRoleableContract, Recentable, RoleableEntity, ScopedToTenant, SentInNotification, Sidenoteable
 {
     use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInOriginalDB, ManagesDocuments, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait, SoftDeletes;
 
@@ -144,7 +135,7 @@ final class Flow extends Model implements
         return $this->roleAssignments()->where('assignable_type', 'user');
     }
 
-    public function getPorterTenantKey(): null|string
+    public function getPorterTenantKey(): ?string
     {
         return $this->getTenantId();
     }
@@ -267,7 +258,7 @@ final class Flow extends Model implements
     /**
      * {@inheritDoc}
      */
-    public function getRecentLabel(): null|string
+    public function getRecentLabel(): ?string
     {
         return $this->title;
     }

@@ -18,14 +18,14 @@ final class RegisterUser
 {
     use AsAction;
 
-    public function handle(string $email, string $username, string $password): null|User
+    public function handle(string $email, string $username, string $password): ?User
     {
         $ip = app()->isProduction() ? request()->ip() : '41.43.60.242';
         $timezone = GetUserLocation::run($ip)->timezone;
 
         try {
             return DB::transaction(function () use ($username, $email, $password, $timezone) {
-                $user = new User();
+                $user = new User;
 
                 $user->username = $username;
                 $user->email = $email;
