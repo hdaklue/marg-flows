@@ -143,8 +143,23 @@ final class UploadDocumentVideo
             // Clean up chunk files
             $sessionManager->cleanupSession($sessionId);
 
-            // Process the video file
-            return ProcessDocumentVideo::run($finalPath, $document);
+            // Return success immediately and process video in background
+            ProcessDocumentVideo::dispatch($finalPath, $document);
+
+            Log::info('HTTP upload session completed', [
+                'sessionId' => $sessionId,
+                'result' => [
+                    'path' => $finalPath,
+                ],
+            ]);
+
+            return [
+                'success' => true,
+                'completed' => true,
+                'filename' => basename($finalPath),
+                'message' => 'Video uploaded successfully. Processing in background.',
+                'processing' => true,
+            ];
         }
 
         // Return chunk upload success response

@@ -6,8 +6,7 @@ namespace App\Services\Document\Actions\FileServing;
 
 use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
-use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
-use Hdaklue\PathBuilder\Facades\LaraPath;
+use App\Services\Document\Actions\Video\ServerVideoStream;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -31,18 +30,21 @@ final class ServeDocumentFile
 
     /**
      * Serve file with generalized parameters.
+     * Delegates video requests to optimized ServerVideoStream action.
      */
     public function handle(
         Document $document,
         string $type,
         string $fileName,
     ): Response|StreamedResponse|RedirectResponse {
-        $directoryManager = DocumentDirectoryManager::make($document);
-        $actualPath = match ($type) {
-            'images' => $directoryManager->images()->getPath($fileName),
-            'videos' => $directoryManager->videos()->getPath($fileName),
-        };
+        // Delegate video requests to specialized video streaming action
+        if ($type === 'videos') {
+            return ServerVideoStream::run($document, $fileName);
+        }
 
+        // Handle images and other file types with existing logic
+        $directoryManager = DocumentDirectoryManager::make($document);
+        $actualPath = $directoryManager->images()->getPath($fileName);
         $diskName = $directoryManager->getDisk();
 
         // Get file details
@@ -69,8 +71,8 @@ final class ServeDocumentFile
             return response($content, 200, $headers);
         }
 
-        // For large files (videos), use streamed response
-        return Storage::disk($diskName)->response($actualPath, $fileName, $headers);
+        // For large non-video files, use basic streaming
+        return $this->streamFileResponse($actualPath, $diskName, $headers);
     }
 
     /**
@@ -83,45 +85,31 @@ final class ServeDocumentFile
         string $filename,
     ): Response|StreamedResponse|RedirectResponse {
         // Verify user is authenticated using Filament's authentication
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('filament.portal.auth.login');
         }
 
-        $userTenantId = auth()->user()->getActiveTenantId();
         $document = Document::whereKey($document)->first();
-        if (!$this->validateDocumentAccess($document, $request)) {
+        if (! $this->validateDocumentAccess($document, $request)) {
             abort(401);
         }
 
-        // Build the path in the format expected by handle method
-        // $hashedTenantId = (string) LaraPath::base($userTenantId, SanitizationStrategy::HASHED)->add(
-        //     $documentFilePath,
-        // );
-
-        //Should be
-
-        // $path = "{$hashedTenantId}/documents/{$document}/{$type}/{$filename}";
-
-        // Check if client has cached version
-        $clientEtag = $request->header('If-None-Match');
-        $clientLastModified = $request->header('If-Modified-Since');
-
-        // Handle range requests for video streaming
-        $rangeHeader = $request->header('Range');
-        if ($rangeHeader) {
-            return $this->handleRangeRequest($document, $type, $filename);
+        // For video requests, delegate to specialized video streaming action with request context
+        if ($type === 'videos') {
+            return ServerVideoStream::run($document, $filename, $request);
         }
 
+        // Handle other file types with existing logic
         return $this->handle($document, $type, $filename);
     }
 
     private function validateDocumentAccess(Document $document, $request)
     {
         $user = $request->user();
-        return (
+
+        return
             $user->isAssignedTo($document)
-            && $document->getTenantId() === $user->getActiveTenantId()
-        );
+            && $document->getTenantId() === $user->getActiveTenantId();
     }
 
     /**
@@ -161,14 +149,26 @@ final class ServeDocumentFile
     }
 
     /**
-     * Handle HTTP range requests for video streaming.
+     * Stream file response with small chunks for faster initial load.
      */
-    private function handleRangeRequest(
-        Document $document,
-        string $type,
-        string $fileName,
-    ): Response|StreamedResponse {
-        // For now, delegate to the main handler - range request logic can be added later
-        return $this->handle($document, $type, $fileName);
+    private function streamFileResponse(string $path, string $disk, array $headers): StreamedResponse
+    {
+        return response()->stream(function () use ($path, $disk) {
+            $stream = Storage::disk($disk)->readStream($path);
+            $chunkSize = 8192; // 8KB chunks for fast initial response
+
+            while (! feof($stream)) {
+                $chunk = fread($stream, $chunkSize);
+                if ($chunk !== false) {
+                    echo $chunk;
+                    if (ob_get_level()) {
+                        ob_flush();
+                    }
+                    flush();
+                }
+            }
+
+            fclose($stream);
+        }, 200, $headers);
     }
 }

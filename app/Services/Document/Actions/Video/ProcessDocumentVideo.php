@@ -8,16 +8,43 @@ use App\Models\Document;
 use Exception;
 use Log;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Throwable;
 
 final class ProcessDocumentVideo
 {
     use AsAction;
 
+    public static function getJobQueue(): string
+    {
+        return 'video-processing';
+    }
+
+    public static function getJobTries(): int
+    {
+        return 3;
+    }
+
+    public static function getJobTimeout(): int
+    {
+        return 300; // 5 minutes
+    }
+
+    public static function getJobBackoff(): int
+    {
+        return 30;
+    }
+
     /**
      * Process uploaded video file (extract metadata, generate thumbnail, etc.).
      */
-    public function handle(string $videoPath, Document $document, ?string $fileKey = null): array
-    {
+    public function handle(
+        string $videoPath,
+        Document $document,
+        ?string $fileKey = null,
+    ): array {
+        // Set memory limit for video processing
+        // ini_set('memory_limit', '512M');
+
         try {
             $extension = pathinfo($videoPath, PATHINFO_EXTENSION);
             $fileKey = $fileKey ?? uniqid();
@@ -42,7 +69,11 @@ final class ProcessDocumentVideo
                 $duration = $videoData['duration'] ?? null;
                 if ($duration && $duration > 0) {
                     try {
-                        $thumbnailPath = GenerateVideoThumbnail::run($videoPath, $duration, $document);
+                        $thumbnailPath = GenerateVideoThumbnail::run(
+                            $videoPath,
+                            $duration,
+                            $document,
+                        );
                     } catch (Exception $e) {
                         Log::warning('Failed to generate video thumbnail', [
                             'path' => $videoPath,
@@ -66,7 +97,10 @@ final class ProcessDocumentVideo
                 'size' => $videoData['size'] ?? null,
                 'format' => strtolower($extension),
                 'original_format' => $extension,
-                'aspect_ratio' => $videoData['aspect_ratio'] ?? config('video-upload.processing.default_aspect_ratio', '16:9'),
+                'aspect_ratio' => $videoData['aspect_ratio'] ?? config(
+                    'video-upload.processing.default_aspect_ratio',
+                    '16:9',
+                ),
                 'aspect_ratio_data' => $videoData['aspect_ratio_data'] ?? null,
                 'message' => 'Video uploaded and processed successfully',
             ];
@@ -85,5 +119,23 @@ final class ProcessDocumentVideo
 
             throw $e;
         }
+    }
+
+    /**
+     * Handle job failure.
+     */
+    public function failed(
+        string $videoPath,
+        Document $document,
+        ?string $fileKey,
+        Throwable $exception,
+    ): void {
+        Log::error('Video processing job failed permanently', [
+            'path' => $videoPath,
+            'document_id' => $document->id,
+            'fileKey' => $fileKey,
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+        ]);
     }
 }
