@@ -17,6 +17,9 @@ import '../../../../css/components/editorjs/video-resize.css';
 // Import ResizableTune for block resizing functionality
 import ResizableTune from './ResizableTune.js';
 
+// Import upload strategies
+import SessionUploadStrategy from './upload-strategies/SessionUploadStrategy.js';
+
 class VideoUpload {
     static get toolbox() {
         return {
@@ -82,6 +85,7 @@ class VideoUpload {
         this.uploadContainer = null;
         this.eventHandlers = null;
         this.currentVideoId = null;
+        this.currentUploadStrategy = null; // 'single' or 'chunk'
         
         // Initialize resize state
         this.resizeMode = false;
@@ -102,8 +106,11 @@ class VideoUpload {
         // Default configuration (fallback values, will be overridden by server config)
         this.defaultConfig = {
             endpoints: {
-                byFile: '/upload-video',
-                delete: '/delete-video'
+                single: '/upload-video-single',
+                chunk: '/upload-video-chunk',
+                delete: '/delete-video',
+                createSession: '/video-upload-sessions',
+                sessionStatus: '/video-upload-sessions'
             },
             additionalRequestHeaders: {},
             field: 'video',
@@ -112,13 +119,43 @@ class VideoUpload {
             buttonContent: this.t.buttonContent,
             uploader: null,
             actions: [],
-            // Fallback chunk settings (will be overridden by server config)
-            chunkSize: 5 * 1024 * 1024,     // 5MB default chunk size
-            maxFileSize: 100 * 1024 * 1024, // 100MB default max file size  
+            // Fallback settings (will be overridden by server config)
+            chunkSize: 5 * 1024 * 1024,         // 5MB default chunk size
+            maxFileSize: 100 * 1024 * 1024,     // 100MB default max file size  
+            maxSingleFileSize: 50 * 1024 * 1024, // 50MB default single file threshold
             useChunkedUpload: true
         };
 
         this.config = Object.assign(this.defaultConfig, this.config);
+
+        // Initialize session-based upload strategy
+        this.sessionUploadStrategy = new SessionUploadStrategy(this.config, this.t);
+        
+        // Initialize progress modal state
+        this.progressModal = null;
+        this.progressState = {
+            isActive: false,
+            phase: 'single_upload',
+            progress: 0,
+            isComplete: false,
+            hasError: false,
+            errorMessage: ''
+        };
+        
+        this.uploadMetrics = {
+            startTime: null,
+            speed: 0,
+            eta: 0,
+            uploaded: 0,
+            lastProgress: 0,
+            lastUpdateTime: null
+        };
+        
+        this.currentFileInfo = {
+            name: '',
+            size: 0,
+            type: ''
+        };
 
         // Bind methods
         this.onUpload = this.onUpload.bind(this);
@@ -152,6 +189,11 @@ class VideoUpload {
                     failed: 'Failed',
                     unknown: 'Unknown'
                 },
+                statusUploading: 'Uploading video...',
+                statusUploadingChunks: 'Uploading video in chunks...',
+                statusProcessing: 'Processing video...',
+                statusComplete: 'Video uploaded successfully!',
+                statusError: 'Upload failed',
                 errors: {
                     invalidFormat: 'Invalid file format. Please select a video file.',
                     unsupportedFormat: 'Unsupported video format. Please use MP4, WebM, or OGV format for best compatibility.',
@@ -190,6 +232,11 @@ class VideoUpload {
                     failed: 'فشل',
                     unknown: 'غير معروف'
                 },
+                statusUploading: 'جاري رفع الفيديو...',
+                statusUploadingChunks: 'جاري رفع الفيديو على دفعات...',
+                statusProcessing: 'جاري معالجة الفيديو...',
+                statusComplete: 'تم رفع الفيديو بنجاح!',
+                statusError: 'فشل الرفع',
                 errors: {
                     invalidFormat: 'تنسيق ملف غير صالح. يرجى اختيار ملف فيديو.',
                     unsupportedFormat: 'تنسيق فيديو غير مدعوم. يرجى استخدام تنسيق MP4 أو WebM أو OGV للحصول على أفضل توافق.',
@@ -1316,105 +1363,41 @@ class VideoUpload {
     }
 
     async performUpload(file) {
-        // Single method for actual upload logic
+        // Single method for actual upload logic using session-based strategy
         if (this.config.uploader && typeof this.config.uploader.uploadByFile === 'function') {
             return await this.config.uploader.uploadByFile(file);
-        } else {
-            // Check if we should use chunked upload
-            if (this.config.useChunkedUpload && file.size > this.config.chunkSize) {
-                return await this.executeChunkedUpload(file);
-            } else {
-                return await this.executeUploadRequest(file);
-            }
         }
-    }
 
-    /**
-     * Execute chunked upload for large files
-     */
-    async executeChunkedUpload(file) {
-        const fileKey = this.generateFileKey();
-        const fileName = file.name;
-        const chunkSize = this.config.chunkSize;
-        const totalChunks = Math.ceil(file.size / chunkSize);
-
-        console.log(`Starting chunked upload: ${fileName} (${totalChunks} chunks)`);
-
-        // Signal editor is busy during upload
-        document.dispatchEvent(new CustomEvent('editor:busy'));
-
-        try {
-            // Upload each chunk sequentially
-            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-                const start = chunkIndex * chunkSize;
-                const end = Math.min(start + chunkSize, file.size);
-                const chunk = file.slice(start, end);
-
-                console.log(`Uploading chunk ${chunkIndex + 1}/${totalChunks}`);
-
-                const chunkFile = new File([chunk], fileName, { type: file.type });
-                const response = await this.uploadChunk(chunkFile, fileKey, fileName, chunkIndex, totalChunks);
-
-                // Update progress based on chunk completion
-                const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
-                this.updateUploadProgress(progress);
-
-                // If this was the last chunk and upload is complete
-                if (response.completed) {
-                    console.log('Chunked upload completed successfully');
-                    return response;
-                }
-            }
-
-            throw new Error('Chunked upload completed but no final response received');
-
-        } catch (error) {
-            console.error('Chunked upload failed:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Upload a single chunk
-     */
-    async uploadChunk(chunkFile, fileKey, fileName, chunkIndex, totalChunks) {
-        const formData = new FormData();
-        formData.append(this.config.field, chunkFile);
-        formData.append('fileKey', fileKey);
-        formData.append('fileName', fileName);
-        formData.append('chunk', chunkIndex.toString());
-        formData.append('chunks', totalChunks.toString());
-
-        const response = await fetch(this.config.endpoints.byFile, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                ...this.config.additionalRequestHeaders,
-                // Don't set Content-Type for FormData, let browser set it with boundary
-            }
+        // Show progress modal
+        this.showProgressModal(file);
+        
+        // Use session-based upload strategy
+        const strategy = this.sessionUploadStrategy;
+        
+        // Set up callbacks for progress and status updates
+        strategy.setProgressCallback((progress) => {
+            console.log('Video upload received progress:', progress); // Debug log
+            this.updateProgressModalProgress(progress);
+        });
+        
+        strategy.setStatusCallback((message, phase) => {
+            console.log('Video upload received status:', message, phase); // Debug log
+            this.updateProgressModalStatus(message, phase);
         });
 
-        // Parse JSON response
-        let json;
+        console.log(`Using ${strategy.getName()} upload strategy for file: ${file.name} (${Math.round(file.size / (1024 * 1024))}MB)`);
+        console.log('Strategy config:', this.config); // Debug log
+        
         try {
-            json = await response.json();
-        } catch (parseError) {
-            throw new Error(`Invalid response format for chunk ${chunkIndex}: ${response.status}`);
+            const result = await strategy.execute(file);
+            console.log('Upload completed successfully:', result); // Debug log
+            this.completeProgressModal();
+            return result;
+        } catch (error) {
+            console.error('Upload failed:', error); // Debug log
+            this.errorProgressModal(error.message || 'Upload failed');
+            throw error;
         }
-
-        // Validate response success
-        if (json.success === false || !response.ok) {
-            throw new Error(json.message || `HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        return json;
-    }
-
-    /**
-     * Generate a unique file key for chunked uploads
-     */
-    generateFileKey() {
-        return `video_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     }
 
     /**
@@ -1423,42 +1406,33 @@ class VideoUpload {
     updateUploadProgress(progress) {
         // This can be used to update progress bars or other UI elements
         console.log(`Upload progress: ${progress}%`);
+        
+        // Update progress in upload items if available
+        if (this.uploadProgress && this.uploadProgress.length > 0) {
+            this.uploadProgress.forEach((item, index) => {
+                if (item.status === 'uploading') {
+                    item.progress = progress;
+                    this.updateProgressItem(index);
+                }
+            });
+        }
     }
 
-    async executeUploadRequest(file) {
-        const formData = new FormData();
-        formData.append(this.config.field, file);
-
-        // Signal editor is busy during upload
-        document.dispatchEvent(new CustomEvent('editor:busy'));
-
-        try {
-            const response = await fetch(this.config.endpoints.byFile, {
-                method: 'POST',
-                body: formData,
-                headers: this.config.additionalRequestHeaders
+    /**
+     * Update upload status with user-friendly messages
+     */
+    updateUploadStatus(message, phase) {
+        console.log(`Upload status: ${message} (${phase})`);
+        
+        // Update status message in upload items if available
+        if (this.uploadProgress && this.uploadProgress.length > 0) {
+            this.uploadProgress.forEach((item, index) => {
+                if (item.status === 'uploading') {
+                    item.statusMessage = message;
+                    item.phase = phase;
+                    this.updateProgressItemStatus(index, message);
+                }
             });
-
-            // Parse JSON response
-            let json;
-            try {
-                json = await response.json();
-            } catch (parseError) {
-                throw new Error(`Invalid response format: ${response.status}`);
-            }
-
-            // Validate response success
-            if (json.success === 0 || json.success === false) {
-                throw new Error(json.message || 'Upload failed');
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            return json;
-        } catch (error) {
-            throw error;
         }
     }
 
@@ -2013,6 +1987,22 @@ class VideoUpload {
         }
     }
 
+    /**
+     * Update progress item with custom status message
+     */
+    updateProgressItemStatus(index, message) {
+        const uploadItem = this.uploadProgress[index];
+        if (!uploadItem) return;
+
+        const progressThumbnail = this.wrapper.querySelector(`.video-upload__progress-thumbnail[data-index="${index}"]`);
+        if (!progressThumbnail) return;
+
+        const statusText = progressThumbnail.querySelector('.video-upload__progress-status-text');
+        if (statusText) {
+            statusText.textContent = message;
+        }
+    }
+
     getProgressIcon(status) {
         switch (status) {
             case 'pending':
@@ -2203,7 +2193,543 @@ class VideoUpload {
         this.data.resize = { ...this.data.resize, ...resizeData };
     }
 
+    /**
+     * Show the progress modal for video upload
+     */
+    showProgressModal(file) {
+        this.currentFileInfo = {
+            name: file.name,
+            size: file.size,
+            type: file.type
+        };
+        
+        this.progressState = {
+            isActive: true,
+            phase: 'single_upload',
+            progress: 0,
+            isComplete: false,
+            hasError: false,
+            errorMessage: ''
+        };
+        
+        this.uploadMetrics = {
+            startTime: Date.now(),
+            speed: 0,
+            eta: 0,
+            uploaded: 0,
+            lastProgress: 0,
+            lastUpdateTime: Date.now()
+        };
+        
+        this.createProgressModal();
+    }
+    
+    /**
+     * Create and show the progress modal
+     */
+    createProgressModal() {
+        // Remove existing modal if any
+        if (this.progressModal) {
+            this.progressModal.remove();
+        }
+        
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4';
+        modal.style.cssText = 'transition: opacity 0.3s ease, transform 0.3s ease;';
+        
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-700 w-full max-w-md overflow-hidden">
+                <!-- Header -->
+                <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                            Video Upload
+                        </h3>
+                        <button class="upload-progress-cancel text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Phase Indicators -->
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center flex-1">
+                            <div class="flex flex-col items-center">
+                                <div class="upload-phase-icon upload-phase-upload w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                </div>
+                                <span class="upload-phase-text upload-phase-upload-text text-xs font-medium mt-2 transition-colors duration-300">Upload</span>
+                            </div>
+                            <div class="upload-connector upload-connector-1 flex-1 h-0.5 mx-3 transition-colors duration-300"></div>
+                        </div>
+                        <div class="flex items-center flex-1">
+                            <div class="flex flex-col items-center">
+                                <div class="upload-phase-icon upload-phase-processing w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </div>
+                                <span class="upload-phase-text upload-phase-processing-text text-xs font-medium mt-2 transition-colors duration-300">Processing</span>
+                            </div>
+                            <div class="upload-connector upload-connector-2 flex-1 h-0.5 mx-3 transition-colors duration-300"></div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="upload-phase-icon upload-phase-complete w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <span class="upload-phase-text upload-phase-complete-text text-xs font-medium mt-2 transition-colors duration-300">Complete</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="px-6 pb-4">
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="upload-status-message text-sm font-medium text-zinc-700 dark:text-zinc-300">Preparing upload...</span>
+                            <span class="upload-progress-percent text-sm font-medium text-sky-600 dark:text-sky-400">0%</span>
+                        </div>
+                        <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2 overflow-hidden">
+                            <div class="upload-progress-bar h-full bg-gradient-to-r from-sky-500 to-sky-600 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Metrics -->
+                    <div class="upload-metrics grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3">
+                            <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Upload Speed</div>
+                            <div class="upload-speed text-sm font-semibold text-zinc-900 dark:text-zinc-100">0 MB/s</div>
+                        </div>
+                        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3">
+                            <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Time Remaining</div>
+                            <div class="upload-eta text-sm font-semibold text-zinc-900 dark:text-zinc-100">--</div>
+                        </div>
+                    </div>
+
+                    <!-- File Info -->
+                    <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3 mb-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-zinc-600 dark:text-zinc-400">File Size:</span>
+                            <span class="upload-file-size font-medium text-zinc-900 dark:text-zinc-100">0 B</span>
+                        </div>
+                        <div class="upload-uploaded-row flex items-center justify-between text-sm mt-1">
+                            <span class="text-zinc-600 dark:text-zinc-400">Uploaded:</span>
+                            <span class="upload-uploaded font-medium text-zinc-900 dark:text-zinc-100">0 B</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm mt-1">
+                            <span class="text-zinc-600 dark:text-zinc-400">Filename:</span>
+                            <span class="upload-filename font-medium text-zinc-900 dark:text-zinc-100 truncate ml-2"></span>
+                        </div>
+                    </div>
+
+                    <!-- Error State -->
+                    <div class="upload-error-state bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4" style="display: none;">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <h4 class="text-sm font-medium text-red-800 dark:text-red-200 mb-1">Upload Failed</h4>
+                                <p class="upload-error-message text-sm text-red-700 dark:text-red-300"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success State -->
+                    <div class="upload-success-state bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 mb-4" style="display: none;">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-emerald-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <h4 class="text-sm font-medium text-emerald-800 dark:text-emerald-200">Upload Complete</h4>
+                                <p class="text-sm text-emerald-700 dark:text-emerald-300">Your video has been successfully uploaded and processed.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="px-6 py-4 bg-zinc-50 dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700">
+                    <div class="flex justify-end space-x-3">
+                        <button class="upload-retry-btn px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors" style="display: none;">
+                            Retry Upload
+                        </button>
+                        <button class="upload-done-btn px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors" style="display: none;">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add event listeners
+        const cancelBtn = modal.querySelector('.upload-progress-cancel');
+        const retryBtn = modal.querySelector('.upload-retry-btn');
+        const doneBtn = modal.querySelector('.upload-done-btn');
+        
+        cancelBtn.addEventListener('click', () => this.cancelProgressModal());
+        retryBtn.addEventListener('click', () => this.retryProgressModal());
+        doneBtn.addEventListener('click', () => this.closeProgressModal());
+        
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) this.closeProgressModal();
+        });
+        
+        this.progressModal = modal;
+        document.body.appendChild(modal);
+        
+        // Update initial values
+        this.updateProgressModalDisplay();
+    }
+    
+    /**
+     * Update progress modal with current progress
+     */
+    updateProgressModalProgress(progress) {
+        if (!this.progressModal) {
+            console.warn('Progress modal not available for update'); // Debug log
+            return;
+        }
+        
+        console.log('Updating progress modal with:', progress); // Debug log
+        
+        const now = Date.now();
+        const timeDiff = (now - this.uploadMetrics.lastUpdateTime) / 1000;
+        
+        this.progressState.progress = Math.min(100, Math.max(0, progress));
+        
+        // Calculate upload metrics during upload phase
+        if ((this.progressState.phase === 'chunk_upload' || this.progressState.phase === 'single_upload') && timeDiff > 0) {
+            this.calculateUploadMetrics(progress, now, timeDiff);
+        }
+        
+        this.uploadMetrics.lastProgress = progress;
+        this.uploadMetrics.lastUpdateTime = now;
+        
+        this.updateProgressModalDisplay();
+    }
+    
+    /**
+     * Update progress modal status
+     */
+    updateProgressModalStatus(message, phase) {
+        if (!this.progressModal) {
+            console.warn('Progress modal not available for status update'); // Debug log
+            return;
+        }
+        
+        console.log('Updating progress modal status:', message, phase); // Debug log
+        
+        this.progressState.phase = phase;
+        this.updateProgressModalDisplay();
+    }
+    
+    /**
+     * Calculate upload metrics
+     */
+    calculateUploadMetrics(progress, now, timeDiff) {
+        const uploadProgress = Math.min(50, progress);
+        const currentUploaded = (uploadProgress / 50) * this.currentFileInfo.size;
+        const bytesUploaded = currentUploaded - this.uploadMetrics.uploaded;
+        
+        if (bytesUploaded > 0 && timeDiff > 0) {
+            const currentSpeed = bytesUploaded / timeDiff;
+            this.uploadMetrics.speed = this.uploadMetrics.speed === 0 
+                ? currentSpeed 
+                : (this.uploadMetrics.speed * 0.7) + (currentSpeed * 0.3);
+        }
+        
+        if (progress < 50) {
+            const remainingBytes = this.currentFileInfo.size - currentUploaded;
+            this.uploadMetrics.eta = this.uploadMetrics.speed > 0 
+                ? remainingBytes / this.uploadMetrics.speed 
+                : 0;
+        } else {
+            this.uploadMetrics.eta = 0;
+        }
+        
+        this.uploadMetrics.uploaded = currentUploaded;
+    }
+    
+    /**
+     * Update the visual display of the progress modal
+     */
+    updateProgressModalDisplay() {
+        if (!this.progressModal) return;
+        
+        const modal = this.progressModal;
+        
+        // Update progress bar
+        const progressBar = modal.querySelector('.upload-progress-bar');
+        const progressPercent = modal.querySelector('.upload-progress-percent');
+        if (progressBar) progressBar.style.width = `${this.progressState.progress}%`;
+        if (progressPercent) progressPercent.textContent = `${Math.round(this.progressState.progress)}%`;
+        
+        // Update status message
+        const statusMessage = modal.querySelector('.upload-status-message');
+        if (statusMessage) {
+            const messages = {
+                single_upload: 'Preparing upload...',
+                chunk_upload: 'Uploading video...',
+                video_processing: 'Processing video...',
+                complete: 'Upload complete!',
+                error: 'Upload failed'
+            };
+            statusMessage.textContent = messages[this.progressState.phase] || 'Processing...';
+        }
+        
+        // Update file info
+        const fileName = modal.querySelector('.upload-filename');
+        const fileSize = modal.querySelector('.upload-file-size');
+        const uploaded = modal.querySelector('.upload-uploaded');
+        const speed = modal.querySelector('.upload-speed');
+        const eta = modal.querySelector('.upload-eta');
+        
+        if (fileName) fileName.textContent = this.currentFileInfo.name;
+        if (fileSize) fileSize.textContent = this.formatFileSize(this.currentFileInfo.size);
+        if (uploaded) uploaded.textContent = this.formatFileSize(this.uploadMetrics.uploaded);
+        if (speed) speed.textContent = this.formatSpeed(this.uploadMetrics.speed);
+        if (eta) eta.textContent = this.formatETA(this.uploadMetrics.eta);
+        
+        // Show/hide metrics during upload
+        const metrics = modal.querySelector('.upload-metrics');
+        const uploadedRow = modal.querySelector('.upload-uploaded-row');
+        if (metrics) {
+            metrics.style.display = (this.progressState.progress < 50 && !this.progressState.hasError && !this.progressState.isComplete) ? 'grid' : 'none';
+        }
+        if (uploadedRow) {
+            uploadedRow.style.display = (this.progressState.progress < 50) ? 'flex' : 'none';
+        }
+        
+        // Update phase indicators
+        this.updatePhaseIndicators();
+    }
+    
+    /**
+     * Update phase indicator styles
+     */
+    updatePhaseIndicators() {
+        if (!this.progressModal) return;
+        
+        const modal = this.progressModal;
+        const phases = ['upload', 'processing', 'complete'];
+        const currentPhase = this.getCurrentPhaseKey();
+        const currentIndex = phases.indexOf(currentPhase);
+        
+        phases.forEach((phase, index) => {
+            const icon = modal.querySelector(`.upload-phase-${phase}`);
+            const text = modal.querySelector(`.upload-phase-${phase}-text`);
+            
+            if (icon && text) {
+                // Reset classes
+                icon.className = icon.className.replace(/bg-\S+|text-\S+|ring-\S+/g, '');
+                text.className = text.className.replace(/text-\S+/g, '');
+                
+                if (this.progressState.hasError) {
+                    if (index <= currentIndex) {
+                        icon.className += ' bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+                        text.className += ' text-red-600 dark:text-red-400';
+                    } else {
+                        icon.className += ' bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500';
+                        text.className += ' text-zinc-400 dark:text-zinc-500';
+                    }
+                } else if (index < currentIndex || this.progressState.isComplete) {
+                    icon.className += ' bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400';
+                    text.className += ' text-zinc-900 dark:text-zinc-100';
+                } else if (index === currentIndex) {
+                    icon.className += ' bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 ring-2 ring-sky-200 dark:ring-sky-800';
+                    text.className += ' text-zinc-900 dark:text-zinc-100';
+                } else {
+                    icon.className += ' bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500';
+                    text.className += ' text-zinc-400 dark:text-zinc-500';
+                }
+            }
+        });
+        
+        // Update connectors
+        [1, 2].forEach(num => {
+            const connector = modal.querySelector(`.upload-connector-${num}`);
+            if (connector) {
+                connector.className = connector.className.replace(/bg-\S+/g, '');
+                
+                if (this.progressState.hasError) {
+                    connector.className += num < currentIndex ? ' bg-red-200 dark:bg-red-800' : ' bg-zinc-200 dark:bg-zinc-700';
+                } else if (num < currentIndex || this.progressState.isComplete) {
+                    connector.className += ' bg-emerald-200 dark:bg-emerald-800';
+                } else {
+                    connector.className += ' bg-zinc-200 dark:bg-zinc-700';
+                }
+            }
+        });
+    }
+    
+    /**
+     * Get current phase key for indicators
+     */
+    getCurrentPhaseKey() {
+        if (this.progressState.phase === 'single_upload' || this.progressState.phase === 'chunk_upload') {
+            return 'upload';
+        } else if (this.progressState.phase === 'video_processing') {
+            return 'processing';
+        } else if (this.progressState.phase === 'complete') {
+            return 'complete';
+        }
+        return 'upload';
+    }
+    
+    /**
+     * Complete the upload process
+     */
+    completeProgressModal() {
+        if (!this.progressModal) return;
+        
+        this.progressState.phase = 'complete';
+        this.progressState.progress = 100;
+        this.progressState.isComplete = true;
+        this.uploadMetrics.eta = 0;
+        
+        const modal = this.progressModal;
+        const successState = modal.querySelector('.upload-success-state');
+        const doneBtn = modal.querySelector('.upload-done-btn');
+        
+        if (successState) successState.style.display = 'block';
+        if (doneBtn) doneBtn.style.display = 'block';
+        
+        this.updateProgressModalDisplay();
+    }
+    
+    /**
+     * Show error state in progress modal
+     */
+    errorProgressModal(errorMessage) {
+        if (!this.progressModal) return;
+        
+        this.progressState.phase = 'error';
+        this.progressState.hasError = true;
+        this.progressState.errorMessage = errorMessage;
+        
+        const modal = this.progressModal;
+        const errorState = modal.querySelector('.upload-error-state');
+        const errorMsg = modal.querySelector('.upload-error-message');
+        const retryBtn = modal.querySelector('.upload-retry-btn');
+        
+        if (errorState) errorState.style.display = 'block';
+        if (errorMsg) errorMsg.textContent = errorMessage;
+        if (retryBtn) retryBtn.style.display = 'block';
+        
+        this.updateProgressModalDisplay();
+    }
+    
+    /**
+     * Cancel upload and close modal
+     */
+    cancelProgressModal() {
+        if (confirm('Are you sure you want to cancel the upload?')) {
+            this.closeProgressModal();
+            // TODO: Implement actual upload cancellation
+        }
+    }
+    
+    /**
+     * Retry failed upload
+     */
+    retryProgressModal() {
+        // Reset state
+        this.progressState.hasError = false;
+        this.progressState.errorMessage = '';
+        this.progressState.phase = 'single_upload';
+        this.progressState.progress = 0;
+        
+        this.uploadMetrics.startTime = Date.now();
+        this.uploadMetrics.lastUpdateTime = Date.now();
+        this.uploadMetrics.speed = 0;
+        this.uploadMetrics.eta = 0;
+        this.uploadMetrics.uploaded = 0;
+        this.uploadMetrics.lastProgress = 0;
+        
+        const modal = this.progressModal;
+        const errorState = modal.querySelector('.upload-error-state');
+        const retryBtn = modal.querySelector('.upload-retry-btn');
+        
+        if (errorState) errorState.style.display = 'none';
+        if (retryBtn) retryBtn.style.display = 'none';
+        
+        this.updateProgressModalDisplay();
+        
+        // TODO: Implement actual retry logic
+    }
+    
+    /**
+     * Close progress modal
+     */
+    closeProgressModal() {
+        if (this.progressModal) {
+            this.progressModal.remove();
+            this.progressModal = null;
+        }
+        this.progressState.isActive = false;
+    }
+    
+    /**
+     * Format file size for display
+     */
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        const size = bytes / Math.pow(1024, i);
+        return `${size.toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
+    }
+    
+    /**
+     * Format upload speed for display
+     */
+    formatSpeed(bytesPerSecond) {
+        if (bytesPerSecond === 0 || !isFinite(bytesPerSecond)) return '0 MB/s';
+        
+        const mbps = bytesPerSecond / (1024 * 1024);
+        if (mbps >= 1) {
+            return `${mbps.toFixed(1)} MB/s`;
+        } else {
+            const kbps = bytesPerSecond / 1024;
+            return `${kbps.toFixed(1)} KB/s`;
+        }
+    }
+    
+    /**
+     * Format ETA for display
+     */
+    formatETA(seconds) {
+        if (seconds === 0 || !isFinite(seconds)) return '--';
+        
+        if (seconds < 60) {
+            return `${Math.ceil(seconds)}s`;
+        } else if (seconds < 3600) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.ceil(seconds % 60);
+            return `${minutes}m ${remainingSeconds}s`;
+        } else {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${minutes}m`;
+        }
+    }
+
     destroy() {
+        // Close progress modal if open
+        this.closeProgressModal();
+        
         // Dispose any Video.js players
         if (this.currentVideoId) {
             try {
@@ -2229,6 +2755,7 @@ class VideoUpload {
         this.eventHandlers = null;
         this.blockDragHandlers = null;
         this.currentVideoId = null;
+        this.progressModal = null;
     }
 }
 

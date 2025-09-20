@@ -67,4 +67,38 @@ final class VideoUploadResponse
             'message' => $message,
         ], $statusCode);
     }
+
+    /**
+     * Create session status response with {status, phase, data} structure.
+     */
+    public static function sessionStatus(
+        string $status,
+        string $phase,
+        array $data,
+    ): JsonResponse {
+        return response()->json([
+            'status' => $status,
+            'phase' => $phase,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Create session creation response.
+     */
+    public static function sessionCreated(array $sessionData): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'status' => 'uploading',
+            'phase' => $sessionData['upload_type'] === 'chunk' ? 'chunk_upload' : 'single_upload',
+            'data' => [
+                'session_id' => $sessionData['session_id'],
+                'upload_type' => $sessionData['upload_type'],
+                'file_size' => $sessionData['file_size'],
+                'chunks_total' => $sessionData['chunks_total'],
+                'max_single_file_size' => $sessionData['max_single_file_size'],
+            ],
+        ]);
+    }
 }

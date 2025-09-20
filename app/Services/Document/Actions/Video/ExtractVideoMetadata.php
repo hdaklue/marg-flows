@@ -18,7 +18,7 @@ final class ExtractVideoMetadata
     /**
      * Extract video metadata using Laravel FFmpeg.
      */
-    public function handle(string $path): array
+    public function handle(string $path, ?string $sessionId = null): array
     {
         try {
             $disk = config('chunked-upload.storage.disk', 'public');

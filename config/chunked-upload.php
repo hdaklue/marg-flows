@@ -163,7 +163,8 @@ return [
     */
 
     'storage' => [
-        'disk' => env('CHUNKED_UPLOAD_DISK', 'public'),
+        // Use local storage for chunks (fast assembly), but final files go to remote storage
+        'disk' => env('CHUNKED_UPLOAD_DISK', 'local_chunks'),
         'temp_directory' => env('CHUNKED_UPLOAD_TEMP_DIR', 'uploads/temp'),
         'final_directory' => env('CHUNKED_UPLOAD_FINAL_DIR', 'uploads'),
         'chunk_directory' => env('CHUNKED_UPLOAD_CHUNK_DIR', 'chunk-uploads'),

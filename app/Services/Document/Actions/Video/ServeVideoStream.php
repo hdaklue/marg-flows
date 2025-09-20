@@ -26,20 +26,20 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * - Proper CORS headers for video streaming
  * - Security validation for video files
  */
-final class ServerVideoStream
+final class ServeVideoStream
 {
     use AsAction;
 
     // Video-specific constants for optimal performance
-    private const INITIAL_CHUNK_SIZE = 2 * 1024 * 1024; // 2MB for fast initial load
+    private const INITIAL_CHUNK_SIZE = 1 * 1024 * 1024; // 2MB for fast initial load
 
-    private const STREAMING_CHUNK_SIZE = 8 * 1024 * 1024; // 8MB for efficient streaming
+    private const STREAMING_CHUNK_SIZE = 4 * 1024 * 1024; // 8MB for efficient streaming
 
     private const MAX_CHUNK_SIZE = 16 * 1024 * 1024; // 16MB max chunk size
 
     private const METADATA_CACHE_TTL = 3600; // 1 hour cache for metadata
 
-    private const CONTENT_CACHE_TTL = 7200; // 2 hours cache for small videos
+    private const CONTENT_CACHE_TTL = 5 * 60 * 60; // 2 hours cache for small videos
 
     private const MAX_CACHEABLE_SIZE = 50 * 1024 * 1024; // 50MB max cacheable video
 
@@ -113,16 +113,20 @@ final class ServerVideoStream
         // Check if we're running under nginx or Apache with X-Sendfile
         $serverSoftware = request()->server('SERVER_SOFTWARE', '');
 
-        return str_contains(strtolower($serverSoftware), 'nginx') ||
-               str_contains(strtolower($serverSoftware), 'apache') ||
-               request()->server('HTTP_X_SENDFILE_TYPE') !== null;
+        return
+            str_contains(strtolower($serverSoftware), 'nginx')
+            || str_contains(strtolower($serverSoftware), 'apache')
+            || request()->server('HTTP_X_SENDFILE_TYPE') !== null;
     }
 
     /**
      * Handle X-Sendfile response for maximum performance.
      */
-    private function handleXSendfileResponse(string $path, string $disk, ?Request $request): Response
-    {
+    private function handleXSendfileResponse(
+        string $path,
+        string $disk,
+        ?Request $request,
+    ): Response {
         $fullPath = Storage::disk($disk)->path($path);
 
         // Minimal metadata for headers
@@ -225,7 +229,13 @@ final class ServerVideoStream
 
         $cacheKey = 'video_metadata:' . md5($path . $lastModified);
 
-        return Cache::remember($cacheKey, self::METADATA_CACHE_TTL, function () use ($path, $size, $lastModified, $mimeType, $etag) {
+        return Cache::remember($cacheKey, self::METADATA_CACHE_TTL, function () use (
+            $path,
+            $size,
+            $lastModified,
+            $mimeType,
+            $etag,
+        ) {
             // Try to extract additional video metadata if FFmpeg is available
             $duration = null;
             $bitrate = null;
@@ -284,14 +294,23 @@ final class ServerVideoStream
         $headers['Content-Length'] = (string) $contentLength;
         $headers['Content-Range'] = "bytes {$start}-{$end}/{$fileSize}";
 
-        return response()->stream(function () use ($path, $disk, $start, $end, $chunkSize) {
-            // Use direct file access for maximum seek performance
-            if ($disk === 'local') {
-                $this->streamRangeDirectly(Storage::disk($disk)->path($path), $start, $end, $chunkSize);
-            } else {
-                $this->streamRangeFromStorage($path, $disk, $start, $end, $chunkSize);
-            }
-        }, 206, $headers);
+        return response()->stream(
+            function () use ($path, $disk, $start, $end, $chunkSize) {
+                // Use direct file access for maximum seek performance
+                if ($disk === 'local') {
+                    $this->streamRangeDirectly(
+                        Storage::disk($disk)->path($path),
+                        $start,
+                        $end,
+                        $chunkSize,
+                    );
+                } else {
+                    $this->streamRangeFromStorage($path, $disk, $start, $end, $chunkSize);
+                }
+            },
+            206,
+            $headers,
+        );
     }
 
     /**
@@ -316,16 +335,20 @@ final class ServerVideoStream
         $chunkSize = $this->getOptimalChunkSize($fileSize, $metadata);
         $headers = $this->getVideoStreamHeaders($metadata);
 
-        return response()->stream(function () use ($path, $disk, $chunkSize) {
-            // Use direct file access for maximum performance
-            if ($disk === 'local') {
-                $fullPath = Storage::disk($disk)->path($path);
-                $this->streamFileDirectly($fullPath, $chunkSize);
-            } else {
-                // Fallback for cloud storage
-                $this->streamFromStorage($path, $disk, $chunkSize);
-            }
-        }, 200, $headers);
+        return response()->stream(
+            function () use ($path, $disk, $chunkSize) {
+                // Use direct file access for maximum performance
+                if ($disk === 'local') {
+                    $fullPath = Storage::disk($disk)->path($path);
+                    $this->streamFileDirectly($fullPath, $chunkSize);
+                } else {
+                    // Fallback for cloud storage
+                    $this->streamFromStorage($path, $disk, $chunkSize);
+                }
+            },
+            200,
+            $headers,
+        );
     }
 
     /**
@@ -354,7 +377,7 @@ final class ServerVideoStream
 
                 // Only flush every few chunks to reduce I/O overhead
                 static $flushCounter = 0;
-                if (++$flushCounter % 4 === 0) { // Flush every 4 chunks
+                if ((++$flushCounter % 4) === 0) { // Flush every 4 chunks
                     flush();
                 }
 
@@ -394,7 +417,7 @@ final class ServerVideoStream
 
                 // Only flush every few chunks to reduce I/O overhead
                 static $flushCounter = 0;
-                if (++$flushCounter % 4 === 0) { // Flush every 4 chunks
+                if ((++$flushCounter % 4) === 0) { // Flush every 4 chunks
                     flush();
                 }
 
@@ -411,8 +434,12 @@ final class ServerVideoStream
     /**
      * Stream range directly from file system for maximum seek performance.
      */
-    private function streamRangeDirectly(string $fullPath, int $start, int $end, int $chunkSize): void
-    {
+    private function streamRangeDirectly(
+        string $fullPath,
+        int $start,
+        int $end,
+        int $chunkSize,
+    ): void {
         $handle = fopen($fullPath, 'rb');
         if (! $handle) {
             return;
@@ -445,7 +472,7 @@ final class ServerVideoStream
 
                 // Minimal flushing for range requests (seeking needs to be instant)
                 static $flushCounter = 0;
-                if (++$flushCounter % 8 === 0) { // Flush every 8 chunks for ranges
+                if ((++$flushCounter % 8) === 0) { // Flush every 8 chunks for ranges
                     flush();
                 }
 
@@ -462,8 +489,13 @@ final class ServerVideoStream
     /**
      * Stream range from Laravel Storage (fallback for cloud storage).
      */
-    private function streamRangeFromStorage(string $path, string $disk, int $start, int $end, int $chunkSize): void
-    {
+    private function streamRangeFromStorage(
+        string $path,
+        string $disk,
+        int $start,
+        int $end,
+        int $chunkSize,
+    ): void {
         $stream = Storage::disk($disk)->readStream($path);
         if (! $stream) {
             return;
@@ -498,7 +530,7 @@ final class ServerVideoStream
 
                 // Minimal flushing for range requests
                 static $flushCounter = 0;
-                if (++$flushCounter % 8 === 0) { // Flush every 8 chunks for ranges
+                if ((++$flushCounter % 8) === 0) { // Flush every 8 chunks for ranges
                     flush();
                 }
 
@@ -519,7 +551,11 @@ final class ServerVideoStream
     {
         $cacheKey = 'video_content:' . md5($path . $metadata['last_modified']);
 
-        return Cache::remember($cacheKey, self::CONTENT_CACHE_TTL, function () use ($path, $disk, $metadata) {
+        return Cache::remember($cacheKey, self::CONTENT_CACHE_TTL, function () use (
+            $path,
+            $disk,
+            $metadata,
+        ) {
             // Only cache if file is small enough
             if ($metadata['size'] >= self::MAX_CACHEABLE_SIZE) {
                 return null;
@@ -539,7 +575,7 @@ final class ServerVideoStream
     private function getOptimalChunkSize(int $fileSize, array $metadata): int
     {
         // For initial requests, use smaller chunks for faster start
-        if ($fileSize < 10 * 1024 * 1024) { // < 10MB
+        if ($fileSize < (10 * 1024 * 1024)) { // < 10MB
             return self::INITIAL_CHUNK_SIZE;
         }
 
@@ -563,21 +599,21 @@ final class ServerVideoStream
         $headers = [
             'Content-Type' => $metadata['mime_type'],
             'Accept-Ranges' => 'bytes',
-            'Cache-Control' => $isPartialContent ? 'no-cache' : 'private, max-age=86400, must-revalidate',
+            'Cache-Control' => $isPartialContent
+                ? 'no-cache'
+                : 'private, max-age=86400, must-revalidate',
             'ETag' => '"' . $metadata['etag'] . '"',
             'Last-Modified' => gmdate('D, d M Y H:i:s', $metadata['last_modified']) . ' GMT',
             'X-Content-Type-Options' => 'nosniff',
             'X-Robots-Tag' => 'noindex, nofollow',
             'Connection' => 'keep-alive',
             'Keep-Alive' => 'timeout=10, max=1000',
-
             // VideoJS-specific optimizations
             'X-Content-Duration' => (string) ($metadata['duration'] ?? 0),
             'Access-Control-Allow-Origin' => '*',
             'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
             'Access-Control-Allow-Headers' => 'Range, Content-Range, Content-Length',
             'Access-Control-Expose-Headers' => 'Content-Range, Content-Length, Accept-Ranges',
-
         ];
 
         // Add content length for non-partial content

@@ -68,9 +68,17 @@ final class ChunkAssembler
 
             fclose($writeHandle);
 
-            // Upload the assembled file using Storage facade
-            $content = file_get_contents($tempFile);
-            Storage::disk($disk)->put($finalPath, $content);
+            // Upload the assembled file using streaming to avoid memory exhaustion
+            $readHandle = fopen($tempFile, 'rb');
+            if (! $readHandle) {
+                throw new RuntimeException('Failed to open temporary file for reading');
+            }
+
+            try {
+                Storage::disk($disk)->writeStream($finalPath, $readHandle);
+            } finally {
+                fclose($readHandle);
+            }
 
         } finally {
             if (is_resource($writeHandle)) {

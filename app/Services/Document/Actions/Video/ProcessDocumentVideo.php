@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Document\Actions\Video;
 
 use App\Models\Document;
+use App\Services\Document\Sessions\VideoUploadSessionManager;
 use Exception;
 use Log;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -40,6 +41,7 @@ final class ProcessDocumentVideo
     public function handle(
         string $videoPath,
         Document $document,
+        ?string $sessionId = null,
         ?string $fileKey = null,
     ): array {
         // Set memory limit for video processing
@@ -53,7 +55,12 @@ final class ProcessDocumentVideo
             $videoData = [];
             if (config('video-upload.processing.extract_metadata', true)) {
                 try {
-                    $videoData = ExtractVideoMetadata::run($videoPath);
+                    $videoData = ExtractVideoMetadata::run($videoPath, $sessionId);
+
+                    // Update session with metadata if session tracking is enabled
+                    if ($sessionId) {
+                        VideoUploadSessionManager::updateProcessingMetadata($sessionId, 'metadata', $videoData);
+                    }
                 } catch (Exception $e) {
                     Log::warning('Failed to extract video metadata', [
                         'path' => $videoPath,
@@ -73,7 +80,13 @@ final class ProcessDocumentVideo
                             $videoPath,
                             $duration,
                             $document,
+                            $sessionId,
                         );
+
+                        // Update session with thumbnail if session tracking is enabled
+                        if ($sessionId && $thumbnailPath) {
+                            VideoUploadSessionManager::updateProcessingMetadata($sessionId, 'thumbnail', basename($thumbnailPath));
+                        }
                     } catch (Exception $e) {
                         Log::warning('Failed to generate video thumbnail', [
                             'path' => $videoPath,
@@ -109,6 +122,11 @@ final class ProcessDocumentVideo
                 $result['thumbnail'] = basename($thumbnailPath);
             }
 
+            // Mark session as completed if session tracking is enabled
+            if ($sessionId) {
+                VideoUploadSessionManager::complete($sessionId, $result);
+            }
+
             return $result;
         } catch (Exception $e) {
             Log::error('Failed to process video file', [
@@ -127,15 +145,22 @@ final class ProcessDocumentVideo
     public function failed(
         string $videoPath,
         Document $document,
+        ?string $sessionId,
         ?string $fileKey,
         Throwable $exception,
     ): void {
         Log::error('Video processing job failed permanently', [
             'path' => $videoPath,
             'document_id' => $document->id,
+            'sessionId' => $sessionId,
             'fileKey' => $fileKey,
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
         ]);
+
+        // Mark session as failed if session tracking is enabled
+        if ($sessionId) {
+            VideoUploadSessionManager::fail($sessionId, $exception->getMessage());
+        }
     }
 }

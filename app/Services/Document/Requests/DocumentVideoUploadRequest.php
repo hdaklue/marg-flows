@@ -16,9 +16,7 @@ final class DocumentVideoUploadRequest extends FormRequest
 
     public function rules(): array
     {
-        $isChunkedUpload = $this->input('chunks', 1) > 1;
-
-        if ($isChunkedUpload) {
+        if ($this->isChunkedUpload()) {
             return $this->chunkedUploadRules();
         }
 
@@ -53,10 +51,7 @@ final class DocumentVideoUploadRequest extends FormRequest
 
     public function getFileName(): string
     {
-        return $this->input(
-            'fileName',
-            $this->file('video')->getClientOriginalName(),
-        );
+        return $this->input('fileName', $this->file('video')->getClientOriginalName());
     }
 
     public function getChunkIndex(): int
@@ -80,6 +75,7 @@ final class DocumentVideoUploadRequest extends FormRequest
             ],
             'fileKey' => 'sometimes|string|max:255',
             'fileName' => 'sometimes|string|max:255',
+            'session_id' => 'sometimes|string|max:255',
         ];
     }
 
@@ -97,15 +93,14 @@ final class DocumentVideoUploadRequest extends FormRequest
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
-                    if (! FileTypes::isStreamableVideo($value)) {
-                        $fail(
-                            'File must have a valid video extension (mp4, webm, ogg).',
-                        );
+                    if (!FileTypes::isStreamableVideo($value)) {
+                        $fail('File must have a valid video extension (mp4, webm, ogg).');
                     }
                 },
             ],
             'chunk' => 'required|integer|min:0',
             'chunks' => 'required|integer|min:2', // Must be chunked if chunks > 1
+            'session_id' => 'sometimes|string|max:255',
         ];
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Services\Document\Actions\Video\ServerVideoStream;
+use App\Services\Document\Actions\Video\ServeVideoStream;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -23,10 +23,10 @@ test('validates video file exists', function () {
 });
 
 test('action class exists and has required methods', function () {
-    expect(class_exists(ServerVideoStream::class))->toBeTrue();
-    expect(method_exists(ServerVideoStream::class, 'handle'))->toBeTrue();
-    expect(method_exists(ServerVideoStream::class, 'clearVideoCache'))->toBeTrue();
-    expect(method_exists(ServerVideoStream::class, 'preloadVideoMetadata'))->toBeTrue();
+    expect(class_exists(ServeVideoStream::class))->toBeTrue();
+    expect(method_exists(ServeVideoStream::class, 'handle'))->toBeTrue();
+    expect(method_exists(ServeVideoStream::class, 'clearVideoCache'))->toBeTrue();
+    expect(method_exists(ServeVideoStream::class, 'preloadVideoMetadata'))->toBeTrue();
 });
 
 test('can clear video cache', function () {
@@ -34,7 +34,7 @@ test('can clear video cache', function () {
     Cache::put($cacheKey, ['test' => 'data'], 3600);
     expect(Cache::has($cacheKey))->toBeTrue();
 
-    ServerVideoStream::clearVideoCache('test-path', 123);
+    ServeVideoStream::clearVideoCache('test-path', 123);
     // The specific cache key might be different, but method should not throw errors
     expect(true)->toBeTrue();
 });
@@ -42,7 +42,7 @@ test('can clear video cache', function () {
 test('can preload video metadata', function () {
     // Should not throw any exceptions for valid video file
     try {
-        ServerVideoStream::preloadVideoMetadata($this->videoPath, 'public');
+        ServeVideoStream::preloadVideoMetadata($this->videoPath, 'public');
         expect(true)->toBeTrue(); // Test passes if no exception thrown
     } catch (\Exception $e) {
         expect(false)->toBeTrue(); // Test fails if exception thrown

@@ -28,8 +28,11 @@ final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContra
             'inlineToolBar' => false,
             'config' => [
                 'endpoints' => [
-                    'byFile' => null,
+                    'single' => null,
+                    'chunk' => null,
                     'delete' => null,
+                    'createSession' => null,
+                    'sessionStatus' => null,
                 ],
                 'additionalRequestHeaders' => [
                     'X-CSRF-TOKEN' => '',
@@ -37,6 +40,7 @@ final class VideoUploadConfigData extends SimpleDTO implements BlockConfigContra
                 'types' => $supportedTypes,
                 'field' => 'video',
                 'maxFileSize' => null,
+                'maxSingleFileSize' => 50 * 1024 * 1024, // 50MB
                 'chunkSize' => null,
                 'useChunkedUpload' => true,
             ],

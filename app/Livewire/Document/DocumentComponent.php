@@ -33,6 +33,8 @@ final class DocumentComponent extends Component
     #[Locked]
     public string $documentId;
 
+    // private string $current_content_hash;
+
     private DocumentDto $documentDto;
 
     public function mount(string $documentId, $canEdit = false)
@@ -42,6 +44,9 @@ final class DocumentComponent extends Component
         $this->documentId = $documentId;
         // Initialize resolver using facade - blocks already contains full EditorJS format
         $this->content = $this->documentDto->blocks;
+
+        // $this->current_content_hash = md5(serialize($this->content));
+
         $this->canEdit = filamentUser()->can('manage', $this->document);
     }
 
@@ -143,7 +148,11 @@ final class DocumentComponent extends Component
             }
 
             // Use DocumentManager to update the document
-            DocumentManager::updateBlocks($this->document, $editorData);
+            DocumentManager::updateBlocks(
+                $this->document,
+                $editorData,
+                // $this->current_content_hash,
+            );
 
             // Update the DTO with new content
             unset($this->updatedAtString, $this->document);

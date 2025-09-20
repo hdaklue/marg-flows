@@ -6,8 +6,11 @@ use App\Models\Document;
 use App\Services\Document\Actions\FileServing\ServeDocumentFile;
 use App\Services\Document\Actions\Image\DeleteDocumentImage;
 use App\Services\Document\Actions\Image\UploadDocumentImage;
+use App\Services\Document\Actions\Video\ChunkVideoUpload;
+use App\Services\Document\Actions\Video\CreateVideoUploadSession;
 use App\Services\Document\Actions\Video\DeleteDocumentVideo;
-use App\Services\Document\Actions\Video\UploadDocumentVideo;
+use App\Services\Document\Actions\Video\GetVideoUploadSessionStatus;
+use App\Services\Document\Actions\Video\SingleVideoUpload;
 use App\Services\FileServing\Document\DocumentFileResolver;
 use Illuminate\Support\Facades\Route;
 
@@ -34,11 +37,25 @@ Route::prefix('documents/{document}')
         // Delete image from document
         Route::delete('delete-image', DeleteDocumentImage::class)->name('documents.delete-image');
 
-        // Upload video to document
-        Route::post('upload-video', UploadDocumentVideo::class)->name('documents.upload-video');
+        // Upload single video to document (< maxSingleFileSize)
+        Route::post('upload-video-single', SingleVideoUpload::class)->name('documents.upload-video-single');
+
+        // Upload chunked video to document (>= maxSingleFileSize)
+        Route::post('upload-video-chunk', ChunkVideoUpload::class)->name('documents.upload-video-chunk');
 
         // Delete video from document
         Route::delete('delete-video', DeleteDocumentVideo::class)->name('documents.delete-video');
+
+        // Create video upload session
+        Route::post('create-video-upload-session', CreateVideoUploadSession::class)->name('documents.create-video-upload-session');
+    });
+
+// Video upload session status routes (not document-specific in URL)
+Route::prefix('video-upload-sessions')
+    ->middleware(['auth'])
+    ->group(function () {
+        // Get session status for polling
+        Route::get('{sessionId}/status', GetVideoUploadSessionStatus::class)->name('video-upload-sessions.status');
     });
 
 // Document file serving routes

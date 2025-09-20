@@ -6,7 +6,7 @@ namespace App\Services\Document\Actions\FileServing;
 
 use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
-use App\Services\Document\Actions\Video\ServerVideoStream;
+use App\Services\Document\Actions\Video\ServeVideoStream;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -39,7 +39,7 @@ final class ServeDocumentFile
     ): Response|StreamedResponse|RedirectResponse {
         // Delegate video requests to specialized video streaming action
         if ($type === 'videos') {
-            return ServerVideoStream::run($document, $fileName);
+            return ServeVideoStream::run($document, $fileName);
         }
 
         // Handle images and other file types with existing logic
@@ -96,7 +96,7 @@ final class ServeDocumentFile
 
         // For video requests, delegate to specialized video streaming action with request context
         if ($type === 'videos') {
-            return ServerVideoStream::run($document, $filename, $request);
+            return ServeVideoStream::run($document, $filename, $request);
         }
 
         // Handle other file types with existing logic
@@ -151,24 +151,31 @@ final class ServeDocumentFile
     /**
      * Stream file response with small chunks for faster initial load.
      */
-    private function streamFileResponse(string $path, string $disk, array $headers): StreamedResponse
-    {
-        return response()->stream(function () use ($path, $disk) {
-            $stream = Storage::disk($disk)->readStream($path);
-            $chunkSize = 8192; // 8KB chunks for fast initial response
+    private function streamFileResponse(
+        string $path,
+        string $disk,
+        array $headers,
+    ): StreamedResponse {
+        return response()->stream(
+            function () use ($path, $disk) {
+                $stream = Storage::disk($disk)->readStream($path);
+                $chunkSize = 8192; // 8KB chunks for fast initial response
 
-            while (! feof($stream)) {
-                $chunk = fread($stream, $chunkSize);
-                if ($chunk !== false) {
-                    echo $chunk;
-                    if (ob_get_level()) {
-                        ob_flush();
+                while (! feof($stream)) {
+                    $chunk = fread($stream, $chunkSize);
+                    if ($chunk !== false) {
+                        echo $chunk;
+                        if (ob_get_level()) {
+                            ob_flush();
+                        }
+                        flush();
                     }
-                    flush();
                 }
-            }
 
-            fclose($stream);
-        }, 200, $headers);
+                fclose($stream);
+            },
+            200,
+            $headers,
+        );
     }
 }

@@ -53,14 +53,14 @@ final class FlowActionCrumb extends WireCrumb
                         ->livewire($this)
                         ->execute('createFlow'),
                 ])
-                ->url(fn () => FlowResource::getUrl('index', ['teanant' => filamentTenant()])),
+                ->url(fn() => FlowResource::getUrl('index', ['teanant' => filamentTenant()])),
             Step::make('current')
-                ->label(fn () => $this->flow->getAttribute('title'))
+                ->label(fn() => str($this->flow->getAttribute('title'))->title())
                 ->actions([
                     Action::make('share')
                         ->label('Share with')
-                        ->visible(fn () => filamentUser()->can('manage', $this->flow))
-                        ->execute(fn () => $this->dispatch(
+                        ->visible(fn() => filamentUser()->can('manage', $this->flow))
+                        ->execute(fn() => $this->dispatch(
                             'open-modal',
                             id: 'manage-participants-modal',
                         )),

@@ -17,7 +17,8 @@ final class VideoUpload implements DocumentBlockConfigContract
 
     private array $config = [
         'endpoints' => [
-            'byFile' => null,
+            'single' => null,
+            'chunk' => null,
             'delete' => null,
         ],
         'additionalRequestHeaders' => [
@@ -26,6 +27,7 @@ final class VideoUpload implements DocumentBlockConfigContract
         'types' => null,
         'field' => 'video',
         'maxFileSize' => null, // 250MB
+        'maxSingleFileSize' => 50 * 1024 * 1024, // 50MB - files larger use chunked upload
         'chunkSize' => null, // 10MB
         'useChunkedUpload' => true,
     ];
@@ -42,8 +44,7 @@ final class VideoUpload implements DocumentBlockConfigContract
         // Default endpoints - will be overridden by forDocument() method
         $this->config['endpoints']['byFile'] = null;
         $this->config['endpoints']['delete'] = null;
-        $this->config['types'] =
-            FileTypes::getStreamVideoFormatsAsValidationString();
+        $this->config['types'] = FileTypes::getStreamVideoFormatsAsValidationString();
         $this->config['maxFileSize'] = $chunkConfig->maxFileSize;
         $this->config['chunkSize'] = $chunkConfig->chunkSize;
 
@@ -53,10 +54,7 @@ final class VideoUpload implements DocumentBlockConfigContract
 
     public function endpoints(array $endpoints): self
     {
-        $this->config['endpoints'] = array_merge(
-            $this->config['endpoints'],
-            $endpoints,
-        );
+        $this->config['endpoints'] = array_merge($this->config['endpoints'], $endpoints);
 
         return $this;
     }
@@ -96,6 +94,13 @@ final class VideoUpload implements DocumentBlockConfigContract
         return $this;
     }
 
+    public function maxSingleFileSize(?int $size): self
+    {
+        $this->config['maxSingleFileSize'] = $size;
+
+        return $this;
+    }
+
     public function chunkSize(?int $size): self
     {
         $this->config['chunkSize'] = $size;
@@ -129,12 +134,20 @@ final class VideoUpload implements DocumentBlockConfigContract
 
     public function forDocument(string $documentId): self
     {
-        $this->config['endpoints']['byFile'] = route('documents.upload-video', [
+        $this->config['endpoints']['single'] = route('documents.upload-video-single', [
+            'document' => $documentId,
+        ]);
+        $this->config['endpoints']['chunk'] = route('documents.upload-video-chunk', [
             'document' => $documentId,
         ]);
         $this->config['endpoints']['delete'] = route('documents.delete-video', [
             'document' => $documentId,
         ]);
+        $this->config['endpoints']['createSession'] = route('documents.create-video-upload-session', [
+            'document' => $documentId,
+        ]);
+        // Set base URL for session status - JS will append sessionId
+        $this->config['endpoints']['sessionStatus'] = url('/video-upload-sessions');
 
         return $this;
     }
