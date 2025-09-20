@@ -2381,9 +2381,9 @@ class VideoUpload {
         retryBtn.addEventListener('click', () => this.retryProgressModal());
         doneBtn.addEventListener('click', () => this.closeProgressModal());
         
-        // Close on background click
+        // Close on background click with confirmation if upload is in progress
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) this.closeProgressModal();
+            if (e.target === modal) this.handleModalClose();
         });
         
         this.progressModal = modal;
@@ -2508,14 +2508,14 @@ class VideoUpload {
         if (speed) speed.textContent = this.formatSpeed(this.uploadMetrics.speed);
         if (eta) eta.textContent = this.formatETA(this.uploadMetrics.eta);
         
-        // Show/hide metrics during upload
+        // Hide redundant metrics since we show speed/eta in status message above
         const metrics = modal.querySelector('.upload-metrics');
         const uploadedRow = modal.querySelector('.upload-uploaded-row');
         if (metrics) {
-            metrics.style.display = (this.progressState.progress < 50 && !this.progressState.hasError && !this.progressState.isComplete) ? 'grid' : 'none';
+            metrics.style.display = 'none'; // Always hide since status message shows this info
         }
         if (uploadedRow) {
-            uploadedRow.style.display = (this.progressState.progress < 50) ? 'flex' : 'none';
+            uploadedRow.style.display = 'none'; // Always hide uploaded amount
         }
         
         // Update phase indicators
@@ -2640,10 +2640,22 @@ class VideoUpload {
     /**
      * Cancel upload and close modal
      */
-    cancelProgressModal() {
+    async cancelProgressModal() {
         if (confirm('Are you sure you want to cancel the upload?')) {
-            this.closeProgressModal();
-            // TODO: Implement actual upload cancellation
+            try {
+                // Cancel the upload strategy if available
+                if (this.sessionUploadStrategy && typeof this.sessionUploadStrategy.cancelUpload === 'function') {
+                    console.log('Cancelling upload session...');
+                    await this.sessionUploadStrategy.cancelUpload();
+                }
+                
+                this.closeProgressModal();
+                console.log('Upload cancelled by user');
+            } catch (error) {
+                console.error('Error during upload cancellation:', error);
+                // Still close the modal even if cancellation fails
+                this.closeProgressModal();
+            }
         }
     }
     
@@ -2674,6 +2686,32 @@ class VideoUpload {
         this.updateProgressModalDisplay();
         
         // TODO: Implement actual retry logic
+    }
+    
+    /**
+     * Handle modal close with confirmation if upload is in progress
+     */
+    async handleModalClose() {
+        // Check if upload is in progress
+        const isInProgress = this.isUploadInProgress();
+        
+        if (isInProgress) {
+            // Show confirmation for in-progress uploads
+            await this.cancelProgressModal();
+        } else {
+            // Directly close if upload is complete or not started
+            this.closeProgressModal();
+        }
+    }
+    
+    /**
+     * Check if upload is currently in progress
+     */
+    isUploadInProgress() {
+        const phase = this.progressState.phase;
+        return phase === 'single_upload' || 
+               phase === 'chunk_upload' || 
+               phase === 'video_processing';
     }
     
     /**

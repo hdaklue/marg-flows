@@ -182,13 +182,45 @@ final class VideoUploadSessionManager
         string $sessionId,
         array $finalData,
     ): bool {
-        $result = self::update($sessionId, [
+        $updates = [
             'status' => 'completed',
             'phase' => 'complete',
             'processing_progress' => 100,
             'final_data' => $finalData,
             'completed_at' => now()->toISOString(),
-        ]);
+        ];
+
+        // Extract individual fields that GetVideoUploadSessionStatus expects
+        if (isset($finalData['thumbnail'])) {
+            $updates['thumbnail_filename'] = $finalData['thumbnail'];
+        }
+
+        // Build video metadata from final data
+        $videoMetadata = [];
+        if (isset($finalData['width'])) {
+            $videoMetadata['width'] = $finalData['width'];
+        }
+        if (isset($finalData['height'])) {
+            $videoMetadata['height'] = $finalData['height'];
+        }
+        if (isset($finalData['duration'])) {
+            $videoMetadata['duration'] = $finalData['duration'];
+        }
+        if (isset($finalData['format'])) {
+            $videoMetadata['format'] = $finalData['format'];
+        }
+        if (isset($finalData['aspect_ratio'])) {
+            $videoMetadata['aspect_ratio'] = $finalData['aspect_ratio'];
+        }
+        if (isset($finalData['aspect_ratio_data'])) {
+            $videoMetadata['aspect_ratio_data'] = $finalData['aspect_ratio_data'];
+        }
+
+        if (! empty($videoMetadata)) {
+            $updates['video_metadata'] = $videoMetadata;
+        }
+
+        $result = self::update($sessionId, $updates);
 
         // Schedule cleanup after completion
         if ($result) {

@@ -6,6 +6,7 @@ use App\Models\Document;
 use App\Services\Document\Actions\FileServing\ServeDocumentFile;
 use App\Services\Document\Actions\Image\DeleteDocumentImage;
 use App\Services\Document\Actions\Image\UploadDocumentImage;
+use App\Services\Document\Actions\Video\CancelVideoUploadSession;
 use App\Services\Document\Actions\Video\ChunkVideoUpload;
 use App\Services\Document\Actions\Video\CreateVideoUploadSession;
 use App\Services\Document\Actions\Video\DeleteDocumentVideo;
@@ -56,6 +57,9 @@ Route::prefix('video-upload-sessions')
     ->group(function () {
         // Get session status for polling
         Route::get('{sessionId}/status', GetVideoUploadSessionStatus::class)->name('video-upload-sessions.status');
+
+        // Cancel session and cleanup
+        Route::delete('{sessionId}/cancel', CancelVideoUploadSession::class)->name('video-upload-sessions.cancel');
     });
 
 // Document file serving routes

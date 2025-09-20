@@ -295,14 +295,16 @@ export default class SessionUploadStrategy {
         switch (status.phase) {
             case 'single_upload':
             case 'chunk_upload':
-                // Cap chunk upload at 80% to leave room for processing phase
-                const uploadProgress = status.data.upload_progress || 0;
-                progress = Math.round(Math.min(uploadProgress * 0.8, 80));
+                // Show actual chunk-by-chunk progress (0-90% for upload phase)
+                const chunksUploaded = status.data.chunks_uploaded || 0;
+                const chunksTotal = status.data.chunks_total || 1;
+                const chunkProgress = chunksTotal > 0 ? (chunksUploaded / chunksTotal) : 0;
+                progress = Math.round(Math.min(chunkProgress * 90, 90));
                 break;
             case 'video_processing':
-                // Processing phase goes from 80% to 95%
+                // Processing phase goes from 90% to 100%
                 const processingProgress = status.data.processing_progress || 0;
-                progress = Math.round(80 + (processingProgress * 0.15));
+                progress = Math.round(90 + (processingProgress * 0.1));
                 break;
             case 'complete':
                 progress = 100;
@@ -466,17 +468,33 @@ export default class SessionUploadStrategy {
     }
 
     /**
-     * Cancel upload process
+     * Cancel upload process and cleanup session
      */
-    cancelUpload() {
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-            this.pollingInterval = null;
+    async cancelUpload() {
+        if (!this.sessionId) {
+            console.log('No session to cancel');
+            return;
         }
-        
-        // Could implement session cancellation API call here
-        console.log('Upload cancelled by user');
-        this.cleanup();
+
+        try {
+            // Call the cancel endpoint to cleanup server-side
+            const cancelUrl = `/video-upload-sessions/${this.sessionId}/cancel`;
+            const response = await fetch(cancelUrl, {
+                method: 'DELETE',
+                headers: this.config.additionalRequestHeaders
+            });
+
+            if (response.ok) {
+                console.log('Upload session cancelled successfully');
+            } else {
+                console.warn('Failed to cancel session on server, but cleaning up locally');
+            }
+        } catch (error) {
+            console.error('Error cancelling upload session:', error);
+        } finally {
+            // Always cleanup local state regardless of server response
+            this.cleanup();
+        }
     }
 
     /**

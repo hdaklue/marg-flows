@@ -58,10 +58,27 @@ final class ProcessDocumentVideo
             $extension = pathinfo($videoPath, PATHINFO_EXTENSION);
             $fileKey = $fileKey ?? uniqid();
 
-            // Extract video metadata if enabled
+            // Get video metadata from session if available, or extract from remote file as fallback
             $videoData = [];
-            if (config('video-upload.processing.extract_metadata', true)) {
+            if ($sessionId) {
+                // Try to get metadata from session first (should be set by AssembleVideoChunks)
+                $sessionData = VideoUploadSessionManager::get($sessionId);
+                $videoData = $sessionData['video_metadata'] ?? [];
+                
+                Log::info('ProcessDocumentVideo: Retrieved metadata from session', [
+                    'sessionId' => $sessionId,
+                    'hasMetadata' => !empty($videoData),
+                    'metadata' => $videoData,
+                ]);
+            }
+            
+            // If no metadata in session, extract from remote file as fallback
+            if (empty($videoData) && config('video-upload.processing.extract_metadata', true)) {
                 try {
+                    Log::info('ProcessDocumentVideo: Extracting metadata from remote file as fallback', [
+                        'videoPath' => $videoPath,
+                    ]);
+                    
                     $videoData = ExtractVideoMetadata::run($videoPath, $sessionId);
 
                     // Update session with metadata if session tracking is enabled
@@ -69,7 +86,7 @@ final class ProcessDocumentVideo
                         VideoUploadSessionManager::updateProcessingMetadata($sessionId, 'metadata', $videoData);
                     }
                 } catch (Exception $e) {
-                    Log::warning('Failed to extract video metadata', [
+                    Log::warning('Failed to extract video metadata from remote file', [
                         'path' => $videoPath,
                         'error' => $e->getMessage(),
                     ]);

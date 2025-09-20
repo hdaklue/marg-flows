@@ -162,6 +162,7 @@ final class ChunkVideoUpload
 
     /**
      * Dispatch assembly of chunks asynchronously to avoid HTTP timeout.
+     * Chain with ProcessDocumentVideo and tag with session ID for cancellation.
      */
     private function assembleChunksAsync(
         UploadSessionService $sessionManager,
@@ -171,7 +172,7 @@ final class ChunkVideoUpload
         Document $document,
         ?string $videoSessionId = null,
     ): void {
-        // Dispatch assembly as a background job to avoid HTTP timeout
+        // Dispatch assembly job - it will handle sequential ProcessDocumentVideo dispatch
         AssembleVideoChunks::dispatch(
             $sessionManager,
             $sessionId,
@@ -180,6 +181,11 @@ final class ChunkVideoUpload
             $document,
             $videoSessionId,
         );
+
+        Log::info('Video assembly job dispatched', [
+            'sessionId' => $sessionId,
+            'videoSessionId' => $videoSessionId,
+        ]);
     }
 
     /**
