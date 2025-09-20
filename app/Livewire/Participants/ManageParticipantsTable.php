@@ -49,7 +49,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
     public function table(Table $table): Table
     {
         return $table
-            ->records(fn () => $this->getParticipants())
+            ->records(fn() => $this->getParticipants())
             ->columns([
                 Split::make([
                     ImageColumn::make('avatarUrl')->circular()->grow(false),
@@ -58,7 +58,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                         TextColumn::make('username')
                             ->size(TextSize::ExtraSmall)
                             ->fontFamily(FontFamily::Mono)
-                            ->formatStateUsing(fn ($state) => "@{$state}")
+                            ->formatStateUsing(fn($state) => "@{$state}")
                             ->label('username'),
                     ])->grow(),
                     Split::make([
@@ -66,7 +66,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                             ->alignEnd()
                             ->badge()
                             // ->formatStateUsing(fn($state) => dd($state)),
-                            ->state(fn ($record) => ucfirst($record['role']['name'])),
+                            ->state(fn($record) => ucfirst($record['role']['name'])),
                     ]),
                 ]),
             ])
@@ -78,7 +78,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                     $this->roleableEntity,
                     filamentUser(),
                     $this->getAssignableUsers(),
-                ),
+                )->outlined(),
             ])
             ->recordActions([
                 Action::make('change_role')
@@ -89,7 +89,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                         RoleSelect::make('role', $this->roleableEntity, filamentUser()),
                     ])
                     ->color('gray')
-                    ->action(fn ($record, array $data) => $this->doChangeRole(
+                    ->action(fn($record, array $data) => $this->doChangeRole(
                         $record['id'],
                         $data['role'],
                     ))
@@ -132,11 +132,11 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
     {
         return (new ParticipantsCollection(
             Porter::getParticipantsWithRoles($this->roleableEntity)
-                ->reject(fn (Roster $item) => $item->assignable_id === filamentUser()->getKey())
+                ->reject(fn(Roster $item) => $item->assignable_id === filamentUser()->getKey())
                 ->keyBy('assignable_id'),
         ))
             ->asDtoCollection()
-            ->map(fn ($item) => $item->toArray())
+            ->map(fn($item) => $item->toArray())
             ->toArray();
     }
 
@@ -149,7 +149,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
         $participantKeys[] = filamentUser()->getKey();
 
         return Porter::getParticipantsWithRoles($tenant)
-            ->reject(fn (Roster $item) => in_array($item->assignable_id, $participantKeys))
+            ->reject(fn(Roster $item) => in_array($item->assignable_id, $participantKeys))
             ->pluck('assignable.name', 'assignable.id')
             ->toArray();
     }

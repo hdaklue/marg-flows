@@ -20,12 +20,12 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/css/filament/portal/theme.css',
                 // Async Alpine components
-                'resources/js/components/async/audio-annotation.js',
-                'resources/js/components/async/video-annotation.js',
-                'resources/js/components/async/voice-recorder.js',
-                'resources/js/components/async/video-recorder.js',
-                'resources/js/components/async/audio-player.js',
-                'resources/js/components/ChunkedFileUpload/index.js',
+                // 'resources/js/components/async/audio-annotation.js',
+                // 'resources/js/components/async/video-annotation.js',
+                // 'resources/js/components/async/voice-recorder.js',
+                // 'resources/js/components/async/video-recorder.js',
+                // 'resources/js/components/async/audio-player.js',
+                // 'resources/js/components/ChunkedFileUpload/index.js',
                 // CSS files
                 'resources/css/components/editorjs/index.css',
                 'resources/css/components/editorjs/resizable-image.css',

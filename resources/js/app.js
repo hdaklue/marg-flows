@@ -6,11 +6,11 @@ import AsyncAlpine from 'async-alpine';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
 // Import TOAST UI Calendar CSS and make it globally available
-import Calendar from '@toast-ui/calendar';
-import '@toast-ui/calendar/dist/toastui-calendar.min.css';
+// import Calendar from '@toast-ui/calendar';
+// import '@toast-ui/calendar/dist/toastui-calendar.min.css';
 
 // Make TOAST UI Calendar available globally
-window.ToastUICalendar = Calendar;
+// window.ToastUICalendar = Calendar;
 
 // Heavy components will be loaded asynchronously
 // Only keep lightweight or critical components as direct imports here if needed
@@ -18,7 +18,7 @@ window.ToastUICalendar = Calendar;
 import anchor from "@alpinejs/anchor";
 import Draggabilly from 'draggabilly';
 import Hammer from 'hammerjs';
-import './dist/components/alpine-sortable';
+// import './dist/components/alpine-sortable';
 
 
 
@@ -46,14 +46,14 @@ Alpine.asyncData('recorder', () => import('./components/voice-recorder'));
 Alpine.asyncData('chunkedFileUpload', () => import('./components/ChunkedFileUpload/index.js'));
 
 // Keep global assignments for components that need it
-Alpine.asyncData('videoAnnotationComponent', () => import('./components/video-annotation').then(module => {
-    window.videoAnnotationComponent = module.default;
-    return module;
-}));
-Alpine.asyncData('chunkedFileUploadComponent', () => import('./components/ChunkedFileUpload/index.js').then(module => {
-    window.chunkedFileUploadComponent = module.default;
-    return module;
-}));
+// Alpine.asyncData('videoAnnotationComponent', () => import('./components/video-annotation').then(module => {
+//     window.videoAnnotationComponent = module.default;
+//     return module;
+// }));
+// Alpine.asyncData('chunkedFileUploadComponent', () => import('./components/ChunkedFileUpload/index.js').then(module => {
+//     window.chunkedFileUploadComponent = module.default;
+//     return module;
+// }));
 
 Alpine.plugin(ui);
 Alpine.plugin(Autosize);
