@@ -31,7 +31,7 @@ final class ChunkAssembler
         $uniqueFileName = uniqid() . '_' . time() . '.' . $extension;
         $finalPath = $storeDirectory . '/' . $uniqueFileName;
 
-        $disk = config('chunked-upload.storage.disk', 'public');
+        $disk = config('chunked-upload.storage.disk', 'local_chunks');
 
         // Ensure final directory exists
         Storage::disk($disk)->makeDirectory($storeDirectory);
@@ -127,7 +127,7 @@ final class ChunkAssembler
         string $chunkDirectory,
         int $totalChunks,
     ): void {
-        $disk = config('chunked-upload.storage.disk', 'public');
+        $disk = config('chunked-upload.storage.disk', 'local_chunks');
         $missingChunks = [];
 
         for ($i = 0; $i < $totalChunks; $i++) {

@@ -22,20 +22,20 @@ final class ExtractVideoMetadata
         try {
             // Determine disk based on path - use local chunks disk for local files, do_spaces for remote files
             $disk = $this->determineDisk($path);
-            
+
             Log::info('Extracting video metadata using VideoManager', [
                 'path' => $path,
                 'disk' => $disk,
                 'sessionId' => $sessionId,
             ]);
-            
+
             // Use VideoManager to create a Video object and extract metadata
             $videoManager = app(VideoManager::class);
             $video = $videoManager->fromDisk($path, $disk);
-            
+
             // Get all metadata from Video object
             $metadata = $video->getMetadata();
-            
+
             Log::info('Video metadata extracted successfully', [
                 'path' => $path,
                 'width' => $metadata['dimension']['width'],
@@ -91,9 +91,9 @@ final class ExtractVideoMetadata
         // If path starts with tenant directory structure, it's likely on do_spaces
         // Otherwise, assume it's on local chunks disk
         if (preg_match('/^[a-f0-9]{32}\/documents\//', $path)) {
-            return config('directory-chunks.tenant_isolation.disk', 'do_spaces');
+            return config('document.storage.disk', 'do_spaces');
         }
-        
+
         return config('chunked-upload.storage.disk', 'local_chunks');
     }
 }
