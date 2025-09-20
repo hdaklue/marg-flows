@@ -114,7 +114,10 @@ final class AssembleVideoChunks implements ShouldQueue
                 'sessionId' => $sessionId,
                 'videoSessionId' => $videoSessionId,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'documentId' => $document->id,
+                'fileName' => $fileName,
+                'totalChunks' => $totalChunks,
             ]);
 
             // Mark session as failed
@@ -132,7 +135,7 @@ final class AssembleVideoChunks implements ShouldQueue
     private function moveToDocumentStorage(string $localPath, Document $document): string
     {
         $chunksDisk = config('chunked-upload.storage.disk', 'local_chunks');
-        $documentDisk = config('directory-chunks.tenant_isolation.disk', 'do_spaces');
+        $documentDisk = config('document.storage.disk', 'do_spaces');
 
         // Get document directory path
         $documentDirectory = DocumentDirectoryManager::make($document)->videos()->getDirectory();
