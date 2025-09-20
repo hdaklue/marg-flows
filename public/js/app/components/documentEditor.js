@@ -460,16 +460,12 @@ ${As(e)}`),t.map&&!t.map.bytes&&(this.logger_("going to request init segment."),
             border-radius: 8px;
             overflow: hidden;
             background: #f3f4f6;
-        `;let p=document.createElement("img");if(p.classList.add("ce-video-upload__thumbnail"),p.style.cssText=`
+        `;let p=document.createElement("img");p.classList.add("ce-video-upload__thumbnail"),p.style.cssText=`
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-        `,p.loading="lazy",this.data.file.thumbnail){let x=this.resolveThumbnailUrl(this.data.file.thumbnail);x?(p.src=x,p.alt="Video thumbnail",p.onerror=()=>{let b=this.resolveThumbnailUrlFallback(this.data.file.thumbnail);b&&p.src!==b?p.src=b:this.showThumbnailFallback(r)},r.appendChild(p)):this.showThumbnailFallback(r)}else r.style.display="flex",r.style.alignItems="center",r.style.justifyContent="center",r.innerHTML=`
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke="#9ca3af" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/>
-                </svg>
-            `;let g=document.createElement("div");g.classList.add("ce-video-upload__play-icon"),g.innerHTML=`
+        `,p.loading="lazy",this.createModernVideoIndicator(r);let g=document.createElement("div");g.classList.add("ce-video-upload__play-icon"),g.innerHTML=`
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="10" fill="rgba(0,0,0,0.7)"/>
                 <path d="M10 8l6 4-6 4V8z" fill="white"/>
@@ -483,7 +479,8 @@ ${As(e)}`),t.map&&!t.map.bytes&&(this.logger_("going to request init segment."),
             opacity: 0.9;
             transition: opacity 0.2s ease;
             pointer-events: none;
-        `,r.addEventListener("click",()=>this.openModal()),this.data.file.thumbnail&&r.appendChild(g);let y=document.createElement("div");if(y.style.cssText=`
+            z-index: 10;
+        `,r.addEventListener("click",()=>this.openModal()),r.appendChild(g);let y=document.createElement("div");if(y.style.cssText=`
             position: relative;
             display: inline-block;
         `,y.classList.add("ce-video-upload__thumbnail-wrapper"),y.appendChild(r),this.resizeMode&&this.addResizeHandles(y),!this.readOnly){let x=document.createElement("button");x.classList.add("ce-video-upload__delete-btn"),x.innerHTML=`
@@ -526,7 +523,87 @@ ${As(e)}`),t.map&&!t.map.bytes&&(this.logger_("going to request init segment."),
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path stroke="#9ca3af" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0-2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/>
             </svg>
-        `}addUploadedFile(e){let t=e.file?.filename;if(!t)throw new Error("No filename in response");let r={filename:t,thumbnail:e.file?.thumbnail||null,caption:e.caption||"",width:e.width||null,height:e.height||null,duration:e.duration||null,size:e.size||null,format:e.format||null,aspect_ratio:e.aspect_ratio||"16:9",aspect_ratio_data:e.aspect_ratio_data||null};this.data.file=r}completeUpload(){this.wrapper.innerHTML="",this.data.file&&(this.data.file.url||this.data.file.filename)?this.createVideoElement(this.wrapper):this.createUploadInterface(this.wrapper);let t=this.uploadProgress.some(n=>n.status==="error"),r=this.uploadProgress.filter(n=>n.status==="success").length,s=this.uploadProgress.filter(n=>n.status==="error");if(r>0&&this.renderGallery(),!t&&r>0)this.hideUploadContainer(),this.hideInlineProgress(),this.uploadProgress=[],this.notifyEditorChange();else if(t){this.showErrorState(s),this.uploadProgress=this.uploadProgress.filter(n=>n.status==="error"),r>0&&this.notifyEditorChange();return}else this.showUploadContainer(),this.hideInlineProgress(),this.uploadProgress=[]}async handleDelete(e){if(!this.data.files||!this.data.files[e])return;let t=this.data.files[e];document.dispatchEvent(new CustomEvent("editor:busy"));try{let r=t.url||this.resolveVideoUrl(t.filename);r&&await this.executeDeleteRequest(r),this.removeFileFromData(e),this.updateAfterDelete(),this.notifyEditorChange()}catch(r){console.error("Delete operation failed:",r),setTimeout(()=>{document.dispatchEvent(new CustomEvent("editor:free"))},0)}}async executeDeleteRequest(e){let t=e;if(t.includes("/storage/")){let r=t.indexOf("/storage/");t=t.substring(r+9)}t.startsWith("documents/videos/")||(t="documents/videos/"+t.replace("documents/",""));try{let r=await fetch(this.config.endpoints.delete||"/delete-video",{method:"DELETE",headers:{"Content-Type":"application/json",...this.config.additionalRequestHeaders},body:JSON.stringify({path:t})});if(!r.ok)throw new Error(`Delete failed: ${r.status}`);return r}catch(r){throw r}}removeFileFromData(e){this.data.files.splice(e,1),this.data.files.length===0&&(this.data.files=[],this.data.caption||(this.data.caption=""))}updateAfterDelete(){this.renderGallery(),this.data.files.length===0&&this.showUploadContainer()}hideUploadContainer(){this.uploadContainer&&(this.uploadContainer.style.display="none")}showUploadContainer(){this.uploadContainer&&(this.uploadContainer.style.display="flex")}showInlineProgress(){if(!this.wrapper||!this.uploadProgress)return;this.uploadContainer&&(this.uploadContainer.style.display="none");let e=this.wrapper.querySelector(".ce-video-upload__uploading");e&&e.remove();let t=document.createElement("div");t.classList.add("ce-video-upload__uploading"),t.innerHTML=`
+        `}createModernVideoIndicator(e){e.innerHTML="";let t=document.documentElement.classList.contains("dark")||document.body.classList.contains("dark")||window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,r=document.createElement("div");r.style.cssText=`
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: ${t?"linear-gradient(135deg, rgba(9, 9, 11, 0.95) 0%, rgba(24, 24, 27, 0.9) 100%)":"linear-gradient(135deg, rgba(250, 250, 250, 0.95) 0%, rgba(228, 228, 231, 0.9) 100%)"};
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+        `;let s=document.createElement("div");s.style.cssText=`
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 2;
+            padding: 16px;
+        `;let n=document.createElement("div");n.style.cssText=`
+            position: relative;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;let o=document.createElement("div");o.innerHTML=`
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path stroke="${t?"#a1a1aa":"#71717a"}" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/>
+            </svg>
+        `,o.style.cssText=`
+            filter: drop-shadow(0 2px 4px ${t?"rgba(0, 0, 0, 0.3)":"rgba(0, 0, 0, 0.1)"});
+        `,n.appendChild(o);let a="";if(this.data.file){let p=[];if(this.data.file.duration){let g=Math.round(this.data.file.duration),y=Math.floor(g/60),_=g%60;p.push(`${y}:${_.toString().padStart(2,"0")}`)}if(this.data.file.width&&this.data.file.height&&p.push(`${this.data.file.width}\xD7${this.data.file.height}`),this.data.file.size){let g=(this.data.file.size/1048576).toFixed(1);p.push(`${g}MB`)}this.data.file.format&&p.push(this.data.file.format.toUpperCase()),p.length>0&&(a=`
+                    <div style="
+                        font-size: 11px;
+                        color: ${t?"#a1a1aa":"#71717a"};
+                        margin-top: 8px;
+                        opacity: 0.8;
+                        font-weight: 500;
+                        letter-spacing: 0.025em;
+                    ">
+                        ${p.join(" \u2022 ")}
+                    </div>
+                `)}let l=document.createElement("div");l.innerHTML=`
+            <div style="
+                font-size: 13px;
+                font-weight: 600;
+                color: ${t?"#e4e4e7":"#3f3f46"};
+                margin-bottom: 2px;
+                letter-spacing: 0.025em;
+            ">
+                Video File
+            </div>
+            <div style="
+                font-size: 11px;
+                color: ${t?"#a1a1aa":"#71717a"};
+                opacity: 0.9;
+            ">
+                Click to preview
+            </div>
+            ${a}
+        `;let d=document.createElement("div");d.style.cssText=`
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid ${t?"rgba(113, 113, 122, 0.2)":"rgba(113, 113, 122, 0.3)"};
+            border-radius: 8px;
+            pointer-events: none;
+            background: ${t?"linear-gradient(135deg, rgba(9, 9, 11, 0.2) 0%, transparent 50%, rgba(24, 24, 27, 0.1) 100%)":"linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%, rgba(228, 228, 231, 0.2) 100%)"};
+        `,s.appendChild(n),s.appendChild(l),e.style.cssText=`
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        `,e.addEventListener("mouseenter",()=>{r.style.transform="scale(1.02)",r.style.transition="transform 0.2s ease",d.style.borderColor=t?"rgba(113, 113, 122, 0.4)":"rgba(113, 113, 122, 0.5)"}),e.addEventListener("mouseleave",()=>{r.style.transform="scale(1)",d.style.borderColor=t?"rgba(113, 113, 122, 0.2)":"rgba(113, 113, 122, 0.3)"}),e.style.background=t?"#18181b":"#fafafa",e.appendChild(r),e.appendChild(d),e.appendChild(s)}addUploadedFile(e){let t=e.file?.filename;if(!t)throw new Error("No filename in response");let r={filename:t,caption:e.caption||"",width:e.width||null,height:e.height||null,duration:e.duration||null,size:e.size||null,format:e.format||null,aspect_ratio:e.aspect_ratio||"16:9",aspect_ratio_data:e.aspect_ratio_data||null};this.data.file=r}completeUpload(){this.wrapper.innerHTML="",this.data.file&&(this.data.file.url||this.data.file.filename)?this.createVideoElement(this.wrapper):this.createUploadInterface(this.wrapper);let t=this.uploadProgress.some(n=>n.status==="error"),r=this.uploadProgress.filter(n=>n.status==="success").length,s=this.uploadProgress.filter(n=>n.status==="error");if(r>0&&this.renderGallery(),!t&&r>0)this.hideUploadContainer(),this.hideInlineProgress(),this.uploadProgress=[],this.notifyEditorChange();else if(t){this.showErrorState(s),this.uploadProgress=this.uploadProgress.filter(n=>n.status==="error"),r>0&&this.notifyEditorChange();return}else this.showUploadContainer(),this.hideInlineProgress(),this.uploadProgress=[]}async handleDelete(e){if(!this.data.files||!this.data.files[e])return;let t=this.data.files[e];document.dispatchEvent(new CustomEvent("editor:busy"));try{let r=t.url||this.resolveVideoUrl(t.filename);r&&await this.executeDeleteRequest(r),this.removeFileFromData(e),this.updateAfterDelete(),this.notifyEditorChange()}catch(r){console.error("Delete operation failed:",r),setTimeout(()=>{document.dispatchEvent(new CustomEvent("editor:free"))},0)}}async executeDeleteRequest(e){let t=e;if(t.includes("/storage/")){let r=t.indexOf("/storage/");t=t.substring(r+9)}t.startsWith("documents/videos/")||(t="documents/videos/"+t.replace("documents/",""));try{let r=await fetch(this.config.endpoints.delete||"/delete-video",{method:"DELETE",headers:{"Content-Type":"application/json",...this.config.additionalRequestHeaders},body:JSON.stringify({path:t})});if(!r.ok)throw new Error(`Delete failed: ${r.status}`);return r}catch(r){throw r}}removeFileFromData(e){this.data.files.splice(e,1),this.data.files.length===0&&(this.data.files=[],this.data.caption||(this.data.caption=""))}updateAfterDelete(){this.renderGallery(),this.data.files.length===0&&this.showUploadContainer()}hideUploadContainer(){this.uploadContainer&&(this.uploadContainer.style.display="none")}showUploadContainer(){this.uploadContainer&&(this.uploadContainer.style.display="flex")}showInlineProgress(){if(!this.wrapper||!this.uploadProgress)return;this.uploadContainer&&(this.uploadContainer.style.display="none");let e=this.wrapper.querySelector(".ce-video-upload__uploading");e&&e.remove();let t=document.createElement("div");t.classList.add("ce-video-upload__uploading"),t.innerHTML=`
             <div class="ce-video-upload__uploading-spinner">
                 <svg class="ce-video-upload__spinner" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="31.416" stroke-dashoffset="31.416">

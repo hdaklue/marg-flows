@@ -661,43 +661,10 @@ class VideoUpload {
         `;
         thumbnail.loading = 'lazy';
 
-        // Use thumbnail from server or fallback to video icon
-        if (this.data.file.thumbnail) {
-            // Resolve thumbnail filename to secure URL
-            const thumbnailUrl = this.resolveThumbnailUrl(this.data.file.thumbnail);
-            if (thumbnailUrl) {
-                thumbnail.src = thumbnailUrl;
-                thumbnail.alt = 'Video thumbnail';
-                
-                // Handle thumbnail load error by trying fallback path
-                thumbnail.onerror = () => {
-                    const fallbackUrl = this.resolveThumbnailUrlFallback(this.data.file.thumbnail);
-                    if (fallbackUrl && thumbnail.src !== fallbackUrl) {
-                        thumbnail.src = fallbackUrl;
-                    } else {
-                        // If both paths fail, show video icon
-                        this.showThumbnailFallback(thumbnailContainer);
-                    }
-                };
-                
-                thumbnailContainer.appendChild(thumbnail);
-            } else {
-                // Fallback to video icon if thumbnail URL cannot be resolved
-                this.showThumbnailFallback(thumbnailContainer);
-            }
-        } else {
-            // Fallback: use a default video icon
-            thumbnailContainer.style.display = 'flex';
-            thumbnailContainer.style.alignItems = 'center';
-            thumbnailContainer.style.justifyContent = 'center';
-            thumbnailContainer.innerHTML = `
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke="#9ca3af" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/>
-                </svg>
-            `;
-        }
+        // Always use modern video indicator instead of thumbnails to eliminate overhead
+        this.createModernVideoIndicator(thumbnailContainer);
 
-        // Add play icon overlay
+        // Add play icon overlay (always show for video files)
         const playIcon = document.createElement('div');
         playIcon.classList.add('ce-video-upload__play-icon');
         playIcon.innerHTML = `
@@ -715,16 +682,14 @@ class VideoUpload {
             opacity: 0.9;
             transition: opacity 0.2s ease;
             pointer-events: none;
+            z-index: 10;
         `;
-        // Note: No click handler on play icon - it's just visual
-
-        // Add click handler to open modal (only on container)
+        
+        // Add click handler to open modal (on container)
         thumbnailContainer.addEventListener('click', () => this.openModal());
 
-        // Add play icon to thumbnail container
-        if (this.data.file.thumbnail) {
-            thumbnailContainer.appendChild(playIcon);
-        }
+        // Always add play icon to thumbnail container for video files
+        thumbnailContainer.appendChild(playIcon);
 
         // Wrapper for thumbnail container and delete button
         const thumbnailWrapper = document.createElement('div');
@@ -1527,6 +1492,187 @@ class VideoUpload {
         `;
     }
 
+    createModernVideoIndicator(thumbnailContainer) {
+        thumbnailContainer.innerHTML = '';
+        
+        // Detect dark mode (typical implementation patterns)
+        const isDarkMode = document.documentElement.classList.contains('dark') || 
+                          document.body.classList.contains('dark') ||
+                          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Create modern gradient background with glass effect
+        const gradientOverlay = document.createElement('div');
+        gradientOverlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: ${isDarkMode 
+                ? 'linear-gradient(135deg, rgba(9, 9, 11, 0.95) 0%, rgba(24, 24, 27, 0.9) 100%)'
+                : 'linear-gradient(135deg, rgba(250, 250, 250, 0.95) 0%, rgba(228, 228, 231, 0.9) 100%)'
+            };
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+        `;
+        
+        // Create the main indicator container
+        const indicatorContent = document.createElement('div');
+        indicatorContent.style.cssText = `
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 2;
+            padding: 16px;
+        `;
+        
+        // Modern video icon with play overlay
+        const videoIconContainer = document.createElement('div');
+        videoIconContainer.style.cssText = `
+            position: relative;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+        
+        // Modern Heroicons video icon
+        const videoIcon = document.createElement('div');
+        videoIcon.innerHTML = `
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path stroke="${isDarkMode ? '#a1a1aa' : '#71717a'}" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/>
+            </svg>
+        `;
+        videoIcon.style.cssText = `
+            filter: drop-shadow(0 2px 4px ${isDarkMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)'});
+        `;
+        
+        videoIconContainer.appendChild(videoIcon);
+        
+        // Video metadata info (if available)
+        let metadataHtml = '';
+        if (this.data.file) {
+            const parts = [];
+            
+            // Duration
+            if (this.data.file.duration) {
+                const duration = Math.round(this.data.file.duration);
+                const minutes = Math.floor(duration / 60);
+                const seconds = duration % 60;
+                parts.push(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+            }
+            
+            // Dimensions
+            if (this.data.file.width && this.data.file.height) {
+                parts.push(`${this.data.file.width}×${this.data.file.height}`);
+            }
+            
+            // File size
+            if (this.data.file.size) {
+                const sizeInMB = (this.data.file.size / (1024 * 1024)).toFixed(1);
+                parts.push(`${sizeInMB}MB`);
+            }
+            
+            // Format
+            if (this.data.file.format) {
+                parts.push(this.data.file.format.toUpperCase());
+            }
+            
+            if (parts.length > 0) {
+                metadataHtml = `
+                    <div style="
+                        font-size: 11px;
+                        color: ${isDarkMode ? '#a1a1aa' : '#71717a'};
+                        margin-top: 8px;
+                        opacity: 0.8;
+                        font-weight: 500;
+                        letter-spacing: 0.025em;
+                    ">
+                        ${parts.join(' • ')}
+                    </div>
+                `;
+            }
+        }
+        
+        // Video label
+        const videoLabel = document.createElement('div');
+        videoLabel.innerHTML = `
+            <div style="
+                font-size: 13px;
+                font-weight: 600;
+                color: ${isDarkMode ? '#e4e4e7' : '#3f3f46'};
+                margin-bottom: 2px;
+                letter-spacing: 0.025em;
+            ">
+                Video File
+            </div>
+            <div style="
+                font-size: 11px;
+                color: ${isDarkMode ? '#a1a1aa' : '#71717a'};
+                opacity: 0.9;
+            ">
+                Click to preview
+            </div>
+            ${metadataHtml}
+        `;
+        
+        // Subtle border effect
+        const borderEffect = document.createElement('div');
+        borderEffect.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid ${isDarkMode ? 'rgba(113, 113, 122, 0.2)' : 'rgba(113, 113, 122, 0.3)'};
+            border-radius: 8px;
+            pointer-events: none;
+            background: ${isDarkMode 
+                ? 'linear-gradient(135deg, rgba(9, 9, 11, 0.2) 0%, transparent 50%, rgba(24, 24, 27, 0.1) 100%)'
+                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%, rgba(228, 228, 231, 0.2) 100%)'
+            };
+        `;
+        
+        // Assemble the indicator
+        indicatorContent.appendChild(videoIconContainer);
+        indicatorContent.appendChild(videoLabel);
+        
+        thumbnailContainer.style.cssText = `
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        `;
+        
+        // Add hover effect
+        thumbnailContainer.addEventListener('mouseenter', () => {
+            gradientOverlay.style.transform = 'scale(1.02)';
+            gradientOverlay.style.transition = 'transform 0.2s ease';
+            borderEffect.style.borderColor = isDarkMode ? 'rgba(113, 113, 122, 0.4)' : 'rgba(113, 113, 122, 0.5)';
+        });
+        
+        thumbnailContainer.addEventListener('mouseleave', () => {
+            gradientOverlay.style.transform = 'scale(1)';
+            borderEffect.style.borderColor = isDarkMode ? 'rgba(113, 113, 122, 0.2)' : 'rgba(113, 113, 122, 0.3)';
+        });
+        
+        // Set up responsive background color
+        thumbnailContainer.style.background = isDarkMode ? '#18181b' : '#fafafa';
+        
+        thumbnailContainer.appendChild(gradientOverlay);
+        thumbnailContainer.appendChild(borderEffect);
+        thumbnailContainer.appendChild(indicatorContent);
+    }
+
     addUploadedFile(response) {
         // Handle the new filename-based response format
         const filename = response.file?.filename;
@@ -1536,7 +1682,6 @@ class VideoUpload {
         
         const fileData = {
             filename: filename,  // Store only filename
-            thumbnail: response.file?.thumbnail || null,
             caption: response.caption || '',
             width: response.width || null,
             height: response.height || null,

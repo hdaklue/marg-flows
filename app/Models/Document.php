@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\Archiveable;
 use App\Concerns\Database\LivesInOriginalDB;
 use App\Concerns\HasSideNotes;
 use App\Concerns\SentInNotificationTrait;
@@ -78,7 +79,7 @@ use Illuminate\Support\Carbon;
 final class Document extends Model implements BelongsToTenantContract, PorterRoleableContract, Recentable, RoleableEntity, SentInNotification, Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DocumentFactory> */
-    use BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait;
+    use Archiveable, BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait;
 
     protected $fillable = [
         'name',

@@ -58,10 +58,10 @@ final class AssembleVideoChunks implements ShouldQueue
                         'localPath' => $localFinalPath,
                         'videoSessionId' => $videoSessionId,
                     ]);
-                    
+
                     // Use a special action to extract from local chunks disk specifically
                     $videoMetadata = $this->extractMetadataFromLocalFile($localFinalPath, $videoSessionId);
-                    
+
                     // Update session with metadata
                     VideoUploadSessionManager::updateProcessingMetadata($videoSessionId, 'metadata', $videoMetadata);
                 } catch (Exception $e) {
@@ -96,7 +96,7 @@ final class AssembleVideoChunks implements ShouldQueue
                 ]);
 
                 VideoUploadSessionManager::startProcessing($videoSessionId, basename($remoteFinalPath));
-                
+
                 // Dispatch processing job with session ID - this runs after assembly completes
                 ProcessDocumentVideo::dispatch($remoteFinalPath, $document, $videoSessionId);
             } else {
@@ -190,21 +190,21 @@ final class AssembleVideoChunks implements ShouldQueue
     private function extractMetadataFromLocalFile(string $localPath, ?string $sessionId = null): array
     {
         $chunksDisk = config('chunked-upload.storage.disk', 'local_chunks');
-        
+
         Log::info('Extracting video metadata from local chunks disk', [
             'localPath' => $localPath,
             'disk' => $chunksDisk,
             'sessionId' => $sessionId,
         ]);
-        
+
         try {
             // Use VideoManager to create a Video object from local chunks disk
             $videoManager = app(VideoManager::class);
             $video = $videoManager->fromDisk($localPath, $chunksDisk);
-            
+
             // Get all metadata from Video object
             $metadata = $video->getMetadata();
-            
+
             Log::info('Video metadata extracted successfully from local file', [
                 'localPath' => $localPath,
                 'width' => $metadata['dimension']['width'],
@@ -228,7 +228,7 @@ final class AssembleVideoChunks implements ShouldQueue
                 'disk' => $chunksDisk,
                 'error' => $e->getMessage(),
             ]);
-            
+
             // Return fallback metadata
             return [
                 'width' => null,

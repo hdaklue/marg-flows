@@ -30,13 +30,24 @@ final class GenerateVideoThumbnail
             $directoryManager = DocumentDirectoryManager::make($document);
             $thumbnailStrategy = $directoryManager->videos()->asThumbnails();
             $thumbnailPath = $thumbnailStrategy->getDirectory() . '/' . $thumbnailFilename;
-            $disk = config('chunked-upload.storage.disk', 'public');
 
-            Storage::disk($disk)->makeDirectory($thumbnailStrategy->getDirectory());
+            // Read video from local chunks disk, save thumbnail to document storage disk
+            $videoDisk = config('chunked-upload.storage.disk', 'local_chunks');
+            $thumbnailDisk = config('document.storage.disk', 'do_spaces');
 
-            $media = FFMpeg::fromDisk($disk)->open($videoPath);
+            Log::info('Generating video thumbnail', [
+                'videoPath' => $videoPath,
+                'thumbnailPath' => $thumbnailPath,
+                'videoDisk' => $videoDisk,
+                'thumbnailDisk' => $thumbnailDisk,
+                'extractionTime' => $extractionTime,
+            ]);
+
+            Storage::disk($thumbnailDisk)->makeDirectory($thumbnailStrategy->getDirectory());
+
+            $media = FFMpeg::fromDisk($videoDisk)->open($videoPath);
             $frame = $media->getFrameFromSeconds($extractionTime);
-            $frame->export()->toDisk($disk)->save($thumbnailPath);
+            $frame->export()->toDisk($thumbnailDisk)->save($thumbnailPath);
 
             Log::info('Video thumbnail generated successfully', [
                 'video_path' => $videoPath,
@@ -44,7 +55,7 @@ final class GenerateVideoThumbnail
                 'extraction_time' => $extractionTime,
             ]);
 
-            $this->warmThumbnailCache($thumbnailPath, $disk);
+            $this->warmThumbnailCache($thumbnailPath, $thumbnailDisk);
 
             return $thumbnailPath;
         } catch (Exception $e) {

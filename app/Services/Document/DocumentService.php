@@ -78,7 +78,7 @@ final class DocumentService implements DocumentManagerInterface
         array|string $newBlocks,
         // string $currentFingerPrint,
     ) {
-        //If current content finger print === $document blocks normal update
+        // If current content finger print === $document blocks normal update
         // if not Should update diffs only
         $document->updateBlocks($newBlocks);
         $this->clearCache($document->documentable);
@@ -121,6 +121,14 @@ final class DocumentService implements DocumentManagerInterface
         )->sortByDesc('updated_at');
     }
 
+    public function restore(Document|string $document)
+    {
+        if (! $document instanceof Document) {
+            $document = $this->getDocument($document);
+        }
+        $document->unArchive();
+    }
+
     /**
      * Get all pages for a documentable entity with caching.
      *
@@ -133,7 +141,7 @@ final class DocumentService implements DocumentManagerInterface
             $cahcedDocuments = Cache::remember(
                 $this->generateDocumentsCacheKey($documentable),
                 now()->addMinutes(config('document.cache_ttl.list', 60)),
-                fn() => $documentable
+                fn () => $documentable
                     ->documents()
                     ->with('creator')
                     ->orderBy('created_at', 'desc')
@@ -159,7 +167,16 @@ final class DocumentService implements DocumentManagerInterface
         return $this->mapDocumentsToDtos($documents, $documentable);
     }
 
-    public function getDocument(string $documentId): null|Document
+    public function archive(Document|string $document)
+    {
+        if (! $document instanceof Document) {
+            $document = $this->getDocument($document);
+        }
+
+        $document->archive();
+    }
+
+    public function getDocument(string $documentId): ?Document
     {
         $page = Document::where('id', $documentId)
             ->with(['creator', 'documentable'])
@@ -171,14 +188,14 @@ final class DocumentService implements DocumentManagerInterface
             return Cache::remember(
                 $cacheKey,
                 now()->addMinutes(config('document.cache_ttl.document', 1440)),
-                fn() => $page,
+                fn () => $page,
             );
         }
 
         return $page;
     }
 
-    public function getDocumentDto(string $documentId): null|DocumentDto
+    public function getDocumentDto(string $documentId): ?DocumentDto
     {
         return DocumentDto::fromModel($this->getDocument($documentId));
     }
@@ -189,7 +206,7 @@ final class DocumentService implements DocumentManagerInterface
             return Cache::remember(
                 "documents:creator:{$creator->getKey()}",
                 now()->addMinutes(config('document.cache_ttl.creator', 60)),
-                fn() => Document::where('creator_id', $creator->getKey())
+                fn () => Document::where('creator_id', $creator->getKey())
                     ->with(['documentable', 'creator'])
                     ->orderBy('created_at', 'desc')
                     ->get(),
@@ -215,7 +232,7 @@ final class DocumentService implements DocumentManagerInterface
             return Cache::remember(
                 "documents:recent:{$documentable->getMorphClass()}:{$documentable->getKey()}:{$limit}",
                 now()->addMinutes(config('document.cache_ttl.recent', 60)),
-                fn() => $documentable
+                fn () => $documentable
                     ->documents()
                     ->with('creator')
                     ->orderBy('created_at', 'desc')
@@ -351,7 +368,7 @@ final class DocumentService implements DocumentManagerInterface
                 "documents:documentable:{$documentable->getMorphClass()}:{$documentable->getKey()}:"
                 . md5(serialize($pages->pluck('id')->toArray()));
 
-            return Cache::remember($cacheKey, now()->addDay(), fn() => $pages);
+            return Cache::remember($cacheKey, now()->addDay(), fn () => $pages);
         }
 
         return $pages;
@@ -384,7 +401,7 @@ final class DocumentService implements DocumentManagerInterface
         Collection $documents,
         Documentable $documentable,
     ): Collection {
-        return $documents->map(fn(Document $document) => DocumentDto::fromArray([
+        return $documents->map(fn (Document $document) => DocumentDto::fromArray([
             'name' => $document->getAttribute('name'),
             'id' => $document->getKey(),
             'created_at' => $document->getAttribute('created_at'),

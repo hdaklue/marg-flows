@@ -64,21 +64,21 @@ final class ProcessDocumentVideo
                 // Try to get metadata from session first (should be set by AssembleVideoChunks)
                 $sessionData = VideoUploadSessionManager::get($sessionId);
                 $videoData = $sessionData['video_metadata'] ?? [];
-                
+
                 Log::info('ProcessDocumentVideo: Retrieved metadata from session', [
                     'sessionId' => $sessionId,
-                    'hasMetadata' => !empty($videoData),
+                    'hasMetadata' => ! empty($videoData),
                     'metadata' => $videoData,
                 ]);
             }
-            
+
             // If no metadata in session, extract from remote file as fallback
             if (empty($videoData) && config('video-upload.processing.extract_metadata', true)) {
                 try {
                     Log::info('ProcessDocumentVideo: Extracting metadata from remote file as fallback', [
                         'videoPath' => $videoPath,
                     ]);
-                    
+
                     $videoData = ExtractVideoMetadata::run($videoPath, $sessionId);
 
                     // Update session with metadata if session tracking is enabled
@@ -94,32 +94,7 @@ final class ProcessDocumentVideo
                 }
             }
 
-            // Generate thumbnail if enabled
-            $thumbnailPath = null;
-            if (config('video-upload.processing.generate_thumbnails', true)) {
-                $duration = $videoData['duration'] ?? null;
-                if ($duration && $duration > 0) {
-                    try {
-                        $thumbnailPath = GenerateVideoThumbnail::run(
-                            $videoPath,
-                            $duration,
-                            $document,
-                            $sessionId,
-                        );
-
-                        // Update session with thumbnail if session tracking is enabled
-                        if ($sessionId && $thumbnailPath) {
-                            VideoUploadSessionManager::updateProcessingMetadata($sessionId, 'thumbnail', basename($thumbnailPath));
-                        }
-                    } catch (Exception $e) {
-                        Log::warning('Failed to generate video thumbnail', [
-                            'path' => $videoPath,
-                            'error' => $e->getMessage(),
-                        ]);
-                        $thumbnailPath = null;
-                    }
-                }
-            }
+            // Thumbnail generation removed - using modern video indicator instead
 
             $filename = basename($videoPath);
 
@@ -141,10 +116,6 @@ final class ProcessDocumentVideo
                 'aspect_ratio_data' => $videoData['aspect_ratio_data'] ?? null,
                 'message' => 'Video uploaded and processed successfully',
             ];
-
-            if ($thumbnailPath) {
-                $result['thumbnail'] = basename($thumbnailPath);
-            }
 
             // Mark session as completed if session tracking is enabled
             if ($sessionId) {
