@@ -2432,6 +2432,7 @@ class VideoUpload {
         console.log('Updating progress modal status:', message, phase); // Debug log
         
         this.progressState.phase = phase;
+        this.progressState.statusMessage = message; // Store the detailed status message
         this.updateProgressModalDisplay();
     }
     
@@ -2479,14 +2480,19 @@ class VideoUpload {
         // Update status message
         const statusMessage = modal.querySelector('.upload-status-message');
         if (statusMessage) {
-            const messages = {
-                single_upload: 'Preparing upload...',
-                chunk_upload: 'Uploading video...',
-                video_processing: 'Processing video...',
-                complete: 'Upload complete!',
-                error: 'Upload failed'
-            };
-            statusMessage.textContent = messages[this.progressState.phase] || 'Processing...';
+            // Use the detailed status message if available, otherwise fallback to generic messages
+            if (this.progressState.statusMessage) {
+                statusMessage.textContent = this.progressState.statusMessage;
+            } else {
+                const messages = {
+                    single_upload: 'Preparing upload...',
+                    chunk_upload: 'Uploading video...',
+                    video_processing: 'Processing video...',
+                    complete: 'Upload complete!',
+                    error: 'Upload failed'
+                };
+                statusMessage.textContent = messages[this.progressState.phase] || 'Processing...';
+            }
         }
         
         // Update file info

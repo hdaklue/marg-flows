@@ -9,67 +9,14 @@ use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Requests\DocumentVideoUploadRequest;
 use App\Services\Document\Responses\VideoUploadResponse;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
-use App\Services\Upload\UploadSessionManager;
-use App\Services\Upload\UploadSessionService;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\UploadedFile;
 use Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 final class SingleVideoUpload
 {
     use AsAction;
-
-    /**
-     * Handle single (non-chunked) video upload for a document.
-     */
-    public function handle(
-        UploadSessionService $sessionManager,
-        UploadedFile $file,
-        Document $document,
-        ?string $fileName = null,
-    ): array {
-        try {
-            // Upload the file directly
-            $path = $sessionManager->upload($file);
-
-            Log::info('Video uploaded directly', [
-                'originalName' => $file->getClientOriginalName(),
-                'fileName' => $fileName,
-                'path' => $path,
-                'size' => $file->getSize(),
-                'documentId' => $document->id,
-            ]);
-
-            // Process the video file synchronously for direct uploads
-            $result = ProcessDocumentVideo::run($path, $document);
-
-            return [
-                'completed' => true,
-                'filename' => $result['file']['filename'] ?? basename($path),
-                'thumbnail' => $result['file']['thumbnail'] ?? null,
-                'width' => $result['width'] ?? null,
-                'height' => $result['height'] ?? null,
-                'duration' => $result['duration'] ?? null,
-                'size' => $result['size'] ?? $file->getSize(),
-                'format' => $result['format'] ?? null,
-                'aspect_ratio' => $result['aspect_ratio'] ?? '16:9',
-                'aspect_ratio_data' => $result['aspect_ratio_data'] ?? null,
-                'message' => 'Video uploaded and processed successfully.',
-                'processing' => false,
-            ];
-        } catch (Exception $e) {
-            Log::error('Single video upload failed', [
-                'error' => $e->getMessage(),
-                'fileName' => $fileName,
-                'originalName' => $file->getClientOriginalName(),
-                'documentId' => $document->id,
-            ]);
-
-            throw $e;
-        }
-    }
 
     /**
      * Handle HTTP controller request for single video upload.
@@ -80,30 +27,45 @@ final class SingleVideoUpload
     ): JsonResponse {
         try {
             $documentModel = Document::findOrFail($document);
-            $tenantId = auth()->user()->getActiveTenantId();
             $sessionId = $request->input('session_id');
 
             if (! $sessionId || ! VideoUploadSessionManager::exists($sessionId)) {
                 return VideoUploadResponse::error('Invalid or expired upload session.', 400);
             }
 
-            // Configure session manager for this document-specific storage
-            $sessionManager = UploadSessionManager::start('http', $tenantId)->storeIn(
-                DocumentDirectoryManager::make($documentModel)->videos()->getDirectory(),
-            );
+            // Store single video directly to document storage disk (not chunk storage)
+            $directoryManager = DocumentDirectoryManager::make($documentModel);
+            $videoDirectory = $directoryManager->videos()->getDirectory();
+            $documentDisk = $directoryManager->getDisk();
 
-            $result = $this->handle(
-                $sessionManager,
-                $request->file('video'),
-                $documentModel,
-                $request->getFileName(),
-            );
+            // Generate unique filename
+            $file = $request->file('video');
+            $extension = $file->getClientOriginalExtension();
+            $uniqueFileName = uniqid() . '_' . time() . '.' . $extension;
+
+            // Store directly to document storage disk
+            $storedPath = $file->storeAs($videoDirectory, $uniqueFileName, $documentDisk);
+
+            Log::info('Single video stored directly to document disk', [
+                'originalName' => $file->getClientOriginalName(),
+                'fileName' => $uniqueFileName,
+                'path' => $storedPath,
+                'disk' => $documentDisk,
+                'size' => $file->getSize(),
+                'documentId' => $documentModel->id,
+            ]);
+
+            $result = [
+                'filename' => $uniqueFileName,
+                'path' => $storedPath,
+                'size' => $file->getSize(),
+            ];
 
             // Mark upload complete and start processing
             VideoUploadSessionManager::startProcessing($sessionId, $result['filename']);
 
-            // Dispatch processing job with session ID
-            ProcessDocumentVideo::dispatch($result['filename'], $documentModel, $sessionId);
+            // Dispatch processing job with full path so it can find the file in DigitalOcean Spaces
+            ProcessDocumentVideo::dispatch($result['path'], $documentModel, $sessionId);
 
             return response()->json([
                 'success' => true,

@@ -48,6 +48,13 @@ final class ProcessDocumentVideo
         // ini_set('memory_limit', '512M');
 
         try {
+            Log::info('ProcessDocumentVideo: Starting video processing', [
+                'videoPath' => $videoPath,
+                'documentId' => $document->id,
+                'sessionId' => $sessionId,
+                'fileKey' => $fileKey,
+            ]);
+
             $extension = pathinfo($videoPath, PATHINFO_EXTENSION);
             $fileKey = $fileKey ?? uniqid();
 

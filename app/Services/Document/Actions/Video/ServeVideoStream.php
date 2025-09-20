@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -79,6 +80,15 @@ final class ServeVideoStream
         $directoryManager = DocumentDirectoryManager::make($document);
         $actualPath = $directoryManager->videos()->getPath($fileName);
         $diskName = $directoryManager->getDisk();
+
+        // Debug logging to track file serving
+        Log::info('ServeVideoStream: Attempting to serve video', [
+            'documentId' => $document->id,
+            'fileName' => $fileName,
+            'actualPath' => $actualPath,
+            'diskName' => $diskName,
+            'fileExists' => Storage::disk($diskName)->exists($actualPath),
+        ]);
 
         // Fast path: Use X-Sendfile if available for maximum performance
         if ($this->canUseXSendfile($diskName)) {

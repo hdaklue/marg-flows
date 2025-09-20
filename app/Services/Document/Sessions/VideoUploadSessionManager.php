@@ -6,6 +6,7 @@ namespace App\Services\Document\Sessions;
 
 use App\Models\Document;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 final class VideoUploadSessionManager
@@ -116,12 +117,24 @@ final class VideoUploadSessionManager
      */
     public static function startProcessing(string $sessionId, string $finalFilename): bool
     {
-        return self::update($sessionId, [
+        Log::info('VideoUploadSessionManager: Starting processing phase', [
+            'sessionId' => $sessionId,
+            'finalFilename' => $finalFilename,
+        ]);
+
+        $result = self::update($sessionId, [
             'status' => 'processing',
             'phase' => 'video_processing',
             'upload_progress' => 100,
             'final_filename' => $finalFilename,
         ]);
+
+        Log::info('VideoUploadSessionManager: Processing phase update result', [
+            'sessionId' => $sessionId,
+            'updateResult' => $result,
+        ]);
+
+        return $result;
     }
 
     /**

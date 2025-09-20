@@ -65,10 +65,29 @@ final class AssembleVideoChunks implements ShouldQueue
 
             // Mark upload complete and start processing if we have a video session
             if ($videoSessionId) {
+                Log::info('Starting video processing phase', [
+                    'videoSessionId' => $videoSessionId,
+                    'finalFilename' => basename($remoteFinalPath),
+                    'remotePath' => $remoteFinalPath,
+                    'documentId' => $document->id,
+                ]);
+
                 VideoUploadSessionManager::startProcessing($videoSessionId, basename($remoteFinalPath));
+
+                Log::info('Dispatching ProcessDocumentVideo job', [
+                    'videoSessionId' => $videoSessionId,
+                    'remotePath' => $remoteFinalPath,
+                    'documentId' => $document->id,
+                ]);
+
                 // Dispatch processing job with session ID
                 ProcessDocumentVideo::dispatch($remoteFinalPath, $document, $videoSessionId);
             } else {
+                Log::info('No video session ID provided, using fallback processing', [
+                    'remotePath' => $remoteFinalPath,
+                    'documentId' => $document->id,
+                ]);
+
                 // Fallback for old behavior without session tracking
                 ProcessDocumentVideo::dispatch($remoteFinalPath, $document);
             }

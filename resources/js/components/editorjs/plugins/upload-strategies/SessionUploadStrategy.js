@@ -67,7 +67,12 @@ export default class SessionUploadStrategy {
             const sessionData = await this.createSession(file);
             this.sessionId = sessionData.data.session_id;
             
-            console.log(`Created upload session: ${this.sessionId} (${sessionData.data.upload_type})`);
+            this.logToBrowser('session', `Created upload session: ${this.sessionId} (${sessionData.data.upload_type})`, {
+                upload_type: sessionData.data.upload_type,
+                chunks_total: sessionData.data.chunks_total,
+                file_name: file.name,
+                file_size: file.size
+            });
             
             // Step 2: Start actual upload based on type
             if (sessionData.data.upload_type === 'single') {
@@ -194,7 +199,12 @@ export default class SessionUploadStrategy {
                 try {
                     const status = await this.getSessionStatus();
                     
-                    // console.log('Polling status:', status); // Debug log
+                    // Log to Laravel browser logs for user visibility
+        this.logToBrowser('polling', `Status: ${status.status}, Phase: ${status.phase}, Progress: ${status.data?.upload_progress || 0}%`, {
+            chunks: status.data?.chunks_uploaded || 0,
+            total: status.data?.chunks_total || 0,
+            fileSize: status.data?.file_size || 0
+        });
                     
                     // Update UI with user-friendly status message
                     if (status.phase !== lastPhase) {
@@ -285,12 +295,14 @@ export default class SessionUploadStrategy {
         switch (status.phase) {
             case 'single_upload':
             case 'chunk_upload':
-                // Show actual upload progress directly (0-100% based on chunks uploaded)
-                progress = Math.round(status.data.upload_progress || 0);
+                // Cap chunk upload at 80% to leave room for processing phase
+                const uploadProgress = status.data.upload_progress || 0;
+                progress = Math.round(Math.min(uploadProgress * 0.8, 80));
                 break;
             case 'video_processing':
-                // Show processing progress (0-100% of processing)
-                progress = Math.round(status.data.processing_progress || 0);
+                // Processing phase goes from 80% to 95%
+                const processingProgress = status.data.processing_progress || 0;
+                progress = Math.round(80 + (processingProgress * 0.15));
                 break;
             case 'complete':
                 progress = 100;
@@ -304,10 +316,11 @@ export default class SessionUploadStrategy {
         let uploadSpeed = null;
         let eta = null;
         
-        if (status.phase === 'chunk_upload' && status.data.chunks_uploaded > this.lastChunksUploaded) {
+        if (status.phase === 'chunk_upload') {
             const timeElapsed = (currentTime - this.uploadStartTime) / 1000; // seconds
             const chunksUploaded = status.data.chunks_uploaded || 0;
             const chunksTotal = status.data.chunks_total || 1;
+            const fileSize = status.data.file_size || 0;
             
             if (timeElapsed > 0 && chunksUploaded > 0) {
                 // Calculate chunks per second
@@ -319,15 +332,27 @@ export default class SessionUploadStrategy {
                     eta = Math.round(remainingChunks / chunksPerSecond);
                 }
                 
-                // Calculate approximate speed (simplified)
-                const avgChunkSize = (status.data.file_size || 0) / chunksTotal;
-                uploadSpeed = Math.round((chunksPerSecond * avgChunkSize) / 1024 / 1024 * 100) / 100; // MB/s
+                // Calculate actual data speed based on bytes uploaded
+                const avgChunkSize = fileSize / chunksTotal;
+                const bytesUploaded = chunksUploaded * avgChunkSize;
+                const bytesPerSecond = bytesUploaded / timeElapsed;
+                uploadSpeed = Math.round((bytesPerSecond / 1024 / 1024) * 100) / 100; // MB/s
+                
+                // Update last known values
+                this.lastChunksUploaded = chunksUploaded;
             }
-            
-            this.lastChunksUploaded = chunksUploaded;
         }
 
-        console.log(`Progress update: ${progress}% (phase: ${status.phase}, chunks: ${status.data.chunks_uploaded}/${status.data.chunks_total}, speed: ${uploadSpeed}MB/s, ETA: ${eta}s)`);
+        // Log detailed progress to Laravel browser logs
+        this.logToBrowser('progress', `${progress}% (phase: ${status.phase}, chunks: ${status.data.chunks_uploaded}/${status.data.chunks_total}, speed: ${uploadSpeed}MB/s, ETA: ${eta}s)`, {
+            progress,
+            phase: status.phase,
+            chunks_uploaded: status.data.chunks_uploaded,
+            chunks_total: status.data.chunks_total,
+            upload_speed: uploadSpeed,
+            eta: eta,
+            status_data: status.data
+        });
 
         // Update legacy progress callback
         if (this.progressCallback && typeof this.progressCallback === 'function') {
@@ -342,11 +367,9 @@ export default class SessionUploadStrategy {
                     message = 'Preparing upload...';
                     break;
                 case 'chunk_upload':
-                    const chunks = status.data.chunks_uploaded || 0;
-                    const total = status.data.chunks_total || 1;
-                    let speedText = uploadSpeed ? ` (${uploadSpeed} MB/s)` : '';
-                    let etaText = eta ? ` - ${eta}s remaining` : '';
-                    message = `Uploading ${chunks}/${total} chunks${speedText}${etaText}`;
+                    let speedText = uploadSpeed && uploadSpeed > 0 ? ` (${uploadSpeed} MB/s)` : '';
+                    let etaText = eta && eta > 0 ? ` - ${eta}s remaining` : '';
+                    message = `Uploading video${speedText}${etaText}`;
                     break;
                 case 'video_processing':
                     message = 'Processing video...';
@@ -478,6 +501,15 @@ export default class SessionUploadStrategy {
             this.pollingInterval = null;
         }
         document.dispatchEvent(new CustomEvent('editor:free'));
+    }
+
+    /**
+     * Log messages for debugging and user visibility
+     */
+    logToBrowser(type, message, data = {}) {
+        // Use console.log with enhanced formatting for user visibility
+        const sessionInfo = this.sessionId ? ` [Session: ${this.sessionId}]` : '';
+        console.log(`[VideoUpload-${type}]${sessionInfo} ${message}`, data);
     }
 
     /**
