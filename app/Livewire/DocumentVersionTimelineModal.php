@@ -46,6 +46,9 @@ final class DocumentVersionTimelineModal extends ModalComponent
         $this->documentId = $documentId;
         $this->currentEditingVersion = $currentEditingVersion;
         $this->lastCheckedAt = now()->toISOString();
+
+        // Notify parent component that version history modal was opened
+        $this->dispatch('version-history-opened');
     }
 
     #[On('version-selected')]

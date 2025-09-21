@@ -39,6 +39,11 @@ final class DocumentComponent extends Component
      */
     public ?string $currentEditingVersion = null;
 
+    /**
+     * Indicates if new versions are available since last check.
+     */
+    public bool $hasNewVersions = false;
+
     // private string $current_content_hash;
 
     private DocumentDto $documentDto;
@@ -251,6 +256,24 @@ final class DocumentComponent extends Component
                 'blockTunes' => __('document.blockTunes'),
             ],
         ];
+    }
+
+    /**
+     * Handle new version notification from modal polling.
+     */
+    #[On('new-versions-found')]
+    public function handleNewVersionsFound(): void
+    {
+        $this->hasNewVersions = true;
+    }
+
+    /**
+     * Reset new versions indicator when history modal is opened.
+     */
+    #[On('version-history-opened')]
+    public function handleVersionHistoryOpened(): void
+    {
+        $this->hasNewVersions = false;
     }
 
     public function render()

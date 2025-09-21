@@ -178,13 +178,21 @@
             <!-- Version History Button -->
             <button wire:ignore
                 @click="$dispatch('openModal', { component: 'document-version-timeline-modal', arguments: { documentId: '{{ $documentId }}', currentEditingVersion: '{{ $currentEditingVersion }}' } })"
-                class="ml-3 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                class="relative ml-3 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                 x-tooltip="'Version History'">
                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <span>History</span>
+                
+                <!-- New Version Indicator -->
+                @if($hasNewVersions)
+                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                    </span>
+                @endif
             </button>
 
             <x-user-avatar-stack :users="$this->participantsArray" :roleableKey="$this->document->getKey()" :roleableType="$this->document->getMorphClass()" :scopeToKey="$this->getDocumentableKey()"

@@ -3,27 +3,27 @@ import Header from "@editorjs/header";
 import EditorJsList from "@editorjs/list";
 import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
-import Alert from 'editorjs-alert';
-import DragDrop from 'editorjs-drag-drop';
-import LinkTool from '../editorjs/plugins/link-tool';
-import Undo from 'editorjs-undo';
-import CommentTune from '../editorjs/plugins/comment-tune';
-import ResizableTune from '../editorjs/plugins/ResizableTune';
-import VideoEmbedResizableTune from '../editorjs/plugins/VideoEmbedResizableTune';
-import ResizableImage from '../editorjs/plugins/resizable-image';
-import VideoEmbed from '../editorjs/plugins/video-embed';
-import VideoUpload from '../editorjs/plugins/video-upload';
-import { VIDEO_VALIDATION_CONFIG } from '../editorjs/video-validation.js';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ar';
 import 'dayjs/locale/en';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import Alert from 'editorjs-alert';
+import DragDrop from 'editorjs-drag-drop';
+import Undo from 'editorjs-undo';
+import CommentTune from '../editorjs/plugins/comment-tune';
+import LinkTool from '../editorjs/plugins/link-tool';
+import ResizableImage from '../editorjs/plugins/resizable-image';
+import ResizableTune from '../editorjs/plugins/ResizableTune';
+import VideoEmbed from '../editorjs/plugins/video-embed';
+import VideoUpload from '../editorjs/plugins/video-upload';
+import VideoEmbedResizableTune from '../editorjs/plugins/VideoEmbedResizableTune';
+import { VIDEO_VALIDATION_CONFIG } from '../editorjs/video-validation.js';
 
 // Initialize Day.js with plugins
 dayjs.extend(relativeTime);
 
 
-export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 30, initialUpdatedAt = null, toolsConfig = null, allowedTools = null) {
+export default function documentEditor(livewireState, uploadUrl, canEdit, saveCallback = null, autosaveIntervalSeconds = 60, initialUpdatedAt = null, toolsConfig = null, allowedTools = null) {
     return {
         editor: null,
         state: livewireState,
@@ -72,8 +72,8 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 statusText: this.isSaving ? this.statusTranslations?.saving || 'Saving...' :
                     this.saveStatus === 'success' ? this.statusTranslations?.saved || 'Saved' :
                         this.saveStatus === 'error' ? this.statusTranslations?.save_failed || 'Save failed' :
-                            this.isDirty ? this.statusTranslations?.unsaved_changes || 'Unsaved changes' : 
-                            this.statusTranslations?.no_changes || 'No changes'
+                            this.isDirty ? this.statusTranslations?.unsaved_changes || 'Unsaved changes' :
+                                this.statusTranslations?.no_changes || 'No changes'
             };
         },
 
@@ -118,27 +118,27 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             // Get current locale from Laravel app
             const htmlElement = document.documentElement;
             const bodyElement = document.body;
-            
+
             // Try to get locale from various sources
-            this.currentLocale = htmlElement.lang || 
-                                bodyElement.getAttribute('data-locale') || 
-                                'en';
-            
+            this.currentLocale = htmlElement.lang ||
+                bodyElement.getAttribute('data-locale') ||
+                'en';
+
             // Determine if the current locale requires RTL
             const rtlLocales = ['ar', 'he', 'fa', 'ur', 'ku', 'dv'];
             const isRtl = rtlLocales.includes(this.currentLocale.split('-')[0]);
-            
+
             // Set direction for RTL support
             this.direction = isRtl ? 'rtl' : 'ltr';
-            
+
             // Get tool translations from Laravel's translation data
             this.toolTranslations = this.getToolTranslations();
             this.uiTranslations = this.getUITranslations();
             this.statusTranslations = this.getStatusTranslations();
-            
+
             // Set Day.js locale
             dayjs.locale(this.currentLocale.split('-')[0]);
-            
+
             // console.log('EditorJS Localization Debug:');
             // console.log('- HTML lang attribute:', htmlElement.lang);
             // console.log('- Detected locale:', this.currentLocale);
@@ -153,12 +153,12 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             if (typeof window.Laravel !== 'undefined' && window.Laravel.translations) {
                 return window.Laravel.translations.editor_tools || {};
             }
-            
+
             // Fallback translations based on detected locale
             const translations = {
                 'en': {
                     'paragraph': 'Text',
-                    'header': 'Heading', 
+                    'header': 'Heading',
                     'images': 'Image',
                     'table': 'Table',
                     'nestedList': 'List',
@@ -172,7 +172,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 'ar': {
                     'paragraph': 'نص',
                     'header': 'عنوان',
-                    'images': 'صورة', 
+                    'images': 'صورة',
                     'table': 'جدول',
                     'nestedList': 'قائمة',
                     'alert': 'تنبيه',
@@ -183,7 +183,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     'resizableTune': 'تغيير الحجم'
                 }
             };
-            
+
             const locale = this.currentLocale.split('-')[0];
             return translations[locale] || translations['en'];
         },
@@ -193,7 +193,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             if (typeof window.Laravel !== 'undefined' && window.Laravel.translations) {
                 return window.Laravel.translations.editor_ui || {};
             }
-            
+
             // Fallback UI translations based on detected locale using EditorJS format
             const uiTranslations = {
                 'en': {
@@ -315,7 +315,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     }
                 }
             };
-            
+
             const locale = this.currentLocale.split('-')[0];
             return uiTranslations[locale] || uiTranslations['en'];
         },
@@ -325,7 +325,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             if (typeof window.Laravel !== 'undefined' && window.Laravel.translations) {
                 return window.Laravel.translations.document?.editor || {};
             }
-            
+
             // Fallback status translations based on detected locale
             const statusTranslations = {
                 'en': {
@@ -343,7 +343,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     'no_changes': 'لا توجد تغييرات'
                 }
             };
-            
+
             const locale = this.currentLocale.split('-')[0];
             return statusTranslations[locale] || statusTranslations['en'];
         },
@@ -421,7 +421,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                      */
                     direction: this.direction,
                     /**
-                     * UI translations 
+                     * UI translations
                      */
                     messages: this.uiTranslations
                 }, // Add RTL support and UI translations based on detected locale
@@ -459,7 +459,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         }
 
                         this.saveStatus = null; // Reset status on change
-                        
+
                         // Mark as dirty for autosave
                         // The actual save() will be called by autosave or manual save
                     }, 100);
@@ -496,10 +496,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     });
                 }
             };
-            
+
             // console.log('EditorJS Configuration:', editorConfig);
             // console.log('EditorJS i18n config:', editorConfig.i18n);
-            
+
             this.editor = new EditorJS(editorConfig);
         },
 
@@ -646,10 +646,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
         buildToolsFromConfig(toolsConfig, csrf, uploadUrl, allowedTools = null) {
             const tools = {};
-            
+
             console.log('Building tools from config:', toolsConfig);
             console.log('Allowed tools for toolbox:', allowedTools);
-            
+
             // Class name mapping from PHP to JavaScript imports
             const classMap = {
                 'paragraph': Paragraph,
@@ -666,7 +666,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             // Process each tool from the config
             Object.entries(toolsConfig).forEach(([toolName, toolConfig]) => {
                 console.log(`Processing tool: ${toolName}`, toolConfig);
-                
+
                 const jsClass = classMap[toolConfig.class];
                 if (!jsClass) {
                     console.warn(`Unknown tool class: ${toolConfig.class}`);
@@ -694,7 +694,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         // console.log(`Applied localized title for ${toolName}: ${this.toolTranslations[toolName]}`);
                     }
                 }
-                
+
                 console.log(`Built tool config for ${toolName}:`, tool);
 
                 // Add tunes if specified
@@ -932,7 +932,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
         formatLastSaved() {
             if (!this.lastSaved) return '';
-            
+
             // Use Day.js for proper internationalization
             return dayjs(this.lastSaved).fromNow();
         },
@@ -956,7 +956,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
             // Reset initialization state
             this.isInitializing = false;
             this.editorReady = false;
-            
+
             // Cleanup timers
             if (this.autosaveTimer) {
                 clearInterval(this.autosaveTimer);

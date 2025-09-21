@@ -7,7 +7,7 @@ return [
         'save' => 'حفظ',
         'saving' => 'جاري الحفظ...',
         'auto_save' => 'الحفظ التلقائي',
-        'auto_save_tooltip' => 'الحفظ التلقائي كل 30 ثانية عند التفعيل',
+        'auto_save_tooltip' => 'الحفظ التلقائي كل 60 ثانية عند التفعيل',
         'toggle_auto_save' => 'تبديل الحفظ التلقائي',
         'enabled' => 'مفعل',
         'disabled' => 'معطل',
@@ -18,7 +18,6 @@ return [
         'error' => 'خطأ في الحفظ',
         'no_changes' => 'لا توجد تغييرات',
     ],
-
     'navigation' => [
         'unsaved_changes' => 'تغييرات غير محفوظة',
         'unsaved_description' => 'لديك تغييرات غير محفوظة. ماذا تريد أن تفعل؟',
@@ -34,7 +33,6 @@ return [
         'wait_here' => 'انتظر هنا',
         'stay_here' => 'ابق هنا',
     ],
-
     'status' => [
         'creating' => 'إنشاء المستند...',
         'updating' => 'تحديث المستند...',
@@ -46,7 +44,6 @@ return [
         'error_updating' => 'خطأ في تحديث المستند',
         'error_deleting' => 'خطأ في حذف المستند',
     ],
-
     'actions' => [
         'create' => 'إنشاء مستند',
         'edit' => 'تحرير المستند',
@@ -57,7 +54,6 @@ return [
         'export' => 'تصدير المستند',
         'print' => 'طباعة المستند',
     ],
-
     'labels' => [
         'title' => 'العنوان',
         'content' => 'المحتوى',
@@ -69,7 +65,6 @@ return [
         'category' => 'الفئة',
         'last_update' => 'آخر تحديث',
     ],
-
     'context_menu' => [
         'page_options' => 'خيارات الصفحة',
         'rename' => 'إعادة تسمية',
@@ -77,7 +72,6 @@ return [
         'duplicate' => 'تكرار',
         'delete' => 'حذف',
     ],
-
     'tools' => [
         'paragraph' => 'نص',
         'header' => 'عنوان',
@@ -90,7 +84,6 @@ return [
         'videoUpload' => 'رفع فيديو',
         'commentTune' => 'إضافة تعليق',
     ],
-
     'ui' => [
         'blockTunes' => [
             'toggler' => [
@@ -115,7 +108,6 @@ return [
             'Nothing found' => 'لم يتم العثور على شيء',
         ],
     ],
-
     'toolNames' => [
         'Text' => 'نص',
         'Heading' => 'عنوان',
@@ -125,7 +117,6 @@ return [
         'Bold' => 'عريض',
         'Italic' => 'مائل',
     ],
-
     'blockTunes' => [
         'delete' => [
             'Delete' => 'حذف',

@@ -6,6 +6,7 @@ namespace App\Services\Document\Actions\Image;
 
 use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
+use App\Services\Document\Actions\Image\OptimizeDocumentImage;
 use App\Services\Document\Requests\DocumentImageUploadRequest;
 use App\Services\Document\Responses\ImageUploadResponse;
 use App\Services\Upload\UploadSessionManager;
@@ -23,20 +24,9 @@ final class UploadDocumentImage
     /**
      * Handle document image upload with generalized parameters.
      */
-    public function handle(
-        Document $document,
-        UploadedFile $file,
-        string $tenantId,
-    ): array {
-        // Get organized directory from DocumentDirectoryManager
-        $storageDirectory = DocumentDirectoryManager::make($document)
-            ->images()
-            ->getDirectory();
-
-        // Use UploadSessionManager with http strategy for single file uploads
-        $path = UploadSessionManager::start('http', $tenantId)
-            ->storeIn($storageDirectory)
-            ->upload($file);
+    public function handle(Document $document, UploadedFile $file, string $tenantId): array
+    {
+        $path = DocumentDirectoryManager::make($document)->images()->store($file);
 
         logger()->info("Saved image to: {$path}");
 
@@ -45,9 +35,8 @@ final class UploadDocumentImage
         $diskDriver = Storage::disk($disk);
 
         // Only optimize images on local storage (cloud storage optimization requires different approach)
-        if ($disk === 'public' && config('filesystems.disks.public.driver') === 'local') {
-            OptimizeDocumentImage::dispatch($diskDriver->path($path));
-        }
+
+        OptimizeDocumentImage::dispatch($diskDriver->path($path));
 
         // Extract just the filename from the full path
         $filename = basename($path);

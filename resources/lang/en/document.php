@@ -7,7 +7,7 @@ return [
         'save' => 'Save',
         'saving' => 'Saving...',
         'auto_save' => 'Auto-save',
-        'auto_save_tooltip' => 'Auto-save every 30 seconds when enabled',
+        'auto_save_tooltip' => 'Auto-save every 60 seconds when enabled',
         'toggle_auto_save' => 'Toggle auto-save',
         'enabled' => 'enabled',
         'disabled' => 'disabled',
@@ -18,7 +18,6 @@ return [
         'error' => 'Error saving',
         'no_changes' => 'No changes',
     ],
-
     'navigation' => [
         'unsaved_changes' => 'Unsaved Changes',
         'unsaved_description' => 'You have unsaved changes. What would you like to do?',
@@ -34,7 +33,6 @@ return [
         'wait_here' => 'Wait Here',
         'stay_here' => 'Stay Here',
     ],
-
     'status' => [
         'creating' => 'Creating document...',
         'updating' => 'Updating document...',
@@ -46,7 +44,6 @@ return [
         'error_updating' => 'Error updating document',
         'error_deleting' => 'Error deleting document',
     ],
-
     'actions' => [
         'create' => 'Create Document',
         'edit' => 'Edit Document',
@@ -57,7 +54,6 @@ return [
         'export' => 'Export Document',
         'print' => 'Print Document',
     ],
-
     'labels' => [
         'title' => 'Title',
         'content' => 'Content',
@@ -69,7 +65,6 @@ return [
         'category' => 'Category',
         'last_update' => 'Last Update',
     ],
-
     'context_menu' => [
         'page_options' => 'Page Options',
         'rename' => 'Rename',
@@ -77,7 +72,6 @@ return [
         'duplicate' => 'Duplicate',
         'delete' => 'Delete',
     ],
-
     // EditorJS specific translations migrated from app.php
     'tools' => [
         'paragraph' => 'Text',
@@ -91,7 +85,6 @@ return [
         'videoUpload' => 'Video Upload',
         'commentTune' => 'Add Comment',
     ],
-
     'ui' => [
         'blockTunes' => [
             'toggler' => [
@@ -116,7 +109,6 @@ return [
             'Nothing found' => 'Nothing found',
         ],
     ],
-
     'toolNames' => [
         'Text' => 'Text',
         'Heading' => 'Heading',
@@ -126,7 +118,6 @@ return [
         'Bold' => 'Bold',
         'Italic' => 'Italic',
     ],
-
     'blockTunes' => [
         'delete' => [
             'Delete' => 'Delete',
