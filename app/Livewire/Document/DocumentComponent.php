@@ -8,6 +8,7 @@ use App\Collections\ParticipantsCollection;
 use App\DTOs\Document\DocumentDto;
 use App\Facades\DocumentManager;
 use App\Models\Document;
+use App\Models\DocumentVersion;
 use App\Services\Document\Facades\EditorBuilder;
 use Exception;
 use Hdaklue\Porter\Facades\Porter;
@@ -32,6 +33,11 @@ final class DocumentComponent extends Component
 
     #[Locked]
     public string $documentId;
+
+    /**
+     * Current editing version for timeline integration.
+     */
+    public ?string $currentEditingVersion = null;
 
     // private string $current_content_hash;
 
@@ -135,6 +141,19 @@ final class DocumentComponent extends Component
         unset($this->participants, $this->participantsArray);
     }
 
+    #[On('document-version-changed')]
+    public function handleVersionChange(string $versionId): void
+    {
+        $this->currentEditingVersion = $versionId;
+
+        // Load version content for editing
+        $version = DocumentVersion::find($versionId);
+        if ($version) {
+            $this->content = $version->content;
+            $this->dispatch('version-content-loaded', content: $version->content);
+        }
+    }
+
     public function saveDocument(string $content)
     {
         $this->authorize('update', $this->document);
@@ -146,6 +165,17 @@ final class DocumentComponent extends Component
             if ($editorData === null) {
                 throw new Exception('Invalid JSON content provided');
             }
+
+            // Save version to timeline
+            $newVersion = DocumentVersion::create([
+                'document_id' => $this->documentId,
+                'content' => $editorData,
+                'created_by' => auth()->id(),
+                'created_at' => now(),
+            ]);
+
+            // Update current editing version
+            $this->currentEditingVersion = $newVersion->id;
 
             // Use DocumentManager to update the document
             DocumentManager::updateBlocks(
@@ -226,5 +256,26 @@ final class DocumentComponent extends Component
     public function render()
     {
         return view('livewire.page.document-component');
+    }
+
+    private function generatePreview(array $content): string
+    {
+        if (empty($content['blocks'])) {
+            return 'Empty document';
+        }
+
+        $textBlocks = collect($content['blocks'])
+            ->filter(fn ($block) => in_array($block['type'] ?? '', ['paragraph', 'header']))
+            ->pluck('data.text')
+            ->filter()
+            ->take(2);
+
+        if ($textBlocks->isEmpty()) {
+            return count($content['blocks']) . ' blocks';
+        }
+
+        $preview = $textBlocks->implode(' ');
+
+        return strlen($preview) > 100 ? substr(strip_tags($preview), 0, 100) . '...' : strip_tags($preview);
     }
 }
