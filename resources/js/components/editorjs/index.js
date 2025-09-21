@@ -8,6 +8,7 @@ import Alert from 'editorjs-alert';
 import DragDrop from 'editorjs-drag-drop';
 import Undo from 'editorjs-undo';
 import ResizableImage from './plugins/resizable-image';
+import ObjectiveBlock from './plugins/objective-block';
 
 
 export default function editorjs(livewireState, uploadUrl, canEdit) {
@@ -150,6 +151,13 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                         headers: {
                             'X-CSRF-TOKEN': csrf,
                         },
+                    }
+                },
+                objective: {
+                    class: ObjectiveBlock,
+                    inlineToolbar: false,
+                    config: {
+                        placeholder: 'Enter objective name...',
                     }
                 },
             };

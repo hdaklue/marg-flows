@@ -10,6 +10,7 @@ use App\Services\Document\ConfigBuilder\Blocks\Hyperlink;
 use App\Services\Document\ConfigBuilder\Blocks\Images;
 use App\Services\Document\ConfigBuilder\Blocks\LinkTool;
 use App\Services\Document\ConfigBuilder\Blocks\NestedList;
+use App\Services\Document\ConfigBuilder\Blocks\Objective;
 use App\Services\Document\ConfigBuilder\Blocks\Paragraph;
 use App\Services\Document\ConfigBuilder\Blocks\Table;
 use App\Services\Document\ConfigBuilder\Blocks\VideoEmbed;
@@ -72,5 +73,10 @@ final class EditorConfigManager extends Manager
     public function linkTool(): DocumentBlockConfigContract
     {
         return new LinkTool;
+    }
+
+    public function objective(): DocumentBlockConfigContract
+    {
+        return new Objective;
     }
 }

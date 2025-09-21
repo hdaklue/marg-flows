@@ -12,6 +12,7 @@ import DragDrop from 'editorjs-drag-drop';
 import Undo from 'editorjs-undo';
 import CommentTune from '../editorjs/plugins/comment-tune';
 import LinkTool from '../editorjs/plugins/link-tool';
+import ObjectiveBlock from '../editorjs/plugins/objective-block';
 import ResizableImage from '../editorjs/plugins/resizable-image';
 import ResizableTune from '../editorjs/plugins/ResizableTune';
 import VideoEmbed from '../editorjs/plugins/video-embed';
@@ -164,6 +165,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     'nestedList': 'List',
                     'alert': 'Alert',
                     'linkTool': 'Link',
+                    'objective': 'Objective',
                     'videoEmbed': 'Video Embed',
                     'videoUpload': 'Video Upload',
                     'commentTune': 'Add Comment',
@@ -177,6 +179,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     'nestedList': 'قائمة',
                     'alert': 'تنبيه',
                     'linkTool': 'رابط',
+                    'objective': 'هدف',
                     'videoEmbed': 'تضمين فيديو',
                     'videoUpload': 'رفع فيديو',
                     'commentTune': 'إضافة تعليق',
@@ -227,6 +230,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         "List": "List",
                         "Table": "Table",
                         "Link": "Link",
+                        "Objective": "Objective",
                         "Bold": "Bold",
                         "Italic": "Italic"
                     },
@@ -286,6 +290,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                         "List": "قائمة",
                         "Table": "جدول",
                         "Link": "رابط",
+                        "Objective": "هدف",
                         "Bold": "عريض",
                         "Italic": "مائل"
                     },
@@ -659,6 +664,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 'EditorJsList': EditorJsList,
                 'Alert': Alert,
                 'LinkTool': LinkTool,
+                'ObjectiveBlock': ObjectiveBlock,
                 'VideoEmbed': VideoEmbed,
                 'VideoUpload': VideoUpload
             };

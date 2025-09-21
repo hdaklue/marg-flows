@@ -9,6 +9,7 @@ use App\Contracts\Document\DocumentTemplateTranslatorInterface;
 use App\Services\Document\ConfigBuilder\EditorConfigManager;
 use App\Services\Document\ConfigBuilder\EditorManager;
 use App\Services\Document\ContentBlocks\ListBlock;
+use App\Services\Document\ContentBlocks\ObjectiveBlock;
 use App\Services\Document\ContentBlocks\ResizableImageBlock;
 use App\Services\Document\DocumentService;
 use App\Services\Document\Facades\EditorBuilder;
@@ -52,6 +53,7 @@ final class DocumentServiceProvider extends ServiceProvider
     {
         EditorPhp::register([
             'nestedList' => ListBlock::class,
+            'objective' => ObjectiveBlock::class,
             'resizableImage' => ResizableImageBlock::class,
         ]);
     }

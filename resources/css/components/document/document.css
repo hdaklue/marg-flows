@@ -2,6 +2,451 @@
 @import '../editorjs/video-embed.css';
 @import '../editorjs/video-upload.css';
 @reference "tailwindcss";
+
+/* ObjectiveBlock Plugin Styles - Inline */
+.objective-block {
+  width: 100%;
+}
+
+.objective-block__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: rgb(250 250 250);
+  border-radius: 0.5rem;
+  border: 1px solid rgb(228 228 231);
+}
+
+.dark .objective-block__form {
+  background-color: rgb(39 39 42);
+  border-color: rgb(63 63 70);
+}
+
+/* RTL Support */
+[dir="rtl"] .objective-block__form {
+  text-align: right;
+}
+
+.objective-block__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Mobile-first responsive layout */
+@media (min-width: 640px) {
+  .objective-block__form {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .objective-block__field {
+    flex: 1;
+  }
+  
+  .objective-block__operator-field {
+    flex: none;
+    width: auto;
+    min-width: 140px;
+  }
+  
+  .objective-block__percentage-field {
+    flex: none;
+    width: auto;
+    min-width: 100px;
+  }
+}
+
+/* Name Input */
+.objective-block__name-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid rgb(212 212 216);
+  border-radius: 0.375rem;
+  background-color: white;
+  color: rgb(24 24 27);
+  transition: colors 200ms;
+}
+
+.dark .objective-block__name-input {
+  border-color: rgb(82 82 91);
+  background-color: rgb(63 63 70);
+  color: rgb(244 244 245);
+}
+
+.objective-block__name-input::placeholder {
+  color: rgb(113 113 122);
+}
+
+.dark .objective-block__name-input::placeholder {
+  color: rgb(161 161 170);
+}
+
+.objective-block__name-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(14 165 233);
+  border-color: transparent;
+}
+
+.objective-block__name-input:read-only {
+  background-color: rgb(244 244 245);
+  cursor: not-allowed;
+}
+
+.dark .objective-block__name-input:read-only {
+  background-color: rgb(39 39 42);
+}
+
+/* Operator Section */
+.objective-block__operator-field {
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .objective-block__operator-field {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.objective-block__operator-select {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid rgb(212 212 216);
+  border-radius: 0.375rem;
+  background-color: white;
+  color: rgb(24 24 27);
+  transition: colors 200ms;
+}
+
+.dark .objective-block__operator-select {
+  border-color: rgb(82 82 91);
+  background-color: rgb(63 63 70);
+  color: rgb(244 244 245);
+}
+
+.objective-block__operator-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(14 165 233);
+  border-color: transparent;
+}
+
+.objective-block__operator-select:disabled {
+  background-color: rgb(244 244 245);
+  cursor: not-allowed;
+}
+
+.dark .objective-block__operator-select:disabled {
+  background-color: rgb(39 39 42);
+}
+
+.objective-block__operator-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  transition: colors 200ms;
+}
+
+@media (max-width: 639px) {
+  .objective-block__operator-icon {
+    margin-top: 0.5rem;
+    align-self: center;
+  }
+}
+
+.objective-block__operator-icon--increase {
+  background-color: rgb(209 250 229);
+  color: rgb(5 150 105);
+}
+
+.dark .objective-block__operator-icon--increase {
+  background-color: rgb(6 78 59);
+  color: rgb(52 211 153);
+}
+
+.objective-block__operator-icon--decrease {
+  background-color: rgb(254 226 226);
+  color: rgb(220 38 38);
+}
+
+.dark .objective-block__operator-icon--decrease {
+  background-color: rgb(127 29 29);
+  color: rgb(248 113 113);
+}
+
+.objective-block__operator-icon--equal {
+  background-color: rgb(219 234 254);
+  color: rgb(37 99 235);
+}
+
+.dark .objective-block__operator-icon--equal {
+  background-color: rgb(30 58 138);
+  color: rgb(96 165 250);
+}
+
+/* Percentage Section */
+.objective-block__percentage-field {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.objective-block__percentage-input {
+  width: 100%;
+  padding: 0.75rem;
+  padding-right: 2rem;
+  font-size: 0.875rem;
+  border: 1px solid rgb(212 212 216);
+  border-radius: 0.375rem;
+  background-color: white;
+  color: rgb(24 24 27);
+  transition: colors 200ms;
+}
+
+.dark .objective-block__percentage-input {
+  border-color: rgb(82 82 91);
+  background-color: rgb(63 63 70);
+  color: rgb(244 244 245);
+}
+
+[dir="rtl"] .objective-block__percentage-input {
+  padding-left: 2rem;
+  padding-right: 0.75rem;
+}
+
+.objective-block__percentage-input::placeholder {
+  color: rgb(113 113 122);
+}
+
+.dark .objective-block__percentage-input::placeholder {
+  color: rgb(161 161 170);
+}
+
+.objective-block__percentage-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(14 165 233);
+  border-color: transparent;
+}
+
+.objective-block__percentage-input:read-only {
+  background-color: rgb(244 244 245);
+  cursor: not-allowed;
+}
+
+.dark .objective-block__percentage-input:read-only {
+  background-color: rgb(39 39 42);
+}
+
+.objective-block__percentage-symbol {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+  color: rgb(113 113 122);
+  pointer-events: none;
+}
+
+.dark .objective-block__percentage-symbol {
+  color: rgb(161 161 170);
+}
+
+[dir="rtl"] .objective-block__percentage-symbol {
+  right: auto;
+  left: 0.75rem;
+}
+
+/* Validation Styles */
+.objective-block__input--error {
+  border-color: rgb(239 68 68) !important;
+  box-shadow: 0 0 0 2px rgb(254 202 202) !important;
+}
+
+.dark .objective-block__input--error {
+  border-color: rgb(248 113 113) !important;
+  box-shadow: 0 0 0 2px rgb(127 29 29) !important;
+}
+
+.objective-block__error-message {
+  font-size: 0.75rem;
+  color: rgb(220 38 38);
+  margin-top: 0.25rem;
+}
+
+.dark .objective-block__error-message {
+  color: rgb(248 113 113);
+}
+
+/* Display Mode (Read-only) */
+.objective-block__display {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid;
+  background-color: rgb(250 250 250);
+  transition: colors 200ms;
+}
+
+.dark .objective-block__display {
+  background-color: rgb(39 39 42);
+}
+
+[dir="rtl"] .objective-block__display {
+  border-left: 0;
+  border-right: 4px solid;
+}
+
+.objective-block__display--increase {
+  border-color: rgb(34 197 94);
+  background-color: rgb(240 253 244);
+}
+
+.dark .objective-block__display--increase {
+  background-color: rgba(6, 78, 59, 0.2);
+}
+
+.objective-block__display--decrease {
+  border-color: rgb(239 68 68);
+  background-color: rgb(254 242 242);
+}
+
+.dark .objective-block__display--decrease {
+  background-color: rgba(127, 29, 29, 0.2);
+}
+
+.objective-block__display--equal {
+  border-color: rgb(59 130 246);
+  background-color: rgb(239 246 255);
+}
+
+.dark .objective-block__display--equal {
+  background-color: rgba(30, 58, 138, 0.2);
+}
+
+.objective-block__display-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.objective-block__display-name {
+  font-weight: 600;
+  color: rgb(24 24 27);
+}
+
+.dark .objective-block__display-name {
+  color: rgb(244 244 245);
+}
+
+.objective-block__display-operator {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.objective-block__display--increase .objective-block__display-operator {
+  background-color: rgb(209 250 229);
+  color: rgb(21 128 61);
+}
+
+.dark .objective-block__display--increase .objective-block__display-operator {
+  background-color: rgb(6 78 59);
+  color: rgb(134 239 172);
+}
+
+.objective-block__display--decrease .objective-block__display-operator {
+  background-color: rgb(254 226 226);
+  color: rgb(185 28 28);
+}
+
+.dark .objective-block__display--decrease .objective-block__display-operator {
+  background-color: rgb(127 29 29);
+  color: rgb(252 165 165);
+}
+
+.objective-block__display--equal .objective-block__display-operator {
+  background-color: rgb(219 234 254);
+  color: rgb(29 78 216);
+}
+
+.dark .objective-block__display--equal .objective-block__display-operator {
+  background-color: rgb(30 58 138);
+  color: rgb(147 197 253);
+}
+
+.objective-block__display-percentage {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: rgb(24 24 27);
+}
+
+.dark .objective-block__display-percentage {
+  color: rgb(244 244 245);
+}
+
+/* Focus and hover states */
+.objective-block__form:hover {
+  background-color: rgb(244 244 245);
+}
+
+.dark .objective-block__form:hover {
+  background-color: rgb(63 63 70);
+}
+
+.objective-block__form:focus-within {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Animation for operator icon changes */
+.objective-block__operator-icon svg {
+  transition: transform 200ms;
+}
+
+.objective-block__operator-icon:hover svg {
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments for Arabic text */
+[dir="rtl"] .objective-block__display-content {
+  flex-direction: row-reverse;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .objective-block__form {
+    border-width: 2px;
+  }
+  
+  .objective-block__name-input,
+  .objective-block__operator-select,
+  .objective-block__percentage-input {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .objective-block__operator-icon,
+  .objective-block__operator-icon svg,
+  .objective-block__form,
+  .objective-block__display {
+    transition: none;
+  }
+}
 .resizable-image {
     @apply relative mt-5 outline-none;
 }
@@ -43,11 +488,11 @@
 }
 
 .resizable-image__upload-icon svg {
-    @apply text-zinc-500 transition-all duration-300 w-9 h-9;
+    @apply transition-all duration-300 text-zinc-500 w-9 h-9;
 }
 
 .resizable-image__upload-container:hover .resizable-image__upload-icon svg {
-    @apply text-zinc-700 scale-110;
+    @apply scale-110 text-zinc-700;
 }
 
 .resizable-image__upload-text {
@@ -83,7 +528,7 @@
 }
 
 .resizable-image__progress-bar {
-    @apply w-full h-1 mb-3 overflow-hidden bg-zinc-200 rounded-sm;
+    @apply w-full h-1 mb-3 overflow-hidden rounded-sm bg-zinc-200;
 }
 
 .resizable-image__progress-fill {
@@ -138,7 +583,7 @@
 }
 
 .resizable-image__handle {
-    @apply absolute z-10 w-3 h-3 transition-opacity duration-200 bg-sky-600 border-2 border-white rounded-full opacity-0;
+    @apply absolute z-10 w-3 h-3 transition-opacity duration-200 border-2 border-white rounded-full opacity-0 bg-sky-600;
 }
 
 .resizable-image__container--resizable:hover .resizable-image__handle {
@@ -182,7 +627,7 @@
 }
 
 .resizable-image__caption {
-    @apply w-full px-3 py-2 mt-3 text-sm text-zinc-600 transition-colors duration-200 bg-white border border-zinc-300 rounded-md outline-none;
+    @apply w-full px-3 py-2 mt-3 text-sm transition-colors duration-200 bg-white border rounded-md outline-none text-zinc-600 border-zinc-300;
 }
 
 .resizable-image__caption:focus {
@@ -190,7 +635,7 @@
 }
 
 .resizable-image__caption:read-only {
-    @apply text-zinc-500 cursor-default bg-zinc-50;
+    @apply cursor-default text-zinc-500 bg-zinc-50;
 }
 
 .resizable-image__caption::placeholder {
@@ -214,7 +659,7 @@
 }
 
 .resizable-image__caption--readonly {
-    @apply w-full px-3 py-2 mt-3 text-sm text-zinc-700 border border-zinc-300 rounded-md bg-zinc-50;
+    @apply w-full px-3 py-2 mt-3 text-sm border rounded-md text-zinc-700 border-zinc-300 bg-zinc-50;
 }
 
 .dark .resizable-image__caption--readonly {
@@ -305,7 +750,7 @@
 }
 
 .resizable-image__container--dark {
-    @apply p-3 border border-zinc-600 shadow-xl bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-black/30;
+    @apply p-3 border shadow-xl border-zinc-600 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-black/30;
 }
 
 .resizable-image__container--centered {
@@ -313,12 +758,12 @@
 }
 
 .resizable-image__container--dark .resizable-image__img {
-    @apply border-2 border-zinc-600 rounded-lg shadow-lg shadow-black/40;
+    @apply border-2 rounded-lg shadow-lg border-zinc-600 shadow-black/40;
     filter: brightness(.85) contrast(1.15) saturate(1.1)
 }
 
 .resizable-image__container--dark .resizable-image__handle {
-    @apply bg-sky-400 border-zinc-800 shadow-sm shadow-black/30;
+    @apply shadow-sm bg-sky-400 border-zinc-800 shadow-black/30;
 }
 
 .resizable-image__loading {
@@ -338,7 +783,7 @@
 }
 
 .resizable-image__thumbnail {
-    @apply relative overflow-hidden transition-all duration-200 bg-zinc-100 border-2 border-transparent rounded-lg cursor-pointer aspect-square hover:scale-105 hover:shadow-lg hover:border-sky-500 dark:bg-zinc-800;
+    @apply relative overflow-hidden transition-all duration-200 border-2 border-transparent rounded-lg cursor-pointer bg-zinc-100 aspect-square hover:scale-105 hover:shadow-lg hover:border-sky-500 dark:bg-zinc-800;
 }
 
 .resizable-image__thumbnail-image {
@@ -358,11 +803,11 @@
 }
 
 .resizable-image__add-more {
-    @apply flex flex-col items-center justify-center transition-all duration-200 bg-white border-2 border-zinc-300 border-dashed rounded-lg cursor-pointer aspect-square dark:border-zinc-600 hover:border-sky-500 hover:bg-sky-50 dark:hover:bg-sky-900/20 dark:bg-zinc-800 hover:shadow-md;
+    @apply flex flex-col items-center justify-center transition-all duration-200 bg-white border-2 border-dashed rounded-lg cursor-pointer border-zinc-300 aspect-square dark:border-zinc-600 hover:border-sky-500 hover:bg-sky-50 dark:hover:bg-sky-900/20 dark:bg-zinc-800 hover:shadow-md;
 }
 
 .resizable-image__add-more-icon {
-    @apply w-8 h-8 mb-1 text-zinc-500 transition-colors duration-200 dark:text-zinc-400;
+    @apply w-8 h-8 mb-1 transition-colors duration-200 text-zinc-500 dark:text-zinc-400;
 }
 
 .resizable-image__add-more:hover .resizable-image__add-more-icon {
@@ -370,7 +815,7 @@
 }
 
 .resizable-image__add-more-text {
-    @apply text-xs font-medium text-zinc-600 transition-colors duration-200 dark:text-zinc-400;
+    @apply text-xs font-medium transition-colors duration-200 text-zinc-600 dark:text-zinc-400;
 }
 
 .resizable-image__add-more:hover .resizable-image__add-more-text {
@@ -446,7 +891,7 @@
 }
 
 .resizable-image__progress-content {
-    @apply relative overflow-hidden bg-zinc-100 border-2 border-zinc-200 rounded-lg aspect-square dark:bg-zinc-800 dark:border-zinc-700;
+    @apply relative overflow-hidden border-2 rounded-lg bg-zinc-100 border-zinc-200 aspect-square dark:bg-zinc-800 dark:border-zinc-700;
 }
 
 .resizable-image__progress-thumbnail.status-pending .resizable-image__progress-content {
@@ -517,7 +962,7 @@
 }
 
 .resizable-image__progress-name {
-    @apply text-sm font-medium text-zinc-900 truncate dark:text-zinc-100;
+    @apply text-sm font-medium truncate text-zinc-900 dark:text-zinc-100;
 }
 
 .resizable-image__progress-status-text {

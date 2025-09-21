@@ -1,7 +1,7 @@
-/* VideoEmbed Plugin Styles */
- @reference "tailwindcss";
 /* Import Video.js CSS */
 @import 'video.js/dist/video-js.css';
+/* VideoEmbed Plugin Styles */
+@reference "tailwindcss";
 
 .video-embed {
     @apply w-full;

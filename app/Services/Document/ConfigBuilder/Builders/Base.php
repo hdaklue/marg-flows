@@ -34,6 +34,7 @@ final class Base
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
             'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
+            'objective' => EditorConfigBuilder::objective()->toArray(),
         ];
     }
 

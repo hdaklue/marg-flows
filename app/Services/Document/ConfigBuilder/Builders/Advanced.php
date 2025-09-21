@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder\Builders;
 
 use App\Facades\DocumentManager;
-use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Facades\EditorConfigBuilder;
 
@@ -13,7 +12,7 @@ final class Advanced
 {
     private string $tenantId;
 
-    public function build(null|string $documentId = null): array
+    public function build(?string $documentId = null): array
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
         $imagesConfig = EditorConfigBuilder::images()->forPlan('advanced');
@@ -40,12 +39,13 @@ final class Advanced
             'nestedList' => EditorConfigBuilder::nestedList()->toArray(),
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
+            'objective' => EditorConfigBuilder::objective()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
             'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
     }
 
-    private function buildVideoUploadConfig(null|string $documentId)
+    private function buildVideoUploadConfig(?string $documentId)
     {
         $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan('advanced');
 
