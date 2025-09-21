@@ -34,7 +34,7 @@ final class ServeVideoStream
     // Video-specific constants for optimal performance
     private const INITIAL_CHUNK_SIZE = 1 * 1024 * 1024; // 1MB for fast initial load
 
-    private const STREAMING_CHUNK_SIZE = 1 * 1024 * 1024; // 1MB for efficient streaming
+    private const STREAMING_CHUNK_SIZE = 4 * 1024 * 1024; // 4MB for efficient streaming
 
     private const MAX_CHUNK_SIZE = 16 * 1024 * 1024; // 16MB max chunk size
 
