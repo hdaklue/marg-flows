@@ -9,6 +9,7 @@
 @source '../../../../resources/views/filament';
 @source '../../../views/';
 @source '../../../../vendor/hdaklue/actioncrumb/resources/views/';
+@source '../../../../vendor/wire-elements/modal/resources/views/';
 
 
 

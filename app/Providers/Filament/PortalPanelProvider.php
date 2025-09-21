@@ -66,6 +66,10 @@ final class PortalPanelProvider extends PanelProvider
                 fn (): string => Blade::render('<x-language-switch />'),
                 scopes: [Login::class, Register::class],
             )
+            ->renderHook(
+                PanelsRenderHook::BODY_START,
+                fn (): string => Blade::render('@livewire(\'wire-elements-modal\')'),
+            )
             ->userMenuItems([
                 Action::make('settings')
                     ->label(fn (): string => __('auth.profile.title'))

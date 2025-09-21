@@ -175,24 +175,28 @@
                 </div>
             </div>
 
+            <!-- Version History Button -->
+            <button wire:ignore
+                @click="$dispatch('openModal', { component: 'document-version-timeline-modal', arguments: { documentId: '{{ $documentId }}', currentEditingVersion: '{{ $currentEditingVersion }}' } })"
+                class="ml-3 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                x-tooltip="'Version History'">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>History</span>
+            </button>
+
             <x-user-avatar-stack :users="$this->participantsArray" :roleableKey="$this->document->getKey()" :roleableType="$this->document->getMorphClass()" :scopeToKey="$this->getDocumentableKey()"
                 :scopeToType="$this->getDocumentableType()" :canEdit="$this->userPermissions['canManageMembers']" size='2xs' />
         </div>
 
     </div>
 
-    <div class="flex gap-6">
-        <!-- Document Editor -->
-        <div class="flex-1">
-            <div id="editor-wrap" wire:ignore @keydown.window.ctrl.k.prevent="saveDoument()"
-                @keydown.meta.k="saveDocument()" class="w-full rounded-2xl p-4">
-            </div>
-        </div>
-
-        <!-- Version Timeline Sidebar -->
-
+    <!-- Document Editor -->
+    <div id="editor-wrap" wire:ignore @keydown.window.ctrl.k.prevent="saveDoument()" @keydown.meta.k="saveDocument()"
+        class="w-full rounded-2xl p-4">
     </div>
-
 
     <livewire:role.manage-members-modal />
 
@@ -201,9 +205,6 @@
         window.Laravel = window.Laravel || {};
         window.Laravel.translations = @js($this->getJavaScriptTranslations());
     </script>
-    <div class="w-80 rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-        <livewire:document-version-timeline :documentId="$documentId" :currentEditingVersion="null" />
-    </div>
 
     @vite(['resources/css/components/editorjs/index.css', 'resources/css/components/editorjs/comment-tune.css', 'resources/css/components/document/document.css'])
 </div>
