@@ -65,7 +65,7 @@ abstract class BaseDto extends ValidatedDTO
         $sensitiveFields = ['password', 'token', 'secret', 'key', 'api_key'];
 
         foreach ($data as $key => $value) {
-            if (in_array(strtolower($key), $sensitiveFields)) {
+            if (in_array(strtolower($key), $sensitiveFields, true)) {
                 $preview[$key] = '[REDACTED]';
             } elseif (is_string($value)) {
                 $preview[$key] = strlen($value) > $maxLength

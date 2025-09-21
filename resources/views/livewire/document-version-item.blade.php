@@ -4,9 +4,9 @@
     <div class="flex items-center justify-between">
         {{-- Version Info --}}
         <div class="flex items-center gap-3">
-            {{-- Version ID --}}
+            {{-- Version ID (last 6 chars) --}}
             <div class="font-mono text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                {{ $versionId }}
+                {{ $this->shortVersionId }}
             </div>
 
             {{-- Current Version Badge --}}
@@ -35,5 +35,12 @@
             </div>
         </div>
     </div>
+
+    {{-- Creator Name --}}
+    @if ($creatorName)
+        <div class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+            Created by {{ $creatorName }}
+        </div>
+    @endif
     <x-filament-actions::modals />
 </div>

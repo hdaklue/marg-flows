@@ -80,7 +80,7 @@ enum AssigneeRole: string implements HasDescription, HasLabel
 
     public function hasResponsibility(string $responsibility): bool
     {
-        return in_array($responsibility, $this->getResponsibilities());
+        return in_array($responsibility, $this->getResponsibilities(), true);
     }
 
     public function shouldReceiveNotificationFor(string $status): bool

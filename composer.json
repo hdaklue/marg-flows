@@ -74,6 +74,7 @@
             "@php artisan cache:clear",
             "clear && php -d memory_limit=2G ./vendor/bin/phpstan analyse"
         ],
+        "ds:check": "@php vendor/bin/laradumps check --dir=app,routes,config",
         "lint": [
             "mago format"
         ],

@@ -278,7 +278,7 @@ final class DesignFeedbackSeeder extends Seeder
     {
         $areaTypes = ['rectangle', 'circle', 'polygon', 'area'];
 
-        if (! in_array($annotationType, $areaTypes) || ! fake()->boolean(80)) {
+        if (! in_array($annotationType, $areaTypes, true) || ! fake()->boolean(80)) {
             return null;
         }
 

@@ -69,9 +69,6 @@ final class ParticipantsCollection extends Collection
 
     public function exceptAssignable(AssignableEntity $user): self
     {
-        return $this->reject(fn ($item): bool => in_array(
-            $item->model->getKey(),
-            $user->getKey(),
-        ));
+        return $this->reject(fn ($item): bool => $item->model->getKey() === $user->getKey());
     }
 }

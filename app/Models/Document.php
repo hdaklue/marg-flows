@@ -28,6 +28,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
@@ -87,6 +89,10 @@ final class Document extends Model implements BelongsToTenantContract, PorterRol
         'archived_at',
     ];
 
+    // protected $with = [
+    //     'latestVersion',
+    // ];
+
     public function getPorterTenantKey(): ?string
     {
         return $this->getTenantId();
@@ -95,6 +101,16 @@ final class Document extends Model implements BelongsToTenantContract, PorterRol
     public function documentable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(DocumentVersion::class, 'document_id');
+    }
+
+    public function latestVersion(): HasOne
+    {
+        return $this->hasOne(DocumentVersion::class, 'document_id')->latestOfMany();
     }
 
     public function creator(): BelongsTo

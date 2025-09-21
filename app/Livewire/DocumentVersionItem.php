@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
-use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\Size;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -26,14 +24,18 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
 
     public bool $isCurrentVersion = false;
 
+    public ?string $creatorName = null;
+
     public function mount(
         string $versionId,
         string $createdAt,
         bool $isCurrentVersion = false,
+        ?string $creatorName = null,
     ): void {
         $this->versionId = $versionId;
         $this->createdAt = $createdAt;
         $this->isCurrentVersion = $isCurrentVersion;
+        $this->creatorName = $creatorName;
     }
 
     public function applyAction(): Action
@@ -44,7 +46,7 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
             ->size(Size::Small)
             ->iconButton()
             ->color('primary')
-            ->visible(!$this->isCurrentVersion)
+            ->visible(! $this->isCurrentVersion)
             ->action(function () {
                 $this->dispatch('apply-version', versionId: $this->versionId);
             });
@@ -58,7 +60,7 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
             ->iconButton()
             ->size(Size::Small)
             ->color('gray')
-            ->visible(!$this->isCurrentVersion)
+            ->visible(! $this->isCurrentVersion)
             ->action(function () {
                 $this->dispatch('preview-version', versionId: $this->versionId);
             });
@@ -66,30 +68,12 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
 
     public function getRelativeTimeProperty(): string
     {
-        $date = Carbon::parse($this->createdAt);
-        $now = now();
-        $diffInSeconds = $now->diffInSeconds($date);
-        $diffInMinutes = $now->diffInMinutes($date);
-        $diffInHours = $now->diffInHours($date);
-        $diffInDays = $now->diffInDays($date);
+        return toUserDiffForHuman($this->createdAt, filamentUser());
+    }
 
-        if ($diffInSeconds < 60) {
-            return 'Just now';
-        }
-
-        if ($diffInMinutes < 60) {
-            return $diffInMinutes . 'm ago';
-        }
-
-        if ($diffInHours < 24) {
-            return $diffInHours . 'h ago';
-        }
-
-        if ($diffInDays < 7) {
-            return $diffInDays . 'd ago';
-        }
-
-        return $date->format('M j, Y');
+    public function getShortVersionIdProperty(): string
+    {
+        return substr($this->versionId, -6);
     }
 
     public function render(): View

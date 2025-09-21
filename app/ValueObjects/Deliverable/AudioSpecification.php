@@ -176,7 +176,7 @@ final class AudioSpecification implements DeliverableSpecification
 
     public function isLossless(): bool
     {
-        return in_array(strtolower($this->format), ['flac', 'wav', 'aiff']);
+        return in_array(strtolower($this->format), ['flac', 'wav', 'aiff'], true);
     }
 
     public function formatDuration(int $seconds): string
@@ -294,7 +294,7 @@ final class AudioSpecification implements DeliverableSpecification
     {
         return
             isset($this->requirements[$requirement])
-            || in_array($requirement, $this->requirements);
+            || in_array($requirement, $this->requirements, true);
     }
 
     public function getChannelConfiguration(): string

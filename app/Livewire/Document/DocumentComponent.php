@@ -135,6 +135,20 @@ final class DocumentComponent extends Component
     }
 
     #[Computed]
+    public function currentEditingVersionComputed(): ?string
+    {
+        // If we have a current editing version, use it
+        if ($this->currentEditingVersion !== null) {
+            return $this->currentEditingVersion;
+        }
+
+        // Otherwise, get the latest version from the document
+        $this->document->loadMissing('latestVersion');
+
+        return $this->document->latestVersion?->id;
+    }
+
+    #[Computed]
     public function participantsArray(): ParticipantsCollection
     {
         return $this->participants->asDtoCollection();
@@ -288,7 +302,7 @@ final class DocumentComponent extends Component
         }
 
         $textBlocks = collect($content['blocks'])
-            ->filter(fn ($block) => in_array($block['type'] ?? '', ['paragraph', 'header']))
+            ->filter(fn ($block) => in_array($block['type'] ?? '', ['paragraph', 'header'], true))
             ->pluck('data.text')
             ->filter()
             ->take(2);
