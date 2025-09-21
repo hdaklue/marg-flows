@@ -35,6 +35,7 @@ final class Ultimate
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'objective' => EditorConfigBuilder::objective()->toArray(),
+            'budget' => EditorConfigBuilder::budget()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
             'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
         ];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder;
 
 use App\Services\Document\ConfigBuilder\Blocks\Alert;
+use App\Services\Document\ConfigBuilder\Blocks\Budget;
 use App\Services\Document\ConfigBuilder\Blocks\Header;
 use App\Services\Document\ConfigBuilder\Blocks\Hyperlink;
 use App\Services\Document\ConfigBuilder\Blocks\Images;
@@ -78,5 +79,10 @@ final class EditorConfigManager extends Manager
     public function objective(): DocumentBlockConfigContract
     {
         return new Objective;
+    }
+
+    public function budget(): DocumentBlockConfigContract
+    {
+        return new Budget;
     }
 }

@@ -10,6 +10,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import Alert from 'editorjs-alert';
 import DragDrop from 'editorjs-drag-drop';
 import Undo from 'editorjs-undo';
+import BudgetBlock from '../editorjs/plugins/budget-block';
 import CommentTune from '../editorjs/plugins/comment-tune';
 import LinkTool from '../editorjs/plugins/link-tool';
 import ObjectiveBlock from '../editorjs/plugins/objective-block';
@@ -166,6 +167,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     'alert': 'Alert',
                     'linkTool': 'Link',
                     'objective': 'Objective',
+                    'budget': 'Budget',
                     'videoEmbed': 'Video Embed',
                     'videoUpload': 'Video Upload',
                     'commentTune': 'Add Comment',
@@ -180,6 +182,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     'alert': 'تنبيه',
                     'linkTool': 'رابط',
                     'objective': 'هدف',
+                    'budget': 'ميزانية',
                     'videoEmbed': 'تضمين فيديو',
                     'videoUpload': 'رفع فيديو',
                     'commentTune': 'إضافة تعليق',
@@ -665,6 +668,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 'Alert': Alert,
                 'LinkTool': LinkTool,
                 'ObjectiveBlock': ObjectiveBlock,
+                'BudgetBlock': BudgetBlock,
                 'VideoEmbed': VideoEmbed,
                 'VideoUpload': VideoUpload
             };

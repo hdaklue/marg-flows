@@ -236,9 +236,9 @@ class ObjectiveBlock {
                     justify-content: center;
                     width: 20px;
                     height: 20px;
-                    background: ${isDarkMode ? '#52525b' : '#d4d4d8'};
+                    background: ${isDarkMode ? '#047857' : '#d1fae5'};
                     border-radius: 4px;
-                    color: ${isDarkMode ? '#fafafa' : '#18181b'};
+                    color: ${isDarkMode ? '#34d399' : '#047857'};
                     flex-shrink: 0;
                 ">
                     ${this.getOperatorIcon(this.data.operator)}
@@ -287,6 +287,19 @@ class ObjectiveBlock {
         const number = parseFloat(num) || 0;
         
         // Use toLocaleString for proper number formatting with commas
+        return number.toLocaleString('en-US', {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 0
+        });
+    }
+
+    formatNumberInput(value) {
+        // Convert to number first, then format for input display
+        const number = parseFloat(value) || 0;
+        
+        // Return formatted number with commas for input display
+        if (number === 0) return '0';
+        
         return number.toLocaleString('en-US', {
             maximumFractionDigits: 2,
             minimumFractionDigits: 0
@@ -601,12 +614,10 @@ class ObjectiveBlock {
                         </div>
                         <div style="position: relative; display: flex; align-items: center;">
                             <input 
-                                type="number" 
+                                type="text" 
                                 id="objective-percentage"
                                 class="objective-block__modal-percentage-input"
-                                min="0" 
-                                step="0.1"
-                                value="${this.data.percentage || 0}"
+                                value="${this.formatNumberInput(this.data.percentage || 0)}"
                                 style="
                                     width: 100%;
                                     padding: 12px 40px 12px 12px;
@@ -718,10 +729,54 @@ class ObjectiveBlock {
         
         // Percentage/number input handler
         if (percentageInput) {
+            // Enhanced input validation - only allow numbers and decimal point
             percentageInput.addEventListener('input', (e) => {
-                const value = parseFloat(e.target.value) || 0;
+                // Only allow numbers and decimal point
+                let inputValue = e.target.value;
+                let cleanValue = inputValue.replace(/[^\d.]/g, '');
+                
+                // Handle multiple decimal points - keep only the first one
+                const parts = cleanValue.split('.');
+                if (parts.length > 2) {
+                    cleanValue = parts[0] + '.' + parts.slice(1).join('');
+                }
+                
+                // Update input if we cleaned it
+                if (inputValue !== cleanValue) {
+                    e.target.value = cleanValue;
+                }
+                
+                // Parse the cleaned value for tempData
+                const value = parseFloat(cleanValue) || 0;
                 tempData.percentage = value;
                 this.validateField(percentageInput, value);
+            });
+            
+            // Format number on blur
+            percentageInput.addEventListener('blur', (e) => {
+                const rawValue = e.target.value;
+                if (rawValue && rawValue.trim() !== '') {
+                    // Parse the raw value to get clean number
+                    const cleanValue = rawValue.replace(/[^\d.]/g, '');
+                    const numberValue = parseFloat(cleanValue) || 0;
+                    
+                    // Format and display the number with commas
+                    e.target.value = this.formatNumberInput(numberValue);
+                    tempData.percentage = numberValue;
+                } else {
+                    e.target.value = '0';
+                    tempData.percentage = 0;
+                }
+            });
+            
+            // Remove formatting on focus for easier editing
+            percentageInput.addEventListener('focus', (e) => {
+                const formattedValue = e.target.value;
+                if (formattedValue) {
+                    // Remove commas for editing
+                    const rawValue = formattedValue.replace(/,/g, '');
+                    e.target.value = rawValue;
+                }
             });
         }
         

@@ -40,6 +40,7 @@ final class Simple
             'linkTool' => EditorConfigBuilder::linkTool()->enablePreview(false)->toArray(),
             'images' => $imagesConfig->toArray(),
             'objective' => EditorConfigBuilder::objective()->toArray(),
+            'budget' => EditorConfigBuilder::budget()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
             'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
         ];
