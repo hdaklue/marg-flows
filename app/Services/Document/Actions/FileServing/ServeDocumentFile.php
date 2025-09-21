@@ -46,7 +46,6 @@ final class ServeDocumentFile
         $directoryManager = DocumentDirectoryManager::make($document);
         $actualPath = $directoryManager->images()->getPath($fileName);
         $diskName = $directoryManager->getDisk();
-        ds(Storage::disk($diskName)->exists($actualPath));
 
         // Get file details
         $mimeType = Storage::disk($diskName)->mimeType($actualPath);
