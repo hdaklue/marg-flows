@@ -10,12 +10,11 @@ use Faker\Generator;
 final class ObjectiveBlock extends Block
 {
     /**
-     * Generate fake data for testing.
+     * Get predefined objective options.
      */
-    public static function fake(Generator $faker): array
+    public static function getPredefinedObjectives(): array
     {
-        $operators = ['increase', 'decrease', 'equal'];
-        $objectives = [
+        return [
             'Brand Awareness',
             'Lead Generation',
             'Customer Retention',
@@ -27,9 +26,17 @@ final class ObjectiveBlock extends Block
             'Conversion Rate',
             'Customer Acquisition Cost',
         ];
+    }
+
+    /**
+     * Generate fake data for testing.
+     */
+    public static function fake(Generator $faker): array
+    {
+        $operators = ['increase', 'decrease', 'equal'];
 
         return [
-            'name' => $faker->randomElement($objectives),
+            'name' => $faker->randomElement(self::getPredefinedObjectives()),
             'operator' => $faker->randomElement($operators),
             'percentage' => $faker->numberBetween(5, 50),
         ];

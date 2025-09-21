@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Document\ConfigBuilder\Blocks;
 
 use App\Services\Document\ConfigBuilder\Blocks\DTO\ObjectiveConfigData;
+use App\Services\Document\ContentBlocks\ObjectiveBlock;
 use App\Services\Document\Contratcs\BlockConfigContract;
 use App\Services\Document\Contratcs\DocumentBlockConfigContract;
 
@@ -23,6 +24,7 @@ final class Objective implements DocumentBlockConfigContract
         'percentageMin' => 0,
         'percentageMax' => 100,
         'percentageStep' => 0.1,
+        'predefinedObjectives' => [],
         'validation' => [
             'nameRequired' => true,
             'nameMaxLength' => 255,
@@ -30,7 +32,7 @@ final class Objective implements DocumentBlockConfigContract
         ],
     ];
 
-    private array $tunes = [];
+    private array $tunes = ['commentTune'];
 
     private ?string $shortcut = 'CMD+SHIFT+O';
 
@@ -136,6 +138,9 @@ final class Objective implements DocumentBlockConfigContract
 
     public function build(): BlockConfigContract
     {
+        // Add predefined objectives from ObjectiveBlock class
+        $this->config['predefinedObjectives'] = ObjectiveBlock::getPredefinedObjectives();
+        
         return ObjectiveConfigData::fromArray([
             'config' => $this->config,
             'class' => self::CLASS_NAME,

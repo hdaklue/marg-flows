@@ -22,7 +22,7 @@ class ObjectiveBlock {
     }
 
     static get tunes() {
-        return [];
+        return ['commentTune'];
     }
 
     constructor({ data, config, api, readOnly, block }) {
@@ -82,9 +82,9 @@ class ObjectiveBlock {
                 cancel: 'Cancel',
                 save: 'Save Objective',
                 previewSample: 'Sample Objective',
-                increaseDesc: 'Grow by target percentage',
-                decreaseDesc: 'Reduce by target percentage',
-                equalDesc: 'Maintain target percentage'
+                increaseDesc: 'Grow by target value',
+                decreaseDesc: 'Reduce by target value',
+                equalDesc: 'Maintain target value'
             },
             'ar': {
                 namePlaceholder: 'أدخل اسم الهدف...',
@@ -110,9 +110,9 @@ class ObjectiveBlock {
                 cancel: 'إلغاء',
                 save: 'حفظ الهدف',
                 previewSample: 'هدف تجريبي',
-                increaseDesc: 'زيادة بالنسبة المستهدفة',
-                decreaseDesc: 'تقليل بالنسبة المستهدفة',
-                equalDesc: 'الحفاظ على النسبة المستهدفة'
+                increaseDesc: 'زيادة بالقيمة المستهدفة',
+                decreaseDesc: 'تقليل بالقيمة المستهدفة',
+                equalDesc: 'الحفاظ على القيمة المستهدفة'
             }
         };
         
@@ -426,26 +426,44 @@ class ObjectiveBlock {
                         <label for="objective-name" style="font-size: 14px; font-weight: 500; color: ${colors.textSecondary};">
                             ${this.t.objectiveName || 'Objective Name'}
                         </label>
-                        <input 
-                            type="text" 
-                            id="objective-name"
-                            class="objective-block__modal-name-input"
-                            placeholder="${this.t.namePlaceholder || 'Enter objective name...'}"
-                            value="${this.data.name || ''}"
-                            style="
-                                width: 100%;
-                                padding: 12px;
-                                border: 1px solid ${colors.inputBorder};
-                                border-radius: 8px;
-                                font-size: 14px;
-                                color: ${colors.text};
+                        <div style="position: relative;">
+                            <input 
+                                type="text" 
+                                id="objective-name"
+                                class="objective-block__modal-name-input"
+                                placeholder="${this.t.namePlaceholder || 'Enter objective name...'}"
+                                value="${this.data.name || ''}"
+                                autocomplete="off"
+                                style="
+                                    width: 100%;
+                                    padding: 12px;
+                                    border: 1px solid ${colors.inputBorder};
+                                    border-radius: 8px;
+                                    font-size: 14px;
+                                    color: ${colors.text};
+                                    background: ${colors.input};
+                                    transition: border-color 0.2s;
+                                    box-sizing: border-box;
+                                "
+                                onfocus="this.style.borderColor='${colors.inputFocus}'; this.style.outline='none'"
+                                onblur="this.style.borderColor='${colors.inputBorder}'"
+                            />
+                            <div class="objective-block__modal-dropdown" style="
+                                position: absolute;
+                                top: 100%;
+                                left: 0;
+                                right: 0;
                                 background: ${colors.input};
-                                transition: border-color 0.2s;
-                                box-sizing: border-box;
-                            "
-                            onfocus="this.style.borderColor='${colors.inputFocus}'; this.style.outline='none'"
-                            onblur="this.style.borderColor='${colors.inputBorder}'"
-                        />
+                                border: 1px solid ${colors.inputBorder};
+                                border-top: none;
+                                border-radius: 0 0 8px 8px;
+                                max-height: 200px;
+                                overflow-y: auto;
+                                z-index: 100;
+                                display: none;
+                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                            "></div>
+                        </div>
                         <div class="objective-block__modal-field-error" style="display: none; font-size: 12px; color: #ef4444; margin-top: 4px;"></div>
                     </div>
                     
@@ -657,6 +675,7 @@ class ObjectiveBlock {
         const saveButton = modal.querySelector('[data-action="save"]');
         const cancelButton = modal.querySelector('[data-action="cancel"]');
         const closeButton = modal.querySelector('[aria-label*="Close"]');
+        const dropdown = modal.querySelector('.objective-block__modal-dropdown');
         
         // Temporary data for form
         let tempData = { ...this.data };
@@ -665,6 +684,12 @@ class ObjectiveBlock {
         if (!tempData.unit) {
             tempData.unit = 'percentage';
         }
+        
+        // Get predefined objectives from config
+        const predefinedObjectives = this.config.predefinedObjectives || [];
+        
+        // Initialize dropdown functionality
+        this.initializeDropdown(nameInput, dropdown, predefinedObjectives, tempData);
         
         // Update unit symbol and input constraints
         const updateUnitDisplay = (unit) => {
@@ -682,11 +707,12 @@ class ObjectiveBlock {
             }
         };
         
-        // Name input handler
+        // Name input handler (updated to work with dropdown)
         if (nameInput) {
             nameInput.addEventListener('input', (e) => {
                 tempData.name = e.target.value;
                 this.validateField(nameInput, tempData.name);
+                this.filterDropdownOptions(dropdown, e.target.value, predefinedObjectives);
             });
         }
         
@@ -796,6 +822,158 @@ class ObjectiveBlock {
         requestAnimationFrame(() => {
             backdrop.classList.add('active');
         });
+    }
+    
+    initializeDropdown(nameInput, dropdown, predefinedObjectives, tempData) {
+        if (!nameInput || !dropdown || !predefinedObjectives.length) return;
+        
+        const isDarkMode = this.isDarkMode();
+        const colors = {
+            text: isDarkMode ? '#fafafa' : '#18181b',
+            textMuted: isDarkMode ? '#a1a1aa' : '#71717a',
+            backgroundHover: isDarkMode ? '#27272a' : '#f4f4f5'
+        };
+        
+        // Show dropdown on focus
+        nameInput.addEventListener('focus', () => {
+            this.showDropdown(dropdown, predefinedObjectives, colors, nameInput, tempData);
+        });
+        
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!nameInput.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Hide dropdown on escape
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
+                nameInput.blur();
+            }
+        });
+    }
+    
+    showDropdown(dropdown, objectives, colors, nameInput, tempData) {
+        dropdown.innerHTML = '';
+        
+        objectives.forEach((objective, index) => {
+            const option = document.createElement('div');
+            option.style.cssText = `
+                padding: 12px;
+                cursor: pointer;
+                color: ${colors.text};
+                font-size: 14px;
+                transition: background-color 0.2s;
+                border-bottom: 1px solid ${colors.backgroundHover};
+            `;
+            
+            option.textContent = objective;
+            
+            // Add hover effect
+            option.addEventListener('mouseenter', () => {
+                option.style.backgroundColor = colors.backgroundHover;
+            });
+            
+            option.addEventListener('mouseleave', () => {
+                option.style.backgroundColor = 'transparent';
+            });
+            
+            // Add click handler
+            option.addEventListener('click', () => {
+                nameInput.value = objective;
+                tempData.name = objective;
+                dropdown.style.display = 'none';
+                this.validateField(nameInput, tempData.name);
+            });
+            
+            dropdown.appendChild(option);
+        });
+        
+        dropdown.style.display = 'block';
+    }
+    
+    filterDropdownOptions(dropdown, inputValue, predefinedObjectives) {
+        if (!dropdown || !predefinedObjectives.length) return;
+        
+        const isDarkMode = this.isDarkMode();
+        const colors = {
+            text: isDarkMode ? '#fafafa' : '#18181b',
+            textMuted: isDarkMode ? '#a1a1aa' : '#71717a',
+            backgroundHover: isDarkMode ? '#27272a' : '#f4f4f5'
+        };
+        
+        // Trim input and check if it's empty or only whitespace
+        const trimmedInput = inputValue.trim();
+        
+        // If input is empty or only whitespace, show all options without highlighting
+        if (!trimmedInput) {
+            this.showDropdown(dropdown, predefinedObjectives, colors, null, null);
+            return;
+        }
+        
+        // Filter objectives based on input
+        const filteredObjectives = predefinedObjectives.filter(objective => 
+            objective.toLowerCase().includes(trimmedInput.toLowerCase())
+        );
+        
+        // Clear dropdown
+        dropdown.innerHTML = '';
+        
+        if (filteredObjectives.length === 0) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        // Add filtered options
+        filteredObjectives.forEach((objective) => {
+            const option = document.createElement('div');
+            option.style.cssText = `
+                padding: 12px;
+                cursor: pointer;
+                color: ${colors.text};
+                font-size: 14px;
+                transition: background-color 0.2s;
+                border-bottom: 1px solid ${colors.backgroundHover};
+            `;
+            
+            // Highlight matching text only if we have meaningful input
+            if (trimmedInput.length > 0) {
+                // Escape special regex characters in the input
+                const escapedInput = trimmedInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(${escapedInput})`, 'gi');
+                const highlightedText = objective.replace(regex, `<mark style="background: #3b82f6; color: white; padding: 0 2px; border-radius: 2px;">$1</mark>`);
+                option.innerHTML = highlightedText;
+            } else {
+                option.textContent = objective;
+            }
+            
+            // Add hover effect
+            option.addEventListener('mouseenter', () => {
+                option.style.backgroundColor = colors.backgroundHover;
+            });
+            
+            option.addEventListener('mouseleave', () => {
+                option.style.backgroundColor = 'transparent';
+            });
+            
+            // Add click handler
+            option.addEventListener('click', () => {
+                const nameInput = dropdown.parentElement.querySelector('.objective-block__modal-name-input');
+                if (nameInput) {
+                    nameInput.value = objective;
+                    // Trigger input event to update tempData
+                    const event = new Event('input', { bubbles: true });
+                    nameInput.dispatchEvent(event);
+                }
+                dropdown.style.display = 'none';
+            });
+            
+            dropdown.appendChild(option);
+        });
+        
+        dropdown.style.display = filteredObjectives.length > 0 ? 'block' : 'none';
     }
 
     createTempPreviewContent(tempData) {
