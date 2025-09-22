@@ -8,7 +8,8 @@ use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
 use App\Services\Upload\UploadSessionService;
-use App\Services\Video\Facades\ResolutionManager;
+use App\Services\Video\Resolutions\Resolution480p;
+use App\Services\Video\Services\ResolutionExporter;
 use App\Services\Video\VideoManager;
 use Exception;
 use Illuminate\Support\Facades\Storage;
@@ -50,23 +51,73 @@ final class AssembleVideoChunks
                 $totalChunks,
             );
 
-            // Extract metadata from local file before moving to remote storage (with timeout protection)
+            // Convert video locally before moving to remote storage
             $videoMetadata = null;
             if ($videoSessionId && config('video-upload.processing.extract_metadata', true)) {
                 try {
-                    // Log::info('Extracting video metadata from local file', [
-                    //     'localPath' => $localFinalPath,
-                    //     'videoSessionId' => $videoSessionId,
-                    // ]);
+                    Log::info('Starting local video conversion and metadata extraction', [
+                        'localPath' => $localFinalPath,
+                        'videoSessionId' => $videoSessionId,
+                    ]);
 
-                    // Set a shorter timeout for metadata extraction to prevent hanging
-                    // set_time_limit(300); // 5 minutes max for metadata extraction
+                    // Perform 480p conversion - overwrite the original local file
+                    $chunksDisk = config('chunked-upload.storage.disk');
 
-                    ResolutionManager::from($localFinalPath, config('chunked-upload.storage.disk'))
-                        ->to480p()
-                        ->convert();
+                    Log::info('Video conversion setup', [
+                        'localFinalPath' => $localFinalPath,
+                        'chunksDisk' => $chunksDisk,
+                        'willOverwriteOriginal' => true,
+                    ]);
 
-                    // Use a special action to extract from local chunks disk specifically
+                    // Use ResolutionExporter directly to specify exact output path (overwrite original)
+                    $exporter = ResolutionExporter::start($localFinalPath, $chunksDisk);
+
+                    // Create video object to get orientation for 480p conversion
+                    $videoManager = app(VideoManager::class);
+                    $video = $videoManager->fromDisk($localFinalPath, $chunksDisk);
+                    $orientation = $video->getOrientation();
+
+                    // Create 480p conversion and export to temporary file with _mod suffix
+                    $pathInfo = pathinfo($localFinalPath);
+                    $tempConvertedPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '_mod.' . $pathInfo['extension'];
+
+                    $conversion = new Resolution480p($orientation);
+                    $conversionResult = $exporter->export($conversion, $tempConvertedPath);
+                    $conversionResults = [$conversionResult];
+
+                    // If conversion successful, replace original file with converted one
+                    if ($conversionResult->isSuccessful()) {
+                        Log::info('Replacing original with converted file', [
+                            'originalPath' => $localFinalPath,
+                            'convertedPath' => $tempConvertedPath,
+                        ]);
+
+                        // Delete original file and rename converted file to original name
+                        Storage::disk($chunksDisk)->delete($localFinalPath);
+                        Storage::disk($chunksDisk)->move($tempConvertedPath, $localFinalPath);
+
+                        Log::info('File replacement completed', [
+                            'finalPath' => $localFinalPath,
+                        ]);
+                    } else {
+                        Log::warning('Conversion failed, keeping original file', [
+                            'originalPath' => $localFinalPath,
+                            'conversionError' => $conversionResult->getErrorMessage(),
+                        ]);
+
+                        // Clean up failed conversion file if it exists
+                        if (Storage::disk($chunksDisk)->exists($tempConvertedPath)) {
+                            Storage::disk($chunksDisk)->delete($tempConvertedPath);
+                        }
+                    }
+
+                    Log::info('Video conversion completed', [
+                        'localPath' => $localFinalPath,
+                        'conversionResults' => $conversionResults,
+                        'successfulConversions' => count(array_filter($conversionResults, fn ($result) => $result->isSuccessful())),
+                    ]);
+
+                    // Extract metadata from the converted local file
                     $videoMetadata = $this->extractMetadataFromLocalFile(
                         $localFinalPath,
                         $videoSessionId,
@@ -78,20 +129,16 @@ final class AssembleVideoChunks
                         'metadata',
                         $videoMetadata,
                     );
-
-                    // Reset timeout back to job timeout
-                    // set_time_limit(0);
                 } catch (Exception $e) {
-                    // Log::warning('Failed to extract video metadata from local file', [
-                    //     'localPath' => $localFinalPath,
-                    //     'error' => $e->getMessage(),
-                    // ]);
-                    // Reset timeout even on failure
-                    // set_time_limit(0);
+                    Log::warning('Failed to convert video or extract metadata', [
+                        'localPath' => $localFinalPath,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
                 }
             }
 
-            // Move assembled file to document storage (remote)
+            // Move converted file to document storage (remote)
             $remoteFinalPath = $this->moveToDocumentStorage($localFinalPath, $document);
 
             // Clean up local files (chunks and assembled file)
