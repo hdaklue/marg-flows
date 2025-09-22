@@ -5,8 +5,15 @@
 
 /* ObjectiveBlock Plugin Styles - Inline */
 .objective-block {
-  width: 100%;
+  width: auto;
+  display: flex;
 }
+.budget-block,
+.persona-block {
+     width: auto;
+  display: flex;
+}
+
 
 .objective-block__form {
   display: flex;
@@ -41,17 +48,17 @@
     align-items: center;
     gap: 1rem;
   }
-  
+
   .objective-block__field {
     flex: 1;
   }
-  
+
   .objective-block__operator-field {
     flex: none;
     width: auto;
     min-width: 140px;
   }
-  
+
   .objective-block__percentage-field {
     flex: none;
     width: auto;
@@ -430,7 +437,7 @@
   .objective-block__form {
     border-width: 2px;
   }
-  
+
   .objective-block__name-input,
   .objective-block__operator-select,
   .objective-block__percentage-input {
