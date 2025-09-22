@@ -10,18 +10,17 @@ use App\Services\Document\Sessions\VideoUploadSessionManager;
 use App\Services\Upload\UploadSessionService;
 use App\Services\Video\VideoManager;
 use Exception;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Storage;
 use Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class AssembleVideoChunks implements ShouldQueue
+final class AssembleVideoChunks
 {
     use AsAction;
 
     public int $tries = 3;
 
-    public int $timeout = 900; // 15 minutes
+    public int $timeout = 30 * 60; // 30 minutes
 
     /**
      * Assemble uploaded video chunks and start processing.
@@ -50,7 +49,7 @@ final class AssembleVideoChunks implements ShouldQueue
                 $totalChunks,
             );
 
-            // Extract metadata from local file before moving to remote storage
+            // Extract metadata from local file before moving to remote storage (with timeout protection)
             $videoMetadata = null;
             if ($videoSessionId && config('video-upload.processing.extract_metadata', true)) {
                 try {
@@ -59,16 +58,32 @@ final class AssembleVideoChunks implements ShouldQueue
                         'videoSessionId' => $videoSessionId,
                     ]);
 
+                    // Set a shorter timeout for metadata extraction to prevent hanging
+                    set_time_limit(300); // 5 minutes max for metadata extraction
+
                     // Use a special action to extract from local chunks disk specifically
-                    $videoMetadata = $this->extractMetadataFromLocalFile($localFinalPath, $videoSessionId);
+                    $videoMetadata = $this->extractMetadataFromLocalFile(
+                        $localFinalPath,
+                        $videoSessionId,
+                    );
 
                     // Update session with metadata
-                    VideoUploadSessionManager::updateProcessingMetadata($videoSessionId, 'metadata', $videoMetadata);
+                    VideoUploadSessionManager::updateProcessingMetadata(
+                        $videoSessionId,
+                        'metadata',
+                        $videoMetadata,
+                    );
+
+                    // Reset timeout back to job timeout
+                    set_time_limit(0);
                 } catch (Exception $e) {
                     Log::warning('Failed to extract video metadata from local file', [
                         'localPath' => $localFinalPath,
                         'error' => $e->getMessage(),
                     ]);
+
+                    // Reset timeout even on failure
+                    set_time_limit(0);
                 }
             }
 
@@ -95,7 +110,10 @@ final class AssembleVideoChunks implements ShouldQueue
                     'documentId' => $document->id,
                 ]);
 
-                VideoUploadSessionManager::startProcessing($videoSessionId, basename($remoteFinalPath));
+                VideoUploadSessionManager::startProcessing(
+                    $videoSessionId,
+                    basename($remoteFinalPath),
+                );
 
                 // Dispatch processing job with session ID - this runs after assembly completes
                 ProcessDocumentVideo::dispatch($remoteFinalPath, $document, $videoSessionId);
@@ -108,7 +126,6 @@ final class AssembleVideoChunks implements ShouldQueue
                 // Fallback for old behavior without session tracking
                 ProcessDocumentVideo::dispatch($remoteFinalPath, $document);
             }
-
         } catch (Exception $e) {
             Log::error('Video chunk assembly failed', [
                 'sessionId' => $sessionId,
@@ -122,7 +139,10 @@ final class AssembleVideoChunks implements ShouldQueue
 
             // Mark session as failed
             if ($videoSessionId) {
-                VideoUploadSessionManager::fail($videoSessionId, 'Failed to assemble video chunks: ' . $e->getMessage());
+                VideoUploadSessionManager::fail(
+                    $videoSessionId,
+                    'Failed to assemble video chunks: ' . $e->getMessage(),
+                );
             }
 
             throw $e;
@@ -141,6 +161,15 @@ final class AssembleVideoChunks implements ShouldQueue
         $documentDirectory = DocumentDirectoryManager::make($document)->videos()->getDirectory();
         $remotePath = $documentDirectory . '/' . basename($localPath);
 
+        Log::info('Starting file transfer to remote storage', [
+            'localPath' => $localPath,
+            'remotePath' => $remotePath,
+            'documentId' => $document->id,
+            'fileSize' => Storage::disk($chunksDisk)->size($localPath),
+        ]);
+
+        $startTime = microtime(true);
+
         // Read from local chunks disk and write to document disk using streaming
         $localStream = Storage::disk($chunksDisk)->readStream($localPath);
         if (! $localStream) {
@@ -150,7 +179,9 @@ final class AssembleVideoChunks implements ShouldQueue
         try {
             $success = Storage::disk($documentDisk)->writeStream($remotePath, $localStream);
             if (! $success) {
-                throw new Exception("Failed to upload assembled file to document storage: {$remotePath}");
+                throw new Exception(
+                    "Failed to upload assembled file to document storage: {$remotePath}",
+                );
             }
         } finally {
             if (is_resource($localStream)) {
@@ -158,10 +189,13 @@ final class AssembleVideoChunks implements ShouldQueue
             }
         }
 
-        Log::info('Moved assembled file to document storage', [
+        $transferTime = microtime(true) - $startTime;
+
+        Log::info('Completed file transfer to remote storage', [
             'localPath' => $localPath,
             'remotePath' => $remotePath,
             'documentId' => $document->id,
+            'transferTimeSeconds' => round($transferTime, 2),
         ]);
 
         return $remotePath;
@@ -190,8 +224,10 @@ final class AssembleVideoChunks implements ShouldQueue
     /**
      * Extract metadata from local chunks disk specifically.
      */
-    private function extractMetadataFromLocalFile(string $localPath, ?string $sessionId = null): array
-    {
+    private function extractMetadataFromLocalFile(
+        string $localPath,
+        ?string $sessionId = null,
+    ): array {
         $chunksDisk = config('chunked-upload.storage.disk', 'local_chunks');
 
         Log::info('Extracting video metadata from local chunks disk', [

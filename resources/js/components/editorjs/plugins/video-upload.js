@@ -2585,8 +2585,9 @@ class VideoUpload {
      * Calculate upload metrics
      */
     calculateUploadMetrics(progress, now, timeDiff) {
-        const uploadProgress = Math.min(50, progress);
-        const currentUploaded = (uploadProgress / 50) * this.currentFileInfo.size;
+        // For chunk upload, progress is 0-90%, so calculate uploaded bytes accordingly
+        const uploadProgress = Math.min(90, progress);
+        const currentUploaded = (uploadProgress / 90) * this.currentFileInfo.size;
         const bytesUploaded = currentUploaded - this.uploadMetrics.uploaded;
         
         if (bytesUploaded > 0 && timeDiff > 0) {
@@ -2596,7 +2597,7 @@ class VideoUpload {
                 : (this.uploadMetrics.speed * 0.7) + (currentSpeed * 0.3);
         }
         
-        if (progress < 50) {
+        if (progress < 90) {
             const remainingBytes = this.currentFileInfo.size - currentUploaded;
             this.uploadMetrics.eta = this.uploadMetrics.speed > 0 
                 ? remainingBytes / this.uploadMetrics.speed 
@@ -2619,8 +2620,48 @@ class VideoUpload {
         // Update progress bar
         const progressBar = modal.querySelector('.upload-progress-bar');
         const progressPercent = modal.querySelector('.upload-progress-percent');
-        if (progressBar) progressBar.style.width = `${this.progressState.progress}%`;
-        if (progressPercent) progressPercent.textContent = `${Math.round(this.progressState.progress)}%`;
+        
+        const isProcessingPhase = this.progressState.phase === 'chunk_assembly' || this.progressState.phase === 'video_processing';
+        
+        if (progressBar) {
+            if (isProcessingPhase) {
+                // Show animated indeterminate progress bar
+                progressBar.style.width = '100%';
+                progressBar.style.background = 'linear-gradient(90deg, #0ea5e9, #0284c7, #0ea5e9)';
+                progressBar.style.backgroundSize = '200% 100%';
+                progressBar.style.animation = 'progress-slide 2s ease-in-out infinite';
+                
+                // Add keyframes if not already added
+                if (!document.querySelector('#progress-animation-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'progress-animation-styles';
+                    style.textContent = `
+                        @keyframes progress-slide {
+                            0% { background-position: 200% 0; }
+                            100% { background-position: -200% 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            } else {
+                // Show normal incremental progress bar
+                progressBar.style.width = `${this.progressState.progress}%`;
+                progressBar.style.background = 'linear-gradient(to right, #0ea5e9, #0284c7)';
+                progressBar.style.backgroundSize = '100% 100%';
+                progressBar.style.animation = 'none';
+            }
+        }
+        
+        if (progressPercent) {
+            if (isProcessingPhase) {
+                // Hide percentage during processing
+                progressPercent.style.display = 'none';
+            } else {
+                // Show percentage during upload
+                progressPercent.style.display = 'block';
+                progressPercent.textContent = `${Math.round(this.progressState.progress)}%`;
+            }
+        }
         
         // Update status message
         const statusMessage = modal.querySelector('.upload-status-message');
@@ -2653,14 +2694,16 @@ class VideoUpload {
         if (speed) speed.textContent = this.formatSpeed(this.uploadMetrics.speed);
         if (eta) eta.textContent = this.formatETA(this.uploadMetrics.eta);
         
-        // Hide redundant metrics since we show speed/eta in status message above
+        // Show metrics during chunk upload phase to display speed and ETA
         const metrics = modal.querySelector('.upload-metrics');
         const uploadedRow = modal.querySelector('.upload-uploaded-row');
         if (metrics) {
-            metrics.style.display = 'none'; // Always hide since status message shows this info
+            // Show metrics during chunk upload, hide during other phases
+            metrics.style.display = this.progressState.phase === 'chunk_upload' ? 'grid' : 'none';
         }
         if (uploadedRow) {
-            uploadedRow.style.display = 'none'; // Always hide uploaded amount
+            // Show uploaded amount during chunk upload
+            uploadedRow.style.display = this.progressState.phase === 'chunk_upload' ? 'flex' : 'none';
         }
         
         // Update phase indicators
@@ -2731,7 +2774,7 @@ class VideoUpload {
     getCurrentPhaseKey() {
         if (this.progressState.phase === 'single_upload' || this.progressState.phase === 'chunk_upload') {
             return 'upload';
-        } else if (this.progressState.phase === 'video_processing') {
+        } else if (this.progressState.phase === 'chunk_assembly' || this.progressState.phase === 'video_processing') {
             return 'processing';
         } else if (this.progressState.phase === 'complete') {
             return 'complete';

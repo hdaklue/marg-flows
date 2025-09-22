@@ -6,7 +6,6 @@ namespace App\Services\Document\Actions\Video;
 
 use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
-use App\Services\Document\Actions\Video\AssembleVideoChunks;
 use App\Services\Document\Requests\DocumentVideoUploadRequest;
 use App\Services\Document\Responses\VideoUploadResponse;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
@@ -58,6 +57,15 @@ final class ChunkVideoUpload
 
             // Check if all chunks are uploaded
             if ($sessionManager->isComplete($sessionId, $totalChunks)) {
+                // Update session to show upload complete and processing starting
+                if ($videoSessionId) {
+                    VideoUploadSessionManager::update($videoSessionId, [
+                        'upload_progress' => 100,
+                        'phase' => 'chunk_assembly',
+                        'status' => 'processing',
+                    ]);
+                }
+
                 // Dispatch assembly asynchronously to avoid HTTP timeout
                 $this->assembleChunksAsync(
                     $sessionManager,

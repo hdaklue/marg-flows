@@ -76,8 +76,16 @@ export default class SessionUploadStrategy {
             
             // Step 2: Start actual upload based on type
             if (sessionData.data.upload_type === 'single') {
+                // Update status for single upload
+                if (this.statusCallback) {
+                    this.statusCallback('Uploading video...', 'single_upload');
+                }
                 await this.uploadSingle(file);
             } else {
+                // Update status for chunked upload and start showing progress immediately
+                if (this.statusCallback) {
+                    this.statusCallback(`Uploading video in ${sessionData.data.chunks_total} chunks...`, 'chunk_upload');
+                }
                 await this.uploadChunked(file, sessionData.data.chunks_total);
             }
             
@@ -158,8 +166,71 @@ export default class SessionUploadStrategy {
             const chunk = file.slice(start, end);
 
             const chunkFile = new File([chunk], file.name, { type: file.type });
+            
+            // Update progress before uploading chunk
+            this.updateChunkProgress(chunkIndex, chunksTotal, file.size);
+            
             await this.uploadChunk(chunkFile, chunkIndex, chunksTotal);
+            
+            // Update progress after uploading chunk
+            this.updateChunkProgress(chunkIndex + 1, chunksTotal, file.size);
         }
+    }
+
+    /**
+     * Update chunk upload progress
+     */
+    updateChunkProgress(chunksUploaded, chunksTotal, fileSize) {
+        const chunkProgress = chunksTotal > 0 ? (chunksUploaded / chunksTotal) : 0;
+        const progress = Math.round(Math.min(chunkProgress * 90, 90)); // 0-90% for upload phase
+        
+        // Calculate upload metrics
+        const currentTime = Date.now();
+        const timeElapsed = (currentTime - this.uploadStartTime) / 1000; // seconds
+        
+        let uploadSpeed = null;
+        let eta = null;
+        
+        if (timeElapsed > 0 && chunksUploaded > 0) {
+            // Calculate chunks per second
+            const chunksPerSecond = chunksUploaded / timeElapsed;
+            const remainingChunks = chunksTotal - chunksUploaded;
+            
+            // Estimate time remaining
+            if (chunksPerSecond > 0 && remainingChunks > 0) {
+                eta = Math.round(remainingChunks / chunksPerSecond);
+            }
+            
+            // Calculate actual data speed based on bytes uploaded
+            const avgChunkSize = fileSize / chunksTotal;
+            const bytesUploaded = chunksUploaded * avgChunkSize;
+            const bytesPerSecond = bytesUploaded / timeElapsed;
+            uploadSpeed = Math.round((bytesPerSecond / 1024 / 1024) * 100) / 100; // MB/s
+        }
+        
+        // Create status message with speed and ETA only
+        let speedText = uploadSpeed && uploadSpeed > 0 ? `${uploadSpeed} MB/s` : '';
+        let etaText = eta && eta > 0 ? ` - ${eta}s remaining` : '';
+        const message = `Uploading video${speedText ? ' (' + speedText + ')' : ''}${etaText}`;
+        
+        // Update progress callback
+        if (this.progressCallback && typeof this.progressCallback === 'function') {
+            this.progressCallback(progress);
+        }
+        
+        // Update status callback with chunk-specific message
+        if (this.statusCallback && typeof this.statusCallback === 'function') {
+            this.statusCallback(message, 'chunk_upload');
+        }
+        
+        // Log detailed progress
+        this.logToBrowser('chunk-progress', `${progress}% (chunk: ${chunksUploaded}/${chunksTotal}, speed: ${uploadSpeed}MB/s, ETA: ${eta}s)`, {
+            progress,
+            chunks_uploaded: chunksUploaded,
+            chunks_total: chunksTotal,
+            upload_speed: uploadSpeed,
+            eta: eta
+        });
     }
 
     /**
@@ -269,6 +340,9 @@ export default class SessionUploadStrategy {
             case 'chunk_upload':
                 message = this.t.statusUploadingChunks || 'Uploading video in chunks...';
                 break;
+            case 'chunk_assembly':
+                message = 'Processing video...';
+                break;
             case 'video_processing':
                 message = this.t.statusProcessing || 'Processing video...';
                 break;
@@ -301,10 +375,14 @@ export default class SessionUploadStrategy {
                 const chunkProgress = chunksTotal > 0 ? (chunksUploaded / chunksTotal) : 0;
                 progress = Math.round(Math.min(chunkProgress * 90, 90));
                 break;
+            case 'chunk_assembly':
+                // Assembly phase is at 90-92%
+                progress = 90;
+                break;
             case 'video_processing':
-                // Processing phase goes from 90% to 100%
+                // Processing phase goes from 92% to 100%
                 const processingProgress = status.data.processing_progress || 0;
-                progress = Math.round(90 + (processingProgress * 0.1));
+                progress = Math.round(92 + (processingProgress * 0.08));
                 break;
             case 'complete':
                 progress = 100;
@@ -372,6 +450,9 @@ export default class SessionUploadStrategy {
                     let speedText = uploadSpeed && uploadSpeed > 0 ? ` (${uploadSpeed} MB/s)` : '';
                     let etaText = eta && eta > 0 ? ` - ${eta}s remaining` : '';
                     message = `Uploading video${speedText}${etaText}`;
+                    break;
+                case 'chunk_assembly':
+                    message = 'Processing video...';
                     break;
                 case 'video_processing':
                     message = 'Processing video...';

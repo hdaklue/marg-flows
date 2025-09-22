@@ -25,10 +25,10 @@ final class HorizonServiceProvider extends HorizonApplicationServiceProvider
     /**
      * Override to disable Horizon dashboard routes registration.
      */
-    protected function registerRoutes(): void
-    {
-        // Do nothing - this disables the dashboard routes
-    }
+    // protected function registerRoutes(): void
+    // {
+    //     // Do nothing - this disables the dashboard routes
+    // }
 
     /**
      * Register the Horizon gate.
@@ -38,9 +38,13 @@ final class HorizonServiceProvider extends HorizonApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewHorizon', function ($user = null) {
-            return in_array(optional($user)->email, [
-                //
-            ], true);
+            return in_array(
+                optional($user)->email,
+                [
+                    'test@example.com',
+                ],
+                true,
+            );
         });
     }
 }
