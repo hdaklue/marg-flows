@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+// Language switch plugin removed - using custom solution
 use App\Filament\Auth\Login;
 use App\Filament\Auth\Register;
-// Language switch plugin removed - using custom solution
 use App\Filament\Pages\UserSettings;
 use App\Filament\Widgets\RecentInteractionsWidget;
 use App\Http\Middleware\Filament\ConfigureDateTimePickers;
 use App\Http\Middleware\SetLocale;
 use App\Models\Tenant;
+use Asmit\ResizedColumn\ResizedColumnPlugin;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -66,10 +67,9 @@ final class PortalPanelProvider extends PanelProvider
                 fn (): string => Blade::render('<x-language-switch />'),
                 scopes: [Login::class, Register::class],
             )
-            ->renderHook(
-                PanelsRenderHook::BODY_START,
-                fn (): string => Blade::render('@livewire(\'wire-elements-modal\')'),
-            )
+            ->renderHook(PanelsRenderHook::BODY_START, fn (): string => Blade::render(
+                '@livewire(\'wire-elements-modal\')',
+            ))
             ->userMenuItems([
                 Action::make('settings')
                     ->label(fn (): string => __('auth.profile.title'))
@@ -92,6 +92,9 @@ final class PortalPanelProvider extends PanelProvider
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
                 RecentInteractionsWidget::class,
+            ])
+            ->plugins([
+                ResizedColumnPlugin::make(),
             ])
             ->pages([])
             ->middleware([

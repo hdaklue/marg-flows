@@ -36,6 +36,7 @@ final class Base
             'videoUpload' => $this->buildVideoUploadConfig($documentId)->toArray(),
             'objective' => EditorConfigBuilder::objective()->toArray(),
             'budget' => EditorConfigBuilder::budget()->toArray(),
+            'persona' => EditorConfigBuilder::persona()->toArray(),
         ];
     }
 

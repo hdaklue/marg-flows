@@ -97,16 +97,45 @@ final class ListBlock extends Block
         ];
     }
 
+    /**
+     * Sanitize content to allow only specific HTML tags while preventing XSS
+     */
+    protected function sanitizeContent(string $content): string
+    {
+        // Define allowed tags that match the allows() method
+        $allowedTags = '<b><i><u><strong><em><span><a>';
+        
+        // Strip all tags except allowed ones
+        $sanitized = strip_tags($content, $allowedTags);
+        
+        // Additional sanitization for 'a' tags to prevent javascript: and data: URLs
+        $sanitized = preg_replace_callback(
+            '/<a\s+([^>]*?)href\s*=\s*["\']([^"\']*)["\']([^>]*?)>/i',
+            function ($matches) {
+                $href = $matches[2];
+                // Only allow http, https, mailto, and relative URLs
+                if (preg_match('/^(https?:\/\/|mailto:|\/|#)/i', $href)) {
+                    return '<a ' . $matches[1] . 'href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '"' . $matches[3] . '>';
+                }
+                // Remove href if it's potentially dangerous
+                return '<span' . $matches[3] . '>';
+            },
+            $sanitized
+        );
+        
+        return $sanitized;
+    }
+
     public function rules(): array
     {
         return [
-            'style' => ['string', Rule::in(['ordered', 'unordered'])],
+            'style' => ['required', 'string', Rule::in(['ordered', 'unordered'])],
             'meta' => ['array'],
             'meta.counterType' => ['nullable', 'string', Rule::in(['numeric', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman'])],
-            'items' => ['array'],
-            'items.*.content' => ['string'],
+            'items' => ['required', 'array', 'max:100'], // Limit items for performance
+            'items.*.content' => ['required', 'string', 'max:10000'], // Limit content length
             'items.*.meta' => ['array'],
-            'items.*.items' => ['array'],
+            'items.*.items' => ['array', 'max:50'], // Limit nested items
         ];
     }
 
@@ -127,16 +156,24 @@ final class ListBlock extends Block
         ?string $counterType = null,
         int $depth = 0,
     ): string {
+        // Performance consideration: Keep depth limit at 5
         if ($depth >= 5) {
             return '';
         }
+        
+        // Additional performance safeguard: limit items per level
+        if (count($items) > 100) {
+            $items = array_slice($items, 0, 100);
+        }
+        
         $tag = $style === 'ordered' ? 'ol' : 'ul';
         $cssClass = $tag === 'ol' ? 'list-decimal list-inside' : 'list-disc list-inside';
 
         $htmlParts = ["<{$tag} class=\"{$cssClass}\">"];
 
         foreach ($items as $index => $item) {
-            $content = htmlspecialchars($item['content'] ?? '', ENT_QUOTES, 'UTF-8');
+            // Use sanitizeContent instead of htmlspecialchars to allow safe HTML tags
+            $content = $this->sanitizeContent($item['content'] ?? '');
             $nested = $item['items'] ?? [];
             $currentPrefix = [...$prefix, $index + 1];
 

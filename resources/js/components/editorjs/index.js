@@ -173,7 +173,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 }
 
                 if (state && Array.isArray(state.blocks)) {
-                    return JSON.parse(JSON.stringify(state));
+                    return this.deepCloneEditorState(state);
                 }
             } catch (e) {
                 console.warn('Invalid EditorJS state', e);
@@ -184,6 +184,118 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 blocks: [],
                 version: '2.31.0-rc.7',
             };
+        },
+
+        /**
+         * Deep clone EditorJS state data safely for structuredClone compatibility
+         * Specifically handles nestedList blocks that may contain non-cloneable objects
+         */
+        deepCloneEditorState(state) {
+            const cloned = {
+                time: state.time || Date.now(),
+                blocks: [],
+                version: state.version || '2.31.0-rc.7'
+            };
+
+            if (Array.isArray(state.blocks)) {
+                cloned.blocks = state.blocks.map(block => this.sanitizeBlockData(block));
+            }
+
+            return cloned;
+        },
+
+        /**
+         * Sanitize block data to ensure compatibility with structuredClone
+         * Removes non-cloneable objects like Proxy instances
+         */
+        sanitizeBlockData(block) {
+            const sanitized = {
+                id: block.id,
+                type: block.type,
+                data: {}
+            };
+
+            if (block.data) {
+                // Handle nestedList blocks specifically
+                if (block.type === 'nestedList') {
+                    sanitized.data = this.sanitizeNestedListData(block.data);
+                } else {
+                    // For other block types, use regular deep cloning
+                    sanitized.data = this.deepCloneObject(block.data);
+                }
+            }
+
+            // Preserve other block properties
+            if (block.tunes) {
+                sanitized.tunes = this.deepCloneObject(block.tunes);
+            }
+
+            return sanitized;
+        },
+
+        /**
+         * Sanitize nestedList data structure to prevent DataCloneError
+         */
+        sanitizeNestedListData(data) {
+            const sanitized = {
+                style: data.style || 'unordered',
+                meta: Array.isArray(data.meta) ? [] : { ...data.meta },
+                items: []
+            };
+
+            if (Array.isArray(data.items)) {
+                sanitized.items = data.items.map(item => this.sanitizeListItem(item));
+            }
+
+            return sanitized;
+        },
+
+        /**
+         * Recursively sanitize list items in nestedList
+         */
+        sanitizeListItem(item) {
+            const sanitized = {
+                content: typeof item.content === 'string' ? item.content : '',
+                meta: Array.isArray(item.meta) ? [] : { ...item.meta },
+                items: []
+            };
+
+            if (Array.isArray(item.items)) {
+                sanitized.items = item.items.map(subItem => this.sanitizeListItem(subItem));
+            }
+
+            return sanitized;
+        },
+
+        /**
+         * Safe deep clone implementation that handles most data types
+         */
+        deepCloneObject(obj) {
+            if (obj === null || typeof obj !== 'object') {
+                return obj;
+            }
+
+            if (obj instanceof Date) {
+                return new Date(obj.getTime());
+            }
+
+            if (Array.isArray(obj)) {
+                return obj.map(item => this.deepCloneObject(item));
+            }
+
+            const cloned = {};
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    try {
+                        cloned[key] = this.deepCloneObject(obj[key]);
+                    } catch (e) {
+                        // Skip non-cloneable properties
+                        console.warn(`Skipping non-cloneable property: ${key}`, e);
+                    }
+                }
+            }
+
+            return cloned;
         }
     }
 }

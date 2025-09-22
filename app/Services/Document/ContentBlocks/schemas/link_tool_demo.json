@@ -1,0 +1,12 @@
+{
+  "type": "linkTool",
+  "data": {
+    "link": "https://docs.laravel.com/11.x/eloquent",
+    "meta": {
+      "title": "Eloquent: Getting Started - Laravel 11.x - The PHP Framework For Web Artisans",
+      "description": "Laravel's Eloquent ORM provides an elegant, simple ActiveRecord implementation for working with your database. Each database table has a corresponding Model which is used to interact with that table.",
+      "image": "https://laravel.com/img/logomark.min.svg"
+    },
+    "enablePreview": true
+  }
+}

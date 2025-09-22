@@ -13,6 +13,7 @@ use App\Services\Document\ConfigBuilder\Blocks\LinkTool;
 use App\Services\Document\ConfigBuilder\Blocks\NestedList;
 use App\Services\Document\ConfigBuilder\Blocks\Objective;
 use App\Services\Document\ConfigBuilder\Blocks\Paragraph;
+use App\Services\Document\ConfigBuilder\Blocks\Persona;
 use App\Services\Document\ConfigBuilder\Blocks\Table;
 use App\Services\Document\ConfigBuilder\Blocks\VideoEmbed;
 use App\Services\Document\ConfigBuilder\Blocks\VideoUpload;
@@ -84,5 +85,10 @@ final class EditorConfigManager extends Manager
     public function budget(): DocumentBlockConfigContract
     {
         return new Budget;
+    }
+
+    public function persona(): DocumentBlockConfigContract
+    {
+        return new Persona;
     }
 }

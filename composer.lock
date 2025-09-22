@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a4c13f5dad355ca2283991d851ac57f0",
+    "content-hash": "e8051308663a2fdd8a604b570f5c7e93",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -71,6 +71,53 @@
                 "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.3.4"
             },
             "time": "2025-07-30T15:45:57+00:00"
+        },
+        {
+            "name": "asmit/resized-column",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AsmitNepali/resized-column.git",
+                "reference": "a40a270cf77a7a2048051dbeb7b7168b17b58b49"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AsmitNepali/resized-column/zipball/a40a270cf77a7a2048051dbeb7b7168b17b58b49",
+                "reference": "a40a270cf77a7a2048051dbeb7b7168b17b58b49",
+                "shasum": ""
+            },
+            "require": {
+                "filament/support": "^3.2|^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Asmit\\ResizedColumn\\ResizedColumnServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Asmit\\ResizedColumn\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AsmitNepali",
+                    "email": "mail2asmitnepali@gmail.com"
+                }
+            ],
+            "description": "Resizeable column for filament",
+            "support": {
+                "issues": "https://github.com/AsmitNepali/resized-column/issues",
+                "source": "https://github.com/AsmitNepali/resized-column/tree/v1.1.0"
+            },
+            "time": "2025-08-13T14:21:50+00:00"
         },
         {
             "name": "aws/aws-crt-php",

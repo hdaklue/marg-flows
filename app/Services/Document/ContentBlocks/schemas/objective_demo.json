@@ -1,0 +1,8 @@
+{
+  "type": "objectiveBlock", 
+  "data": {
+    "name": "Increase Monthly Active Users",
+    "value": 50000,
+    "unit": "users"
+  }
+}

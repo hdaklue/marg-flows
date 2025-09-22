@@ -8,6 +8,7 @@ use App\Enums\FlowStage;
 use App\Filament\Resources\Flows\Actions\CreateFlowAction;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Filament\Resources\Flows\Schemas\FlowsTable;
+use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\EmbeddedTable;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 final class ListFlows extends ListRecords
 {
+    use HasResizableColumn;
+
     protected static string $resource = FlowResource::class;
 
     public function table(Table $table): Table

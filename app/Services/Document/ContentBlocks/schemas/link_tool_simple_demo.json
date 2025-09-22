@@ -1,0 +1,8 @@
+{
+  "type": "linkTool",
+  "data": {
+    "link": "https://github.com/laravel/laravel",
+    "meta": {},
+    "enablePreview": false
+  }
+}

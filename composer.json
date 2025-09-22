@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "asmit/resized-column": "^1.1",
         "bumpcore/editor.php": "^1.2",
         "filament/filament": "^4.0",
         "hdaklue/actioncrumb": "^1.0",

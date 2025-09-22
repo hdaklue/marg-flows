@@ -11,8 +11,11 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Colors\Color;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -26,10 +29,7 @@ final class FlowsTable
     {
         return $table
             ->query(function () {
-                $isAdmin = filamentUser()->hasAssignmentOn(
-                    filamentTenant(),
-                    RoleFactory::admin(),
-                );
+                $isAdmin = filamentUser()->hasAssignmentOn(filamentTenant(), RoleFactory::admin());
 
                 return Flow::query()
                     ->unless($isAdmin, function ($query) {
@@ -43,41 +43,41 @@ final class FlowsTable
             ->deferLoading()
             ->recordUrl(fn (Model $record) => FlowResource::getUrl('view', ['record' => $record->getKey()]))
             ->columns([
-                TextColumn::make('title')
-                    ->formatStateUsing(
-                        fn ($state) => str($state)->title()->toString(),
-                    )
-                    ->label(__('flow.table.columns.title'))
-                    ->weight(FontWeight::Bold),
-                TextColumn::make('description')
-                    ->formatStateUsing(
-                        fn ($state) => str($state)->ucfirst()->toString(),
-                    )
-                    ->limit(80),
-                SelectColumn::make('stage')
-                    ->label(__('flow.table.columns.stage'))
-                    ->grow(false)
-                    ->options(options: FlowStage::asFilamentHtmlArray())
-                    ->afterStateUpdated(function ($record, $state, $livewire) {
-                        $record->update([
-                            'stage' => $state,
-                        ]);
-                        $livewire->resetTable();
-                    })
-                    ->allowOptionsHtml()
-                    ->selectablePlaceholder(false)
-                    ->native(false),
-                TextColumn::make(
-                    'started_at',
-                )->formatStateUsing(fn ($state) => toUserDate(
-                    $state,
-                    filamentUser(),
-                )),
-                ImageColumn::make('creator_avatar')
-                    ->label(__('flow.table.columns.creator_avatar'))
-                    ->getStateUsing(fn ($record) => avatarUrlFromUser($record->creator))
-                    ->imageSize(30)
-                    ->circular(),
+                Split::make([
+                    Stack::make([
+                        TextColumn::make('title')
+                            ->colors([Color::Red[400]])
+                            ->formatStateUsing(fn ($state) => str($state)->title()->toString())
+                            ->label(__('flow.table.columns.title'))
+                            ->weight(FontWeight::Bold),
+                        TextColumn::make('description')
+                            ->color(Color::Red[400])
+                            ->formatStateUsing(fn ($state) => str($state)->ucfirst()->toString())
+                            ->limit(80),
+                        TextColumn::make('started_at')->formatStateUsing(fn ($state) => 'Started: '
+                        . toUserDate($state, filamentUser())),
+                    ]),
+                    // ImageColumn::make('creator_avatar')
+                    //     ->label(__('flow.table.columns.creator_avatar'))
+                    //     ->getStateUsing(fn($record) => avatarUrlFromUser($record->creator))
+                    //     ->imageSize(30)
+                    //     ->circular(),
+                    Stack::make([
+                        SelectColumn::make('stage')
+                            ->label(__('flow.table.columns.stage'))
+                            ->grow(false)
+                            ->options(options: FlowStage::asFilamentHtmlArray())
+                            ->afterStateUpdated(function ($record, $state, $livewire) {
+                                $record->update([
+                                    'stage' => $state,
+                                ]);
+                                $livewire->resetTable();
+                            })
+                            ->allowOptionsHtml()
+                            ->selectablePlaceholder(false)
+                            ->native(false),
+                    ]),
+                ])->from('md'),
                 // ImageColumn::make('participant_stack')
                 //     ->label(__('flow.table.columns.participant_stack'))
                 //     ->getStateUsing(fn ($record) => $record->getParticipants()->avatars()->toArray())

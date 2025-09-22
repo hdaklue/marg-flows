@@ -1,0 +1,12 @@
+{
+  "type": "personaBlock",
+  "data": {
+    "name": "Marketing Manager Sarah",
+    "ageRange": "30-40",
+    "gender": "female",
+    "location": "San Francisco, CA",
+    "interests": "Digital marketing, Analytics, Growth strategies, Team leadership",
+    "channel": "email",
+    "color": "blue"
+  }
+}

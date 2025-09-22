@@ -1,0 +1,8 @@
+{
+  "type": "budgetBlock",
+  "data": {
+    "name": "Q4 Marketing Campaign Budget",
+    "amount": 150000,
+    "currency": "USD"
+  }
+}

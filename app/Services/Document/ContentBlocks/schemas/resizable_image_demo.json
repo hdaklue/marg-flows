@@ -1,0 +1,26 @@
+{
+  "type": "resizableImage",
+  "data": {
+    "files": [
+      {
+        "filename": "document_1234567890_image1.jpg",
+        "caption": "Team meeting in the conference room",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "filename": "document_1234567890_image2.png",
+        "caption": "Project timeline visualization",
+        "width": 1600,
+        "height": 900
+      },
+      {
+        "filename": "document_1234567890_image3.webp",
+        "caption": "",
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "caption": "Gallery showcasing our Q4 project milestones and team collaboration"
+  }
+}
