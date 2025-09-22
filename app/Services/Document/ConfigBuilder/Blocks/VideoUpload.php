@@ -27,7 +27,7 @@ final class VideoUpload implements DocumentBlockConfigContract
         'types' => null,
         'field' => 'video',
         'maxFileSize' => null, // 250MB
-        'maxSingleFileSize' => 50 * 1024 * 1024, // 50MB - files larger use chunked upload
+        'maxSingleFileSize' => 20 * 1024 * 1024, // 50MB - files larger use chunked upload
         'chunkSize' => null, // 10MB
         'useChunkedUpload' => true,
     ];
@@ -87,28 +87,28 @@ final class VideoUpload implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function maxFileSize(?int $size): self
+    public function maxFileSize(null|int $size): self
     {
         $this->config['maxFileSize'] = $size;
 
         return $this;
     }
 
-    public function maxSingleFileSize(?int $size): self
+    public function maxSingleFileSize(null|int $size): self
     {
         $this->config['maxSingleFileSize'] = $size;
 
         return $this;
     }
 
-    public function chunkSize(?int $size): self
+    public function chunkSize(null|int $size): self
     {
         $this->config['chunkSize'] = $size;
 
         return $this;
     }
 
-    public function useChunkedUpload(?bool $enabled): self
+    public function useChunkedUpload(null|bool $enabled): self
     {
         $this->config['useChunkedUpload'] = $enabled;
 
