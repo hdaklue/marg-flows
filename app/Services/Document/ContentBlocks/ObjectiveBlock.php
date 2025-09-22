@@ -51,6 +51,7 @@ final class ObjectiveBlock extends Block
             'name' => ['required', 'string', 'max:255'],
             'operator' => ['required', 'string', 'in:increase,decrease,equal'],
             'percentage' => ['required', 'numeric', 'min:0', 'max:100'],
+            'unit' => ['sometimes'],
         ];
     }
 

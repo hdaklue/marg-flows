@@ -188,7 +188,7 @@ final class ChunkVideoUpload
             $totalChunks,
             $document,
             $videoSessionId,
-        );
+        )->onQueue('document-video-upload');
 
         Log::info('Video assembly job dispatched', [
             'sessionId' => $sessionId,
@@ -228,10 +228,10 @@ final class ChunkVideoUpload
             if ($videoSessionId) {
                 VideoUploadSessionManager::startProcessing($videoSessionId, basename($finalPath));
                 // Dispatch processing job with session ID
-                ProcessDocumentVideo::dispatch($finalPath, $document, $videoSessionId);
+                ProcessDocumentVideo::dispatch($finalPath, $document, $videoSessionId)->onQueue('document-video-upload');
             } else {
                 // Fallback for old behavior without session tracking
-                ProcessDocumentVideo::dispatch($finalPath, $document);
+                ProcessDocumentVideo::dispatch($finalPath, $document)->onQueue('document-video-upload');
             }
 
             return [

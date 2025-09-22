@@ -17,7 +17,7 @@ final class ProcessDocumentVideo
 
     public static function getJobQueue(): string
     {
-        return 'video-processing';
+        return 'document-video-upload';
     }
 
     public static function getJobTries(): int
@@ -27,7 +27,7 @@ final class ProcessDocumentVideo
 
     public static function getJobTimeout(): int
     {
-        return 300; // 5 minutes
+        return 1800; // 30 minutes
     }
 
     public static function getJobBackoff(): int

@@ -8,6 +8,7 @@ use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
 use App\Services\Upload\UploadSessionService;
+use App\Services\Video\Facades\ResolutionManager;
 use App\Services\Video\VideoManager;
 use Exception;
 use Illuminate\Support\Facades\Storage;
@@ -53,13 +54,17 @@ final class AssembleVideoChunks
             $videoMetadata = null;
             if ($videoSessionId && config('video-upload.processing.extract_metadata', true)) {
                 try {
-                    Log::info('Extracting video metadata from local file', [
-                        'localPath' => $localFinalPath,
-                        'videoSessionId' => $videoSessionId,
-                    ]);
+                    // Log::info('Extracting video metadata from local file', [
+                    //     'localPath' => $localFinalPath,
+                    //     'videoSessionId' => $videoSessionId,
+                    // ]);
 
                     // Set a shorter timeout for metadata extraction to prevent hanging
-                    set_time_limit(300); // 5 minutes max for metadata extraction
+                    // set_time_limit(300); // 5 minutes max for metadata extraction
+
+                    ResolutionManager::from($localFinalPath, config('chunked-upload.storage.disk'))
+                        ->to480p()
+                        ->convert();
 
                     // Use a special action to extract from local chunks disk specifically
                     $videoMetadata = $this->extractMetadataFromLocalFile(
@@ -75,15 +80,14 @@ final class AssembleVideoChunks
                     );
 
                     // Reset timeout back to job timeout
-                    set_time_limit(0);
+                    // set_time_limit(0);
                 } catch (Exception $e) {
-                    Log::warning('Failed to extract video metadata from local file', [
-                        'localPath' => $localFinalPath,
-                        'error' => $e->getMessage(),
-                    ]);
-
+                    // Log::warning('Failed to extract video metadata from local file', [
+                    //     'localPath' => $localFinalPath,
+                    //     'error' => $e->getMessage(),
+                    // ]);
                     // Reset timeout even on failure
-                    set_time_limit(0);
+                    // set_time_limit(0);
                 }
             }
 
@@ -116,7 +120,7 @@ final class AssembleVideoChunks
                 );
 
                 // Dispatch processing job with session ID - this runs after assembly completes
-                ProcessDocumentVideo::dispatch($remoteFinalPath, $document, $videoSessionId);
+                ProcessDocumentVideo::dispatch($remoteFinalPath, $document, $videoSessionId)->onQueue('document-video-upload');
             } else {
                 Log::info('No video session ID provided, using fallback processing', [
                     'remotePath' => $remoteFinalPath,
@@ -124,7 +128,7 @@ final class AssembleVideoChunks
                 ]);
 
                 // Fallback for old behavior without session tracking
-                ProcessDocumentVideo::dispatch($remoteFinalPath, $document);
+                ProcessDocumentVideo::dispatch($remoteFinalPath, $document)->onQueue('document-video-upload');
             }
         } catch (Exception $e) {
             Log::error('Video chunk assembly failed', [

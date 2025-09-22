@@ -65,7 +65,7 @@ final class SingleVideoUpload
             VideoUploadSessionManager::startProcessing($sessionId, $result['filename']);
 
             // Dispatch processing job with full path so it can find the file in DigitalOcean Spaces
-            ProcessDocumentVideo::dispatch($result['path'], $documentModel, $sessionId);
+            ProcessDocumentVideo::dispatch($result['path'], $documentModel, $sessionId)->onQueue('document-video-upload');
 
             return response()->json([
                 'success' => true,

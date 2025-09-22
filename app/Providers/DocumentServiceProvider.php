@@ -8,9 +8,12 @@ use App\Contracts\Document\DocumentManagerInterface;
 use App\Contracts\Document\DocumentTemplateTranslatorInterface;
 use App\Services\Document\ConfigBuilder\EditorConfigManager;
 use App\Services\Document\ConfigBuilder\EditorManager;
+use App\Services\Document\ContentBlocks\BudgetBlock;
 use App\Services\Document\ContentBlocks\ListBlock;
 use App\Services\Document\ContentBlocks\ObjectiveBlock;
+use App\Services\Document\ContentBlocks\PersonaBlock;
 use App\Services\Document\ContentBlocks\ResizableImageBlock;
+use App\Services\Document\ContentBlocks\VideoUploadBlock;
 use App\Services\Document\DocumentService;
 use App\Services\Document\Facades\EditorBuilder;
 use App\Services\Document\Facades\EditorConfigBuilder;
@@ -53,8 +56,12 @@ final class DocumentServiceProvider extends ServiceProvider
     {
         EditorPhp::register([
             'nestedList' => ListBlock::class,
+            'list' => ListBlock::class,
             'objective' => ObjectiveBlock::class,
-            'resizableImage' => ResizableImageBlock::class,
+            'images' => ResizableImageBlock::class,
+            'videoUpload' => VideoUploadBlock::class,
+            'budget' => BudgetBlock::class,
+            'persona' => PersonaBlock::class,
         ]);
     }
 }
