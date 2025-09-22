@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Document\Actions\Video\Upload;
 
 use App\Models\Document;
+use App\Services\Document\Actions\Video\ExtractVideoMetadata;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
 use Exception;
 use Log;
