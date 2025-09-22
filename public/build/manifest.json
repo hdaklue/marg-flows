@@ -1,0 +1,118 @@
+{
+  "_video.es-Z9R2J9Kp.js": {
+    "file": "assets/video.es-Z9R2J9Kp.js",
+    "name": "video.es",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-CI0DJCHN.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/audio-annotation.css": {
+    "file": "assets/audio-annotation-BEQjJTJn.css",
+    "src": "resources/css/audio-annotation.css",
+    "isEntry": true
+  },
+  "resources/css/components/document/document.css": {
+    "file": "assets/document-DY4n-r9H.css",
+    "src": "resources/css/components/document/document.css",
+    "isEntry": true
+  },
+  "resources/css/components/editorjs/comment-tune.css": {
+    "file": "assets/comment-tune-DP1try-p.css",
+    "src": "resources/css/components/editorjs/comment-tune.css",
+    "isEntry": true
+  },
+  "resources/css/components/editorjs/index.css": {
+    "file": "assets/index-Rk62lYdj.css",
+    "src": "resources/css/components/editorjs/index.css",
+    "isEntry": true
+  },
+  "resources/css/components/editorjs/resizable-image.css": {
+    "file": "assets/resizable-image-BmgbDSD-.css",
+    "src": "resources/css/components/editorjs/resizable-image.css",
+    "isEntry": true
+  },
+  "resources/css/components/mentionable-text.css": {
+    "file": "assets/mentionable-text-BZ-5h95g.css",
+    "src": "resources/css/components/mentionable-text.css",
+    "isEntry": true
+  },
+  "resources/css/components/video-recorder.css": {
+    "file": "assets/video-recorder-k8omP3bP.css",
+    "src": "resources/css/components/video-recorder.css",
+    "isEntry": true
+  },
+  "resources/css/components/voice-recorder.css": {
+    "file": "assets/voice-recorder-Mo8OB_zv.css",
+    "src": "resources/css/components/voice-recorder.css",
+    "isEntry": true
+  },
+  "resources/css/filament/portal/theme.css": {
+    "file": "assets/theme-DX7gBkC1.css",
+    "src": "resources/css/filament/portal/theme.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Be3saH4J.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/components/document/index.js",
+      "resources/js/components/mentionable/index.js",
+      "resources/js/components/video-recorder/index.js",
+      "resources/js/components/voice-recorder/index.js",
+      "resources/js/components/ChunkedFileUpload/index.js"
+    ]
+  },
+  "resources/js/components/ChunkedFileUpload/index.js": {
+    "file": "assets/index-QjG8o4fZ.js",
+    "name": "index",
+    "src": "resources/js/components/ChunkedFileUpload/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/components/document/index.js": {
+    "file": "assets/index-Ddd_U6c3.js",
+    "name": "index",
+    "src": "resources/js/components/document/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_video.es-Z9R2J9Kp.js"
+    ],
+    "dynamicImports": [
+      "_video.es-Z9R2J9Kp.js"
+    ],
+    "css": [
+      "assets/index-BUZ_M5Cd.css",
+      "assets/resizable-image-BmgbDSD-.css"
+    ]
+  },
+  "resources/js/components/mentionable/index.js": {
+    "file": "assets/index-CtvFbK5g.js",
+    "name": "index",
+    "src": "resources/js/components/mentionable/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/components/video-recorder/index.js": {
+    "file": "assets/index-8ZYONzCy.js",
+    "name": "index",
+    "src": "resources/js/components/video-recorder/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_video.es-Z9R2J9Kp.js"
+    ]
+  },
+  "resources/js/components/voice-recorder/index.js": {
+    "file": "assets/index-DClmYLPx.js",
+    "name": "index",
+    "src": "resources/js/components/voice-recorder/index.js",
+    "isDynamicEntry": true
+  }
+}

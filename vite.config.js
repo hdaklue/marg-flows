@@ -6,13 +6,11 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
-                manualChunks: undefined, // Disable automatic chunking for small files
+                manualChunks: undefined // Disable automatic chunking for small files
             }
         },
         chunkSizeWarningLimit: 1000,
-        minify: 'esbuild', // Use esbuild minifier (faster, less memory)
-        target: 'es2018', // Reduce transpilation overhead
-        sourcemap: false, // Disable sourcemaps in production
+        minify: 'esbuild' // Use esbuild minifier (faster, less memory)
     },
     plugins: [
         tailwindcss(),
