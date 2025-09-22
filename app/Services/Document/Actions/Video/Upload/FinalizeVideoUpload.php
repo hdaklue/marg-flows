@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Document\Actions\Video;
+namespace App\Services\Document\Actions\Video\Upload;
 
 use App\Models\Document;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
@@ -11,7 +11,7 @@ use Log;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Throwable;
 
-final class ProcessDocumentVideo
+final class FinalizeVideoUpload
 {
     use AsAction;
 
@@ -48,7 +48,7 @@ final class ProcessDocumentVideo
         // ini_set('memory_limit', '512M');
 
         try {
-            Log::info('ProcessDocumentVideo: Starting video processing', [
+            Log::info('FinalizeVideoUpload: Starting video processing', [
                 'videoPath' => $videoPath,
                 'documentId' => $document->id,
                 'sessionId' => $sessionId,
@@ -65,7 +65,7 @@ final class ProcessDocumentVideo
                 $sessionData = VideoUploadSessionManager::get($sessionId);
                 $videoData = $sessionData['video_metadata'] ?? [];
 
-                Log::info('ProcessDocumentVideo: Retrieved metadata from session', [
+                Log::info('FinalizeVideoUpload: Retrieved metadata from session', [
                     'sessionId' => $sessionId,
                     'hasMetadata' => ! empty($videoData),
                     'metadata' => $videoData,
@@ -75,7 +75,7 @@ final class ProcessDocumentVideo
             // If no metadata in session, extract from remote file as fallback
             if (empty($videoData) && config('video-upload.processing.extract_metadata', true)) {
                 try {
-                    Log::info('ProcessDocumentVideo: Extracting metadata from remote file as fallback', [
+                    Log::info('FinalizeVideoUpload: Extracting metadata from remote file as fallback', [
                         'videoPath' => $videoPath,
                     ]);
 

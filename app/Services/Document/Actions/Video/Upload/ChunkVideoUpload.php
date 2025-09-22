@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Document\Actions\Video;
+namespace App\Services\Document\Actions\Video\Upload;
 
 use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
@@ -116,14 +116,6 @@ final class ChunkVideoUpload
         DocumentVideoUploadRequest $request,
         string $document,
     ): JsonResponse {
-        // Log::info('ChunkVideoUpload::asController called', [
-        //     'documentId' => $document,
-        //     'hasSessionId' => $request->has('session_id'),
-        //     'sessionId' => $request->input('session_id'),
-        //     'chunkIndex' => $request->getChunkIndex(),
-        //     'totalChunks' => $request->getTotalChunks(),
-        // ]);
-
         try {
             $documentModel = Document::findOrFail($document);
             $tenantId = auth()->user()->getActiveTenantId();
@@ -135,15 +127,6 @@ final class ChunkVideoUpload
 
             // Get video session ID if available
             $videoSessionId = $request->input('session_id');
-
-            // // Debug logging for session tracking
-            // if ($videoSessionId) {
-            //     Log::info('ChunkVideoUpload processing chunk', [
-            //         'chunkIndex' => $request->getChunkIndex(),
-            //         'totalChunks' => $request->getTotalChunks(),
-            //         'videoSessionId' => $videoSessionId,
-            //     ]);
-            // }
 
             $result = $this->handle(
                 $sessionManager,
@@ -170,7 +153,7 @@ final class ChunkVideoUpload
 
     /**
      * Dispatch assembly of chunks asynchronously to avoid HTTP timeout.
-     * Chain with ProcessDocumentVideo and tag with session ID for cancellation.
+     * Chain with FinalizeVideoUpload and tag with session ID for cancellation.
      */
     private function assembleChunksAsync(
         UploadSessionService $sessionManager,
@@ -180,7 +163,7 @@ final class ChunkVideoUpload
         Document $document,
         ?string $videoSessionId = null,
     ): void {
-        // Dispatch assembly job - it will handle sequential ProcessDocumentVideo dispatch
+        // Dispatch assembly job with a small delay to ensure chunks are fully written
         AssembleVideoChunks::dispatch(
             $sessionManager,
             $sessionId,
@@ -188,77 +171,13 @@ final class ChunkVideoUpload
             $totalChunks,
             $document,
             $videoSessionId,
-        )->onQueue('document-video-upload');
+        )
+            ->delay(now()->addSeconds(3))
+            ->onQueue('document-video-upload');
 
         Log::info('Video assembly job dispatched', [
             'sessionId' => $sessionId,
             'videoSessionId' => $videoSessionId,
         ]);
-    }
-
-    /**
-     * Assemble all uploaded chunks into final video file.
-     */
-    private function assembleChunks(
-        UploadSessionService $sessionManager,
-        string $sessionId,
-        ?string $fileName,
-        int $totalChunks,
-        Document $document,
-        ?string $videoSessionId = null,
-    ): array {
-        try {
-            // Assemble all chunks into final file
-            $finalPath = $sessionManager->assembleFile(
-                $sessionId,
-                $fileName ?? 'video.mp4',
-                $totalChunks,
-            );
-
-            // Clean up chunk files
-            $sessionManager->cleanupSession($sessionId);
-
-            Log::info('Chunked upload session completed', [
-                'sessionId' => $sessionId,
-                'finalPath' => $finalPath,
-                'documentId' => $document->id,
-            ]);
-
-            // Mark upload complete and start processing if we have a video session
-            if ($videoSessionId) {
-                VideoUploadSessionManager::startProcessing($videoSessionId, basename($finalPath));
-                // Dispatch processing job with session ID
-                ProcessDocumentVideo::dispatch($finalPath, $document, $videoSessionId)->onQueue('document-video-upload');
-            } else {
-                // Fallback for old behavior without session tracking
-                ProcessDocumentVideo::dispatch($finalPath, $document)->onQueue('document-video-upload');
-            }
-
-            return [
-                'completed' => true,
-                'filename' => basename($finalPath),
-                'thumbnail' => null,
-                'message' => 'Video uploaded successfully. Processing in background.',
-                'processing' => true,
-            ];
-        } catch (Exception $e) {
-            Log::error('Failed to assemble chunks', [
-                'error' => $e->getMessage(),
-                'sessionId' => $sessionId,
-                'documentId' => $document->id,
-            ]);
-
-            // Cleanup on failure
-            try {
-                $sessionManager->cleanupSession($sessionId);
-            } catch (Exception $cleanupError) {
-                Log::warning('Failed to cleanup session after assembly failure', [
-                    'sessionId' => $sessionId,
-                    'cleanupError' => $cleanupError->getMessage(),
-                ]);
-            }
-
-            throw $e;
-        }
     }
 }

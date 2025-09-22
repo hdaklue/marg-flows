@@ -7,11 +7,11 @@ use App\Services\Document\Actions\FileServing\ServeDocumentFile;
 use App\Services\Document\Actions\Image\DeleteDocumentImage;
 use App\Services\Document\Actions\Image\UploadDocumentImage;
 use App\Services\Document\Actions\Video\CancelVideoUploadSession;
-use App\Services\Document\Actions\Video\ChunkVideoUpload;
 use App\Services\Document\Actions\Video\CreateVideoUploadSession;
 use App\Services\Document\Actions\Video\DeleteDocumentVideo;
 use App\Services\Document\Actions\Video\GetVideoUploadSessionStatus;
-use App\Services\Document\Actions\Video\SingleVideoUpload;
+use App\Services\Document\Actions\Video\Upload\ChunkVideoUpload;
+use App\Services\Document\Actions\Video\Upload\SingleVideoUpload;
 use App\Services\FileServing\Document\DocumentFileResolver;
 use Illuminate\Support\Facades\Route;
 

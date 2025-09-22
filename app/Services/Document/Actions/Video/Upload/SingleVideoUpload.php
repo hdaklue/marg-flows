@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Document\Actions\Video;
+namespace App\Services\Document\Actions\Video\Upload;
 
 use App\Models\Document;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
+use App\Services\Document\Actions\Video\Upload\FinalizeVideoUpload;
 use App\Services\Document\Requests\DocumentVideoUploadRequest;
 use App\Services\Document\Responses\VideoUploadResponse;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
@@ -65,7 +66,7 @@ final class SingleVideoUpload
             VideoUploadSessionManager::startProcessing($sessionId, $result['filename']);
 
             // Dispatch processing job with full path so it can find the file in DigitalOcean Spaces
-            ProcessDocumentVideo::dispatch($result['path'], $documentModel, $sessionId)->onQueue('document-video-upload');
+            FinalizeVideoUpload::dispatch($result['path'], $documentModel, $sessionId)->onQueue('document-video-upload');
 
             return response()->json([
                 'success' => true,
