@@ -80,23 +80,26 @@
                           x-text="uploadState.progress + '%'"></span>
                 </div>
                 <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-sky-500 to-sky-600 rounded-full transition-all duration-300 ease-out"
+                    <div class="h-full rounded-full transition-all duration-300 ease-out"
                          :style="`width: ${uploadState.progress}%`"
-                         :class="{ 'animate-pulse': uploadState.phase === 'video_processing' }"></div>
+                         :class="{ 
+                             'bg-gradient-to-r from-sky-500 to-sky-600': !isProcessingPhase(uploadState.phase),
+                             'bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 animate-pulse': isProcessingPhase(uploadState.phase)
+                         }"></div>
                 </div>
             </div>
 
             {{-- Upload Metrics --}}
-            <div x-show="!uploadState.hasError && !uploadState.isComplete && uploadState.progress < 50" class="grid grid-cols-2 gap-4 mb-4">
+            <div x-show="!uploadState.hasError && !uploadState.isComplete && uploadState.progress < 90" class="grid grid-cols-2 gap-4 mb-4">
                 <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3">
                     <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Upload Speed</div>
                     <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100"
-                         x-text="formatSpeed(uploadMetrics.speed)"></div>
+                         x-text="formatSpeed(getCurrentSpeed())"></div>
                 </div>
                 <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3">
                     <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Time Remaining</div>
                     <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100"
-                         x-text="formatETA(uploadMetrics.eta)"></div>
+                         x-text="formatETA(getCurrentETA())"></div>
                 </div>
             </div>
 
@@ -105,12 +108,12 @@
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-zinc-600 dark:text-zinc-400">File Size:</span>
                     <span class="font-medium text-zinc-900 dark:text-zinc-100"
-                          x-text="formatFileSize(fileInfo.size)"></span>
+                          x-text="formatFileSize(getTotalBytes())"></span>
                 </div>
-                <div class="flex items-center justify-between text-sm mt-1" x-show="uploadState.progress < 50">
+                <div class="flex items-center justify-between text-sm mt-1" x-show="uploadState.progress < 90">
                     <span class="text-zinc-600 dark:text-zinc-400">Uploaded:</span>
                     <span class="font-medium text-zinc-900 dark:text-zinc-100"
-                          x-text="formatFileSize(uploadMetrics.uploaded)"></span>
+                          x-text="formatFileSize(getCurrentBytesUploaded())"></span>
                 </div>
                 <div class="flex items-center justify-between text-sm mt-1" x-show="fileInfo.name">
                     <span class="text-zinc-600 dark:text-zinc-400">Filename:</span>

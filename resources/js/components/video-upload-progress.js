@@ -43,6 +43,10 @@ export function videoUploadProgress() {
         statusMessages: {
             single_upload: 'Preparing upload...',
             chunk_upload: 'Uploading video...',
+            chunk_assembly: 'Assembling video chunks...',
+            conversion: 'Converting video format...',
+            metadata_extraction: 'Extracting metadata...',
+            thumbnail_generation: 'Generating thumbnails...',
             video_processing: 'Processing video...',
             complete: 'Upload complete!',
             error: 'Upload failed'
@@ -81,7 +85,14 @@ export function videoUploadProgress() {
             const timeDiff = (now - this.uploadMetrics.lastUpdateTime) / 1000; // seconds
             
             this.uploadState.phase = phase;
-            this.uploadState.progress = Math.min(100, Math.max(0, progress));
+            
+            // During processing phases, keep progress at 100% and ignore server progress percentage
+            const isProcessingPhase = this.isProcessingPhase(phase);
+            if (isProcessingPhase) {
+                this.uploadState.progress = 100;
+            } else {
+                this.uploadState.progress = Math.min(100, Math.max(0, progress));
+            }
             
             // Calculate upload metrics only during upload phases
             if ((phase === 'chunk_upload' || phase === 'single_upload') && timeDiff > 0) {
@@ -90,6 +101,33 @@ export function videoUploadProgress() {
             
             this.uploadMetrics.lastProgress = progress;
             this.uploadMetrics.lastUpdateTime = now;
+        },
+
+        updateProgressWithServerData(phase, progress, serverData) {
+            this.updateProgress(phase, progress);
+            
+            // Store server metrics if available during upload phases
+            if (serverData && !this.isProcessingPhase(phase)) {
+                if (serverData.uploadSpeed !== undefined) {
+                    this.uploadMetrics.speed = serverData.uploadSpeed;
+                }
+                if (serverData.eta !== undefined) {
+                    this.uploadMetrics.eta = serverData.eta;
+                }
+                if (serverData.bytesUploaded !== undefined) {
+                    this.uploadMetrics.uploaded = serverData.bytesUploaded;
+                }
+            }
+        },
+
+        isProcessingPhase(phase) {
+            return [
+                'chunk_assembly',
+                'conversion', 
+                'metadata_extraction',
+                'thumbnail_generation',
+                'video_processing'
+            ].includes(phase);
         },
 
         calculateUploadMetrics(progress, now, timeDiff) {
@@ -191,7 +229,7 @@ export function videoUploadProgress() {
         getCurrentPhaseKey() {
             if (this.uploadState.phase === 'single_upload' || this.uploadState.phase === 'chunk_upload') {
                 return 'upload';
-            } else if (this.uploadState.phase === 'video_processing') {
+            } else if (this.isProcessingPhase(this.uploadState.phase)) {
                 return 'processing';
             } else if (this.uploadState.phase === 'complete') {
                 return 'complete';
@@ -264,6 +302,12 @@ export function videoUploadProgress() {
             this.uploadMetrics.eta = 0;
             this.uploadMetrics.uploaded = 0;
             this.uploadMetrics.lastProgress = 0;
+            // Reset server metrics
+            this.uploadMetrics.serverSpeed = null;
+            this.uploadMetrics.serverEta = null;
+            this.uploadMetrics.serverBytesUploaded = null;
+            this.uploadMetrics.serverTotalBytes = null;
+            this.uploadMetrics.useServerData = false;
             
             // Dispatch event for SessionUploadStrategy
             this.$dispatch('upload-retry');

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Document\Sessions;
 
 use App\Models\Document;
+use App\Services\Document\Sessions\Enums\VideoUploadPhase;
+use App\Services\Document\Sessions\Enums\VideoUploadStatus;
+use App\Services\Document\Sessions\Enums\VideoUploadType;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -22,19 +25,21 @@ final class VideoUploadSessionManager
         Document $document,
         string $originalFilename,
         int $fileSize,
-        string $uploadType = 'single',
+        VideoUploadType $uploadType = VideoUploadType::SINGLE,
         ?int $chunksTotal = null,
     ): string {
         $sessionId = Str::ulid()->toString();
+
+        $initialPhase = $uploadType->getInitialPhase();
 
         $sessionData = [
             'session_id' => $sessionId,
             'document_id' => $document->id,
             'user_id' => auth()->id(),
             'tenant_id' => auth()->user()->getActiveTenantId(),
-            'status' => 'uploading',
-            'phase' => $uploadType === 'chunk' ? 'chunk_upload' : 'single_upload',
-            'upload_type' => $uploadType,
+            'status' => VideoUploadStatus::UPLOADING->value,
+            'phase' => $initialPhase->value,
+            'upload_type' => $uploadType->value,
             'original_filename' => $originalFilename,
             'file_size' => $fileSize,
             'chunks_total' => $chunksTotal,
@@ -123,8 +128,8 @@ final class VideoUploadSessionManager
         ]);
 
         $result = self::update($sessionId, [
-            'status' => 'processing',
-            'phase' => 'video_processing',
+            'status' => VideoUploadStatus::PROCESSING->value,
+            'phase' => VideoUploadPhase::VIDEO_PROCESSING->value,
             'upload_progress' => 100,
             'final_filename' => $finalFilename,
         ]);
@@ -166,9 +171,11 @@ final class VideoUploadSessionManager
 
         if ($type === 'metadata') {
             $updates['video_metadata'] = $data;
+            $updates['phase'] = VideoUploadPhase::METADATA_EXTRACTION->value;
             $updates['processing_progress'] = 75; // Metadata extraction is 75% of processing
         } elseif ($type === 'thumbnail') {
             $updates['thumbnail_filename'] = $data;
+            $updates['phase'] = VideoUploadPhase::THUMBNAIL_GENERATION->value;
             $updates['processing_progress'] = 100; // Thumbnail generation completes processing
         }
 
@@ -183,8 +190,8 @@ final class VideoUploadSessionManager
         array $finalData,
     ): bool {
         $updates = [
-            'status' => 'completed',
-            'phase' => 'complete',
+            'status' => VideoUploadStatus::COMPLETED->value,
+            'phase' => VideoUploadPhase::COMPLETE->value,
             'processing_progress' => 100,
             'final_data' => $finalData,
             'completed_at' => now()->toISOString(),
@@ -236,8 +243,8 @@ final class VideoUploadSessionManager
     public static function fail(string $sessionId, string $errorMessage): bool
     {
         $result = self::update($sessionId, [
-            'status' => 'failed',
-            'phase' => 'error',
+            'status' => VideoUploadStatus::FAILED->value,
+            'phase' => VideoUploadPhase::ERROR->value,
             'error_message' => $errorMessage,
         ]);
 
@@ -266,13 +273,104 @@ final class VideoUploadSessionManager
     }
 
     /**
-     * Get session status.
+     * Get session status as enum.
      */
-    public static function getStatus(string $sessionId): ?string
+    public static function getStatus(string $sessionId): ?VideoUploadStatus
     {
         $sessionData = self::get($sessionId);
 
-        return $sessionData['status'] ?? null;
+        if (! $sessionData || ! isset($sessionData['status'])) {
+            return null;
+        }
+
+        return VideoUploadStatus::tryFrom($sessionData['status']);
+    }
+
+    /**
+     * Get session status as string.
+     */
+    public static function getStatusString(string $sessionId): ?string
+    {
+        return self::getStatus($sessionId)?->value;
+    }
+
+    /**
+     * Get session phase as enum.
+     */
+    public static function getPhase(string $sessionId): ?VideoUploadPhase
+    {
+        $sessionData = self::get($sessionId);
+
+        if (! $sessionData || ! isset($sessionData['phase'])) {
+            return null;
+        }
+
+        return VideoUploadPhase::tryFrom($sessionData['phase']);
+    }
+
+    /**
+     * Get session phase as string.
+     */
+    public static function getPhaseString(string $sessionId): ?string
+    {
+        return self::getPhase($sessionId)?->value;
+    }
+
+    /**
+     * Get session upload type as enum.
+     */
+    public static function getUploadType(string $sessionId): ?VideoUploadType
+    {
+        $sessionData = self::get($sessionId);
+
+        if (! $sessionData || ! isset($sessionData['upload_type'])) {
+            return null;
+        }
+
+        return VideoUploadType::tryFrom($sessionData['upload_type']);
+    }
+
+    /**
+     * Get session upload type as string.
+     */
+    public static function getUploadTypeString(string $sessionId): ?string
+    {
+        return self::getUploadType($sessionId)?->value;
+    }
+
+    /**
+     * Check if session is in active state.
+     */
+    public static function isActive(string $sessionId): bool
+    {
+        return self::getStatus($sessionId)?->isActive() ?? false;
+    }
+
+    /**
+     * Check if session is in final state.
+     */
+    public static function isFinal(string $sessionId): bool
+    {
+        return self::getStatus($sessionId)?->isFinal() ?? false;
+    }
+
+    /**
+     * Add a method to cancel session.
+     */
+    public static function cancel(string $sessionId): bool
+    {
+        $result = self::update($sessionId, [
+            'status' => VideoUploadStatus::CANCELLED->value,
+            'phase' => VideoUploadPhase::CANCELLED->value,
+            'cancelled_at' => now()->toISOString(),
+        ]);
+
+        // Schedule cleanup after cancellation
+        if ($result) {
+            self::scheduleCleanup($sessionId);
+        }
+
+        return $result;
     }
 
     /**

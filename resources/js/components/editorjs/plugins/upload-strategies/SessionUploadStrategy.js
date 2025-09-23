@@ -170,15 +170,15 @@ export default class SessionUploadStrategy {
             // Update progress before uploading chunk
             this.updateChunkProgress(chunkIndex, chunksTotal, file.size);
             
-            await this.uploadChunk(chunkFile, chunkIndex, chunksTotal);
+            const chunkResponse = await this.uploadChunk(chunkFile, chunkIndex, chunksTotal);
             
-            // Update progress after uploading chunk
-            this.updateChunkProgress(chunkIndex + 1, chunksTotal, file.size);
+            // Update progress after uploading chunk with server response data
+            this.updateChunkProgressWithServerData(chunkResponse, chunkIndex + 1, chunksTotal, file.size);
         }
     }
 
     /**
-     * Update chunk upload progress
+     * Update chunk upload progress (legacy method)
      */
     updateChunkProgress(chunksUploaded, chunksTotal, fileSize) {
         const chunkProgress = chunksTotal > 0 ? (chunksUploaded / chunksTotal) : 0;
@@ -232,6 +232,104 @@ export default class SessionUploadStrategy {
             eta: eta
         });
     }
+    
+    /**
+     * Update chunk upload progress with server response data (enhanced)
+     */
+    updateChunkProgressWithServerData(serverResponse, chunksUploaded, chunksTotal, fileSize) {
+        // Use server-provided progress data if available
+        const progressData = serverResponse?.progressData;
+        const serverProgress = serverResponse?.progress;
+        const bytesUploaded = serverResponse?.bytesUploaded || progressData?.bytesUploaded;
+        const totalBytes = serverResponse?.totalBytes || progressData?.totalBytes;
+        const serverEta = serverResponse?.estimatedTimeRemaining || progressData?.estimatedTimeRemaining;
+        
+        // Use server progress if available, otherwise calculate
+        const progress = serverProgress !== undefined ? serverProgress : 
+            Math.round(Math.min((chunksUploaded / chunksTotal) * 90, 90));
+        
+        // Calculate speed from server data or fallback to client calculation
+        let uploadSpeed = null;
+        let eta = serverEta;
+        
+        if (bytesUploaded && totalBytes) {
+            const currentTime = Date.now();
+            const timeElapsed = (currentTime - this.uploadStartTime) / 1000; // seconds
+            
+            if (timeElapsed > 0) {
+                // Calculate speed based on actual bytes uploaded
+                const bytesPerSecond = bytesUploaded / timeElapsed;
+                uploadSpeed = Math.round((bytesPerSecond / 1024 / 1024) * 100) / 100; // MB/s
+                
+                // Use server ETA if available, otherwise calculate
+                if (!eta && uploadSpeed > 0) {
+                    const remainingBytes = totalBytes - bytesUploaded;
+                    eta = Math.round(remainingBytes / bytesPerSecond);
+                }
+            }
+        } else {
+            // Fallback to legacy calculation if server data not available
+            const currentTime = Date.now();
+            const timeElapsed = (currentTime - this.uploadStartTime) / 1000;
+            
+            if (timeElapsed > 0 && chunksUploaded > 0) {
+                const avgChunkSize = fileSize / chunksTotal;
+                const estimatedBytesUploaded = chunksUploaded * avgChunkSize;
+                const bytesPerSecond = estimatedBytesUploaded / timeElapsed;
+                uploadSpeed = Math.round((bytesPerSecond / 1024 / 1024) * 100) / 100;
+                
+                if (!eta) {
+                    const remainingChunks = chunksTotal - chunksUploaded;
+                    const chunksPerSecond = chunksUploaded / timeElapsed;
+                    eta = chunksPerSecond > 0 ? Math.round(remainingChunks / chunksPerSecond) : null;
+                }
+            }
+        }
+        
+        // Create enhanced status message
+        let speedText = uploadSpeed && uploadSpeed > 0 ? `${uploadSpeed} MB/s` : '';
+        let etaText = eta && eta > 0 ? ` - ${eta}s remaining` : '';
+        const message = `Uploading video${speedText ? ' (' + speedText + ')' : ''}${etaText}`;
+        
+        // Enhanced progress data for callbacks
+        const enhancedProgressData = {
+            progress,
+            chunksUploaded,
+            chunksTotal,
+            bytesUploaded,
+            totalBytes,
+            uploadSpeed,
+            eta,
+            serverData: progressData
+        };
+        
+        // Update progress callback with enhanced data
+        if (this.progressCallback && typeof this.progressCallback === 'function') {
+            this.progressCallback(progress, enhancedProgressData);
+        }
+        
+        // Update status callback with enhanced message
+        if (this.statusCallback && typeof this.statusCallback === 'function') {
+            this.statusCallback(message, 'chunk_upload', enhancedProgressData);
+        }
+        
+        // Update modern progress component with server data
+        if (this.progressComponent) {
+            this.updateProgressComponentWithServerData('chunk_upload', progress, enhancedProgressData);
+        }
+        
+        // Log enhanced progress
+        this.logToBrowser('chunk-progress-enhanced', `${progress}% (chunk: ${chunksUploaded}/${chunksTotal}, speed: ${uploadSpeed}MB/s, ETA: ${eta}s)`, {
+            progress,
+            chunks_uploaded: chunksUploaded,
+            chunks_total: chunksTotal,
+            bytes_uploaded: bytesUploaded,
+            total_bytes: totalBytes,
+            upload_speed: uploadSpeed,
+            eta: eta,
+            server_response: serverResponse
+        });
+    }
 
     /**
      * Upload a single chunk
@@ -257,6 +355,10 @@ export default class SessionUploadStrategy {
             const json = await response.json();
             throw new Error(json.message || `Failed to upload chunk ${chunkIndex}`);
         }
+        
+        // Return the response data for enhanced progress tracking
+        const responseData = await response.json();
+        return responseData;
     }
 
     /**
@@ -528,11 +630,38 @@ export default class SessionUploadStrategy {
                         uploadSpeed: metrics.uploadSpeed,
                         eta: metrics.eta,
                         chunksUploaded: status.data.chunks_uploaded,
-                        chunksTotal: status.data.chunks_total
+                        chunksTotal: status.data.chunks_total,
+                        bytesUploaded: status.data.bytes_uploaded,
+                        totalBytes: status.data.total_bytes
                     });
                 } else {
                     this.progressComponent.updateProgress(mappedPhase, progress);
                 }
+            }
+        }
+    }
+    
+    /**
+     * Update the progress component with server data (enhanced method)
+     */
+    updateProgressComponentWithServerData(phase, progress, enhancedData = {}) {
+        if (this.progressComponent) {
+            // Use the enhanced method if available
+            if (typeof this.progressComponent.updateProgressWithServerData === 'function') {
+                this.progressComponent.updateProgressWithServerData(phase, progress, enhancedData);
+            } else if (typeof this.progressComponent.updateProgressWithMetrics === 'function') {
+                // Fallback to metrics method
+                this.progressComponent.updateProgressWithMetrics(phase, progress, {
+                    uploadSpeed: enhancedData.uploadSpeed,
+                    eta: enhancedData.eta,
+                    chunksUploaded: enhancedData.chunksUploaded,
+                    chunksTotal: enhancedData.chunksTotal,
+                    bytesUploaded: enhancedData.bytesUploaded,
+                    totalBytes: enhancedData.totalBytes
+                });
+            } else {
+                // Fallback to basic method
+                this.progressComponent.updateProgress(phase, progress);
             }
         }
     }

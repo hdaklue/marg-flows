@@ -28,74 +28,52 @@ final class ChunkVideoUpload
     public function handle(
         UploadSessionService $sessionManager,
         string $sessionId,
-        UploadedFile $file,
+        UploadedFile $chunk,
         int $chunkIndex,
         int $totalChunks,
         ?string $fileName,
         Document $document,
-        ?string $videoSessionId = null,
+        string $videoSessionId,
     ): array {
         try {
             // Store the chunk
-            $sessionManager->storeChunk($sessionId, $file, $chunkIndex);
+            $sessionManager->storeChunk($sessionId, $chunk, $chunkIndex);
 
-            Log::info('Chunk uploaded successfully', [
-                'sessionId' => $sessionId,
-                'chunk' => $chunkIndex,
-                'totalChunks' => $totalChunks,
-                'documentId' => $document->id,
-            ]);
+            // Update session chunk progress
+            VideoUploadSessionManager::updateChunkProgress(
+                $videoSessionId,
+                $chunkIndex + 1,
+                $totalChunks,
+            );
 
-            // Update session chunk progress if we have a video upload session
-            if ($videoSessionId) {
-                VideoUploadSessionManager::updateChunkProgress(
-                    $videoSessionId,
-                    $chunkIndex + 1,
-                    $totalChunks,
-                );
-            }
+            // Get detailed progress data from the upload session
+            $progressData = $sessionManager->getProgress($sessionId);
 
             // Check if all chunks are uploaded
             if ($sessionManager->isComplete($sessionId, $totalChunks)) {
-                // Update session to show upload complete and processing starting
-                if ($videoSessionId) {
-                    VideoUploadSessionManager::update($videoSessionId, [
-                        'upload_progress' => 100,
-                        'phase' => 'chunk_assembly',
-                        'status' => 'processing',
-                    ]);
-                }
-
-                // Dispatch assembly asynchronously to avoid HTTP timeout
-                $this->assembleChunksAsync(
+                return $this->handleChunksComplete(
                     $sessionManager,
                     $sessionId,
                     $fileName,
                     $totalChunks,
                     $document,
+                    $chunkIndex,
                     $videoSessionId,
                 );
-
-                // Return success immediately - polling will handle the rest
-                return [
-                    'success' => true,
-                    'completed' => true,
-                    'chunk' => $chunkIndex,
-                    'totalChunks' => $totalChunks,
-                    'progress' => 100,
-                    'message' => 'All chunks uploaded successfully. Processing started.',
-                    'processing' => true,
-                ];
             }
 
-            // Return chunk upload progress response
+            // Return chunk upload progress response with detailed progress data
             return [
                 'success' => true,
                 'completed' => false,
                 'chunk' => $chunkIndex,
                 'totalChunks' => $totalChunks,
-                'progress' => round((($chunkIndex + 1) / $totalChunks) * 100, 2),
+                'progress' => $progressData?->percentage ?? round((($chunkIndex + 1) / $totalChunks) * 100, 2),
                 'message' => "Chunk {$chunkIndex} of {$totalChunks} uploaded successfully.",
+                'progressData' => $progressData?->toArray(),
+                'bytesUploaded' => $progressData?->bytesUploaded,
+                'totalBytes' => $progressData?->totalBytes,
+                'estimatedTimeRemaining' => $progressData?->estimatedTimeRemaining,
             ];
         } catch (Exception $e) {
             Log::error('Chunk upload failed', [
@@ -120,13 +98,17 @@ final class ChunkVideoUpload
             $documentModel = Document::findOrFail($document);
             $tenantId = auth()->user()->getActiveTenantId();
 
+            // Get video session ID (required for video uploads)
+            $videoSessionId = $request->input('session_id');
+            if (! $videoSessionId) {
+                return VideoUploadResponse::error('Video session ID is required for chunk uploads.');
+            }
+
             // Configure session manager for this document-specific storage
+            // Use existing session or create new one if needed
             $sessionManager = UploadSessionManager::start('http', $tenantId)->storeIn(
                 DocumentDirectoryManager::make($documentModel)->videos()->getDirectory(),
             );
-
-            // Get video session ID if available
-            $videoSessionId = $request->input('session_id');
 
             $result = $this->handle(
                 $sessionManager,
@@ -152,6 +134,49 @@ final class ChunkVideoUpload
     }
 
     /**
+     * Handle completion when all chunks have been uploaded.
+     */
+    private function handleChunksComplete(
+        UploadSessionService $sessionManager,
+        string $sessionId,
+        ?string $fileName,
+        int $totalChunks,
+        Document $document,
+        int $chunkIndex,
+        string $videoSessionId,
+    ): array {
+        // Update session to show upload complete and processing starting
+        VideoUploadSessionManager::update($videoSessionId, [
+            'upload_progress' => 100,
+            'phase' => 'chunk_assembly',
+            'status' => 'processing',
+        ]);
+
+        // Dispatch assembly asynchronously to avoid HTTP timeout
+        $this->assembleChunksAsync(
+            $sessionManager,
+            $sessionId,
+            $fileName,
+            $totalChunks,
+            $document,
+            $videoSessionId,
+        );
+
+        // Return success immediately - polling will handle the rest
+        return [
+            'success' => true,
+            'completed' => true,
+            'chunk' => $chunkIndex,
+            'totalChunks' => $totalChunks,
+            'progress' => 100,
+            'phase' => 'chunk_assembly',
+            'status' => 'processing',
+            'message' => 'All chunks uploaded successfully. Processing started.',
+            'processing' => true,
+        ];
+    }
+
+    /**
      * Dispatch assembly of chunks asynchronously to avoid HTTP timeout.
      * Chain with FinalizeVideoUpload and tag with session ID for cancellation.
      */
@@ -161,7 +186,7 @@ final class ChunkVideoUpload
         ?string $fileName,
         int $totalChunks,
         Document $document,
-        ?string $videoSessionId = null,
+        string $videoSessionId,
     ): void {
         // Dispatch assembly job with a small delay to ensure chunks are fully written
         AssembleVideoChunks::dispatch(

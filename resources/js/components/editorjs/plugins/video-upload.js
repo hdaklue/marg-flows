@@ -1340,14 +1340,22 @@ class VideoUpload {
         const strategy = this.sessionUploadStrategy;
 
         // Set up callbacks for progress and status updates
-        strategy.setProgressCallback((progress) => {
-            console.log('Video upload received progress:', progress); // Debug log
-            this.updateProgressModalProgress(progress);
+        strategy.setProgressCallback((progress, enhancedData) => {
+            console.log('Video upload received progress:', progress, enhancedData); // Debug log
+            if (enhancedData) {
+                this.updateProgressModalProgressWithData(progress, enhancedData);
+            } else {
+                this.updateProgressModalProgress(progress);
+            }
         });
 
-        strategy.setStatusCallback((message, phase) => {
-            console.log('Video upload received status:', message, phase); // Debug log
-            this.updateProgressModalStatus(message, phase);
+        strategy.setStatusCallback((message, phase, enhancedData) => {
+            console.log('Video upload received status:', message, phase, enhancedData); // Debug log
+            if (enhancedData) {
+                this.updateProgressModalStatusWithData(message, phase, enhancedData);
+            } else {
+                this.updateProgressModalStatus(message, phase);
+            }
         });
 
         console.log(`Using ${strategy.getName()} upload strategy for file: ${file.name} (${Math.round(file.size / (1024 * 1024))}MB)`);
@@ -2559,6 +2567,49 @@ class VideoUpload {
 
         this.updateProgressModalDisplay();
     }
+    
+    /**
+     * Update progress modal with enhanced server data
+     */
+    updateProgressModalProgressWithData(progress, enhancedData) {
+        if (!this.progressModal) {
+            console.warn('Progress modal not available for enhanced update'); // Debug log
+            return;
+        }
+
+        console.log('Updating progress modal with enhanced data:', progress, enhancedData); // Debug log
+
+        const now = Date.now();
+        this.progressState.progress = Math.min(100, Math.max(0, progress));
+
+        // Update metrics with server data
+        if (enhancedData) {
+            if (enhancedData.uploadSpeed !== undefined && enhancedData.uploadSpeed !== null) {
+                this.uploadMetrics.speed = enhancedData.uploadSpeed * 1024 * 1024; // Convert MB/s to bytes/s
+            }
+            
+            if (enhancedData.eta !== undefined && enhancedData.eta !== null) {
+                this.uploadMetrics.eta = enhancedData.eta;
+            }
+            
+            if (enhancedData.bytesUploaded !== undefined && enhancedData.bytesUploaded !== null) {
+                this.uploadMetrics.uploaded = enhancedData.bytesUploaded;
+            }
+            
+            // Update file size if we have more accurate server data
+            if (enhancedData.totalBytes && enhancedData.totalBytes > this.currentFileInfo.size) {
+                this.currentFileInfo.size = enhancedData.totalBytes;
+            }
+        }
+
+        this.uploadMetrics.lastProgress = progress;
+        this.uploadMetrics.lastUpdateTime = now;
+
+        // Update Alpine.js component with enhanced data if available
+        this.updateAlpineComponentWithServerData(this.progressState.phase, progress, enhancedData);
+        
+        this.updateProgressModalDisplay();
+    }
 
     /**
      * Update progress modal status
@@ -2575,9 +2626,29 @@ class VideoUpload {
         this.progressState.statusMessage = message; // Store the detailed status message
         this.updateProgressModalDisplay();
     }
+    
+    /**
+     * Update progress modal status with enhanced server data
+     */
+    updateProgressModalStatusWithData(message, phase, enhancedData) {
+        if (!this.progressModal) {
+            console.warn('Progress modal not available for enhanced status update'); // Debug log
+            return;
+        }
+
+        console.log('Updating progress modal status with enhanced data:', message, phase, enhancedData); // Debug log
+
+        this.progressState.phase = phase;
+        this.progressState.statusMessage = message;
+        
+        // Update Alpine.js component with enhanced data if available
+        this.updateAlpineComponentWithServerData(phase, this.progressState.progress, enhancedData);
+        
+        this.updateProgressModalDisplay();
+    }
 
     /**
-     * Calculate upload metrics
+     * Calculate upload metrics (legacy method, used when no server data available)
      */
     calculateUploadMetrics(progress, now, timeDiff) {
         // For chunk upload, progress is 0-90%, so calculate uploaded bytes accordingly
@@ -2603,6 +2674,36 @@ class VideoUpload {
 
         this.uploadMetrics.uploaded = currentUploaded;
     }
+    
+    /**
+     * Update Alpine.js component with server data
+     */
+    updateAlpineComponentWithServerData(phase, progress, enhancedData) {
+        // Find and update the Alpine.js progress component
+        const progressElement = document.querySelector('[x-data*="videoUploadProgress"]');
+        if (progressElement && window.Alpine) {
+            const alpineComponent = window.Alpine.$data(progressElement);
+            if (alpineComponent) {
+                // Use the enhanced method if available
+                if (typeof alpineComponent.updateProgressWithServerData === 'function') {
+                    alpineComponent.updateProgressWithServerData(phase, progress, enhancedData);
+                } else if (typeof alpineComponent.updateProgressWithMetrics === 'function') {
+                    // Fallback to metrics method
+                    alpineComponent.updateProgressWithMetrics(phase, progress, {
+                        uploadSpeed: enhancedData.uploadSpeed,
+                        eta: enhancedData.eta,
+                        chunksUploaded: enhancedData.chunksUploaded,
+                        chunksTotal: enhancedData.chunksTotal,
+                        bytesUploaded: enhancedData.bytesUploaded,
+                        totalBytes: enhancedData.totalBytes
+                    });
+                } else {
+                    // Fallback to basic method
+                    alpineComponent.updateProgress(phase, progress);
+                }
+            }
+        }
+    }
 
     /**
      * Update the visual display of the progress modal
@@ -2616,7 +2717,7 @@ class VideoUpload {
         const progressBar = modal.querySelector('.upload-progress-bar');
         const progressPercent = modal.querySelector('.upload-progress-percent');
 
-        const isProcessingPhase = this.progressState.phase === 'chunk_assembly' || this.progressState.phase === 'video_processing';
+        const isProcessingPhase = ['chunk_assembly', 'conversion', 'metadata_extraction', 'thumbnail_generation', 'video_processing'].includes(this.progressState.phase);
 
         if (progressBar) {
             if (isProcessingPhase) {
@@ -2769,7 +2870,7 @@ class VideoUpload {
     getCurrentPhaseKey() {
         if (this.progressState.phase === 'single_upload' || this.progressState.phase === 'chunk_upload') {
             return 'upload';
-        } else if (this.progressState.phase === 'chunk_assembly' || this.progressState.phase === 'video_processing') {
+        } else if (['chunk_assembly', 'conversion', 'metadata_extraction', 'thumbnail_generation', 'video_processing'].includes(this.progressState.phase)) {
             return 'processing';
         } else if (this.progressState.phase === 'complete') {
             return 'complete';

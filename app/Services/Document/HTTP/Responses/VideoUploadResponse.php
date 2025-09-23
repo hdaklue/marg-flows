@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Document\HTTP\Responses;
 
+use App\Services\Document\Sessions\Enums\VideoUploadType;
 use Illuminate\Http\JsonResponse;
 
 final class VideoUploadResponse
@@ -91,7 +92,7 @@ final class VideoUploadResponse
         return response()->json([
             'success' => true,
             'status' => 'uploading',
-            'phase' => $sessionData['upload_type'] === 'chunk' ? 'chunk_upload' : 'single_upload',
+            'phase' => VideoUploadType::tryFrom($sessionData['upload_type'])?->getInitialPhase()->value ?? 'single_upload',
             'data' => [
                 'session_id' => $sessionData['session_id'],
                 'upload_type' => $sessionData['upload_type'],

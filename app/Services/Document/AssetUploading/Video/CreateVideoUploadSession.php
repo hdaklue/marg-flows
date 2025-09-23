@@ -7,6 +7,7 @@ namespace App\Services\Document\AssetUploading\Video;
 use App\Models\Document;
 use App\Services\Document\HTTP\Requests\CreateVideoUploadSessionRequest;
 use App\Services\Document\HTTP\Responses\VideoUploadResponse;
+use App\Services\Document\Sessions\Enums\VideoUploadType;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
 use Illuminate\Http\JsonResponse;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -26,8 +27,7 @@ final class CreateVideoUploadSession
         ?int $chunksTotal = null,
     ): array {
         // Determine upload type based on file size
-
-        $uploadType = $fileSize >= $maxSingleFileSize ? 'chunk' : 'single';
+        $uploadType = $fileSize >= $maxSingleFileSize ? VideoUploadType::CHUNK : VideoUploadType::SINGLE;
 
         $sessionId = VideoUploadSessionManager::create(
             $document,
@@ -39,7 +39,7 @@ final class CreateVideoUploadSession
 
         return [
             'session_id' => $sessionId,
-            'upload_type' => $uploadType,
+            'upload_type' => $uploadType->value,
             'file_size' => $fileSize,
             'chunks_total' => $chunksTotal,
             'max_single_file_size' => $maxSingleFileSize,
