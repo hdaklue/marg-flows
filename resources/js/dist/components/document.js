@@ -1649,7 +1649,7 @@ ${As(e)}`),t.map&&!t.map.bytes&&(this.logger_("going to request init segment."),
             </svg>
         `,o.style.cssText=`
             filter: drop-shadow(0 2px 4px ${t?"rgba(0, 0, 0, 0.3)":"rgba(0, 0, 0, 0.1)"});
-        `,n.appendChild(o);let a="";if(this.data.file){let h=[];if(this.data.file.duration){let g=Math.round(this.data.file.duration),v=Math.floor(g/60),_=g%60;h.push(`${v}:${_.toString().padStart(2,"0")}`)}if(this.data.file.width&&this.data.file.height&&h.push(`${this.data.file.width}\xD7${this.data.file.height}`),this.data.file.size){let g=(this.data.file.size/1048576).toFixed(1);h.push(`${g}MB`)}this.data.file.format&&h.push(this.data.file.format.toUpperCase()),h.length>0&&(a=`
+        `,n.appendChild(o);let a="";if(this.data.file){let h=[];if(this.data.file.duration){let g=Math.round(this.data.file.duration),v=Math.floor(g/60),_=g%60;h.push(`${v}:${_.toString().padStart(2,"0")}`)}this.data.file.width&&this.data.file.height&&h.push(`${this.data.file.width}\xD7${this.data.file.height}`),this.data.file.format&&h.push(this.data.file.format.toUpperCase()),h.length>0&&(a=`
                     <div style="
                         font-size: 11px;
                         color: ${t?"#a1a1aa":"#71717a"};

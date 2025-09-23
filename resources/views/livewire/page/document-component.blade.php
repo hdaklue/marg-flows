@@ -9,7 +9,7 @@
     <!-- Save Status Indicator -->
     <div x-cloak x-bind:style="isSticky ? `top: ${topbarHeight}px;` : ''"
         :class="{
-            'fixed left-0 right-0 z-10 bg-white/80 dark:bg-zinc-900  py-2 border-y border-zinc-200 dark:border-zinc-700': isSticky,
+            'fixed left-0 right-0 z-20 bg-white/80 dark:bg-zinc-900  py-2 border-y border-zinc-200 dark:border-zinc-700': isSticky,
             'mb-3': !isSticky,
             'flex items-center justify-center space-x-2 text-xs transition-all duration-150 ease-out': true
         }">
@@ -185,12 +185,13 @@
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <span>History</span>
-                
+
                 <!-- New Version Indicator -->
-                @if($hasNewVersions)
-                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                @if ($hasNewVersions)
+                    <span class="absolute -right-1 -top-1 flex h-3 w-3">
+                        <span
+                            class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+                        <span class="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span>
                     </span>
                 @endif
             </button>

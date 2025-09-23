@@ -1571,11 +1571,6 @@ class VideoUpload {
                 parts.push(`${this.data.file.width}×${this.data.file.height}`);
             }
 
-            // File size
-            if (this.data.file.size) {
-                const sizeInMB = (this.data.file.size / (1024 * 1024)).toFixed(1);
-                parts.push(`${sizeInMB}MB`);
-            }
 
             // Format
             if (this.data.file.format) {
