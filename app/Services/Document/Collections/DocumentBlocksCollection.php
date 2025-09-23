@@ -28,10 +28,7 @@ final class DocumentBlocksCollection extends Collection
 
     public function filterBlocks(array $allowedBlocks): self
     {
-        $this->reject(fn ($item): bool => in_array(
-            $item['type'],
-            $allowedBlocks,
-        ));
+        $this->reject(fn ($item): bool => in_array($item['type'], $allowedBlocks));
 
         return $this;
     }
@@ -57,11 +54,7 @@ final class DocumentBlocksCollection extends Collection
     {
         return [
             'time' => time(),
-            'blocks' => [
-                'time' => time() * 1000,
-                'blocks' => $this->toArray(),
-                'version' => '2.31.0-rc.7',
-            ],
+            'blocks' => $this->toArray(),
             'version' => '2.28.2',
         ];
     }
@@ -91,8 +84,7 @@ final class DocumentBlocksCollection extends Collection
                 'header' => ! empty($data['text']),
                 'list' => ! empty($data['items']),
                 'table' => ! empty($data['content']),
-                'image', 'images' => ! empty($data['file']['url'])
-                    || ! empty($data['files']),
+                'image', 'images' => ! empty($data['file']['url']) || ! empty($data['files']),
                 'video' => ! empty($data['file']['url']),
                 'embed' => ! empty($data['source']),
                 'quote' => ! empty($data['text']),
@@ -108,11 +100,7 @@ final class DocumentBlocksCollection extends Collection
     public function byType(string $type): self
     {
         return $this->filter(
-            fn ($block) => (
-                is_array($block)
-                && isset($block['type'])
-                && $block['type'] === $type
-            ),
+            fn ($block) => is_array($block) && isset($block['type']) && $block['type'] === $type,
         );
     }
 

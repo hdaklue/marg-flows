@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Services\Directory\Managers\ChunksDirectoryManager;
-use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Directory\Managers\SystemDirectoryManager;
 use App\Services\FileServing\Chunks\ChunkFileResolver;
-use App\Services\FileServing\Document\DocumentFileResolver;
 use App\Services\FileServing\System\SystemFileResolver;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Route;
@@ -17,27 +15,20 @@ use Illuminate\Support\ServiceProvider;
 /**
  * File Serving Service Provider.
  *
- * Registers all FileResolver services and loads their respective routes.
- * Provides centralized management for file serving functionality across
- * the application with proper service binding and route organization.
+ * Registers System and Chunks FileResolver services and loads their routes.
+ * Document file serving is handled separately by DocumentServiceProvider.
+ * Provides centralized management for general file serving functionality.
  */
 final class FileServingServiceProvider extends ServiceProvider
 {
     /**
      * Register file serving services.
      *
-     * Binds all FileResolver implementations to the service container
-     * for dependency injection throughout the application.
+     * Binds FileResolver implementations for System and Chunks services.
+     * Document file serving is now handled by DocumentServiceProvider.
      */
     public function register(): void
     {
-        // Register Document File Resolver
-        // $this->app->singleton(DocumentFileResolver::class, function ($app) {
-        //     return new DocumentFileResolver(
-        //         $app->make(DocumentDirectoryManager::class),
-        //     );
-        // });
-
         // Register System File Resolver
         $this->app->singleton(SystemFileResolver::class, function ($app) {
             return new SystemFileResolver($app->make(SystemDirectoryManager::class));
@@ -49,7 +40,6 @@ final class FileServingServiceProvider extends ServiceProvider
         });
 
         // Register aliases for easier access
-
         $this->app->alias(SystemFileResolver::class, 'file-resolver.system');
         $this->app->alias(ChunkFileResolver::class, 'file-resolver.chunks');
     }
@@ -74,10 +64,8 @@ final class FileServingServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return [
-
             SystemFileResolver::class,
             ChunkFileResolver::class,
-
             'file-resolver.system',
             'file-resolver.chunks',
         ];
@@ -86,15 +74,11 @@ final class FileServingServiceProvider extends ServiceProvider
     /**
      * Load file serving routes from each service directory.
      *
-     * Each FileResolver service manages its own routes for better organization
-     * and separation of concerns. Routes are loaded with appropriate middleware
-     * and prefixes for clean URL structure.
+     * Loads routes for System and Chunks FileResolver services.
+     * Document routes are now loaded by DocumentServiceProvider.
      */
     private function loadFileServingRoutes(): void
     {
-        // Load Document FileResolver routes
-        Route::middleware('web')->group(base_path('app/Services/FileServing/Document/routes.php'));
-
         // Load System FileResolver routes
         Route::middleware('web')->group(base_path('app/Services/FileServing/System/routes.php'));
 
@@ -123,21 +107,11 @@ final class FileServingServiceProvider extends ServiceProvider
     /**
      * Configure file type validation rules.
      *
-     * Defines allowed file types and size limits for different
-     * file categories across all FileResolver services.
+     * Defines allowed file types and size limits for System and Chunks services.
+     * Document file validation is now handled by DocumentServiceProvider.
      */
     private function configureFileTypeValidation(): void
     {
-        // Document files
-        config([
-            'fileserving.document.allowed_types.images' => ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-            'fileserving.document.allowed_types.videos' => ['mp4', 'webm', 'ogg'],
-            'fileserving.document.allowed_types.documents' => ['pdf', 'doc', 'docx', 'txt'],
-            'fileserving.document.max_size.images' => 10 * 1024 * 1024, // 10MB
-            'fileserving.document.max_size.videos' => 100 * 1024 * 1024, // 100MB
-            'fileserving.document.max_size.documents' => 50 * 1024 * 1024, // 50MB
-        ]);
-
         // System files
         config([
             'fileserving.system.allowed_types.avatars' => ['jpg', 'jpeg', 'png', 'gif'],

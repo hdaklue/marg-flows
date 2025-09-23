@@ -13,8 +13,6 @@ use App\Livewire\Reusable\VideoRecorder;
 use App\Livewire\SortableDemo;
 use App\Livewire\TestChunkedUpload;
 use App\Livewire\ToastCalendarTest;
-use App\Services\Document\Actions\FileServing\ResolveDocumentFile;
-use App\Services\Document\Actions\FileServing\ServeDocumentFile;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -43,14 +41,12 @@ Route::get(
     AcceptInvitation::class,
 )->middleware([Authenticate::class])->name('invitation.accept');
 
-// Legacy EditorJS routes - now handled by Document FileResolver service
-
 // URL fetch route for EditorJS LinkTool
 Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])->middleware(['auth'])->name(
     'editorjs.fetch-url',
 );
 
-// Secure file access routes
+// Secure file access routes (for non-document files)
 Route::get('secure-files/{tenantId}/{type}/{path}', [SecureFileController::class, 'show'])
     ->middleware(['auth'])
     ->where('path', '.*')
@@ -59,18 +55,6 @@ Route::get('secure-files/{tenantId}/{type}/{path}', [SecureFileController::class
 Route::post('secure-files/temp-url', [SecureFileController::class, 'generateTemporaryUrl'])
     ->middleware(['auth'])
     ->name('secure-files.temp-url');
-
-// Authenticated file serving route (authentication handled in controller)
-Route::get('files/{path}', ServeDocumentFile::class)->where('path', '.*')->name('file.serve');
-
-// File URL resolver routes
-Route::get('file-resolver', [ResolveDocumentFile::class, 'resolve'])->middleware(['auth'])->name(
-    'file.resolver',
-);
-
-Route::get('file-resolver/temporary', [ResolveDocumentFile::class, 'temporary'])->middleware([
-    'auth',
-])->name('file.resolver.temporary');
 
 // Chunked upload routes (temporarily commented out)
 // Route::post('chunked-upload', [\ChunkedUploadController::class, 'store'])
