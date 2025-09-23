@@ -13,7 +13,7 @@ final class NestedListConfigData extends SimpleDTO implements BlockConfigContrac
 
     public array $tunes;
 
-    public bool $inlineToolBar;
+    public array|bool $inlineToolBar;
 
     public array $config;
 
@@ -22,7 +22,7 @@ final class NestedListConfigData extends SimpleDTO implements BlockConfigContrac
         return [
             'class' => 'EditorJsList',
             'tunes' => ['commentTune'],
-            'inlineToolBar' => false,
+            'inlineToolBar' => ['link', 'bold', 'italic'],
             'config' => [
                 'defaultStyle' => 'unordered',
                 'placeholder' => 'Add an item',

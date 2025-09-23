@@ -1,6 +1,7 @@
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import EditorJsList from "@editorjs/list";
+import Marker from '@editorjs/marker';
 import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
 import dayjs from 'dayjs';
@@ -424,7 +425,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                 readOnly: !this.canEdit,
                 placeholder: 'Let`s write an awesome story!',
                 defaultBlock: false, // Disable default block during initialization
-                inlineToolbar: false, // Disable during initialization
+                inlineToolbar: true, // Disable during initialization
                 tools: this.getEditorTools(csrf, uploadUrl),
                 i18n: {
                     /**
@@ -484,7 +485,7 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
 
                         // Enable inline toolbar now that editor is ready
                         if (this.editor.configuration) {
-                            this.editor.configuration.inlineToolbar = ['bold', 'link', 'convertTo'];
+                            this.editor.configuration.inlineToolbar = ['bold', 'link', 'convertTo', 'Marker'];
                             this.editor.configuration.defaultBlock = 'paragraph';
                         }
 
@@ -529,6 +530,10 @@ export default function documentEditor(livewireState, uploadUrl, canEdit, saveCa
                     toolbox: {
                         title: this.toolTranslations?.paragraph || 'Text'
                     }
+                },
+                Marker: {
+                    class: Marker,
+                    shortcut: 'CMD+SHIFT+M',
                 },
                 header: {
                     class: Header,

@@ -1,6 +1,6 @@
 {
-  "_video.es-DjFmAUWl.js": {
-    "file": "assets/video.es-DjFmAUWl.js",
+  "_video.es-DBzt0Inb.js": {
+    "file": "assets/video.es-DBzt0Inb.js",
     "name": "video.es",
     "isDynamicEntry": true,
     "imports": [
@@ -58,7 +58,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-C-psxB1M.js",
+    "file": "assets/app-Dean8J26.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -77,19 +77,19 @@
     "isDynamicEntry": true
   },
   "resources/js/components/document/index.js": {
-    "file": "assets/index-DkIXEAbO.js",
+    "file": "assets/index-BT4U1pIj.js",
     "name": "index",
     "src": "resources/js/components/document/index.js",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_video.es-DjFmAUWl.js"
+      "_video.es-DBzt0Inb.js"
     ],
     "dynamicImports": [
-      "_video.es-DjFmAUWl.js"
+      "_video.es-DBzt0Inb.js"
     ],
     "css": [
-      "assets/index-BUZ_M5Cd.css",
+      "assets/index-B_nUxDBI.css",
       "assets/resizable-image-BmgbDSD-.css"
     ]
   },
@@ -100,13 +100,13 @@
     "isDynamicEntry": true
   },
   "resources/js/components/video-recorder/index.js": {
-    "file": "assets/index-BuBXv4tV.js",
+    "file": "assets/index-QTXNuDD-.js",
     "name": "index",
     "src": "resources/js/components/video-recorder/index.js",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_video.es-DjFmAUWl.js"
+      "_video.es-DBzt0Inb.js"
     ]
   },
   "resources/js/components/voice-recorder/index.js": {

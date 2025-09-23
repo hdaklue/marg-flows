@@ -9,6 +9,8 @@ import DragDrop from 'editorjs-drag-drop';
 import Undo from 'editorjs-undo';
 import ResizableImage from './plugins/resizable-image';
 import ObjectiveBlock from './plugins/objective-block';
+import Marker from '@editorjs/marker';
+import InlineCode from '@editorjs/inline-code';
 
 
 export default function editorjs(livewireState, uploadUrl, canEdit) {
@@ -50,7 +52,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 readOnly: this.canEdit,
                 placeholder: 'Let`s write an awesome story!',
                 defaultBlock: 'paragraph',
-                inlineToolbar: ['bold', 'link', 'convertTo'],
+                inlineToolbar: true,
                 tools: this.getEditorTools(csrf, uploadUrl),
                 onChange: () => {
                     this.editor.save()
@@ -75,11 +77,12 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
             return {
                 paragraph: {
                     class: Paragraph,
-                    inlineToolbar: true,
+                    inlineToolbar: ['link', 'bold', 'italic'],
                     config: { preserveBlank: true },
                 },
                 header: {
                     class: Header,
+                    inlineToolbar: ['link', 'bold', 'italic'],
                     config: {
                         placeholder: 'Enter a heading',
                         // levels: [2, 3, 4, 5],
@@ -102,6 +105,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 // },
                 images: {
                     class: ResizableImage,
+                    inlineToolbar: false,
                     config: {
                         endpoints: {
                             byFile: uploadUrl,
@@ -119,6 +123,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 },
                 table: {
                     class: Table,
+                    inlineToolbar: false,
                     withHeadings: true,
                     config: {
                         rows: 2,
@@ -127,7 +132,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 },
                 nestedList: {
                     class: EditorJsList,
-                    inlineToolbar: true,
+                    inlineToolbar: ['link', 'bold', 'italic'],
                     config: {
                         defaultStyle: 'unordered',
                         placeholder: "Add an item",
@@ -136,7 +141,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 },
                 alert: {
                     class: Alert,
-                    inlineToolbar: true,
+                    inlineToolbar: false,
                     shortcut: 'CMD+SHIFT+A',
                     config: {
                         alertTypes: ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'light', 'dark'],
@@ -146,6 +151,7 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                 },
                 linkTool: {
                     class: LinkTool,
+                    inlineToolbar: false,
                     config: {
                         endpoint: '/editor/fetch-url',
                         headers: {
@@ -159,6 +165,16 @@ export default function editorjs(livewireState, uploadUrl, canEdit) {
                     config: {
                         placeholder: 'Enter objective name...',
                     }
+                },
+                
+                // Inline Tools
+                Marker: {
+                    class: Marker,
+                    shortcut: 'CMD+SHIFT+M',
+                },
+                inlineCode: {
+                    class: InlineCode,
+                    shortcut: 'CMD+SHIFT+C',
                 },
             };
         },

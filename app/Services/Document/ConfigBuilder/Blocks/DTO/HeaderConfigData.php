@@ -15,9 +15,20 @@ final class HeaderConfigData extends SimpleDTO implements BlockConfigContract
 
     public array $tunes;
 
+    public array|bool $inlineToolBar;
+
     protected function defaults(): array
     {
-        return [];
+        return [
+            'class' => 'header',
+            'tunes' => ['commentTune'],
+            'inlineToolBar' => ['link', 'bold', 'italic'],
+            'config' => [
+                'placeholder' => 'Enter a header',
+                'levels' => [1, 2, 3, 4, 5, 6],
+                'defaultLevel' => 2,
+            ],
+        ];
     }
 
     protected function casts(): array

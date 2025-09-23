@@ -21,6 +21,8 @@ final class Header implements DocumentBlockConfigContract
 
     private array $tunes = ['commentTune'];
 
+    private array|bool $inlineToolBar = ['link', 'bold', 'italic'];
+
     /**
      * {@inheritDoc}
      */
@@ -34,6 +36,7 @@ final class Header implements DocumentBlockConfigContract
                 'defaultLevel' => $this->defaultLevel,
             ],
             'tunes' => $this->tunes,
+            'inlineToolBar' => $this->inlineToolBar,
         ]);
     }
 
@@ -81,6 +84,13 @@ final class Header implements DocumentBlockConfigContract
         );
 
         $this->defaultLevel = $level;
+
+        return $this;
+    }
+
+    public function inlineToolBar(array|bool $tools = true): self
+    {
+        $this->inlineToolBar = $tools;
 
         return $this;
     }

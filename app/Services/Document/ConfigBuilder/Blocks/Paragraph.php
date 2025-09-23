@@ -20,7 +20,7 @@ final class Paragraph implements DocumentBlockConfigContract
     private array $tunes = ['commentTune'];
 
     public function __construct(
-        private $inlineToolBar = false,
+        private array|bool $inlineToolBar = ['link', 'bold', 'italic'],
     ) {}
 
     public function placeholder(string $placeholder): self
@@ -30,9 +30,9 @@ final class Paragraph implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function inlineToolBar(bool $enabled = true)
+    public function inlineToolBar(array|bool $tools = true): self
     {
-        $this->inlineToolBar = $enabled;
+        $this->inlineToolBar = $tools;
 
         return $this;
     }

@@ -13,7 +13,7 @@ final class ParagraphConfigData extends SimpleDTO implements BlockConfigContract
 
     public array $tunes;
 
-    public bool $inlineToolBar;
+    public array|bool $inlineToolBar;
 
     public array $config;
 
@@ -22,7 +22,7 @@ final class ParagraphConfigData extends SimpleDTO implements BlockConfigContract
         return [
             'class' => 'paragraph',
             'tunes' => ['commentTune'],
-            'inlineToolBar' => false,
+            'inlineToolBar' => ['link', 'bold', 'italic'],
             'config' => [
                 'placeholder' => 'Write something ..',
                 'preserveBlank' => false,

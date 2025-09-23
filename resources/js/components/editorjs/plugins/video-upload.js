@@ -5,14 +5,14 @@
  */
 
 // Import validation utilities (for format validation and display)
-import { 
-    VIDEO_VALIDATION_CONFIG, 
-    isVideoFormatSupported 
+import {
+    VIDEO_VALIDATION_CONFIG,
+    isVideoFormatSupported
 } from '../video-validation.js';
 
 // Import the plugin styles
-import '../../../../css/components/editorjs/video-upload.css';
 import '../../../../css/components/editorjs/video-resize.css';
+import '../../../../css/components/editorjs/video-upload.css';
 
 // Import ResizableTune for block resizing functionality
 import ResizableTune from './ResizableTune.js';
@@ -86,14 +86,14 @@ class VideoUpload {
         this.eventHandlers = null;
         this.currentVideoId = null;
         this.currentUploadStrategy = null; // 'single' or 'chunk'
-        
+
         // Initialize resize state
         this.resizeMode = false;
         this.resizeHandles = [];
         this.isResizing = false;
         this.aspectRatioLocked = true;
         this.originalAspectRatio = null;
-        
+
         // Initialize custom dimensions from data
         if (!this.data.customDimensions) {
             this.data.customDimensions = {
@@ -121,7 +121,7 @@ class VideoUpload {
             actions: [],
             // Fallback settings (will be overridden by server config)
             chunkSize: 5 * 1024 * 1024,         // 5MB default chunk size
-            maxFileSize: 100 * 1024 * 1024,     // 100MB default max file size  
+            maxFileSize: 100 * 1024 * 1024,     // 100MB default max file size
             maxSingleFileSize: 50 * 1024 * 1024, // 50MB default single file threshold
             useChunkedUpload: true
         };
@@ -130,7 +130,7 @@ class VideoUpload {
 
         // Initialize session-based upload strategy
         this.sessionUploadStrategy = new SessionUploadStrategy(this.config, this.t);
-        
+
         // Initialize progress modal state
         this.progressModal = null;
         this.progressState = {
@@ -141,7 +141,7 @@ class VideoUpload {
             hasError: false,
             errorMessage: ''
         };
-        
+
         this.uploadMetrics = {
             startTime: null,
             speed: 0,
@@ -150,7 +150,7 @@ class VideoUpload {
             lastProgress: 0,
             lastUpdateTime: null
         };
-        
+
         this.currentFileInfo = {
             name: '',
             size: 0,
@@ -167,7 +167,7 @@ class VideoUpload {
         const htmlElement = document.documentElement;
         const currentLocale = htmlElement.lang || 'en';
         const locale = currentLocale.split('-')[0]; // Get base locale (e.g., 'en' from 'en-US')
-        
+
         // Define translations for VideoUpload plugin
         const translations = {
             'en': {
@@ -257,7 +257,7 @@ class VideoUpload {
                 }
             }
         };
-        
+
         return translations[locale] || translations['en'];
     }
 
@@ -604,7 +604,7 @@ class VideoUpload {
     createVideoElement(wrapper) {
         const videoContainer = document.createElement('div');
         videoContainer.classList.add('ce-video-upload__container');
-        
+
         // Apply custom dimensions if available (but now initial sizing already uses resize values)
         this.applyStoredResizeDimensions(videoContainer);
 
@@ -619,7 +619,7 @@ class VideoUpload {
 
         // Use stored resize dimensions if available, otherwise calculate default size
         let containerWidth, containerHeight;
-        
+
         if (this.data.resize && this.data.resize.width && this.data.resize.height) {
             // Use stored resize dimensions as the initial scale
             containerWidth = this.data.resize.width;
@@ -684,7 +684,7 @@ class VideoUpload {
             pointer-events: none;
             z-index: 10;
         `;
-        
+
         // Add click handler to open modal (on container)
         thumbnailContainer.addEventListener('click', () => this.openModal());
 
@@ -699,7 +699,7 @@ class VideoUpload {
         `;
         thumbnailWrapper.classList.add('ce-video-upload__thumbnail-wrapper');
         thumbnailWrapper.appendChild(thumbnailContainer);
-        
+
         // Add resize handles if in resize mode
         if (this.resizeMode) {
             this.addResizeHandles(thumbnailWrapper);
@@ -889,7 +889,7 @@ class VideoUpload {
 
     openModal() {
         if (!this.data.file || (!this.data.file.url && !this.data.file.filename)) return;
-        
+
         // Get the video URL (resolve from filename if needed)
         const videoUrl = this.data.file.url || this.resolveVideoUrl(this.data.file.filename);
         if (!videoUrl) return;
@@ -1335,16 +1335,16 @@ class VideoUpload {
 
         // Show progress modal
         this.showProgressModal(file);
-        
+
         // Use session-based upload strategy
         const strategy = this.sessionUploadStrategy;
-        
+
         // Set up callbacks for progress and status updates
         strategy.setProgressCallback((progress) => {
             console.log('Video upload received progress:', progress); // Debug log
             this.updateProgressModalProgress(progress);
         });
-        
+
         strategy.setStatusCallback((message, phase) => {
             console.log('Video upload received status:', message, phase); // Debug log
             this.updateProgressModalStatus(message, phase);
@@ -1352,7 +1352,7 @@ class VideoUpload {
 
         console.log(`Using ${strategy.getName()} upload strategy for file: ${file.name} (${Math.round(file.size / (1024 * 1024))}MB)`);
         console.log('Strategy config:', this.config); // Debug log
-        
+
         try {
             const result = await strategy.execute(file);
             console.log('Upload completed successfully:', result); // Debug log
@@ -1371,7 +1371,7 @@ class VideoUpload {
     updateUploadProgress(progress) {
         // This can be used to update progress bars or other UI elements
         console.log(`Upload progress: ${progress}%`);
-        
+
         // Update progress in upload items if available
         if (this.uploadProgress && this.uploadProgress.length > 0) {
             this.uploadProgress.forEach((item, index) => {
@@ -1388,7 +1388,7 @@ class VideoUpload {
      */
     updateUploadStatus(message, phase) {
         console.log(`Upload status: ${message} (${phase})`);
-        
+
         // Update status message in upload items if available
         if (this.uploadProgress && this.uploadProgress.length > 0) {
             this.uploadProgress.forEach((item, index) => {
@@ -1403,10 +1403,10 @@ class VideoUpload {
 
     extractFilenameFromUrl(url) {
         if (!url) return null;
-        
+
         // Handle both full URLs and paths
         let path = url;
-        
+
         // If it's a full URL, extract the path part
         if (url.includes('://')) {
             try {
@@ -1417,24 +1417,24 @@ class VideoUpload {
                 path = url;
             }
         }
-        
+
         // Remove leading slash if present
         if (path.startsWith('/')) {
             path = path.substring(1);
         }
-        
+
         // Extract just the filename from paths like 'storage/documents/videos/tenant_id/document_id/filename.mp4'
         const segments = path.split('/');
         return segments[segments.length - 1];
     }
-    
+
     resolveVideoUrl(filename) {
         if (!filename) return null;
-        
+
         // Use the secure file serving endpoint (requires authentication)
         // Try new path structure first (videos/), fallback to old structure (videos/videos/)
         if (this.config.secureFileEndpoint) {
-            // Return new correct path structure  
+            // Return new correct path structure
             return `${this.config.secureFileEndpoint}/videos/${encodeURIComponent(filename)}`;
         }
 
@@ -1445,7 +1445,7 @@ class VideoUpload {
 
     resolveVideoUrlFallback(filename) {
         if (!filename) return null;
-        
+
         // Fallback for old videos with double videos path
         if (this.config.secureFileEndpoint) {
             return `${this.config.secureFileEndpoint}/videos/videos/${encodeURIComponent(filename)}`;
@@ -1456,7 +1456,7 @@ class VideoUpload {
 
     resolveThumbnailUrl(filename) {
         if (!filename) return null;
-        
+
         // Use the secure file serving endpoint for thumbnails (requires authentication)
         // Try new path structure first (videos/prev/), fallback to old structure (videos/videos/prev/)
         if (this.config.secureFileEndpoint) {
@@ -1471,7 +1471,7 @@ class VideoUpload {
 
     resolveThumbnailUrlFallback(filename) {
         if (!filename) return null;
-        
+
         // Fallback for old thumbnails with double videos path
         if (this.config.secureFileEndpoint) {
             return `${this.config.secureFileEndpoint}/videos/videos/prev/${encodeURIComponent(filename)}`;
@@ -1494,12 +1494,12 @@ class VideoUpload {
 
     createModernVideoIndicator(thumbnailContainer) {
         thumbnailContainer.innerHTML = '';
-        
+
         // Detect dark mode (typical implementation patterns)
-        const isDarkMode = document.documentElement.classList.contains('dark') || 
-                          document.body.classList.contains('dark') ||
-                          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
+        const isDarkMode = document.documentElement.classList.contains('dark') ||
+            document.body.classList.contains('dark') ||
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
         // Create modern gradient background with glass effect
         const gradientOverlay = document.createElement('div');
         gradientOverlay.style.cssText = `
@@ -1508,14 +1508,14 @@ class VideoUpload {
             left: 0;
             right: 0;
             bottom: 0;
-            background: ${isDarkMode 
+            background: ${isDarkMode
                 ? 'linear-gradient(135deg, rgba(9, 9, 11, 0.95) 0%, rgba(24, 24, 27, 0.9) 100%)'
                 : 'linear-gradient(135deg, rgba(250, 250, 250, 0.95) 0%, rgba(228, 228, 231, 0.9) 100%)'
             };
             backdrop-filter: blur(8px);
             border-radius: 8px;
         `;
-        
+
         // Create the main indicator container
         const indicatorContent = document.createElement('div');
         indicatorContent.style.cssText = `
@@ -1527,10 +1527,9 @@ class VideoUpload {
             align-items: center;
             justify-content: center;
             text-align: center;
-            z-index: 2;
             padding: 16px;
         `;
-        
+
         // Modern video icon with play overlay
         const videoIconContainer = document.createElement('div');
         videoIconContainer.style.cssText = `
@@ -1540,7 +1539,7 @@ class VideoUpload {
             align-items: center;
             justify-content: center;
         `;
-        
+
         // Modern Heroicons video icon
         const videoIcon = document.createElement('div');
         videoIcon.innerHTML = `
@@ -1551,14 +1550,14 @@ class VideoUpload {
         videoIcon.style.cssText = `
             filter: drop-shadow(0 2px 4px ${isDarkMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)'});
         `;
-        
+
         videoIconContainer.appendChild(videoIcon);
-        
+
         // Video metadata info (if available)
         let metadataHtml = '';
         if (this.data.file) {
             const parts = [];
-            
+
             // Duration
             if (this.data.file.duration) {
                 const duration = Math.round(this.data.file.duration);
@@ -1566,23 +1565,23 @@ class VideoUpload {
                 const seconds = duration % 60;
                 parts.push(`${minutes}:${seconds.toString().padStart(2, '0')}`);
             }
-            
+
             // Dimensions
             if (this.data.file.width && this.data.file.height) {
                 parts.push(`${this.data.file.width}×${this.data.file.height}`);
             }
-            
+
             // File size
             if (this.data.file.size) {
                 const sizeInMB = (this.data.file.size / (1024 * 1024)).toFixed(1);
                 parts.push(`${sizeInMB}MB`);
             }
-            
+
             // Format
             if (this.data.file.format) {
                 parts.push(this.data.file.format.toUpperCase());
             }
-            
+
             if (parts.length > 0) {
                 metadataHtml = `
                     <div style="
@@ -1598,7 +1597,7 @@ class VideoUpload {
                 `;
             }
         }
-        
+
         // Video label
         const videoLabel = document.createElement('div');
         videoLabel.innerHTML = `
@@ -1620,7 +1619,7 @@ class VideoUpload {
             </div>
             ${metadataHtml}
         `;
-        
+
         // Subtle border effect
         const borderEffect = document.createElement('div');
         borderEffect.style.cssText = `
@@ -1632,16 +1631,16 @@ class VideoUpload {
             border: 1px solid ${isDarkMode ? 'rgba(113, 113, 122, 0.2)' : 'rgba(113, 113, 122, 0.3)'};
             border-radius: 8px;
             pointer-events: none;
-            background: ${isDarkMode 
+            background: ${isDarkMode
                 ? 'linear-gradient(135deg, rgba(9, 9, 11, 0.2) 0%, transparent 50%, rgba(24, 24, 27, 0.1) 100%)'
                 : 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%, rgba(228, 228, 231, 0.2) 100%)'
             };
         `;
-        
+
         // Assemble the indicator
         indicatorContent.appendChild(videoIconContainer);
         indicatorContent.appendChild(videoLabel);
-        
+
         thumbnailContainer.style.cssText = `
             position: relative;
             display: flex;
@@ -1651,23 +1650,24 @@ class VideoUpload {
             overflow: hidden;
             transition: all 0.2s ease;
             cursor: pointer;
+            z-index: 0;
         `;
-        
+
         // Add hover effect
         thumbnailContainer.addEventListener('mouseenter', () => {
             gradientOverlay.style.transform = 'scale(1.02)';
             gradientOverlay.style.transition = 'transform 0.2s ease';
             borderEffect.style.borderColor = isDarkMode ? 'rgba(113, 113, 122, 0.4)' : 'rgba(113, 113, 122, 0.5)';
         });
-        
+
         thumbnailContainer.addEventListener('mouseleave', () => {
             gradientOverlay.style.transform = 'scale(1)';
             borderEffect.style.borderColor = isDarkMode ? 'rgba(113, 113, 122, 0.2)' : 'rgba(113, 113, 122, 0.3)';
         });
-        
+
         // Set up responsive background color
         thumbnailContainer.style.background = isDarkMode ? '#18181b' : '#fafafa';
-        
+
         thumbnailContainer.appendChild(gradientOverlay);
         thumbnailContainer.appendChild(borderEffect);
         thumbnailContainer.appendChild(indicatorContent);
@@ -1679,7 +1679,7 @@ class VideoUpload {
         if (!filename) {
             throw new Error('No filename in response');
         }
-        
+
         const fileData = {
             filename: filename,  // Store only filename
             caption: response.caption || '',
@@ -2347,7 +2347,7 @@ class VideoUpload {
             size: file.size,
             type: file.type
         };
-        
+
         this.progressState = {
             isActive: true,
             phase: 'single_upload',
@@ -2356,7 +2356,7 @@ class VideoUpload {
             hasError: false,
             errorMessage: ''
         };
-        
+
         this.uploadMetrics = {
             startTime: Date.now(),
             speed: 0,
@@ -2365,10 +2365,10 @@ class VideoUpload {
             lastProgress: 0,
             lastUpdateTime: Date.now()
         };
-        
+
         this.createProgressModal();
     }
-    
+
     /**
      * Create and show the progress modal
      */
@@ -2377,11 +2377,11 @@ class VideoUpload {
         if (this.progressModal) {
             this.progressModal.remove();
         }
-        
+
         const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
         modal.style.cssText = 'transition: opacity 0.3s ease, transform 0.3s ease;';
-        
+
         modal.innerHTML = `
             <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-700 w-full max-w-md overflow-hidden">
                 <!-- Header -->
@@ -2516,28 +2516,28 @@ class VideoUpload {
                 </div>
             </div>
         `;
-        
+
         // Add event listeners
         const cancelBtn = modal.querySelector('.upload-progress-cancel');
         const retryBtn = modal.querySelector('.upload-retry-btn');
         const doneBtn = modal.querySelector('.upload-done-btn');
-        
+
         cancelBtn.addEventListener('click', () => this.cancelProgressModal());
         retryBtn.addEventListener('click', () => this.retryProgressModal());
         doneBtn.addEventListener('click', () => this.closeProgressModal());
-        
+
         // Close on background click with confirmation if upload is in progress
         modal.addEventListener('click', (e) => {
             if (e.target === modal) this.handleModalClose();
         });
-        
+
         this.progressModal = modal;
         document.body.appendChild(modal);
-        
+
         // Update initial values
         this.updateProgressModalDisplay();
     }
-    
+
     /**
      * Update progress modal with current progress
      */
@@ -2546,25 +2546,25 @@ class VideoUpload {
             console.warn('Progress modal not available for update'); // Debug log
             return;
         }
-        
+
         console.log('Updating progress modal with:', progress); // Debug log
-        
+
         const now = Date.now();
         const timeDiff = (now - this.uploadMetrics.lastUpdateTime) / 1000;
-        
+
         this.progressState.progress = Math.min(100, Math.max(0, progress));
-        
+
         // Calculate upload metrics during upload phase
         if ((this.progressState.phase === 'chunk_upload' || this.progressState.phase === 'single_upload') && timeDiff > 0) {
             this.calculateUploadMetrics(progress, now, timeDiff);
         }
-        
+
         this.uploadMetrics.lastProgress = progress;
         this.uploadMetrics.lastUpdateTime = now;
-        
+
         this.updateProgressModalDisplay();
     }
-    
+
     /**
      * Update progress modal status
      */
@@ -2573,14 +2573,14 @@ class VideoUpload {
             console.warn('Progress modal not available for status update'); // Debug log
             return;
         }
-        
+
         console.log('Updating progress modal status:', message, phase); // Debug log
-        
+
         this.progressState.phase = phase;
         this.progressState.statusMessage = message; // Store the detailed status message
         this.updateProgressModalDisplay();
     }
-    
+
     /**
      * Calculate upload metrics
      */
@@ -2589,40 +2589,40 @@ class VideoUpload {
         const uploadProgress = Math.min(90, progress);
         const currentUploaded = (uploadProgress / 90) * this.currentFileInfo.size;
         const bytesUploaded = currentUploaded - this.uploadMetrics.uploaded;
-        
+
         if (bytesUploaded > 0 && timeDiff > 0) {
             const currentSpeed = bytesUploaded / timeDiff;
-            this.uploadMetrics.speed = this.uploadMetrics.speed === 0 
-                ? currentSpeed 
+            this.uploadMetrics.speed = this.uploadMetrics.speed === 0
+                ? currentSpeed
                 : (this.uploadMetrics.speed * 0.7) + (currentSpeed * 0.3);
         }
-        
+
         if (progress < 90) {
             const remainingBytes = this.currentFileInfo.size - currentUploaded;
-            this.uploadMetrics.eta = this.uploadMetrics.speed > 0 
-                ? remainingBytes / this.uploadMetrics.speed 
+            this.uploadMetrics.eta = this.uploadMetrics.speed > 0
+                ? remainingBytes / this.uploadMetrics.speed
                 : 0;
         } else {
             this.uploadMetrics.eta = 0;
         }
-        
+
         this.uploadMetrics.uploaded = currentUploaded;
     }
-    
+
     /**
      * Update the visual display of the progress modal
      */
     updateProgressModalDisplay() {
         if (!this.progressModal) return;
-        
+
         const modal = this.progressModal;
-        
+
         // Update progress bar
         const progressBar = modal.querySelector('.upload-progress-bar');
         const progressPercent = modal.querySelector('.upload-progress-percent');
-        
+
         const isProcessingPhase = this.progressState.phase === 'chunk_assembly' || this.progressState.phase === 'video_processing';
-        
+
         if (progressBar) {
             if (isProcessingPhase) {
                 // Show animated indeterminate progress bar
@@ -2630,7 +2630,7 @@ class VideoUpload {
                 progressBar.style.background = 'linear-gradient(90deg, #0ea5e9, #0284c7, #0ea5e9)';
                 progressBar.style.backgroundSize = '200% 100%';
                 progressBar.style.animation = 'progress-slide 2s ease-in-out infinite';
-                
+
                 // Add keyframes if not already added
                 if (!document.querySelector('#progress-animation-styles')) {
                     const style = document.createElement('style');
@@ -2651,7 +2651,7 @@ class VideoUpload {
                 progressBar.style.animation = 'none';
             }
         }
-        
+
         if (progressPercent) {
             if (isProcessingPhase) {
                 // Hide percentage during processing
@@ -2662,7 +2662,7 @@ class VideoUpload {
                 progressPercent.textContent = `${Math.round(this.progressState.progress)}%`;
             }
         }
-        
+
         // Update status message
         const statusMessage = modal.querySelector('.upload-status-message');
         if (statusMessage) {
@@ -2680,20 +2680,20 @@ class VideoUpload {
                 statusMessage.textContent = messages[this.progressState.phase] || 'Processing...';
             }
         }
-        
+
         // Update file info
         const fileName = modal.querySelector('.upload-filename');
         const fileSize = modal.querySelector('.upload-file-size');
         const uploaded = modal.querySelector('.upload-uploaded');
         const speed = modal.querySelector('.upload-speed');
         const eta = modal.querySelector('.upload-eta');
-        
+
         if (fileName) fileName.textContent = this.currentFileInfo.name;
         if (fileSize) fileSize.textContent = this.formatFileSize(this.currentFileInfo.size);
         if (uploaded) uploaded.textContent = this.formatFileSize(this.uploadMetrics.uploaded);
         if (speed) speed.textContent = this.formatSpeed(this.uploadMetrics.speed);
         if (eta) eta.textContent = this.formatETA(this.uploadMetrics.eta);
-        
+
         // Show metrics during chunk upload phase to display speed and ETA
         const metrics = modal.querySelector('.upload-metrics');
         const uploadedRow = modal.querySelector('.upload-uploaded-row');
@@ -2705,31 +2705,31 @@ class VideoUpload {
             // Show uploaded amount during chunk upload
             uploadedRow.style.display = this.progressState.phase === 'chunk_upload' ? 'flex' : 'none';
         }
-        
+
         // Update phase indicators
         this.updatePhaseIndicators();
     }
-    
+
     /**
      * Update phase indicator styles
      */
     updatePhaseIndicators() {
         if (!this.progressModal) return;
-        
+
         const modal = this.progressModal;
         const phases = ['upload', 'processing', 'complete'];
         const currentPhase = this.getCurrentPhaseKey();
         const currentIndex = phases.indexOf(currentPhase);
-        
+
         phases.forEach((phase, index) => {
             const icon = modal.querySelector(`.upload-phase-${phase}`);
             const text = modal.querySelector(`.upload-phase-${phase}-text`);
-            
+
             if (icon && text) {
                 // Reset classes
                 icon.className = icon.className.replace(/bg-\S+|text-\S+|ring-\S+/g, '');
                 text.className = text.className.replace(/text-\S+/g, '');
-                
+
                 if (this.progressState.hasError) {
                     if (index <= currentIndex) {
                         icon.className += ' bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
@@ -2750,13 +2750,13 @@ class VideoUpload {
                 }
             }
         });
-        
+
         // Update connectors
         [1, 2].forEach(num => {
             const connector = modal.querySelector(`.upload-connector-${num}`);
             if (connector) {
                 connector.className = connector.className.replace(/bg-\S+/g, '');
-                
+
                 if (this.progressState.hasError) {
                     connector.className += num < currentIndex ? ' bg-red-200 dark:bg-red-800' : ' bg-zinc-200 dark:bg-zinc-700';
                 } else if (num < currentIndex || this.progressState.isComplete) {
@@ -2767,7 +2767,7 @@ class VideoUpload {
             }
         });
     }
-    
+
     /**
      * Get current phase key for indicators
      */
@@ -2781,50 +2781,50 @@ class VideoUpload {
         }
         return 'upload';
     }
-    
+
     /**
      * Complete the upload process
      */
     completeProgressModal() {
         if (!this.progressModal) return;
-        
+
         this.progressState.phase = 'complete';
         this.progressState.progress = 100;
         this.progressState.isComplete = true;
         this.uploadMetrics.eta = 0;
-        
+
         const modal = this.progressModal;
         const successState = modal.querySelector('.upload-success-state');
         const doneBtn = modal.querySelector('.upload-done-btn');
-        
+
         if (successState) successState.style.display = 'block';
         if (doneBtn) doneBtn.style.display = 'block';
-        
+
         this.updateProgressModalDisplay();
     }
-    
+
     /**
      * Show error state in progress modal
      */
     errorProgressModal(errorMessage) {
         if (!this.progressModal) return;
-        
+
         this.progressState.phase = 'error';
         this.progressState.hasError = true;
         this.progressState.errorMessage = errorMessage;
-        
+
         const modal = this.progressModal;
         const errorState = modal.querySelector('.upload-error-state');
         const errorMsg = modal.querySelector('.upload-error-message');
         const retryBtn = modal.querySelector('.upload-retry-btn');
-        
+
         if (errorState) errorState.style.display = 'block';
         if (errorMsg) errorMsg.textContent = errorMessage;
         if (retryBtn) retryBtn.style.display = 'block';
-        
+
         this.updateProgressModalDisplay();
     }
-    
+
     /**
      * Cancel upload and close modal
      */
@@ -2836,7 +2836,7 @@ class VideoUpload {
                     console.log('Cancelling upload session...');
                     await this.sessionUploadStrategy.cancelUpload();
                 }
-                
+
                 this.closeProgressModal();
                 console.log('Upload cancelled by user');
             } catch (error) {
@@ -2846,7 +2846,7 @@ class VideoUpload {
             }
         }
     }
-    
+
     /**
      * Retry failed upload
      */
@@ -2856,33 +2856,33 @@ class VideoUpload {
         this.progressState.errorMessage = '';
         this.progressState.phase = 'single_upload';
         this.progressState.progress = 0;
-        
+
         this.uploadMetrics.startTime = Date.now();
         this.uploadMetrics.lastUpdateTime = Date.now();
         this.uploadMetrics.speed = 0;
         this.uploadMetrics.eta = 0;
         this.uploadMetrics.uploaded = 0;
         this.uploadMetrics.lastProgress = 0;
-        
+
         const modal = this.progressModal;
         const errorState = modal.querySelector('.upload-error-state');
         const retryBtn = modal.querySelector('.upload-retry-btn');
-        
+
         if (errorState) errorState.style.display = 'none';
         if (retryBtn) retryBtn.style.display = 'none';
-        
+
         this.updateProgressModalDisplay();
-        
+
         // TODO: Implement actual retry logic
     }
-    
+
     /**
      * Handle modal close with confirmation if upload is in progress
      */
     async handleModalClose() {
         // Check if upload is in progress
         const isInProgress = this.isUploadInProgress();
-        
+
         if (isInProgress) {
             // Show confirmation for in-progress uploads
             await this.cancelProgressModal();
@@ -2891,17 +2891,17 @@ class VideoUpload {
             this.closeProgressModal();
         }
     }
-    
+
     /**
      * Check if upload is currently in progress
      */
     isUploadInProgress() {
         const phase = this.progressState.phase;
-        return phase === 'single_upload' || 
-               phase === 'chunk_upload' || 
-               phase === 'video_processing';
+        return phase === 'single_upload' ||
+            phase === 'chunk_upload' ||
+            phase === 'video_processing';
     }
-    
+
     /**
      * Close progress modal
      */
@@ -2912,7 +2912,7 @@ class VideoUpload {
         }
         this.progressState.isActive = false;
     }
-    
+
     /**
      * Format file size for display
      */
@@ -2923,13 +2923,13 @@ class VideoUpload {
         const size = bytes / Math.pow(1024, i);
         return `${size.toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
     }
-    
+
     /**
      * Format upload speed for display
      */
     formatSpeed(bytesPerSecond) {
         if (bytesPerSecond === 0 || !isFinite(bytesPerSecond)) return '0 MB/s';
-        
+
         const mbps = bytesPerSecond / (1024 * 1024);
         if (mbps >= 1) {
             return `${mbps.toFixed(1)} MB/s`;
@@ -2938,13 +2938,13 @@ class VideoUpload {
             return `${kbps.toFixed(1)} KB/s`;
         }
     }
-    
+
     /**
      * Format ETA for display
      */
     formatETA(seconds) {
         if (seconds === 0 || !isFinite(seconds)) return '--';
-        
+
         if (seconds < 60) {
             return `${Math.ceil(seconds)}s`;
         } else if (seconds < 3600) {
@@ -2961,7 +2961,7 @@ class VideoUpload {
     destroy() {
         // Close progress modal if open
         this.closeProgressModal();
-        
+
         // Dispose any Video.js players
         if (this.currentVideoId) {
             try {
