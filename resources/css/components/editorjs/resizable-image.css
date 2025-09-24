@@ -410,7 +410,8 @@
 
 /* Modal Styles */
 .resizable-image__modal {
-  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm;
+  @apply fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm;
+  z-index: 999999 !important; /* Highest possible z-index to appear over any modal */
 }
 
 .resizable-image__modal-content {
