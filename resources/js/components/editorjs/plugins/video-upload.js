@@ -1656,17 +1656,6 @@ class VideoUpload {
             z-index: 0;
         `;
 
-        // Add hover effect
-        thumbnailContainer.addEventListener('mouseenter', () => {
-            gradientOverlay.style.transform = 'scale(1.02)';
-            gradientOverlay.style.transition = 'transform 0.2s ease';
-            borderEffect.style.borderColor = isDarkMode ? 'rgba(113, 113, 122, 0.4)' : 'rgba(113, 113, 122, 0.5)';
-        });
-
-        thumbnailContainer.addEventListener('mouseleave', () => {
-            gradientOverlay.style.transform = 'scale(1)';
-            borderEffect.style.borderColor = isDarkMode ? 'rgba(113, 113, 122, 0.2)' : 'rgba(113, 113, 122, 0.3)';
-        });
 
         // Set up responsive background color
         thumbnailContainer.style.background = isDarkMode ? '#18181b' : '#fafafa';
