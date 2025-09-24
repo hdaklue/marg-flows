@@ -20,6 +20,8 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
 
     public string $versionId;
 
+    public string $documentId;
+
     public string $createdAt;
 
     public bool $isCurrentVersion = false;
@@ -28,11 +30,13 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
 
     public function mount(
         string $versionId,
+        string $documentId,
         string $createdAt,
         bool $isCurrentVersion = false,
         ?string $creatorName = null,
     ): void {
         $this->versionId = $versionId;
+        $this->documentId = $documentId;
         $this->createdAt = $createdAt;
         $this->isCurrentVersion = $isCurrentVersion;
         $this->creatorName = $creatorName;
@@ -52,18 +56,13 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
             });
     }
 
-    public function previewAction(): Action
+    public function openPreview(): void
     {
-        return Action::make('preview')
-            ->label('Preview')
-            ->icon('heroicon-o-eye')
-            ->iconButton()
-            ->size(Size::Small)
-            ->color('gray')
-            ->visible(! $this->isCurrentVersion)
-            ->action(function () {
-                $this->dispatch('preview-version', versionId: $this->versionId);
-            });
+        $this->dispatch('openModal', component: 'document-versions-modal', arguments: [
+            'documentId' => $this->documentId,
+            'currentEditingVersion' => null, // We don't know the current editing version from here
+            'previewVersionId' => $this->versionId,
+        ]);
     }
 
     public function getRelativeTimeProperty(): string

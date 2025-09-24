@@ -1,4 +1,4 @@
-<div class="mx-auto flex h-[80vh] w-full max-w-4xl flex-col rounded-lg bg-white shadow-xl dark:bg-zinc-900">
+<div class="mx-auto flex h-screen w-full max-w-4xl flex-col rounded-lg bg-white/95 shadow-xl dark:bg-zinc-900/95">
     {{-- Modal Header --}}
     <div class="flex flex-shrink-0 items-center justify-between border-b border-zinc-200 p-6 dark:border-zinc-700">
         <div>
@@ -26,6 +26,7 @@
                 @foreach ($loadedVersions as $version)
                     <livewire:document-version-item 
                         :version-id="$version->id" 
+                        :document-id="$documentId"
                         :created-at="$version->created_at->toISOString()" 
                         :is-current-version="$version->id === $currentEditingVersion"
                         :creator-name="$version->creator?->name"
@@ -82,18 +83,10 @@
             Versions are automatically saved as you edit
         </div>
 
-        <div class="flex gap-3">
-            <button type="button"
-                class="px-4 py-2 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
-                wire:click="$dispatch('closeModal')">
-                Close
-            </button>
-
-            <button type="button"
-                class="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-700"
-                wire:click="$dispatch('closeModal')">
-                Done
-            </button>
-        </div>
+        <button type="button"
+            class="px-4 py-2 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+            wire:click="$dispatch('closeModal')">
+            Close
+        </button>
     </div>
 </div>

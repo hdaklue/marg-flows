@@ -7,7 +7,6 @@ namespace App\Livewire;
 use App\Models\DocumentVersion;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use LivewireUI\Modal\ModalComponent;
 
@@ -25,9 +24,11 @@ final class DocumentVersionTimelineModal extends ModalComponent
 
     public bool $isLoading = false;
 
+    public Collection $loadedVersions;
+
     public static function closeModalOnClickAway(): bool
     {
-        return false;
+        return true;
     }
 
     public static function closeModalOnEscape(): bool
@@ -40,13 +41,11 @@ final class DocumentVersionTimelineModal extends ModalComponent
         return true;
     }
 
-    public Collection $loadedVersions;
-
     public function mount(string $documentId, ?string $currentEditingVersion = null): void
     {
         $this->documentId = $documentId;
         $this->currentEditingVersion = $currentEditingVersion;
-        $this->loadedVersions = new Collection();
+        $this->loadedVersions = new Collection;
 
         // Load initial versions
         $this->loadMoreVersions();
@@ -59,29 +58,24 @@ final class DocumentVersionTimelineModal extends ModalComponent
     public function handleVersionSelection(string $versionId): void
     {
         $this->currentEditingVersion = $versionId;
-        $this->dispatch('DocumentVersionTimelineModal::document-version-changed', versionId: $versionId);
+        $this->dispatch(
+            'DocumentVersionTimelineModal::document-version-changed',
+            versionId: $versionId,
+        );
     }
 
     #[On('DocumentComponent::document-saved')]
     public function handleDocumentSaved(string $newVersionId): void
     {
         $this->currentEditingVersion = $newVersionId;
-        
+
         // Refresh versions list to show the new version
         $this->refreshVersions();
     }
 
-    private function refreshVersions(): void
-    {
-        $this->page = 1;
-        $this->hasMoreVersions = true;
-        $this->loadedVersions = new Collection();
-        $this->loadMoreVersions();
-    }
-
     public function loadMoreVersions(): void
     {
-        if (!$this->hasMoreVersions || $this->isLoading) {
+        if (! $this->hasMoreVersions || $this->isLoading) {
             return;
         }
 
@@ -106,5 +100,13 @@ final class DocumentVersionTimelineModal extends ModalComponent
     public function render(): View
     {
         return view('livewire.document-version-timeline-modal');
+    }
+
+    private function refreshVersions(): void
+    {
+        $this->page = 1;
+        $this->hasMoreVersions = true;
+        $this->loadedVersions = new Collection;
+        $this->loadMoreVersions();
     }
 }

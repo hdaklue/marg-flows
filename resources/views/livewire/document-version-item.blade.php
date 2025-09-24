@@ -29,7 +29,17 @@
             {{-- Actions --}}
             <div class="flex items-center gap-1">
                 @unless ($isCurrentVersion)
-                    {{ $this->previewAction }}
+                    {{-- Preview Button --}}
+                    <button wire:click="openPreview" 
+                        class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-zinc-500 bg-transparent border border-transparent rounded-lg hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 dark:focus:ring-zinc-400"
+                        title="Preview">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                    
+                    {{-- Apply Button --}}
                     {{ $this->applyAction }}
                 @endunless
             </div>
