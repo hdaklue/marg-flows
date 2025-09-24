@@ -24,10 +24,12 @@ final class CreateVideoUploadSession
         string $originalFilename,
         int $fileSize,
         int $maxSingleFileSize,
-        ?int $chunksTotal = null,
+        null|int $chunksTotal = null,
     ): array {
         // Determine upload type based on file size
-        $uploadType = $fileSize >= $maxSingleFileSize ? VideoUploadType::CHUNK : VideoUploadType::SINGLE;
+        $uploadType = $fileSize >= $maxSingleFileSize
+            ? VideoUploadType::CHUNK
+            : VideoUploadType::SINGLE;
 
         $sessionId = VideoUploadSessionManager::create(
             $document,

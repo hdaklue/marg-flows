@@ -23,10 +23,10 @@ final class DocumentSpecification
         private readonly array $sections,
         private readonly array $requirements,
         private readonly array $constraints = [],
-        private readonly ?string $language = null,
-        private readonly ?int $minWords = null,
-        private readonly ?int $maxWords = null,
-        private readonly ?array $styles = null,
+        private readonly null|string $language = null,
+        private readonly null|int $minWords = null,
+        private readonly null|int $maxWords = null,
+        private readonly null|array $styles = null,
     ) {
         throw_if(
             $this->maxPages < 0,
@@ -37,9 +37,7 @@ final class DocumentSpecification
             $this->minWords !== null
             && $this->maxWords !== null
             && $this->minWords > $this->maxWords,
-            new InvalidArgumentException(
-                'Minimum words cannot exceed maximum words.',
-            ),
+            new InvalidArgumentException('Minimum words cannot exceed maximum words.'),
         );
     }
 
@@ -112,22 +110,22 @@ final class DocumentSpecification
         return $this->constraints;
     }
 
-    public function getLanguage(): ?string
+    public function getLanguage(): null|string
     {
         return $this->language;
     }
 
-    public function getMinWords(): ?int
+    public function getMinWords(): null|int
     {
         return $this->minWords;
     }
 
-    public function getMaxWords(): ?int
+    public function getMaxWords(): null|int
     {
         return $this->maxWords;
     }
 
-    public function getStyles(): ?array
+    public function getStyles(): null|array
     {
         return $this->styles;
     }
@@ -153,12 +151,12 @@ final class DocumentSpecification
 
     public function hasSections(): bool
     {
-        return ! empty($this->sections);
+        return !empty($this->sections);
     }
 
     public function getRequiredSections(): array
     {
-        if (! $this->hasSections()) {
+        if (!$this->hasSections()) {
             return [];
         }
 
@@ -169,14 +167,12 @@ final class DocumentSpecification
 
     public function getOptionalSections(): array
     {
-        if (! $this->hasSections()) {
+        if (!$this->hasSections()) {
             return [];
         }
 
         return array_filter($this->sections, function ($section) {
-            return is_array($section)
-                ? ($section['required'] ?? true) === false
-                : false;
+            return is_array($section) ? ($section['required'] ?? true) === false : false;
         });
     }
 
@@ -267,7 +263,7 @@ final class DocumentSpecification
 
     public function matchesPageCount(int $pages): bool
     {
-        return ! $this->hasPageLimit() || $pages <= $this->maxPages;
+        return !$this->hasPageLimit() || $pages <= $this->maxPages;
     }
 
     public function matchesWordCount(int $words): bool
@@ -326,25 +322,22 @@ final class DocumentSpecification
 
     public function hasRequirement(string $requirement): bool
     {
-        return
+        return (
             isset($this->requirements[$requirement])
-            || in_array($requirement, $this->requirements);
+            || in_array($requirement, $this->requirements)
+        );
     }
 
     public function getTemplateDetails(): array
     {
         return [
             'template' => $this->template,
-            'has_template' => ! empty($this->template) && $this->template !== 'none',
-            'template_display' => ucfirst(str_replace(
-                '_',
-                ' ',
-                $this->template,
-            )),
+            'has_template' => !empty($this->template) && $this->template !== 'none',
+            'template_display' => ucfirst(str_replace('_', ' ', $this->template)),
         ];
     }
 
-    public function getEstimatedReadingTime(): ?array
+    public function getEstimatedReadingTime(): null|array
     {
         if ($this->maxWords === null && $this->minWords === null) {
             return null;
@@ -352,22 +345,14 @@ final class DocumentSpecification
 
         $wordsPerMinute = 200; // Average reading speed
 
-        $minTime = $this->minWords
-            ? ceil($this->minWords / $wordsPerMinute)
-            : null;
-        $maxTime = $this->maxWords
-            ? ceil($this->maxWords / $wordsPerMinute)
-            : null;
+        $minTime = $this->minWords ? ceil($this->minWords / $wordsPerMinute) : null;
+        $maxTime = $this->maxWords ? ceil($this->maxWords / $wordsPerMinute) : null;
 
         return [
             'min_minutes' => $minTime,
             'max_minutes' => $maxTime,
-            'min_formatted' => $minTime
-                ? $this->formatReadingTime((int) $minTime)
-                : null,
-            'max_formatted' => $maxTime
-                ? $this->formatReadingTime((int) $maxTime)
-                : null,
+            'min_formatted' => $minTime ? $this->formatReadingTime((int) $minTime) : null,
+            'max_formatted' => $maxTime ? $this->formatReadingTime((int) $maxTime) : null,
         ];
     }
 
@@ -408,13 +393,14 @@ final class DocumentSpecification
 
     public function equals(self $other): bool
     {
-        return
+        return (
             $this->name === $other->name
             && $this->format === $other->format
             && $this->maxPages === $other->maxPages
             && $this->template === $other->template
             && $this->minWords === $other->minWords
-            && $this->maxWords === $other->maxWords;
+            && $this->maxWords === $other->maxWords
+        );
     }
 
     private function formatReadingTime(int $minutes): string
@@ -426,8 +412,6 @@ final class DocumentSpecification
         $hours = intval($minutes / 60);
         $remainingMinutes = $minutes % 60;
 
-        return $remainingMinutes > 0
-            ? "{$hours}h {$remainingMinutes}m"
-            : "{$hours}h";
+        return $remainingMinutes > 0 ? "{$hours}h {$remainingMinutes}m" : "{$hours}h";
     }
 }

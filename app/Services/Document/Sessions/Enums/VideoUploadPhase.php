@@ -58,7 +58,7 @@ enum VideoUploadPhase: string
     {
         return array_combine(
             array_column(self::cases(), 'value'),
-            array_map(fn (self $phase) => $phase->label(), self::cases()),
+            array_map(fn(self $phase) => $phase->label(), self::cases()),
         );
     }
 
@@ -168,8 +168,14 @@ enum VideoUploadPhase: string
     public function getCorrespondingStatus(): VideoUploadStatus
     {
         return match ($this) {
-            self::SINGLE_UPLOAD, self::CHUNK_UPLOAD, self::CHUNK_ASSEMBLY => VideoUploadStatus::UPLOADING,
-            self::VIDEO_PROCESSING, self::METADATA_EXTRACTION, self::THUMBNAIL_GENERATION => VideoUploadStatus::PROCESSING,
+            self::SINGLE_UPLOAD,
+            self::CHUNK_UPLOAD,
+            self::CHUNK_ASSEMBLY,
+                => VideoUploadStatus::UPLOADING,
+            self::VIDEO_PROCESSING,
+            self::METADATA_EXTRACTION,
+            self::THUMBNAIL_GENERATION,
+                => VideoUploadStatus::PROCESSING,
             self::COMPLETE => VideoUploadStatus::COMPLETED,
             self::ERROR => VideoUploadStatus::FAILED,
             self::CANCELLED => VideoUploadStatus::CANCELLED,

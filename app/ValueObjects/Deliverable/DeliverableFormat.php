@@ -19,9 +19,7 @@ final class DeliverableFormat
     ) {
         throw_unless(
             config('deliverables.formats'),
-            new InvalidArgumentException(
-                "Deliverable format '{$key}' does not exist.",
-            ),
+            new InvalidArgumentException("Deliverable format '{$key}' does not exist."),
         );
 
         throw_unless(
@@ -68,11 +66,11 @@ final class DeliverableFormat
     {
         $types = config($this->configPath);
 
-        if (! $types) {
+        if (!$types) {
             return [];
         }
 
-        return collect($types)->mapWithKeys(fn ($definition, $key) => [
+        return collect($types)->mapWithKeys(fn($definition, $key) => [
             $key => $definition['name'],
         ])->toArray();
     }
@@ -81,7 +79,7 @@ final class DeliverableFormat
     {
         $types = config($this->configPath);
 
-        if (! $types) {
+        if (!$types) {
             return [];
         }
 

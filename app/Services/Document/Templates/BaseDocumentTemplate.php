@@ -16,7 +16,7 @@ abstract class BaseDocumentTemplate implements DocumentTemplateContract
 
     public static function make(): static
     {
-        $instance = new static;
+        $instance = new static();
         $instance->setTranslator(app(DocumentTemplateTranslatorInterface::class));
 
         return $instance;
@@ -47,9 +47,7 @@ abstract class BaseDocumentTemplate implements DocumentTemplateContract
         if ($blockCollection->isNotEmpty()) {
             return [
                 'time' => $this->getTimestamp(),
-                'blocks' => $blockCollection->map(
-                    fn (Block $block) => $block->toArray(),
-                )->toArray(),
+                'blocks' => $blockCollection->map(fn(Block $block) => $block->toArray())->toArray(),
                 'version' => config('document.editorjs.version', '2.30.8'),
             ];
         }

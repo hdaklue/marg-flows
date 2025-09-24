@@ -18,10 +18,8 @@ final class DocumentSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (! $testUser) {
-            $this->command->warn(
-                'Test user not found. Please run main DatabaseSeeder first.',
-            );
+        if (!$testUser) {
+            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
         }
@@ -47,9 +45,7 @@ final class DocumentSeeder extends Seeder
             return;
         }
 
-        $this->command->info(
-            "Found {$flows->count()} flows for page creation...",
-        );
+        $this->command->info("Found {$flows->count()} flows for page creation...");
 
         // Create 5 pages for each flow
         foreach ($flows as $flow) {
@@ -85,8 +81,6 @@ final class DocumentSeeder extends Seeder
         }
 
         $totalPages = Document::count();
-        $this->command->info(
-            "✅ Created {$totalPages} pages in business database",
-        );
+        $this->command->info("✅ Created {$totalPages} pages in business database");
     }
 }

@@ -56,14 +56,11 @@ it('can actually download and process a real video from URL', function () {
             $editor = new VideoEditor($tempPath, false, 'local');
 
             // Apply some basic operations (without actual FFmpeg processing for now)
-            $editor->convert(new Conversion720p);
+            $editor->convert(new Conversion720p());
 
             // Verify the operations were queued
             $operations = $editor->getOperations();
-            expect(count($operations))
-                ->toBe(1)
-                ->and($operations[0]['type'])
-                ->toBe('convert');
+            expect(count($operations))->toBe(1)->and($operations[0]['type'])->toBe('convert');
 
             // In a real scenario, this would process the video:
             // $editor->save($outputPath);
@@ -81,15 +78,13 @@ it('can actually download and process a real video from URL', function () {
 it('can create a simple test video file and process it', function () {
     // Create a simple test video file using FFmpeg command
     $testVideoPath = Storage::disk('local')->path('videos/temp/test-input.mp4');
-    $outputVideoPath = Storage::disk('local')->path(
-        'videos/processed/test-output.mp4',
-    );
+    $outputVideoPath = Storage::disk('local')->path('videos/processed/test-output.mp4');
 
     // Create directories if they don't exist
-    if (! is_dir(dirname($testVideoPath))) {
+    if (!is_dir(dirname($testVideoPath))) {
         mkdir(dirname($testVideoPath), 0755, true);
     }
-    if (! is_dir(dirname($outputVideoPath))) {
+    if (!is_dir(dirname($outputVideoPath))) {
         mkdir(dirname($outputVideoPath), 0755, true);
     }
 
@@ -106,7 +101,7 @@ it('can create a simple test video file and process it', function () {
         // Great! We have a test video, now process it
         $editor = new VideoEditor('videos/temp/test-input.mp4', false, 'local');
 
-        $editor->resize(new Dimension(320, 240))->convert(new Conversion480p); // Resize to smaller
+        $editor->resize(new Dimension(320, 240))->convert(new Conversion480p()); // Resize to smaller
 
         // Verify operations
         $operations = $editor->getOperations();
@@ -118,9 +113,7 @@ it('can create a simple test video file and process it', function () {
             ->toBe('convert');
 
         // Test that source file exists
-        expect(Storage::disk('local')->exists(
-            'videos/temp/test-input.mp4',
-        ))->toBeTrue();
+        expect(Storage::disk('local')->exists('videos/temp/test-input.mp4'))->toBeTrue();
 
         // In real usage: $editor->save('videos/processed/test-output.mp4');
         // This would create the actual output file
@@ -128,9 +121,7 @@ it('can create a simple test video file and process it', function () {
         // Clean up
         unlink($testVideoPath);
     } else {
-        $this->markTestSkipped(
-            'Could not create test video file (FFmpeg may not be available)',
-        );
+        $this->markTestSkipped('Could not create test video file (FFmpeg may not be available)');
     }
 });
 
@@ -149,7 +140,7 @@ it('demonstrates actual file processing workflow with facade', function () {
     $editor = Video::fromDisk($inputPath)
         ->trim(0, 30)
         ->resize(new Dimension(1280, 720))
-        ->convert(new Conversion720p);
+        ->convert(new Conversion720p());
 
     // Verify the editor was created properly
     expect($editor)->toBeInstanceOf(VideoEditor::class);
@@ -186,9 +177,7 @@ it('can simulate URL download and processing workflow', function () {
         ->toBeGreaterThan(0);
 
     // Step 2: Process the downloaded file
-    $editor = Video::fromDisk($tempPath)
-        ->trim(10, 60)
-        ->convert(new Conversion720p);
+    $editor = Video::fromDisk($tempPath)->trim(10, 60)->convert(new Conversion720p());
 
     // Step 3: Verify processing setup
     $operations = $editor->getOperations();
@@ -225,7 +214,7 @@ it('validates actual file paths and storage operations', function () {
     $processedFiles = [];
 
     foreach ($testFiles as $index => $file) {
-        $editor = Video::fromDisk($file)->convert(new Conversion480p);
+        $editor = Video::fromDisk($file)->convert(new Conversion480p());
 
         $outputFile = "videos/processed/batch-{$index}.mp4";
         $processedFiles[] = $outputFile;

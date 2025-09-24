@@ -81,8 +81,13 @@ final class BudgetBlock extends Block
         $name = $this->get('name');
         $amount = $this->get('amount');
 
-        return ! empty($name) && is_string($name) && trim($name) !== '' &&
-               is_numeric($amount) && $amount > 0;
+        return (
+            !empty($name)
+            && is_string($name)
+            && trim($name) !== ''
+            && is_numeric($amount)
+            && $amount > 0
+        );
     }
 
     /**
@@ -126,7 +131,7 @@ final class BudgetBlock extends Block
      */
     public function isEmpty(): bool
     {
-        return ! $this->hasBudget();
+        return !$this->hasBudget();
     }
 
     /**
@@ -134,7 +139,7 @@ final class BudgetBlock extends Block
      */
     public function getDisplayText(): string
     {
-        if (! $this->hasBudget()) {
+        if (!$this->hasBudget()) {
             return '';
         }
 
@@ -149,7 +154,7 @@ final class BudgetBlock extends Block
      */
     public function getDisplayTextArabic(): string
     {
-        if (! $this->hasBudget()) {
+        if (!$this->hasBudget()) {
             return '';
         }
 
@@ -201,7 +206,7 @@ final class BudgetBlock extends Block
      */
     public function render(): string
     {
-        if (! $this->hasBudget()) {
+        if (!$this->hasBudget()) {
             return '';
         }
 
@@ -234,7 +239,7 @@ final class BudgetBlock extends Block
      */
     public function renderRtl(): string
     {
-        if (! $this->hasBudget()) {
+        if (!$this->hasBudget()) {
             return '';
         }
 

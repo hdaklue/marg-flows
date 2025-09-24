@@ -17,11 +17,8 @@ final class VideoManager
     /**
      * Create a video object.
      */
-    public function make(
-        string $sourcePath,
-        bool $isUrl = false,
-        string $disk = 'local',
-    ): Video {
+    public function make(string $sourcePath, bool $isUrl = false, string $disk = 'local'): Video
+    {
         return new Video($sourcePath, $isUrl, $disk);
     }
 
@@ -78,10 +75,8 @@ final class VideoManager
     /**
      * Create a resolution manager from a path (convenience method).
      */
-    public function convert(
-        string $path,
-        string $disk = 'local',
-    ): ResolutionManager {
+    public function convert(string $path, string $disk = 'local'): ResolutionManager
+    {
         $video = $this->fromDisk($path, $disk);
 
         return $this->resolutions($video);

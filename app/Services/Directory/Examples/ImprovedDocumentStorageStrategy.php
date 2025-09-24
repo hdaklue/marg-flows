@@ -24,15 +24,16 @@ use Illuminate\Support\Facades\Storage;
  * - Better error handling
  * - Consistent naming and structure
  */
-final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implements DocumentStorageStrategyContract
+final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implements
+    DocumentStorageStrategyContract
 {
-    private ?string $documentId = null;
+    private null|string $documentId = null;
 
-    private ?UploadedFile $file = null;
+    private null|UploadedFile $file = null;
 
-    private ?string $subdirectory = null;
+    private null|string $subdirectory = null;
 
-    private ?string $storedPath = null;
+    private null|string $storedPath = null;
 
     public function __construct(
         private readonly string $tenantBaseDirectory,
@@ -96,10 +97,7 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
 
             return $this->storedPath;
         } catch (Exception $e) {
-            throw DirectoryException::storageError(
-                'file upload',
-                $e->getMessage(),
-            );
+            throw DirectoryException::storageError('file upload', $e->getMessage());
         }
     }
 
@@ -138,10 +136,7 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
             $segments[] = $this->subdirectory;
         }
 
-        return PathBuilder::base($segments[0])->add(...array_slice(
-            $segments,
-            1,
-        ))->toString();
+        return PathBuilder::base($segments[0])->add(...array_slice($segments, 1))->toString();
     }
 
     /**
@@ -160,9 +155,6 @@ final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implemen
 
         $segments[] = $subdirectory;
 
-        return PathBuilder::base($segments[0])->add(...array_slice(
-            $segments,
-            1,
-        ))->toString();
+        return PathBuilder::base($segments[0])->add(...array_slice($segments, 1))->toString();
     }
 }

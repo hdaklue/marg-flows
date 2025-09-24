@@ -23,7 +23,7 @@ enum VideoUploadType: string
     {
         return array_combine(
             array_column(self::cases(), 'value'),
-            array_map(fn (self $type) => $type->label(), self::cases()),
+            array_map(fn(self $type) => $type->label(), self::cases()),
         );
     }
 

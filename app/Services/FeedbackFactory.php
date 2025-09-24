@@ -22,8 +22,7 @@ final class FeedbackFactory
     /**
      * Create feedback using the most appropriate specialized model.
      */
-    public static function create(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback
-    {
+    public static function create(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback {
         $feedbackType = self::determineFeedbackType($attributes);
 
         return match ($feedbackType) {
@@ -87,9 +86,7 @@ final class FeedbackFactory
         // Validate time range
         throw_if(
             $attributes['start_time'] >= $attributes['end_time'],
-            new InvalidArgumentException(
-                'Audio feedback end_time must be greater than start_time',
-            ),
+            new InvalidArgumentException('Audio feedback end_time must be greater than start_time'),
         );
 
         return AudioFeedback::create($attributes);
@@ -126,7 +123,7 @@ final class FeedbackFactory
         ]);
 
         // Set default annotation type if not provided
-        if (! isset($attributes['annotation_type'])) {
+        if (!isset($attributes['annotation_type'])) {
             $attributes['annotation_type'] = 'point';
         }
 
@@ -183,10 +180,7 @@ final class FeedbackFactory
     {
         $modelClass = FeedbackConfigService::getModelClass($type);
 
-        throw_unless(
-            $modelClass,
-            new InvalidArgumentException("Unknown feedback type: {$type}"),
-        );
+        throw_unless($modelClass, new InvalidArgumentException("Unknown feedback type: {$type}"));
 
         return $modelClass;
     }
@@ -227,8 +221,7 @@ final class FeedbackFactory
     /**
      * Create feedback with automatic type detection and validation.
      */
-    public static function createSmart(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback
-    {
+    public static function createSmart(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback {
         // Automatically clean and validate attributes
         $cleanAttributes = self::cleanAttributes($attributes);
 
@@ -260,7 +253,7 @@ final class FeedbackFactory
         $detectionRules = config('feedback.factory.type_detection_rules', []);
 
         foreach ($detectionRules as $type => $rules) {
-            if (! in_array($type, $availableTypes)) {
+            if (!in_array($type, $availableTypes)) {
                 continue;
             }
 
@@ -270,14 +263,10 @@ final class FeedbackFactory
         }
 
         // Legacy metadata detection
-        if (
-            isset($attributes['metadata'])
-            && is_array($attributes['metadata'])
-        ) {
+        if (isset($attributes['metadata']) && is_array($attributes['metadata'])) {
             $metadata = $attributes['metadata'];
             if (isset($metadata['type'])) {
-                $legacyMapping = config('feedback.migration.legacy_metadata_mapping', [
-                ]);
+                $legacyMapping = config('feedback.migration.legacy_metadata_mapping', []);
                 $legacyType = $metadata['type'];
 
                 if (isset($legacyMapping[$legacyType])) {
@@ -298,17 +287,12 @@ final class FeedbackFactory
     /**
      * Check if attributes match the detection rules for a feedback type.
      */
-    private static function matchesDetectionRules(
-        array $attributes,
-        array $rules,
-    ): bool {
+    private static function matchesDetectionRules(array $attributes, array $rules): bool
+    {
         // Check required_all fields
         if (isset($rules['required_all'])) {
             foreach ($rules['required_all'] as $field) {
-                if (
-                    ! isset($attributes[$field])
-                    || $attributes[$field] === null
-                ) {
+                if (!isset($attributes[$field]) || $attributes[$field] === null) {
                     return false;
                 }
             }
@@ -318,15 +302,12 @@ final class FeedbackFactory
         if (isset($rules['required_any'])) {
             $hasAny = false;
             foreach ($rules['required_any'] as $field) {
-                if (
-                    isset($attributes[$field])
-                    && $attributes[$field] !== null
-                ) {
+                if (isset($attributes[$field]) && $attributes[$field] !== null) {
                     $hasAny = true;
                     break;
                 }
             }
-            if (! $hasAny) {
+            if (!$hasAny) {
                 return false;
             }
         }
@@ -334,10 +315,7 @@ final class FeedbackFactory
         // Check forbidden fields (must not be present)
         if (isset($rules['forbidden'])) {
             foreach ($rules['forbidden'] as $field) {
-                if (
-                    isset($attributes[$field])
-                    && $attributes[$field] !== null
-                ) {
+                if (isset($attributes[$field]) && $attributes[$field] !== null) {
                     return false;
                 }
             }
@@ -360,7 +338,7 @@ final class FeedbackFactory
                 }
             }
             // Require at least one indicator match if indicators are specified
-            if ($indicatorScore === 0 && ! empty($rules['indicators'])) {
+            if ($indicatorScore === 0 && !empty($rules['indicators'])) {
                 return false;
             }
         }
@@ -369,7 +347,7 @@ final class FeedbackFactory
         if (isset($rules['patterns'])) {
             foreach ($rules['patterns'] as $field => $pattern) {
                 if (isset($attributes[$field])) {
-                    if (! preg_match($pattern, (string) $attributes[$field])) {
+                    if (!preg_match($pattern, (string) $attributes[$field])) {
                         return false;
                     }
                 }
@@ -382,14 +360,12 @@ final class FeedbackFactory
     /**
      * Validate that required fields are present in attributes.
      */
-    private static function validateRequiredFields(
-        array $attributes,
-        array $requiredFields,
-    ): void {
+    private static function validateRequiredFields(array $attributes, array $requiredFields): void
+    {
         $missingFields = [];
 
         foreach ($requiredFields as $field) {
-            if (! isset($attributes[$field]) || $attributes[$field] === null) {
+            if (!isset($attributes[$field]) || $attributes[$field] === null) {
                 $missingFields[] = $field;
             }
         }
@@ -407,7 +383,7 @@ final class FeedbackFactory
     private static function cleanAttributes(array $attributes): array
     {
         // Remove null values
-        $attributes = array_filter($attributes, fn ($value) => $value !== null);
+        $attributes = array_filter($attributes, fn($value) => $value !== null);
 
         // Normalize coordinate values
         if (isset($attributes['x_coordinate'])) {

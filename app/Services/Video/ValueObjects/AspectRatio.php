@@ -165,20 +165,15 @@ final class AspectRatio implements JsonSerializable
     private function __construct(
         private readonly string $label,
         private readonly float $ratio,
-        private readonly ?string $resolutionName = null,
+        private readonly null|string $resolutionName = null,
         private readonly int $width = 0,
         private readonly int $height = 0,
     ) {
         throw_if(
             $this->width < 0 || $this->height < 0,
-            new InvalidArgumentException(
-                'Width and height cannot be negative.',
-            ),
+            new InvalidArgumentException('Width and height cannot be negative.'),
         );
-        throw_if(
-            $this->ratio <= 0,
-            new InvalidArgumentException('Ratio must be positive.'),
-        );
+        throw_if($this->ratio <= 0, new InvalidArgumentException('Ratio must be positive.'));
     }
 
     /**
@@ -188,12 +183,10 @@ final class AspectRatio implements JsonSerializable
         float $width,
         float $height,
         float $tolerance = self::DEFAULT_TOLERANCE,
-    ): ?self {
+    ): null|self {
         throw_if(
             $width <= 0 || $height <= 0,
-            new InvalidArgumentException(
-                'Width and height must be positive non-zero values.',
-            ),
+            new InvalidArgumentException('Width and height must be positive non-zero values.'),
         );
 
         $intWidth = (int) $width;
@@ -204,13 +197,7 @@ final class AspectRatio implements JsonSerializable
         if (isset(self::$resolutionCache[$cacheKey])) {
             $res = self::$resolutionCache[$cacheKey];
 
-            return new self(
-                $res['label'],
-                $res['ratio'],
-                $res['name'],
-                $intWidth,
-                $intHeight,
-            );
+            return new self($res['label'], $res['ratio'], $res['name'], $intWidth, $intHeight);
         }
 
         // Check exact resolution match
@@ -218,13 +205,7 @@ final class AspectRatio implements JsonSerializable
             if ($res['width'] === $intWidth && $res['height'] === $intHeight) {
                 self::$resolutionCache[$cacheKey] = $res;
 
-                return new self(
-                    $res['label'],
-                    $res['ratio'],
-                    $res['name'],
-                    $intWidth,
-                    $intHeight,
-                );
+                return new self($res['label'], $res['ratio'], $res['name'], $intWidth, $intHeight);
             }
         }
 
@@ -233,13 +214,7 @@ final class AspectRatio implements JsonSerializable
 
         foreach (self::$map as $label => $targetRatio) {
             if (abs($actual - $targetRatio) < $tolerance) {
-                return new self(
-                    $label,
-                    $targetRatio,
-                    null,
-                    $intWidth,
-                    $intHeight,
-                );
+                return new self($label, $targetRatio, null, $intWidth, $intHeight);
             }
         }
 
@@ -252,20 +227,16 @@ final class AspectRatio implements JsonSerializable
     public static function fromDimension(
         Dimension $dimension,
         float $tolerance = self::DEFAULT_TOLERANCE,
-    ): ?self {
-        return self::from(
-            $dimension->getWidth(),
-            $dimension->getHeight(),
-            $tolerance,
-        );
+    ): null|self {
+        return self::from($dimension->getWidth(), $dimension->getHeight(), $tolerance);
     }
 
     /**
      * Create an AspectRatio instance from a ratio string (e.g., "16:9").
      */
-    public static function fromString(string $ratioString): ?self
+    public static function fromString(string $ratioString): null|self
     {
-        if (! isset(self::$map[$ratioString])) {
+        if (!isset(self::$map[$ratioString])) {
             return null;
         }
 
@@ -278,11 +249,8 @@ final class AspectRatio implements JsonSerializable
     public static function fromRatio(
         float $ratio,
         float $tolerance = self::DEFAULT_TOLERANCE,
-    ): ?self {
-        throw_if(
-            $ratio <= 0,
-            new InvalidArgumentException('Ratio must be positive.'),
-        );
+    ): null|self {
+        throw_if($ratio <= 0, new InvalidArgumentException('Ratio must be positive.'));
 
         foreach (self::$map as $label => $targetRatio) {
             if (abs($ratio - $targetRatio) < $tolerance) {
@@ -319,7 +287,7 @@ final class AspectRatio implements JsonSerializable
         $grouped = [];
         foreach (self::$resolutions as $resolution) {
             $label = $resolution['label'];
-            if (! isset($grouped[$label])) {
+            if (!isset($grouped[$label])) {
                 $grouped[$label] = [];
             }
             $grouped[$label][] = $resolution;
@@ -335,16 +303,13 @@ final class AspectRatio implements JsonSerializable
      */
     public static function getStandardVideoResolutions(): array
     {
-        return array_filter(
-            self::$resolutions,
-            fn ($res) => in_array($res['name'], [
-                'HD',
-                'Full HD',
-                'QHD',
-                '4K UHD',
-                '8K UHD',
-            ]),
-        );
+        return array_filter(self::$resolutions, fn($res) => in_array($res['name'], [
+            'HD',
+            'Full HD',
+            'QHD',
+            '4K UHD',
+            '8K UHD',
+        ]));
     }
 
     /**
@@ -356,7 +321,7 @@ final class AspectRatio implements JsonSerializable
     {
         return array_filter(
             self::$resolutions,
-            fn ($res) => (
+            fn($res) => (
                 str_contains($res['name'], 'Mobile')
                 || str_contains($res['name'], 'Instagram')
             ),
@@ -372,10 +337,7 @@ final class AspectRatio implements JsonSerializable
     {
         return array_filter(
             self::$resolutions,
-            fn ($res) => (
-                str_contains($res['name'], 'Cinema')
-                || str_contains($res['name'], 'DCI')
-            ),
+            fn($res) => str_contains($res['name'], 'Cinema') || str_contains($res['name'], 'DCI'),
         );
     }
 
@@ -389,7 +351,7 @@ final class AspectRatio implements JsonSerializable
         return $this->ratio;
     }
 
-    public function getResolutionName(): ?string
+    public function getResolutionName(): null|string
     {
         return $this->resolutionName;
     }
@@ -434,9 +396,7 @@ final class AspectRatio implements JsonSerializable
      */
     public function equals(self $other): bool
     {
-        return
-            $this->label === $other->label
-            && abs($this->ratio - $other->ratio) < 1e-10;
+        return $this->label === $other->label && abs($this->ratio - $other->ratio) < 1e-10;
     }
 
     /**
@@ -489,9 +449,7 @@ final class AspectRatio implements JsonSerializable
     {
         return array_filter(
             self::$resolutions,
-            fn ($res) => (
-                abs($res['ratio'] - $this->ratio) < self::DEFAULT_TOLERANCE
-            ),
+            fn($res) => abs($res['ratio'] - $this->ratio) < self::DEFAULT_TOLERANCE,
         );
     }
 

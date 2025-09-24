@@ -58,10 +58,7 @@ final class DesignDeliverableService implements DeliverableServiceContract
 
     public function name(string $name): self
     {
-        throw_if(
-            empty($name),
-            new InvalidArgumentException('Name cannot be empty.'),
-        );
+        throw_if(empty($name), new InvalidArgumentException('Name cannot be empty.'));
         $this->name = $name;
 
         return $this;
@@ -75,10 +72,8 @@ final class DesignDeliverableService implements DeliverableServiceContract
             $users = [$users];
         }
         throw_if(
-            ! is_array($users) || empty($users),
-            new InvalidArgumentException(
-                'Assigned users must be a non-empty array or string.',
-            ),
+            !is_array($users) || empty($users),
+            new InvalidArgumentException('Assigned users must be a non-empty array or string.'),
         );
         $this->assignedUsers = $users;
 
@@ -88,12 +83,10 @@ final class DesignDeliverableService implements DeliverableServiceContract
     public function build(): Deliverable
     {
         throw_if(
-            ! isset($this->formatObject)
-            || ! isset($this->typeObject)
-            || ! isset($this->deliverableSpecification),
-            new InvalidArgumentException(
-                'Deliverable type must be set before building.',
-            ),
+            !isset($this->formatObject)
+            || !isset($this->typeObject)
+            || !isset($this->deliverableSpecification),
+            new InvalidArgumentException('Deliverable type must be set before building.'),
         );
 
         return new Deliverable(

@@ -179,14 +179,12 @@ final class GeneralFeedbackPolicy
     /**
      * Check if user can access the feedbackable entity.
      */
-    private function canAccessFeedbackable(
-        User $user,
-        GeneralFeedback $feedback,
-    ): bool {
+    private function canAccessFeedbackable(User $user, GeneralFeedback $feedback): bool
+    {
         $feedbackable = $feedback->feedbackable;
 
         // If feedbackable doesn't exist, deny access
-        if (! $feedbackable) {
+        if (!$feedbackable) {
             return false;
         }
 
@@ -205,22 +203,17 @@ final class GeneralFeedbackPolicy
     /**
      * Check if user can manage feedback on the feedbackable entity.
      */
-    private function canManageFeedbackable(
-        User $user,
-        GeneralFeedback $feedback,
-    ): bool {
+    private function canManageFeedbackable(User $user, GeneralFeedback $feedback): bool
+    {
         $feedbackable = $feedback->feedbackable;
 
-        if (! $feedbackable) {
+        if (!$feedbackable) {
             return false;
         }
 
         // For pages, check if user has contributor+ access to the flow
         if ($feedbackable instanceof Document) {
-            return $user->hasRoleOnFlow(
-                $feedbackable->flow,
-                RoleFactory::admin(),
-            );
+            return $user->hasRoleOnFlow($feedbackable->flow, RoleFactory::admin());
         }
 
         // For other entities, implement specific management logic

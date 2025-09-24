@@ -27,20 +27,14 @@ final class DeliverableSpecResolver
     ): DeliverableSpecification {
         return match ($format->key()) {
             'design' => self::handelDesignType($format, $type),
-            default => throw new InvalidArgumentException(
-                "Unsupported format [{$format->key()}].",
-            ),
+            default => throw new InvalidArgumentException("Unsupported format [{$format->key()}]."),
         };
     }
 
     public static function getSupportedFormats(): array
     {
-        return collect(array_keys(config(self::CONFIG_PATH
-        . '.'
-        . self::SUPPORTED_FORMATS, [])))
-            ->mapWithKeys(fn ($item) => [$item => str(
-                $item,
-            )->title()->toString()])
+        return collect(array_keys(config(self::CONFIG_PATH . '.' . self::SUPPORTED_FORMATS, [])))
+            ->mapWithKeys(fn($item) => [$item => str($item)->title()->toString()])
             ->toArray();
     }
 

@@ -24,22 +24,18 @@ final class VideoSpecification
         private readonly array $recommendedPlatforms,
         private readonly array $requirements,
         private readonly array $constraints = [],
-        private readonly ?string $codec = null,
-        private readonly ?int $bitrate = null,
-        private readonly ?int $frameRate = null,
+        private readonly null|string $codec = null,
+        private readonly null|int $bitrate = null,
+        private readonly null|int $frameRate = null,
     ) {
         throw_if(
             $this->durationMin < 0 || $this->durationMax < 0,
-            new InvalidArgumentException(
-                'Duration values must be non-negative.',
-            ),
+            new InvalidArgumentException('Duration values must be non-negative.'),
         );
 
         throw_if(
             $this->durationMin > $this->durationMax,
-            new InvalidArgumentException(
-                'Minimum duration cannot exceed maximum duration.',
-            ),
+            new InvalidArgumentException('Minimum duration cannot exceed maximum duration.'),
         );
     }
 
@@ -117,17 +113,17 @@ final class VideoSpecification
         return $this->constraints;
     }
 
-    public function getCodec(): ?string
+    public function getCodec(): null|string
     {
         return $this->codec;
     }
 
-    public function getBitrate(): ?int
+    public function getBitrate(): null|int
     {
         return $this->bitrate;
     }
 
-    public function getFrameRate(): ?int
+    public function getFrameRate(): null|int
     {
         return $this->frameRate;
     }
@@ -200,9 +196,7 @@ final class VideoSpecification
         $remainingSeconds = $seconds % 60;
 
         if ($minutes < 60) {
-            return $remainingSeconds > 0
-                ? "{$minutes}m {$remainingSeconds}s"
-                : "{$minutes}m";
+            return $remainingSeconds > 0 ? "{$minutes}m {$remainingSeconds}s" : "{$minutes}m";
         }
 
         $hours = intval($minutes / 60);
@@ -224,10 +218,7 @@ final class VideoSpecification
         // Validate duration if provided
         if (isset($fileData['duration'])) {
             $duration = (int) $fileData['duration'];
-            if (
-                $duration < $this->durationMin
-                || $duration > $this->durationMax
-            ) {
+            if ($duration < $this->durationMin || $duration > $this->durationMax) {
                 return false;
             }
         }
@@ -238,10 +229,7 @@ final class VideoSpecification
             $fileWidth = (int) $fileData['width'];
             $fileHeight = (int) $fileData['height'];
 
-            if (
-                $expectedDimensions['width'] > 0
-                && $expectedDimensions['height'] > 0
-            ) {
+            if ($expectedDimensions['width'] > 0 && $expectedDimensions['height'] > 0) {
                 if (
                     $fileWidth !== $expectedDimensions['width']
                     || $fileHeight !== $expectedDimensions['height']
@@ -278,9 +266,7 @@ final class VideoSpecification
 
     public function matchesDuration(int $duration): bool
     {
-        return
-            $duration >= $this->durationMin
-            && $duration <= $this->durationMax;
+        return $duration >= $this->durationMin && $duration <= $this->durationMax;
     }
 
     public function matchesResolution(int $width, int $height): bool
@@ -333,12 +319,13 @@ final class VideoSpecification
 
     public function equals(self $other): bool
     {
-        return
+        return (
             $this->name === $other->name
             && $this->durationMin === $other->durationMin
             && $this->durationMax === $other->durationMax
             && $this->resolution === $other->resolution
-            && $this->format === $other->format;
+            && $this->format === $other->format
+        );
     }
 
     private function getEstimatedBitrate(): int

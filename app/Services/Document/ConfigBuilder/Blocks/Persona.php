@@ -17,7 +17,7 @@ final class Persona implements DocumentBlockConfigContract
 
     private array $tunes = ['commentTune'];
 
-    private ?string $shortcut = 'CMD+SHIFT+P';
+    private null|string $shortcut = 'CMD+SHIFT+P';
 
     public function __construct(
         private bool $inlineToolBar = false,
@@ -116,7 +116,7 @@ final class Persona implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function shortcut(?string $shortcut): self
+    public function shortcut(null|string $shortcut): self
     {
         $this->shortcut = $shortcut;
 
@@ -139,7 +139,7 @@ final class Persona implements DocumentBlockConfigContract
 
     public function addTune(string $tune): self
     {
-        if (! in_array($tune, $this->tunes)) {
+        if (!in_array($tune, $this->tunes)) {
             $this->tunes[] = $tune;
         }
 

@@ -29,10 +29,10 @@ abstract class AbstractFileResolver
      */
     public function resolveSecureUrl($entity, string $type, string $filename): string
     {
-        if (! $this->validateAccess($entity)) {
-            throw new HttpResponseException(
-                response()->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN),
-            );
+        if (!$this->validateAccess($entity)) {
+            throw new HttpResponseException(response()->json([
+                'error' => 'Access denied',
+            ], Response::HTTP_FORBIDDEN));
         }
 
         return $this->generateSecureUrl($entity, $type, $filename);
@@ -50,14 +50,19 @@ abstract class AbstractFileResolver
      *
      * @throws HttpResponseException When access is denied
      */
-    public function resolveTemporaryUrl($entity, string $type, string $filename, ?int $expires = null, ?User $user = null): string
-    {
+    public function resolveTemporaryUrl(
+        $entity,
+        string $type,
+        string $filename,
+        null|int $expires = null,
+        null|User $user = null,
+    ): string {
         $user ??= auth()->user();
 
-        if (! $user || ! $this->validateAccess($entity)) {
-            throw new HttpResponseException(
-                response()->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN),
-            );
+        if (!$user || !$this->validateAccess($entity)) {
+            throw new HttpResponseException(response()->json([
+                'error' => 'Access denied',
+            ], Response::HTTP_FORBIDDEN));
         }
 
         return $this->generateTemporaryUrl($entity, $type, $filename, $expires);
@@ -81,7 +86,7 @@ abstract class AbstractFileResolver
      * @param  string  $filename  The filename
      * @return int|null File size in bytes, null if file doesn't exist
      */
-    abstract public function getFileSize($entity, string $type, string $filename): ?int;
+    abstract public function getFileSize($entity, string $type, string $filename): null|int;
 
     /**
      * Delete file for the entity.
@@ -94,14 +99,18 @@ abstract class AbstractFileResolver
      *
      * @throws HttpResponseException When access is denied
      */
-    public function deleteFile($entity, string $type, string $filename, ?User $user = null): bool
-    {
+    public function deleteFile(
+        $entity,
+        string $type,
+        string $filename,
+        null|User $user = null,
+    ): bool {
         $user ??= auth()->user();
 
-        if (! $user || ! $this->validateAccess($entity)) {
-            throw new HttpResponseException(
-                response()->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN),
-            );
+        if (!$user || !$this->validateAccess($entity)) {
+            throw new HttpResponseException(response()->json([
+                'error' => 'Access denied',
+            ], Response::HTTP_FORBIDDEN));
         }
 
         return $this->performFileDelete($entity, $type, $filename);
@@ -141,7 +150,12 @@ abstract class AbstractFileResolver
      * @param  int|null  $expires  Expiration time in seconds
      * @return string Temporary URL with expiration
      */
-    abstract protected function generateTemporaryUrl($entity, string $type, string $filename, ?int $expires = null): string;
+    abstract protected function generateTemporaryUrl(
+        $entity,
+        string $type,
+        string $filename,
+        null|int $expires = null,
+    ): string;
 
     /**
      * Perform the actual file deletion.

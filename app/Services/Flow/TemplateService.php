@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Flow;
 
 use App\DTOs\Flow\FlowTemplateDto;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
+use SplFileInfo;
 
 use function base_path;
 use function collect;
 use function config;
-
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
-use SplFileInfo;
 
 final class TemplateService
 {
@@ -22,7 +21,7 @@ final class TemplateService
 
         return collect(
             $files,
-        )->map(callback: fn (SplFileInfo $file): FlowTemplateDto => FlowTemplateDto::fromJson(File::get($file->getRealPath())));
+        )->map(callback: fn(SplFileInfo $file): FlowTemplateDto => FlowTemplateDto::fromJson(File::get($file->getRealPath())));
     }
 
     public static function getTemplate($slug): FlowTemplateDto

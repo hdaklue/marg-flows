@@ -16,7 +16,7 @@ final class FlowTemplateDto extends ValidatedDTO
 
     public string $slug;
 
-    public ?string $id;
+    public null|string $id;
 
     public string $description;
 

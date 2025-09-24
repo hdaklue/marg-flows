@@ -20,7 +20,7 @@ final class DocumentTemplateManager
     {
         $templates = config('document.templates');
 
-        return collect($templates)->mapWithKeys(fn (
+        return collect($templates)->mapWithKeys(fn(
             $class,
             $key,
         ) => [$key => $class::getName()])->toArray();
@@ -35,7 +35,7 @@ final class DocumentTemplateManager
 
         $templates = config('document.templates');
 
-        if (! isset($templates[$templateKey])) {
+        if (!isset($templates[$templateKey])) {
             throw new InvalidArgumentException(
                 "Template '{$templateKey}' not found in configuration.",
             );
@@ -43,7 +43,7 @@ final class DocumentTemplateManager
 
         $templateClass = $templates[$templateKey];
 
-        if (! class_exists($templateClass)) {
+        if (!class_exists($templateClass)) {
             throw new InvalidArgumentException("Template class '{$templateClass}' does not exist.");
         }
 

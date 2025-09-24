@@ -47,13 +47,7 @@ abstract class BaseDto extends ValidatedDTO
         $message .= "First error: {$firstError}. ";
         $message .= 'Check logs for detailed information.';
 
-        throw new DTOException(
-            static::class,
-            $this->validator,
-            $data,
-            $this->rules(),
-            $message,
-        );
+        throw new DTOException(static::class, $this->validator, $data, $this->rules(), $message);
     }
 
     /**

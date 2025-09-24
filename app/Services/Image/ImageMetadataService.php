@@ -32,11 +32,7 @@ final class ImageMetadataService
         int $maxContainerWidth = self::DEFAULT_MAX_WIDTH,
         int $maxContainerHeight = self::DEFAULT_MAX_HEIGHT,
     ): ImageMetadataDTO {
-        $cacheKey = $this->getCacheKey(
-            $imageUrlOrPath,
-            $maxContainerWidth,
-            $maxContainerHeight,
-        );
+        $cacheKey = $this->getCacheKey($imageUrlOrPath, $maxContainerWidth, $maxContainerHeight);
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use (
             $imageUrlOrPath,
@@ -59,11 +55,7 @@ final class ImageMetadataService
         int $maxContainerWidth = self::DEFAULT_MAX_WIDTH,
         int $maxContainerHeight = self::DEFAULT_MAX_HEIGHT,
     ): ImageMetadataDTO {
-        return $this->doExtractMetadata(
-            $imageUrlOrPath,
-            $maxContainerWidth,
-            $maxContainerHeight,
-        );
+        return $this->doExtractMetadata($imageUrlOrPath, $maxContainerWidth, $maxContainerHeight);
     }
 
     /**
@@ -103,11 +95,7 @@ final class ImageMetadataService
             ];
 
             foreach ($commonSizes as [$width, $height]) {
-                Cache::forget($this->getCacheKey(
-                    $imageUrlOrPath,
-                    $width,
-                    $height,
-                ));
+                Cache::forget($this->getCacheKey($imageUrlOrPath, $width, $height));
             }
         }
     }
@@ -123,7 +111,7 @@ final class ImageMetadataService
         try {
             $imagePath = $this->resolveImagePath($imageUrlOrPath);
 
-            if (! $imagePath || ! File::exists($imagePath)) {
+            if (!$imagePath || !File::exists($imagePath)) {
                 return $this->createErrorMetadata(
                     $imageUrlOrPath,
                     'Image file not found',
@@ -132,7 +120,7 @@ final class ImageMetadataService
                 );
             }
 
-            if (! $this->isValidImageFile($imagePath)) {
+            if (!$this->isValidImageFile($imagePath)) {
                 return $this->createErrorMetadata(
                     $imageUrlOrPath,
                     'Invalid image file format',
@@ -143,8 +131,7 @@ final class ImageMetadataService
 
             $image = Image::load($imagePath);
             $fileSize = File::size($imagePath);
-            $mimeType =
-                File::mimeType($imagePath) ?? 'application/octet-stream';
+            $mimeType = File::mimeType($imagePath) ?? 'application/octet-stream';
             $extension = File::extension($imagePath) ?: 'unknown';
 
             $width = $image->getWidth();
@@ -215,7 +202,7 @@ final class ImageMetadataService
     /**
      * Resolve an image URL or path to a local file path.
      */
-    private function resolveImagePath(string $imageUrlOrPath): ?string
+    private function resolveImagePath(string $imageUrlOrPath): null|string
     {
         // If it's already a local path and exists
         if (File::exists($imageUrlOrPath)) {
@@ -318,9 +305,7 @@ final class ImageMetadataService
         return [
             'width' => $optimalWidth,
             'height' => $optimalHeight,
-            'aspectRatio' => $optimalHeight > 0
-                ? $optimalWidth / $optimalHeight
-                : 1.0,
+            'aspectRatio' => $optimalHeight > 0 ? $optimalWidth / $optimalHeight : 1.0,
         ];
     }
 
@@ -402,14 +387,8 @@ final class ImageMetadataService
     /**
      * Generate cache key for the given parameters.
      */
-    private function getCacheKey(
-        string $imageUrl,
-        int $maxWidth,
-        int $maxHeight,
-    ): string {
-        return
-            self::CACHE_PREFIX
-            . md5($imageUrl)
-            . ":{$maxWidth}x{$maxHeight}";
+    private function getCacheKey(string $imageUrl, int $maxWidth, int $maxHeight): string
+    {
+        return self::CACHE_PREFIX . md5($imageUrl) . ":{$maxWidth}x{$maxHeight}";
     }
 }

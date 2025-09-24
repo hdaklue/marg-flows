@@ -17,7 +17,7 @@ final class ParticipantsCollection extends Collection
     {
         dd($this);
 
-        return $this->map(fn ($item) => [
+        return $this->map(fn($item) => [
             'userDto' => $item->assignable,
             'role' => $item->role_key,
         ]);
@@ -28,9 +28,7 @@ final class ParticipantsCollection extends Collection
      */
     public function avatars(): Collection
     {
-        return $this->pluck('assignable')->map(
-            fn ($item) => $item->getAvatarUrl(),
-        );
+        return $this->pluck('assignable')->map(fn($item) => $item->getAvatarUrl());
     }
 
     /**
@@ -40,7 +38,7 @@ final class ParticipantsCollection extends Collection
      */
     public function asDtoCollection(): self
     {
-        return $this->map(fn ($item) => SingleParticipantDto::fromArray([
+        return $this->map(fn($item) => SingleParticipantDto::fromArray([
             'avatarUrl' => $item->assignable->getAvatarUrl(),
             'username' => $item->assignable->getAttribute('username'),
             'id' => $item->assignable_id,
@@ -61,7 +59,7 @@ final class ParticipantsCollection extends Collection
     public function getParticipantsAsSelectArray(): array
     {
         return $this->pluck('assignable')
-            ->mapWithKeys(fn ($model) => [
+            ->mapWithKeys(fn($model) => [
                 $model->getKey() => $model->getAttribute('name'),
             ])
             ->toArray();
@@ -69,6 +67,6 @@ final class ParticipantsCollection extends Collection
 
     public function exceptAssignable(AssignableEntity $user): self
     {
-        return $this->reject(fn ($item): bool => $item->model->getKey() === $user->getKey());
+        return $this->reject(fn($item): bool => $item->model->getKey() === $user->getKey());
     }
 }

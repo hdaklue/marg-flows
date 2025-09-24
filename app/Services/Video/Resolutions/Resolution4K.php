@@ -28,32 +28,14 @@ final class Resolution4K extends AbstractResolution
 
         // Set reasonable constraints for 4K - adjust based on orientation
         $this->maxDimension = match ($orientation) {
-            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(
-                2160,
-                4096,
-            ), // Portrait 4K max
-            'square' => \App\Services\Video\ValueObjects\Dimension::from(
-                2160,
-                2160,
-            ), // Square 4K max
-            default => \App\Services\Video\ValueObjects\Dimension::from(
-                4096,
-                2160,
-            ), // Landscape 4K max (DCI)
+            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(2160, 4096), // Portrait 4K max
+            'square' => \App\Services\Video\ValueObjects\Dimension::from(2160, 2160), // Square 4K max
+            default => \App\Services\Video\ValueObjects\Dimension::from(4096, 2160), // Landscape 4K max (DCI)
         };
         $this->minDimension = match ($orientation) {
-            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(
-                1080,
-                1920,
-            ), // Portrait Full HD min
-            'square' => \App\Services\Video\ValueObjects\Dimension::from(
-                1080,
-                1080,
-            ), // Square Full HD min
-            default => \App\Services\Video\ValueObjects\Dimension::from(
-                1920,
-                1080,
-            ), // Landscape Full HD min
+            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(1080, 1920), // Portrait Full HD min
+            'square' => \App\Services\Video\ValueObjects\Dimension::from(1080, 1080), // Square Full HD min
+            default => \App\Services\Video\ValueObjects\Dimension::from(1920, 1080), // Landscape Full HD min
         };
     }
 
@@ -65,10 +47,8 @@ final class Resolution4K extends AbstractResolution
     /**
      * Create Resolution4K based on source video orientation.
      */
-    public static function forOrientation(
-        string $orientation,
-        bool $allowScaleUp = false,
-    ): self {
+    public static function forOrientation(string $orientation, bool $allowScaleUp = false): self
+    {
         return new self($orientation, $allowScaleUp);
     }
 
@@ -83,10 +63,7 @@ final class Resolution4K extends AbstractResolution
     {
         // Create ResizeFilter directly instead of using closure
         return new ResizeFilter(
-            new Dimension(
-                $this->dimension->getWidth(),
-                $this->dimension->getHeight(),
-            ),
+            new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
             $this->resizeMode,
             false, // Disable standard aspect ratio enforcement to prevent black bars
         );

@@ -16,10 +16,7 @@ interface ProgressStrategyContract
     /**
      * Update progress for a session.
      */
-    public function updateProgress(
-        string $sessionId,
-        ProgressData $progress,
-    ): void;
+    public function updateProgress(string $sessionId, ProgressData $progress): void;
 
     /**
      * Mark session as completed.
@@ -34,7 +31,7 @@ interface ProgressStrategyContract
     /**
      * Get current progress for a session.
      */
-    public function getProgress(string $sessionId): ?ProgressData;
+    public function getProgress(string $sessionId): null|ProgressData;
 
     /**
      * Clean up session data.

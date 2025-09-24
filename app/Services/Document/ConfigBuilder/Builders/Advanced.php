@@ -12,7 +12,7 @@ final class Advanced
 {
     private string $tenantId;
 
-    public function build(?string $documentId = null): array
+    public function build(null|string $documentId = null): array
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
         $imagesConfig = EditorConfigBuilder::images()->forPlan('advanced');
@@ -47,7 +47,7 @@ final class Advanced
         ];
     }
 
-    private function buildVideoUploadConfig(?string $documentId)
+    private function buildVideoUploadConfig(null|string $documentId)
     {
         $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan('advanced');
 

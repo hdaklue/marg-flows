@@ -71,7 +71,7 @@ final class VideoRecorder extends Component
             $this->videoUrls = array_values($this->videoUrls); // Reindex array
         }
 
-        $this->hasRecording = ! empty($this->videoUrls);
+        $this->hasRecording = !empty($this->videoUrls);
 
         // Dispatch event to notify parent component
         $this->dispatch('video:removed', $index);

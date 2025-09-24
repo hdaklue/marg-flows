@@ -75,26 +75,28 @@ final class VideoUploadBlock extends Block
     {
         $file = $this->get('file');
 
-        return is_array($file) &&
-               ! empty($file['filename']) &&
-               is_string($file['filename']) &&
-               trim($file['filename']) !== '';
+        return (
+            is_array($file)
+            && !empty($file['filename'])
+            && is_string($file['filename'])
+            && trim($file['filename']) !== ''
+        );
     }
 
     /**
      * Get the video filename.
      */
-    public function getFilename(): ?string
+    public function getFilename(): null|string
     {
         $file = $this->get('file');
 
-        return is_array($file) ? ($file['filename'] ?? null) : null;
+        return is_array($file) ? $file['filename'] ?? null : null;
     }
 
     /**
      * Get the video caption.
      */
-    public function getCaption(): ?string
+    public function getCaption(): null|string
     {
         return $this->get('caption');
     }
@@ -102,10 +104,10 @@ final class VideoUploadBlock extends Block
     /**
      * Get video width.
      */
-    public function getWidth(): ?int
+    public function getWidth(): null|int
     {
         $file = $this->get('file');
-        $width = is_array($file) ? ($file['width'] ?? null) : null;
+        $width = is_array($file) ? $file['width'] ?? null : null;
 
         return is_numeric($width) ? (int) $width : null;
     }
@@ -113,10 +115,10 @@ final class VideoUploadBlock extends Block
     /**
      * Get video height.
      */
-    public function getHeight(): ?int
+    public function getHeight(): null|int
     {
         $file = $this->get('file');
-        $height = is_array($file) ? ($file['height'] ?? null) : null;
+        $height = is_array($file) ? $file['height'] ?? null : null;
 
         return is_numeric($height) ? (int) $height : null;
     }
@@ -124,10 +126,10 @@ final class VideoUploadBlock extends Block
     /**
      * Get video duration in seconds.
      */
-    public function getDuration(): ?float
+    public function getDuration(): null|float
     {
         $file = $this->get('file');
-        $duration = is_array($file) ? ($file['duration'] ?? null) : null;
+        $duration = is_array($file) ? $file['duration'] ?? null : null;
 
         return is_numeric($duration) ? (float) $duration : null;
     }
@@ -135,10 +137,10 @@ final class VideoUploadBlock extends Block
     /**
      * Get video file size in bytes.
      */
-    public function getSize(): ?int
+    public function getSize(): null|int
     {
         $file = $this->get('file');
-        $size = is_array($file) ? ($file['size'] ?? null) : null;
+        $size = is_array($file) ? $file['size'] ?? null : null;
 
         return is_numeric($size) ? (int) $size : null;
     }
@@ -146,11 +148,11 @@ final class VideoUploadBlock extends Block
     /**
      * Get video format.
      */
-    public function getFormat(): ?string
+    public function getFormat(): null|string
     {
         $file = $this->get('file');
 
-        return is_array($file) ? ($file['format'] ?? null) : null;
+        return is_array($file) ? $file['format'] ?? null : null;
     }
 
     /**
@@ -160,7 +162,7 @@ final class VideoUploadBlock extends Block
     {
         $file = $this->get('file');
 
-        return is_array($file) ? ($file['aspect_ratio'] ?? '16:9') : '16:9';
+        return is_array($file) ? $file['aspect_ratio'] ?? '16:9' : '16:9';
     }
 
     /**
@@ -195,7 +197,7 @@ final class VideoUploadBlock extends Block
         $i = 0;
         $bytes = $size;
 
-        while ($bytes >= 1024 && $i < count($units) - 1) {
+        while ($bytes >= 1024 && $i < (count($units) - 1)) {
             $bytes /= 1024;
             $i++;
         }
@@ -233,7 +235,7 @@ final class VideoUploadBlock extends Block
      */
     public function isEmpty(): bool
     {
-        return ! $this->hasVideo();
+        return !$this->hasVideo();
     }
 
     /**
@@ -241,7 +243,7 @@ final class VideoUploadBlock extends Block
      */
     public function getMetadata(): array
     {
-        if (! $this->hasVideo()) {
+        if (!$this->hasVideo()) {
             return [];
         }
 
@@ -283,12 +285,12 @@ final class VideoUploadBlock extends Block
     {
         $errors = [];
 
-        if (! $this->hasVideo()) {
+        if (!$this->hasVideo()) {
             return $errors;
         }
 
         // Validate file size
-        if (! empty($constraints['max_size'])) {
+        if (!empty($constraints['max_size'])) {
             $size = $this->getSize();
             if ($size && $size > $constraints['max_size']) {
                 $maxSizeMB = round($constraints['max_size'] / (1024 * 1024), 1);
@@ -298,7 +300,7 @@ final class VideoUploadBlock extends Block
         }
 
         // Validate duration
-        if (! empty($constraints['max_duration'])) {
+        if (!empty($constraints['max_duration'])) {
             $duration = $this->getDuration();
             if ($duration && $duration > $constraints['max_duration']) {
                 $maxDuration = $this->formatDurationFromSeconds($constraints['max_duration']);
@@ -308,8 +310,11 @@ final class VideoUploadBlock extends Block
         }
 
         // Validate format
-        if (! $this->isSupportedFormat()) {
-            $supportedFormats = implode(', ', array_map('strtoupper', self::getPredefinedFormats()));
+        if (!$this->isSupportedFormat()) {
+            $supportedFormats = implode(', ', array_map(
+                'strtoupper',
+                self::getPredefinedFormats(),
+            ));
             $currentFormat = strtoupper($this->getFormat() ?? 'unknown');
             $errors[] = "Video format ({$currentFormat}) is not supported. Supported formats: {$supportedFormats}";
         }

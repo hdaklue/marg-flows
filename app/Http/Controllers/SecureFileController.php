@@ -28,15 +28,22 @@ final class SecureFileController extends Controller
      * @param  string  $type  The file type (documents, videos, etc.)
      * @param  string  $path  The file path within the tenant directory
      */
-    public function show(Request $request, string $tenantId, string $type, string $path): StreamedResponse|Response
-    {
+    public function show(
+        Request $request,
+        string $tenantId,
+        string $type,
+        string $path,
+    ): StreamedResponse|Response {
         // Ensure user is authenticated
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             abort(401, 'Authentication required');
         }
 
         $user = auth()->user();
-        $userTenantId = LaraPath::base($user->getActiveTenantId(), SanitizationStrategy::HASHED)->toString();
+        $userTenantId = LaraPath::base(
+            $user->getActiveTenantId(),
+            SanitizationStrategy::HASHED,
+        )->toString();
 
         // Validate tenant access - user must belong to the tenant
         if ($tenantId !== $userTenantId) {
@@ -48,7 +55,7 @@ final class SecureFileController extends Controller
         $disk = config('document.storage.disk', 'public');
 
         // Verify file exists
-        if (! Storage::disk($disk)->exists($fullPath)) {
+        if (!Storage::disk($disk)->exists($fullPath)) {
             abort(404, 'File not found');
         }
 
@@ -82,12 +89,15 @@ final class SecureFileController extends Controller
         ]);
 
         // Ensure user is authenticated
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             abort(401, 'Authentication required');
         }
 
         $user = auth()->user();
-        $userTenantId = LaraPath::base($user->getActiveTenantId(), SanitizationStrategy::HASHED)->toString();
+        $userTenantId = LaraPath::base(
+            $user->getActiveTenantId(),
+            SanitizationStrategy::HASHED,
+        )->toString();
 
         // Validate tenant access
         if ($request->input('tenant_id') !== $userTenantId) {
@@ -102,15 +112,12 @@ final class SecureFileController extends Controller
         $fullPath = "{$userTenantId}/{$type}/{$path}";
         $disk = config('document.storage.disk', 'public');
 
-        if (! Storage::disk($disk)->exists($fullPath)) {
+        if (!Storage::disk($disk)->exists($fullPath)) {
             abort(404, 'File not found');
         }
 
         // Generate temporary URL
-        $tempUrl = Storage::disk($disk)->temporaryUrl(
-            $fullPath,
-            now()->addSeconds($expiresIn),
-        );
+        $tempUrl = Storage::disk($disk)->temporaryUrl($fullPath, now()->addSeconds($expiresIn));
 
         return response()->json([
             'url' => $tempUrl,

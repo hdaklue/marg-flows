@@ -20,11 +20,7 @@ final class ScaleToFit implements ScaleStrategyContract
 
     public function apply(Dimension $current, Dimension $target): Dimension
     {
-        return $current->scaleTo(
-            $this->target->getWidth(),
-            $this->target->getHeight(),
-            true,
-        );
+        return $current->scaleTo($this->target->getWidth(), $this->target->getHeight(), true);
     }
 
     public function getDescription(): string

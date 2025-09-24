@@ -14,8 +14,8 @@ final readonly class ChunkData
         public int $chunkSize,
         /** @var ChunkInfo[] */
         public array $chunks,
-        public ?string $mimeType = null,
-        public ?array $metadata = null,
+        public null|string $mimeType = null,
+        public null|array $metadata = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -26,9 +26,7 @@ final readonly class ChunkData
             fileName: $data['fileName'],
             totalSize: $data['totalSize'],
             chunkSize: $data['chunkSize'],
-            chunks: array_map(fn (array $chunk) => ChunkInfo::fromArray(
-                $chunk,
-            ), $data['chunks']),
+            chunks: array_map(fn(array $chunk) => ChunkInfo::fromArray($chunk), $data['chunks']),
             mimeType: $data['mimeType'] ?? null,
             metadata: $data['metadata'] ?? null,
         );
@@ -41,15 +39,12 @@ final readonly class ChunkData
 
     public function getCompletedChunks(): int
     {
-        return count(array_filter(
-            $this->chunks,
-            fn (ChunkInfo $chunk) => $chunk->uploaded,
-        ));
+        return count(array_filter($this->chunks, fn(ChunkInfo $chunk) => $chunk->uploaded));
     }
 
     public function getUploadedBytes(): int
     {
-        return array_sum(array_map(fn (ChunkInfo $chunk) => $chunk->uploaded
+        return array_sum(array_map(fn(ChunkInfo $chunk) => $chunk->uploaded
             ? $chunk->size
             : 0, $this->chunks));
     }
@@ -68,10 +63,10 @@ final readonly class ChunkData
         return $this->getCompletedChunks() === $this->getTotalChunks();
     }
 
-    public function getNextChunk(): ?ChunkInfo
+    public function getNextChunk(): null|ChunkInfo
     {
         foreach ($this->chunks as $chunk) {
-            if (! $chunk->uploaded) {
+            if (!$chunk->uploaded) {
                 return $chunk;
             }
         }
@@ -81,8 +76,7 @@ final readonly class ChunkData
 
     public function markChunkAsUploaded(int $chunkIndex): self
     {
-        $updatedChunks = array_map(fn (ChunkInfo $chunk) => $chunk->index
-        === $chunkIndex
+        $updatedChunks = array_map(fn(ChunkInfo $chunk) => $chunk->index === $chunkIndex
             ? new ChunkInfo($chunk->index, $chunk->size, $chunk->hash, true)
             : $chunk, $this->chunks);
 
@@ -106,10 +100,7 @@ final readonly class ChunkData
             'fileName' => $this->fileName,
             'totalSize' => $this->totalSize,
             'chunkSize' => $this->chunkSize,
-            'chunks' => array_map(
-                fn (ChunkInfo $chunk) => $chunk->toArray(),
-                $this->chunks,
-            ),
+            'chunks' => array_map(fn(ChunkInfo $chunk) => $chunk->toArray(), $this->chunks),
             'mimeType' => $this->mimeType,
             'metadata' => $this->metadata,
         ];

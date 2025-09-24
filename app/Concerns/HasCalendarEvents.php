@@ -22,7 +22,7 @@ trait HasCalendarEvents
     /**
      * Selected event for modal display.
      */
-    public ?array $selectedEvent = null;
+    public null|array $selectedEvent = null;
 
     /**
      * View-only mode - prevents create/edit/delete operations.

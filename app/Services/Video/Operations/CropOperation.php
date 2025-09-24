@@ -44,11 +44,12 @@ final class CropOperation extends AbstractVideoOperation
 
     public function canExecute(): bool
     {
-        return
+        return (
             $this->x >= 0
             && $this->y >= 0
             && $this->dimension->getWidth() > 0
-            && $this->dimension->getHeight() > 0;
+            && $this->dimension->getHeight() > 0
+        );
     }
 
     public function applyToBuilder(MediaExporter $builder): MediaExporter

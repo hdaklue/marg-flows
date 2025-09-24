@@ -42,7 +42,7 @@ trait HasSideNotes
         return $sidenote;
     }
 
-    public function getSideNote(int|string $id): ?SideNote
+    public function getSideNote(int|string $id): null|SideNote
     {
         /** @var SideNote|null */
         return $this->sideNotes()->whereKey($id)->first();

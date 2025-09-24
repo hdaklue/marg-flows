@@ -22,9 +22,7 @@ final class DeliverableType
     ) {
         throw_unless(
             array_key_exists($key, config($format->configPath())),
-            new InvalidArgumentException(
-                "Deliverable type '{$key}' does not exist.",
-            ),
+            new InvalidArgumentException("Deliverable type '{$key}' does not exist."),
         );
 
         $this->configPath = "{$format->configPath()}.{$key}";

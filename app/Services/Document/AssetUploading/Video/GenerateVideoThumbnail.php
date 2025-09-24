@@ -20,8 +20,12 @@ final class GenerateVideoThumbnail
     /**
      * Generate video thumbnail using Laravel FFmpeg.
      */
-    public function handle(string $videoPath, float $duration, Document $document, ?string $sessionId = null): ?string
-    {
+    public function handle(
+        string $videoPath,
+        float $duration,
+        Document $document,
+        null|string $sessionId = null,
+    ): null|string {
         try {
             $extractionTime = $duration < 10 ? $duration * 0.1 : 1.0;
             $videoFilename = pathinfo($videoPath, PATHINFO_FILENAME);

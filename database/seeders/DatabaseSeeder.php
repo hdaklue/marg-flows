@@ -24,7 +24,7 @@ final class DatabaseSeeder extends Seeder
         // Keep original test user or use existing one
         $testUser = User::where('email', 'test@example.com')->first();
 
-        if (! $testUser) {
+        if (!$testUser) {
             $testUser = User::factory()->create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
@@ -141,7 +141,7 @@ final class DatabaseSeeder extends Seeder
 
         // Get available roles from Porter (excluding admin since test user has it)
         $availableRoles = collect(RoleFactory::getAllWithKeys())
-            ->reject(fn ($role, $key) => $key === 'admin')
+            ->reject(fn($role, $key) => $key === 'admin')
             ->values()
             ->toArray();
 
@@ -197,7 +197,7 @@ final class DatabaseSeeder extends Seeder
                 }
             });
 
-        $fullTenants = count(array_filter($tenantParticipantCounts, fn ($count) => $count === 10));
+        $fullTenants = count(array_filter($tenantParticipantCounts, fn($count) => $count === 10));
         $this->command->info("Tenants with max participants (10): {$fullTenants}/300");
 
         $this->command->info('Creating 5 flows per tenant...');
@@ -225,7 +225,7 @@ final class DatabaseSeeder extends Seeder
 
         // Get available roles for flow assignments
         $flowRoles = collect(RoleFactory::getAllWithKeys())
-            ->reject(fn ($role, $key) => $key === 'admin')
+            ->reject(fn($role, $key) => $key === 'admin')
             ->values()
             ->toArray();
 
@@ -249,7 +249,7 @@ final class DatabaseSeeder extends Seeder
                         'assignable',
                     );
                     $availableUsers = $tenantParticipants->filter(
-                        fn ($user) => $user->id !== $testUser->id,
+                        fn($user) => $user->id !== $testUser->id,
                     );
 
                     // Assign up to 9 more participants (or fewer if tenant has fewer participants)

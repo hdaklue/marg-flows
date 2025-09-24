@@ -17,8 +17,11 @@ final class OptimizeDocumentImage
     {
         $storage = Storage::disk($disk);
 
-        if (! $storage->exists($imagePath)) {
-            logger()->warning('Image not found for optimization', ['path' => $imagePath, 'disk' => $disk]);
+        if (!$storage->exists($imagePath)) {
+            logger()->warning('Image not found for optimization', [
+                'path' => $imagePath,
+                'disk' => $disk,
+            ]);
 
             return;
         }

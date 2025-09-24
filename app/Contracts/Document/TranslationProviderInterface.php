@@ -24,5 +24,5 @@ interface TranslationProviderInterface
     /**
      * Get a translation by dot notation key.
      */
-    public function getTranslationByKey(string $key): ?string;
+    public function getTranslationByKey(string $key): null|string;
 }

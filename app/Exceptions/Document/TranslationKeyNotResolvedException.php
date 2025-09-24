@@ -8,7 +8,7 @@ use Exception;
 
 final class TranslationKeyNotResolvedException extends Exception
 {
-    public function __construct(string $key, string $template, ?string $locale = null)
+    public function __construct(string $key, string $template, null|string $locale = null)
     {
         $message = "Translation key '{$key}' could not be resolved for template '{$template}'";
 

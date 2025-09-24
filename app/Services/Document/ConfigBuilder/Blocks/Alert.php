@@ -29,7 +29,7 @@ final class Alert implements DocumentBlockConfigContract
 
     private array $tunes = ['commentTune'];
 
-    private ?string $shortcut = 'CMD+SHIFT+A';
+    private null|string $shortcut = 'CMD+SHIFT+A';
 
     public function __construct(
         private bool $inlineToolBar = false,
@@ -56,7 +56,7 @@ final class Alert implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function shortcut(?string $shortcut): self
+    public function shortcut(null|string $shortcut): self
     {
         $this->shortcut = $shortcut;
 

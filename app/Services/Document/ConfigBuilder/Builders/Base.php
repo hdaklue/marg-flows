@@ -9,7 +9,7 @@ use App\Services\Upload\ChunkConfigManager;
 
 final class Base
 {
-    public function build(?string $documentId = null): array
+    public function build(null|string $documentId = null): array
     {
         $imagesConfig = EditorConfigBuilder::images();
         if ($documentId) {
@@ -27,9 +27,7 @@ final class Base
                 ->maxRows(20)
                 ->maxCols(20)
                 ->toArray(),
-            'nestedList' => EditorConfigBuilder::nestedList()
-                ->maxLevel(10)
-                ->toArray(),
+            'nestedList' => EditorConfigBuilder::nestedList()->maxLevel(10)->toArray(),
             'alert' => EditorConfigBuilder::alert()->toArray(),
             'linkTool' => EditorConfigBuilder::linkTool()->toArray(),
             'videoEmbed' => EditorConfigBuilder::videoEmbed()->toArray(),
@@ -40,7 +38,7 @@ final class Base
         ];
     }
 
-    private function buildVideoUploadConfig(?string $documentId)
+    private function buildVideoUploadConfig(null|string $documentId)
     {
         $videoUploadConfig = EditorConfigBuilder::videoUpload()->withChunkConfig(ChunkConfigManager::forVideos(
             'simple',

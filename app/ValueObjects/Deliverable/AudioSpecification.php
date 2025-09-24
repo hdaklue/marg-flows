@@ -25,22 +25,18 @@ final class AudioSpecification implements DeliverableSpecification
         private readonly array $tags,
         private readonly array $requirements,
         private readonly array $constraints = [],
-        private readonly ?int $channels = null,
-        private readonly ?string $codec = null,
-        private readonly ?bool $stereo = null,
+        private readonly null|int $channels = null,
+        private readonly null|string $codec = null,
+        private readonly null|bool $stereo = null,
     ) {
         throw_if(
             $this->durationMin < 0 || $this->durationMax < 0,
-            new InvalidArgumentException(
-                'Duration values must be non-negative.',
-            ),
+            new InvalidArgumentException('Duration values must be non-negative.'),
         );
 
         throw_if(
             $this->durationMin > $this->durationMax,
-            new InvalidArgumentException(
-                'Minimum duration cannot exceed maximum duration.',
-            ),
+            new InvalidArgumentException('Minimum duration cannot exceed maximum duration.'),
         );
     }
 
@@ -118,17 +114,17 @@ final class AudioSpecification implements DeliverableSpecification
         return $this->constraints;
     }
 
-    public function getChannels(): ?int
+    public function getChannels(): null|int
     {
         return $this->channels;
     }
 
-    public function getCodec(): ?string
+    public function getCodec(): null|string
     {
         return $this->codec;
     }
 
-    public function isStereo(): ?bool
+    public function isStereo(): null|bool
     {
         return $this->stereo;
     }
@@ -189,9 +185,7 @@ final class AudioSpecification implements DeliverableSpecification
         $remainingSeconds = $seconds % 60;
 
         if ($minutes < 60) {
-            return $remainingSeconds > 0
-                ? "{$minutes}m {$remainingSeconds}s"
-                : "{$minutes}m";
+            return $remainingSeconds > 0 ? "{$minutes}m {$remainingSeconds}s" : "{$minutes}m";
         }
 
         $hours = intval($minutes / 60);
@@ -213,10 +207,7 @@ final class AudioSpecification implements DeliverableSpecification
         // Validate duration if provided
         if (isset($fileData['duration'])) {
             $duration = (int) $fileData['duration'];
-            if (
-                $duration < $this->durationMin
-                || $duration > $this->durationMax
-            ) {
+            if ($duration < $this->durationMin || $duration > $this->durationMax) {
                 return false;
             }
         }
@@ -271,9 +262,7 @@ final class AudioSpecification implements DeliverableSpecification
 
     public function matchesDuration(int $duration): bool
     {
-        return
-            $duration >= $this->durationMin
-            && $duration <= $this->durationMax;
+        return $duration >= $this->durationMin && $duration <= $this->durationMax;
     }
 
     public function getEstimatedFileSize(int $duration): array
@@ -292,9 +281,10 @@ final class AudioSpecification implements DeliverableSpecification
 
     public function hasRequirement(string $requirement): bool
     {
-        return
+        return (
             isset($this->requirements[$requirement])
-            || in_array($requirement, $this->requirements, true);
+            || in_array($requirement, $this->requirements, true)
+        );
     }
 
     public function getChannelConfiguration(): string
@@ -355,13 +345,14 @@ final class AudioSpecification implements DeliverableSpecification
 
     public function equals(self $other): bool
     {
-        return
+        return (
             $this->name === $other->name
             && $this->durationMin === $other->durationMin
             && $this->durationMax === $other->durationMax
             && $this->format === $other->format
             && $this->bitrate === $other->bitrate
-            && $this->sampleRate === $other->sampleRate;
+            && $this->sampleRate === $other->sampleRate
+        );
     }
 
     private function formatFileSize(float $bytes): string

@@ -7,7 +7,7 @@ use App\Services\Document\ConfigBuilder\Blocks\Objective;
 
 describe('Objective Config Builder', function () {
     it('can create instance with default configuration', function () {
-        $objective = new Objective;
+        $objective = new Objective();
         $config = $objective->build();
 
         expect($config)->toBeInstanceOf(ObjectiveConfigData::class);
@@ -18,7 +18,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('has default configuration values', function () {
-        $objective = new Objective;
+        $objective = new Objective();
         $array = $objective->toArray();
 
         expect($array['config'])->toHaveKey('operators');
@@ -35,7 +35,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can customize operators', function () {
-        $objective = new Objective;
+        $objective = new Objective();
         $customOperators = ['increase', 'decrease'];
 
         $objective->operators($customOperators);
@@ -45,7 +45,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can set default operator', function () {
-        $objective = new Objective;
+        $objective = new Objective();
 
         $objective->defaultOperator('decrease');
         $config = $objective->toArray();
@@ -54,7 +54,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can customize placeholders', function () {
-        $objective = new Objective;
+        $objective = new Objective();
 
         $objective->namePlaceholder('Custom name placeholder');
         $objective->percentagePlaceholder('Custom percentage placeholder');
@@ -65,7 +65,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can set percentage range', function () {
-        $objective = new Objective;
+        $objective = new Objective();
 
         $objective->percentageRange(10, 90);
         $config = $objective->toArray();
@@ -75,7 +75,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can toggle decimal support', function () {
-        $objective = new Objective;
+        $objective = new Objective();
 
         $objective->allowDecimals(false);
         $config = $objective->toArray();
@@ -89,7 +89,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can toggle RTL support', function () {
-        $objective = new Objective;
+        $objective = new Objective();
 
         $objective->rtlSupport(false);
         $config = $objective->toArray();
@@ -103,7 +103,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can customize operator labels', function () {
-        $objective = new Objective;
+        $objective = new Objective();
         $customLabels = [
             'increase' => [
                 'ar' => 'زيادة مخصصة',
@@ -121,7 +121,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can customize shortcut', function () {
-        $objective = new Objective;
+        $objective = new Objective();
 
         $objective->shortcut('CMD+ALT+O');
         $config = $objective->toArray();
@@ -135,7 +135,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can toggle inline toolbar', function () {
-        $objective = new Objective;
+        $objective = new Objective();
 
         $objective->inlineToolBar(true);
         $config = $objective->toArray();
@@ -149,7 +149,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can customize tunes', function () {
-        $objective = new Objective;
+        $objective = new Objective();
         $customTunes = ['commentTune', 'customTune'];
 
         $objective->tunes($customTunes);
@@ -159,7 +159,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can output as JSON', function () {
-        $objective = new Objective;
+        $objective = new Objective();
         $json = $objective->toJson();
 
         expect($json)->toBeString();
@@ -167,7 +167,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can output as pretty JSON', function () {
-        $objective = new Objective;
+        $objective = new Objective();
         $prettyJson = $objective->toPrettyJson();
 
         expect($prettyJson)->toBeString();
@@ -175,7 +175,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('can chain configuration methods', function () {
-        $objective = new Objective;
+        $objective = new Objective();
 
         $result = $objective
             ->operators(['increase', 'decrease'])
@@ -201,7 +201,7 @@ describe('Objective Config Builder', function () {
     });
 
     it('maintains operator labels structure integrity', function () {
-        $objective = new Objective;
+        $objective = new Objective();
         $config = $objective->toArray();
 
         $operatorLabels = $config['config']['operatorLabels'];

@@ -64,7 +64,7 @@ final class AvatarStorageStrategy extends BaseStorageStrategy
     {
         $securePath = $this->buildSecurePath($fileName);
 
-        return Cache::rememberForever(md5($fileName), fn () => Storage::disk($this->getDisk())->url(
+        return Cache::rememberForever(md5($fileName), fn() => Storage::disk($this->getDisk())->url(
             $securePath,
         ));
     }

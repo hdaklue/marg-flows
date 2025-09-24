@@ -90,8 +90,11 @@ final class DocumentCreateTemplateCommand extends Command
         $this->line("   - {$templatePath}/Translations");
     }
 
-    private function generateTemplateClass(string $className, string $templateKey, string $templatePath): void
-    {
+    private function generateTemplateClass(
+        string $className,
+        string $templateKey,
+        string $templatePath,
+    ): void {
         $this->info('📝 Generating template class...');
 
         $namespace = "App\\Services\\Document\\Templates\\{$className}";
@@ -110,50 +113,45 @@ final class DocumentCreateTemplateCommand extends Command
         $this->line("   - {$filePath}");
     }
 
-    private function generateTranslationFiles(string $className, string $templateKey, string $templatePath, string $templateName): void
-    {
+    private function generateTranslationFiles(
+        string $className,
+        string $templateKey,
+        string $templatePath,
+        string $templateName,
+    ): void {
         $this->info('🌐 Generating translation files...');
 
         $translationsPath = "{$templatePath}/Translations";
 
         // Generate English translation
-        $this->generateTranslationFile(
-            'En',
-            $translationsPath,
-            $className,
-            [
-                'templateName' => $templateName,
-                'templateDescription' => "{$templateName} Template",
-            ],
-        );
+        $this->generateTranslationFile('En', $translationsPath, $className, [
+            'templateName' => $templateName,
+            'templateDescription' => "{$templateName} Template",
+        ]);
 
         // Generate Arabic translation
-        $this->generateTranslationFile(
-            'Ar',
-            $translationsPath,
-            $className,
-            [
-                'templateNameAr' => $templateName, // User can customize this
-                'templateDescriptionAr' => "قالب {$templateName}",
-            ],
-        );
+        $this->generateTranslationFile('Ar', $translationsPath, $className, [
+            'templateNameAr' => $templateName, // User can customize this
+            'templateDescriptionAr' => "قالب {$templateName}",
+        ]);
     }
 
-    private function generateTranslationFile(string $locale, string $translationsPath, string $className, array $replacements): void
-    {
+    private function generateTranslationFile(
+        string $locale,
+        string $translationsPath,
+        string $className,
+        array $replacements,
+    ): void {
         $namespace = "App\\Services\\Document\\Templates\\{$className}\\Translations";
         $stubPath = base_path('stubs/translation-' . strtolower($locale) . '.stub');
         $stub = File::get($stubPath);
 
         $replacementKeys = array_merge(
             ['{{ namespace }}'],
-            array_map(fn ($key) => "{{ {$key} }}", array_keys($replacements)),
+            array_map(fn($key) => "{{ {$key} }}", array_keys($replacements)),
         );
 
-        $replacementValues = array_merge(
-            [$namespace],
-            array_values($replacements),
-        );
+        $replacementValues = array_merge([$namespace], array_values($replacements));
 
         $content = str_replace($replacementKeys, $replacementValues, $stub);
 
@@ -172,7 +170,7 @@ final class DocumentCreateTemplateCommand extends Command
 
         // Add use statement if not exists
         $useStatement = "use App\\Services\\Document\\Templates\\{$className}\\{$className};";
-        if (! str_contains($configContent, $useStatement)) {
+        if (!str_contains($configContent, $useStatement)) {
             $configContent = str_replace(
                 "use App\Services\Document\Templates\General\General;",
                 "use App\Services\Document\Templates\General\General;\n{$useStatement}",

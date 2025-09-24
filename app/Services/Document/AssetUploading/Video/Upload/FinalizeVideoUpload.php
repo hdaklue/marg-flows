@@ -42,8 +42,8 @@ final class FinalizeVideoUpload
     public function handle(
         string $videoPath,
         Document $document,
-        ?string $sessionId = null,
-        ?string $fileKey = null,
+        null|string $sessionId = null,
+        null|string $fileKey = null,
     ): array {
         // Set memory limit for video processing
         // ini_set('memory_limit', '512M');
@@ -68,7 +68,7 @@ final class FinalizeVideoUpload
 
                 Log::info('FinalizeVideoUpload: Retrieved metadata from session', [
                     'sessionId' => $sessionId,
-                    'hasMetadata' => ! empty($videoData),
+                    'hasMetadata' => !empty($videoData),
                     'metadata' => $videoData,
                 ]);
             }
@@ -84,7 +84,11 @@ final class FinalizeVideoUpload
 
                     // Update session with metadata if session tracking is enabled
                     if ($sessionId) {
-                        VideoUploadSessionManager::updateProcessingMetadata($sessionId, 'metadata', $videoData);
+                        VideoUploadSessionManager::updateProcessingMetadata(
+                            $sessionId,
+                            'metadata',
+                            $videoData,
+                        );
                     }
                 } catch (Exception $e) {
                     Log::warning('Failed to extract video metadata from remote file', [
@@ -141,8 +145,8 @@ final class FinalizeVideoUpload
     public function failed(
         string $videoPath,
         Document $document,
-        ?string $sessionId,
-        ?string $fileKey,
+        null|string $sessionId,
+        null|string $fileKey,
         Throwable $exception,
     ): void {
         Log::error('Video processing job failed permanently', [

@@ -302,10 +302,7 @@ final class CalendarComponentTest extends TestCase
             'color' => 'emerald-500',
         ]);
 
-        $this->assertEquals(
-            'bg-emerald-500 text-white',
-            $event1->getColorClass(),
-        );
+        $this->assertEquals('bg-emerald-500 text-white', $event1->getColorClass());
         $this->assertEquals('', $event1->getInlineStyle());
 
         // Test hex color
@@ -317,10 +314,7 @@ final class CalendarComponentTest extends TestCase
         ]);
 
         $this->assertEquals('', $event2->getColorClass());
-        $this->assertEquals(
-            'background-color: #ff5722; color: white;',
-            $event2->getInlineStyle(),
-        );
+        $this->assertEquals('background-color: #ff5722; color: white;', $event2->getInlineStyle());
 
         // Test default color
         $event3 = CalendarEventDTO::fromArray([
@@ -381,9 +375,6 @@ final class CalendarComponentTest extends TestCase
         $this->assertArrayHasKey('disabledDates', $config->restrictions);
         $this->assertEquals('2024-01-01', $config->restrictions['minDate']);
         $this->assertEquals('2024-12-31', $config->restrictions['maxDate']);
-        $this->assertContains(
-            '2024-12-25',
-            $config->restrictions['disabledDates'],
-        );
+        $this->assertContains('2024-12-25', $config->restrictions['disabledDates']);
     }
 }

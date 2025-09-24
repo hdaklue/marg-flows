@@ -32,7 +32,7 @@ final class ToastCalendarTest extends Component implements CalendarInterface
      */
     public function toggleViewOnly(): void
     {
-        $this->viewOnly = ! $this->viewOnly;
+        $this->viewOnly = !$this->viewOnly;
         $this->dispatch('show-notification', [
             'message' => $this->viewOnly
                 ? 'Calendar is now in view-only mode'

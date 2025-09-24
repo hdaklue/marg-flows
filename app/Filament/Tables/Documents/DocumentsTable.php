@@ -26,7 +26,7 @@ final class DocumentsTable
             ->records(function ($search) use ($documentable) {
                 return self::getDocuments($documentable, $search);
             })
-            ->recordUrl(fn ($record) => DocumentResource::getUrl('view', [
+            ->recordUrl(fn($record) => DocumentResource::getUrl('view', [
                 'record' => $record['id'],
             ]))
             ->columns([
@@ -36,7 +36,7 @@ final class DocumentsTable
                 ]),
                 TextColumn::make('updated_at')
                     ->label('Last Update')
-                    ->getStateUsing(fn ($record) => toUserDateTime(
+                    ->getStateUsing(fn($record) => toUserDateTime(
                         $record['updated_at'],
                         filamentUser(),
                     )),
@@ -54,7 +54,7 @@ final class DocumentsTable
                     ->color('danger')
                     ->icon(Heroicon::ArchiveBoxArrowDown)
                     ->visible(
-                        fn (array $record) => (
+                        fn(array $record) => (
                             filamentUser()->can('manage', $documentable)
                             && empty($record['archived_at'])
                         ),
@@ -82,9 +82,9 @@ final class DocumentsTable
                     ->color('primary')
                     ->icon(Heroicon::ArrowPath)
                     ->visible(
-                        fn (array $record) => (
+                        fn(array $record) => (
                             filamentUser()->can('manage', $documentable)
-                            && ! empty($record['archived_at'])
+                            && !empty($record['archived_at'])
                         ),
                     )
                     ->action(function (array $record, Component $livewire) {
@@ -117,15 +117,15 @@ final class DocumentsTable
         $canManage = filamentUser()->can('manage', $documentable);
 
         return DocumentManager::getDocumentsForUser($documentable, filamentUser())
-            ->when(! $canManage, function ($collection) {
-                return $collection->filter(fn ($item) => ! $item->isArchived());
+            ->when(!$canManage, function ($collection) {
+                return $collection->filter(fn($item) => !$item->isArchived());
             })
             ->when($search, function ($collection, $term) {
                 return $collection->filter(
-                    fn ($item): bool => stripos($item->name, $term) !== false,
+                    fn($item): bool => stripos($item->name, $term) !== false,
                 );
             })
-            ->keyBy(fn ($item) => $item->getKey())
+            ->keyBy(fn($item) => $item->getKey())
             ->toArray();
     }
 }

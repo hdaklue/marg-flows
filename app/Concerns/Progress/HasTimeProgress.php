@@ -20,9 +20,7 @@ trait HasTimeProgress
             // $this refers to the model
             throw_unless(
                 $model->hasValidProgressDates(),
-                new InvalidArgumentException(
-                    'Model must have valid progress dates',
-                ),
+                new InvalidArgumentException('Model must have valid progress dates'),
             );
         });
 
@@ -30,9 +28,7 @@ trait HasTimeProgress
             // $this refers to the model
             throw_unless(
                 $model->hasValidProgressDates(),
-                new InvalidArgumentException(
-                    'Model must have valid progress dates',
-                ),
+                new InvalidArgumentException('Model must have valid progress dates'),
             );
         });
     }
@@ -83,7 +79,7 @@ trait HasTimeProgress
      * Get the due date for progress calculation
      * Override this method if your due date attribute has a different name.
      */
-    public function getProgressCompletedDate(): ?Carbon
+    public function getProgressCompletedDate(): null|Carbon
     {
         $completedDateAttribute = $this->getProgressCompletedDateAttribute();
 
@@ -113,7 +109,7 @@ trait HasTimeProgress
             // Basic validation: start and due dates must exist and be valid
             $hasValidBasicDates = $dueDate->gte($startDate);
 
-            if (! $hasValidBasicDates) {
+            if (!$hasValidBasicDates) {
                 return false;
             }
 

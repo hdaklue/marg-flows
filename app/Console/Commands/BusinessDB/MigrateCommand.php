@@ -25,20 +25,14 @@ final class MigrateCommand extends Command
 
     public function handle(): int
     {
-        $this->info(
-            'Running migrations on Business Database (business_db connection)...',
-        );
+        $this->info('Running migrations on Business Database (business_db connection)...');
 
         // Get all business-db migration paths
         $businessDbPaths = $this->getBusinessDbMigrationPaths();
 
         if (empty($businessDbPaths)) {
-            $this->warn(
-                'No migrations found in database/migrations/business-db/ folder.',
-            );
-            $this->info(
-                'Create the folder and add your business database migrations there.',
-            );
+            $this->warn('No migrations found in database/migrations/business-db/ folder.');
+            $this->info('Create the folder and add your business database migrations there.');
 
             return 0;
         }
@@ -59,13 +53,11 @@ final class MigrateCommand extends Command
         // Handle different migration operations
         if ($this->option('fresh')) {
             $command = 'migrate:fresh';
-            $this->warn(
-                '⚠️  This will DROP ALL TABLES in the business database!',
-            );
+            $this->warn('⚠️  This will DROP ALL TABLES in the business database!');
 
             if (
-                ! $this->option('force')
-                && ! $this->confirm('Do you really wish to run this command?')
+                !$this->option('force')
+                && !$this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
 
@@ -78,8 +70,8 @@ final class MigrateCommand extends Command
             $this->warn('⚠️  This will rollback ALL migrations!');
 
             if (
-                ! $this->option('force')
-                && ! $this->confirm('Do you really wish to run this command?')
+                !$this->option('force')
+                && !$this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
 
@@ -90,8 +82,8 @@ final class MigrateCommand extends Command
             $this->warn('⚠️  This will reset and re-run all migrations!');
 
             if (
-                ! $this->option('force')
-                && ! $this->confirm('Do you really wish to run this command?')
+                !$this->option('force')
+                && !$this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
 
@@ -111,10 +103,7 @@ final class MigrateCommand extends Command
         // Add any additional paths specified by user
         if ($this->option('additional-path')) {
             $additionalPaths = $this->option('additional-path');
-            $arguments['--path'] = array_merge(
-                $arguments['--path'],
-                $additionalPaths,
-            );
+            $arguments['--path'] = array_merge($arguments['--path'], $additionalPaths);
         }
 
         if ($this->option('realpath')) {
@@ -132,8 +121,7 @@ final class MigrateCommand extends Command
         // Show what we're about to run
         $this->line('');
         $this->comment(
-            "Executing: php artisan {$command} "
-            . $this->buildArgumentsString($arguments),
+            "Executing: php artisan {$command} " . $this->buildArgumentsString($arguments),
         );
         $this->line('');
 
@@ -144,9 +132,7 @@ final class MigrateCommand extends Command
         $this->line(Artisan::output());
 
         if ($exitCode === 0) {
-            $this->info(
-                '✅ Business database migrations completed successfully!',
-            );
+            $this->info('✅ Business database migrations completed successfully!');
         } else {
             $this->error('❌ Business database migrations failed!');
         }
@@ -167,7 +153,7 @@ final class MigrateCommand extends Command
                 foreach ($value as $item) {
                     $parts[] = "{$key}={$item}";
                 }
-            } elseif (! is_bool($value)) {
+            } elseif (!is_bool($value)) {
                 $parts[] = "{$key}={$value}";
             }
         }
@@ -179,7 +165,7 @@ final class MigrateCommand extends Command
     {
         $businessDbPath = database_path('migrations/business-db');
 
-        if (! is_dir($businessDbPath)) {
+        if (!is_dir($businessDbPath)) {
             return [];
         }
 

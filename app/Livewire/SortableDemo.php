@@ -298,7 +298,7 @@ final class SortableDemo extends Component
     public function getAvailableColumnsFor(string $currentColumnId): array
     {
         return collect($this->columns)
-            ->reject(fn ($column) => $column['id'] === $currentColumnId)
+            ->reject(fn($column) => $column['id'] === $currentColumnId)
             ->values()
             ->toArray();
     }
@@ -310,11 +310,8 @@ final class SortableDemo extends Component
         return false;
     }
 
-    public function onSort(
-        array $itemIds,
-        ?string $from = null,
-        ?string $to = null,
-    ): mixed {
+    public function onSort(array $itemIds, null|string $from = null, null|string $to = null): mixed
+    {
         return true;
     }
 
@@ -431,11 +428,8 @@ final class SortableDemo extends Component
     //     throw new RuntimeException('Unable to determine which property to sort');
     // }
 
-    public function onCrossGroupSort(
-        array $itemIds,
-        string $from,
-        string $to,
-    ): array {
+    public function onCrossGroupSort(array $itemIds, string $from, string $to): array
+    {
         logger()->info('onCrossGroupSort called', [
             'itemIds' => $itemIds,
             'from' => $from,
@@ -447,12 +441,7 @@ final class SortableDemo extends Component
 
     public function addTodo(): void
     {
-        $newId = (string) (
-            count($this->todos)
-            + count($this->inProgress)
-            + count($this->done)
-            + 1
-        );
+        $newId = (string) (count($this->todos) + count($this->inProgress) + count($this->done) + 1);
 
         $newTodo = [
             'id' => $newId,
@@ -478,15 +467,15 @@ final class SortableDemo extends Component
             $oldDone = count($this->done);
 
             $this->todos = collect($this->todos)
-                ->reject(fn ($item) => $item['id'] === $itemId)
+                ->reject(fn($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
             $this->inProgress = collect($this->inProgress)
-                ->reject(fn ($item) => $item['id'] === $itemId)
+                ->reject(fn($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
             $this->done = collect($this->done)
-                ->reject(fn ($item) => $item['id'] === $itemId)
+                ->reject(fn($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
 
@@ -506,10 +495,7 @@ final class SortableDemo extends Component
                 'itemId' => $itemId,
                 'error' => $e->getMessage(),
             ]);
-            $this->addError(
-                'remove',
-                'Failed to remove item: ' . $e->getMessage(),
-            );
+            $this->addError('remove', 'Failed to remove item: ' . $e->getMessage());
         }
     }
 
@@ -528,11 +514,8 @@ final class SortableDemo extends Component
         ];
     }
 
-    private function handleCrossGroupMove(
-        array $itemIds,
-        string $from,
-        string $to,
-    ): array {
+    private function handleCrossGroupMove(array $itemIds, string $from, string $to): array
+    {
         $fromProperty = $this->getPropertyFromContainer($from);
         $toProperty = $this->getPropertyFromContainer($to);
 
@@ -544,11 +527,9 @@ final class SortableDemo extends Component
         ]);
 
         $movedItemId = $itemIds[0] ?? null;
-        if (! $movedItemId) {
+        if (!$movedItemId) {
             logger()->error('handleCrossGroupMove failed - no item ID');
-            throw new InvalidArgumentException(
-                'No item ID provided for cross-group sort',
-            );
+            throw new InvalidArgumentException('No item ID provided for cross-group sort');
         }
 
         logger()->info('handleCrossGroupMove moving item', [
@@ -643,28 +624,20 @@ final class SortableDemo extends Component
         };
     }
 
-    private function findAndRemoveItem(
-        string $property,
-        string $itemId,
-    ): ?array {
+    private function findAndRemoveItem(string $property, string $itemId): null|array
+    {
         $items = collect($this->$property);
         $item = $items->firstWhere('id', $itemId);
 
         if ($item) {
-            $this->$property = $items
-                ->reject(fn ($i) => $i['id'] === $itemId)
-                ->values()
-                ->toArray();
+            $this->$property = $items->reject(fn($i) => $i['id'] === $itemId)->values()->toArray();
         }
 
         return $item;
     }
 
-    private function addItemToProperty(
-        string $property,
-        array $item,
-        int $position,
-    ): void {
+    private function addItemToProperty(string $property, array $item, int $position): void
+    {
         $items = collect($this->$property);
 
         if ($position === -1 || $position >= $items->count()) {

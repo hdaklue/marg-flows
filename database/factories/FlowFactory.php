@@ -24,8 +24,7 @@ final class FlowFactory extends Factory
         $statusType = $this->getWeightedStatus();
 
         // Generate predictable dates based on status
-        [$startDate, $dueDate, $completedAt] =
-            $this->generateDatesForStatus($statusType);
+        [$startDate, $dueDate, $completedAt] = $this->generateDatesForStatus($statusType);
 
         return [
             'title' => $this->getProjectTitle(),
@@ -47,14 +46,8 @@ final class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $startDate = $now
-                ->copy()
-                ->addDays(fake()->numberBetween(1, 60))
-                ->startOfDay();
-            $dueDate = $startDate
-                ->copy()
-                ->addDays(fake()->numberBetween(7, 45))
-                ->endOfDay();
+            $startDate = $now->copy()->addDays(fake()->numberBetween(1, 60))->startOfDay();
+            $dueDate = $startDate->copy()->addDays(fake()->numberBetween(7, 45))->endOfDay();
 
             return [
                 'status' => FlowStage::SCHEDULED->value,
@@ -72,14 +65,8 @@ final class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $startDate = $now
-                ->copy()
-                ->subDays(fake()->numberBetween(1, 60))
-                ->startOfDay();
-            $dueDate = $now
-                ->copy()
-                ->addDays(fake()->numberBetween(7, 60))
-                ->endOfDay();
+            $startDate = $now->copy()->subDays(fake()->numberBetween(1, 60))->startOfDay();
+            $dueDate = $now->copy()->addDays(fake()->numberBetween(7, 60))->endOfDay();
 
             return [
                 'status' => FlowStage::ACTIVE->value,
@@ -97,14 +84,8 @@ final class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $dueDate = $now
-                ->copy()
-                ->subDays(fake()->numberBetween(1, 30))
-                ->endOfDay();
-            $startDate = $dueDate
-                ->copy()
-                ->subDays(fake()->numberBetween(14, 60))
-                ->startOfDay();
+            $dueDate = $now->copy()->subDays(fake()->numberBetween(1, 30))->endOfDay();
+            $startDate = $dueDate->copy()->subDays(fake()->numberBetween(14, 60))->startOfDay();
 
             return [
                 'status' => FlowStage::ACTIVE->value, // Active but overdue
@@ -122,14 +103,8 @@ final class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $startDate = $now
-                ->copy()
-                ->subDays(fake()->numberBetween(7, 90))
-                ->startOfDay();
-            $dueDate = $now
-                ->copy()
-                ->addDays(fake()->numberBetween(7, 45))
-                ->endOfDay();
+            $startDate = $now->copy()->subDays(fake()->numberBetween(7, 90))->startOfDay();
+            $dueDate = $now->copy()->addDays(fake()->numberBetween(7, 45))->endOfDay();
 
             return [
                 'status' => FlowStage::PAUSED->value,
@@ -147,10 +122,7 @@ final class FlowFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $now = now();
-            $completedAt = $now->copy()->subDays(fake()->numberBetween(
-                1,
-                90,
-            ))->setTime(
+            $completedAt = $now->copy()->subDays(fake()->numberBetween(1, 90))->setTime(
                 fake()->numberBetween(9, 17),
                 fake()->numberBetween(0, 59),
                 0,
@@ -289,10 +261,7 @@ final class FlowFactory extends Factory
         // Ensure due date is in the future for most active flows
         if ($dueDate->lt($now) && fake()->boolean(70)) {
             // 70% chance to push due date to future if it's in the past
-            $dueDate = $now
-                ->copy()
-                ->addDays(fake()->numberBetween(7, 30))
-                ->endOfDay();
+            $dueDate = $now->copy()->addDays(fake()->numberBetween(7, 30))->endOfDay();
         }
 
         return [$startDate, $dueDate, null];
@@ -329,29 +298,17 @@ final class FlowFactory extends Factory
 
         // Started before completion
         $projectDuration = fake()->numberBetween(7, 90);
-        $startDate = $completedAt
-            ->copy()
-            ->subDays($projectDuration)
-            ->startOfDay();
+        $startDate = $completedAt->copy()->subDays($projectDuration)->startOfDay();
 
         // Due date - 80% completed on time, 20% completed late
         if (fake()->boolean(80)) {
             // Completed on time or early
-            $dueDays = fake()->numberBetween(
-                $projectDuration,
-                $projectDuration + 7,
-            );
+            $dueDays = fake()->numberBetween($projectDuration, $projectDuration + 7);
             $dueDate = $startDate->copy()->addDays($dueDays)->endOfDay();
         } else {
             // Completed late
-            $dueDays = fake()->numberBetween(
-                $projectDuration - 7,
-                $projectDuration - 1,
-            );
-            $dueDate = $startDate
-                ->copy()
-                ->addDays(max(7, $dueDays))
-                ->endOfDay();
+            $dueDays = fake()->numberBetween($projectDuration - 7, $projectDuration - 1);
+            $dueDate = $startDate->copy()->addDays(max(7, $dueDays))->endOfDay();
         }
 
         return [$startDate, $dueDate, $completedAt];
@@ -391,7 +348,7 @@ final class FlowFactory extends Factory
     /**
      * Get predictable project settings.
      */
-    private function getProjectSettings(): ?array
+    private function getProjectSettings(): null|array
     {
         if (fake()->boolean(30)) {
             return null; // 30% chance of no settings
@@ -405,9 +362,7 @@ final class FlowFactory extends Factory
                 'mentions',
                 'none',
             ]),
-            'budget' => fake()->boolean(70)
-                ? fake()->numberBetween(5000, 50000)
-                : null,
+            'budget' => fake()->boolean(70) ? fake()->numberBetween(5000, 50000) : null,
             'priority' => fake()->randomElement(['low', 'medium', 'high']),
         ];
     }

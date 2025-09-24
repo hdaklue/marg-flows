@@ -17,7 +17,7 @@ final class PersonaConfigData extends SimpleDTO implements BlockConfigContract
 
     public array $config;
 
-    public ?string $shortcut;
+    public null|string $shortcut;
 
     protected function defaults(): array
     {

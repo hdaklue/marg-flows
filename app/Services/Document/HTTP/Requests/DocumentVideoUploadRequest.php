@@ -93,7 +93,7 @@ final class DocumentVideoUploadRequest extends FormRequest
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
-                    if (! FileTypes::isStreamableVideo($value)) {
+                    if (!FileTypes::isStreamableVideo($value)) {
                         $fail('File must have a valid video extension (mp4, webm, ogg).');
                     }
                 },

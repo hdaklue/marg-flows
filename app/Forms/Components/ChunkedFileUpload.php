@@ -95,7 +95,7 @@ final class ChunkedFileUpload extends BaseFileUpload
             );
 
             // Set chunk size for images
-            if (! isset($this->chunkSize)) {
+            if (!isset($this->chunkSize)) {
                 $this->chunkSize = $imageConfig['chunk_size'] ?? config(
                     'chunked-upload.default_chunk_size',
                 );
@@ -129,7 +129,7 @@ final class ChunkedFileUpload extends BaseFileUpload
             );
 
             // Set chunk size for videos
-            if (! isset($this->chunkSize)) {
+            if (!isset($this->chunkSize)) {
                 $this->chunkSize = $videoConfig['chunk_size'] ?? config(
                     'chunked-upload.default_chunk_size',
                 );
@@ -171,23 +171,21 @@ final class ChunkedFileUpload extends BaseFileUpload
     public function getChunkSize(): int
     {
         return $this->evaluate(
-            $this->chunkSize ?? config(
-                'chunked-upload.default_chunk_size',
-                5 * 1024 * 1024,
-            ),
+            $this->chunkSize ?? config('chunked-upload.default_chunk_size', 5 * 1024 * 1024),
         );
     }
 
     public function getMaxParallelUploads(): int
     {
-        return
+        return (
             $this->evaluate($this->maxParallelUploads) ?? config(
                 'chunked-upload.max_parallel_uploads',
                 3,
-            );
+            )
+        );
     }
 
-    public function getAlignment(): ?string
+    public function getAlignment(): null|string
     {
         return $this->evaluate($this->alignment);
     }
@@ -224,26 +222,17 @@ final class ChunkedFileUpload extends BaseFileUpload
 
     public function getChunkUploadUrl(): string
     {
-        return route(config(
-            'chunked-upload.routes.store',
-            'chunked-upload.store',
-        ));
+        return route(config('chunked-upload.routes.store', 'chunked-upload.store'));
     }
 
     public function getChunkDeleteUrl(): string
     {
-        return route(config(
-            'chunked-upload.routes.delete',
-            'chunked-upload.delete',
-        ));
+        return route(config('chunked-upload.routes.delete', 'chunked-upload.delete'));
     }
 
     public function getChunkCancelUrl(): string
     {
-        return route(config(
-            'chunked-upload.routes.cancel',
-            'chunked-upload.cancel',
-        ));
+        return route(config('chunked-upload.routes.cancel', 'chunked-upload.cancel'));
     }
 
     public function getChunkSizeFormatted(): string
@@ -264,40 +253,22 @@ final class ChunkedFileUpload extends BaseFileUpload
     {
         return [
             'disk' => config('chunked-upload.storage.disk', 'public'),
-            'tempDir' => config(
-                'chunked-upload.storage.temp_directory',
-                'uploads/temp',
-            ),
-            'finalDir' => config(
-                'chunked-upload.storage.final_directory',
-                'uploads',
-            ),
-            'autoCleanup' => config(
-                'chunked-upload.storage.auto_cleanup',
-                true,
-            ),
+            'tempDir' => config('chunked-upload.storage.temp_directory', 'uploads/temp'),
+            'finalDir' => config('chunked-upload.storage.final_directory', 'uploads'),
+            'autoCleanup' => config('chunked-upload.storage.auto_cleanup', true),
         ];
     }
 
     public function getSecurityConfig(): array
     {
         return [
-            'validateMimeTypes' => config(
-                'chunked-upload.security.validate_mime_types',
-                true,
-            ),
-            'scanForViruses' => config(
-                'chunked-upload.security.scan_for_viruses',
-                false,
-            ),
+            'validateMimeTypes' => config('chunked-upload.security.validate_mime_types', true),
+            'scanForViruses' => config('chunked-upload.security.scan_for_viruses', false),
             'allowedExtensionsOnly' => config(
                 'chunked-upload.security.allowed_extensions_only',
                 true,
             ),
-            'maxFilenameLength' => config(
-                'chunked-upload.security.max_filename_length',
-                255,
-            ),
+            'maxFilenameLength' => config('chunked-upload.security.max_filename_length', 255),
         ];
     }
 

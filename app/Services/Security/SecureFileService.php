@@ -32,10 +32,10 @@ final class SecureFileService
      * Default expiration times in seconds for different file types.
      */
     private const array DEFAULT_EXPIRATION_TIMES = [
-        'avatars' => 3600,     // 1 hour for avatars (cached heavily)
-        'documents' => 1800,   // 30 minutes for document files
-        'images' => 1800,      // 30 minutes for images
-        'videos' => 7200,      // 2 hours for videos (larger files)
+        'avatars' => 3600, // 1 hour for avatars (cached heavily)
+        'documents' => 1800, // 30 minutes for document files
+        'images' => 1800, // 30 minutes for images
+        'videos' => 7200, // 2 hours for videos (larger files)
     ];
 
     /**
@@ -71,7 +71,7 @@ final class SecureFileService
         string $fileName,
         string $tenantId,
         string $fileType,
-        ?int $expiresIn = null,
+        null|int $expiresIn = null,
     ): string {
         $strategy = $this->getStorageStrategy($tenantId, $fileType);
         $expiration = $expiresIn ?? $this->getDefaultExpirationTime($fileType);
@@ -96,7 +96,10 @@ final class SecureFileService
     ): bool {
         // Check tenant access
         $hashedTenantId = LaraPath::base($tenantId, SanitizationStrategy::HASHED)->toString();
-        $hashedUserTenantId = LaraPath::base($userTenantId, SanitizationStrategy::HASHED)->toString();
+        $hashedUserTenantId = LaraPath::base(
+            $userTenantId,
+            SanitizationStrategy::HASHED,
+        )->toString();
 
         if ($hashedTenantId !== $hashedUserTenantId) {
             return false;
@@ -130,7 +133,7 @@ final class SecureFileService
      * @param  int|null  $expiresIn  Optional custom expiration time
      * @return array Array of temporary URLs indexed by filename
      */
-    public function getBatchTemporaryUrls(array $files, ?int $expiresIn = null): array
+    public function getBatchTemporaryUrls(array $files, null|int $expiresIn = null): array
     {
         $urls = [];
 
@@ -172,6 +175,8 @@ final class SecureFileService
      */
     private function getDefaultExpirationTime(string $fileType): int
     {
-        return self::DEFAULT_EXPIRATION_TIMES[$fileType] ?? self::DEFAULT_EXPIRATION_TIMES['documents'];
+        return (
+            self::DEFAULT_EXPIRATION_TIMES[$fileType] ?? self::DEFAULT_EXPIRATION_TIMES['documents']
+        );
     }
 }

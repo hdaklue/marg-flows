@@ -22,11 +22,11 @@ final class VideoOperationPipeline
 
     private bool $forceTranscoding = false;
 
-    private ?VideoFormatContract $convertFormat = null;
+    private null|VideoFormatContract $convertFormat = null;
 
-    private ?BitrateEnum $convertBitrate = null;
+    private null|BitrateEnum $convertBitrate = null;
 
-    private ?int $forcedBitrate = null;
+    private null|int $forcedBitrate = null;
 
     public function __construct(
         private readonly string $sourcePath,
@@ -52,7 +52,7 @@ final class VideoOperationPipeline
     public function addOperations(array $operations): self
     {
         foreach ($operations as $operation) {
-            if (! $operation instanceof VideoOperationContract) {
+            if (!$operation instanceof VideoOperationContract) {
                 throw new InvalidArgumentException(
                     'All operations must implement VideoOperationContract',
                 );
@@ -69,7 +69,7 @@ final class VideoOperationPipeline
      */
     public function setConvertFormat(
         VideoFormatContract $format,
-        ?BitrateEnum $bitrate = null,
+        null|BitrateEnum $bitrate = null,
     ): self {
         $this->convertFormat = $format;
         $this->convertBitrate = $bitrate;
@@ -85,16 +85,8 @@ final class VideoOperationPipeline
     {
         $this->executionLog = [];
 
-        $exporter = new VideoPipelineExporter(
-            $this,
-            $this->sourcePath,
-            $this->disk,
-        );
-        $finalPath = $exporter->export(
-            $outputPath,
-            $this->convertFormat,
-            $this->convertBitrate,
-        );
+        $exporter = new VideoPipelineExporter($this, $this->sourcePath, $this->disk);
+        $finalPath = $exporter->export($outputPath, $this->convertFormat, $this->convertBitrate);
 
         $this->logPipelineCompletion($finalPath);
 
@@ -130,13 +122,13 @@ final class VideoOperationPipeline
      */
     public function getOperationsMetadata(): array
     {
-        return array_map(fn ($op) => $op->getMetadata(), $this->operations);
+        return array_map(fn($op) => $op->getMetadata(), $this->operations);
     }
 
     /**
      * Force transcoding even if operations might not require it.
      */
-    public function forceTranscoding(?int $bitrate = null): self
+    public function forceTranscoding(null|int $bitrate = null): self
     {
         $this->forceTranscoding = true;
         if ($bitrate) {
@@ -183,10 +175,8 @@ final class VideoOperationPipeline
     /**
      * Log skipped operation.
      */
-    private function logSkippedOperation(
-        VideoOperationContract $operation,
-        string $reason,
-    ): void {
+    private function logSkippedOperation(VideoOperationContract $operation, string $reason): void
+    {
         $this->executionLog[] = [
             'operation' => $operation->getName(),
             'status' => 'skipped',

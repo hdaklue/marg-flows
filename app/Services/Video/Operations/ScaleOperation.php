@@ -24,16 +24,11 @@ final class ScaleOperation extends AbstractVideoOperation
 
     public function execute(MediaExporter $mediaExporter): MediaExporter
     {
-        $finalDimension = $this->strategy->apply(
-            $this->currentDimension,
-            $this->currentDimension,
-        );
+        $finalDimension = $this->strategy->apply($this->currentDimension, $this->currentDimension);
 
         $this->metadata['final_dimension'] = $finalDimension->toArray();
 
-        return $mediaExporter->addFilter(function ($filters) use (
-            $finalDimension,
-        ) {
+        return $mediaExporter->addFilter(function ($filters) use ($finalDimension) {
             $filters->resize(
                 new \FFMpeg\Coordinate\Dimension(
                     $finalDimension->getWidth(),
@@ -51,10 +46,7 @@ final class ScaleOperation extends AbstractVideoOperation
 
     public function applyToBuilder(MediaExporter $builder): MediaExporter
     {
-        $finalDimension = $this->strategy->apply(
-            $this->currentDimension,
-            $this->currentDimension,
-        );
+        $finalDimension = $this->strategy->apply($this->currentDimension, $this->currentDimension);
 
         $this->metadata['final_dimension'] = $finalDimension->toArray();
 
@@ -71,10 +63,7 @@ final class ScaleOperation extends AbstractVideoOperation
 
     public function applyToMedia(MediaOpener $media): MediaOpener
     {
-        $finalDimension = $this->strategy->apply(
-            $this->currentDimension,
-            $this->currentDimension,
-        );
+        $finalDimension = $this->strategy->apply($this->currentDimension, $this->currentDimension);
 
         $this->metadata['final_dimension'] = $finalDimension->toArray();
 

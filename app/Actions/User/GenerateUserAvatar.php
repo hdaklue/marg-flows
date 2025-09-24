@@ -25,20 +25,14 @@ final class GenerateUserAvatar
         // Download image using Laravel's HTTP client with timeout
         $response = Http::timeout(30)->get($url);
 
-        throw_if(
-            $response->failed(),
-            new Exception("Failed to download image from URL: {$url}"),
-        );
+        throw_if($response->failed(), new Exception("Failed to download image from URL: {$url}"));
 
         // Detect file extension from content type or URL
         $extension = $this->detectExtension($response, $url);
         $fileName = $this->generateFileName($user, $extension);
 
         // Validate that we got image content
-        throw_if(
-            empty($response->body()),
-            new Exception("Empty response body from URL: {$url}"),
-        );
+        throw_if(empty($response->body()), new Exception("Empty response body from URL: {$url}"));
 
         // Process content based on file type
         $content = $response->body();
@@ -51,10 +45,8 @@ final class GenerateUserAvatar
         $user->updateProfileAvatar($avatarFileName);
     }
 
-    private function generateFileName(
-        User $user,
-        string $extension = 'svg',
-    ): string {
+    private function generateFileName(User $user, string $extension = 'svg'): string
+    {
         return AvatarService::generateFileName($user) . '.' . $extension;
     }
 
@@ -65,10 +57,11 @@ final class GenerateUserAvatar
         if ($contentType) {
             $extension = match (true) {
                 str_contains($contentType, 'image/svg+xml')
-                    || str_contains($contentType, 'image/svg') => 'svg',
+                    || str_contains($contentType, 'image/svg')
+                    => 'svg',
                 str_contains($contentType, 'image/png') => 'png',
-                str_contains($contentType, 'image/jpeg')
-                    || str_contains($contentType, 'image/jpg') => 'jpg',
+                str_contains($contentType, 'image/jpeg') || str_contains($contentType, 'image/jpg')
+                    => 'jpg',
                 str_contains($contentType, 'image/gif') => 'gif',
                 str_contains($contentType, 'image/webp') => 'webp',
                 default => null,
@@ -80,10 +73,7 @@ final class GenerateUserAvatar
         }
 
         // Fallback: try to detect from URL
-        $urlExtension = pathinfo(
-            parse_url($url, PHP_URL_PATH),
-            PATHINFO_EXTENSION,
-        );
+        $urlExtension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
         if (in_array(strtolower($urlExtension), [
             'svg',
             'png',
@@ -112,11 +102,8 @@ final class GenerateUserAvatar
 
         // Basic SVG validation - should start with XML declaration or <svg tag
         throw_if(
-            ! str_starts_with($content, '<?xml')
-            && ! str_starts_with($content, '<svg'),
-            new Exception(
-                'Invalid SVG content: does not start with XML declaration or <svg> tag',
-            ),
+            !str_starts_with($content, '<?xml') && !str_starts_with($content, '<svg'),
+            new Exception('Invalid SVG content: does not start with XML declaration or <svg> tag'),
         );
 
         // Try to load as XML to validate structure
@@ -125,14 +112,10 @@ final class GenerateUserAvatar
 
         if ($doc === false) {
             $errors = libxml_get_errors();
-            $errorMessages = array_map(
-                fn ($error) => trim($error->message),
-                $errors,
-            );
+            $errorMessages = array_map(fn($error) => trim($error->message), $errors);
             libxml_clear_errors();
 
-            throw new Exception('Invalid SVG XML structure: '
-            . implode(', ', $errorMessages));
+            throw new Exception('Invalid SVG XML structure: ' . implode(', ', $errorMessages));
         }
 
         libxml_clear_errors();

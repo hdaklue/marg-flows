@@ -23,10 +23,7 @@ trait BelongsToTenant
 
             $tenantId = static::resolveTenantId();
 
-            throw_unless(
-                $tenantId,
-                new Exception('Cannot resolve tenant for creating model'),
-            );
+            throw_unless($tenantId, new Exception('Cannot resolve tenant for creating model'));
 
             $model->tenant_id = $tenantId;
         });

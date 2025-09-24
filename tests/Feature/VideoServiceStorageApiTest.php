@@ -26,7 +26,7 @@ it('demonstrates using video service API with storage paths', function () {
     $editor = new VideoEditor($storagePath, false, 'local');
 
     // Step 2: Apply conversion using the fluent API
-    $editor->convert(new Conversion720p);
+    $editor->convert(new Conversion720p());
 
     // Step 3: Verify the operation was queued
     $operations = $editor->getOperations();
@@ -49,8 +49,8 @@ it('demonstrates multiple conversions from storage with fluent API', function ()
 
     // Create multiple quality versions from storage
     $conversions = [
-        '720p' => new Conversion720p,
-        '480p' => new Conversion480p,
+        '720p' => new Conversion720p(),
+        '480p' => new Conversion480p(),
     ];
 
     $results = [];
@@ -97,7 +97,7 @@ it('demonstrates complex video processing from storage using API', function () {
     $result = $editor
         ->trim(30, 120)
         ->resize(new Dimension(1280, 720))
-        ->convert(new Conversion720p)
+        ->convert(new Conversion720p())
         ->setFrameRate(30); // Extract 2 minutes starting at 30s // Resize to 720p // Apply 720p conversion settings // Standardize frame rate
 
     // Verify the complete chain
@@ -125,7 +125,7 @@ it('demonstrates storage disk configuration with API', function () {
         $editor = new VideoEditor($videoPath, false, $disk);
 
         // Apply conversion
-        $editor->convert(new Conversion720p);
+        $editor->convert(new Conversion720p());
 
         // Verify configuration
         expect($editor->getSourcePath())->toBe($videoPath);
@@ -143,7 +143,7 @@ it('simulates real API workflow for video processing from storage', function () 
         // Step 1: Get video path from storage (simulated)
         'source' => 'videos/uploads/user-video-' . uniqid() . '.mp4',
         // Step 2: Choose conversion based on requirements
-        'conversion' => new Conversion720p,
+        'conversion' => new Conversion720p(),
         // Step 3: Define output path
         'output' => 'videos/processed/converted-' . uniqid() . '.mp4',
     ];

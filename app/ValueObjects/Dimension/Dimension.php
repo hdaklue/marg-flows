@@ -24,9 +24,7 @@ final class Dimension implements Arrayable, Jsonable
     {
         throw_if(
             $width <= 0 || $height <= 0,
-            new InvalidArgumentException(
-                'Width and height should be positive integer',
-            ),
+            new InvalidArgumentException('Width and height should be positive integer'),
         );
 
         $this->width = (int) $width;

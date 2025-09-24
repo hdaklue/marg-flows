@@ -42,7 +42,7 @@ final class DocumentVersionFactory extends Factory
      */
     public function empty(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'content' => ['blocks' => []],
         ]);
     }
@@ -52,7 +52,7 @@ final class DocumentVersionFactory extends Factory
      */
     public function complex(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'content' => [
                 'blocks' => [
                     [

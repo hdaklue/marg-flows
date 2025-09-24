@@ -133,10 +133,11 @@ final class ChunkedUploadResponse
      */
     public static function expectsJson(): bool
     {
-        return
+        return (
             request()->expectsJson()
             || request()->ajax()
             || request()->header('Content-Type') === 'application/json'
-            || str_contains(request()->header('Accept', ''), 'application/json');
+            || str_contains(request()->header('Accept', ''), 'application/json')
+        );
     }
 }

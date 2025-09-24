@@ -19,9 +19,9 @@ final class DocumentVersionsModal extends ModalComponent
     #[Locked]
     public string $documentId;
 
-    public ?string $selectedVersionId = null;
+    public null|string $selectedVersionId = null;
 
-    public ?string $currentEditingVersion = null;
+    public null|string $currentEditingVersion = null;
 
     public int $page = 1;
 
@@ -52,17 +52,21 @@ final class DocumentVersionsModal extends ModalComponent
         return true;
     }
 
-    public function mount(string $documentId, ?string $currentEditingVersion = null, ?string $previewVersionId = null): void
-    {
+    public function mount(
+        string $documentId,
+        null|string $currentEditingVersion = null,
+        null|string $previewVersionId = null,
+    ): void {
         $this->documentId = $documentId;
         $this->currentEditingVersion = $currentEditingVersion;
-        $this->loadedVersions = new Collection;
+        $this->loadedVersions = new Collection();
 
         // Load initial versions
         $this->loadMoreVersions();
 
         // Set initial selected version (preview if provided, otherwise current editing)
-        $this->selectedVersionId = $previewVersionId ?? $currentEditingVersion ?? $this->loadedVersions->first()?->id;
+        $this->selectedVersionId =
+            $previewVersionId ?? $currentEditingVersion ?? $this->loadedVersions->first()?->id;
     }
 
     public function selectVersion(string $versionId): void
@@ -72,7 +76,7 @@ final class DocumentVersionsModal extends ModalComponent
 
     public function loadMoreVersions(): void
     {
-        if (! $this->hasMoreVersions || $this->isLoading) {
+        if (!$this->hasMoreVersions || $this->isLoading) {
             return;
         }
 
@@ -95,9 +99,9 @@ final class DocumentVersionsModal extends ModalComponent
     }
 
     #[Computed]
-    public function selectedVersion(): ?DocumentVersion
+    public function selectedVersion(): null|DocumentVersion
     {
-        if (! $this->selectedVersionId) {
+        if (!$this->selectedVersionId) {
             return null;
         }
 
@@ -163,7 +167,7 @@ final class DocumentVersionsModal extends ModalComponent
 
     public function toggleSidebar(): void
     {
-        $this->sidebarCollapsed = ! $this->sidebarCollapsed;
+        $this->sidebarCollapsed = !$this->sidebarCollapsed;
     }
 
     public function applyVersion(string $versionId): void
@@ -187,7 +191,7 @@ final class DocumentVersionsModal extends ModalComponent
     {
         $this->page = 1;
         $this->hasMoreVersions = true;
-        $this->loadedVersions = new Collection;
+        $this->loadedVersions = new Collection();
         $this->loadMoreVersions();
 
         // Update selected version if it was the current editing one

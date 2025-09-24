@@ -25,9 +25,8 @@ final class FeedbackFactory extends Factory
             'content' => fake()->paragraph(),
             'metadata' => $this->createDocumentBlockMetadata(),
             'feedbackable_type' => Relation::getMorphAlias(Document::class),
-            'feedbackable_id' => fn () => (
-                Document::inRandomOrder()->first()?->id
-                ?? Document::factory()->create()->id
+            'feedbackable_id' => fn() => (
+                Document::inRandomOrder()->first()?->id ?? Document::factory()->create()->id
             ),
             'status' => fake()->randomElement(FeedbackStatus::cases()),
             'resolution' => null,
@@ -38,35 +37,35 @@ final class FeedbackFactory extends Factory
 
     public function documentBlock(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'metadata' => $this->createDocumentBlockMetadata(),
         ]);
     }
 
     public function audioRegion(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'metadata' => $this->createAudioRegionMetadata(),
         ]);
     }
 
     public function videoRegion(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'metadata' => $this->createVideoRegionMetadata(),
         ]);
     }
 
     public function videoFrame(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'metadata' => $this->createVideoFrameMetadata(),
         ]);
     }
 
     public function open(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => FeedbackStatus::OPEN,
             'resolution' => null,
             'resolved_by' => null,
@@ -76,7 +75,7 @@ final class FeedbackFactory extends Factory
 
     public function resolved(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => FeedbackStatus::RESOLVED,
             'resolution' => fake()->sentence(),
             'resolved_by' => User::factory(),
@@ -86,21 +85,21 @@ final class FeedbackFactory extends Factory
 
     public function urgent(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => FeedbackStatus::URGENT,
         ]);
     }
 
     public function inProgress(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => FeedbackStatus::IN_PROGRESS,
         ]);
     }
 
     public function rejected(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => FeedbackStatus::REJECTED,
             'resolution' => 'Feedback was rejected: ' . fake()->sentence(),
             'resolved_by' => User::factory(),
@@ -110,7 +109,7 @@ final class FeedbackFactory extends Factory
 
     public function forPage(Document $page): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'feedbackable_type' => Relation::getMorphAlias(Document::class),
             'feedbackable_id' => $page->id,
         ]);
@@ -118,7 +117,7 @@ final class FeedbackFactory extends Factory
 
     public function byCreator(User $creator): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'creator_id' => $creator->id,
         ]);
     }

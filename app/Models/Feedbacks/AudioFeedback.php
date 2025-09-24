@@ -132,10 +132,7 @@ final class AudioFeedback extends Model implements HasMentionsContract
 
     public function getTimeDisplay(): string
     {
-        return
-            $this->formatTime($this->start_time)
-            . ' - '
-            . $this->formatTime($this->end_time);
+        return $this->formatTime($this->start_time) . ' - ' . $this->formatTime($this->end_time);
     }
 
     public function getDurationDisplay(): string
@@ -179,12 +176,12 @@ final class AudioFeedback extends Model implements HasMentionsContract
 
     public function hasWaveformData(): bool
     {
-        return ! empty($this->waveform_data);
+        return !empty($this->waveform_data);
     }
 
     public function hasFrequencyData(): bool
     {
-        return ! empty($this->frequency_data);
+        return !empty($this->frequency_data);
     }
 
     public function hasAmplitudeData(): bool
@@ -194,16 +191,12 @@ final class AudioFeedback extends Model implements HasMentionsContract
 
     public function isHighAmplitude(float $threshold = 0.7): bool
     {
-        return
-            $this->peak_amplitude !== null
-            && $this->peak_amplitude >= $threshold;
+        return $this->peak_amplitude !== null && $this->peak_amplitude >= $threshold;
     }
 
     public function isLowAmplitude(float $threshold = 0.3): bool
     {
-        return
-            $this->peak_amplitude !== null
-            && $this->peak_amplitude <= $threshold;
+        return $this->peak_amplitude !== null && $this->peak_amplitude <= $threshold;
     }
 
     public function getAmplitudeLevel(): string
@@ -251,22 +244,13 @@ final class AudioFeedback extends Model implements HasMentionsContract
     }
 
     // Type-specific scopes
-    protected function scopeAtTimestamp(
-        Builder $query,
-        float $timestamp,
-    ): Builder {
-        return $query->where('start_time', '<=', $timestamp)->where(
-            'end_time',
-            '>=',
-            $timestamp,
-        );
+    protected function scopeAtTimestamp(Builder $query, float $timestamp): Builder
+    {
+        return $query->where('start_time', '<=', $timestamp)->where('end_time', '>=', $timestamp);
     }
 
-    protected function scopeInTimeRange(
-        Builder $query,
-        float $startTime,
-        float $endTime,
-    ): Builder {
+    protected function scopeInTimeRange(Builder $query, float $startTime, float $endTime): Builder
+    {
         return $query->where(function ($q) use ($startTime, $endTime) {
             // Feedback that overlaps with the given range
             $q
@@ -286,7 +270,7 @@ final class AudioFeedback extends Model implements HasMentionsContract
     protected function scopeByDuration(
         Builder $query,
         float $minDuration,
-        ?float $maxDuration = null,
+        null|float $maxDuration = null,
     ): Builder {
         $query->whereRaw('(end_time - start_time) >= ?', [$minDuration]);
 
@@ -297,38 +281,25 @@ final class AudioFeedback extends Model implements HasMentionsContract
         return $query;
     }
 
-    protected function scopeShortClips(
-        Builder $query,
-        float $maxDuration = 5.0,
-    ): Builder {
+    protected function scopeShortClips(Builder $query, float $maxDuration = 5.0): Builder
+    {
         return $query->whereRaw('(end_time - start_time) <= ?', [$maxDuration]);
     }
 
-    protected function scopeLongClips(
-        Builder $query,
-        float $minDuration = 30.0,
-    ): Builder {
+    protected function scopeLongClips(Builder $query, float $minDuration = 30.0): Builder
+    {
         return $query->whereRaw('(end_time - start_time) >= ?', [$minDuration]);
     }
 
-    protected function scopeWithHighAmplitude(
-        Builder $query,
-        float $minAmplitude = 0.7,
-    ): Builder {
+    protected function scopeWithHighAmplitude(Builder $query, float $minAmplitude = 0.7): Builder
+    {
         return $query->where('peak_amplitude', '>=', $minAmplitude);
     }
 
-    protected function scopeOverlapping(
-        Builder $query,
-        float $startTime,
-        float $endTime,
-    ): Builder {
+    protected function scopeOverlapping(Builder $query, float $startTime, float $endTime): Builder
+    {
         return $query->where(function ($q) use ($startTime, $endTime) {
-            $q->where('start_time', '<', $endTime)->where(
-                'end_time',
-                '>',
-                $startTime,
-            );
+            $q->where('start_time', '<', $endTime)->where('end_time', '>', $startTime);
         });
     }
 

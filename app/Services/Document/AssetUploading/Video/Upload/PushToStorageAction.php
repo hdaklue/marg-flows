@@ -31,8 +31,8 @@ final class PushToStorageAction
     public function handle(
         string $localFinalPath,
         Document $document,
-        ?string $videoSessionId = null,
-        ?array $videoMetadata = null,
+        null|string $videoSessionId = null,
+        null|array $videoMetadata = null,
     ): string {
         try {
             Log::info('Starting push to storage', [
@@ -68,7 +68,11 @@ final class PushToStorageAction
                 );
 
                 // Dispatch final processing job
-                FinalizeVideoUpload::dispatch($remoteFinalPath, $document, $videoSessionId)->onQueue('document-video-upload');
+                FinalizeVideoUpload::dispatch(
+                    $remoteFinalPath,
+                    $document,
+                    $videoSessionId,
+                )->onQueue('document-video-upload');
             } else {
                 Log::info('No video session ID provided, using fallback processing', [
                     'remotePath' => $remoteFinalPath,
@@ -76,7 +80,9 @@ final class PushToStorageAction
                 ]);
 
                 // Fallback for old behavior without session tracking
-                FinalizeVideoUpload::dispatch($remoteFinalPath, $document)->onQueue('document-video-upload');
+                FinalizeVideoUpload::dispatch($remoteFinalPath, $document)->onQueue(
+                    'document-video-upload',
+                );
             }
 
             return $remoteFinalPath;
@@ -124,13 +130,13 @@ final class PushToStorageAction
 
         // Read from local chunks disk and write to document disk using streaming
         $localStream = Storage::disk($chunksDisk)->readStream($localPath);
-        if (! $localStream) {
+        if (!$localStream) {
             throw new Exception("Failed to read assembled file from local storage: {$localPath}");
         }
 
         try {
             $success = Storage::disk($documentDisk)->writeStream($remotePath, $localStream);
-            if (! $success) {
+            if (!$success) {
                 throw new Exception(
                     "Failed to upload assembled file to document storage: {$remotePath}",
                 );

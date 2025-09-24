@@ -19,7 +19,7 @@ final class RecentableData extends SimpleDTO
 
     public string $url;
 
-    public ?string $color;
+    public null|string $color;
 
     public static function fromRecentable(Recentable $recentable, Tenant $tenant): static
     {
@@ -34,9 +34,7 @@ final class RecentableData extends SimpleDTO
 
     public static function color(string $type): string
     {
-        return match ($type) {
-            default => 'zinc',
-        };
+        return match ($type) { default => 'zinc' };
     }
 
     protected static function resolveUrl(Recentable $recentable, Tenant $tenant)

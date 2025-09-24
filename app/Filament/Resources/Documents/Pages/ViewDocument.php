@@ -22,7 +22,7 @@ final class ViewDocument extends ViewRecord
 {
     protected static string $resource = DocumentResource::class;
 
-    public ?array $data = [];
+    public null|array $data = [];
 
     public Width|string|null $maxContentWidth = 'full';
 
@@ -74,7 +74,7 @@ final class ViewDocument extends ViewRecord
                 ->afterStateUpdated(function ($state, $livewire) {
                     $livewire->validate();
 
-                    if (! $this->canEdit() || blank($state)) {
+                    if (!$this->canEdit() || blank($state)) {
                         return;
                     }
 

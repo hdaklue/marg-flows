@@ -54,10 +54,9 @@ test('user can delete their account', function () {
 
     $this->actingAs($user);
 
-    $response = Livewire::test('settings.delete-user-form')->set(
-        'password',
-        'password',
-    )->call('deleteUser');
+    $response = Livewire::test('settings.delete-user-form')->set('password', 'password')->call(
+        'deleteUser',
+    );
 
     $response->assertHasNoErrors()->assertRedirect('/');
 

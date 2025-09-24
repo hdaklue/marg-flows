@@ -23,10 +23,7 @@ it('demonstrates complete video service API workflow', function () {
     $editor = new VideoEditor($sourcePath);
 
     // Chain multiple operations using fluent API
-    $editor
-        ->trim(10, 30)
-        ->resize(new Dimension(1280, 720))
-        ->convert(new Conversion720p); // Trim from 10s to 30s duration // Resize to 720p dimensions // Apply 720p conversion
+    $editor->trim(10, 30)->resize(new Dimension(1280, 720))->convert(new Conversion720p()); // Trim from 10s to 30s duration // Resize to 720p dimensions // Apply 720p conversion
 
     // Verify all operations were queued
     $operations = $editor->getOperations();
@@ -46,8 +43,8 @@ it('demonstrates multiple conversion workflow', function () {
 
     // Create multiple conversions from the same source
     $conversions = [
-        new Conversion720p,
-        new Conversion480p,
+        new Conversion720p(),
+        new Conversion480p(),
     ];
 
     $results = [];
@@ -94,15 +91,12 @@ it('demonstrates complex video manipulation chain', function () {
         ->resize(new Dimension(1920, 1080))
         ->crop(100, 100, new Dimension(1720, 880))
         ->watermark($watermarkPath, 'bottom-right', 0.8)
-        ->convert(new Conversion720p)
+        ->convert(new Conversion720p())
         ->setFrameRate(30); // Extract 40 seconds starting at 5s // Resize to Full HD // Crop with 100px margin // Add watermark // Convert to 720p // Set frame rate
 
     $operations = $editor->getOperations();
 
-    expect($result)
-        ->toBeInstanceOf(VideoEditor::class)
-        ->and(count($operations))
-        ->toBe(6);
+    expect($result)->toBeInstanceOf(VideoEditor::class)->and(count($operations))->toBe(6);
 
     // Verify operation types and order
     $operationTypes = array_column($operations, 'type');
@@ -142,19 +136,10 @@ it('demonstrates dimension calculations and constraints', function () {
     ];
 
     foreach ($scenarios as $scenario) {
-        $sourceDim = new Dimension(
-            $scenario['source'][0],
-            $scenario['source'][1],
-        );
-        $targetDim = new Dimension(
-            $scenario['target'][0],
-            $scenario['target'][1],
-        );
+        $sourceDim = new Dimension($scenario['source'][0], $scenario['source'][1]);
+        $targetDim = new Dimension($scenario['target'][0], $scenario['target'][1]);
 
-        $scaledDim = $sourceDim->scaleTo(
-            $targetDim->getWidth(),
-            $targetDim->getHeight(),
-        );
+        $scaledDim = $sourceDim->scaleTo($targetDim->getWidth(), $targetDim->getHeight());
 
         // Verify scaled dimensions are valid
         expect($scaledDim)
@@ -168,8 +153,8 @@ it('demonstrates dimension calculations and constraints', function () {
 
 it('demonstrates conversion constraints and quality settings', function () {
     $conversions = [
-        new Conversion720p,
-        new Conversion480p,
+        new Conversion720p(),
+        new Conversion480p(),
     ];
 
     // Test scale-up prevention
@@ -179,10 +164,7 @@ it('demonstrates conversion constraints and quality settings', function () {
         $wouldScaleUp = $conversion->wouldScaleUp($smallDimension);
         $finalDimension = $conversion->calculateFinalDimension($smallDimension);
 
-        expect($wouldScaleUp)
-            ->toBeBool()
-            ->and($finalDimension)
-            ->toBeInstanceOf(Dimension::class);
+        expect($wouldScaleUp)->toBeBool()->and($finalDimension)->toBeInstanceOf(Dimension::class);
 
         // Test conversion properties
         expect($conversion->getFormat())
@@ -201,10 +183,7 @@ it('can simulate video processing with operation pipeline', function () {
     $editor = new VideoEditor($sourcePath);
 
     // Build a complete processing pipeline
-    $editor
-        ->trim(0, 60)
-        ->resize(new Dimension(1280, 720))
-        ->convert(new Conversion720p); // First minute // Standardize to 720p // Apply quality conversion
+    $editor->trim(0, 60)->resize(new Dimension(1280, 720))->convert(new Conversion720p()); // First minute // Standardize to 720p // Apply quality conversion
 
     // Get the operations that would be executed
     $operations = $editor->getOperations();
@@ -213,10 +192,7 @@ it('can simulate video processing with operation pipeline', function () {
 
     // Verify each operation has the expected structure
     foreach ($operations as $operation) {
-        expect($operation)
-            ->toBeArray()
-            ->and(array_key_exists('type', $operation))
-            ->toBeTrue();
+        expect($operation)->toBeArray()->and(array_key_exists('type', $operation))->toBeTrue();
     }
 
     // Simulate getting source path (as would be used in actual processing)

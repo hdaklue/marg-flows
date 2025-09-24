@@ -29,18 +29,9 @@ final class Resolution144p extends AbstractResolution
         // Constraints for 144p (ultra low quality) - adjust based on orientation
         $this->maxDimension = $this->resolution->dimension;
         $this->minDimension = match ($orientation) {
-            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(
-                96,
-                144,
-            ),
-            'square' => \App\Services\Video\ValueObjects\Dimension::from(
-                96,
-                96,
-            ),
-            default => \App\Services\Video\ValueObjects\Dimension::from(
-                144,
-                96,
-            ),
+            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(96, 144),
+            'square' => \App\Services\Video\ValueObjects\Dimension::from(96, 96),
+            default => \App\Services\Video\ValueObjects\Dimension::from(144, 96),
         };
     }
 
@@ -52,10 +43,8 @@ final class Resolution144p extends AbstractResolution
     /**
      * Create Resolution144p based on source video orientation.
      */
-    public static function forOrientation(
-        string $orientation,
-        bool $allowScaleUp = true,
-    ): self {
+    public static function forOrientation(string $orientation, bool $allowScaleUp = true): self
+    {
         return new self($orientation, $allowScaleUp);
     }
 
@@ -70,10 +59,7 @@ final class Resolution144p extends AbstractResolution
     {
         // Create ResizeFilter directly instead of using closure
         return new ResizeFilter(
-            new Dimension(
-                $this->dimension->getWidth(),
-                $this->dimension->getHeight(),
-            ),
+            new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
             $this->resizeMode,
             false, // Disable standard aspect ratio enforcement to prevent black bars
         );

@@ -29,18 +29,9 @@ final class Resolution2K extends AbstractResolution
         // Set reasonable constraints for 2K - adjust based on orientation
         $this->maxDimension = $this->resolution->dimension;
         $this->minDimension = match ($orientation) {
-            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(
-                720,
-                1280,
-            ), // Portrait 720p min
-            'square' => \App\Services\Video\ValueObjects\Dimension::from(
-                720,
-                720,
-            ), // Square 720p min
-            default => \App\Services\Video\ValueObjects\Dimension::from(
-                1280,
-                720,
-            ), // Landscape 720p min
+            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(720, 1280), // Portrait 720p min
+            'square' => \App\Services\Video\ValueObjects\Dimension::from(720, 720), // Square 720p min
+            default => \App\Services\Video\ValueObjects\Dimension::from(1280, 720), // Landscape 720p min
         };
     }
 
@@ -52,10 +43,8 @@ final class Resolution2K extends AbstractResolution
     /**
      * Create Resolution2K based on source video orientation.
      */
-    public static function forOrientation(
-        string $orientation,
-        bool $allowScaleUp = false,
-    ): self {
+    public static function forOrientation(string $orientation, bool $allowScaleUp = false): self
+    {
         return new self($orientation, $allowScaleUp);
     }
 
@@ -70,10 +59,7 @@ final class Resolution2K extends AbstractResolution
     {
         // Create ResizeFilter directly instead of using closure
         return new ResizeFilter(
-            new Dimension(
-                $this->dimension->getWidth(),
-                $this->dimension->getHeight(),
-            ),
+            new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
             $this->resizeMode,
             false, // Disable standard aspect ratio enforcement to prevent black bars
         );

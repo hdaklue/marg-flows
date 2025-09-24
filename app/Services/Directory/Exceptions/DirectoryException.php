@@ -23,10 +23,8 @@ final class DirectoryException extends Exception
         return new self("Invalid file: {$reason}");
     }
 
-    public static function storageError(
-        string $operation,
-        string $details = '',
-    ): self {
+    public static function storageError(string $operation, string $details = ''): self
+    {
         $message = "Storage operation failed: {$operation}";
         if ($details) {
             $message .= " - {$details}";

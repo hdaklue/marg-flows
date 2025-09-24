@@ -19,10 +19,8 @@ final class AudioFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (! $testUser) {
-            $this->command->warn(
-                'Test user not found. Please run main DatabaseSeeder first.',
-            );
+        if (!$testUser) {
+            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
         }
@@ -138,9 +136,9 @@ final class AudioFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateWaveformData(float $duration): ?array
+    private function generateWaveformData(float $duration): null|array
     {
-        if (! fake()->boolean(70)) { // 70% chance of having waveform data
+        if (!fake()->boolean(70)) { // 70% chance of having waveform data
             return null;
         }
 
@@ -169,9 +167,9 @@ final class AudioFeedbackSeeder extends Seeder
         ];
     }
 
-    private function generatePeakAmplitude(): ?float
+    private function generatePeakAmplitude(): null|float
     {
-        if (! fake()->boolean(80)) { // 80% chance of having peak amplitude data
+        if (!fake()->boolean(80)) { // 80% chance of having peak amplitude data
             return null;
         }
 
@@ -187,9 +185,9 @@ final class AudioFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateFrequencyData(): ?array
+    private function generateFrequencyData(): null|array
     {
-        if (! fake()->boolean(50)) { // 50% chance of having frequency data
+        if (!fake()->boolean(50)) { // 50% chance of having frequency data
             return null;
         }
 
@@ -221,10 +219,8 @@ final class AudioFeedbackSeeder extends Seeder
         ];
     }
 
-    private function createSpecializedAudioFeedback(
-        User $user,
-        Document $document,
-    ): void {
+    private function createSpecializedAudioFeedback(User $user, Document $document): void
+    {
         // Very short audio clip (sound effect or quick transition)
         AudioFeedback::create([
             'creator_id' => $user->id,

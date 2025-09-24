@@ -40,7 +40,7 @@ final class SeedCommand extends Command
     {
         $this->info("Running {$class}...");
 
-        $seeder = new $class;
+        $seeder = new $class();
         $seeder->setCommand($this);
         $seeder->run();
     }

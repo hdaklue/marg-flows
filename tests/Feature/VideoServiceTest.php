@@ -37,7 +37,7 @@ it('can apply conversion to video editor', function () {
     $videoPath = 'videos/test-video.mp4';
     $editor = new VideoEditor($videoPath);
 
-    $conversion = new Conversion720p;
+    $conversion = new Conversion720p();
     $result = $editor->convert($conversion);
 
     expect($result)->toBeInstanceOf(VideoEditor::class);
@@ -58,10 +58,7 @@ it('can chain multiple operations', function () {
 
     $dimension = new Dimension(854, 480);
 
-    $result = $editor
-        ->trim(5, 25)
-        ->resize($dimension)
-        ->convert(new Conversion720p);
+    $result = $editor->trim(5, 25)->resize($dimension)->convert(new Conversion720p());
 
     expect($result)->toBeInstanceOf(VideoEditor::class);
 });
@@ -83,10 +80,7 @@ it('can build pipeline and get operations count', function () {
     $videoPath = 'videos/test-video.mp4';
     $editor = new VideoEditor($videoPath);
 
-    $editor
-        ->resize(new Dimension(1920, 1080))
-        ->trim(0, 60)
-        ->convert(new Conversion720p);
+    $editor->resize(new Dimension(1920, 1080))->trim(0, 60)->convert(new Conversion720p());
 
     $operations = $editor->getOperations();
 
@@ -100,11 +94,7 @@ it('can process video operations in correct order', function () {
     $editor = new VideoEditor($videoPath);
 
     // Add operations in specific order
-    $editor->trim(5, 30)->resize(new Dimension(1280, 720))->crop(
-        0,
-        0,
-        new Dimension(640, 480),
-    ); // Should be index 0 // Should be index 1 // Should be index 2
+    $editor->trim(5, 30)->resize(new Dimension(1280, 720))->crop(0, 0, new Dimension(640, 480)); // Should be index 0 // Should be index 1 // Should be index 2
 
     $operations = $editor->getOperations();
 
@@ -139,10 +129,7 @@ it('can scale dimensions correctly', function () {
         $targetDimension->getHeight(),
     );
 
-    expect($scaledDimension->getWidth())
-        ->toBe(960)
-        ->and($scaledDimension->getHeight())
-        ->toBe(540);
+    expect($scaledDimension->getWidth())->toBe(960)->and($scaledDimension->getHeight())->toBe(540);
 });
 
 it('correctly handles scaling scenarios', function () {
@@ -150,10 +137,7 @@ it('correctly handles scaling scenarios', function () {
     $largeDimension = new Dimension(1920, 1080); // Target 1080p
 
     // Scale to larger dimensions (upscaling allowed by default in scaleTo)
-    $result = $smallDimension->scaleTo(
-        $largeDimension->getWidth(),
-        $largeDimension->getHeight(),
-    );
+    $result = $smallDimension->scaleTo($largeDimension->getWidth(), $largeDimension->getHeight());
 
     // The result should maintain aspect ratio but fit within bounds
     expect($result->getWidth())

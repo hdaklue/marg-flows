@@ -30,10 +30,10 @@ final class AssembleVideoChunks
     public function handle(
         UploadSessionService $sessionManager,
         string $sessionId,
-        ?string $fileName,
+        null|string $fileName,
         int $totalChunks,
         Document $document,
-        ?string $videoSessionId = null,
+        null|string $videoSessionId = null,
     ): string {
         try {
             Log::info('Starting video chunk assembly', [
@@ -72,11 +72,9 @@ final class AssembleVideoChunks
             }
 
             // Chain to conversion action with a small delay
-            ConvertVideoAction::dispatch(
-                $localFinalPath,
-                $document,
-                $videoSessionId,
-            )->delay(now()->addSeconds(3))->onQueue('document-video-upload');
+            ConvertVideoAction::dispatch($localFinalPath, $document, $videoSessionId)
+                ->delay(now()->addSeconds(3))
+                ->onQueue('document-video-upload');
 
             return $localFinalPath;
         } catch (Exception $e) {

@@ -11,7 +11,7 @@ final class FileDeleteResponse
     /**
      * Create a successful deletion response.
      */
-    public static function success(bool $deleted = true, ?string $message = null): JsonResponse
+    public static function success(bool $deleted = true, null|string $message = null): JsonResponse
     {
         return response()->json([
             'success' => true,

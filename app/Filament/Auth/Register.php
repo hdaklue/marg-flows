@@ -60,7 +60,7 @@ final class Register extends BaseRegister
         ])->statePath('data');
     }
 
-    public function register(): ?RegistrationResponseContract
+    public function register(): null|RegistrationResponseContract
     {
         try {
             $this->rateLimit(2);
@@ -80,7 +80,7 @@ final class Register extends BaseRegister
 
             session()->regenerate();
 
-            return new RegistrationResponse;
+            return new RegistrationResponse();
         } catch (Exception $e) {
             throw $e;
         }
@@ -101,11 +101,11 @@ final class Register extends BaseRegister
             ->placeholder(__('auth.register.username_placeholder'))
             ->required()
             ->live(onBlur: true)
-            ->afterStateUpdated(fn (
+            ->afterStateUpdated(fn(
                 $livewire,
                 Field $component,
             ) => $livewire->validateOnly($component->getStatePath()))
-            ->rules([new UsernameAvailable, new UsernameFormat])
+            ->rules([new UsernameAvailable(), new UsernameFormat()])
             ->maxLength(255)
             ->autofocus();
     }
@@ -119,7 +119,7 @@ final class Register extends BaseRegister
             ->required()
             ->rule('indisposable')
             ->live(onBlur: true)
-            ->afterStateUpdated(fn (
+            ->afterStateUpdated(fn(
                 $livewire,
                 Field $component,
             ) => $livewire->validateOnly($component->getStatePath()))
@@ -137,7 +137,7 @@ final class Register extends BaseRegister
             ->required()
             ->rule(Password::default())
             ->showAllValidationMessages()
-            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+            ->dehydrateStateUsing(fn($state) => Hash::make($state))
             ->validationAttribute(__('auth.register.password'));
     }
 

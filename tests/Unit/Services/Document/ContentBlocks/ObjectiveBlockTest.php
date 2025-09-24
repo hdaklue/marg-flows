@@ -14,7 +14,7 @@ describe('ObjectiveBlock', function () {
         ]);
     });
     it('can create an instance with default data', function () {
-        $block = new ObjectiveBlock;
+        $block = new ObjectiveBlock();
 
         expect($block)->toBeInstanceOf(ObjectiveBlock::class);
         expect($block->isEmpty())->toBeTrue();
@@ -36,7 +36,7 @@ describe('ObjectiveBlock', function () {
     });
 
     it('validates fields through rules', function () {
-        $block = new ObjectiveBlock;
+        $block = new ObjectiveBlock();
         $rules = $block->rules();
 
         expect($rules)->toHaveKey('name');
@@ -137,11 +137,26 @@ describe('ObjectiveBlock', function () {
     });
 
     it('correctly identifies empty blocks', function () {
-        $emptyBlock = new ObjectiveBlock;
-        $noNameBlock = new ObjectiveBlock(['operator' => ObjectiveBlock::OPERATOR_INCREASE, 'percentage' => 50]);
-        $invalidOperatorBlock = new ObjectiveBlock(['name' => 'Test', 'operator' => 'invalid', 'percentage' => 50]);
-        $negativePercentageBlock = new ObjectiveBlock(['name' => 'Test', 'operator' => ObjectiveBlock::OPERATOR_INCREASE, 'percentage' => -5]);
-        $validBlock = new ObjectiveBlock(['name' => 'Test', 'operator' => ObjectiveBlock::OPERATOR_INCREASE, 'percentage' => 50]);
+        $emptyBlock = new ObjectiveBlock();
+        $noNameBlock = new ObjectiveBlock([
+            'operator' => ObjectiveBlock::OPERATOR_INCREASE,
+            'percentage' => 50,
+        ]);
+        $invalidOperatorBlock = new ObjectiveBlock([
+            'name' => 'Test',
+            'operator' => 'invalid',
+            'percentage' => 50,
+        ]);
+        $negativePercentageBlock = new ObjectiveBlock([
+            'name' => 'Test',
+            'operator' => ObjectiveBlock::OPERATOR_INCREASE,
+            'percentage' => -5,
+        ]);
+        $validBlock = new ObjectiveBlock([
+            'name' => 'Test',
+            'operator' => ObjectiveBlock::OPERATOR_INCREASE,
+            'percentage' => 50,
+        ]);
 
         expect($emptyBlock->isEmpty())->toBeTrue();
         expect($noNameBlock->isEmpty())->toBeTrue();
@@ -200,7 +215,7 @@ describe('ObjectiveBlock', function () {
     });
 
     it('returns empty string when rendering empty block', function () {
-        $emptyBlock = new ObjectiveBlock;
+        $emptyBlock = new ObjectiveBlock();
 
         expect($emptyBlock->render())->toBe('');
     });

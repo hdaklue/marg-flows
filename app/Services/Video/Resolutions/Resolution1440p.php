@@ -29,18 +29,9 @@ final class Resolution1440p extends AbstractResolution
         // Constraints for 1440p QHD - adjust based on orientation
         $this->maxDimension = $this->resolution->dimension;
         $this->minDimension = match ($orientation) {
-            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(
-                720,
-                1280,
-            ),
-            'square' => \App\Services\Video\ValueObjects\Dimension::from(
-                720,
-                720,
-            ),
-            default => \App\Services\Video\ValueObjects\Dimension::from(
-                1280,
-                720,
-            ),
+            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(720, 1280),
+            'square' => \App\Services\Video\ValueObjects\Dimension::from(720, 720),
+            default => \App\Services\Video\ValueObjects\Dimension::from(1280, 720),
         };
     }
 
@@ -52,10 +43,8 @@ final class Resolution1440p extends AbstractResolution
     /**
      * Create Resolution1440p based on source video orientation.
      */
-    public static function forOrientation(
-        string $orientation,
-        bool $allowScaleUp = false,
-    ): self {
+    public static function forOrientation(string $orientation, bool $allowScaleUp = false): self
+    {
         return new self($orientation, $allowScaleUp);
     }
 
@@ -70,10 +59,7 @@ final class Resolution1440p extends AbstractResolution
     {
         // Create ResizeFilter directly instead of using closure
         return new ResizeFilter(
-            new Dimension(
-                $this->dimension->getWidth(),
-                $this->dimension->getHeight(),
-            ),
+            new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
             $this->resizeMode,
             false, // Disable standard aspect ratio enforcement to prevent black bars
         );

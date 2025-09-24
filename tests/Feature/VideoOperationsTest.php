@@ -124,11 +124,7 @@ it('validates watermark operation parameters', function () {
     expect($invalidOperation->canExecute())->toBeFalse();
 
     // Invalid opacity
-    $invalidOpacityOperation = new WatermarkOperation(
-        'some/file.png',
-        'top-left',
-        1.5,
-    );
+    $invalidOpacityOperation = new WatermarkOperation('some/file.png', 'top-left', 1.5);
     expect($invalidOpacityOperation->canExecute())->toBeFalse();
 });
 
@@ -204,15 +200,11 @@ it('dimension operations work correctly', function () {
     expect($dimension->getPixelCount())->toBe(2073600);
 
     // Test aspect ratio calculation (16:9 = 1.777...)
-    expect($dimension->getAspectRatio())
-        ->toBeInstanceOf(AspectRatio::class);
+    expect($dimension->getAspectRatio())->toBeInstanceOf(AspectRatio::class);
 
     // Test scaling to smaller dimensions
     $smaller = new Dimension(960, 540);
     $scaled = $dimension->scaleTo($smaller->getWidth(), $smaller->getHeight());
 
-    expect($scaled->getWidth())
-        ->toBe(960)
-        ->and($scaled->getHeight())
-        ->toBe(540);
+    expect($scaled->getWidth())->toBe(960)->and($scaled->getHeight())->toBe(540);
 });

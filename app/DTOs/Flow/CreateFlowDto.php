@@ -14,11 +14,11 @@ final class CreateFlowDto extends ValidatedDTO
 {
     public string $title;
 
-    public ?FlowStage $stage;
+    public null|FlowStage $stage;
 
-    public ?string $description;
+    public null|string $description;
 
-    public ?string $id;
+    public null|string $id;
 
     protected function rules(): array
     {

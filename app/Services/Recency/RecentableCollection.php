@@ -26,6 +26,6 @@ final class RecentableCollection extends Collection
 
     public function whereTypeIs(string $type)
     {
-        return $this->filter(fn ($item) => $item->recentable?->getRecentType() === $type);
+        return $this->filter(fn($item) => $item->recentable?->getRecentType() === $type);
     }
 }

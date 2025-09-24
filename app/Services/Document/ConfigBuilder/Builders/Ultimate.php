@@ -12,7 +12,7 @@ final class Ultimate
 {
     private string $tenantId;
 
-    public function build(?string $documentId = null): array
+    public function build(null|string $documentId = null): array
     {
         $this->tenantId = auth()->user()->getActiveTenantId();
         $imagesConfig = EditorConfigBuilder::images()->forPlan('ultimate');
@@ -42,7 +42,7 @@ final class Ultimate
         ];
     }
 
-    private function buildVideoUploadConfig(?string $documentId)
+    private function buildVideoUploadConfig(null|string $documentId)
     {
         $videoUploadConfig = EditorConfigBuilder::videoUpload()->forPlan('ultimate');
 

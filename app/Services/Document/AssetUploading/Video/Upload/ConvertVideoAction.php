@@ -33,7 +33,7 @@ final class ConvertVideoAction
     public function handle(
         string $localFinalPath,
         Document $document,
-        ?string $videoSessionId = null,
+        null|string $videoSessionId = null,
     ): array {
         try {
             Log::info('Starting video conversion', [
@@ -68,7 +68,12 @@ final class ConvertVideoAction
 
                 // Create 480p conversion and export to temporary file with _mod suffix
                 $pathInfo = pathinfo($localFinalPath);
-                $tempConvertedPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '_mod.' . $pathInfo['extension'];
+                $tempConvertedPath =
+                    $pathInfo['dirname']
+                    . '/'
+                    . $pathInfo['filename']
+                    . '_mod.'
+                    . $pathInfo['extension'];
 
                 $conversion = new Resolution480p($orientation);
                 $conversionResult = $exporter->export($conversion, $tempConvertedPath);
@@ -141,7 +146,9 @@ final class ConvertVideoAction
                 $document,
                 $videoSessionId,
                 $videoMetadata,
-            )->delay(now()->addSeconds(2))->onQueue('document-video-upload');
+            )
+                ->delay(now()->addSeconds(2))
+                ->onQueue('document-video-upload');
 
             return $videoMetadata;
         } catch (Exception $e) {
@@ -189,7 +196,7 @@ final class ConvertVideoAction
      */
     private function extractMetadataFromLocalFileWithFallback(
         string $localPath,
-        ?string $sessionId = null,
+        null|string $sessionId = null,
     ): array {
         try {
             return $this->extractMetadataFromLocalFile($localPath, $sessionId);
@@ -224,7 +231,7 @@ final class ConvertVideoAction
      */
     private function extractMetadataFromLocalFile(
         string $localPath,
-        ?string $sessionId = null,
+        null|string $sessionId = null,
     ): array {
         $chunksDisk = config('chunked-upload.storage.disk', 'local_chunks');
 

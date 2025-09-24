@@ -48,7 +48,7 @@ final class CreateFlow extends CreateRecord
 
     protected static bool $canCreateAnother = false;
 
-    protected static ?string $title = '';
+    protected static null|string $title = '';
 
     public $start = 3;
 
@@ -58,7 +58,7 @@ final class CreateFlow extends CreateRecord
 
     // public ?string $maxContentWidth = 'screen-7xl';
 
-    protected ?bool $hasUnsavedDataChangesAlert = true;
+    protected null|bool $hasUnsavedDataChangesAlert = true;
 
     // public function form(Form $form): Form
     // {
@@ -265,16 +265,14 @@ final class CreateFlow extends CreateRecord
     //     ];
     // }
 
-    protected function getCreatedNotification(): ?Notification
+    protected function getCreatedNotification(): null|Notification
     {
         return null; // Disables automatic notification
     }
 
     private function getParticipantsSelectArray(): array
     {
-        $participants = filamentTenant()
-            ->getParticipants()
-            ->pluck('assignable');
+        $participants = filamentTenant()->getParticipants()->pluck('assignable');
 
         // return $participants->mapWithKeys(fn (ModelHasRole $item) => [$item->model->getKey() => "{$item->model->getAttribute('name')} - {$item->role->name}"])->toArray();
 

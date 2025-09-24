@@ -37,7 +37,7 @@ final class DocumentComponent extends Component
     /**
      * Current editing version for timeline integration.
      */
-    public ?string $currentEditingVersion = null;
+    public null|string $currentEditingVersion = null;
 
     /**
      * Indicates if new versions are available since last check.
@@ -135,7 +135,7 @@ final class DocumentComponent extends Component
     }
 
     #[Computed]
-    public function currentEditingVersionComputed(): ?string
+    public function currentEditingVersionComputed(): null|string
     {
         // If we have a current editing version, use it
         if ($this->currentEditingVersion !== null) {
@@ -305,7 +305,7 @@ final class DocumentComponent extends Component
         }
 
         $textBlocks = collect($content['blocks'])
-            ->filter(fn ($block) => in_array($block['type'] ?? '', ['paragraph', 'header'], true))
+            ->filter(fn($block) => in_array($block['type'] ?? '', ['paragraph', 'header'], true))
             ->pluck('data.text')
             ->filter()
             ->take(2);

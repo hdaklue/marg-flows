@@ -99,10 +99,8 @@ enum AssigneeRole: string implements HasDescription, HasLabel
         };
     }
 
-    public function canTriggerStatusChange(
-        string $fromStatus,
-        string $toStatus,
-    ): bool {
+    public function canTriggerStatusChange(string $fromStatus, string $toStatus): bool
+    {
         return match ([$this, $fromStatus, $toStatus]) {
             [self::ASSIGNEE, 'assigned', 'in_progress'] => true,
             [self::ASSIGNEE, 'in_progress', 'review_requested'] => true,

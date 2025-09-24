@@ -32,7 +32,7 @@ final class CreateDocument extends Page implements HasForms
 
     protected static string $resource = FlowResource::class;
 
-    public ?array $data = [];
+    public null|array $data = [];
 
     public Flow $flow;
 
@@ -55,19 +55,18 @@ final class CreateDocument extends Page implements HasForms
                 ->preload()
                 ->multiple()
                 ->searchable()
-                ->options(fn () => $this->flow
+                ->options(fn() => $this->flow
                     ->getParticipants()
                     ->filter(
-                        fn (ModelHasRole $item) => (
+                        fn(ModelHasRole $item) => (
                             $item->model->getKey() !== filamentUser()->getKey()
                         ),
                     )
-                    ->mapWithKeys(fn (ModelHasRole $item) => [
-                        $item->model->getKey() => $item->model->getAttribute('name')
+                    ->mapWithKeys(fn(ModelHasRole $item) => [
+                        $item->model->getKey() =>
+                            $item->model->getAttribute('name')
                             . ' - '
-                            . RoleEnum::from($item->role->getAttribute(
-                                'name',
-                            ))->getLabel(),
+                            . RoleEnum::from($item->role->getAttribute('name'))->getLabel(),
                     ]))
                 ->columnSpan(1),
             Section::make([
@@ -79,9 +78,7 @@ final class CreateDocument extends Page implements HasForms
                 EditorJs::make('blocks')->required()->columnSpanFull(),
             ])->columns(3),
             Actions::make([
-                Action::make('save')
-                    ->color('primary')
-                    ->action(fn () => $this->createDocument()),
+                Action::make('save')->color('primary')->action(fn() => $this->createDocument()),
             ]),
         ])->statePath('data');
     }
@@ -97,11 +94,7 @@ final class CreateDocument extends Page implements HasForms
                 'blocks' => json_decode($data['blocks']),
             ]);
 
-            \App\Actions\Flow\CreateDocument::run(
-                filamentUser(),
-                $this->flow,
-                $dto,
-            );
+            \App\Actions\Flow\CreateDocument::run(filamentUser(), $this->flow, $dto);
 
             Notification::make()
                 ->body('Document Created Successfully')

@@ -167,15 +167,12 @@ final class VideoFeedback extends Model
 
     public function hasTimeRange(): bool
     {
-        return
-            $this->isRegionComment()
-            && $this->start_time !== null
-            && $this->end_time !== null;
+        return $this->isRegionComment() && $this->start_time !== null && $this->end_time !== null;
     }
 
-    public function getDuration(): ?float
+    public function getDuration(): null|float
     {
-        if (! $this->hasTimeRange()) {
+        if (!$this->hasTimeRange()) {
             return null;
         }
 
@@ -189,10 +186,11 @@ final class VideoFeedback extends Model
         }
 
         if ($this->isRegionComment() && $this->hasTimeRange()) {
-            return
+            return (
                 $this->formatTime($this->start_time)
                 . ' - '
-                . $this->formatTime($this->end_time);
+                . $this->formatTime($this->end_time)
+            );
         }
 
         return 'No time specified';
@@ -200,7 +198,7 @@ final class VideoFeedback extends Model
 
     public function getCoordinatesDisplay(): string
     {
-        if (! $this->hasCoordinates()) {
+        if (!$this->hasCoordinates()) {
             return 'No coordinates';
         }
 
@@ -214,9 +212,7 @@ final class VideoFeedback extends Model
         }
 
         if ($this->isRegionComment()) {
-            return
-                $timestamp >= $this->start_time
-                && $timestamp <= $this->end_time;
+            return $timestamp >= $this->start_time && $timestamp <= $this->end_time;
         }
 
         return false;
@@ -252,10 +248,7 @@ final class VideoFeedback extends Model
             // Frame comments: exact timestamp match (with tolerance)
             $q
                 ->where(function ($frameQuery) use ($timestamp, $tolerance) {
-                    $frameQuery->where(
-                        'feedback_type',
-                        'frame',
-                    )->whereBetween('timestamp', [
+                    $frameQuery->where('feedback_type', 'frame')->whereBetween('timestamp', [
                         $timestamp - $tolerance,
                         $timestamp + $tolerance,
                     ]);
@@ -271,19 +264,16 @@ final class VideoFeedback extends Model
         });
     }
 
-    protected function scopeInTimeRange(
-        Builder $query,
-        float $startTime,
-        float $endTime,
-    ): Builder {
+    protected function scopeInTimeRange(Builder $query, float $startTime, float $endTime): Builder
+    {
         return $query->where(function ($q) use ($startTime, $endTime) {
             // Frame comments within the range
             $q
                 ->where(function ($frameQuery) use ($startTime, $endTime) {
-                    $frameQuery->where(
-                        'feedback_type',
-                        'frame',
-                    )->whereBetween('timestamp', [$startTime, $endTime]);
+                    $frameQuery->where('feedback_type', 'frame')->whereBetween('timestamp', [
+                        $startTime,
+                        $endTime,
+                    ]);
                 })
                 // Region comments that overlap with the range
                 ->orWhere(function ($regionQuery) use ($startTime, $endTime) {
@@ -299,15 +289,12 @@ final class VideoFeedback extends Model
                                     $startTime,
                                     $endTime,
                                 ])
-                                ->orWhere(function ($contains) use (
-                                    $startTime,
-                                    $endTime,
-                                ) {
-                                    $contains->where(
-                                        'start_time',
-                                        '<=',
-                                        $startTime,
-                                    )->where('end_time', '>=', $endTime);
+                                ->orWhere(function ($contains) use ($startTime, $endTime) {
+                                    $contains->where('start_time', '<=', $startTime)->where(
+                                        'end_time',
+                                        '>=',
+                                        $endTime,
+                                    );
                                 });
                         });
                 });

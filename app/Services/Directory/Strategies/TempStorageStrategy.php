@@ -23,9 +23,7 @@ final class TempStorageStrategy extends BaseStorageStrategy
 
     public function deleteAll(): bool
     {
-        $secureDirectory = PathBuilder::base($this->getDirectory())
-            ->validate()
-            ->toString();
+        $secureDirectory = PathBuilder::base($this->getDirectory())->validate()->toString();
 
         return Storage::deleteDirectory($secureDirectory);
     }

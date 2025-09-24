@@ -15,16 +15,12 @@ final class DocumentFeedbackSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info(
-            'Creating document feedback in business database...',
-        );
+        $this->command->info('Creating document feedback in business database...');
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (! $testUser) {
-            $this->command->warn(
-                'Test user not found. Please run main DatabaseSeeder first.',
-            );
+        if (!$testUser) {
+            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
         }
@@ -79,10 +75,7 @@ final class DocumentFeedbackSeeder extends Seeder
 
                 DocumentFeedback::create([
                     'creator_id' => $testUser->id,
-                    'content' => $this->generateDocumentComment(
-                        $elementType,
-                        $hasTextSelection,
-                    ),
+                    'content' => $this->generateDocumentComment($elementType, $hasTextSelection),
                     'feedbackable_type' => $document->getMorphClass(),
                     'feedbackable_id' => $document->id,
                     'status' => fake()->randomElement($statuses),
@@ -91,18 +84,13 @@ final class DocumentFeedbackSeeder extends Seeder
                     'element_type' => $elementType,
                     'position_data' => $this->generatePositionData($elementType),
                     'block_version' => $this->generateBlockVersion(),
-                    'selection_data' => $hasTextSelection
-                        ? $this->generateSelectionData()
-                        : null,
+                    'selection_data' => $hasTextSelection ? $this->generateSelectionData() : null,
                 ]);
             }
         }
 
         // Create specialized document feedback for testing
-        $this->createSpecializedDocumentFeedback(
-            $testUser,
-            $documents->first(),
-        );
+        $this->createSpecializedDocumentFeedback($testUser, $documents->first());
 
         $totalDocumentFeedback = DocumentFeedback::count();
         $this->command->info(
@@ -116,25 +104,24 @@ final class DocumentFeedbackSeeder extends Seeder
         return 'block_' . fake()->uuid();
     }
 
-    private function generateBlockVersion(): ?string
+    private function generateBlockVersion(): null|string
     {
-        if (! fake()->boolean(70)) { // 70% chance of having version info
+        if (!fake()->boolean(70)) { // 70% chance of having version info
             return null;
         }
 
-        return
+        return (
             'v'
             . fake()->numberBetween(1, 10)
             . '.'
             . fake()->numberBetween(0, 9)
             . '.'
-            . fake()->sha1();
+            . fake()->sha1()
+        );
     }
 
-    private function generateDocumentComment(
-        string $elementType,
-        bool $hasTextSelection,
-    ): string {
+    private function generateDocumentComment(string $elementType, bool $hasTextSelection): string
+    {
         $blockComments = [
             'paragraph' => [
                 'This paragraph could be restructured for better flow.',
@@ -205,9 +192,9 @@ final class DocumentFeedbackSeeder extends Seeder
         return fake()->randomElement($elementComments);
     }
 
-    private function generatePositionData(string $elementType): ?array
+    private function generatePositionData(string $elementType): null|array
     {
-        if (! fake()->boolean(60)) { // 60% chance of having position data
+        if (!fake()->boolean(60)) { // 60% chance of having position data
             return null;
         }
 
@@ -284,10 +271,8 @@ final class DocumentFeedbackSeeder extends Seeder
         ];
     }
 
-    private function createSpecializedDocumentFeedback(
-        User $user,
-        Document $document,
-    ): void {
+    private function createSpecializedDocumentFeedback(User $user, Document $document): void
+    {
         // Header hierarchy feedback
         DocumentFeedback::create([
             'creator_id' => $user->id,

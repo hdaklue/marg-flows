@@ -17,7 +17,7 @@ final class UserTenant
     public static function configure(Table $table): Table
     {
         return $table
-            ->records(fn () => filamentUser()->getAssignedTenants()->keyBy('id')->toArray())
+            ->records(fn() => filamentUser()->getAssignedTenants()->keyBy('id')->toArray())
             ->columns([
                 Split::make([TextColumn::make('name')->weight(FontWeight::SemiBold)]),
             ])
@@ -29,13 +29,13 @@ final class UserTenant
             ])
             ->recordActions([
                 Action::make('switch')
-                    ->label(fn ($record) => $record['id'] === filamentTenant()->getKey()
+                    ->label(fn($record) => $record['id'] === filamentTenant()->getKey()
                         ? 'Current'
                         : 'Switch')
-                    ->color(fn ($record) => $record['id'] === filamentTenant()->getKey()
+                    ->color(fn($record) => $record['id'] === filamentTenant()->getKey()
                         ? 'gray'
                         : 'primary')
-                    ->disabled(fn ($record) => $record['id'] === filamentTenant()->getKey())
+                    ->disabled(fn($record) => $record['id'] === filamentTenant()->getKey())
                     ->action(function ($record) {
                         SwitchTenant::run(filamentUser(), $record['id']);
 

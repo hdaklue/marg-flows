@@ -51,5 +51,8 @@ interface StorageManagerContract
      * @param  string  $baseDirectory  The base directory for video storage
      * @return VideoStorageStrategy Configured video storage strategy
      */
-    public function createVideoStrategy(string $tenantId, string $baseDirectory): VideoStorageStrategy;
+    public function createVideoStrategy(
+        string $tenantId,
+        string $baseDirectory,
+    ): VideoStorageStrategy;
 }

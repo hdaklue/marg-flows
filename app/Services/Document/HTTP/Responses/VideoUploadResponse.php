@@ -72,11 +72,8 @@ final class VideoUploadResponse
     /**
      * Create session status response with {status, phase, data} structure.
      */
-    public static function sessionStatus(
-        string $status,
-        string $phase,
-        array $data,
-    ): JsonResponse {
+    public static function sessionStatus(string $status, string $phase, array $data): JsonResponse
+    {
         return response()->json([
             'status' => $status,
             'phase' => $phase,
@@ -92,7 +89,9 @@ final class VideoUploadResponse
         return response()->json([
             'success' => true,
             'status' => 'uploading',
-            'phase' => VideoUploadType::tryFrom($sessionData['upload_type'])?->getInitialPhase()->value ?? 'single_upload',
+            'phase' =>
+                VideoUploadType::tryFrom($sessionData['upload_type'])?->getInitialPhase()->value
+                ?? 'single_upload',
             'data' => [
                 'session_id' => $sessionData['session_id'],
                 'upload_type' => $sessionData['upload_type'],

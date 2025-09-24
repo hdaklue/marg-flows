@@ -118,8 +118,8 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     public function updateProfileAvatar(string $avatarFileName)
     {
         $this->loadMissing('profile')->profile->update([
-            'avatar' => $avatarFileName,
-        ]);
+                'avatar' => $avatarFileName,
+            ]);
     }
 
     public function getTimeZone(): string
@@ -127,7 +127,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return $this->loadMissing('profile')->profile->getAttribute('timezone');
     }
 
-    public function getDefaultTenant(Panel $panel): ?Model
+    public function getDefaultTenant(Panel $panel): null|Model
     {
         return $this->activeTenant() ?? $this->getAssignedTenants()->first();
     }
@@ -180,12 +180,12 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return $this->hasAssignmentOn($flow, $role);
     }
 
-    public function getAvatar(): ?string
+    public function getAvatar(): null|string
     {
         return $this->load('profile')->profile?->avatar;
     }
 
-    public function getAvatarFileName(): ?string
+    public function getAvatarFileName(): null|string
     {
         return $this->load('profile')->profile?->avatar;
     }
@@ -222,8 +222,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
      */
     public function notifications(): MorphMany
     {
-        return $this->morphMany(Notification::class, 'notifiable')
-            ->orderBy('created_at', 'desc');
+        return $this->morphMany(Notification::class, 'notifiable')->orderBy('created_at', 'desc');
     }
 
     /**

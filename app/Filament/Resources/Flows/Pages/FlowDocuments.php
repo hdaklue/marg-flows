@@ -69,10 +69,7 @@ final class FlowDocuments extends Page implements HasForms
 
     public function pages(): Collection
     {
-        return DocumentManager::getDocumentsForUser(
-            $this->flow,
-            filamentUser(),
-        );
+        return DocumentManager::getDocumentsForUser($this->flow, filamentUser());
     }
 
     public function getTitle(): string|Htmlable // @phpstan-ignore-line

@@ -19,7 +19,7 @@ final class ResolveDocumentFile
         string $documentId,
         string $type,
         string $filename,
-        ?int $expiresIn = null,
+        null|int $expiresIn = null,
     ): string {
         // Generate URL using the correct document serve route
         return route('documents.serve', [
@@ -35,7 +35,7 @@ final class ResolveDocumentFile
     public function resolve(Request $request): Response
     {
         // Verify user is authenticated
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             abort(401, 'Authentication required');
         }
 
@@ -65,7 +65,7 @@ final class ResolveDocumentFile
     public function temporary(Request $request): Response
     {
         // Verify user is authenticated
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             abort(401, 'Authentication required');
         }
 

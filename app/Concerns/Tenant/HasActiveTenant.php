@@ -9,12 +9,12 @@ use Exception;
 
 trait HasActiveTenant
 {
-    public function activeTenant(): ?Tenant
+    public function activeTenant(): null|Tenant
     {
         return Tenant::where('id', $this->active_tenant_id)->first();
     }
 
-    public function switchActiveTenant(Tenant $tenant): ?self
+    public function switchActiveTenant(Tenant $tenant): null|self
     {
         if ($this->isAssignedTo($tenant)) {
             $this->active_tenant_id = $tenant->getKey();
@@ -22,9 +22,7 @@ trait HasActiveTenant
 
             return $this;
         }
-        throw new Exception(
-            'Teanant Cannot be assgined to User as It does not Has Role On',
-        );
+        throw new Exception('Teanant Cannot be assgined to User as It does not Has Role On');
     }
 
     public function clearActiveTenant()
@@ -32,7 +30,7 @@ trait HasActiveTenant
         $this->update(['active_tenant_id' => null]);
     }
 
-    public function getActiveTenantId(): ?string
+    public function getActiveTenantId(): null|string
     {
         return $this->active_tenant_id;
     }

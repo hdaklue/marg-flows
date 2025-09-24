@@ -21,25 +21,23 @@ final class DeliverableSpecificationCast implements CastsAttributes
         string $key,
         mixed $value,
         array $attributes,
-    ): ?DeliverableSpecification {
+    ): null|DeliverableSpecification {
         if ($value === null) {
             return null;
         }
 
         $data = is_string($value) ? json_decode($value, true) : $value;
 
-        if (! is_array($data) || empty($data)) {
+        if (!is_array($data) || empty($data)) {
             return null;
         }
 
         // Get the format from the model to determine which specification class to use
         $format = $model->getAttribute('format');
 
-        if (! $format instanceof DeliverableFormat) {
+        if (!$format instanceof DeliverableFormat) {
             // Try to cast it if it's a string
-            $format = is_string($format)
-                ? DeliverableFormat::tryFrom($format)
-                : null;
+            $format = is_string($format) ? DeliverableFormat::tryFrom($format) : null;
         }
 
         throw_unless(
@@ -53,18 +51,12 @@ final class DeliverableSpecificationCast implements CastsAttributes
             DeliverableFormat::DESIGN => DesignSpecification::fromConfig($data),
             DeliverableFormat::VIDEO => VideoSpecification::fromConfig($data),
             DeliverableFormat::AUDIO => AudioSpecification::fromConfig($data),
-            DeliverableFormat::DOCUMENT => DocumentSpecification::fromConfig(
-                $data,
-            ),
+            DeliverableFormat::DOCUMENT => DocumentSpecification::fromConfig($data),
         };
     }
 
-    public function set(
-        Model $model,
-        string $key,
-        mixed $value,
-        array $attributes,
-    ): array {
+    public function set(Model $model, string $key, mixed $value, array $attributes): array
+    {
         if ($value === null) {
             return [$key => null];
         }

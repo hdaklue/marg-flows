@@ -30,7 +30,7 @@ final class DocumentCard extends Component
 
     public string $name;
 
-    public ?string $updatedAt;
+    public null|string $updatedAt;
 
     #[Locked]
     public string $pageableId;

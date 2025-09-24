@@ -18,9 +18,10 @@ use InvalidArgumentException;
  * Handles temporary chunk storage for file upload sessions with tenant isolation.
  * Uses LaraPath for secure directory structure and hashed tenant/session IDs.
  */
-final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksStorageStrategyContract
+final class ChunksStorageStrategy extends BaseStorageStrategy implements
+    ChunksStorageStrategyContract
 {
-    private ?string $sessionId = null;
+    private null|string $sessionId = null;
 
     /**
      * Constructor receives the tenant ID for secure path building.
@@ -114,18 +115,14 @@ final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksS
         $unique = uniqid();
         $filename = "chunk_{$unique}_{$timestamp}";
 
-        return PathBuilder::base('')
-            ->add($filename, SanitizationStrategy::SLUG)
-            ->toString();
+        return PathBuilder::base('')->add($filename, SanitizationStrategy::SLUG)->toString();
     }
 
     private function validateConfiguration(): void
     {
         throw_unless(
             $this->sessionId,
-            new Exception(
-                'Session ID is required. Call forSession($sessionId) first.',
-            ),
+            new Exception('Session ID is required. Call forSession($sessionId) first.'),
         );
     }
 }

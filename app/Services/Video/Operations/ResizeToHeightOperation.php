@@ -23,10 +23,7 @@ final class ResizeToHeightOperation extends AbstractVideoOperation
     {
         // Use addFilter with scale that maintains aspect ratio based on height
         return $mediaExporter->addFilter(function ($filters) {
-            $filters->resize(
-                new Dimension(-1, $this->height),
-                'fit',
-            ); // -1 means maintain aspect ratio
+            $filters->resize(new Dimension(-1, $this->height), 'fit'); // -1 means maintain aspect ratio
         });
     }
 
@@ -43,20 +40,14 @@ final class ResizeToHeightOperation extends AbstractVideoOperation
     public function applyToBuilder(MediaExporter $builder): MediaExporter
     {
         return $builder->addFilter(function ($filters) {
-            $filters->resize(
-                new Dimension(-1, $this->height),
-                'fit',
-            ); // -1 means maintain aspect ratio
+            $filters->resize(new Dimension(-1, $this->height), 'fit'); // -1 means maintain aspect ratio
         });
     }
 
     public function applyToMedia(MediaOpener $media): MediaOpener
     {
         return $media->addFilter(function ($filters) {
-            $filters->resize(
-                new Dimension(-1, $this->height),
-                'fit',
-            ); // -1 means maintain aspect ratio
+            $filters->resize(new Dimension(-1, $this->height), 'fit'); // -1 means maintain aspect ratio
         });
     }
 }

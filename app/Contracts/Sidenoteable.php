@@ -23,7 +23,7 @@ interface Sidenoteable
 
     public function getSideNotesBy(User $user): Collection;
 
-    public function getSideNote(string|int $id): ?SideNote;
+    public function getSideNote(string|int $id): null|SideNote;
 
     public function deleteSideNote(int|string|SideNote $entity);
 }

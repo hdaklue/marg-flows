@@ -59,11 +59,8 @@ final class SideNote extends Model
     }
 
     #[Scope]
-    protected function for(
-        Builder $builder,
-        Sidenoteable $entity,
-        User $owner,
-    ): Builder {
+    protected function for(Builder $builder, Sidenoteable $entity, User $owner): Builder
+    {
         return $builder->where(
             'owner_id',
             $owner->getKey(),

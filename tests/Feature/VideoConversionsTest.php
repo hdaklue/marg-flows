@@ -13,7 +13,7 @@ use App\Services\Video\Resolutions\Resolution720p;
 use App\Services\Video\ValueObjects\Dimension;
 
 it('creates 144p conversion with correct dimensions', function () {
-    $resolution = new Resolution144p;
+    $resolution = new Resolution144p();
 
     expect($resolution->getDimension())
         ->toBeInstanceOf(Dimension::class)
@@ -28,7 +28,7 @@ it('creates 144p conversion with correct dimensions', function () {
 });
 
 it('creates 240p conversion with correct dimensions', function () {
-    $resolution = new Resolution240p;
+    $resolution = new Resolution240p();
 
     expect($resolution->getDimension())
         ->toBeInstanceOf(Dimension::class)
@@ -43,7 +43,7 @@ it('creates 240p conversion with correct dimensions', function () {
 });
 
 it('creates 360p conversion with correct dimensions', function () {
-    $resolution = new Resolution360p;
+    $resolution = new Resolution360p();
 
     expect($resolution->getDimension())
         ->toBeInstanceOf(Dimension::class)
@@ -58,7 +58,7 @@ it('creates 360p conversion with correct dimensions', function () {
 });
 
 it('creates 480p conversion with correct dimensions', function () {
-    $resolution = new Resolution480p;
+    $resolution = new Resolution480p();
 
     expect($resolution->getDimension())
         ->toBeInstanceOf(Dimension::class)
@@ -73,7 +73,7 @@ it('creates 480p conversion with correct dimensions', function () {
 });
 
 it('creates 720p conversion with correct dimensions', function () {
-    $resolution = new Resolution720p;
+    $resolution = new Resolution720p();
 
     expect($resolution->getDimension())
         ->toBeInstanceOf(Dimension::class)
@@ -88,7 +88,7 @@ it('creates 720p conversion with correct dimensions', function () {
 });
 
 it('creates 1080p conversion with correct dimensions', function () {
-    $resolution = new Resolution1080p;
+    $resolution = new Resolution1080p();
 
     expect($resolution->getDimension())
         ->toBeInstanceOf(Dimension::class)
@@ -103,7 +103,7 @@ it('creates 1080p conversion with correct dimensions', function () {
 });
 
 it('creates 1440p conversion with correct dimensions', function () {
-    $resolution = new Resolution1440p;
+    $resolution = new Resolution1440p();
 
     expect($resolution->getDimension())
         ->toBeInstanceOf(Dimension::class)
@@ -118,7 +118,7 @@ it('creates 1440p conversion with correct dimensions', function () {
 });
 
 it('creates 4K conversion with correct dimensions', function () {
-    $resolution = new Resolution4K;
+    $resolution = new Resolution4K();
 
     expect($resolution->getDimension())
         ->toBeInstanceOf(Dimension::class)
@@ -137,7 +137,7 @@ it('conversion respects scale-up constraints', function () {
     $sourceDimension = new Dimension(640, 360); // 360p source
 
     // Try to apply 4K conversion (should be constrained)
-    $resolution4K = new Resolution4K;
+    $resolution4K = new Resolution4K();
     $targetDimension = $resolution4K->getDimension();
 
     // The conversion dimension should be valid
@@ -152,14 +152,14 @@ it('conversion respects scale-up constraints', function () {
 
 it('all conversions have proper bitrate settings', function () {
     $resolutions = [
-        new Resolution144p,
-        new Resolution240p,
-        new Resolution360p,
-        new Resolution480p,
-        new Resolution720p,
-        new Resolution1080p,
-        new Resolution1440p,
-        new Resolution4K,
+        new Resolution144p(),
+        new Resolution240p(),
+        new Resolution360p(),
+        new Resolution480p(),
+        new Resolution720p(),
+        new Resolution1080p(),
+        new Resolution1440p(),
+        new Resolution4K(),
     ];
 
     foreach ($resolutions as $resolution) {
@@ -176,14 +176,14 @@ it('all conversions have proper bitrate settings', function () {
 
 it('conversions are properly ordered by quality', function () {
     $resolutions = [
-        new Resolution144p,
-        new Resolution240p,
-        new Resolution360p,
-        new Resolution480p,
-        new Resolution720p,
-        new Resolution1080p,
-        new Resolution1440p,
-        new Resolution4K,
+        new Resolution144p(),
+        new Resolution240p(),
+        new Resolution360p(),
+        new Resolution480p(),
+        new Resolution720p(),
+        new Resolution1080p(),
+        new Resolution1440p(),
+        new Resolution4K(),
     ];
 
     $previousPixelCount = 0;

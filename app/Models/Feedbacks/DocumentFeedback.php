@@ -96,10 +96,8 @@ final class DocumentFeedback extends Model
 
     protected $with = ['creator'];
 
-    public static function createForBlock(
-        string $blockId,
-        array $attributes,
-    ): static {
+    public static function createForBlock(string $blockId, array $attributes): static
+    {
         return self::create([
             ...$attributes,
             'block_id' => $blockId,
@@ -156,30 +154,31 @@ final class DocumentFeedback extends Model
     // Type-specific methods
     public function hasTextSelection(): bool
     {
-        return
-            ! empty($this->selection_data)
+        return (
+            !empty($this->selection_data)
             && isset($this->selection_data['selectedText'])
-            && ! empty($this->selection_data['selectedText']);
+            && !empty($this->selection_data['selectedText'])
+        );
     }
 
-    public function getSelectedText(): ?string
+    public function getSelectedText(): null|string
     {
         return $this->selection_data['selectedText'] ?? null;
     }
 
-    public function getSelectionStart(): ?int
+    public function getSelectionStart(): null|int
     {
         return $this->selection_data['start'] ?? null;
     }
 
-    public function getSelectionEnd(): ?int
+    public function getSelectionEnd(): null|int
     {
         return $this->selection_data['end'] ?? null;
     }
 
     public function getSelectionLength(): int
     {
-        if (! $this->hasTextSelection()) {
+        if (!$this->hasTextSelection()) {
             return 0;
         }
 
@@ -193,19 +192,19 @@ final class DocumentFeedback extends Model
         return $end - $start;
     }
 
-    public function getBlockIndex(): ?int
+    public function getBlockIndex(): null|int
     {
         return $this->position_data['blockIndex'] ?? null;
     }
 
-    public function getBlockPosition(): ?array
+    public function getBlockPosition(): null|array
     {
         return $this->position_data['position'] ?? null;
     }
 
     public function isBlockLevelFeedback(): bool
     {
-        return ! $this->hasTextSelection();
+        return !$this->hasTextSelection();
     }
 
     public function isTextLevelFeedback(): bool
@@ -277,7 +276,7 @@ final class DocumentFeedback extends Model
 
     public function hasBlockVersion(): bool
     {
-        return ! empty($this->block_version);
+        return !empty($this->block_version);
     }
 
     public function isBlockVersionCurrent(string $currentVersion): bool
@@ -331,29 +330,19 @@ final class DocumentFeedback extends Model
         return $query->where('block_id', $blockId);
     }
 
-    protected function scopeForBlockType(
-        Builder $query,
-        string $elementType,
-    ): Builder {
+    protected function scopeForBlockType(Builder $query, string $elementType): Builder
+    {
         return $query->where('element_type', $elementType);
     }
 
     protected function scopeWithTextSelection(Builder $query): Builder
     {
-        return $query->whereNotNull('selection_data')->whereJsonLength(
-            'selection_data',
-            '>',
-            0,
-        );
+        return $query->whereNotNull('selection_data')->whereJsonLength('selection_data', '>', 0);
     }
 
     protected function scopeWithoutTextSelection(Builder $query): Builder
     {
-        return $query->whereNull('selection_data')->orWhereJsonLength(
-            'selection_data',
-            '=',
-            0,
-        );
+        return $query->whereNull('selection_data')->orWhereJsonLength('selection_data', '=', 0);
     }
 
     protected function scopeForBlocks(Builder $query, array $blockIds): Builder
@@ -361,19 +350,15 @@ final class DocumentFeedback extends Model
         return $query->whereIn('block_id', $blockIds);
     }
 
-    protected function scopeByElementTypes(
-        Builder $query,
-        array $elementTypes,
-    ): Builder {
+    protected function scopeByElementTypes(Builder $query, array $elementTypes): Builder
+    {
         return $query->whereIn('element_type', $elementTypes);
     }
 
     protected function scopeOrderByBlockPosition(Builder $query): Builder
     {
         // Assuming position_data contains block index or order
-        return $query->orderByRaw(
-            'JSON_EXTRACT(position_data, "$.blockIndex") ASC',
-        );
+        return $query->orderByRaw('JSON_EXTRACT(position_data, "$.blockIndex") ASC');
     }
 
     protected function casts(): array

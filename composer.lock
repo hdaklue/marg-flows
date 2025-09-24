@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e8051308663a2fdd8a604b570f5c7e93",
+    "content-hash": "b41328d80f1a097d4505821491c5a76c",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2676,6 +2676,61 @@
                 "source": "https://github.com/hdaklue/naptap/tree/1.0.23"
             },
             "time": "2025-09-15T07:40:35+00:00"
+        },
+        {
+            "name": "hdaklue/polish",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hdaklue/polish.git",
+                "reference": "9995f2b7caf201de369fc731b1083e97cabe9a5f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hdaklue/polish/zipball/9995f2b7caf201de369fc731b1083e97cabe9a5f",
+                "reference": "9995f2b7caf201de369fc731b1083e97cabe9a5f",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^9.0|^10.0|^11.0|^12.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0",
+                "pestphp/pest": "^2.34",
+                "pestphp/pest-plugin-laravel": "^2.4",
+                "phpstan/phpstan": "^1.0",
+                "phpunit/phpunit": "^9.0|^10.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Hdaklue\\Polish\\PolishServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Hdaklue\\Polish\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hassan Ibrahim",
+                    "email": "hassan@daklue.com"
+                }
+            ],
+            "description": "A Laravel package for data polishing and transformation",
+            "support": {
+                "issues": "https://github.com/hdaklue/polish/issues",
+                "source": "https://github.com/hdaklue/polish/tree/1.0.2"
+            },
+            "time": "2025-09-24T11:09:14+00:00"
         },
         {
             "name": "hdaklue/porter",

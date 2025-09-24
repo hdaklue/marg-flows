@@ -63,7 +63,12 @@ use Illuminate\Support\Collection;
  *
  * @method static \Database\Factories\DeliverableFactory factory($count = null, $state = [])
  */
-final class Deliverable extends Model implements BelongsToTenantContract, HasStages, RoleableEntity, ScopedToTenant, Sidenoteable
+final class Deliverable extends Model implements
+    BelongsToTenantContract,
+    HasStages,
+    RoleableEntity,
+    ScopedToTenant,
+    Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DeliverableFactory> */
     use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInBusinessDB, ReceivesRoleAssignments, SoftDeletes;
@@ -160,7 +165,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
 
     public function transitionTo(DeliverableStatus $newStatus): bool
     {
-        if (! $this->canTransitionTo($newStatus)) {
+        if (!$this->canTransitionTo($newStatus)) {
             return false;
         }
 
@@ -174,7 +179,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     }
 
     // Format & Specifications
-    public function getFormatSpecifications(): ?DeliverableSpecification
+    public function getFormatSpecifications(): null|DeliverableSpecification
     {
         return $this->format_specifications;
     }
@@ -194,7 +199,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
 
     public function getSpecification(string $key, mixed $default = null): mixed
     {
-        if (! $this->format_specifications) {
+        if (!$this->format_specifications) {
             return $default;
         }
 
@@ -203,7 +208,7 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
 
     public function validateFile(array $fileData): bool
     {
-        if (! $this->format_specifications) {
+        if (!$this->format_specifications) {
             return true; // No specifications to validate against
         }
 
@@ -233,21 +238,21 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     // Progress & Status Helpers
     public function isOverdue(): bool
     {
-        return $this->success_date && $this->success_date->isPast() && ! $this->status->isComplete();
+        return $this->success_date && $this->success_date->isPast() && !$this->status->isComplete();
     }
 
     public function isDue(): bool
     {
-        if (! $this->success_date) {
+        if (!$this->success_date) {
             return false;
         }
 
         return $this->success_date->isToday() || $this->success_date->isTomorrow();
     }
 
-    public function getDaysUntilDue(): ?int
+    public function getDaysUntilDue(): null|int
     {
-        if (! $this->success_date) {
+        if (!$this->success_date) {
             return null;
         }
 
@@ -333,10 +338,11 @@ final class Deliverable extends Model implements BelongsToTenantContract, HasSta
     {
         $userId = $user instanceof User ? $user->id : $user;
 
-        return
+        return (
             $this->isAssignedTo($userId)
             || $this->creator_id === $userId
-            || $this->flow->hasParticipantWithRole($userId, AssigneeRole::ASSIGNEE);
+            || $this->flow->hasParticipantWithRole($userId, AssigneeRole::ASSIGNEE)
+        );
     }
 
     // RoleableEntity Implementation

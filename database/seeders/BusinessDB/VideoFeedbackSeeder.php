@@ -19,10 +19,8 @@ final class VideoFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (! $testUser) {
-            $this->command->warn(
-                'Test user not found. Please run main DatabaseSeeder first.',
-            );
+        if (!$testUser) {
+            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
         }
@@ -93,12 +91,8 @@ final class VideoFeedbackSeeder extends Seeder
                     'timestamp' => null,
                     'start_time' => $startTime,
                     'end_time' => $endTime,
-                    'x_coordinate' => fake()->boolean(70)
-                        ? rand(100, 1820)
-                        : null, // 70% chance of having coordinates
-                    'y_coordinate' => fake()->boolean(70)
-                        ? rand(100, 980)
-                        : null,
+                    'x_coordinate' => fake()->boolean(70) ? rand(100, 1820) : null, // 70% chance of having coordinates
+                    'y_coordinate' => fake()->boolean(70) ? rand(100, 980) : null,
                     'region_data' => $this->generateRegionData(),
                 ]);
             }
@@ -159,9 +153,9 @@ final class VideoFeedbackSeeder extends Seeder
         return fake()->randomElement($comments);
     }
 
-    private function generateRegionData(): ?array
+    private function generateRegionData(): null|array
     {
-        if (! fake()->boolean(60)) { // 60% chance of having region data
+        if (!fake()->boolean(60)) { // 60% chance of having region data
             return null;
         }
 
@@ -187,10 +181,8 @@ final class VideoFeedbackSeeder extends Seeder
         ];
     }
 
-    private function createEdgeCaseFeedback(
-        User $user,
-        Document $document,
-    ): void {
+    private function createEdgeCaseFeedback(User $user, Document $document): void
+    {
         // Very short timestamp (beginning of video)
         VideoFeedback::create([
             'creator_id' => $user->id,

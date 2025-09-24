@@ -13,7 +13,7 @@ final class ConvertOperation extends AbstractVideoOperation
 {
     public function __construct(
         private readonly VideoInterface $format,
-        private readonly ?BitrateEnum $bitrate = null,
+        private readonly null|BitrateEnum $bitrate = null,
     ) {
         $this->metadata = [
             'format' => get_class($this->format),

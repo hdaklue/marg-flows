@@ -23,17 +23,13 @@ final class ResolutionExporter
         private readonly string $disk = 'local',
     ) {}
 
-    public static function start(
-        string $sourcePath,
-        string $disk = 'local',
-    ): self {
+    public static function start(string $sourcePath, string $disk = 'local'): self
+    {
         return new self($sourcePath, $disk);
     }
 
-    public function export(
-        ConversionContract $conversion,
-        string $outputPath,
-    ): ResolutionData {
+    public function export(ConversionContract $conversion, string $outputPath): ResolutionData
+    {
         try {
             // Use FFMpeg directly
             $media = FFMpeg::fromDisk($this->disk)->open($this->sourcePath);
@@ -45,23 +41,17 @@ final class ResolutionExporter
 
             // Apply resize filter using FFMpeg's Dimension class
             $media->addFilter(function ($filters) use ($dimension) {
-                $ffmpegDimension = new Dimension(
-                    $dimension->getWidth(),
-                    $dimension->getHeight(),
-                );
+                $ffmpegDimension = new Dimension($dimension->getWidth(), $dimension->getHeight());
 
-                return $filters->resize(
-                    $ffmpegDimension,
-                    ResizeFilter::RESIZEMODE_INSET,
-                );
+                return $filters->resize($ffmpegDimension, ResizeFilter::RESIZEMODE_INSET);
             });
 
             // Create the appropriate FFMpeg format object
             $format = match ($formatString) {
-                'mp4', 'mov' => new X264,
-                'webm' => new WebM,
-                'avi' => new WMV,
-                default => new X264,
+                'mp4', 'mov' => new X264(),
+                'webm' => new WebM(),
+                'avi' => new WMV(),
+                default => new X264(),
             };
 
             // Set bitrate if specified
@@ -74,20 +64,11 @@ final class ResolutionExporter
 
             // Get file size using Storage disk path
             $fullStoragePath = Storage::disk($this->disk)->path($outputPath);
-            $fileSize = File::exists($fullStoragePath)
-                ? File::size($fullStoragePath)
-                : 0;
+            $fileSize = File::exists($fullStoragePath) ? File::size($fullStoragePath) : 0;
 
-            return ResolutionData::success(
-                get_class($conversion),
-                $outputPath,
-                $fileSize,
-            );
+            return ResolutionData::success(get_class($conversion), $outputPath, $fileSize);
         } catch (Exception $e) {
-            return ResolutionData::failed(
-                get_class($conversion),
-                $e->getMessage(),
-            );
+            return ResolutionData::failed(get_class($conversion), $e->getMessage());
         }
     }
 }

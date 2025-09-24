@@ -32,9 +32,7 @@ final class OriginalMigrateCommand extends Command
      */
     public function handle(): int
     {
-        $this->info(
-            'Running migrations on original database (mysql connection)...',
-        );
+        $this->info('Running migrations on original database (mysql connection)...');
 
         try {
             // Get only main migrations (exclude rbac and business-db subdirectories)
@@ -55,9 +53,7 @@ final class OriginalMigrateCommand extends Command
             ]));
 
             if ($exitCode === 0) {
-                $this->info(
-                    '✅ Original database migrations completed successfully!',
-                );
+                $this->info('✅ Original database migrations completed successfully!');
 
                 if ($this->option('seed')) {
                     $this->info('Running seeders on original database...');
@@ -85,7 +81,7 @@ final class OriginalMigrateCommand extends Command
     {
         $migrationsPath = database_path('migrations');
 
-        if (! is_dir($migrationsPath)) {
+        if (!is_dir($migrationsPath)) {
             return [];
         }
 

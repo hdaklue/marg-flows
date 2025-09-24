@@ -40,10 +40,10 @@ it('creates actual video files using FFmpeg and processes them', function () {
         $inputDir = dirname($fullInputPath);
         $outputDir = dirname($fullOutputPath);
 
-        if (! is_dir($inputDir)) {
+        if (!is_dir($inputDir)) {
             mkdir($inputDir, 0755, true);
         }
-        if (! is_dir($outputDir)) {
+        if (!is_dir($outputDir)) {
             mkdir($outputDir, 0755, true);
         }
 
@@ -66,9 +66,7 @@ it('creates actual video files using FFmpeg and processes them', function () {
             $editor = new VideoEditor($testVideoPath, false, 'local');
 
             // Apply operations but don't actually process yet (just queue them)
-            $editor
-                ->resize(new Dimension(320, 240))
-                ->convert(new Conversion480p);
+            $editor->resize(new Dimension(320, 240))->convert(new Conversion480p());
 
             // Verify operations are queued
             $operations = $editor->getOperations();
@@ -103,10 +101,7 @@ it('creates actual video files using FFmpeg and processes them', function () {
                 $inputSize = Storage::disk('local')->size($testVideoPath);
                 $outputSize = Storage::disk('local')->size($outputVideoPath);
 
-                expect($inputSize)
-                    ->toBeGreaterThan(0)
-                    ->and($outputSize)
-                    ->toBeGreaterThan(0);
+                expect($inputSize)->toBeGreaterThan(0)->and($outputSize)->toBeGreaterThan(0);
 
                 dump('✅ Created actual video files:');
                 dump("Input: {$testVideoPath} ({$inputSize} bytes)");
@@ -138,7 +133,7 @@ it('downloads real video from URL and processes it', function () {
         $fullDownloadPath = Storage::disk('local')->path($downloadPath);
         $downloadDir = dirname($fullDownloadPath);
 
-        if (! is_dir($downloadDir)) {
+        if (!is_dir($downloadDir)) {
             mkdir($downloadDir, 0755, true);
         }
 
@@ -164,7 +159,7 @@ it('downloads real video from URL and processes it', function () {
             // Now process with our video service
             $editor = Video::fromDisk($downloadPath)
                 ->resize(new Dimension(480, 270))
-                ->convert(new Conversion480p);
+                ->convert(new Conversion480p());
 
             // Verify operations
             $operations = $editor->getOperations();
@@ -194,7 +189,7 @@ it('creates multiple video files and batch processes them', function () {
         $fullSourcePath = Storage::disk('local')->path($sourcePath);
         $sourceDir = dirname($fullSourcePath);
 
-        if (! is_dir($sourceDir)) {
+        if (!is_dir($sourceDir)) {
             mkdir($sourceDir, 0755, true);
         }
 
@@ -221,7 +216,7 @@ it('creates multiple video files and batch processes them', function () {
         foreach ($sourceFiles as $index => $sourceFile) {
             $editor = Video::fromDisk($sourceFile)
                 ->resize(new Dimension(160, 120))
-                ->convert(new Conversion480p); // Very small
+                ->convert(new Conversion480p()); // Very small
 
             $operations = $editor->getOperations();
             expect(count($operations))->toBe(2);
@@ -229,18 +224,14 @@ it('creates multiple video files and batch processes them', function () {
             // For actual processing: $editor->save($processedFiles[$index]);
         }
 
-        dump('✅ Created '
-        . count($sourceFiles)
-        . ' test video files for batch processing');
+        dump('✅ Created ' . count($sourceFiles) . ' test video files for batch processing');
 
         foreach ($sourceFiles as $file) {
             $size = Storage::disk('local')->size($file);
             dump("Created: {$file} ({$size} bytes)");
         }
     } else {
-        $this->markTestSkipped(
-            'Could not create test videos for batch processing',
-        );
+        $this->markTestSkipped('Could not create test videos for batch processing');
     }
 });
 

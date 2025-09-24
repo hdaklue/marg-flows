@@ -93,19 +93,16 @@ final class TimeProgressService
         $cacheKey = $this->getCacheKey($item);
         $ttl = (int) now()->diffInSeconds(now()->endOfDay());
 
-        return Cache::remember($cacheKey, $ttl, fn () => [
+        return Cache::remember($cacheKey, $ttl, fn() => [
             'percentage' => $percentage->toArray(),
             'color' => $color,
             'status' => $status,
             'days_remaining' => $this->getDaysRemaining($item),
-            'days_remaining_display' => now()->diffForHumans(
-                $this->getDueDate($item),
-                [
-                    'syntax' => CarbonInterface::DIFF_ABSOLUTE,
-                    'short' => false,
-                    'parts' => 1,
-                ],
-            ),
+            'days_remaining_display' => now()->diffForHumans($this->getDueDate($item), [
+                'syntax' => CarbonInterface::DIFF_ABSOLUTE,
+                'short' => false,
+                'parts' => 1,
+            ]),
             'days_elapsed' => $this->getDaysElapsed($item),
             'total_days' => $this->getTotalDays($item),
             'is_overdue' => $this->isPastDue($item),
@@ -284,7 +281,7 @@ final class TimeProgressService
             return self::STATUS_OVERDUE;
         }
 
-        if (! $this->hasStarted($item)) {
+        if (!$this->hasStarted($item)) {
             return self::STATUS_SCHEDULED;
         }
 
@@ -294,15 +291,13 @@ final class TimeProgressService
     private function handleSameDayProject(TimeProgressable $item): Percentage
     {
         // For same-day projects, consider them 100% if today or past due date
-        return today()->gte($this->getDueDate($item))
-            ? Percentage::complete()
-            : Percentage::zero();
+        return today()->gte($this->getDueDate($item)) ? Percentage::complete() : Percentage::zero();
     }
 
     private function calculateProgressPercentage(TimeProgressable $item): Percentage
     {
         // Project hasn't started
-        if (! $this->hasStarted($item)) {
+        if (!$this->hasStarted($item)) {
             return Percentage::zero();
         }
 
@@ -325,10 +320,8 @@ final class TimeProgressService
         return Percentage::fromRatio($clampedRatio);
     }
 
-    private function mapStatusToColor(
-        string $status,
-        Percentage $percentage,
-    ): string {
+    private function mapStatusToColor(string $status, Percentage $percentage): string
+    {
         return match ($status) {
             self::STATUS_COMPLETED => self::COLOR_GREEN_500,
             self::STATUS_OVERDUE => self::COLOR_RED_500,

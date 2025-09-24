@@ -31,24 +31,28 @@ Route::prefix('documents/{document}')
     ->middleware(['auth'])
     ->group(function () {
         // Upload image to document
-        Route::post('upload-image', UploadDocumentImage::class)->name(
-            'documents.upload-image',
-        );
+        Route::post('upload-image', UploadDocumentImage::class)->name('documents.upload-image');
 
         // Delete image from document
         Route::delete('delete-image', DeleteDocumentImage::class)->name('documents.delete-image');
 
         // Upload single video to document (< maxSingleFileSize)
-        Route::post('upload-video-single', SingleVideoUpload::class)->name('documents.upload-video-single');
+        Route::post('upload-video-single', SingleVideoUpload::class)->name(
+            'documents.upload-video-single',
+        );
 
         // Upload chunked video to document (>= maxSingleFileSize)
-        Route::post('upload-video-chunk', ChunkVideoUpload::class)->name('documents.upload-video-chunk');
+        Route::post('upload-video-chunk', ChunkVideoUpload::class)->name(
+            'documents.upload-video-chunk',
+        );
 
         // Delete video from document
         Route::delete('delete-video', DeleteDocumentVideo::class)->name('documents.delete-video');
 
         // Create video upload session
-        Route::post('create-video-upload-session', CreateVideoUploadSession::class)->name('documents.create-video-upload-session');
+        Route::post('create-video-upload-session', CreateVideoUploadSession::class)->name(
+            'documents.create-video-upload-session',
+        );
     });
 
 // Video upload session status routes (not document-specific in URL)
@@ -56,10 +60,14 @@ Route::prefix('video-upload-sessions')
     ->middleware(['auth'])
     ->group(function () {
         // Get session status for polling
-        Route::get('{sessionId}/status', GetVideoUploadSessionStatus::class)->name('video-upload-sessions.status');
+        Route::get('{sessionId}/status', GetVideoUploadSessionStatus::class)->name(
+            'video-upload-sessions.status',
+        );
 
         // Cancel session and cleanup
-        Route::delete('{sessionId}/cancel', CancelVideoUploadSession::class)->name('video-upload-sessions.cancel');
+        Route::delete('{sessionId}/cancel', CancelVideoUploadSession::class)->name(
+            'video-upload-sessions.cancel',
+        );
     });
 
 // Document file serving routes
@@ -155,6 +163,7 @@ Route::prefix('documents/{document}/files')
     });
 
 // Document file serving (actual file delivery)
-Route::get('documents/{document}/serve/{type}/{filename}', ServeDocumentFile::class)
-    ->where('filename', '.*')
-    ->name('documents.serve');
+Route::get('documents/{document}/serve/{type}/{filename}', ServeDocumentFile::class)->where(
+    'filename',
+    '.*',
+)->name('documents.serve');

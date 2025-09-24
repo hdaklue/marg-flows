@@ -183,10 +183,7 @@ final readonly class Resolution
     ): Dimension {
         return match ($orientation) {
             'portrait' => Dimension::from($baseHeight, $baseWidth), // Flip dimensions
-            'square' => Dimension::from(
-                min($baseWidth, $baseHeight),
-                min($baseWidth, $baseHeight),
-            ), // Use smaller dimension
+            'square' => Dimension::from(min($baseWidth, $baseHeight), min($baseWidth, $baseHeight)), // Use smaller dimension
             default => Dimension::from($baseWidth, $baseHeight), // Keep as-is for 'landscape' and others
         };
     }

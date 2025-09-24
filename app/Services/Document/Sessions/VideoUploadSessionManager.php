@@ -26,7 +26,7 @@ final class VideoUploadSessionManager
         string $originalFilename,
         int $fileSize,
         VideoUploadType $uploadType = VideoUploadType::SINGLE,
-        ?int $chunksTotal = null,
+        null|int $chunksTotal = null,
     ): string {
         $sessionId = Str::ulid()->toString();
 
@@ -55,11 +55,7 @@ final class VideoUploadSessionManager
             'updated_at' => now()->toISOString(),
         ];
 
-        Cache::put(
-            self::CACHE_PREFIX . $sessionId,
-            $sessionData,
-            self::DEFAULT_TTL,
-        );
+        Cache::put(self::CACHE_PREFIX . $sessionId, $sessionData, self::DEFAULT_TTL);
 
         return $sessionId;
     }
@@ -67,7 +63,7 @@ final class VideoUploadSessionManager
     /**
      * Get session data by session ID.
      */
-    public static function get(string $sessionId): ?array
+    public static function get(string $sessionId): null|array
     {
         return Cache::get(self::CACHE_PREFIX . $sessionId);
     }
@@ -78,18 +74,14 @@ final class VideoUploadSessionManager
     public static function update(string $sessionId, array $updates): bool
     {
         $sessionData = self::get($sessionId);
-        if (! $sessionData) {
+        if (!$sessionData) {
             return false;
         }
 
         $sessionData = array_merge($sessionData, $updates);
         $sessionData['updated_at'] = now()->toISOString();
 
-        Cache::put(
-            self::CACHE_PREFIX . $sessionId,
-            $sessionData,
-            self::DEFAULT_TTL,
-        );
+        Cache::put(self::CACHE_PREFIX . $sessionId, $sessionData, self::DEFAULT_TTL);
 
         return true;
     }
@@ -145,10 +137,8 @@ final class VideoUploadSessionManager
     /**
      * Update processing progress.
      */
-    public static function updateProcessingProgress(
-        string $sessionId,
-        int $progress,
-    ): bool {
+    public static function updateProcessingProgress(string $sessionId, int $progress): bool
+    {
         return self::update($sessionId, [
             'processing_progress' => min(100, max(0, $progress)),
         ]);
@@ -163,7 +153,7 @@ final class VideoUploadSessionManager
         mixed $data,
     ): bool {
         $sessionData = self::get($sessionId);
-        if (! $sessionData) {
+        if (!$sessionData) {
             return false;
         }
 
@@ -185,10 +175,8 @@ final class VideoUploadSessionManager
     /**
      * Mark session as completed with final data.
      */
-    public static function complete(
-        string $sessionId,
-        array $finalData,
-    ): bool {
+    public static function complete(string $sessionId, array $finalData): bool
+    {
         $updates = [
             'status' => VideoUploadStatus::COMPLETED->value,
             'phase' => VideoUploadPhase::COMPLETE->value,
@@ -223,7 +211,7 @@ final class VideoUploadSessionManager
             $videoMetadata['aspect_ratio_data'] = $finalData['aspect_ratio_data'];
         }
 
-        if (! empty($videoMetadata)) {
+        if (!empty($videoMetadata)) {
             $updates['video_metadata'] = $videoMetadata;
         }
 
@@ -275,11 +263,11 @@ final class VideoUploadSessionManager
     /**
      * Get session status as enum.
      */
-    public static function getStatus(string $sessionId): ?VideoUploadStatus
+    public static function getStatus(string $sessionId): null|VideoUploadStatus
     {
         $sessionData = self::get($sessionId);
 
-        if (! $sessionData || ! isset($sessionData['status'])) {
+        if (!$sessionData || !isset($sessionData['status'])) {
             return null;
         }
 
@@ -289,7 +277,7 @@ final class VideoUploadSessionManager
     /**
      * Get session status as string.
      */
-    public static function getStatusString(string $sessionId): ?string
+    public static function getStatusString(string $sessionId): null|string
     {
         return self::getStatus($sessionId)?->value;
     }
@@ -297,11 +285,11 @@ final class VideoUploadSessionManager
     /**
      * Get session phase as enum.
      */
-    public static function getPhase(string $sessionId): ?VideoUploadPhase
+    public static function getPhase(string $sessionId): null|VideoUploadPhase
     {
         $sessionData = self::get($sessionId);
 
-        if (! $sessionData || ! isset($sessionData['phase'])) {
+        if (!$sessionData || !isset($sessionData['phase'])) {
             return null;
         }
 
@@ -311,7 +299,7 @@ final class VideoUploadSessionManager
     /**
      * Get session phase as string.
      */
-    public static function getPhaseString(string $sessionId): ?string
+    public static function getPhaseString(string $sessionId): null|string
     {
         return self::getPhase($sessionId)?->value;
     }
@@ -319,11 +307,11 @@ final class VideoUploadSessionManager
     /**
      * Get session upload type as enum.
      */
-    public static function getUploadType(string $sessionId): ?VideoUploadType
+    public static function getUploadType(string $sessionId): null|VideoUploadType
     {
         $sessionData = self::get($sessionId);
 
-        if (! $sessionData || ! isset($sessionData['upload_type'])) {
+        if (!$sessionData || !isset($sessionData['upload_type'])) {
             return null;
         }
 
@@ -333,7 +321,7 @@ final class VideoUploadSessionManager
     /**
      * Get session upload type as string.
      */
-    public static function getUploadTypeString(string $sessionId): ?string
+    public static function getUploadTypeString(string $sessionId): null|string
     {
         return self::getUploadType($sessionId)?->value;
     }
@@ -389,15 +377,11 @@ final class VideoUploadSessionManager
     public static function scheduleCleanup(string $sessionId, int $delayMinutes = 5): void
     {
         $sessionData = self::get($sessionId);
-        if (! $sessionData) {
+        if (!$sessionData) {
             return;
         }
 
         // Extend TTL briefly for final status checks, then auto-cleanup
-        Cache::put(
-            self::CACHE_PREFIX . $sessionId,
-            $sessionData,
-            now()->addMinutes($delayMinutes),
-        );
+        Cache::put(self::CACHE_PREFIX . $sessionId, $sessionData, now()->addMinutes($delayMinutes));
     }
 }

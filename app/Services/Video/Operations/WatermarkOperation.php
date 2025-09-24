@@ -38,7 +38,7 @@ final class WatermarkOperation extends AbstractVideoOperation
 
     public function canExecute(): bool
     {
-        if (! file_exists($this->watermarkPath)) {
+        if (!file_exists($this->watermarkPath)) {
             return false;
         }
 

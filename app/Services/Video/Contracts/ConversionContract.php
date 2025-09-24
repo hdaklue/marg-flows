@@ -15,9 +15,9 @@ interface ConversionContract
 
     public function getQuality(): string;
 
-    public function getDimension(): ?Dimension;
+    public function getDimension(): null|Dimension;
 
-    public function getTargetBitrate(): ?int;
+    public function getTargetBitrate(): null|int;
 
     public function getName(): string;
 
@@ -25,15 +25,15 @@ interface ConversionContract
 
     public function allowScaleUp(): bool;
 
-    public function getMaxDimension(): ?Dimension;
+    public function getMaxDimension(): null|Dimension;
 
-    public function getMinDimension(): ?Dimension;
+    public function getMinDimension(): null|Dimension;
 
     public function shouldMaintainAspectRatio(): bool;
 
     public function getConstraints(): array;
 
-    public function calculateFinalDimension(Dimension $currentDimension): ?Dimension;
+    public function calculateFinalDimension(Dimension $currentDimension): null|Dimension;
 
     public function wouldScaleUp(Dimension $currentDimension): bool;
 

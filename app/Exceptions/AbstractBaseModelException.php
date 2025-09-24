@@ -43,10 +43,8 @@ final class AbstractBaseModelException extends Exception
         );
     }
 
-    public static function cannotPersist(
-        string $modelClass,
-        string $operation,
-    ): self {
+    public static function cannotPersist(string $modelClass, string $operation): self
+    {
         return new self(
             "Cannot perform [{$operation}] operation on abstract base model [{$modelClass}]. "
             . 'Use a concrete implementation instead.',
@@ -60,7 +58,7 @@ final class AbstractBaseModelException extends Exception
     ): self {
         $message = "Invalid operation [{$operation}] on abstract base model [{$modelClass}].";
 
-        if (! empty($availableModels)) {
+        if (!empty($availableModels)) {
             $modelList = implode(', ', $availableModels);
             $message .= " Available concrete models: {$modelList}";
         }

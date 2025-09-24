@@ -13,10 +13,7 @@ final class ScaleProportional implements ScaleStrategyContract
     public function __construct(
         private readonly float $factor,
     ) {
-        throw_if(
-            $factor <= 0,
-            new InvalidArgumentException('Scale factor must be positive'),
-        );
+        throw_if($factor <= 0, new InvalidArgumentException('Scale factor must be positive'));
     }
 
     public static function make(float $factor): self

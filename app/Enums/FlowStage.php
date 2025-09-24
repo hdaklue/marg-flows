@@ -19,7 +19,7 @@ enum FlowStage: int implements HasColor, HasLabel
     public static function asFilamentHtmlArray(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn ($case) => [
+            ->mapWithKeys(fn($case) => [
                 $case->value => "<div class='flex items-center gap-2'><div class='w-3 h-3 rounded bg-{$case->getColor()}-500 dark:bg-{$case->getColor()}-700'></div><span>{$case->getLabel()}</span></div>",
             ])
             ->toArray();

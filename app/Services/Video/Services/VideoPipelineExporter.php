@@ -39,19 +39,14 @@ final class VideoPipelineExporter
      */
     public function export(
         string $outputPath,
-        ?VideoFormatContract $convertFormat = null,
-        ?BitrateEnum $convertBitrate = null,
+        null|VideoFormatContract $convertFormat = null,
+        null|BitrateEnum $convertBitrate = null,
     ): string {
         $media = $this->openSourceMedia();
         $media = $this->applyOperations($media);
         $exporter = $media->export();
 
-        $outputPath = $this->applyFormat(
-            $exporter,
-            $outputPath,
-            $convertFormat,
-            $convertBitrate,
-        );
+        $outputPath = $this->applyFormat($exporter, $outputPath, $convertFormat, $convertBitrate);
         $exporter->save($outputPath);
 
         return $outputPath;
@@ -66,8 +61,7 @@ final class VideoPipelineExporter
             return FFMpeg::fromDisk($this->disk)->open($this->sourcePath);
         } catch (Exception $e) {
             throw new InvalidArgumentException(
-                "Could not open source video: {$this->sourcePath}. Error: "
-                . $e->getMessage(),
+                "Could not open source video: {$this->sourcePath}. Error: " . $e->getMessage(),
             );
         }
     }
@@ -90,8 +84,8 @@ final class VideoPipelineExporter
     private function applyFormat(
         $exporter,
         string $outputPath,
-        ?VideoFormatContract $convertFormat,
-        ?BitrateEnum $convertBitrate,
+        null|VideoFormatContract $convertFormat,
+        null|BitrateEnum $convertBitrate,
     ): string {
         if ($convertFormat) {
             return $this->applyConvertFormat(
@@ -105,7 +99,7 @@ final class VideoPipelineExporter
         if ($this->hasOperationsRequiringTranscoding()) {
             $this->applyTranscodingFormat($exporter, $outputPath);
         } else {
-            $exporter->inFormat(new CopyFormat);
+            $exporter->inFormat(new CopyFormat());
         }
 
         return $outputPath;
@@ -118,10 +112,10 @@ final class VideoPipelineExporter
         $exporter,
         string $outputPath,
         VideoFormatContract $convertFormat,
-        ?BitrateEnum $convertBitrate,
+        null|BitrateEnum $convertBitrate,
     ): string {
         $bitrate = $convertBitrate ?: null;
-        if (! $bitrate) {
+        if (!$bitrate) {
             $this->getOriginalBitrate(); // Get original bitrate but don't convert to enum
         }
 
@@ -141,10 +135,10 @@ final class VideoPipelineExporter
     {
         $extension = strtolower(pathinfo($outputPath, PATHINFO_EXTENSION));
         $format = match ($extension) {
-            'mp4', 'mov' => new X264,
-            'webm' => new WebM,
-            'avi' => new WMV,
-            default => new X264,
+            'mp4', 'mov' => new X264(),
+            'webm' => new WebM(),
+            'avi' => new WMV(),
+            default => new X264(),
         };
 
         $originalBitrate = $this->getOriginalBitrate();
@@ -161,11 +155,7 @@ final class VideoPipelineExporter
     private function hasOperationsRequiringTranscoding(): bool
     {
         foreach ($this->pipeline->getOperations() as $operation) {
-            if (in_array(
-                $operation->getName(),
-                self::TRANSCODING_OPERATIONS,
-                true,
-            )) {
+            if (in_array($operation->getName(), self::TRANSCODING_OPERATIONS, true)) {
                 return true;
             }
         }
@@ -176,21 +166,14 @@ final class VideoPipelineExporter
     /**
      * Update output path extension to match the format.
      */
-    private function updateOutputPathExtension(
-        string $outputPath,
-        string $newExtension,
-    ): string {
+    private function updateOutputPathExtension(string $outputPath, string $newExtension): string
+    {
         $pathInfo = pathinfo($outputPath);
         $directory = $pathInfo['dirname'] ?? '';
         $filename = $pathInfo['filename'] ?? '';
 
         if ($directory && $directory !== '.') {
-            return
-                $directory
-                . DIRECTORY_SEPARATOR
-                . $filename
-                . '.'
-                . $newExtension;
+            return $directory . DIRECTORY_SEPARATOR . $filename . '.' . $newExtension;
         }
 
         return $filename . '.' . $newExtension;
@@ -199,7 +182,7 @@ final class VideoPipelineExporter
     /**
      * Get original video bitrate to preserve quality.
      */
-    private function getOriginalBitrate(): ?int
+    private function getOriginalBitrate(): null|int
     {
         try {
             $media = FFMpeg::fromDisk($this->disk)->open($this->sourcePath);

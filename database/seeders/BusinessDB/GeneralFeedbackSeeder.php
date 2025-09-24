@@ -15,16 +15,12 @@ final class GeneralFeedbackSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info(
-            'Creating general feedback in business database...',
-        );
+        $this->command->info('Creating general feedback in business database...');
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (! $testUser) {
-            $this->command->warn(
-                'Test user not found. Please run main DatabaseSeeder first.',
-            );
+        if (!$testUser) {
+            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
         }
@@ -198,9 +194,9 @@ final class GeneralFeedbackSeeder extends Seeder
         return fake()->randomElement($categoryComments);
     }
 
-    private function generateMetadata(string $category): ?array
+    private function generateMetadata(string $category): null|array
     {
-        if (! fake()->boolean(80)) { // 80% chance of having metadata
+        if (!fake()->boolean(80)) { // 80% chance of having metadata
             return null;
         }
 
@@ -323,9 +319,9 @@ final class GeneralFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateCustomData(string $category): ?array
+    private function generateCustomData(string $category): null|array
     {
-        if (! fake()->boolean(60)) { // 60% chance of having custom data
+        if (!fake()->boolean(60)) { // 60% chance of having custom data
             return null;
         }
 
@@ -382,10 +378,8 @@ final class GeneralFeedbackSeeder extends Seeder
         ];
     }
 
-    private function createSpecializedGeneralFeedback(
-        User $user,
-        Document $document,
-    ): void {
+    private function createSpecializedGeneralFeedback(User $user, Document $document): void
+    {
         // High-priority bug report with detailed metadata
         GeneralFeedback::create([
             'creator_id' => $user->id,

@@ -15,21 +15,21 @@ use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 
 final class Video
 {
-    private ?Dimension $dimension = null;
+    private null|Dimension $dimension = null;
 
-    private ?float $duration = null;
+    private null|float $duration = null;
 
-    private ?int $bitrate = null;
+    private null|int $bitrate = null;
 
-    private ?string $extension = null;
+    private null|string $extension = null;
 
-    private ?string $relativePath = null;
+    private null|string $relativePath = null;
 
-    private ?string $directory = null;
+    private null|string $directory = null;
 
-    private ?string $filename = null;
+    private null|string $filename = null;
 
-    private ?int $fileSize = null;
+    private null|int $fileSize = null;
 
     public function __construct(
         private readonly string $path,
@@ -44,10 +44,8 @@ final class Video
     /**
      * Load a video from file path.
      */
-    public static function load(
-        string $path,
-        string $disk = 'local',
-    ): VideoEditor {
+    public static function load(string $path, string $disk = 'local'): VideoEditor
+    {
         $video = new self($path, false, $disk);
 
         return new VideoEditor($video);
@@ -56,10 +54,8 @@ final class Video
     /**
      * Load a video from URL.
      */
-    public static function loadFromUrl(
-        string $url,
-        string $disk = 'local',
-    ): VideoEditor {
+    public static function loadFromUrl(string $url, string $disk = 'local'): VideoEditor
+    {
         $video = new self($url, true, $disk);
 
         return new VideoEditor($video);
@@ -68,10 +64,8 @@ final class Video
     /**
      * Create a video editor instance from an existing video path.
      */
-    public static function make(
-        string $path,
-        string $disk = 'local',
-    ): VideoEditor {
+    public static function make(string $path, string $disk = 'local'): VideoEditor
+    {
         return self::load($path, $disk);
     }
 
@@ -164,7 +158,7 @@ final class Video
         return $this->duration;
     }
 
-    public function getBitrate(): ?int
+    public function getBitrate(): null|int
     {
         if ($this->bitrate === null) {
             $this->loadVideoMetadata();
@@ -281,13 +275,11 @@ final class Video
     private function validatePath(): void
     {
         if ($this->isUrl) {
-            if (! filter_var($this->path, FILTER_VALIDATE_URL)) {
-                throw new InvalidArgumentException(
-                    "Invalid URL: {$this->path}",
-                );
+            if (!filter_var($this->path, FILTER_VALIDATE_URL)) {
+                throw new InvalidArgumentException("Invalid URL: {$this->path}");
             }
         } else {
-            if (! Storage::disk($this->disk)->exists($this->path)) {
+            if (!Storage::disk($this->disk)->exists($this->path)) {
                 throw new InvalidArgumentException(
                     "Video file not found: {$this->path} on disk: {$this->disk}",
                 );
@@ -321,10 +313,7 @@ final class Video
         // Create relative path by removing the current working directory
         $cwd = getcwd();
         if ($cwd && strpos($this->path, $cwd) === 0) {
-            $this->relativePath = ltrim(
-                substr($this->path, strlen($cwd)),
-                DIRECTORY_SEPARATOR,
-            );
+            $this->relativePath = ltrim(substr($this->path, strlen($cwd)), DIRECTORY_SEPARATOR);
         } else {
             $this->relativePath = $this->path;
         }
@@ -332,11 +321,7 @@ final class Video
 
     private function loadVideoMetadata(): void
     {
-        if (
-            $this->dimension !== null
-            && $this->duration !== null
-            && $this->bitrate !== null
-        ) {
+        if ($this->dimension !== null && $this->duration !== null && $this->bitrate !== null) {
             return; // Already loaded
         }
 
@@ -361,10 +346,7 @@ final class Video
             if ($this->bitrate === null) {
                 try {
                     $format = $media->getFormat();
-                    if (
-                        method_exists($format, 'get')
-                        && $format->get('bit_rate')
-                    ) {
+                    if (method_exists($format, 'get') && $format->get('bit_rate')) {
                         $this->bitrate = (int) ($format->get('bit_rate') / 1000); // Convert to kbps
                     }
                 } catch (Exception $e) {
@@ -373,8 +355,7 @@ final class Video
             }
         } catch (Exception $e) {
             throw new InvalidArgumentException(
-                "Could not analyze video: {$this->path}. Error: "
-                . $e->getMessage(),
+                "Could not analyze video: {$this->path}. Error: " . $e->getMessage(),
             );
         }
     }

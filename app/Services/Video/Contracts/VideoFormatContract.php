@@ -12,7 +12,7 @@ interface VideoFormatContract
     /**
      * Get the underlying FFMpeg format driver.
      */
-    public function getDriverFormat(?BitrateEnum $bitrate = null): VideoInterface;
+    public function getDriverFormat(null|BitrateEnum $bitrate = null): VideoInterface;
 
     /**
      * Get the file extension for this format.
@@ -27,7 +27,7 @@ interface VideoFormatContract
     /**
      * Get the default bitrate for this format if none specified.
      */
-    public function getDefaultBitrate(): ?int;
+    public function getDefaultBitrate(): null|int;
 
     /**
      * Check if this format supports the given bitrate.

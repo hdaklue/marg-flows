@@ -83,17 +83,17 @@ final class ResizableImageBlock extends Block
     public function getFilenames(): array
     {
         $files = $this->get('files', []);
-        if (! is_array($files)) {
+        if (!is_array($files)) {
             return [];
         }
 
-        return array_map(fn ($file) => $file['filename'] ?? '', $files);
+        return array_map(fn($file) => $file['filename'] ?? '', $files);
     }
 
     /**
      * Get the gallery caption.
      */
-    public function getCaption(): ?string
+    public function getCaption(): null|string
     {
         return $this->get('caption');
     }
@@ -103,7 +103,7 @@ final class ResizableImageBlock extends Block
      */
     public function isEmpty(): bool
     {
-        return ! $this->hasImages();
+        return !$this->hasImages();
     }
 
     /**
@@ -113,7 +113,7 @@ final class ResizableImageBlock extends Block
      */
     public function render(): string
     {
-        if (! $this->hasImages()) {
+        if (!$this->hasImages()) {
             return '';
         }
 
@@ -133,7 +133,8 @@ final class ResizableImageBlock extends Block
 
         // Add gallery caption if present
         if ($caption) {
-            $html .= '<div class="resizable-image-caption">' . htmlspecialchars($caption) . '</div>';
+            $html .=
+                '<div class="resizable-image-caption">' . htmlspecialchars($caption) . '</div>';
         }
 
         $html .= '</div>';
@@ -162,7 +163,10 @@ final class ResizableImageBlock extends Block
         $html .= ' class="resizable-image-img">';
 
         if ($caption) {
-            $html .= '<div class="resizable-image-single-caption">' . htmlspecialchars($caption) . '</div>';
+            $html .=
+                '<div class="resizable-image-single-caption">'
+                . htmlspecialchars($caption)
+                . '</div>';
         }
 
         $html .= '</div>';

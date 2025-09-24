@@ -19,24 +19,16 @@ final class ResolutionMobile extends AbstractResolution
 
     protected Resolution $resolution;
 
-    public function __construct(
-        ?Resolution $resolution = null,
-        bool $allowScaleUp = true,
-    ) {
+    public function __construct(null|Resolution $resolution = null, bool $allowScaleUp = true)
+    {
         $this->resolution = $resolution ?? Resolution::createMobilePortrait(); // Portrait by default
         $this->dimension = $this->resolution->dimension;
         $this->bitrate = $this->resolution->getBitrateKbps();
         $this->allowScaleUp = $allowScaleUp;
 
         // Set mobile-friendly constraints
-        $this->maxDimension = \App\Services\Video\ValueObjects\Dimension::from(
-            1080,
-            1920,
-        );
-        $this->minDimension = \App\Services\Video\ValueObjects\Dimension::from(
-            480,
-            640,
-        );
+        $this->maxDimension = \App\Services\Video\ValueObjects\Dimension::from(1080, 1920);
+        $this->minDimension = \App\Services\Video\ValueObjects\Dimension::from(480, 640);
     }
 
     public static function landscape(): self
@@ -59,10 +51,7 @@ final class ResolutionMobile extends AbstractResolution
         // Use addFilter approach as recommended by Laravel FFMpeg
         $exporter->addFilter(function ($filters) {
             $filters->resize(
-                new Dimension(
-                    $this->dimension->getWidth(),
-                    $this->dimension->getHeight(),
-                ),
+                new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
                 $this->resizeMode,
             );
         });
@@ -71,10 +60,7 @@ final class ResolutionMobile extends AbstractResolution
     public function getFilter()
     {
         return new ResizeFilter(
-            new Dimension(
-                $this->dimension->getWidth(),
-                $this->dimension->getHeight(),
-            ),
+            new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
             $this->resizeMode,
             false, // Disable standard aspect ratio enforcement to prevent black bars
         );

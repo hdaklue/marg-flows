@@ -16,11 +16,11 @@ final class GetVideoUploadSessionStatus
     /**
      * Get upload session status with phase-based data.
      */
-    public function handle(string $sessionId): ?array
+    public function handle(string $sessionId): null|array
     {
         $sessionData = VideoUploadSessionManager::get($sessionId);
 
-        if (! $sessionData) {
+        if (!$sessionData) {
             return null;
         }
 
@@ -41,7 +41,7 @@ final class GetVideoUploadSessionStatus
     {
         $result = $this->handle($sessionId);
 
-        if (! $result) {
+        if (!$result) {
             return VideoUploadResponse::error('Session not found or expired', 404);
         }
 

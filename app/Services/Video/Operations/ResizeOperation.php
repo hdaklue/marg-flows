@@ -42,9 +42,7 @@ final class ResizeOperation extends AbstractVideoOperation
 
     public function canExecute(): bool
     {
-        return
-            $this->dimension->getWidth() > 0
-            && $this->dimension->getHeight() > 0;
+        return $this->dimension->getWidth() > 0 && $this->dimension->getHeight() > 0;
     }
 
     public function applyToBuilder(MediaExporter $builder): MediaExporter

@@ -32,7 +32,7 @@ final class MargRefreshDbCommand extends Command
     public function handle(): int
     {
         // SAFETY CHECK: Only allow in local environment
-        if (! app()->environment('local', 'testing')) {
+        if (!app()->environment('local', 'testing')) {
             $this->error(
                 '❌ This command is only allowed in local/testing environments for safety!',
             );
@@ -78,9 +78,7 @@ final class MargRefreshDbCommand extends Command
                 $this->info('✅ Business database refreshed successfully!');
                 $this->newLine();
             } else {
-                $this->info(
-                    'Step 2: Business database connection not configured, skipping...',
-                );
+                $this->info('Step 2: Business database connection not configured, skipping...');
                 $this->newLine();
             }
 
@@ -114,15 +112,9 @@ final class MargRefreshDbCommand extends Command
             $this->newLine();
             $this->info('🎉 All databases refreshed successfully!');
             $this->info('Architecture:');
-            $this->info(
-                '  - RBAC Database (margrbac): Users, Tenants, Roles, Permissions',
-            );
-            $this->info(
-                '  - Business Database (business_db): Business-specific data',
-            );
-            $this->info(
-                '  - Original Database (mysql): Main application data, Flows, Profiles',
-            );
+            $this->info('  - RBAC Database (margrbac): Users, Tenants, Roles, Permissions');
+            $this->info('  - Business Database (business_db): Business-specific data');
+            $this->info('  - Original Database (mysql): Main application data, Flows, Profiles');
         } catch (Exception $e) {
             $this->error('❌ Database refresh failed: ' . $e->getMessage());
 

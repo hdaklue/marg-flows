@@ -92,10 +92,7 @@ final class Previewtest extends Component
 
     public function saveComment($comment, $imageId)
     {
-        $this->images = collect($this->images)->map(function ($image) use (
-            $imageId,
-            $comment,
-        ) {
+        $this->images = collect($this->images)->map(function ($image) use ($imageId, $comment) {
             if ($image['id'] === $imageId) {
                 $image['comments'][] = $comment;
             }

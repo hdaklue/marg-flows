@@ -42,9 +42,7 @@ final class BlocksCollection extends Collection
     {
         throw_unless(
             $item instanceof Block,
-            new InvalidArgumentException(
-                'Item must be an instance of Block',
-            ),
+            new InvalidArgumentException('Item must be an instance of Block'),
         );
 
         return parent::add($item);
@@ -58,9 +56,7 @@ final class BlocksCollection extends Collection
         foreach ($values as $value) {
             throw_unless(
                 $value instanceof Block,
-                new InvalidArgumentException(
-                    'All items must be instances of Block',
-                ),
+                new InvalidArgumentException('All items must be instances of Block'),
             );
         }
 
@@ -74,9 +70,7 @@ final class BlocksCollection extends Collection
     {
         throw_unless(
             $value instanceof Block,
-            new InvalidArgumentException(
-                'Value must be an instance of Block',
-            ),
+            new InvalidArgumentException('Value must be an instance of Block'),
         );
 
         return parent::put($key, $value);
@@ -87,9 +81,7 @@ final class BlocksCollection extends Collection
      */
     public function byType(string $type): self
     {
-        return $this->filter(
-            fn (Block $block) => $block->type === $type,
-        );
+        return $this->filter(fn(Block $block) => $block->type === $type);
     }
 
     /**
@@ -130,7 +122,7 @@ final class BlocksCollection extends Collection
      */
     public function nonEmpty(): self
     {
-        return $this->filter(fn (Block $block) => $this->isBlockNonEmpty($block));
+        return $this->filter(fn(Block $block) => $this->isBlockNonEmpty($block));
     }
 
     /**
@@ -138,7 +130,7 @@ final class BlocksCollection extends Collection
      */
     public function withText(): self
     {
-        return $this->filter(fn (Block $block) => $this->hasText($block));
+        return $this->filter(fn(Block $block) => $this->hasText($block));
     }
 
     /**
@@ -146,7 +138,7 @@ final class BlocksCollection extends Collection
      */
     public function extractText(): array
     {
-        return $this->map(fn (Block $block) => $this->getText($block))
+        return $this->map(fn(Block $block) => $this->getText($block))
             ->filter()
             ->values()
             ->toArray();
@@ -155,9 +147,9 @@ final class BlocksCollection extends Collection
     /**
      * Find block by type and data criteria.
      */
-    public function findByData(string $key, mixed $value): ?Block
+    public function findByData(string $key, mixed $value): null|Block
     {
-        return $this->first(fn (Block $block) => $block->get($key) === $value);
+        return $this->first(fn(Block $block) => $block->get($key) === $value);
     }
 
     /**
@@ -165,7 +157,7 @@ final class BlocksCollection extends Collection
      */
     public function removeByData(string $key, mixed $value): self
     {
-        return $this->reject(fn (Block $block) => $block->get($key) === $value);
+        return $this->reject(fn(Block $block) => $block->get($key) === $value);
     }
 
     /**
@@ -173,9 +165,7 @@ final class BlocksCollection extends Collection
      */
     public function replaceByData(string $key, mixed $value, Block $newBlock): self
     {
-        return $this->map(fn (Block $block) => $block->get($key) === $value
-            ? $newBlock
-            : $block);
+        return $this->map(fn(Block $block) => $block->get($key) === $value ? $newBlock : $block);
     }
 
     /**
@@ -206,7 +196,7 @@ final class BlocksCollection extends Collection
      */
     public function groupByType(): Collection
     {
-        return $this->groupBy(fn (Block $block) => $block->type);
+        return $this->groupBy(fn(Block $block) => $block->type);
     }
 
     /**
@@ -214,7 +204,7 @@ final class BlocksCollection extends Collection
      */
     public function countByType(): Collection
     {
-        return $this->groupByType()->map(fn ($blocks) => $blocks->count());
+        return $this->groupByType()->map(fn($blocks) => $blocks->count());
     }
 
     /**
@@ -222,27 +212,23 @@ final class BlocksCollection extends Collection
      */
     public function sortByType(): self
     {
-        return $this->sortBy(fn (Block $block) => $block->type);
+        return $this->sortBy(fn(Block $block) => $block->type);
     }
 
     /**
      * Get first block of specific type.
      */
-    public function firstOfType(string $type): ?Block
+    public function firstOfType(string $type): null|Block
     {
-        return $this->first(
-            fn (Block $block) => $block->type === $type,
-        );
+        return $this->first(fn(Block $block) => $block->type === $type);
     }
 
     /**
      * Get last block of specific type.
      */
-    public function lastOfType(string $type): ?Block
+    public function lastOfType(string $type): null|Block
     {
-        return $this->last(
-            fn (Block $block) => $block->type === $type,
-        );
+        return $this->last(fn(Block $block) => $block->type === $type);
     }
 
     /**
@@ -250,9 +236,7 @@ final class BlocksCollection extends Collection
      */
     public function allOfType(string $type): bool
     {
-        return $this->every(
-            fn (Block $block) => $block->type === $type,
-        );
+        return $this->every(fn(Block $block) => $block->type === $type);
     }
 
     /**
@@ -260,10 +244,7 @@ final class BlocksCollection extends Collection
      */
     public function transformType(string $type, callable $callback): self
     {
-        return $this->map(function (Block $block) use (
-            $type,
-            $callback,
-        ) {
+        return $this->map(function (Block $block) use ($type, $callback) {
             return $block->type === $type ? $callback($block) : $block;
         });
     }
@@ -274,15 +255,15 @@ final class BlocksCollection extends Collection
     private function isBlockNonEmpty(Block $block): bool
     {
         return match ($block->type) {
-            'paragraph' => ! empty(trim($block->get('text', ''))),
-            'header' => ! empty(trim($block->get('text', ''))),
-            'list' => ! empty($block->get('items', [])),
-            'checklist' => ! empty($block->get('items', [])),
-            'quote' => ! empty(trim($block->get('text', ''))),
-            'code' => ! empty(trim($block->get('code', ''))),
+            'paragraph' => !empty(trim($block->get('text', ''))),
+            'header' => !empty(trim($block->get('text', ''))),
+            'list' => !empty($block->get('items', [])),
+            'checklist' => !empty($block->get('items', [])),
+            'quote' => !empty(trim($block->get('text', ''))),
+            'code' => !empty(trim($block->get('code', ''))),
             'delimiter', 'raw' => true,
-            'table' => ! empty($block->get('content', [])),
-            'image', 'attaches' => ! empty($block->get('file', [])),
+            'table' => !empty($block->get('content', [])),
+            'image', 'attaches' => !empty($block->get('file', [])),
             default => true,
         };
     }
@@ -294,13 +275,13 @@ final class BlocksCollection extends Collection
     {
         $text = $this->getText($block);
 
-        return ! empty(trim($text ?? ''));
+        return !empty(trim($text ?? ''));
     }
 
     /**
      * Get text content from a block.
      */
-    private function getText(Block $block): ?string
+    private function getText(Block $block): null|string
     {
         return match ($block->type) {
             'paragraph', 'header', 'quote' => $block->get('text'),

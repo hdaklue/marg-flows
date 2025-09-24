@@ -85,8 +85,7 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
 
         throw_unless(
             is_numeric($cleaned),
-            new InvalidArgumentException('Invalid percentage string: '
-            . $percentage),
+            new InvalidArgumentException('Invalid percentage string: ' . $percentage),
         );
 
         $numericValue = (float) $cleaned;
@@ -241,10 +240,7 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
      */
     public function multiply(float $factor): self
     {
-        throw_if(
-            $factor < 0,
-            new InvalidArgumentException('Factor cannot be negative'),
-        );
+        throw_if($factor < 0, new InvalidArgumentException('Factor cannot be negative'));
 
         $newRatio = min(1.0, $this->value * $factor);
 
@@ -307,8 +303,7 @@ final class Percentage implements Arrayable, Jsonable, JsonSerializable, Stringa
 
         throw_if(
             $ratio < 0 || $ratio > 1,
-            new InvalidArgumentException('Ratio must be between 0 and 1, got: '
-            . $ratio),
+            new InvalidArgumentException('Ratio must be between 0 and 1, got: ' . $ratio),
         );
     }
 

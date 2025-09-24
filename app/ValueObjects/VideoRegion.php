@@ -57,21 +57,15 @@ final class VideoRegion extends MediaTimestamp
 
     public static function fromArray(array $data): self
     {
-        $frameRate = (float) (
-            $data['frame_rate'] ?? $data['media']['frame_rate'] ?? 30.0
-        );
+        $frameRate = (float) ($data['frame_rate'] ?? $data['media']['frame_rate'] ?? 30.0);
 
         $startTime = isset($data['start_time'])
             ? CommentTime::fromSeconds((float) $data['start_time'])
-            : CommentTime::fromSeconds(
-                (float) ($data['timing']['start']['seconds'] ?? 0),
-            );
+            : CommentTime::fromSeconds((float) ($data['timing']['start']['seconds'] ?? 0));
 
         $endTime = isset($data['end_time'])
             ? CommentTime::fromSeconds((float) $data['end_time'])
-            : CommentTime::fromSeconds(
-                (float) ($data['timing']['end']['seconds'] ?? 0),
-            );
+            : CommentTime::fromSeconds((float) ($data['timing']['end']['seconds'] ?? 0));
 
         $bounds = isset($data['bounds'])
             ? Rectangle::fromArray($data['bounds'])
@@ -137,16 +131,15 @@ final class VideoRegion extends MediaTimestamp
 
     public function containsTime(CommentTime $time): bool
     {
-        return
+        return (
             $time->asSeconds() >= $this->startTime->asSeconds()
-            && $time->asSeconds() <= $this->endTime->asSeconds();
+            && $time->asSeconds() <= $this->endTime->asSeconds()
+        );
     }
 
     public function containsFrame(int $frameNumber): bool
     {
-        return
-            $frameNumber >= $this->getStartFrame()
-            && $frameNumber <= $this->getEndFrame();
+        return $frameNumber >= $this->getStartFrame() && $frameNumber <= $this->getEndFrame();
     }
 
     public function containsPoint(int $x, int $y): bool
@@ -156,9 +149,10 @@ final class VideoRegion extends MediaTimestamp
 
     public function overlapsTime(VideoRegion $other): bool
     {
-        return
+        return (
             $this->startTime->asSeconds() < $other->endTime->asSeconds()
-            && $other->startTime->asSeconds() < $this->endTime->asSeconds();
+            && $other->startTime->asSeconds() < $this->endTime->asSeconds()
+        );
     }
 
     public function overlapsSpace(VideoRegion $other): bool
@@ -171,20 +165,14 @@ final class VideoRegion extends MediaTimestamp
         return $this->overlapsTime($other) && $this->overlapsSpace($other);
     }
 
-    public function getTimeOverlapDuration(VideoRegion $other): ?CommentTime
+    public function getTimeOverlapDuration(VideoRegion $other): null|CommentTime
     {
-        if (! $this->overlapsTime($other)) {
+        if (!$this->overlapsTime($other)) {
             return null;
         }
 
-        $overlapStart = max(
-            $this->startTime->asSeconds(),
-            $other->startTime->asSeconds(),
-        );
-        $overlapEnd = min(
-            $this->endTime->asSeconds(),
-            $other->endTime->asSeconds(),
-        );
+        $overlapStart = max($this->startTime->asSeconds(), $other->startTime->asSeconds());
+        $overlapEnd = min($this->endTime->asSeconds(), $other->endTime->asSeconds());
 
         return CommentTime::fromSeconds($overlapEnd - $overlapStart);
     }
@@ -275,8 +263,7 @@ final class VideoRegion extends MediaTimestamp
     {
         throw_if(
             $this->frameRate <= 0,
-            new InvalidArgumentException('Frame rate must be positive, got: '
-            . $this->frameRate),
+            new InvalidArgumentException('Frame rate must be positive, got: ' . $this->frameRate),
         );
 
         throw_unless(

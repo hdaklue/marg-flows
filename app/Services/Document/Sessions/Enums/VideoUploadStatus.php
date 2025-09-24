@@ -26,7 +26,7 @@ enum VideoUploadStatus: string
     {
         return array_combine(
             array_column(self::cases(), 'value'),
-            array_map(fn (self $status) => $status->label(), self::cases()),
+            array_map(fn(self $status) => $status->label(), self::cases()),
         );
     }
 
@@ -51,7 +51,8 @@ enum VideoUploadStatus: string
     {
         return match ($this) {
             self::UPLOADING => 'File is being uploaded to the server',
-            self::PROCESSING => 'File is being processed (metadata extraction, thumbnail generation)',
+            self::PROCESSING
+                => 'File is being processed (metadata extraction, thumbnail generation)',
             self::COMPLETED => 'Upload and processing completed successfully',
             self::FAILED => 'Upload or processing failed with an error',
             self::CANCELLED => 'Upload was cancelled by the user',

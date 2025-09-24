@@ -45,9 +45,7 @@ final class TenantEventSubscriber
     public function handleMemberAdded(TanantMemberAdded $event): void
     {
         RoleManager::clearCache($event->tenant);
-        $event->user->notify(
-            new AssignedToEntity($event->tenant, $event->role->getLabel()),
-        );
+        $event->user->notify(new AssignedToEntity($event->tenant, $event->role->getLabel()));
     }
 
     /**

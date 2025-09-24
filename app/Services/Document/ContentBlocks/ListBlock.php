@@ -104,10 +104,10 @@ final class ListBlock extends Block
     {
         // Define allowed tags that match the allows() method
         $allowedTags = '<b><i><u><strong><em><span><a>';
-        
+
         // Strip all tags except allowed ones
         $sanitized = strip_tags($content, $allowedTags);
-        
+
         // Additional sanitization for 'a' tags to prevent javascript: and data: URLs
         $sanitized = preg_replace_callback(
             '/<a\s+([^>]*?)href\s*=\s*["\']([^"\']*)["\']([^>]*?)>/i',
@@ -115,14 +115,22 @@ final class ListBlock extends Block
                 $href = $matches[2];
                 // Only allow http, https, mailto, and relative URLs
                 if (preg_match('/^(https?:\/\/|mailto:|\/|#)/i', $href)) {
-                    return '<a ' . $matches[1] . 'href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '"' . $matches[3] . '>';
+                    return (
+                        '<a '
+                        . $matches[1]
+                        . 'href="'
+                        . htmlspecialchars($href, ENT_QUOTES, 'UTF-8')
+                        . '"'
+                        . $matches[3]
+                        . '>'
+                    );
                 }
                 // Remove href if it's potentially dangerous
                 return '<span' . $matches[3] . '>';
             },
-            $sanitized
+            $sanitized,
         );
-        
+
         return $sanitized;
     }
 
@@ -131,7 +139,11 @@ final class ListBlock extends Block
         return [
             'style' => ['required', 'string', Rule::in(['ordered', 'unordered'])],
             'meta' => ['array'],
-            'meta.counterType' => ['nullable', 'string', Rule::in(['numeric', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman'])],
+            'meta.counterType' => [
+                'nullable',
+                'string',
+                Rule::in(['numeric', 'lower-alpha', 'upper-alpha', 'lower-roman', 'upper-roman']),
+            ],
             'items' => ['required', 'array', 'max:100'], // Limit items for performance
             'items.*.content' => ['required', 'string', 'max:10000'], // Limit content length
             'items.*.meta' => ['array'],
@@ -153,19 +165,19 @@ final class ListBlock extends Block
         array $items,
         string $style = 'unordered',
         array $prefix = [],
-        ?string $counterType = null,
+        null|string $counterType = null,
         int $depth = 0,
     ): string {
         // Performance consideration: Keep depth limit at 5
         if ($depth >= 5) {
             return '';
         }
-        
+
         // Additional performance safeguard: limit items per level
         if (count($items) > 100) {
             $items = array_slice($items, 0, 100);
         }
-        
+
         $tag = $style === 'ordered' ? 'ol' : 'ul';
         $cssClass = $tag === 'ol' ? 'list-decimal list-inside' : 'list-disc list-inside';
 
@@ -178,14 +190,25 @@ final class ListBlock extends Block
             $currentPrefix = [...$prefix, $index + 1];
 
             if ($style === 'ordered') {
-                $prefixString = self::formatCounter($currentPrefix, $counterType ?? 'numeric') . '. ';
-                $htmlParts[] = '<li><span class="mr-1">' . htmlspecialchars($prefixString, ENT_QUOTES, 'UTF-8') . '</span>' . $content;
+                $prefixString =
+                    self::formatCounter($currentPrefix, $counterType ?? 'numeric') . '. ';
+                $htmlParts[] =
+                    '<li><span class="mr-1">'
+                    . htmlspecialchars($prefixString, ENT_QUOTES, 'UTF-8')
+                    . '</span>'
+                    . $content;
             } else {
                 $htmlParts[] = '<li>' . $content;
             }
 
-            if (! empty($nested)) {
-                $htmlParts[] = $this->renderNestedList($nested, $style, $currentPrefix, $counterType, $depth + 1);
+            if (!empty($nested)) {
+                $htmlParts[] = $this->renderNestedList(
+                    $nested,
+                    $style,
+                    $currentPrefix,
+                    $counterType,
+                    $depth + 1,
+                );
             }
 
             $htmlParts[] = '</li>';

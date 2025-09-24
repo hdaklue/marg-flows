@@ -8,7 +8,7 @@ use Livewire\Component;
 
 final class TestChunkedUpload extends Component
 {
-    public ?array $data = [];
+    public null|array $data = [];
 
     public function mount(): void
     {

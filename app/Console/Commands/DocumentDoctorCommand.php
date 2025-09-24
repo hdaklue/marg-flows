@@ -60,7 +60,7 @@ final class DocumentDoctorCommand extends Command
 
         $configPath = config_path('document.php');
 
-        if (! File::exists($configPath)) {
+        if (!File::exists($configPath)) {
             $this->error("❌ Configuration file missing: {$configPath}");
             $this->issuesFound++;
 
@@ -91,7 +91,7 @@ final class DocumentDoctorCommand extends Command
 
         $templatesPath = app_path('Services/Document/Templates');
 
-        if (! File::exists($templatesPath)) {
+        if (!File::exists($templatesPath)) {
             $this->error("❌ Templates directory missing: {$templatesPath}");
             $this->issuesFound++;
 
@@ -102,7 +102,10 @@ final class DocumentDoctorCommand extends Command
 
         // Check for template subdirectories
         $directories = File::directories($templatesPath);
-        $templateDirectories = array_filter($directories, fn ($dir) => basename($dir) !== 'Translation');
+        $templateDirectories = array_filter(
+            $directories,
+            fn($dir) => basename($dir) !== 'Translation',
+        );
 
         if (empty($templateDirectories)) {
             $this->warning('⚠️  No template directories found');
@@ -143,7 +146,7 @@ final class DocumentDoctorCommand extends Command
         }
 
         // Check if class exists
-        if (! class_exists($templateClass)) {
+        if (!class_exists($templateClass)) {
             $this->error("❌ Template class not found: {$templateClass}");
             $templateIssues++;
 
@@ -153,36 +156,46 @@ final class DocumentDoctorCommand extends Command
         // Check if implements DocumentTemplateContract
         try {
             $reflection = new ReflectionClass($templateClass);
-            if (! $reflection->implementsInterface(DocumentTemplateContract::class)) {
-                $this->error("❌ Template does not implement DocumentTemplateContract: {$templateClass}");
+            if (!$reflection->implementsInterface(DocumentTemplateContract::class)) {
+                $this->error(
+                    "❌ Template does not implement DocumentTemplateContract: {$templateClass}",
+                );
                 $templateIssues++;
             }
 
             // Check if template can be instantiated
             $instance = $templateClass::make();
-            if (! $instance) {
+            if (!$instance) {
                 $this->error("❌ Cannot instantiate template: {$templateClass}");
                 $templateIssues++;
             }
 
             // Check required methods
             $this->checkRequiredMethods($reflection, $templateClass, $templateIssues);
-
         } catch (Throwable $e) {
             $this->error("❌ Error checking template {$templateClass}: " . $e->getMessage());
             $templateIssues++;
         }
     }
 
-    private function checkRequiredMethods(ReflectionClass $reflection, string $templateClass, int &$templateIssues): void
-    {
+    private function checkRequiredMethods(
+        ReflectionClass $reflection,
+        string $templateClass,
+        int &$templateIssues,
+    ): void {
         $requiredMethods = [
-            'getName', 'getDescription', 'getBlocks', 'getConfigArray',
-            'getDataArray', 'toJson', 'toArray', 'getAvailableTranslations',
+            'getName',
+            'getDescription',
+            'getBlocks',
+            'getConfigArray',
+            'getDataArray',
+            'toJson',
+            'toArray',
+            'getAvailableTranslations',
         ];
 
         foreach ($requiredMethods as $method) {
-            if (! $reflection->hasMethod($method)) {
+            if (!$reflection->hasMethod($method)) {
                 $this->error("❌ Missing method {$method} in {$templateClass}");
                 $templateIssues++;
             }
@@ -203,7 +216,6 @@ final class DocumentDoctorCommand extends Command
                 $translator->setLocale('en');
                 $this->success('✅ Translator setLocale method works');
             }
-
         } catch (Throwable $e) {
             $this->error('❌ Translator service issue: ' . $e->getMessage());
             $this->issuesFound++;
@@ -229,10 +241,13 @@ final class DocumentDoctorCommand extends Command
         }
     }
 
-    private function checkTemplateTranslations(string $key, string $templateClass, int &$translationIssues): void
-    {
+    private function checkTemplateTranslations(
+        string $key,
+        string $templateClass,
+        int &$translationIssues,
+    ): void {
         try {
-            if (! class_exists($templateClass)) {
+            if (!class_exists($templateClass)) {
                 return; // Already reported in template check
             }
 
@@ -248,16 +263,18 @@ final class DocumentDoctorCommand extends Command
             foreach ($availableTranslations as $translationClass) {
                 $this->checkTranslationClass($key, $translationClass, $translationIssues);
             }
-
         } catch (Throwable $e) {
             $this->error("❌ Error checking translations for {$key}: " . $e->getMessage());
             $translationIssues++;
         }
     }
 
-    private function checkTranslationClass(string $templateKey, string $translationClass, int &$translationIssues): void
-    {
-        if (! class_exists($translationClass)) {
+    private function checkTranslationClass(
+        string $templateKey,
+        string $translationClass,
+        int &$translationIssues,
+    ): void {
+        if (!class_exists($translationClass)) {
             $this->error("❌ Translation class not found: {$translationClass}");
             $translationIssues++;
 
@@ -268,28 +285,34 @@ final class DocumentDoctorCommand extends Command
             $reflection = new ReflectionClass($translationClass);
 
             // Check if extends BaseTranslation
-            if (! $reflection->isSubclassOf(BaseTranslation::class)) {
-                $this->error("❌ Translation class does not extend BaseTranslation: {$translationClass}");
+            if (!$reflection->isSubclassOf(BaseTranslation::class)) {
+                $this->error(
+                    "❌ Translation class does not extend BaseTranslation: {$translationClass}",
+                );
                 $translationIssues++;
             }
 
             // Check if can be instantiated
-            $instance = new $translationClass;
+            $instance = new $translationClass();
             $translations = $instance->getTranslations();
 
             // Check structure
-            if (! isset($translations['meta']) || ! isset($translations['blocks'])) {
+            if (!isset($translations['meta']) || !isset($translations['blocks'])) {
                 $this->error("❌ Invalid translation structure in {$translationClass}");
                 $translationIssues++;
             } else {
                 if ($this->option('detailed')) {
                     $locale = $translationClass::getLocaleCode();
-                    $this->line("   ✅ {$templateKey} ({$locale}) - " . basename(str_replace('\\', '/', $translationClass)));
+                    $this->line(
+                        "   ✅ {$templateKey} ({$locale}) - "
+                        . basename(str_replace('\\', '/', $translationClass)),
+                    );
                 }
             }
-
         } catch (Throwable $e) {
-            $this->error("❌ Error checking translation class {$translationClass}: " . $e->getMessage());
+            $this->error(
+                "❌ Error checking translation class {$translationClass}: " . $e->getMessage(),
+            );
             $translationIssues++;
         }
     }

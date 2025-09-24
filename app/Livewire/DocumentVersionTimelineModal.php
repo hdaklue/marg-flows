@@ -14,7 +14,7 @@ final class DocumentVersionTimelineModal extends ModalComponent
 {
     public string $documentId;
 
-    public ?string $currentEditingVersion = null;
+    public null|string $currentEditingVersion = null;
 
     public int $page = 1;
 
@@ -41,11 +41,11 @@ final class DocumentVersionTimelineModal extends ModalComponent
         return true;
     }
 
-    public function mount(string $documentId, ?string $currentEditingVersion = null): void
+    public function mount(string $documentId, null|string $currentEditingVersion = null): void
     {
         $this->documentId = $documentId;
         $this->currentEditingVersion = $currentEditingVersion;
-        $this->loadedVersions = new Collection;
+        $this->loadedVersions = new Collection();
 
         // Load initial versions
         $this->loadMoreVersions();
@@ -75,7 +75,7 @@ final class DocumentVersionTimelineModal extends ModalComponent
 
     public function loadMoreVersions(): void
     {
-        if (! $this->hasMoreVersions || $this->isLoading) {
+        if (!$this->hasMoreVersions || $this->isLoading) {
             return;
         }
 
@@ -106,7 +106,7 @@ final class DocumentVersionTimelineModal extends ModalComponent
     {
         $this->page = 1;
         $this->hasMoreVersions = true;
-        $this->loadedVersions = new Collection;
+        $this->loadedVersions = new Collection();
         $this->loadMoreVersions();
     }
 }

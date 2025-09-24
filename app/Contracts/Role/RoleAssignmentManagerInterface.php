@@ -24,10 +24,7 @@ interface RoleAssignmentManagerInterface
     /**
      * Revoke a role from a user or assignable entity on a target.
      */
-    public function remove(
-        AssignableEntity $user,
-        RoleableEntity $target,
-    ): void;
+    public function remove(AssignableEntity $user, RoleableEntity $target): void;
 
     /**
      * Determine if the user/entity has a specific role on the target.
@@ -41,10 +38,7 @@ interface RoleAssignmentManagerInterface
     /**
      * Determine if the user/entity has any role on the target.
      */
-    public function hasAnyRoleOn(
-        AssignableEntity $user,
-        RoleableEntity $target,
-    ): bool;
+    public function hasAnyRoleOn(AssignableEntity $user, RoleableEntity $target): bool;
 
     /**
      * Get all users/entities assigned a specific role on the target.
@@ -85,15 +79,9 @@ interface RoleAssignmentManagerInterface
      */
     public function bulkClearCache(Collection $targets);
 
-    public function getRoleOn(
-        AssignableEntity $user,
-        RoleableEntity $target,
-    ): ?Role;
+    public function getRoleOn(AssignableEntity $user, RoleableEntity $target): null|Role;
 
-    public function getAssignedEntitiesByType(
-        AssignableEntity $entity,
-        string $type,
-    ): Collection;
+    public function getAssignedEntitiesByType(AssignableEntity $entity, string $type): Collection;
 
     /**
      * Summary of getAssignedEntitiesByKeysByType.

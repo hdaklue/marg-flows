@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\User;
 use Carbon\Carbon;
 
-if (! function_exists('toUserDate')) {
+if (!function_exists('toUserDate')) {
     /**
      * Convert UTC date to user's timezone and format as short date.
      *
@@ -28,13 +28,11 @@ if (! function_exists('toUserDate')) {
 
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
 
-        return Carbon::parse($date, 'UTC')
-            ->setTimezone($timezone)
-            ->format('M j, Y');
+        return Carbon::parse($date, 'UTC')->setTimezone($timezone)->format('M j, Y');
     }
 }
 
-if (! function_exists('toUserDateString')) {
+if (!function_exists('toUserDateString')) {
     /**
      * Convert UTC date to user's timezone and format as readable date string.
      *
@@ -57,13 +55,11 @@ if (! function_exists('toUserDateString')) {
 
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
 
-        return Carbon::parse($date, 'UTC')
-            ->setTimezone($timezone)
-            ->format('D, j M Y');
+        return Carbon::parse($date, 'UTC')->setTimezone($timezone)->format('D, j M Y');
     }
 }
 
-if (! function_exists('toUserTime')) {
+if (!function_exists('toUserTime')) {
     /**
      * Convert UTC date to user's timezone and format as time only.
      *
@@ -91,7 +87,7 @@ if (! function_exists('toUserTime')) {
     }
 }
 
-if (! function_exists('toUserDateTime')) {
+if (!function_exists('toUserDateTime')) {
     /**
      * Convert UTC date to user's timezone and format as date and time.
      *
@@ -114,13 +110,11 @@ if (! function_exists('toUserDateTime')) {
 
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
 
-        return Carbon::parse($date, 'UTC')
-            ->setTimezone($timezone)
-            ->format('d/m/Y g:i A');
+        return Carbon::parse($date, 'UTC')->setTimezone($timezone)->format('d/m/Y g:i A');
     }
 }
 
-if (! function_exists('fromUserDate')) {
+if (!function_exists('fromUserDate')) {
     /**
      * Convert date from user's timezone to UTC and format as date string.
      *
@@ -145,13 +139,11 @@ if (! function_exists('fromUserDate')) {
         // Parse the date string as being in the user's timezone, then convert to UTC
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
 
-        return Carbon::parse($date, $timezone)
-            ->setTimezone('UTC')
-            ->toDateString();
+        return Carbon::parse($date, $timezone)->setTimezone('UTC')->toDateString();
     }
 }
 
-if (! function_exists('fromUserTime')) {
+if (!function_exists('fromUserTime')) {
     /**
      * Convert time from user's timezone to UTC and format as time string.
      *
@@ -176,13 +168,11 @@ if (! function_exists('fromUserTime')) {
         // Parse the date string as being in the user's timezone, then convert to UTC
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
 
-        return Carbon::parse($date, $timezone)
-            ->setTimezone('UTC')
-            ->toTimeString();
+        return Carbon::parse($date, $timezone)->setTimezone('UTC')->toTimeString();
     }
 }
 
-if (! function_exists('fromUserDateTime')) {
+if (!function_exists('fromUserDateTime')) {
     /**
      * Convert datetime from user's timezone to UTC and format as datetime string.
      *
@@ -207,13 +197,11 @@ if (! function_exists('fromUserDateTime')) {
         // Parse the date string as being in the user's timezone, then convert to UTC
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
 
-        return Carbon::parse($date, $timezone)
-            ->setTimezone('UTC')
-            ->toDateTimeString();
+        return Carbon::parse($date, $timezone)->setTimezone('UTC')->toDateTimeString();
     }
 }
 
-if (! function_exists('toUserDiffForHuman')) {
+if (!function_exists('toUserDiffForHuman')) {
     /**
      * Convert UTC date to user's timezone and format as human-readable difference.
      * Always uses "ago/in" format relative to now, even when custom comparison date is provided.
@@ -233,11 +221,8 @@ if (! function_exists('toUserDiffForHuman')) {
      * // Input: "2025-01-14 12:00:00" (UTC), current time "2025-01-15 12:30:00" (UTC)
      * // Output: "1 day ago"
      */
-    function toUserDiffForHuman(
-        string|Carbon $date,
-        User $user,
-        ?Carbon $other = null,
-    ): string {
+    function toUserDiffForHuman(string|Carbon $date, User $user, null|Carbon $other = null): string
+    {
         if ($date instanceof Carbon) {
             $date = $date->toDateTimeString();
         }
@@ -259,7 +244,7 @@ if (! function_exists('toUserDiffForHuman')) {
     }
 }
 
-if (! function_exists('toUserIsoString')) {
+if (!function_exists('toUserIsoString')) {
     /**
      * Convert UTC date to user's timezone and format as ISO string.
      *
@@ -283,13 +268,11 @@ if (! function_exists('toUserIsoString')) {
         // Parse UTC date and convert to user's timezone, then format as ISO string
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
 
-        return Carbon::parse($date, 'UTC')
-            ->setTimezone($timezone)
-            ->toISOString();
+        return Carbon::parse($date, 'UTC')->setTimezone($timezone)->toISOString();
     }
 }
 
-if (! function_exists('fromUserIsoString')) {
+if (!function_exists('fromUserIsoString')) {
     /**
      * Convert ISO string from user's timezone back to UTC datetime string.
      *
@@ -309,8 +292,6 @@ if (! function_exists('fromUserIsoString')) {
         // Parse ISO string as being in user's timezone, then convert to UTC
         $timezone = $user->getTimezone() ?? config('app.timezone', 'UTC');
 
-        return Carbon::parse($isoString, $timezone)
-            ->setTimezone('UTC')
-            ->toDateTimeString();
+        return Carbon::parse($isoString, $timezone)->setTimezone('UTC')->toDateTimeString();
     }
 }

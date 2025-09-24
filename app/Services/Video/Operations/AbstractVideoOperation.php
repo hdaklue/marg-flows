@@ -42,11 +42,9 @@ abstract class AbstractVideoOperation implements VideoOperationContract
     /**
      * Handle method for Laravel Pipeline pattern.
      */
-    public function handle(
-        MediaExporter $mediaExporter,
-        Closure $next,
-    ): MediaExporter {
-        if (! $this->canExecute()) {
+    public function handle(MediaExporter $mediaExporter, Closure $next): MediaExporter
+    {
+        if (!$this->canExecute()) {
             // Skip this operation and pass to next
             return $next($mediaExporter);
         }

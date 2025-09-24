@@ -25,7 +25,7 @@ abstract class BaseTranslation implements TranslationProviderInterface
     /**
      * Get translation value using dot notation.
      */
-    public function getTranslationByKey(string $key): ?string
+    public function getTranslationByKey(string $key): null|string
     {
         return data_get($this->getTranslations(), $key);
     }

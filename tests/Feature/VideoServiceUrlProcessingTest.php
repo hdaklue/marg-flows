@@ -23,10 +23,7 @@ it('can load video from URL and process it', function () {
     $editor = new VideoEditor($videoUrl, true, 'local');
 
     // Apply operations
-    $editor
-        ->trim(0, 30)
-        ->resize(new Dimension(640, 360))
-        ->convert(new Conversion480p); // First 30 seconds // Resize to smaller // Apply 480p conversion
+    $editor->trim(0, 30)->resize(new Dimension(640, 360))->convert(new Conversion480p()); // First 30 seconds // Resize to smaller // Apply 480p conversion
 
     // Verify the editor was created and operations queued
     expect($editor->getSourcePath())->toBe($videoUrl);
@@ -51,7 +48,7 @@ it('demonstrates complete URL to storage workflow', function () {
     $editor = new VideoEditor($sourceUrl, true);
 
     // Step 3: Apply processing operations
-    $editor->trim(10, 60)->convert(new Conversion720p); // Extract 1 minute starting at 10s // Convert to 720p
+    $editor->trim(10, 60)->convert(new Conversion720p()); // Extract 1 minute starting at 10s // Convert to 720p
 
     // Step 4: Verify setup before processing
     $operations = $editor->getOperations();
@@ -77,8 +74,8 @@ it('can chain complex operations from URL to multiple outputs', function () {
 
     // Create different quality versions
     $conversions = [
-        '720p' => new Conversion720p,
-        '480p' => new Conversion480p,
+        '720p' => new Conversion720p(),
+        '480p' => new Conversion480p(),
     ];
 
     $processingChains = [];
@@ -87,10 +84,7 @@ it('can chain complex operations from URL to multiple outputs', function () {
         $editor = new VideoEditor($sourceUrl, true);
 
         // Apply different processing for each quality
-        $editor
-            ->trim(0, 120)
-            ->resize($conversion->getDimension())
-            ->convert($conversion); // First 2 minutes // Resize to target // Apply conversion
+        $editor->trim(0, 120)->resize($conversion->getDimension())->convert($conversion); // First 2 minutes // Resize to target // Apply conversion
 
         $processingChains[$quality] = [
             'editor' => $editor,
@@ -122,7 +116,7 @@ it('demonstrates saveAs workflow with URL source', function () {
 
     // Create editor and apply operations
     $editor = new VideoEditor($videoUrl, true);
-    $conversion = new Conversion720p;
+    $conversion = new Conversion720p();
 
     $editor->trim(5, 45)->convert($conversion); // 40 seconds starting at 5s
 
@@ -147,14 +141,10 @@ it('demonstrates saveAs workflow with URL source', function () {
 
     // For testing, we verify the operations are correctly queued
     $trimOperation = $operations[0];
-    expect($trimOperation['start'])
-        ->toBe(5.0)
-        ->and($trimOperation['duration'])
-        ->toBe(45.0);
+    expect($trimOperation['start'])->toBe(5.0)->and($trimOperation['duration'])->toBe(45.0);
 
     $convertOperation = $operations[1];
-    expect($convertOperation['conversion'])
-        ->toBeInstanceOf(Conversion720p::class);
+    expect($convertOperation['conversion'])->toBeInstanceOf(Conversion720p::class);
 });
 
 it('validates URL and storage path handling', function () {
@@ -182,7 +172,7 @@ it('validates URL and storage path handling', function () {
         expect($editor->getSourcePath())->toBe($case['source']);
 
         // Apply a simple operation to verify it works
-        $editor->convert(new Conversion720p);
+        $editor->convert(new Conversion720p());
 
         $operations = $editor->getOperations();
         expect(count($operations))->toBe(1);
@@ -200,7 +190,7 @@ it('simulates real-world URL processing pipeline', function () {
         'operations' => [
             'trim' => ['start' => 0, 'duration' => 30],
             'resize' => new Dimension(1280, 720),
-            'conversion' => new Conversion720p,
+            'conversion' => new Conversion720p(),
         ],
     ];
 

@@ -25,7 +25,7 @@ enum NamingPattern: string
 
     public static function getPatternOptions(): array
     {
-        return array_map(fn (self $pattern) => [
+        return array_map(fn(self $pattern) => [
             'value' => $pattern->value,
             'label' => $pattern->name,
             'description' => $pattern->getDescription(),
@@ -38,7 +38,8 @@ enum NamingPattern: string
             self::Quality => 'Filename with quality suffix (e.g., video_high.mp4)',
             self::Dimension => 'Filename with dimensions (e.g., video_1920x1080.mp4)',
             self::Format => 'Filename with format (e.g., video_webm.webm)',
-            self::Full => 'Full details with timestamp (e.g., video_1920x1080_high_20241224123456.mp4)',
+            self::Full
+                => 'Full details with timestamp (e.g., video_1920x1080_high_20241224123456.mp4)',
             self::Conversion => 'Filename with conversion name (e.g., video_4K.mp4)',
             self::Detailed => 'Detailed with bitrate (e.g., video_1920x1080_high_5000kbps.mp4)',
             self::Timestamped => 'Filename with timestamp (e.g., video_20241224123456.mp4)',

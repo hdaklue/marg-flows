@@ -41,20 +41,21 @@ final class FlowsTable
             })
             ->filtersLayout(FiltersLayout::AboveContent)
             ->deferLoading()
-            ->recordUrl(fn (Model $record) => FlowResource::getUrl('view', ['record' => $record->getKey()]))
+            ->recordUrl(fn(Model $record) => FlowResource::getUrl('view', ['record' =>
+                $record->getKey()]))
             ->columns([
                 Split::make([
                     Stack::make([
                         TextColumn::make('title')
                             ->colors([Color::Red[400]])
-                            ->formatStateUsing(fn ($state) => str($state)->title()->toString())
+                            ->formatStateUsing(fn($state) => str($state)->title()->toString())
                             ->label(__('flow.table.columns.title'))
                             ->weight(FontWeight::Bold),
                         TextColumn::make('description')
                             ->color(Color::Red[400])
-                            ->formatStateUsing(fn ($state) => str($state)->ucfirst()->toString())
+                            ->formatStateUsing(fn($state) => str($state)->ucfirst()->toString())
                             ->limit(80),
-                        TextColumn::make('started_at')->formatStateUsing(fn ($state) => 'Started: '
+                        TextColumn::make('started_at')->formatStateUsing(fn($state) => 'Started: '
                         . toUserDate($state, filamentUser())),
                     ]),
                     // ImageColumn::make('creator_avatar')
@@ -101,7 +102,7 @@ final class FlowsTable
                     ->color('gray')
                     ->icon('heroicon-s-clipboard-document-list')
                     ->iconButton()
-                    ->url(fn ($record) => FlowResource::getUrl('pages', [
+                    ->url(fn($record) => FlowResource::getUrl('pages', [
                         'record' => $record,
                     ])),
             ])

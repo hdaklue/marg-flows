@@ -18,18 +18,20 @@ beforeEach(function () {
     $this->document = Document::factory()->create();
 
     // Create some test versions
-    $this->versions = DocumentVersion::factory()->count(3)->create([
-        'document_id' => $this->document->id,
-        'created_by' => $this->user->id,
-        'content' => [
-            'blocks' => [
-                [
-                    'type' => 'paragraph',
-                    'data' => ['text' => 'Test content for version'],
+    $this->versions = DocumentVersion::factory()
+        ->count(3)
+        ->create([
+            'document_id' => $this->document->id,
+            'created_by' => $this->user->id,
+            'content' => [
+                'blocks' => [
+                    [
+                        'type' => 'paragraph',
+                        'data' => ['text' => 'Test content for version'],
+                    ],
                 ],
             ],
-        ],
-    ]);
+        ]);
 });
 
 test('can mount component with document id', function () {
@@ -145,10 +147,12 @@ test('handles empty content blocks gracefully', function () {
 
 test('limits versions for performance', function () {
     // Create more than 20 versions
-    DocumentVersion::factory()->count(25)->create([
-        'document_id' => $this->document->id,
-        'created_by' => $this->user->id,
-    ]);
+    DocumentVersion::factory()
+        ->count(25)
+        ->create([
+            'document_id' => $this->document->id,
+            'created_by' => $this->user->id,
+        ]);
 
     $component = Livewire::test(DocumentVersionTimeline::class, [
         'documentId' => $this->document->id,
@@ -168,7 +172,7 @@ test('versions are ordered by creation date descending', function () {
     $versions = $component->get('versions');
 
     // Versions should be ordered newest first
-    $timestamps = collect($versions)->pluck('created_at')->map(fn ($ts) => strtotime($ts));
+    $timestamps = collect($versions)->pluck('created_at')->map(fn($ts) => strtotime($ts));
     $sortedTimestamps = $timestamps->sort()->reverse()->values();
 
     expect($timestamps->values()->toArray())->toBe($sortedTimestamps->toArray());

@@ -17,7 +17,7 @@ final class ExtractVideoMetadata
     /**
      * Extract video metadata using VideoManager.
      */
-    public function handle(string $path, ?string $sessionId = null): array
+    public function handle(string $path, null|string $sessionId = null): array
     {
         try {
             // Determine disk based on path - use local chunks disk for local files, do_spaces for remote files

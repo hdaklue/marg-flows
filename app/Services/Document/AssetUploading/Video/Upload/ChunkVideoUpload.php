@@ -31,7 +31,7 @@ final class ChunkVideoUpload
         UploadedFile $chunk,
         int $chunkIndex,
         int $totalChunks,
-        ?string $fileName,
+        null|string $fileName,
         Document $document,
         string $videoSessionId,
     ): array {
@@ -68,7 +68,10 @@ final class ChunkVideoUpload
                 'completed' => false,
                 'chunk' => $chunkIndex,
                 'totalChunks' => $totalChunks,
-                'progress' => $progressData?->percentage ?? round((($chunkIndex + 1) / $totalChunks) * 100, 2),
+                'progress' => $progressData?->percentage ?? round(
+                    (($chunkIndex + 1) / $totalChunks) * 100,
+                    2,
+                ),
                 'message' => "Chunk {$chunkIndex} of {$totalChunks} uploaded successfully.",
                 'progressData' => $progressData?->toArray(),
                 'bytesUploaded' => $progressData?->bytesUploaded,
@@ -100,8 +103,10 @@ final class ChunkVideoUpload
 
             // Get video session ID (required for video uploads)
             $videoSessionId = $request->input('session_id');
-            if (! $videoSessionId) {
-                return VideoUploadResponse::error('Video session ID is required for chunk uploads.');
+            if (!$videoSessionId) {
+                return VideoUploadResponse::error(
+                    'Video session ID is required for chunk uploads.',
+                );
             }
 
             // Configure session manager for this document-specific storage
@@ -139,7 +144,7 @@ final class ChunkVideoUpload
     private function handleChunksComplete(
         UploadSessionService $sessionManager,
         string $sessionId,
-        ?string $fileName,
+        null|string $fileName,
         int $totalChunks,
         Document $document,
         int $chunkIndex,
@@ -183,7 +188,7 @@ final class ChunkVideoUpload
     private function assembleChunksAsync(
         UploadSessionService $sessionManager,
         string $sessionId,
-        ?string $fileName,
+        null|string $fileName,
         int $totalChunks,
         Document $document,
         string $videoSessionId,

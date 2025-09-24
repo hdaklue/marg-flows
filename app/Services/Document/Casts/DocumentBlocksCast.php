@@ -9,10 +9,8 @@ use WendellAdriel\ValidatedDTO\Casting\Castable;
 
 final class DocumentBlocksCast implements Castable
 {
-    public function cast(
-        string $property,
-        mixed $value,
-    ): DocumentBlocksCollection {
+    public function cast(string $property, mixed $value): DocumentBlocksCollection
+    {
         if (is_array($value)) {
             return new DocumentBlocksCollection($value);
         }

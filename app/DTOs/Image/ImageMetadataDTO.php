@@ -32,7 +32,7 @@ final class ImageMetadataDTO extends ValidatedDTO
 
     public string $extension;
 
-    public ?string $error;
+    public null|string $error;
 
     public bool $hasError;
 
@@ -68,23 +68,19 @@ final class ImageMetadataDTO extends ValidatedDTO
      */
     public function isValid(): bool
     {
-        return
-            $this->exists
-            && ! $this->hasError
-            && $this->width > 0
-            && $this->height > 0;
+        return $this->exists && !$this->hasError && $this->width > 0 && $this->height > 0;
     }
 
     protected function casts(): array
     {
         return [
-            'exists' => new BooleanCast,
-            'width' => new IntegerCast,
-            'height' => new IntegerCast,
-            'aspectRatio' => new FloatCast,
-            'fileSizeBytes' => new IntegerCast,
-            'hasError' => new BooleanCast,
-            'maxZoomLevel' => new FloatCast,
+            'exists' => new BooleanCast(),
+            'width' => new IntegerCast(),
+            'height' => new IntegerCast(),
+            'aspectRatio' => new FloatCast(),
+            'fileSizeBytes' => new IntegerCast(),
+            'hasError' => new BooleanCast(),
+            'maxZoomLevel' => new FloatCast(),
         ];
     }
 

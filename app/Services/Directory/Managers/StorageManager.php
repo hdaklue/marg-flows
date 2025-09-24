@@ -54,7 +54,7 @@ final class StorageManager implements StorageManagerContract
      */
     public function createAvatarStrategy(): StorageStrategyContract
     {
-        return new AvatarStorageStrategy;
+        return new AvatarStorageStrategy();
     }
 
     /**
@@ -64,7 +64,7 @@ final class StorageManager implements StorageManagerContract
      */
     public function createTempStrategy(): StorageStrategyContract
     {
-        return new TempStorageStrategy;
+        return new TempStorageStrategy();
     }
 
     /**
@@ -74,12 +74,13 @@ final class StorageManager implements StorageManagerContract
      * @param  string  $baseDirectory  The base directory for video storage
      * @return VideoStorageStrategy Configured video storage strategy
      */
-    public function createVideoStrategy(string $tenantId, string $baseDirectory): VideoStorageStrategy
-    {
-        $rootDirectory = LaraPath::base(
-            $tenantId,
-            SanitizationStrategy::HASHED,
-        )->add($baseDirectory);
+    public function createVideoStrategy(
+        string $tenantId,
+        string $baseDirectory,
+    ): VideoStorageStrategy {
+        $rootDirectory = LaraPath::base($tenantId, SanitizationStrategy::HASHED)->add(
+            $baseDirectory,
+        );
 
         return new VideoStorageStrategy($rootDirectory);
     }

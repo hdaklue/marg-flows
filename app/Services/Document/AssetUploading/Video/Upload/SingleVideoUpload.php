@@ -29,7 +29,7 @@ final class SingleVideoUpload
             $documentModel = Document::findOrFail($document);
             $sessionId = $request->input('session_id');
 
-            if (! $sessionId || ! VideoUploadSessionManager::exists($sessionId)) {
+            if (!$sessionId || !VideoUploadSessionManager::exists($sessionId)) {
                 return VideoUploadResponse::error('Invalid or expired upload session.', 400);
             }
 
@@ -65,7 +65,9 @@ final class SingleVideoUpload
             VideoUploadSessionManager::startProcessing($sessionId, $result['filename']);
 
             // Dispatch processing job with full path so it can find the file in DigitalOcean Spaces
-            FinalizeVideoUpload::dispatch($result['path'], $documentModel, $sessionId)->onQueue('document-video-upload');
+            FinalizeVideoUpload::dispatch($result['path'], $documentModel, $sessionId)->onQueue(
+                'document-video-upload',
+            );
 
             return response()->json([
                 'success' => true,

@@ -85,12 +85,12 @@ final class ServeDocumentFile
         string $filename,
     ): Response|StreamedResponse|RedirectResponse {
         // Verify user is authenticated using Filament's authentication
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             return redirect()->route('filament.portal.auth.login');
         }
 
         $document = Document::whereKey($document)->first();
-        if (! $this->validateDocumentAccess($document, $request)) {
+        if (!$this->validateDocumentAccess($document, $request)) {
             abort(401);
         }
 
@@ -107,9 +107,10 @@ final class ServeDocumentFile
     {
         $user = $request->user();
 
-        return
+        return (
             $user->isAssignedTo($document)
-            && $document->getTenantId() === $user->getActiveTenantId();
+            && $document->getTenantId() === $user->getActiveTenantId()
+        );
     }
 
     /**
@@ -161,7 +162,7 @@ final class ServeDocumentFile
                 $stream = Storage::disk($disk)->readStream($path);
                 $chunkSize = 8192; // 8KB chunks for fast initial response
 
-                while (! feof($stream)) {
+                while (!feof($stream)) {
                     $chunk = fread($stream, $chunkSize);
                     if ($chunk !== false) {
                         echo $chunk;

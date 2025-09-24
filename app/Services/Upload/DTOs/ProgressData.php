@@ -13,9 +13,9 @@ final readonly class ProgressData
         public int $totalBytes,
         public float $percentage,
         public string $status = 'uploading', // uploading, completed, error
-        public ?array $currentChunk = null,
-        public ?int $estimatedTimeRemaining = null,
-        public ?string $error = null,
+        public null|array $currentChunk = null,
+        public null|int $estimatedTimeRemaining = null,
+        public null|string $error = null,
     ) {}
 
     public static function fromArray(array $data): self

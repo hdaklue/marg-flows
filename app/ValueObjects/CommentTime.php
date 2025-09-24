@@ -39,14 +39,12 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     {
         throw_if(
             $frameNumber < 0,
-            new InvalidArgumentException('Frame number cannot be negative, got: '
-            . $frameNumber),
+            new InvalidArgumentException('Frame number cannot be negative, got: ' . $frameNumber),
         );
 
         throw_if(
             $frameRate <= 0,
-            new InvalidArgumentException('Frame rate must be positive, got: '
-            . $frameRate),
+            new InvalidArgumentException('Frame rate must be positive, got: ' . $frameRate),
         );
 
         $seconds = $frameNumber / $frameRate;
@@ -61,10 +59,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     {
         $cleaned = trim($time);
 
-        throw_if(
-            empty($cleaned),
-            new InvalidArgumentException('Time string cannot be empty'),
-        );
+        throw_if(empty($cleaned), new InvalidArgumentException('Time string cannot be empty'));
 
         // Split by colon
         $parts = explode(':', $cleaned);
@@ -93,10 +88,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
         } else {
             // HH:MM:SS format
             [$hours, $minutes, $secs] = $parts;
-            $seconds =
-                ((float) $hours * 3600)
-                + ((float) $minutes * 60)
-                + (float) $secs;
+            $seconds = ((float) $hours * 3600) + ((float) $minutes * 60) + (float) $secs;
         }
 
         return new self($seconds);
@@ -109,10 +101,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     {
         $cleaned = trim($input);
 
-        throw_if(
-            empty($cleaned),
-            new InvalidArgumentException('Time string cannot be empty'),
-        );
+        throw_if(empty($cleaned), new InvalidArgumentException('Time string cannot be empty'));
 
         // If it contains colons, treat as formatted time
         if (str_contains($cleaned, ':')) {
@@ -177,8 +166,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     {
         throw_if(
             $frameRate <= 0,
-            new InvalidArgumentException('Frame rate must be positive, got: '
-            . $frameRate),
+            new InvalidArgumentException('Frame rate must be positive, got: ' . $frameRate),
         );
 
         return (int) round($this->seconds * $frameRate);
@@ -214,10 +202,8 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
     /**
      * Get formatted with decimal precision for seconds.
      */
-    public function asFormattedPrecise(
-        int $decimals = 1,
-        bool $forceHours = false,
-    ): string {
+    public function asFormattedPrecise(int $decimals = 1, bool $forceHours = false): string
+    {
         $totalSeconds = $this->seconds;
         $hours = intval($totalSeconds / 3600);
         $minutes = intval(($totalSeconds % 3600) / 60);
@@ -232,11 +218,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
             );
         }
 
-        return sprintf(
-            '%d:%0' . (3 + $decimals) . '.' . $decimals . 'f',
-            $minutes,
-            $seconds,
-        );
+        return sprintf('%d:%0' . (3 + $decimals) . '.' . $decimals . 'f', $minutes, $seconds);
     }
 
     /**
@@ -392,8 +374,7 @@ final class CommentTime implements Arrayable, Jsonable, JsonSerializable, String
 
         throw_if(
             $seconds < 0,
-            new InvalidArgumentException('Seconds cannot be negative, got: '
-            . $seconds),
+            new InvalidArgumentException('Seconds cannot be negative, got: ' . $seconds),
         );
     }
 

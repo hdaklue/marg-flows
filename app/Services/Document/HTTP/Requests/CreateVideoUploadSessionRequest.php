@@ -54,7 +54,7 @@ final class CreateVideoUploadSessionRequest extends FormRequest
         return (int) $this->input('max_single_file_size');
     }
 
-    public function getChunksTotal(): ?int
+    public function getChunksTotal(): null|int
     {
         return $this->has('chunks_total') ? (int) $this->input('chunks_total') : null;
     }

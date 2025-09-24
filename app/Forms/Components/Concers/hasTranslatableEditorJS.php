@@ -20,8 +20,7 @@ trait hasTranslatableEditorJS
 
         $this->resetValidation();
 
-        $translatableAttributes =
-            static::getResource()::getTranslatableAttributes();
+        $translatableAttributes = static::getResource()::getTranslatableAttributes();
 
         $this->otherLocaleData[$this->oldActiveLocale] = Arr::only(
             $this->data,

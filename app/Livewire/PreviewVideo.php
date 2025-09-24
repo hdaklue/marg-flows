@@ -205,15 +205,12 @@ final class PreviewVideo extends Component
         ];
     }
 
-    public function addComment(
-        $timestamp,
-        $frameNumber = null,
-        $frameRate = null,
-    ) {
+    public function addComment($timestamp, $frameNumber = null, $frameRate = null)
+    {
         $time = CommentTime::fromSeconds($timestamp);
 
         // Validate timestamp
-        if (! is_numeric($timestamp) || $timestamp < 0) {
+        if (!is_numeric($timestamp) || $timestamp < 0) {
             session()->flash('error', 'Invalid timestamp provided');
 
             return;
@@ -257,8 +254,7 @@ final class PreviewVideo extends Component
 
     public function loadComment($commentId)
     {
-        $comment = collect($this->comments)
-            ->firstWhere('commentId', $commentId);
+        $comment = collect($this->comments)->firstWhere('commentId', $commentId);
 
         if ($comment) {
             // Simulate loading comment details
@@ -273,7 +269,7 @@ final class PreviewVideo extends Component
     {
         // Toggle the main annotation setting
         $this->config['features']['enableAnnotations'] =
-            ! $this->config['features']['enableAnnotations'];
+            !$this->config['features']['enableAnnotations'];
 
         // Update all related annotation features based on the main toggle
         $enabled = (bool) $this->config['features']['enableAnnotations'];

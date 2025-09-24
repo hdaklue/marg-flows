@@ -29,18 +29,9 @@ final class Resolution1080p extends AbstractResolution
         // Set reasonable constraints for 1080p - adjust based on orientation
         $this->maxDimension = $this->resolution->dimension;
         $this->minDimension = match ($orientation) {
-            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(
-                360,
-                640,
-            ),
-            'square' => \App\Services\Video\ValueObjects\Dimension::from(
-                360,
-                360,
-            ),
-            default => \App\Services\Video\ValueObjects\Dimension::from(
-                640,
-                360,
-            ),
+            'portrait' => \App\Services\Video\ValueObjects\Dimension::from(360, 640),
+            'square' => \App\Services\Video\ValueObjects\Dimension::from(360, 360),
+            default => \App\Services\Video\ValueObjects\Dimension::from(640, 360),
         };
     }
 
@@ -52,10 +43,8 @@ final class Resolution1080p extends AbstractResolution
     /**
      * Create Resolution1080p based on source video orientation.
      */
-    public static function forOrientation(
-        string $orientation,
-        bool $allowScaleUp = true,
-    ): self {
+    public static function forOrientation(string $orientation, bool $allowScaleUp = true): self
+    {
         return new self($orientation, $allowScaleUp);
     }
 
@@ -70,10 +59,7 @@ final class Resolution1080p extends AbstractResolution
     {
         // Create ResizeFilter directly instead of using closure
         return new ResizeFilter(
-            new Dimension(
-                $this->dimension->getWidth(),
-                $this->dimension->getHeight(),
-            ),
+            new Dimension($this->dimension->getWidth(), $this->dimension->getHeight()),
             $this->resizeMode,
             false, // Disable standard aspect ratio enforcement to prevent black bars
         );

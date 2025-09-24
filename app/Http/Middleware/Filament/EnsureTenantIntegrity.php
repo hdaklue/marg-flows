@@ -21,12 +21,7 @@ final class EnsureTenantIntegrity
         // Check route parameters for tenant access
         foreach ($request->route()->parameters() as $parameter) {
             if ($parameter instanceof BelongsToTenantContract) {
-                abort_if(
-                    $parameter
-                        ->getTenant()
-                        ->getKey() !== filamentTenant()->getKey(),
-                    404,
-                );
+                abort_if($parameter->getTenant()->getKey() !== filamentTenant()->getKey(), 404);
             }
         }
 

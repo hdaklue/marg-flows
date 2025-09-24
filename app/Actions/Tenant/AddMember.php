@@ -9,9 +9,6 @@ use App\Models\Flow;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
-
-use function config;
-
 use Exception;
 use Hdaklue\MargRbac\Contracts\Role\RoleableEntity;
 use Hdaklue\MargRbac\Enums\Role\RoleEnum;
@@ -21,6 +18,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
+
+use function config;
 
 final class AddMember
 {
@@ -36,22 +35,11 @@ final class AddMember
         try {
             $assignedRole = $tenant->systemRoleByName($role);
 
-            DB::transaction(function () use (
-                $tenant,
-                $user,
-                $assignedRole,
-                $silently,
-                $flows,
-            ) {
+            DB::transaction(function () use ($tenant, $user, $assignedRole, $silently, $flows) {
                 $tenant->addParticipant($user, $assignedRole->name, $silently);
 
-                if (! empty($flows)) {
-                    $this->assignFlowsRole(
-                        $tenant,
-                        $user,
-                        $flows,
-                        $assignedRole,
-                    );
+                if (!empty($flows)) {
+                    $this->assignFlowsRole($tenant, $user, $flows, $assignedRole);
                 }
             });
         } catch (Exception $e) {
@@ -69,23 +57,14 @@ final class AddMember
         TanantMemberAdded::dispatch($tenant, $user, $role);
     }
 
-    private function assignFlowsRole(
-        Tenant $tenant,
-        User $user,
-        $flows,
-        Role $role,
-    ) {
+    private function assignFlowsRole(Tenant $tenant, User $user, $flows, Role $role)
+    {
         $flows = $tenant->flows()->whereIn('id', $flows)->get();
         if ($flows->isEmpty()) {
             return;
         }
 
-        $data = $this->buildInsertAttr(
-            $tenant,
-            $user,
-            $flows->pluck('id')->toArray(),
-            $role,
-        );
+        $data = $this->buildInsertAttr($tenant, $user, $flows->pluck('id')->toArray(), $role);
 
         DB::table(config('role.table_names.model_has_roles'))->upsert(
             $data,
@@ -106,12 +85,8 @@ final class AddMember
         RoleManager::bulkClearCache($flows->collect());
     }
 
-    private function buildInsertAttr(
-        Tenant $tenant,
-        User $user,
-        array $flows,
-        Role $assignedRole,
-    ) {
+    private function buildInsertAttr(Tenant $tenant, User $user, array $flows, Role $assignedRole)
+    {
         $rolableKey = config('role.column_names.roleable_morph_key');
         $roleableTypeKey = config('role.column_names.roleable_morph_type');
 

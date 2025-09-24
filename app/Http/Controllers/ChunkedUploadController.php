@@ -32,9 +32,7 @@ final class ChunkedUploadController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return ChunkedUploadResponse::validationError(
-                $validator->errors()->toArray(),
-            );
+            return ChunkedUploadResponse::validationError($validator->errors()->toArray());
         }
 
         $fileKey = $request->input('fileKey');
@@ -77,9 +75,7 @@ final class ChunkedUploadController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return ChunkedUploadResponse::validationError(
-                $validator->errors()->toArray(),
-            );
+            return ChunkedUploadResponse::validationError($validator->errors()->toArray());
         }
 
         $fileKey = $request->input('fileKey');
@@ -99,8 +95,7 @@ final class ChunkedUploadController extends Controller
 
             return ChunkedUploadResponse::cancelled();
         } catch (Exception $e) {
-            return ChunkedUploadResponse::error('Failed to cancel upload: '
-            . $e->getMessage());
+            return ChunkedUploadResponse::error('Failed to cancel upload: ' . $e->getMessage());
         }
     }
 
@@ -115,9 +110,7 @@ final class ChunkedUploadController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return ChunkedUploadResponse::validationError(
-                $validator->errors()->toArray(),
-            );
+            return ChunkedUploadResponse::validationError($validator->errors()->toArray());
         }
 
         $fileKey = $request->input('fileKey');
@@ -156,8 +149,7 @@ final class ChunkedUploadController extends Controller
 
             return ChunkedUploadResponse::deleted();
         } catch (Exception $e) {
-            return ChunkedUploadResponse::error('Failed to delete file: '
-            . $e->getMessage());
+            return ChunkedUploadResponse::error('Failed to delete file: ' . $e->getMessage());
         }
     }
 
@@ -166,13 +158,10 @@ final class ChunkedUploadController extends Controller
      */
     public function cleanup(): JsonResponse
     {
-        $chunkDir = config(
-            'chunked-upload.storage.chunk_directory',
-            'chunk-uploads',
-        );
+        $chunkDir = config('chunked-upload.storage.chunk_directory', 'chunk-uploads');
         $chunkUploadsDir = storage_path("app/{$chunkDir}");
 
-        if (! is_dir($chunkUploadsDir)) {
+        if (!is_dir($chunkUploadsDir)) {
             return response()->json([
                 'success' => true,
                 'message' => 'No chunks to clean up',
@@ -211,10 +200,7 @@ final class ChunkedUploadController extends Controller
      */
     protected function getChunkDirectory(string $fileKey): string
     {
-        $chunkDir = config(
-            'chunked-upload.storage.chunk_directory',
-            'chunk-uploads',
-        );
+        $chunkDir = config('chunked-upload.storage.chunk_directory', 'chunk-uploads');
 
         return storage_path("app/{$chunkDir}/{$fileKey}");
     }
@@ -233,7 +219,7 @@ final class ChunkedUploadController extends Controller
         $chunkDir = $this->getChunkDirectory($fileKey);
 
         // Create chunk directory if it doesn't exist
-        if (! is_dir($chunkDir)) {
+        if (!is_dir($chunkDir)) {
             mkdir($chunkDir, 0755, true);
         }
 
@@ -244,11 +230,7 @@ final class ChunkedUploadController extends Controller
         // Check if all chunks are uploaded
         if ($this->allChunksUploaded($fileKey, $totalChunks)) {
             // Assemble the file
-            $finalPath = $this->assembleChunkedFile(
-                $fileKey,
-                $fileName,
-                $totalChunks,
-            );
+            $finalPath = $this->assembleChunkedFile($fileKey, $fileName, $totalChunks);
 
             // Clean up chunks
             $this->cleanupChunks($fileKey);
@@ -282,11 +264,7 @@ final class ChunkedUploadController extends Controller
         // Generate unique filename
         $extension = $uploadedFile->getClientOriginalExtension();
         $uniqueFileName =
-            $fileKey
-            . '_'
-            . Str::slug(pathinfo($fileName, PATHINFO_FILENAME))
-            . '.'
-            . $extension;
+            $fileKey . '_' . Str::slug(pathinfo($fileName, PATHINFO_FILENAME)) . '.' . $extension;
 
         $disk = config('chunked-upload.storage.disk', 'public');
         $finalDirectory = config('chunked-upload.storage.final_directory', 'uploads');
@@ -305,19 +283,17 @@ final class ChunkedUploadController extends Controller
     /**
      * Check if all chunks are uploaded.
      */
-    protected function allChunksUploaded(
-        string $fileKey,
-        int $totalChunks,
-    ): bool {
+    protected function allChunksUploaded(string $fileKey, int $totalChunks): bool
+    {
         $chunkDir = $this->getChunkDirectory($fileKey);
 
-        if (! is_dir($chunkDir)) {
+        if (!is_dir($chunkDir)) {
             return false;
         }
 
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDir}/chunk_{$i}";
-            if (! file_exists($chunkPath)) {
+            if (!file_exists($chunkPath)) {
                 return false;
             }
         }
@@ -340,11 +316,7 @@ final class ChunkedUploadController extends Controller
         // Generate unique filename
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
         $uniqueFileName =
-            $fileKey
-            . '_'
-            . Str::slug(pathinfo($fileName, PATHINFO_FILENAME))
-            . '.'
-            . $extension;
+            $fileKey . '_' . Str::slug(pathinfo($fileName, PATHINFO_FILENAME)) . '.' . $extension;
 
         // Create final file path using configured disk
         $finalPath = $finalDirectory . '/' . $uniqueFileName;
@@ -353,35 +325,32 @@ final class ChunkedUploadController extends Controller
 
         // Ensure directory exists
         $finalDir = dirname($fullFinalPath);
-        if (! is_dir($finalDir)) {
+        if (!is_dir($finalDir)) {
             mkdir($finalDir, 0755, true);
         }
 
         // Open final file for writing
         $finalHandle = fopen($fullFinalPath, 'wb');
 
-        throw_unless(
-            $finalHandle,
-            new Exception('Could not create final file'),
-        );
+        throw_unless($finalHandle, new Exception('Could not create final file'));
 
         // Append all chunks to final file
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDir}/chunk_{$i}";
 
-            if (! file_exists($chunkPath)) {
+            if (!file_exists($chunkPath)) {
                 fclose($finalHandle);
                 throw new Exception("Chunk {$i} not found");
             }
 
             $chunkHandle = fopen($chunkPath, 'rb');
-            if (! $chunkHandle) {
+            if (!$chunkHandle) {
                 fclose($finalHandle);
                 throw new Exception("Could not read chunk {$i}");
             }
 
             // Copy chunk to final file
-            while (! feof($chunkHandle)) {
+            while (!feof($chunkHandle)) {
                 $data = fread($chunkHandle, 8192);
                 fwrite($finalHandle, $data);
             }

@@ -90,15 +90,16 @@
         </div>
     @endforeach
 
-    @if ($showCount)
-        <div class="{{ $offsetClasses[$size] ?? '' }} group relative"
-            @if ($canEdit) wire:click="$dispatch('open-members-modal',{roleableKey: '{{ $roleableKey }}', roleableType: '{{ $roleableType }}', scopeToKey: '{{ $scopeToKey }}', scopeToType: '{{ $scopeToType }}'  })" @endif>
+    @if ($showCount && $remainingCount > 0)
+        {{-- <div class="{{ $offsetClasses[$size] ?? '' }} group relative"
+            @if ($canEdit) wire:click="$dispatch('open-members-modal',{roleableKey: '{{ $roleableKey }}', roleableType: '{{ $roleableType }}', scopeToKey: '{{ $scopeToKey }}', scopeToType: '{{ $scopeToType }}'  })" @endif> --}}
+        <div class="{{ $offsetClasses[$size] ?? '' }} group relative">
             <div
                 class="{{ $sizeClasses[$size] ?? '' }} {{ $borderClasses[$size] ?? '' }} flex cursor-pointer items-center justify-center rounded-full border-white bg-gray-100 font-semibold text-gray-600 shadow-sm ring-2 ring-white transition-all duration-200 hover:z-10 hover:scale-110 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-gray-600">
                 @if ($remainingCount > 0)
                     +{{ $remainingCount }}
                 @else
-                    <x-heroicon-o-users class="w-3 h-3" />
+                    {{-- <x-heroicon-o-users class="w-3 h-3" /> --}}
                 @endif
             </div>
             @if ($showTooltip)

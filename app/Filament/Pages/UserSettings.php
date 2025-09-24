@@ -61,7 +61,7 @@ final class UserSettings extends Page implements HasTable
                         )->imageSize(50),
                         Grid::make(1)
                             ->schema([
-                                Text::make(fn () => filamentUser()->name)->weight(FontWeight::Bold),
+                                Text::make(fn() => filamentUser()->name)->weight(FontWeight::Bold),
                                 Text::make('@' . filamentUser()->username),
                                 Text::make(filamentUser()->email),
                                 Text::make(filamentUser()->displayTimeZone()),
@@ -74,7 +74,7 @@ final class UserSettings extends Page implements HasTable
                         ->label(__('auth.profile.actions.edit'))
                         ->color('primary')
                         ->outlined()
-                        ->fillForm(fn () => [
+                        ->fillForm(fn() => [
                             'name' => filamentUser()->getAttribute('name'),
                             'avatar' => AvatarService::getAvatarPath(filamentUser()) ?: null,
                             'timezone' => filamentUser()->getTimeZone(),
@@ -96,7 +96,7 @@ final class UserSettings extends Page implements HasTable
                                 ->searchable()
                                 ->options(Timezone::getTimezonesAsSelectList()),
                         ])
-                        ->action(fn (array $data) => $this->updateUserBasicData($data)),
+                        ->action(fn(array $data) => $this->updateUserBasicData($data)),
                 ]),
             Section::make(__('auth.profile.sections.teams'))->schema([
                 EmbeddedTable::make(),

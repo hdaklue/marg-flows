@@ -29,9 +29,9 @@ final class CreateDeliverableDto extends ValidatedDTO
 
     public int $urgency;
 
-    public ?Carbon $start_date;
+    public null|Carbon $start_date;
 
-    public ?Carbon $success_date;
+    public null|Carbon $success_date;
 
     public array $settings;
 
@@ -84,9 +84,7 @@ final class CreateDeliverableDto extends ValidatedDTO
      */
     public function getFormatTypeLabel(): string
     {
-        return
-            "{$this->format->getLabel()} - "
-            . ucwords(str_replace('_', ' ', $this->type));
+        return "{$this->format->getLabel()} - " . ucwords(str_replace('_', ' ', $this->type));
     }
 
     /**
@@ -94,10 +92,11 @@ final class CreateDeliverableDto extends ValidatedDTO
      */
     public function shouldStartImmediately(): bool
     {
-        return
+        return (
             $this->start_date === null
             || $this->start_date->isPast()
-            || $this->start_date->isToday();
+            || $this->start_date->isToday()
+        );
     }
 
     protected function rules(): array
@@ -134,8 +133,8 @@ final class CreateDeliverableDto extends ValidatedDTO
         return [
             'status' => new EnumCast(DeliverableStatus::class),
             'urgency' => new EnumCast(UrgencyEnum::class),
-            'start_date' => new CarbonCast,
-            'success_date' => new CarbonCast,
+            'start_date' => new CarbonCast(),
+            'success_date' => new CarbonCast(),
         ];
     }
 }

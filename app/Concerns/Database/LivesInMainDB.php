@@ -9,7 +9,7 @@ trait LivesInMainDB
     /**
      * Get the database connection for the model.
      */
-    public function getConnectionName(): ?string
+    public function getConnectionName(): null|string
     {
         // Use the default connection (main database)
         return config('database.default');

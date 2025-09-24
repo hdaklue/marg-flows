@@ -55,9 +55,9 @@ final class ChunkFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return int|null File size in bytes, null if file doesn't exist
      */
-    public function getFileSize($entity, string $type, string $filename): ?int
+    public function getFileSize($entity, string $type, string $filename): null|int
     {
-        if (! $this->fileExists($entity, $type, $filename)) {
+        if (!$this->fileExists($entity, $type, $filename)) {
             return null;
         }
 
@@ -152,8 +152,12 @@ final class ChunkFileResolver extends AbstractFileResolver
      * @param  int|null  $expires  Expiration time in seconds
      * @return string Temporary URL with expiration
      */
-    protected function generateTemporaryUrl($entity, string $type, string $filename, ?int $expires = null): string
-    {
+    protected function generateTemporaryUrl(
+        $entity,
+        string $type,
+        string $filename,
+        null|int $expires = null,
+    ): string {
         $expires ??= config('directory-chunks.session_ttl', 3600);
 
         $disk = config('directory-chunks.storage.disk', 'local');
@@ -173,7 +177,7 @@ final class ChunkFileResolver extends AbstractFileResolver
      */
     protected function performFileDelete($entity, string $type, string $filename): bool
     {
-        if (! $this->fileExists($entity, $type, $filename)) {
+        if (!$this->fileExists($entity, $type, $filename)) {
             return false;
         }
 

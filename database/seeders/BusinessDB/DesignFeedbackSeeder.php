@@ -15,16 +15,12 @@ final class DesignFeedbackSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info(
-            'Creating design feedback in business database...',
-        );
+        $this->command->info('Creating design feedback in business database...');
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (! $testUser) {
-            $this->command->warn(
-                'Test user not found. Please run main DatabaseSeeder first.',
-            );
+        if (!$testUser) {
+            $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
         }
@@ -98,11 +94,7 @@ final class DesignFeedbackSeeder extends Seeder
                     'x_coordinate' => $x,
                     'y_coordinate' => $y,
                     'annotation_type' => $annotationType,
-                    'annotation_data' => $this->generateAnnotationData(
-                        $annotationType,
-                        $x,
-                        $y,
-                    ),
+                    'annotation_data' => $this->generateAnnotationData($annotationType, $x, $y),
                     'area_bounds' => $this->generateAreaBounds($annotationType),
                     'color' => fake()->randomElement($colors),
                     'zoom_level' => fake()->randomFloat(2, 0.25, 3.0), // 25% to 300% zoom
@@ -190,12 +182,9 @@ final class DesignFeedbackSeeder extends Seeder
         return fake()->randomElement($typeComments);
     }
 
-    private function generateAnnotationData(
-        string $annotationType,
-        int $x,
-        int $y,
-    ): ?array {
-        if (! fake()->boolean(70)) { // 70% chance of having annotation data
+    private function generateAnnotationData(string $annotationType, int $x, int $y): null|array
+    {
+        if (!fake()->boolean(70)) { // 70% chance of having annotation data
             return null;
         }
 
@@ -274,11 +263,11 @@ final class DesignFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateAreaBounds(string $annotationType): ?array
+    private function generateAreaBounds(string $annotationType): null|array
     {
         $areaTypes = ['rectangle', 'circle', 'polygon', 'area'];
 
-        if (! in_array($annotationType, $areaTypes, true) || ! fake()->boolean(80)) {
+        if (!in_array($annotationType, $areaTypes, true) || !fake()->boolean(80)) {
             return null;
         }
 
@@ -338,10 +327,8 @@ final class DesignFeedbackSeeder extends Seeder
         return $vertices;
     }
 
-    private function createSpecializedDesignFeedback(
-        User $user,
-        Document $document,
-    ): void {
+    private function createSpecializedDesignFeedback(User $user, Document $document): void
+    {
         // High-precision point annotation
         DesignFeedback::create([
             'creator_id' => $user->id,

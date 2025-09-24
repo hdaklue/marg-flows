@@ -14,11 +14,11 @@ final class MentionableDTO extends ValidatedDTO
 
     public string $email;
 
-    public ?string $avatar;
+    public null|string $avatar;
 
-    public ?string $title;
+    public null|string $title;
 
-    public ?string $department;
+    public null|string $department;
 
     public function toTributeFormat(): array
     {

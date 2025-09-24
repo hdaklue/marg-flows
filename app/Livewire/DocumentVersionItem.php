@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Services\Document\DocumentVersionPolisher;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -26,14 +27,14 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
 
     public bool $isCurrentVersion = false;
 
-    public ?string $creatorName = null;
+    public null|string $creatorName = null;
 
     public function mount(
         string $versionId,
         string $documentId,
         string $createdAt,
         bool $isCurrentVersion = false,
-        ?string $creatorName = null,
+        null|string $creatorName = null,
     ): void {
         $this->versionId = $versionId;
         $this->documentId = $documentId;
@@ -50,7 +51,7 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
             ->size(Size::Small)
             ->iconButton()
             ->color('primary')
-            ->visible(! $this->isCurrentVersion)
+            ->visible(!$this->isCurrentVersion)
             ->action(function () {
                 $this->dispatch('apply-version', versionId: $this->versionId);
             });
@@ -72,7 +73,7 @@ final class DocumentVersionItem extends Component implements HasActions, HasSche
 
     public function getShortVersionIdProperty(): string
     {
-        return substr($this->versionId, -6);
+        return DocumentVersionPolisher::shortKey($this->documentId);
     }
 
     public function render(): View
