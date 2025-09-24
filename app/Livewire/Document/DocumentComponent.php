@@ -37,7 +37,7 @@ final class DocumentComponent extends Component
     /**
      * Current editing version for timeline integration.
      */
-    public ?string $currentEditingVersion = null;
+    public null|string $currentEditingVersion = null;
 
     /**
      * Indicates if new versions are available since last check.
@@ -135,7 +135,7 @@ final class DocumentComponent extends Component
     }
 
     #[Computed]
-    public function currentEditingVersionComputed(): ?string
+    public function currentEditingVersionComputed(): null|string
     {
         // If we have a current editing version, use it
         if ($this->currentEditingVersion !== null) {
@@ -160,7 +160,7 @@ final class DocumentComponent extends Component
         unset($this->participants, $this->participantsArray);
     }
 
-    #[On('document-version-changed')]
+    #[On('DocumentVersionTimelineModal::document-version-changed')]
     public function handleVersionChange(string $versionId): void
     {
         $this->currentEditingVersion = $versionId;
@@ -203,8 +203,11 @@ final class DocumentComponent extends Component
                 // $this->current_content_hash,
             );
 
+            // Notify version modal about the new version
+            $this->dispatch('DocumentComponent::document-saved', newVersionId: $newVersion->id);
+
             // Update the DTO with new content
-            unset($this->updatedAtString, $this->document);
+            unset($this->updatedAtString, $this->document, $this->currentEditingVersionComputed);
         } catch (Exception $e) {
             Log::error('Document save failed', [
                 'document_id' => $this->documentId,
@@ -302,7 +305,7 @@ final class DocumentComponent extends Component
         }
 
         $textBlocks = collect($content['blocks'])
-            ->filter(fn ($block) => in_array($block['type'] ?? '', ['paragraph', 'header'], true))
+            ->filter(fn($block) => in_array($block['type'] ?? '', ['paragraph', 'header'], true))
             ->pluck('data.text')
             ->filter()
             ->take(2);
@@ -313,6 +316,8 @@ final class DocumentComponent extends Component
 
         $preview = $textBlocks->implode(' ');
 
-        return strlen($preview) > 100 ? substr(strip_tags($preview), 0, 100) . '...' : strip_tags($preview);
+        return strlen($preview) > 100
+            ? substr(strip_tags($preview), 0, 100) . '...'
+            : strip_tags($preview);
     }
 }

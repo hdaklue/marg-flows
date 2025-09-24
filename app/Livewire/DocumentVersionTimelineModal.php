@@ -17,6 +17,14 @@ final class DocumentVersionTimelineModal extends ModalComponent
 
     public ?string $currentEditingVersion = null;
 
+    public int $page = 1;
+
+    public int $perPage = 10;
+
+    public bool $hasMoreVersions = true;
+
+    public bool $isLoading = false;
+
     public static function closeModalOnClickAway(): bool
     {
         return false;
@@ -32,10 +40,16 @@ final class DocumentVersionTimelineModal extends ModalComponent
         return true;
     }
 
+    public Collection $loadedVersions;
+
     public function mount(string $documentId, ?string $currentEditingVersion = null): void
     {
         $this->documentId = $documentId;
         $this->currentEditingVersion = $currentEditingVersion;
+        $this->loadedVersions = new Collection();
+
+        // Load initial versions
+        $this->loadMoreVersions();
 
         // Notify parent component that version history modal was opened
         $this->dispatch('version-history-opened');
@@ -45,17 +59,48 @@ final class DocumentVersionTimelineModal extends ModalComponent
     public function handleVersionSelection(string $versionId): void
     {
         $this->currentEditingVersion = $versionId;
-        $this->dispatch('document-version-changed', versionId: $versionId);
+        $this->dispatch('DocumentVersionTimelineModal::document-version-changed', versionId: $versionId);
     }
 
-    #[Computed]
-    public function versions(): Collection
+    #[On('DocumentComponent::document-saved')]
+    public function handleDocumentSaved(string $newVersionId): void
     {
-        return DocumentVersion::where('document_id', $this->documentId)
+        $this->currentEditingVersion = $newVersionId;
+        
+        // Refresh versions list to show the new version
+        $this->refreshVersions();
+    }
+
+    private function refreshVersions(): void
+    {
+        $this->page = 1;
+        $this->hasMoreVersions = true;
+        $this->loadedVersions = new Collection();
+        $this->loadMoreVersions();
+    }
+
+    public function loadMoreVersions(): void
+    {
+        if (!$this->hasMoreVersions || $this->isLoading) {
+            return;
+        }
+
+        $this->isLoading = true;
+
+        $newVersions = DocumentVersion::where('document_id', $this->documentId)
             ->with('creator')
             ->orderByDesc('created_at')
-            ->limit(20)
+            ->skip(($this->page - 1) * $this->perPage)
+            ->limit($this->perPage)
             ->get();
+
+        if ($newVersions->count() < $this->perPage) {
+            $this->hasMoreVersions = false;
+        }
+
+        $this->loadedVersions = $this->loadedVersions->concat($newVersions);
+        $this->page++;
+        $this->isLoading = false;
     }
 
     public function render(): View

@@ -6,7 +6,8 @@
                 Document Version History
             </h2>
             <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                {{ $this->versions->count() }} version{{ $this->versions->count() !== 1 ? 's' : '' }} available
+                {{ $loadedVersions->count() }} version{{ $loadedVersions->count() !== 1 ? 's' : '' }} loaded
+                @if($hasMoreVersions), more available @endif
             </p>
         </div>
 
@@ -20,9 +21,9 @@
 
     {{-- Modal Content --}}
     <div class="flex-1 overflow-y-auto p-6">
-        @if ($this->versions->count() > 0)
+        @if ($loadedVersions->count() > 0)
             <div class="space-y-4">
-                @foreach ($this->versions as $version)
+                @foreach ($loadedVersions as $version)
                     <livewire:document-version-item 
                         :version-id="$version->id" 
                         :created-at="$version->created_at->toISOString()" 
@@ -31,6 +32,34 @@
                         :key="$version->id" 
                     />
                 @endforeach
+
+                {{-- Infinite Scroll Trigger --}}
+                @if ($hasMoreVersions)
+                    <div x-intersect="$wire.loadMoreVersions()" class="flex justify-center py-4">
+                        @if ($isLoading)
+                            {{-- Loading Skeleton --}}
+                            <div class="w-full animate-pulse">
+                                @for ($i = 0; $i < 3; $i++)
+                                    <div class="mb-4 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <div class="h-4 w-16 rounded bg-zinc-200 dark:bg-zinc-700"></div>
+                                                <div class="h-4 w-12 rounded bg-zinc-200 dark:bg-zinc-700"></div>
+                                            </div>
+                                            <div class="h-4 w-20 rounded bg-zinc-200 dark:bg-zinc-700"></div>
+                                        </div>
+                                        <div class="mt-2 h-3 w-32 rounded bg-zinc-200 dark:bg-zinc-700"></div>
+                                    </div>
+                                @endfor
+                            </div>
+                        @else
+                            {{-- Load More Indicator --}}
+                            <div class="text-sm text-zinc-500 dark:text-zinc-400">
+                                Scroll to load more versions...
+                            </div>
+                        @endif
+                    </div>
+                @endif
             </div>
         @else
             <div class="py-12 text-center">

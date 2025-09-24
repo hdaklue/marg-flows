@@ -27,7 +27,7 @@
             </span>
 
             {{-- Actions --}}
-            <div class="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <div class="flex items-center gap-1">
                 @unless ($isCurrentVersion)
                     {{ $this->previewAction }}
                     {{ $this->applyAction }}
