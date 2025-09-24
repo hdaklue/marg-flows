@@ -33,7 +33,7 @@
                         'bg-zinc-400': !currentStatus.isDirty && !currentStatus.isSaving && !currentStatus.saveStatus
                     }">
                 </div>
-                <span class="w-28 text-start text-zinc-600 dark:text-zinc-400" x-text="currentStatus.statusText"></span>
+                <span class="hidden sm:inline w-28 text-start text-zinc-600 dark:text-zinc-400" x-text="currentStatus.statusText"></span>
             </div>
 
             <!-- Last saved time -->
@@ -56,7 +56,7 @@
                             d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12">
                         </path>
                     </svg>
-                    <span>{{ __('document.editor.save') }}</span>
+                    <span class="hidden sm:inline">{{ __('document.editor.save') }}</span>
                 </span>
                 <span x-show="isSaving" class="flex items-center space-x-1">
                     <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                         </path>
                     </svg>
-                    <span>{{ __('document.editor.saving') }}</span>
+                    <span class="hidden sm:inline">{{ __('document.editor.saving') }}</span>
                 </span>
             </button>
 
@@ -156,7 +156,7 @@
                 </button>
 
                 <!-- Toggle Label -->
-                <span class="text-xs font-medium text-zinc-600 dark:text-zinc-400"
+                <span class="hidden sm:inline text-xs font-medium text-zinc-600 dark:text-zinc-400"
                     :class="autoSaveEnabled ? 'text-sky-600 dark:text-sky-400' : ''">
                     {{ __('document.editor.auto_save') }}
                 </span>
@@ -184,7 +184,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span>History</span>
+                <span class="hidden sm:inline">History</span>
 
                 <!-- New Version Indicator -->
                 @if ($hasNewVersions)
