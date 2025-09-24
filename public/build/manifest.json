@@ -1,11 +1,32 @@
 {
-  "_video.es-ChnzEjsh.js": {
-    "file": "assets/video.es-ChnzEjsh.js",
+  "_video.es-BHW71Bob.js": {
+    "file": "assets/video.es-BHW71Bob.js",
     "name": "video.es",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js"
     ]
+  },
+  "_video.es-D1NRVe2t.js": {
+    "file": "assets/video.es-D1NRVe2t.js",
+    "name": "video.es",
+    "imports": [
+      "resources/js/app.js",
+      "_video.es-BHW71Bob.js"
+    ]
+  },
+  "_wavesurfer-manager-AxFnsDT5.js": {
+    "file": "assets/wavesurfer-manager-AxFnsDT5.js",
+    "name": "wavesurfer-manager",
+    "imports": [
+      "node_modules/wavesurfer.js/dist/wavesurfer.esm.js"
+    ]
+  },
+  "node_modules/wavesurfer.js/dist/wavesurfer.esm.js": {
+    "file": "assets/wavesurfer.esm-Toh_7rjd.js",
+    "name": "wavesurfer.esm",
+    "src": "node_modules/wavesurfer.js/dist/wavesurfer.esm.js",
+    "isDynamicEntry": true
   },
   "resources/css/app.css": {
     "file": "assets/app-B4rd-tZw.css",
@@ -58,15 +79,22 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DEdJg1YH.js",
+    "file": "assets/app-BX_EKoAH.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "dynamicImports": [
+      "resources/js/components/audio-annotation/index.js",
+      "resources/js/components/design-annotation/index.js",
+      "resources/js/components/image-review/index.js",
+      "resources/js/components/video-annotation/index.js",
+      "resources/js/components/audio-player/index.js",
       "resources/js/components/document/index.js",
       "resources/js/components/mentionable/index.js",
       "resources/js/components/video-recorder/index.js",
       "resources/js/components/voice-recorder/index.js",
+      "resources/js/components/ChunkedFileUpload/index.js",
+      "resources/js/components/video-annotation/index.js",
       "resources/js/components/ChunkedFileUpload/index.js"
     ]
   },
@@ -76,22 +104,58 @@
     "src": "resources/js/components/ChunkedFileUpload/index.js",
     "isDynamicEntry": true
   },
+  "resources/js/components/audio-annotation/index.js": {
+    "file": "assets/index-DNOlxYJP.js",
+    "name": "index",
+    "src": "resources/js/components/audio-annotation/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "node_modules/wavesurfer.js/dist/wavesurfer.esm.js"
+    ]
+  },
+  "resources/js/components/audio-player/index.js": {
+    "file": "assets/index-BeahqjPU.js",
+    "name": "index",
+    "src": "resources/js/components/audio-player/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_wavesurfer-manager-AxFnsDT5.js",
+      "node_modules/wavesurfer.js/dist/wavesurfer.esm.js"
+    ],
+    "dynamicImports": [
+      "node_modules/wavesurfer.js/dist/wavesurfer.esm.js"
+    ]
+  },
+  "resources/js/components/design-annotation/index.js": {
+    "file": "assets/index-DVOJIbR-.js",
+    "name": "index",
+    "src": "resources/js/components/design-annotation/index.js",
+    "isDynamicEntry": true
+  },
   "resources/js/components/document/index.js": {
-    "file": "assets/index-CW0rewj5.js",
+    "file": "assets/index-vCKLht3m.js",
     "name": "index",
     "src": "resources/js/components/document/index.js",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_video.es-ChnzEjsh.js"
+      "_video.es-BHW71Bob.js",
+      "_video.es-D1NRVe2t.js"
     ],
     "dynamicImports": [
-      "_video.es-ChnzEjsh.js"
+      "_video.es-BHW71Bob.js"
     ],
     "css": [
       "assets/index-B_nUxDBI.css",
       "assets/resizable-image-CqxKyYZf.css"
     ]
+  },
+  "resources/js/components/image-review/index.js": {
+    "file": "assets/index-CJZwoCe-.js",
+    "name": "index",
+    "src": "resources/js/components/image-review/index.js",
+    "isDynamicEntry": true
   },
   "resources/js/components/mentionable/index.js": {
     "file": "assets/index-CtvFbK5g.js",
@@ -99,20 +163,38 @@
     "src": "resources/js/components/mentionable/index.js",
     "isDynamicEntry": true
   },
+  "resources/js/components/video-annotation/index.js": {
+    "file": "assets/index-fimTSwMG.js",
+    "name": "index",
+    "src": "resources/js/components/video-annotation/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_video.es-BHW71Bob.js"
+    ],
+    "css": [
+      "assets/index-CNCXBngZ.css"
+    ]
+  },
   "resources/js/components/video-recorder/index.js": {
-    "file": "assets/index-SehddFZK.js",
+    "file": "assets/index-BrHTtRK_.js",
     "name": "index",
     "src": "resources/js/components/video-recorder/index.js",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_video.es-ChnzEjsh.js"
+      "_video.es-BHW71Bob.js",
+      "_video.es-D1NRVe2t.js"
     ]
   },
   "resources/js/components/voice-recorder/index.js": {
-    "file": "assets/index-DClmYLPx.js",
+    "file": "assets/index-NXzvLjqe.js",
     "name": "index",
     "src": "resources/js/components/voice-recorder/index.js",
-    "isDynamicEntry": true
+    "isDynamicEntry": true,
+    "imports": [
+      "node_modules/wavesurfer.js/dist/wavesurfer.esm.js",
+      "_wavesurfer-manager-AxFnsDT5.js"
+    ]
   }
 }
