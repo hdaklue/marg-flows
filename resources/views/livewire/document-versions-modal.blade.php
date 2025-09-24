@@ -1,8 +1,29 @@
 {{-- Unified Document Versions Modal with Sidebar --}}
 <div class="fixed inset-0 z-50 overflow-hidden bg-white dark:bg-zinc-900" wire:key="versions-{{ $documentId }}">
-    <div class="flex h-full">
+    {{-- Mobile Overlay (when sidebar is open on mobile) --}}
+    @if (!$sidebarCollapsed)
+        <div class="fixed inset-0 z-40 bg-black/50 md:hidden"
+             wire:click="toggleSidebar"></div>
+    @endif
+    
+    <div class="flex h-full relative">
         {{-- Sidebar - Version List (LTR: left, RTL: right) --}}
-        <div class="flex flex-col w-80 border-r border-zinc-200 dark:border-zinc-700 ltr:border-r rtl:border-l">
+        <div class="flex flex-col transition-all duration-300 border-r border-zinc-200 dark:border-zinc-700 ltr:border-r rtl:border-l 
+                   {{ $sidebarCollapsed ? 'w-0 md:w-80 overflow-hidden md:overflow-visible -translate-x-full md:translate-x-0' : 'w-80' }}
+                   absolute md:relative z-50 md:z-auto h-full bg-white dark:bg-zinc-900 md:bg-transparent"
+             x-data="{ 
+                 isMobile: window.innerWidth < 768,
+                 init() {
+                     const updateMobile = () => {
+                         this.isMobile = window.innerWidth < 768;
+                         if (!this.isMobile && @js($sidebarCollapsed)) {
+                             $wire.toggleSidebar();
+                         }
+                     };
+                     window.addEventListener('resize', updateMobile);
+                     updateMobile();
+                 }
+             }">
             {{-- Sidebar Header --}}
             <div class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
                 <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Document Versions</h2>
@@ -44,7 +65,7 @@
                                 {{-- Actions --}}
                                 @if ($currentEditingVersion !== $version->id)
                                     <button wire:click.stop="applyVersion('{{ $version->id }}')"
-                                        class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-sky-600 bg-transparent border border-transparent rounded hover:bg-sky-100 hover:text-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:text-sky-400 dark:hover:bg-sky-900/50 dark:hover:text-sky-300 dark:focus:ring-sky-400"
+                                        class="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-sky-600 bg-transparent border border-transparent rounded hover:bg-sky-100 hover:text-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:text-sky-400 dark:hover:bg-sky-900/50 dark:hover:text-sky-300 dark:focus:ring-sky-400"
                                         title="Apply Version">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -92,20 +113,46 @@
         {{-- Main Content - Document Preview --}}
         <div class="flex-1 flex flex-col">
             {{-- Content Header --}}
-            @if ($this->selectedVersion)
-                <div class="flex items-center justify-between flex-shrink-0 px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">
-                    <div class="flex items-center space-x-3">
+            <div class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 md:px-6 md:py-4">
+                <div class="flex items-center space-x-3">
+                    {{-- Mobile Sidebar Toggle --}}
+                    <button type="button" 
+                        class="md:hidden text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                        wire:click="toggleSidebar"
+                        title="Toggle Versions">
+                        @if ($sidebarCollapsed)
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        @else
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        @endif
+                    </button>
+                    
+                    @if ($this->selectedVersion)
                         <div class="h-2 w-2 rounded-full bg-amber-400"></div>
                         <span class="text-sm text-zinc-600 dark:text-zinc-400">Preview Mode - Read Only</span>
-                        <span class="text-sm font-mono text-zinc-500 dark:text-zinc-400">
+                        <span class="hidden sm:inline text-sm font-mono text-zinc-500 dark:text-zinc-400">
                             {{ substr($this->selectedVersion->id, -6) }}
                         </span>
-                        <span class="text-sm text-zinc-500 dark:text-zinc-400">
+                        <span class="hidden lg:inline text-sm text-zinc-500 dark:text-zinc-400">
                             {{ $this->selectedVersion->created_at->format('M j, Y \a\t g:i A') }}
                         </span>
-                    </div>
+                    @endif
                 </div>
-            @endif
+                
+                {{-- Mobile Close Button (always visible) --}}
+                <button type="button" 
+                    class="md:hidden text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    wire:click="$dispatch('closeModal')"
+                    title="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
 
             {{-- Document Content --}}
             <div class="flex-1 overflow-y-auto p-6">

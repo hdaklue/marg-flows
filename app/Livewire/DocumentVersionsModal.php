@@ -33,6 +33,8 @@ final class DocumentVersionsModal extends ModalComponent
 
     public Collection $loadedVersions;
 
+    public bool $sidebarCollapsed = false;
+
     public string $userPlan = 'ultimate';
 
     public static function closeModalOnClickAway(): bool
@@ -157,6 +159,11 @@ final class DocumentVersionsModal extends ModalComponent
                 'blockTunes' => __('document.blockTunes'),
             ],
         ];
+    }
+
+    public function toggleSidebar(): void
+    {
+        $this->sidebarCollapsed = ! $this->sidebarCollapsed;
     }
 
     public function applyVersion(string $versionId): void
