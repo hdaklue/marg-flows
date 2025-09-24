@@ -27,8 +27,9 @@
             {{-- Sidebar Header --}}
             <div class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
                 <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Document Versions</h2>
-                <button type="button" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                    wire:click="$dispatch('closeModal')">
+                {{-- Mobile-only sidebar close button (closes sidebar, not modal) --}}
+                <button type="button" class="md:hidden text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    wire:click="toggleSidebar">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -143,9 +144,9 @@
                     @endif
                 </div>
                 
-                {{-- Mobile Close Button (always visible) --}}
+                {{-- Main Close Button (always visible on all screen sizes) --}}
                 <button type="button" 
-                    class="md:hidden text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                     wire:click="$dispatch('closeModal')"
                     title="Close">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
