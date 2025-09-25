@@ -2679,16 +2679,16 @@
         },
         {
             "name": "hdaklue/polish",
-            "version": "1.0.2",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/polish.git",
-                "reference": "9995f2b7caf201de369fc731b1083e97cabe9a5f"
+                "reference": "bd0d0a64ec14cf924949ddab93cc20e5441fd4bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/polish/zipball/9995f2b7caf201de369fc731b1083e97cabe9a5f",
-                "reference": "9995f2b7caf201de369fc731b1083e97cabe9a5f",
+                "url": "https://api.github.com/repos/hdaklue/polish/zipball/bd0d0a64ec14cf924949ddab93cc20e5441fd4bf",
+                "reference": "bd0d0a64ec14cf924949ddab93cc20e5441fd4bf",
                 "shasum": ""
             },
             "require": {
@@ -2728,9 +2728,9 @@
             "description": "A Laravel package for data polishing and transformation",
             "support": {
                 "issues": "https://github.com/hdaklue/polish/issues",
-                "source": "https://github.com/hdaklue/polish/tree/1.0.2"
+                "source": "https://github.com/hdaklue/polish/tree/1.0.4"
             },
-            "time": "2025-09-24T11:09:14+00:00"
+            "time": "2025-09-25T07:26:55+00:00"
         },
         {
             "name": "hdaklue/porter",
@@ -13486,16 +13486,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.28",
+            "version": "2.1.29",
             "source": {
                 "type": "git",
-                "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "578fa296a166605d97b94091f724f1257185d278"
+                "url": "https://github.com/phpstan/phpstan-phar-composer-source.git",
+                "reference": "git"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/578fa296a166605d97b94091f724f1257185d278",
-                "reference": "578fa296a166605d97b94091f724f1257185d278",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d618573eed4a1b6b75e37b2e0b65ac65c885d88e",
+                "reference": "d618573eed4a1b6b75e37b2e0b65ac65c885d88e",
                 "shasum": ""
             },
             "require": {
@@ -13540,7 +13540,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-19T08:58:49+00:00"
+            "time": "2025-09-25T06:58:18+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",

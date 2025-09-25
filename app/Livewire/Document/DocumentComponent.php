@@ -29,7 +29,7 @@ final class DocumentComponent extends Component
     public array $content;
 
     // Todo: filamentTenant()->subscription()->getName()
-    public string $userPlan = 'ultimate'; // Default plan - testing restrictions
+    public string $userPlan = 'advanced'; // Default plan - testing restrictions
 
     #[Locked]
     public string $documentId;
@@ -291,6 +291,16 @@ final class DocumentComponent extends Component
     public function handleVersionHistoryOpened(): void
     {
         $this->hasNewVersions = false;
+    }
+
+    public function handleVerionsModalOpen()
+    {
+        $this->dispatch('openModal', 'document-versions-modal', [
+            'documentId' => $this->documentId,
+            'currentEditingVersion' => $this->currentEditingVersionComputed,
+        ]);
+
+        // $this->dispatch('openModal', { component: 'document-versions-modal', arguments: { documentId: '{{ $documentId }}', currentEditingVersion: '{{ $this->currentEditingVersionComputed }}' } });
     }
 
     public function render()

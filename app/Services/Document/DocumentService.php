@@ -9,13 +9,17 @@ use App\Contracts\Document\DocumentManagerInterface;
 use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
 use App\Models\Document;
+use App\Models\DocumentVersion;
 use App\Models\User;
+use DB;
+use Exception;
 use Hdaklue\Porter\Facades\Porter;
 use Hdaklue\Porter\RoleFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Log;
 
 final class DocumentService implements DocumentManagerInterface
 {
@@ -32,20 +36,43 @@ final class DocumentService implements DocumentManagerInterface
         Documentable $documentable,
         User $creator,
     ): Document {
-        $document = new Document([
-            'name' => $data->name,
-            'blocks' => $data->toEditorJSFormat(),
-        ]);
+        return DB::transaction(function () use ($data, $documentable, $creator) {
+            try {
+                $document = new Document([
+                    'name' => $data->name,
+                    'blocks' => $data->toEditorJSFormat(),
+                ]);
 
-        assert($documentable instanceof Model);
-        $document->documentable()->associate($documentable);
-        $document->creator()->associate($creator);
-        $document->save();
-        $document->assign($creator, RoleFactory::admin());
+                assert($documentable instanceof Model);
+                $document->documentable()->associate($documentable);
+                $document->creator()->associate($creator);
+                $document->save();
+                $document->assign($creator, RoleFactory::admin());
 
-        $this->clearCache($documentable);
+                $document->refresh();
+                $version = new DocumentVersion([
+                    'content' => $document->blocks,
+                    'created_at' => now(),
+                ]);
+                $version->document()->associate($document);
+                $version->creator()->associate($creator);
+                $version->save();
 
-        return $document;
+                $this->clearCache($documentable);
+
+                return $document;
+            } catch (Exception $e) {
+                Log::error('Failed to create document', [
+                    'error' => $e->getMessage(),
+                    'data' => $data->toArray(),
+                    'documentable_type' => $documentable::class,
+                    'documentable_id' => $documentable->getKey(),
+                    'creator_id' => $creator->getKey(),
+                ]);
+
+                throw $e;
+            }
+        });
     }
 
     /**

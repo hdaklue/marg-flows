@@ -2,36 +2,35 @@
 <div class="fixed inset-0 z-50 overflow-hidden bg-white dark:bg-zinc-900" wire:key="versions-{{ $documentId }}">
     {{-- Mobile Overlay (when sidebar is open on mobile) --}}
     @if (!$sidebarCollapsed)
-        <div class="fixed inset-0 z-40 bg-black/50 md:hidden"
-             wire:click="toggleSidebar"></div>
+        <div class="fixed inset-0 z-40 bg-black/50 md:hidden" wire:click="toggleSidebar"></div>
     @endif
-    
-    <div class="flex h-full relative">
+
+    <div class="relative flex h-full">
         {{-- Sidebar - Version List (LTR: left, RTL: right) --}}
-        <div class="flex flex-col transition-all duration-300 border-r border-zinc-200 dark:border-zinc-700 ltr:border-r rtl:border-l 
-                   {{ $sidebarCollapsed ? 'w-0 md:w-80 overflow-hidden md:overflow-visible -translate-x-full md:translate-x-0' : 'w-80' }}
-                   absolute md:relative z-50 md:z-auto h-full bg-white dark:bg-zinc-900 md:bg-transparent"
-             x-data="{ 
-                 isMobile: window.innerWidth < 768,
-                 init() {
-                     const updateMobile = () => {
-                         this.isMobile = window.innerWidth < 768;
-                         if (!this.isMobile && @js($sidebarCollapsed)) {
-                             $wire.toggleSidebar();
-                         }
-                     };
-                     window.addEventListener('resize', updateMobile);
-                     updateMobile();
-                 }
-             }">
+        <div class="{{ $sidebarCollapsed ? 'w-0 md:w-80 overflow-hidden md:overflow-visible -translate-x-full md:translate-x-0' : 'w-80' }} absolute z-50 flex h-full flex-col border-r border-zinc-200 bg-white transition-all duration-300 md:relative md:z-auto md:bg-transparent ltr:border-r rtl:border-l dark:border-zinc-700 dark:bg-zinc-900"
+            x-data="{
+                isMobile: window.innerWidth < 768,
+                init() {
+                    const updateMobile = () => {
+                        this.isMobile = window.innerWidth < 768;
+                        if (!this.isMobile && @js($sidebarCollapsed)) {
+                            $wire.toggleSidebar();
+                        }
+                    };
+                    window.addEventListener('resize', updateMobile);
+                    updateMobile();
+                }
+            }">
             {{-- Sidebar Header --}}
-            <div class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
+            <div
+                class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
                 <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Document Versions</h2>
                 {{-- Mobile-only sidebar close button (closes sidebar, not modal) --}}
-                <button type="button" class="md:hidden text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                <button type="button" class="text-zinc-400 hover:text-zinc-600 md:hidden dark:hover:text-zinc-300"
                     wire:click="toggleSidebar">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
                     </svg>
                 </button>
             </div>
@@ -40,13 +39,12 @@
             <div class="flex-1 overflow-y-auto">
                 <div class="p-2 space-y-1">
                     @foreach ($loadedVersions as $version)
-                        <div wire:key="version-{{ $version->id }}" 
-                             class="relative group rounded-lg border p-3 cursor-pointer transition-colors duration-200
-                                    {{ $selectedVersionId === $version->id 
-                                        ? 'border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/20' 
-                                        : 'border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}"
-                             wire:click="selectVersion('{{ $version->id }}')">
-                            
+                        <div wire:key="version-{{ $version->id }}"
+                            class="{{ $selectedVersionId === $version->id
+                                ? 'border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/20'
+                                : 'border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }} group relative cursor-pointer rounded-lg border p-3 transition-colors duration-200"
+                            wire:click="selectVersion('{{ $version->id }}')">
+
                             {{-- Version Info --}}
                             <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center gap-2">
@@ -57,7 +55,8 @@
 
                                     {{-- Current Version Badge --}}
                                     @if ($currentEditingVersion === $version->id)
-                                        <span class="inline-flex items-center rounded-full bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-900/50 dark:text-sky-200">
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-900/50 dark:text-sky-200">
                                             Current
                                         </span>
                                     @endif
@@ -66,25 +65,30 @@
                                 {{-- Actions --}}
                                 @if ($currentEditingVersion !== $version->id)
                                     <button wire:click.stop="applyVersion('{{ $version->id }}')"
-                                        class="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-sky-600 bg-transparent border border-transparent rounded hover:bg-sky-100 hover:text-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:text-sky-400 dark:hover:bg-sky-900/50 dark:hover:text-sky-300 dark:focus:ring-sky-400"
+                                        class="inline-flex items-center justify-center w-6 h-6 text-xs font-medium bg-transparent border border-transparent rounded text-sky-600 hover:bg-sky-100 hover:text-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:text-sky-400 dark:hover:bg-sky-900/50 dark:hover:text-sky-300 dark:focus:ring-sky-400"
                                         title="Apply Version">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
                                         </svg>
                                     </button>
                                 @endif
                             </div>
 
                             {{-- Date --}}
-                            <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1"
-                                 title="{{ $version->created_at->format('M j, Y \a\t g:i A') }}">
+                            <div class="mb-1 text-xs text-zinc-500 dark:text-zinc-400"
+                                title="{{ $version->created_at->format('M j, Y \a\t g:i A') }}">
                                 {{ toUserDiffForHuman($version->created_at->toISOString(), filamentUser()) }}
                             </div>
 
                             {{-- Creator Name --}}
                             @if ($version->creator?->name)
                                 <div class="text-xs text-zinc-400 dark:text-zinc-500">
-                                    {{ $version->creator->name }}
+                                    @if ($version->creator->name !== filamentUser()->name)
+                                        {{ $version->creator->name }}
+                                    @else
+                                        You
+                                    @endif
                                 </div>
                             @endif
                         </div>
@@ -95,8 +99,10 @@
                         <div x-intersect="$wire.loadMoreVersions()" class="flex items-center justify-center py-4">
                             @if ($isLoading)
                                 <div class="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-                                    <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                     </svg>
                                     Loading more versions...
                                 </div>
@@ -112,74 +118,74 @@
         </div>
 
         {{-- Main Content - Document Preview --}}
-        <div class="flex-1 flex flex-col">
+        <div class="flex flex-col flex-1">
             {{-- Content Header --}}
-            <div class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 md:px-6 md:py-4">
+            <div
+                class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-zinc-200 md:px-6 md:py-4 dark:border-zinc-700">
                 <div class="flex items-center space-x-3">
                     {{-- Mobile Sidebar Toggle --}}
-                    <button type="button" 
-                        class="md:hidden text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                        wire:click="toggleSidebar"
-                        title="Toggle Versions">
+                    <button type="button" class="text-zinc-400 hover:text-zinc-600 md:hidden dark:hover:text-zinc-300"
+                        wire:click="toggleSidebar" title="Toggle Versions">
                         @if ($sidebarCollapsed)
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
                         @else
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 19l-7-7 7-7"></path>
                             </svg>
                         @endif
                     </button>
-                    
+
                     @if ($this->selectedVersion)
-                        <div class="h-2 w-2 rounded-full bg-amber-400"></div>
+                        <div class="w-2 h-2 rounded-full bg-amber-400"></div>
                         <span class="text-sm text-zinc-600 dark:text-zinc-400">Preview Mode - Read Only</span>
-                        <span class="hidden sm:inline text-sm font-mono text-zinc-500 dark:text-zinc-400">
+                        <span class="hidden font-mono text-sm text-zinc-500 sm:inline dark:text-zinc-400">
                             {{ substr($this->selectedVersion->id, -6) }}
                         </span>
-                        <span class="hidden lg:inline text-sm text-zinc-500 dark:text-zinc-400">
+                        <span class="hidden text-sm text-zinc-500 lg:inline dark:text-zinc-400">
                             {{ $this->selectedVersion->created_at->format('M j, Y \a\t g:i A') }}
                         </span>
                     @endif
                 </div>
-                
+
                 {{-- Main Close Button (always visible on all screen sizes) --}}
-                <button type="button" 
-                    class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                    wire:click="$dispatch('closeModal')"
-                    title="Close">
+                <button type="button" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    wire:click="$dispatch('closeModal')" title="Close">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
                     </svg>
                 </button>
             </div>
 
             {{-- Document Content --}}
-            <div class="flex-1 overflow-y-auto p-6">
+            <div class="flex-1 p-6 overflow-y-auto">
                 @if (!$this->selectedVersion || empty($this->selectedVersion->content))
                     <div class="flex items-center justify-center h-full">
                         <div class="text-center">
-                            <svg class="w-16 h-16 mx-auto text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            <svg class="w-16 h-16 mx-auto text-zinc-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
                                 {{ $this->selectedVersion ? 'No Content Available' : 'Select a Version' }}
                             </h3>
                             <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                                {{ $this->selectedVersion 
-                                    ? 'This version appears to be empty or corrupted.' 
+                                {{ $this->selectedVersion
+                                    ? 'This version appears to be empty or corrupted.'
                                     : 'Choose a version from the sidebar to preview its content.' }}
                             </p>
                         </div>
                     </div>
                 @else
                     {{-- Document Editor (Read-Only) --}}
-                    <div wire:key="editor-{{ $selectedVersionId }}" 
-                         x-load
-                         x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('documentEditor') }}"
-                         x-data="documentEditor(@js($this->selectedVersion->content), '', @js(false), null, 0, '', @js($this->getFullToolsConfig()), @js($this->getAllowedTools()))" 
-                         class="w-full max-w-4xl mx-auto">
+                    <div wire:key="editor-{{ $selectedVersionId }}" x-load
+                        x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('documentEditor') }}"
+                        x-data="documentEditor(@js($this->selectedVersion->content), '', @js(false), null, 0, '', @js($this->getFullToolsConfig()), @js($this->getAllowedTools()))" class="w-full max-w-4xl mx-auto">
 
                         {{-- Document Editor Container --}}
                         <div id="editor-wrap" wire:ignore class="w-full">
