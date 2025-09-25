@@ -16,9 +16,9 @@ use Filament\Resources\Resource;
 
 final class FlowResource extends Resource
 {
-    protected static null|string $model = Flow::class;
+    protected static ?string $model = Flow::class;
 
-    protected static null|string $slug = 'f';
+    protected static ?string $slug = 'f';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 

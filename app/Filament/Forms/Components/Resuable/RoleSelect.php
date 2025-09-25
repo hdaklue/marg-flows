@@ -28,8 +28,8 @@ final class RoleSelect
         RoleableEntity $roleableEntity,
     ) {
         return RoleFactory::getRolesLowerThan($assignableEntity->getAssignmentOn($roleableEntity))
-            ->sortByDesc(fn($item) => (int) $item->getLevel())
-            ->mapWithKeys(fn($item) => [
+            ->sortByDesc(fn ($item) => (int) $item->getLevel())
+            ->mapWithKeys(fn ($item) => [
                 $item::getPlainKey() => $item->getLabel(),
             ]);
     }

@@ -42,8 +42,8 @@ final class FinalizeVideoUpload
     public function handle(
         string $videoPath,
         Document $document,
-        null|string $sessionId = null,
-        null|string $fileKey = null,
+        ?string $sessionId = null,
+        ?string $fileKey = null,
     ): array {
         // Set memory limit for video processing
         // ini_set('memory_limit', '512M');
@@ -68,7 +68,7 @@ final class FinalizeVideoUpload
 
                 Log::info('FinalizeVideoUpload: Retrieved metadata from session', [
                     'sessionId' => $sessionId,
-                    'hasMetadata' => !empty($videoData),
+                    'hasMetadata' => ! empty($videoData),
                     'metadata' => $videoData,
                 ]);
             }
@@ -145,8 +145,8 @@ final class FinalizeVideoUpload
     public function failed(
         string $videoPath,
         Document $document,
-        null|string $sessionId,
-        null|string $fileKey,
+        ?string $sessionId,
+        ?string $fileKey,
         Throwable $exception,
     ): void {
         Log::error('Video processing job failed permanently', [

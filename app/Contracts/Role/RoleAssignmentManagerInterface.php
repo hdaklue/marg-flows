@@ -79,7 +79,7 @@ interface RoleAssignmentManagerInterface
      */
     public function bulkClearCache(Collection $targets);
 
-    public function getRoleOn(AssignableEntity $user, RoleableEntity $target): null|Role;
+    public function getRoleOn(AssignableEntity $user, RoleableEntity $target): ?Role;
 
     public function getAssignedEntitiesByType(AssignableEntity $entity, string $type): Collection;
 

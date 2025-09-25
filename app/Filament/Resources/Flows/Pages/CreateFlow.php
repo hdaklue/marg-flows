@@ -48,7 +48,7 @@ final class CreateFlow extends CreateRecord
 
     protected static bool $canCreateAnother = false;
 
-    protected static null|string $title = '';
+    protected static ?string $title = '';
 
     public $start = 3;
 
@@ -58,7 +58,7 @@ final class CreateFlow extends CreateRecord
 
     // public ?string $maxContentWidth = 'screen-7xl';
 
-    protected null|bool $hasUnsavedDataChangesAlert = true;
+    protected ?bool $hasUnsavedDataChangesAlert = true;
 
     // public function form(Form $form): Form
     // {
@@ -265,7 +265,7 @@ final class CreateFlow extends CreateRecord
     //     ];
     // }
 
-    protected function getCreatedNotification(): null|Notification
+    protected function getCreatedNotification(): ?Notification
     {
         return null; // Disables automatic notification
     }

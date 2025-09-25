@@ -24,7 +24,7 @@ final class CreateVideoUploadSession
         string $originalFilename,
         int $fileSize,
         int $maxSingleFileSize,
-        null|int $chunksTotal = null,
+        ?int $chunksTotal = null,
     ): array {
         // Determine upload type based on file size
         $uploadType = $fileSize >= $maxSingleFileSize

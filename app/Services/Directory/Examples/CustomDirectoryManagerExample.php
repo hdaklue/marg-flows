@@ -65,7 +65,7 @@ final class CustomDirectoryManagerExample extends AbstractDirectoryManager
      *
      * Creates hierarchical directory structure based on project type and identifier.
      */
-    protected function getBaseDirectory(null|string $identifier = null): string
+    protected function getBaseDirectory(?string $identifier = null): string
     {
         if ($identifier === null) {
             return $this->projectType;

@@ -55,9 +55,9 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  string  $filename  The filename
      * @return int|null File size in bytes, null if file doesn't exist
      */
-    public function getFileSize($entity, string $type, string $filename): null|int
+    public function getFileSize($entity, string $type, string $filename): ?int
     {
-        if (!$this->fileExists($entity, $type, $filename)) {
+        if (! $this->fileExists($entity, $type, $filename)) {
             return null;
         }
 
@@ -74,7 +74,7 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  User  $user  The user
      * @return string|null Avatar URL or null if no avatar
      */
-    public function getUserAvatarUrl(User $user): null|string
+    public function getUserAvatarUrl(User $user): ?string
     {
         if (empty($user->getAvatarFileName())) {
             return null;
@@ -89,7 +89,7 @@ final class SystemFileResolver extends AbstractFileResolver
      * @param  User  $user  The user
      * @return string|null Avatar path or null if no avatar
      */
-    public function getUserAvatarPath(User $user): null|string
+    public function getUserAvatarPath(User $user): ?string
     {
         if (empty($user->getAvatarFileName())) {
             return null;
@@ -153,7 +153,7 @@ final class SystemFileResolver extends AbstractFileResolver
         $entity,
         string $type,
         string $filename,
-        null|int $expires = null,
+        ?int $expires = null,
     ): string {
         $expires ??= config('directory-system.public_access.default_expiry', 3600);
 
@@ -170,7 +170,7 @@ final class SystemFileResolver extends AbstractFileResolver
      */
     protected function performFileDelete($entity, string $type, string $filename): bool
     {
-        if (!$this->fileExists($entity, $type, $filename)) {
+        if (! $this->fileExists($entity, $type, $filename)) {
             return false;
         }
 

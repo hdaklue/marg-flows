@@ -26,7 +26,7 @@ final class VideoUploadSessionManager
         string $originalFilename,
         int $fileSize,
         VideoUploadType $uploadType = VideoUploadType::SINGLE,
-        null|int $chunksTotal = null,
+        ?int $chunksTotal = null,
     ): string {
         $sessionId = Str::ulid()->toString();
 
@@ -63,7 +63,7 @@ final class VideoUploadSessionManager
     /**
      * Get session data by session ID.
      */
-    public static function get(string $sessionId): null|array
+    public static function get(string $sessionId): ?array
     {
         return Cache::get(self::CACHE_PREFIX . $sessionId);
     }
@@ -74,7 +74,7 @@ final class VideoUploadSessionManager
     public static function update(string $sessionId, array $updates): bool
     {
         $sessionData = self::get($sessionId);
-        if (!$sessionData) {
+        if (! $sessionData) {
             return false;
         }
 
@@ -153,7 +153,7 @@ final class VideoUploadSessionManager
         mixed $data,
     ): bool {
         $sessionData = self::get($sessionId);
-        if (!$sessionData) {
+        if (! $sessionData) {
             return false;
         }
 
@@ -211,7 +211,7 @@ final class VideoUploadSessionManager
             $videoMetadata['aspect_ratio_data'] = $finalData['aspect_ratio_data'];
         }
 
-        if (!empty($videoMetadata)) {
+        if (! empty($videoMetadata)) {
             $updates['video_metadata'] = $videoMetadata;
         }
 
@@ -263,11 +263,11 @@ final class VideoUploadSessionManager
     /**
      * Get session status as enum.
      */
-    public static function getStatus(string $sessionId): null|VideoUploadStatus
+    public static function getStatus(string $sessionId): ?VideoUploadStatus
     {
         $sessionData = self::get($sessionId);
 
-        if (!$sessionData || !isset($sessionData['status'])) {
+        if (! $sessionData || ! isset($sessionData['status'])) {
             return null;
         }
 
@@ -277,7 +277,7 @@ final class VideoUploadSessionManager
     /**
      * Get session status as string.
      */
-    public static function getStatusString(string $sessionId): null|string
+    public static function getStatusString(string $sessionId): ?string
     {
         return self::getStatus($sessionId)?->value;
     }
@@ -285,11 +285,11 @@ final class VideoUploadSessionManager
     /**
      * Get session phase as enum.
      */
-    public static function getPhase(string $sessionId): null|VideoUploadPhase
+    public static function getPhase(string $sessionId): ?VideoUploadPhase
     {
         $sessionData = self::get($sessionId);
 
-        if (!$sessionData || !isset($sessionData['phase'])) {
+        if (! $sessionData || ! isset($sessionData['phase'])) {
             return null;
         }
 
@@ -299,7 +299,7 @@ final class VideoUploadSessionManager
     /**
      * Get session phase as string.
      */
-    public static function getPhaseString(string $sessionId): null|string
+    public static function getPhaseString(string $sessionId): ?string
     {
         return self::getPhase($sessionId)?->value;
     }
@@ -307,11 +307,11 @@ final class VideoUploadSessionManager
     /**
      * Get session upload type as enum.
      */
-    public static function getUploadType(string $sessionId): null|VideoUploadType
+    public static function getUploadType(string $sessionId): ?VideoUploadType
     {
         $sessionData = self::get($sessionId);
 
-        if (!$sessionData || !isset($sessionData['upload_type'])) {
+        if (! $sessionData || ! isset($sessionData['upload_type'])) {
             return null;
         }
 
@@ -321,7 +321,7 @@ final class VideoUploadSessionManager
     /**
      * Get session upload type as string.
      */
-    public static function getUploadTypeString(string $sessionId): null|string
+    public static function getUploadTypeString(string $sessionId): ?string
     {
         return self::getUploadType($sessionId)?->value;
     }
@@ -377,7 +377,7 @@ final class VideoUploadSessionManager
     public static function scheduleCleanup(string $sessionId, int $delayMinutes = 5): void
     {
         $sessionData = self::get($sessionId);
-        if (!$sessionData) {
+        if (! $sessionData) {
             return;
         }
 

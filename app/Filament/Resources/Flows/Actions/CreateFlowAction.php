@@ -17,7 +17,7 @@ use Livewire\Component;
 
 final class CreateFlowAction
 {
-    public static function make(null|Component $component)
+    public static function make(?Component $component)
     {
         return Action::make('create')
             ->visible(filamentUser()->can('create', [

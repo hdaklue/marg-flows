@@ -24,9 +24,9 @@ final class VideoEditor
 {
     private VideoOperationPipeline $pipeline;
 
-    private null|VideoFormatContract $convertFormat = null;
+    private ?VideoFormatContract $convertFormat = null;
 
-    private null|BitrateEnum $convertBitrate = null;
+    private ?BitrateEnum $convertBitrate = null;
 
     public function __construct(
         private readonly Video $video,
@@ -139,7 +139,7 @@ final class VideoEditor
         float $opacity = 1.0,
     ): self {
         throw_if(
-            !file_exists($path),
+            ! file_exists($path),
             new InvalidArgumentException("Watermark file not found: {$path}"),
         );
         throw_if(
@@ -158,7 +158,7 @@ final class VideoEditor
     public function addAudio(string $audioPath): self
     {
         throw_if(
-            !file_exists($audioPath),
+            ! file_exists($audioPath),
             new InvalidArgumentException("Audio file not found: {$audioPath}"),
         );
 
@@ -183,7 +183,7 @@ final class VideoEditor
      * Convert video to specific format with optional bitrate.
      * If no bitrate provided, uses original video bitrate.
      */
-    public function convertTo(VideoFormatContract $format, null|BitrateEnum $bitrate = null): self
+    public function convertTo(VideoFormatContract $format, ?BitrateEnum $bitrate = null): self
     {
         $this->convertFormat = $format;
         $this->convertBitrate = $bitrate;
@@ -195,7 +195,7 @@ final class VideoEditor
      * Save video with auto-generated filename using naming service.
      * Always uses CopyFormat unless convertTo() was called.
      */
-    public function save(null|VideoNamingService $namingService = null): string
+    public function save(?VideoNamingService $namingService = null): string
     {
         // Always use naming service - create default if not provided
         $namingService = $namingService ?? VideoNamingService::timestamped();
@@ -272,7 +272,7 @@ final class VideoEditor
     {
         $directory = dirname($outputPath);
         throw_if(
-            !is_dir($directory),
+            ! is_dir($directory),
             new InvalidArgumentException("Output directory does not exist: {$directory}"),
         );
 

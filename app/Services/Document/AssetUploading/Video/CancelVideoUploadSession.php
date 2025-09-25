@@ -24,7 +24,7 @@ final class CancelVideoUploadSession
         ]);
 
         // Check if session exists
-        if (!VideoUploadSessionManager::exists($sessionId)) {
+        if (! VideoUploadSessionManager::exists($sessionId)) {
             Log::warning('Attempted to cancel non-existent session', [
                 'sessionId' => $sessionId,
             ]);
@@ -59,7 +59,7 @@ final class CancelVideoUploadSession
         try {
             $cancelled = $this->handle($sessionId);
 
-            if (!$cancelled) {
+            if (! $cancelled) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Session not found or already completed',

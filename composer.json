@@ -78,11 +78,10 @@
         ],
         "ds:check": "@php vendor/bin/laradumps check --dir=app,routes,config",
         "lint": [
-            "mago format"
+            "vendor/bin/pint"
         ],
         "analyze": [
-            "mago lint",
-            "mago analyze"
+            "vendor/bin/pint --test"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

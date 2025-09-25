@@ -62,7 +62,7 @@ final class ServeVideoStream
     public static function preloadVideoMetadata(string $path, string $disk): void
     {
         try {
-            $instance = new self();
+            $instance = new self;
             $instance->getVideoMetadata($path, $disk);
         } catch (Exception $e) {
             // Graceful failure for preloading
@@ -75,7 +75,7 @@ final class ServeVideoStream
     public function handle(
         Document $document,
         string $fileName,
-        null|Request $request = null,
+        ?Request $request = null,
     ): Response|StreamedResponse {
         $directoryManager = DocumentDirectoryManager::make($document);
         $actualPath = $directoryManager->videos()->getPath($fileName);
@@ -123,11 +123,10 @@ final class ServeVideoStream
         // Check if we're running under nginx or Apache with X-Sendfile
         $serverSoftware = request()->server('SERVER_SOFTWARE', '');
 
-        return (
+        return
             str_contains(strtolower($serverSoftware), 'nginx')
             || str_contains(strtolower($serverSoftware), 'apache')
-            || request()->server('HTTP_X_SENDFILE_TYPE') !== null
-        );
+            || request()->server('HTTP_X_SENDFILE_TYPE') !== null;
     }
 
     /**
@@ -136,7 +135,7 @@ final class ServeVideoStream
     private function handleXSendfileResponse(
         string $path,
         string $disk,
-        null|Request $request,
+        ?Request $request,
     ): Response {
         $fullPath = Storage::disk($disk)->path($path);
 
@@ -190,7 +189,7 @@ final class ServeVideoStream
         // Cache validation result to avoid repeated Storage API calls
         $validationCacheKey = 'video_validation:' . md5($path);
         $isValid = Cache::remember($validationCacheKey, 300, function () use ($path, $disk) { // 5 min cache
-            if (!Storage::disk($disk)->exists($path)) {
+            if (! Storage::disk($disk)->exists($path)) {
                 return false;
             }
 
@@ -199,7 +198,7 @@ final class ServeVideoStream
             return $this->isValidVideoMimeType($mimeType);
         });
 
-        if (!$isValid) {
+        if (! $isValid) {
             abort(404, 'Video file not found or invalid type');
         }
     }
@@ -207,9 +206,9 @@ final class ServeVideoStream
     /**
      * Check if mime type is a valid video format.
      */
-    private function isValidVideoMimeType(null|string $mimeType): bool
+    private function isValidVideoMimeType(?string $mimeType): bool
     {
-        if (!$mimeType) {
+        if (! $mimeType) {
             return false;
         }
 
@@ -285,7 +284,7 @@ final class ServeVideoStream
         $fileSize = $metadata['size'];
 
         // Parse range header (format: bytes=start-end)
-        if (!preg_match('/bytes=(\d*)-(\d*)/', $rangeHeader, $matches)) {
+        if (! preg_match('/bytes=(\d*)-(\d*)/', $rangeHeader, $matches)) {
             abort(416, 'Invalid range request');
         }
 
@@ -368,7 +367,7 @@ final class ServeVideoStream
     private function streamFileDirectly(string $fullPath, int $chunkSize): void
     {
         $handle = fopen($fullPath, 'rb');
-        if (!$handle) {
+        if (! $handle) {
             return;
         }
 
@@ -378,7 +377,7 @@ final class ServeVideoStream
                 ob_end_clean();
             }
 
-            while (!feof($handle)) {
+            while (! feof($handle)) {
                 $chunk = fread($handle, $chunkSize);
                 if ($chunk === false || $chunk === '') {
                     break;
@@ -408,7 +407,7 @@ final class ServeVideoStream
     private function streamFromStorage(string $path, string $disk, int $chunkSize): void
     {
         $stream = Storage::disk($disk)->readStream($path);
-        if (!$stream) {
+        if (! $stream) {
             return;
         }
 
@@ -418,7 +417,7 @@ final class ServeVideoStream
                 ob_end_clean();
             }
 
-            while (!feof($stream)) {
+            while (! feof($stream)) {
                 $chunk = fread($stream, $chunkSize);
                 if ($chunk === false || $chunk === '') {
                     break;
@@ -452,7 +451,7 @@ final class ServeVideoStream
         int $chunkSize,
     ): void {
         $handle = fopen($fullPath, 'rb');
-        if (!$handle) {
+        if (! $handle) {
             return;
         }
 
@@ -470,7 +469,7 @@ final class ServeVideoStream
             $bytesToRead = $end - $start + 1;
             $bytesRead = 0;
 
-            while ($bytesRead < $bytesToRead && !feof($handle)) {
+            while ($bytesRead < $bytesToRead && ! feof($handle)) {
                 $readSize = min($chunkSize, $bytesToRead - $bytesRead);
                 $chunk = fread($handle, $readSize);
 
@@ -508,7 +507,7 @@ final class ServeVideoStream
         int $chunkSize,
     ): void {
         $stream = Storage::disk($disk)->readStream($path);
-        if (!$stream) {
+        if (! $stream) {
             return;
         }
 
@@ -528,7 +527,7 @@ final class ServeVideoStream
             $bytesToRead = $end - $start + 1;
             $bytesRead = 0;
 
-            while ($bytesRead < $bytesToRead && !feof($stream)) {
+            while ($bytesRead < $bytesToRead && ! feof($stream)) {
                 $readSize = min($chunkSize, $bytesToRead - $bytesRead);
                 $chunk = fread($stream, $readSize);
 
@@ -558,7 +557,7 @@ final class ServeVideoStream
     /**
      * Get cached video content for small files.
      */
-    private function getCachedVideoContent(string $path, string $disk, array $metadata): null|string
+    private function getCachedVideoContent(string $path, string $disk, array $metadata): ?string
     {
         $cacheKey = 'video_content:' . md5($path . $metadata['last_modified']);
 
@@ -628,7 +627,7 @@ final class ServeVideoStream
         ];
 
         // Add content length for non-partial content
-        if (!$isPartialContent) {
+        if (! $isPartialContent) {
             $headers['Content-Length'] = (string) $metadata['size'];
         }
 

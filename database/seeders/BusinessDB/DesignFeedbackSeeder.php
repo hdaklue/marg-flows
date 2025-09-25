@@ -19,7 +19,7 @@ final class DesignFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (!$testUser) {
+        if (! $testUser) {
             $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
@@ -182,9 +182,9 @@ final class DesignFeedbackSeeder extends Seeder
         return fake()->randomElement($typeComments);
     }
 
-    private function generateAnnotationData(string $annotationType, int $x, int $y): null|array
+    private function generateAnnotationData(string $annotationType, int $x, int $y): ?array
     {
-        if (!fake()->boolean(70)) { // 70% chance of having annotation data
+        if (! fake()->boolean(70)) { // 70% chance of having annotation data
             return null;
         }
 
@@ -263,11 +263,11 @@ final class DesignFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateAreaBounds(string $annotationType): null|array
+    private function generateAreaBounds(string $annotationType): ?array
     {
         $areaTypes = ['rectangle', 'circle', 'polygon', 'area'];
 
-        if (!in_array($annotationType, $areaTypes, true) || !fake()->boolean(80)) {
+        if (! in_array($annotationType, $areaTypes, true) || ! fake()->boolean(80)) {
             return null;
         }
 

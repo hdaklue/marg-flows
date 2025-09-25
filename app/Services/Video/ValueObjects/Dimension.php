@@ -70,7 +70,7 @@ final class Dimension implements Arrayable, Jsonable
             new InvalidArgumentException('Target dimensions must be positive'),
         );
 
-        if (!$maintainAspectRatio) {
+        if (! $maintainAspectRatio) {
             return new self($targetWidth, $targetHeight);
         }
 

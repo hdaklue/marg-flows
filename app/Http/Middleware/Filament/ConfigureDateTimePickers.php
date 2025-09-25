@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Middleware\Filament;
 
 use Closure;
+
+use function config;
+
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-
-use function config;
 
 final class ConfigureDateTimePickers
 {
@@ -30,9 +31,9 @@ final class ConfigureDateTimePickers
 
             return $component;
         });
-        DatePicker::configureUsing(fn(DatePicker $component) => $component->timezone($timezone));
+        DatePicker::configureUsing(fn (DatePicker $component) => $component->timezone($timezone));
 
-        TextColumn::configureUsing(fn(TextColumn $component) => $component->timezone($timezone));
+        TextColumn::configureUsing(fn (TextColumn $component) => $component->timezone($timezone));
 
         return $next($request);
     }

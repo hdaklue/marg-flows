@@ -27,13 +27,10 @@ enum DeliverableFormat: string implements HasDescription, HasLabel
     public function getDescription(): string
     {
         return match ($this) {
-            self::DESIGN
-                => 'Visual design deliverables including graphics, layouts, and UI elements',
-            self::VIDEO
-                => 'Video content including promotional videos, tutorials, and presentations',
+            self::DESIGN => 'Visual design deliverables including graphics, layouts, and UI elements',
+            self::VIDEO => 'Video content including promotional videos, tutorials, and presentations',
             self::AUDIO => 'Audio content including podcasts, voiceovers, and sound effects',
-            self::DOCUMENT
-                => 'Written content including reports, specifications, and documentation',
+            self::DOCUMENT => 'Written content including reports, specifications, and documentation',
         };
     }
 

@@ -7,7 +7,7 @@
       "Bash(php artisan tinker:*)",
       "mcp__filesystem__read_text_file",
       "mcp__filesystem__directory_tree",
-      "context7__read_file",
+      "Context7__read_file",
       "mcp__laravel-boost__tinker",
       "Bash(find:*)",
       "mcp__laravel-boost__application-info",

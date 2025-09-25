@@ -52,19 +52,6 @@ final class ViewDocument extends ViewRecord
         return DocumentManager::getDocument($key);
     }
 
-    // #[Computed]
-    // public function relatedDocuments(): Collection
-    // {
-    //     $documentable = $this->record->documentable;
-
-    //     return DocumentManager::getDocumentsForUser($documentable, filamentUser())->reject(
-    //         fn($doc) => (
-    //             $doc->getKey() === $this->record->getKey()
-    //             && $doc->getMorphClass() === $this->record->getMorphClass()
-    //         ),
-    //     );
-    // }
-
     public function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -87,12 +74,6 @@ final class ViewDocument extends ViewRecord
                         'name' => $state,
                     ]);
                 }),
-            // EditorJs::make('blocks')
-            //     ->editable($this->canEdit)
-            //     ->live()
-            //     ->afterStateUpdated(fn ($state) => $this->record->update([
-            //         'blocks' => $state,
-            //     ])),
         ])->statePath('data');
     }
 

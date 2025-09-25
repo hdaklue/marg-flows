@@ -170,9 +170,9 @@ final class VideoFeedback extends Model
         return $this->isRegionComment() && $this->start_time !== null && $this->end_time !== null;
     }
 
-    public function getDuration(): null|float
+    public function getDuration(): ?float
     {
-        if (!$this->hasTimeRange()) {
+        if (! $this->hasTimeRange()) {
             return null;
         }
 
@@ -186,11 +186,10 @@ final class VideoFeedback extends Model
         }
 
         if ($this->isRegionComment() && $this->hasTimeRange()) {
-            return (
+            return
                 $this->formatTime($this->start_time)
                 . ' - '
-                . $this->formatTime($this->end_time)
-            );
+                . $this->formatTime($this->end_time);
         }
 
         return 'No time specified';
@@ -198,7 +197,7 @@ final class VideoFeedback extends Model
 
     public function getCoordinatesDisplay(): string
     {
-        if (!$this->hasCoordinates()) {
+        if (! $this->hasCoordinates()) {
             return 'No coordinates';
         }
 

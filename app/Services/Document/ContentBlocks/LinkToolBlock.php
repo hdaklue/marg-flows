@@ -128,7 +128,7 @@ final class LinkToolBlock extends Block
     {
         $link = $this->get('link');
 
-        return !empty($link) && is_string($link) && trim($link) !== '' && $this->isValidUrl($link);
+        return ! empty($link) && is_string($link) && trim($link) !== '' && $this->isValidUrl($link);
     }
 
     /**
@@ -160,31 +160,31 @@ final class LinkToolBlock extends Block
     /**
      * Get link title from metadata.
      */
-    public function getTitle(): null|string
+    public function getTitle(): ?string
     {
         $meta = $this->getMeta();
 
-        return !empty($meta['title']) ? (string) $meta['title'] : null;
+        return ! empty($meta['title']) ? (string) $meta['title'] : null;
     }
 
     /**
      * Get link description from metadata.
      */
-    public function getDescription(): null|string
+    public function getDescription(): ?string
     {
         $meta = $this->getMeta();
 
-        return !empty($meta['description']) ? (string) $meta['description'] : null;
+        return ! empty($meta['description']) ? (string) $meta['description'] : null;
     }
 
     /**
      * Get link image from metadata.
      */
-    public function getImage(): null|string
+    public function getImage(): ?string
     {
         $meta = $this->getMeta();
 
-        return !empty($meta['image']) ? (string) $meta['image'] : null;
+        return ! empty($meta['image']) ? (string) $meta['image'] : null;
     }
 
     /**
@@ -210,10 +210,9 @@ final class LinkToolBlock extends Block
     {
         $meta = $this->getMeta();
 
-        return (
-            !empty($meta)
-            && (!empty($meta['title']) || !empty($meta['description']) || !empty($meta['image']))
-        );
+        return
+            ! empty($meta)
+            && (! empty($meta['title']) || ! empty($meta['description']) || ! empty($meta['image']));
     }
 
     /**
@@ -230,7 +229,7 @@ final class LinkToolBlock extends Block
     public function isValidUrl(string $url): bool
     {
         // Basic URL validation
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
             return false;
         }
 
@@ -239,7 +238,7 @@ final class LinkToolBlock extends Block
         // Check scheme
         if (
             empty($parsed['scheme'])
-            || !in_array(strtolower($parsed['scheme']), self::getAllowedSchemes())
+            || ! in_array(strtolower($parsed['scheme']), self::getAllowedSchemes())
         ) {
             return false;
         }
@@ -255,7 +254,7 @@ final class LinkToolBlock extends Block
         // Check if URL ends with blocked file extension
         $path = $parsed['path'] ?? '';
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        if (!empty($extension) && in_array($extension, self::getBlockedExtensions())) {
+        if (! empty($extension) && in_array($extension, self::getBlockedExtensions())) {
             return false;
         }
 
@@ -269,19 +268,19 @@ final class LinkToolBlock extends Block
     {
         $errors = [];
 
-        if (!$this->hasLink()) {
+        if (! $this->hasLink()) {
             return $errors;
         }
 
         $link = $this->getLink();
 
         // Validate URL format
-        if (!$this->isValidUrl($link)) {
+        if (! $this->isValidUrl($link)) {
             $errors[] = 'Invalid URL format or blocked domain/file type';
         }
 
         // Validate against custom domain whitelist
-        if (!empty($constraints['allowed_domains'])) {
+        if (! empty($constraints['allowed_domains'])) {
             $hostname = $this->getHostname();
             $isAllowed = false;
 
@@ -292,14 +291,14 @@ final class LinkToolBlock extends Block
                 }
             }
 
-            if (!$isAllowed) {
+            if (! $isAllowed) {
                 $allowedList = implode(', ', $constraints['allowed_domains']);
                 $errors[] = "Domain ({$hostname}) is not in the allowed domains list: {$allowedList}";
             }
         }
 
         // Validate against custom domain blacklist
-        if (!empty($constraints['blocked_domains'])) {
+        if (! empty($constraints['blocked_domains'])) {
             $hostname = $this->getHostname();
 
             foreach ($constraints['blocked_domains'] as $blockedDomain) {
@@ -311,8 +310,8 @@ final class LinkToolBlock extends Block
         }
 
         // Validate metadata if preview is enabled
-        if ($this->isPreviewEnabled() && !empty($constraints['require_metadata'])) {
-            if (!$this->hasMetadata()) {
+        if ($this->isPreviewEnabled() && ! empty($constraints['require_metadata'])) {
+            if (! $this->hasMetadata()) {
                 $errors[] = 'Link preview is enabled but metadata is missing or invalid';
             }
         }
@@ -325,7 +324,7 @@ final class LinkToolBlock extends Block
      */
     public function isEmpty(): bool
     {
-        return !$this->hasLink();
+        return ! $this->hasLink();
     }
 
     /**
@@ -333,7 +332,7 @@ final class LinkToolBlock extends Block
      */
     public function getDisplayText(): string
     {
-        if (!$this->hasLink()) {
+        if (! $this->hasLink()) {
             return '';
         }
 

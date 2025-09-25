@@ -42,7 +42,7 @@ final class LogProgressStrategy implements ProgressStrategyContract
         ]);
     }
 
-    public function getProgress(string $sessionId): null|ProgressData
+    public function getProgress(string $sessionId): ?ProgressData
     {
         // Log strategy doesn't store progress data for retrieval
         return null;

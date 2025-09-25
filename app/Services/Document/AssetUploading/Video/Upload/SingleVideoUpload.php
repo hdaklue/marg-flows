@@ -29,7 +29,7 @@ final class SingleVideoUpload
             $documentModel = Document::findOrFail($document);
             $sessionId = $request->input('session_id');
 
-            if (!$sessionId || !VideoUploadSessionManager::exists($sessionId)) {
+            if (! $sessionId || ! VideoUploadSessionManager::exists($sessionId)) {
                 return VideoUploadResponse::error('Invalid or expired upload session.', 400);
             }
 

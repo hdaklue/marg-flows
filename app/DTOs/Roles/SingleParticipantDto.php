@@ -42,7 +42,7 @@ final class SingleParticipantDto extends ValidatedDTO
         return $this->role->getDescription();
     }
 
-    public function participantAvatar(): null|string
+    public function participantAvatar(): ?string
     {
         return $this->avatarUrl;
     }

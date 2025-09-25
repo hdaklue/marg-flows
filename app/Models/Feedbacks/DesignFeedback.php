@@ -250,25 +250,24 @@ final class DesignFeedback extends Model
 
     public function hasAreaBounds(): bool
     {
-        return (
-            !empty($this->area_bounds)
-            && isset($this->area_bounds['width'], $this->area_bounds['height'])
-        );
+        return
+            ! empty($this->area_bounds)
+            && isset($this->area_bounds['width'], $this->area_bounds['height']);
     }
 
-    public function getAreaWidth(): null|int
+    public function getAreaWidth(): ?int
     {
         return $this->area_bounds['width'] ?? null;
     }
 
-    public function getAreaHeight(): null|int
+    public function getAreaHeight(): ?int
     {
         return $this->area_bounds['height'] ?? null;
     }
 
-    public function getAreaSize(): null|int
+    public function getAreaSize(): ?int
     {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             return null;
         }
 
@@ -287,40 +286,38 @@ final class DesignFeedback extends Model
 
     public function containsPoint(int $x, int $y): bool
     {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             return false;
         }
 
         $bounds = $this->area_bounds;
 
-        return (
+        return
             $x >= $this->x_coordinate
             && $x
             <= ($this->x_coordinate + $bounds['width'])
             && $y >= $this->y_coordinate
             && $y
-            <= ($this->y_coordinate + $bounds['height'])
-        );
+            <= ($this->y_coordinate + $bounds['height']);
     }
 
     public function overlapsWithArea(int $x, int $y, int $width, int $height): bool
     {
-        if (!$this->hasAreaBounds()) {
+        if (! $this->hasAreaBounds()) {
             // For point annotations, check if the point is within the area
-            return (
+            return
                 $this->x_coordinate >= $x
                 && $this->x_coordinate
                 <= ($x + $width)
                 && $this->y_coordinate >= $y
                 && $this->y_coordinate
-                <= ($y + $height)
-            );
+                <= ($y + $height);
         }
 
         $bounds = $this->area_bounds;
 
         // Check if rectangles overlap
-        return !(
+        return ! (
             $this->x_coordinate
             > ($x + $width)
             || $x
@@ -351,17 +348,16 @@ final class DesignFeedback extends Model
 
     public function hasCustomColor(): bool
     {
-        return (
+        return
             $this->color !== null
-            && !in_array($this->color, [
+            && ! in_array($this->color, [
                 'red',
                 'blue',
                 'green',
                 'yellow',
                 'orange',
                 'purple',
-            ])
-        );
+            ]);
     }
 
     public function getZoomLevelDisplay(): string

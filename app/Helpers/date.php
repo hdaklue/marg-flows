@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\User;
 use Carbon\Carbon;
 
-if (!function_exists('toUserDate')) {
+if (! function_exists('toUserDate')) {
     /**
      * Convert UTC date to user's timezone and format as short date.
      *
@@ -32,7 +32,7 @@ if (!function_exists('toUserDate')) {
     }
 }
 
-if (!function_exists('toUserDateString')) {
+if (! function_exists('toUserDateString')) {
     /**
      * Convert UTC date to user's timezone and format as readable date string.
      *
@@ -59,7 +59,7 @@ if (!function_exists('toUserDateString')) {
     }
 }
 
-if (!function_exists('toUserTime')) {
+if (! function_exists('toUserTime')) {
     /**
      * Convert UTC date to user's timezone and format as time only.
      *
@@ -87,7 +87,7 @@ if (!function_exists('toUserTime')) {
     }
 }
 
-if (!function_exists('toUserDateTime')) {
+if (! function_exists('toUserDateTime')) {
     /**
      * Convert UTC date to user's timezone and format as date and time.
      *
@@ -114,7 +114,7 @@ if (!function_exists('toUserDateTime')) {
     }
 }
 
-if (!function_exists('fromUserDate')) {
+if (! function_exists('fromUserDate')) {
     /**
      * Convert date from user's timezone to UTC and format as date string.
      *
@@ -143,7 +143,7 @@ if (!function_exists('fromUserDate')) {
     }
 }
 
-if (!function_exists('fromUserTime')) {
+if (! function_exists('fromUserTime')) {
     /**
      * Convert time from user's timezone to UTC and format as time string.
      *
@@ -172,7 +172,7 @@ if (!function_exists('fromUserTime')) {
     }
 }
 
-if (!function_exists('fromUserDateTime')) {
+if (! function_exists('fromUserDateTime')) {
     /**
      * Convert datetime from user's timezone to UTC and format as datetime string.
      *
@@ -201,7 +201,7 @@ if (!function_exists('fromUserDateTime')) {
     }
 }
 
-if (!function_exists('toUserDiffForHuman')) {
+if (! function_exists('toUserDiffForHuman')) {
     /**
      * Convert UTC date to user's timezone and format as human-readable difference.
      * Always uses "ago/in" format relative to now, even when custom comparison date is provided.
@@ -221,7 +221,7 @@ if (!function_exists('toUserDiffForHuman')) {
      * // Input: "2025-01-14 12:00:00" (UTC), current time "2025-01-15 12:30:00" (UTC)
      * // Output: "1 day ago"
      */
-    function toUserDiffForHuman(string|Carbon $date, User $user, null|Carbon $other = null): string
+    function toUserDiffForHuman(string|Carbon $date, User $user, ?Carbon $other = null): string
     {
         if ($date instanceof Carbon) {
             $date = $date->toDateTimeString();
@@ -244,7 +244,7 @@ if (!function_exists('toUserDiffForHuman')) {
     }
 }
 
-if (!function_exists('toUserIsoString')) {
+if (! function_exists('toUserIsoString')) {
     /**
      * Convert UTC date to user's timezone and format as ISO string.
      *
@@ -272,7 +272,7 @@ if (!function_exists('toUserIsoString')) {
     }
 }
 
-if (!function_exists('fromUserIsoString')) {
+if (! function_exists('fromUserIsoString')) {
     /**
      * Convert ISO string from user's timezone back to UTC datetime string.
      *

@@ -64,6 +64,13 @@ return [
             'subtitle' => 'يمكنك فقط رؤية هذه الملاحظات',
             'placeholder' => 'اكتب ملاحظتك .. واضغط Enter',
         ],
+
+        'avatar_stack' => [
+            'you' => 'أنت',
+            'more_users_single' => ':count مستخدم آخر',
+            'more_users_plural' => ':count مستخدمين آخرين',
+            'manage_members' => 'إدارة الأعضاء',
+        ],
     ],
 
     'panels' => [

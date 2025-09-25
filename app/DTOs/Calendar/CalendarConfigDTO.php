@@ -31,9 +31,9 @@ final class CalendarConfigDTO extends ValidatedDTO
 
     public string $dateField;
 
-    public null|string $endDateField;
+    public ?string $endDateField;
 
-    public null|string $colorField;
+    public ?string $colorField;
 
     public string $defaultView;
 
@@ -47,7 +47,7 @@ final class CalendarConfigDTO extends ValidatedDTO
 
     public bool $enableEventClick;
 
-    public null|string $timezone;
+    public ?string $timezone;
 
     public array $restrictions;
 
@@ -93,18 +93,18 @@ final class CalendarConfigDTO extends ValidatedDTO
     protected function casts(): array
     {
         return [
-            'titleField' => new StringCast(),
-            'dateField' => new StringCast(),
-            'endDateField' => new StringCast(),
-            'colorField' => new StringCast(),
-            'defaultView' => new StringCast(),
-            'availableViews' => new ArrayCast(),
-            'showWeekends' => new BooleanCast(),
-            'showNavigation' => new BooleanCast(),
-            'showToday' => new BooleanCast(),
-            'enableEventClick' => new BooleanCast(),
-            'timezone' => new StringCast(),
-            'restrictions' => new ArrayCast(),
+            'titleField' => new StringCast,
+            'dateField' => new StringCast,
+            'endDateField' => new StringCast,
+            'colorField' => new StringCast,
+            'defaultView' => new StringCast,
+            'availableViews' => new ArrayCast,
+            'showWeekends' => new BooleanCast,
+            'showNavigation' => new BooleanCast,
+            'showToday' => new BooleanCast,
+            'enableEventClick' => new BooleanCast,
+            'timezone' => new StringCast,
+            'restrictions' => new ArrayCast,
         ];
     }
 }

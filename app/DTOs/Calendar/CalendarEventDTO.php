@@ -31,13 +31,13 @@ final class CalendarEventDTO extends ValidatedDTO
 
     public Carbon $startDate;
 
-    public null|Carbon $endDate;
+    public ?Carbon $endDate;
 
-    public null|string $color;
+    public ?string $color;
 
     public array $meta;
 
-    public null|string $url;
+    public ?string $url;
 
     public bool $allDay;
 
@@ -46,7 +46,7 @@ final class CalendarEventDTO extends ValidatedDTO
      */
     public function isMultiDay(): bool
     {
-        if (!$this->endDate) {
+        if (! $this->endDate) {
             return false;
         }
 
@@ -58,7 +58,7 @@ final class CalendarEventDTO extends ValidatedDTO
      */
     public function getDurationInDays(): int
     {
-        if (!$this->endDate) {
+        if (! $this->endDate) {
             return 1;
         }
 
@@ -72,7 +72,7 @@ final class CalendarEventDTO extends ValidatedDTO
     {
         $checkDate = $date->startOfDay();
 
-        if (!$this->endDate) {
+        if (! $this->endDate) {
             return $this->startDate->startOfDay()->eq($checkDate);
         }
 
@@ -84,7 +84,7 @@ final class CalendarEventDTO extends ValidatedDTO
      */
     public function getColorClass(): string
     {
-        if (!$this->color) {
+        if (! $this->color) {
             return 'bg-sky-500 text-white';
         }
 
@@ -107,7 +107,7 @@ final class CalendarEventDTO extends ValidatedDTO
      */
     public function getInlineStyle(): string
     {
-        if (!$this->color || !str_starts_with($this->color, '#')) {
+        if (! $this->color || ! str_starts_with($this->color, '#')) {
             return '';
         }
 
@@ -142,14 +142,14 @@ final class CalendarEventDTO extends ValidatedDTO
     protected function casts(): array
     {
         return [
-            'id' => new StringCast(),
-            'title' => new StringCast(),
-            'startDate' => new CarbonCast(),
-            'endDate' => new CarbonCast(),
-            'color' => new StringCast(),
-            'meta' => new ArrayCast(),
-            'url' => new StringCast(),
-            'allDay' => new BooleanCast(),
+            'id' => new StringCast,
+            'title' => new StringCast,
+            'startDate' => new CarbonCast,
+            'endDate' => new CarbonCast,
+            'color' => new StringCast,
+            'meta' => new ArrayCast,
+            'url' => new StringCast,
+            'allDay' => new BooleanCast,
         ];
     }
 }

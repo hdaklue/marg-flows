@@ -72,7 +72,7 @@ final class ObjectiveBlock extends Block
     {
         $name = $this->get('name');
 
-        return !empty($name) && is_string($name) && trim($name) !== '';
+        return ! empty($name) && is_string($name) && trim($name) !== '';
     }
 
     /**
@@ -106,7 +106,7 @@ final class ObjectiveBlock extends Block
      */
     public function isEmpty(): bool
     {
-        return !$this->hasObjective();
+        return ! $this->hasObjective();
     }
 
     /**
@@ -114,7 +114,7 @@ final class ObjectiveBlock extends Block
      */
     public function getDisplayText(): string
     {
-        if (!$this->hasObjective()) {
+        if (! $this->hasObjective()) {
             return '';
         }
 
@@ -133,7 +133,7 @@ final class ObjectiveBlock extends Block
      */
     public function getDisplayTextArabic(): string
     {
-        if (!$this->hasObjective()) {
+        if (! $this->hasObjective()) {
             return '';
         }
 
@@ -153,12 +153,9 @@ final class ObjectiveBlock extends Block
     public function getOperatorIcon(): string
     {
         return match ($this->getOperator()) {
-            'increase'
-                => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14l5-5 5 5"/></svg>',
-            'decrease'
-                => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10l5 5 5-5"/></svg>',
-            'equal'
-                => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 9h14M5 15h14"/></svg>',
+            'increase' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14l5-5 5 5"/></svg>',
+            'decrease' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10l5 5 5-5"/></svg>',
+            'equal' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 9h14M5 15h14"/></svg>',
             default => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14l5-5 5 5"/></svg>',
         };
     }
@@ -205,7 +202,7 @@ final class ObjectiveBlock extends Block
      */
     public function render(): string
     {
-        if (!$this->hasObjective()) {
+        if (! $this->hasObjective()) {
             return '';
         }
 
@@ -236,7 +233,7 @@ final class ObjectiveBlock extends Block
      */
     public function renderRtl(): string
     {
-        if (!$this->hasObjective()) {
+        if (! $this->hasObjective()) {
             return '';
         }
 

@@ -13,7 +13,7 @@ final class VideoNamingService
 {
     private NamingPattern $pattern;
 
-    public function __construct(null|NamingPattern $pattern = null)
+    public function __construct(?NamingPattern $pattern = null)
     {
         $this->pattern = $pattern ?? NamingPattern::default();
     }
@@ -33,20 +33,17 @@ final class VideoNamingService
         $basename = pathinfo($video->getFilename(), PATHINFO_FILENAME);
 
         return match ($this->pattern) {
-            NamingPattern::Quality
-                => "{$basename}_{$conversion->getQuality()}.{$conversion->getFormat()}",
+            NamingPattern::Quality => "{$basename}_{$conversion->getQuality()}.{$conversion->getFormat()}",
             NamingPattern::Dimension => "{$basename}_{$conversion
                 ->getDimension()
                 ?->getWidth()}x{$conversion
                 ->getDimension()
                 ?->getHeight()}.{$conversion->getFormat()}",
-            NamingPattern::Conversion
-                => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
+            NamingPattern::Conversion => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
             NamingPattern::Resolution => "{$basename}_{$this->getResolutionName(
                 $conversion,
             )}.{$conversion->getFormat()}",
-            NamingPattern::ResolutionLabel
-                => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
+            NamingPattern::ResolutionLabel => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
             default => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
         };
     }
@@ -60,13 +57,12 @@ final class VideoNamingService
             NamingPattern::Timestamped => "{$basename}_"
                 . Carbon::now()->format('YmdHis')
                 . ".{$ext}",
-            NamingPattern::Dimension
-                => "{$basename}_{$video->getWidth()}x{$video->getHeight()}.{$ext}",
+            NamingPattern::Dimension => "{$basename}_{$video->getWidth()}x{$video->getHeight()}.{$ext}",
             default => "{$basename}_edited.{$ext}",
         };
 
         $directory = $video->getDirectory();
-        if (!empty($directory) && $directory !== '.') {
+        if (! empty($directory) && $directory !== '.') {
             return $directory . DIRECTORY_SEPARATOR . $filename;
         }
 

@@ -12,10 +12,10 @@ final class ScaleToAspectRatio implements ScaleStrategyContract
 {
     public function __construct(
         private readonly AspectRatio $aspectRatio,
-        private readonly null|int $maxWidth = null,
+        private readonly ?int $maxWidth = null,
     ) {}
 
-    public static function make(AspectRatio $aspectRatio, null|int $maxWidth = null): self
+    public static function make(AspectRatio $aspectRatio, ?int $maxWidth = null): self
     {
         return new self($aspectRatio, $maxWidth);
     }

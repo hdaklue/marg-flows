@@ -89,8 +89,7 @@ final class VideoUploadResponse
         return response()->json([
             'success' => true,
             'status' => 'uploading',
-            'phase' =>
-                VideoUploadType::tryFrom($sessionData['upload_type'])?->getInitialPhase()->value
+            'phase' => VideoUploadType::tryFrom($sessionData['upload_type'])?->getInitialPhase()->value
                 ?? 'single_upload',
             'data' => [
                 'session_id' => $sessionData['session_id'],

@@ -23,7 +23,7 @@ trait Archiveable
 
     public function isArchived()
     {
-        return !empty($this->archived_at);
+        return ! empty($this->archived_at);
     }
 
     #[Scope]

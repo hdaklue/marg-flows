@@ -25,7 +25,7 @@ final class DeliverableSeeder extends Seeder
 
     private function createDeliverablesForFlow(Flow $flow): void
     {
-        $users = User::whereHas('tenantMemberships', fn($query) => $query->where(
+        $users = User::whereHas('tenantMemberships', fn ($query) => $query->where(
             'tenant_id',
             $flow->tenant_id,
         ))->take(5)->get();
@@ -218,16 +218,11 @@ final class DeliverableSeeder extends Seeder
     private function getDesignDescription(string $type): string
     {
         return match ($type) {
-            'video_cover'
-                => 'Create an engaging video cover that captures attention and represents the brand effectively with proper 16:9 aspect ratio.',
-            'square'
-                => 'Design a balanced square format perfect for social media posts with clear messaging and brand consistency.',
-            'story'
-                => 'Develop a vertical story format optimized for mobile viewing with engaging visual hierarchy.',
-            'Portrait'
-                => 'Create a portrait-oriented design ideal for mobile applications and vertical content display.',
-            'land_scape'
-                => 'Design a wide landscape format perfect for presentations and web headers with cinematic appeal.',
+            'video_cover' => 'Create an engaging video cover that captures attention and represents the brand effectively with proper 16:9 aspect ratio.',
+            'square' => 'Design a balanced square format perfect for social media posts with clear messaging and brand consistency.',
+            'story' => 'Develop a vertical story format optimized for mobile viewing with engaging visual hierarchy.',
+            'Portrait' => 'Create a portrait-oriented design ideal for mobile applications and vertical content display.',
+            'land_scape' => 'Design a wide landscape format perfect for presentations and web headers with cinematic appeal.',
             default => 'Custom design deliverable with specific requirements.',
         };
     }
@@ -252,10 +247,8 @@ final class DeliverableSeeder extends Seeder
     private function getVideoDescription(string $type): string
     {
         return match ($type) {
-            'promotional'
-                => 'Create a compelling promotional video that showcases the brand and drives engagement within the specified duration.',
-            'tutorial'
-                => 'Develop an educational tutorial video with clear instructions, proper pacing, and engaging visual elements.',
+            'promotional' => 'Create a compelling promotional video that showcases the brand and drives engagement within the specified duration.',
+            'tutorial' => 'Develop an educational tutorial video with clear instructions, proper pacing, and engaging visual elements.',
             default => 'Professional video content with high production value.',
         };
     }
@@ -280,10 +273,8 @@ final class DeliverableSeeder extends Seeder
     private function getAudioDescription(string $type): string
     {
         return match ($type) {
-            'podcast_episode'
-                => 'Record a professional podcast episode with high audio quality, proper intro/outro, and engaging content.',
-            'voiceover'
-                => 'Create professional voiceover recording with clear diction, proper pacing, and studio-quality audio.',
+            'podcast_episode' => 'Record a professional podcast episode with high audio quality, proper intro/outro, and engaging content.',
+            'voiceover' => 'Create professional voiceover recording with clear diction, proper pacing, and studio-quality audio.',
             default => 'High-quality audio content with professional production standards.',
         };
     }

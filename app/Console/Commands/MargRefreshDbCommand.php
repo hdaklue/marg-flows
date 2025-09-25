@@ -32,7 +32,7 @@ final class MargRefreshDbCommand extends Command
     public function handle(): int
     {
         // SAFETY CHECK: Only allow in local environment
-        if (!app()->environment('local', 'testing')) {
+        if (! app()->environment('local', 'testing')) {
             $this->error(
                 '❌ This command is only allowed in local/testing environments for safety!',
             );

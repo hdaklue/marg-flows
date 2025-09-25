@@ -78,13 +78,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin Eloquent
  */
-final class Document extends Model implements
-    BelongsToTenantContract,
-    PorterRoleableContract,
-    Recentable,
-    RoleableEntity,
-    SentInNotification,
-    Sidenoteable
+final class Document extends Model implements BelongsToTenantContract, PorterRoleableContract, Recentable, RoleableEntity, SentInNotification, Sidenoteable
 {
     /** @use HasFactory<\Database\Factories\DocumentFactory> */
     use Archiveable, BelongsToTenant, HasFactory, HasSideNotes, HasUlids, LivesInOriginalDB, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait;
@@ -99,7 +93,7 @@ final class Document extends Model implements
     //     'latestVersion',
     // ];
 
-    public function getPorterTenantKey(): null|string
+    public function getPorterTenantKey(): ?string
     {
         return $this->getTenantId();
     }
@@ -124,7 +118,7 @@ final class Document extends Model implements
         return $this->belongsTo(User::class, 'creator_id');
     }
 
-    public function getRecentLabel(): null|string
+    public function getRecentLabel(): ?string
     {
         return $this->getAttribute('name');
     }
@@ -142,7 +136,7 @@ final class Document extends Model implements
 
     public function isArchived(): bool
     {
-        return !empty($this->getAttribute('archived_at'));
+        return ! empty($this->getAttribute('archived_at'));
     }
 
     public function casts(): array
@@ -186,7 +180,7 @@ final class Document extends Model implements
      */
     protected function blockCollection(): Attribute
     {
-        return Attribute::make(get: fn() => DocumentBlocksCollection::fromEditorJS($this->getAttribute(
+        return Attribute::make(get: fn () => DocumentBlocksCollection::fromEditorJS($this->getAttribute(
             'blocks',
         )));
     }

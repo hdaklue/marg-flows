@@ -47,12 +47,12 @@ final class ChunkAssembler
     ): void {
         // Create a temporary file to write generator output
         $tempFile = tempnam(sys_get_temp_dir(), 'chunk_assembly_');
-        if (!$tempFile) {
+        if (! $tempFile) {
             throw new RuntimeException('Failed to create temporary file for chunk assembly');
         }
 
         $writeHandle = fopen($tempFile, 'wb');
-        if (!$writeHandle) {
+        if (! $writeHandle) {
             unlink($tempFile);
             throw new RuntimeException('Failed to open temporary file for writing');
         }
@@ -67,7 +67,7 @@ final class ChunkAssembler
 
             // Upload the assembled file using streaming to avoid memory exhaustion
             $readHandle = fopen($tempFile, 'rb');
-            if (!$readHandle) {
+            if (! $readHandle) {
                 throw new RuntimeException('Failed to open temporary file for reading');
             }
 
@@ -94,18 +94,18 @@ final class ChunkAssembler
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDirectory}/chunk_{$i}";
 
-            if (!Storage::disk($disk)->exists($chunkPath)) {
+            if (! Storage::disk($disk)->exists($chunkPath)) {
                 throw new RuntimeException("Chunk {$i} not found at {$chunkPath}");
             }
 
             // Yield chunk content in small pieces for memory efficiency
             $readStream = Storage::disk($disk)->readStream($chunkPath);
-            if (!$readStream) {
+            if (! $readStream) {
                 throw new RuntimeException("Failed to read chunk {$i} at {$chunkPath}");
             }
 
             try {
-                while (!feof($readStream)) {
+                while (! feof($readStream)) {
                     $buffer = fread($readStream, 8192); // 8KB buffer
                     if ($buffer !== false && $buffer !== '') {
                         yield $buffer;
@@ -126,7 +126,7 @@ final class ChunkAssembler
 
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDirectory}/chunk_{$i}";
-            if (!Storage::disk($disk)->exists($chunkPath)) {
+            if (! Storage::disk($disk)->exists($chunkPath)) {
                 $missingChunks[] = $i;
             }
         }

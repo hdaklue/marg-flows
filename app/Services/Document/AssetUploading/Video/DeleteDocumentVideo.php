@@ -19,7 +19,7 @@ final class DeleteDocumentVideo
     /**
      * Handle document video deletion with generalized parameters.
      */
-    public function handle(string $path, null|string $disk = null): bool
+    public function handle(string $path, ?string $disk = null): bool
     {
         try {
             // Convert URL path to storage path if needed
@@ -87,7 +87,7 @@ final class DeleteDocumentVideo
         $path = str_replace('/storage/', '', $path);
 
         // Ensure it starts with documents/videos/
-        if (!str_starts_with($path, 'documents/videos/')) {
+        if (! str_starts_with($path, 'documents/videos/')) {
             // If path doesn't contain documents/videos, assume it's just the filename
             if (str_contains($path, '/')) {
                 $filename = basename($path);

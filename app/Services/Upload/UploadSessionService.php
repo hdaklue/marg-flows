@@ -17,11 +17,11 @@ use Symfony\Component\HttpFoundation\File\File;
 // Todo: should start assembly queue
 final class UploadSessionService
 {
-    private null|string $tenantId = null;
+    private ?string $tenantId = null;
 
-    private null|string $chunkDirectory = null;
+    private ?string $chunkDirectory = null;
 
-    private null|string $storeDirectory = null;
+    private ?string $storeDirectory = null;
 
     public function __construct(
         private readonly ProgressStrategyContract $progressStrategy,
@@ -64,7 +64,7 @@ final class UploadSessionService
     public function initSession(
         string $fileName,
         int $totalChunks,
-        null|int $totalSize = null,
+        ?int $totalSize = null,
     ): string {
         $this->validateConfiguration();
 
@@ -140,7 +140,7 @@ final class UploadSessionService
 
             // Process chunks sequentially
             foreach ($chunkData->chunks as $chunk) {
-                if (!$chunk->uploaded) {
+                if (! $chunk->uploaded) {
                     $this->processChunk($chunkData->sessionId, $chunk, $chunkDirectory);
 
                     // Update progress
@@ -185,7 +185,7 @@ final class UploadSessionService
 
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDirectory}/chunk_{$i}";
-            if (!Storage::disk($disk)->exists($chunkPath)) {
+            if (! Storage::disk($disk)->exists($chunkPath)) {
                 return false;
             }
         }
@@ -224,7 +224,7 @@ final class UploadSessionService
      */
     public function cleanupSession(string $sessionId): void
     {
-        if (!$this->tenantId) {
+        if (! $this->tenantId) {
             return;
         }
 
@@ -241,7 +241,7 @@ final class UploadSessionService
     /**
      * Get progress information for a session.
      */
-    public function getProgress(string $sessionId): null|ProgressData
+    public function getProgress(string $sessionId): ?ProgressData
     {
         return $this->progressStrategy->getProgress($sessionId);
     }
@@ -329,7 +329,7 @@ final class UploadSessionService
 
     private function cleanupChunks(string $chunkDirectory): void
     {
-        if (!$this->tenantId) {
+        if (! $this->tenantId) {
             return;
         }
 

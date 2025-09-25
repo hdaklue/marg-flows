@@ -24,16 +24,15 @@ use Illuminate\Support\Facades\Storage;
  * - Better error handling
  * - Consistent naming and structure
  */
-final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implements
-    DocumentStorageStrategyContract
+final class ImprovedDocumentStorageStrategy extends BaseStorageStrategy implements DocumentStorageStrategyContract
 {
-    private null|string $documentId = null;
+    private ?string $documentId = null;
 
-    private null|UploadedFile $file = null;
+    private ?UploadedFile $file = null;
 
-    private null|string $subdirectory = null;
+    private ?string $subdirectory = null;
 
-    private null|string $storedPath = null;
+    private ?string $storedPath = null;
 
     public function __construct(
         private readonly string $tenantBaseDirectory,

@@ -41,7 +41,7 @@ final class ChunkedFileUpload extends Component
 
     public string $tempDir = 'uploads/temp';
 
-    public null|string $importUrlEndpoint = null;
+    public ?string $importUrlEndpoint = null;
 
     // Component state
     public array $uploadedFiles = [];
@@ -53,25 +53,25 @@ final class ChunkedFileUpload extends Component
 
     public bool $uploading = false;
 
-    public null|string $error = null;
+    public ?string $error = null;
 
-    public null|string $success = null;
+    public ?string $success = null;
 
     // Props for external configuration
     public function mount(
-        null|bool $modalMode = false,
-        null|bool $allowUrlImport = false,
-        null|bool $multiple = true,
-        null|array $acceptedFileTypes = null,
-        null|int $maxFiles = null,
-        null|int $maxFileSize = null,
-        null|int $minFileSize = null,
-        null|int $maxParallelUploads = null,
-        null|string $statePath = null,
-        null|string $disk = null,
-        null|string $finalDir = null,
-        null|string $tempDir = null,
-        null|string $importUrlEndpoint = null,
+        ?bool $modalMode = false,
+        ?bool $allowUrlImport = false,
+        ?bool $multiple = true,
+        ?array $acceptedFileTypes = null,
+        ?int $maxFiles = null,
+        ?int $maxFileSize = null,
+        ?int $minFileSize = null,
+        ?int $maxParallelUploads = null,
+        ?string $statePath = null,
+        ?string $disk = null,
+        ?string $finalDir = null,
+        ?string $tempDir = null,
+        ?string $importUrlEndpoint = null,
     ): void {
         $this->modalMode = $modalMode ?? false;
         $this->allowUrlImport = $allowUrlImport ?? false;
@@ -130,7 +130,7 @@ final class ChunkedFileUpload extends Component
     {
         $fileToRemove = collect($this->uploadedFiles)->firstWhere('key', $fileKey);
 
-        if (!$fileToRemove) {
+        if (! $fileToRemove) {
             $this->showError('File not found');
 
             return;
@@ -138,7 +138,7 @@ final class ChunkedFileUpload extends Component
 
         $this->uploadedFiles = array_values(array_filter(
             $this->uploadedFiles,
-            fn($file) => $file['key'] !== $fileKey,
+            fn ($file) => $file['key'] !== $fileKey,
         ));
 
         $this->showSuccess("File '{$fileToRemove['name']}' removed successfully");
@@ -215,7 +215,7 @@ final class ChunkedFileUpload extends Component
 
     public function updateUploadProgress(string $fileId, array $updates): void
     {
-        if (!isset($this->activeUploads[$fileId])) {
+        if (! isset($this->activeUploads[$fileId])) {
             return;
         }
 
@@ -282,7 +282,7 @@ final class ChunkedFileUpload extends Component
     // URL Import functionality
     public function importFromUrl(string $url): void
     {
-        if (empty($url) || !$this->importUrlEndpoint) {
+        if (empty($url) || ! $this->importUrlEndpoint) {
             $this->showError('Invalid URL or import endpoint not configured');
 
             return;

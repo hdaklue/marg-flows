@@ -19,7 +19,7 @@ final class AudioFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (!$testUser) {
+        if (! $testUser) {
             $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
@@ -136,9 +136,9 @@ final class AudioFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateWaveformData(float $duration): null|array
+    private function generateWaveformData(float $duration): ?array
     {
-        if (!fake()->boolean(70)) { // 70% chance of having waveform data
+        if (! fake()->boolean(70)) { // 70% chance of having waveform data
             return null;
         }
 
@@ -167,9 +167,9 @@ final class AudioFeedbackSeeder extends Seeder
         ];
     }
 
-    private function generatePeakAmplitude(): null|float
+    private function generatePeakAmplitude(): ?float
     {
-        if (!fake()->boolean(80)) { // 80% chance of having peak amplitude data
+        if (! fake()->boolean(80)) { // 80% chance of having peak amplitude data
             return null;
         }
 
@@ -185,9 +185,9 @@ final class AudioFeedbackSeeder extends Seeder
         };
     }
 
-    private function generateFrequencyData(): null|array
+    private function generateFrequencyData(): ?array
     {
-        if (!fake()->boolean(50)) { // 50% chance of having frequency data
+        if (! fake()->boolean(50)) { // 50% chance of having frequency data
             return null;
         }
 

@@ -89,7 +89,8 @@ Route::prefix('chunks/{tenantId}/files')
         ) {
             $resolver = app(ChunkFileResolver::class);
 
-            $chunkEntity = new class($tenantId) {
+            $chunkEntity = new class($tenantId)
+            {
                 public function __construct(
                     private string $tenantId,
                 ) {}
@@ -123,7 +124,8 @@ Route::prefix('chunks/{tenantId}/files')
         ) {
             $resolver = app(ChunkFileResolver::class);
 
-            $chunkEntity = new class($tenantId) {
+            $chunkEntity = new class($tenantId)
+            {
                 public function __construct(
                     private string $tenantId,
                 ) {}
@@ -161,7 +163,8 @@ Route::prefix('chunks/{tenantId}/files')
         ) {
             $resolver = app(ChunkFileResolver::class);
 
-            $chunkEntity = new class($tenantId) {
+            $chunkEntity = new class($tenantId)
+            {
                 public function __construct(
                     private string $tenantId,
                 ) {}
@@ -198,7 +201,8 @@ Route::get('chunks/{tenantId}/serve/{type}/{filename}', function (
 ) {
     $resolver = app(ChunkFileResolver::class);
 
-    $chunkEntity = new class($tenantId) implements \HasFiles {
+    $chunkEntity = new class($tenantId) implements \HasFiles
+    {
         public function __construct(
             private string $tenantId,
         ) {}
@@ -219,7 +223,7 @@ Route::get('chunks/{tenantId}/serve/{type}/{filename}', function (
         }
     };
 
-    if (!$resolver->fileExists($chunkEntity, $type, $filename)) {
+    if (! $resolver->fileExists($chunkEntity, $type, $filename)) {
         abort(404, 'File not found');
     }
 

@@ -15,13 +15,14 @@ final class FeedbackMetadata implements Castable
 
     public static function castUsing(array $arguments): CastsAttributes
     {
-        return new class implements CastsAttributes {
+        return new class implements CastsAttributes
+        {
             public function get(
                 $model,
                 string $key,
                 $value,
                 array $attributes,
-            ): null|FeedbackMetadata {
+            ): ?FeedbackMetadata {
                 if ($value === null) {
                     return null;
                 }
@@ -61,9 +62,9 @@ final class FeedbackMetadata implements Castable
         return $this->data['searchable'] ?? [];
     }
 
-    public function getTimeRange(): null|array
+    public function getTimeRange(): ?array
     {
-        if (!$this->isMediaTimestamp()) {
+        if (! $this->isMediaTimestamp()) {
             return null;
         }
 

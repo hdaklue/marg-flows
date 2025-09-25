@@ -34,7 +34,7 @@ final class DeliverableSpecResolver
     public static function getSupportedFormats(): array
     {
         return collect(array_keys(config(self::CONFIG_PATH . '.' . self::SUPPORTED_FORMATS, [])))
-            ->mapWithKeys(fn($item) => [$item => str($item)->title()->toString()])
+            ->mapWithKeys(fn ($item) => [$item => str($item)->title()->toString()])
             ->toArray();
     }
 

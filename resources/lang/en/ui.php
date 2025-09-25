@@ -65,6 +65,13 @@ return [
             'subtitle' => 'Only you can see this notes',
             'placeholder' => 'write your note .. and hit Enter',
         ],
+
+        'avatar_stack' => [
+            'you' => 'You',
+            'more_users_single' => ':count more user',
+            'more_users_plural' => ':count more users',
+            'manage_members' => 'Manage members',
+        ],
     ],
 
     'panels' => [

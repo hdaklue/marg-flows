@@ -31,7 +31,7 @@ interface ProgressStrategyContract
     /**
      * Get current progress for a session.
      */
-    public function getProgress(string $sessionId): null|ProgressData;
+    public function getProgress(string $sessionId): ?ProgressData;
 
     /**
      * Clean up session data.

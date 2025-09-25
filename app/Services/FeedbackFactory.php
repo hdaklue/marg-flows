@@ -22,7 +22,8 @@ final class FeedbackFactory
     /**
      * Create feedback using the most appropriate specialized model.
      */
-    public static function create(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback {
+    public static function create(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback
+    {
         $feedbackType = self::determineFeedbackType($attributes);
 
         return match ($feedbackType) {
@@ -123,7 +124,7 @@ final class FeedbackFactory
         ]);
 
         // Set default annotation type if not provided
-        if (!isset($attributes['annotation_type'])) {
+        if (! isset($attributes['annotation_type'])) {
             $attributes['annotation_type'] = 'point';
         }
 
@@ -221,7 +222,8 @@ final class FeedbackFactory
     /**
      * Create feedback with automatic type detection and validation.
      */
-    public static function createSmart(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback {
+    public static function createSmart(array $attributes): VideoFeedback|AudioFeedback|DocumentFeedback|DesignFeedback|GeneralFeedback
+    {
         // Automatically clean and validate attributes
         $cleanAttributes = self::cleanAttributes($attributes);
 
@@ -253,7 +255,7 @@ final class FeedbackFactory
         $detectionRules = config('feedback.factory.type_detection_rules', []);
 
         foreach ($detectionRules as $type => $rules) {
-            if (!in_array($type, $availableTypes)) {
+            if (! in_array($type, $availableTypes)) {
                 continue;
             }
 
@@ -292,7 +294,7 @@ final class FeedbackFactory
         // Check required_all fields
         if (isset($rules['required_all'])) {
             foreach ($rules['required_all'] as $field) {
-                if (!isset($attributes[$field]) || $attributes[$field] === null) {
+                if (! isset($attributes[$field]) || $attributes[$field] === null) {
                     return false;
                 }
             }
@@ -307,7 +309,7 @@ final class FeedbackFactory
                     break;
                 }
             }
-            if (!$hasAny) {
+            if (! $hasAny) {
                 return false;
             }
         }
@@ -338,7 +340,7 @@ final class FeedbackFactory
                 }
             }
             // Require at least one indicator match if indicators are specified
-            if ($indicatorScore === 0 && !empty($rules['indicators'])) {
+            if ($indicatorScore === 0 && ! empty($rules['indicators'])) {
                 return false;
             }
         }
@@ -347,7 +349,7 @@ final class FeedbackFactory
         if (isset($rules['patterns'])) {
             foreach ($rules['patterns'] as $field => $pattern) {
                 if (isset($attributes[$field])) {
-                    if (!preg_match($pattern, (string) $attributes[$field])) {
+                    if (! preg_match($pattern, (string) $attributes[$field])) {
                         return false;
                     }
                 }
@@ -365,7 +367,7 @@ final class FeedbackFactory
         $missingFields = [];
 
         foreach ($requiredFields as $field) {
-            if (!isset($attributes[$field]) || $attributes[$field] === null) {
+            if (! isset($attributes[$field]) || $attributes[$field] === null) {
                 $missingFields[] = $field;
             }
         }
@@ -383,7 +385,7 @@ final class FeedbackFactory
     private static function cleanAttributes(array $attributes): array
     {
         // Remove null values
-        $attributes = array_filter($attributes, fn($value) => $value !== null);
+        $attributes = array_filter($attributes, fn ($value) => $value !== null);
 
         // Normalize coordinate values
         if (isset($attributes['x_coordinate'])) {

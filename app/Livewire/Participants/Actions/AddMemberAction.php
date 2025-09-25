@@ -23,7 +23,7 @@ final class AddMemberAction
         array $assignableEntities,
     ): Action {
         return Action::make('add_member')
-            ->visible(fn() => filamentUser()->can('manage', $roleableEntity))
+            ->visible(fn () => filamentUser()->can('manage', $roleableEntity))
             ->form([
                 Select::make('member')
                     ->native(false)

@@ -57,11 +57,9 @@ final class GenerateUserAvatar
         if ($contentType) {
             $extension = match (true) {
                 str_contains($contentType, 'image/svg+xml')
-                    || str_contains($contentType, 'image/svg')
-                    => 'svg',
+                    || str_contains($contentType, 'image/svg') => 'svg',
                 str_contains($contentType, 'image/png') => 'png',
-                str_contains($contentType, 'image/jpeg') || str_contains($contentType, 'image/jpg')
-                    => 'jpg',
+                str_contains($contentType, 'image/jpeg') || str_contains($contentType, 'image/jpg') => 'jpg',
                 str_contains($contentType, 'image/gif') => 'gif',
                 str_contains($contentType, 'image/webp') => 'webp',
                 default => null,
@@ -102,7 +100,7 @@ final class GenerateUserAvatar
 
         // Basic SVG validation - should start with XML declaration or <svg tag
         throw_if(
-            !str_starts_with($content, '<?xml') && !str_starts_with($content, '<svg'),
+            ! str_starts_with($content, '<?xml') && ! str_starts_with($content, '<svg'),
             new Exception('Invalid SVG content: does not start with XML declaration or <svg> tag'),
         );
 
@@ -112,7 +110,7 @@ final class GenerateUserAvatar
 
         if ($doc === false) {
             $errors = libxml_get_errors();
-            $errorMessages = array_map(fn($error) => trim($error->message), $errors);
+            $errorMessages = array_map(fn ($error) => trim($error->message), $errors);
             libxml_clear_errors();
 
             throw new Exception('Invalid SVG XML structure: ' . implode(', ', $errorMessages));

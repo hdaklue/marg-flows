@@ -21,7 +21,7 @@ final class FeedbackConfigService
     /**
      * Get concrete model class for a specific type.
      */
-    public static function getModelClass(string $type): null|string
+    public static function getModelClass(string $type): ?string
     {
         return config("feedback.concrete_models.{$type}");
     }
@@ -193,7 +193,7 @@ final class FeedbackConfigService
         // Check required fields
         $requiredFields = self::getValidationRules($type);
         foreach ($requiredFields as $field) {
-            if (!isset($attributes[$field]) || $attributes[$field] === null) {
+            if (! isset($attributes[$field]) || $attributes[$field] === null) {
                 $errors[] = "Required field '{$field}' is missing";
             }
         }
@@ -311,7 +311,7 @@ final class FeedbackConfigService
         // Validate annotation type
         if (isset($attributes['annotation_type'])) {
             $supportedTypes = self::getTypeSetting('design', 'supported_annotation_types', []);
-            if (!in_array($attributes['annotation_type'], $supportedTypes)) {
+            if (! in_array($attributes['annotation_type'], $supportedTypes)) {
                 $errors[] = 'Unsupported annotation type';
             }
         }
@@ -367,14 +367,14 @@ final class FeedbackConfigService
 
         if (isset($attributes['block_id'])) {
             $pattern = self::getTypeSetting('document', 'block_id_pattern');
-            if ($pattern && !preg_match($pattern, $attributes['block_id'])) {
+            if ($pattern && ! preg_match($pattern, $attributes['block_id'])) {
                 $errors[] = 'Invalid block ID format';
             }
         }
 
         if (isset($attributes['element_type'])) {
             $supportedTypes = self::getTypeSetting('document', 'supported_block_types', []);
-            if (!in_array($attributes['element_type'], $supportedTypes)) {
+            if (! in_array($attributes['element_type'], $supportedTypes)) {
                 $errors[] = 'Unsupported block element type';
             }
         }

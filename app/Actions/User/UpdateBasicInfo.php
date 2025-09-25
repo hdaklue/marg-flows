@@ -36,7 +36,7 @@ final class UpdateBasicInfo
         $changes = array_diff_assoc($newData, $currentData);
 
         // Only update if there are actual changes
-        if (!empty($changes)) {
+        if (! empty($changes)) {
             $user->profile->update($changes);
         }
 
@@ -48,7 +48,7 @@ final class UpdateBasicInfo
         return $user->getAvatarFileName() !== $newFileName;
     }
 
-    private function handleAvatarChange(User $user, null|string $newAvatarPath): string
+    private function handleAvatarChange(User $user, ?string $newAvatarPath): string
     {
         $extension = str($newAvatarPath)->afterLast('/')->afterLast('.')->toString();
         $newFileName = AvatarService::generateFileName($user);

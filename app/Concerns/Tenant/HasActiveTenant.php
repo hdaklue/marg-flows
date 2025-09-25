@@ -9,12 +9,12 @@ use Exception;
 
 trait HasActiveTenant
 {
-    public function activeTenant(): null|Tenant
+    public function activeTenant(): ?Tenant
     {
         return Tenant::where('id', $this->active_tenant_id)->first();
     }
 
-    public function switchActiveTenant(Tenant $tenant): null|self
+    public function switchActiveTenant(Tenant $tenant): ?self
     {
         if ($this->isAssignedTo($tenant)) {
             $this->active_tenant_id = $tenant->getKey();
@@ -30,7 +30,7 @@ trait HasActiveTenant
         $this->update(['active_tenant_id' => null]);
     }
 
-    public function getActiveTenantId(): null|string
+    public function getActiveTenantId(): ?string
     {
         return $this->active_tenant_id;
     }

@@ -32,10 +32,10 @@ final class ListFlows extends ListRecords
         return [
             'active' => Tab::make()
                 ->label(__('flow.tabs.active'))
-                ->modifyQueryUsing(fn(Builder $query) => $query->running()),
+                ->modifyQueryUsing(fn (Builder $query) => $query->running()),
             'blocked' => Tab::make()
                 ->label(__('flow.tabs.blocked'))
-                ->modifyQueryUsing(fn(Builder $query) => $query->where(
+                ->modifyQueryUsing(fn (Builder $query) => $query->where(
                     'stage',
                     FlowStage::BLOCKED->value,
                 )),

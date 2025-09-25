@@ -18,7 +18,7 @@ final class StageDto extends ValidatedDTO
 
     public string $slug;
 
-    public null|string $id;
+    public ?string $id;
 
     protected function rules(): array
     {

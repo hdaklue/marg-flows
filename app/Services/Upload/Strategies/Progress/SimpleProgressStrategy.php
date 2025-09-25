@@ -64,7 +64,7 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->validateSessionId($sessionId);
 
         $currentProgress = $this->getProgress($sessionId);
-        if (!$currentProgress) {
+        if (! $currentProgress) {
             // Create error progress if session doesn't exist
             $errorProgress = new ProgressData(
                 completedChunks: 0,
@@ -90,17 +90,17 @@ final class SimpleProgressStrategy implements ProgressStrategyContract
         $this->storeProgress($sessionId, $errorProgress);
     }
 
-    public function getProgress(string $sessionId): null|ProgressData
+    public function getProgress(string $sessionId): ?ProgressData
     {
         $this->validateSessionId($sessionId);
 
         $data = Redis::get($this->getRedisKey($sessionId));
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
         $decoded = json_decode($data, true);
-        if (!$decoded) {
+        if (! $decoded) {
             return null;
         }
 

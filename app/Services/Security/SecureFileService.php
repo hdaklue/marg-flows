@@ -71,7 +71,7 @@ final class SecureFileService
         string $fileName,
         string $tenantId,
         string $fileType,
-        null|int $expiresIn = null,
+        ?int $expiresIn = null,
     ): string {
         $strategy = $this->getStorageStrategy($tenantId, $fileType);
         $expiration = $expiresIn ?? $this->getDefaultExpirationTime($fileType);
@@ -133,7 +133,7 @@ final class SecureFileService
      * @param  int|null  $expiresIn  Optional custom expiration time
      * @return array Array of temporary URLs indexed by filename
      */
-    public function getBatchTemporaryUrls(array $files, null|int $expiresIn = null): array
+    public function getBatchTemporaryUrls(array $files, ?int $expiresIn = null): array
     {
         $urls = [];
 
@@ -175,8 +175,6 @@ final class SecureFileService
      */
     private function getDefaultExpirationTime(string $fileType): int
     {
-        return (
-            self::DEFAULT_EXPIRATION_TIMES[$fileType] ?? self::DEFAULT_EXPIRATION_TIMES['documents']
-        );
+        return self::DEFAULT_EXPIRATION_TIMES[$fileType] ?? self::DEFAULT_EXPIRATION_TIMES['documents'];
     }
 }

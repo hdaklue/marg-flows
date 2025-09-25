@@ -9,7 +9,7 @@ trait LivesInOriginalDB
     /**
      * Get the database connection for the model.
      */
-    public function getConnectionName(): null|string
+    public function getConnectionName(): ?string
     {
         return config('database.default');
     }
@@ -19,7 +19,7 @@ trait LivesInOriginalDB
      */
     public function getTable(): string
     {
-        if (!isset($this->table)) {
+        if (! isset($this->table)) {
             return str_replace(
                 '\\',
                 '',

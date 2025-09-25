@@ -167,7 +167,7 @@ final class AspectRatio implements JsonSerializable
     private function __construct(
         private readonly string $label,
         private readonly float $ratio,
-        private readonly null|string $resolutionName = null,
+        private readonly ?string $resolutionName = null,
         private readonly int $width = 0,
         private readonly int $height = 0,
     ) {
@@ -186,7 +186,7 @@ final class AspectRatio implements JsonSerializable
         float $width,
         float $height,
         float $tolerance = self::DEFAULT_TOLERANCE,
-    ): null|self {
+    ): ?self {
         throw_if(
             $width <= 0 || $height <= 0,
             new InvalidArgumentException('Width and height must be positive non-zero values.'),
@@ -227,9 +227,9 @@ final class AspectRatio implements JsonSerializable
     /**
      * Create an AspectRatio instance from a ratio string (e.g., "16:9").
      */
-    public static function fromString(string $ratioString): null|self
+    public static function fromString(string $ratioString): ?self
     {
-        if (!isset(self::$map[$ratioString])) {
+        if (! isset(self::$map[$ratioString])) {
             return null;
         }
 
@@ -242,7 +242,7 @@ final class AspectRatio implements JsonSerializable
     public static function fromRatio(
         float $ratio,
         float $tolerance = self::DEFAULT_TOLERANCE,
-    ): null|self {
+    ): ?self {
         throw_if($ratio <= 0, new InvalidArgumentException('Ratio must be positive.'));
 
         foreach (self::$map as $label => $targetRatio) {
@@ -264,7 +264,7 @@ final class AspectRatio implements JsonSerializable
         return $this->ratio;
     }
 
-    public function getResolutionName(): null|string
+    public function getResolutionName(): ?string
     {
         return $this->resolutionName;
     }

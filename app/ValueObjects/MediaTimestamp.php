@@ -19,7 +19,7 @@ abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, 
     public static function fromLivewire($value): self
     {
         throw_if(
-            !is_array($value) || !isset($value['type']),
+            ! is_array($value) || ! isset($value['type']),
             new InvalidArgumentException('Invalid Livewire value for MediaTimestamp'),
         );
 
@@ -41,7 +41,7 @@ abstract class MediaTimestamp implements Arrayable, Jsonable, JsonSerializable, 
 
     abstract public function getDuration(): CommentTime;
 
-    abstract public function getFrameRate(): null|float;
+    abstract public function getFrameRate(): ?float;
 
     /**
      * JSON serialization.

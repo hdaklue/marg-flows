@@ -69,30 +69,28 @@ final class AudioRegion extends MediaTimestamp
         return $this->endTime->subtract($this->startTime);
     }
 
-    public function getFrameRate(): null|float
+    public function getFrameRate(): ?float
     {
         return null; // Audio regions don't have frame rates
     }
 
     public function contains(CommentTime $time): bool
     {
-        return (
+        return
             $time->asSeconds() >= $this->startTime->asSeconds()
-            && $time->asSeconds() <= $this->endTime->asSeconds()
-        );
+            && $time->asSeconds() <= $this->endTime->asSeconds();
     }
 
     public function overlaps(AudioRegion $other): bool
     {
-        return (
+        return
             $this->startTime->asSeconds() < $other->endTime->asSeconds()
-            && $other->startTime->asSeconds() < $this->endTime->asSeconds()
-        );
+            && $other->startTime->asSeconds() < $this->endTime->asSeconds();
     }
 
-    public function getOverlapDuration(AudioRegion $other): null|CommentTime
+    public function getOverlapDuration(AudioRegion $other): ?CommentTime
     {
-        if (!$this->overlaps($other)) {
+        if (! $this->overlaps($other)) {
             return null;
         }
 

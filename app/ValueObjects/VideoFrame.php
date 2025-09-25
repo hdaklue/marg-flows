@@ -13,7 +13,7 @@ final class VideoFrame extends MediaTimestamp
     public function __construct(
         private readonly CommentTime $time,
         private readonly float $frameRate,
-        null|int $frameNumber = null,
+        ?int $frameNumber = null,
     ) {
         $this->validateFrameRate();
         $this->frameNumber = $frameNumber ?? $this->time->getFrame($frameRate);
@@ -123,10 +123,9 @@ final class VideoFrame extends MediaTimestamp
 
     public function isAtSameFrame(VideoFrame $other): bool
     {
-        return (
+        return
             $this->frameNumber === $other->frameNumber
-            && abs($this->frameRate - $other->frameRate) < PHP_FLOAT_EPSILON
-        );
+            && abs($this->frameRate - $other->frameRate) < PHP_FLOAT_EPSILON;
     }
 
     public function frameDifference(VideoFrame $other): int

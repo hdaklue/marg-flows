@@ -131,10 +131,9 @@ final class VideoRegion extends MediaTimestamp
 
     public function containsTime(CommentTime $time): bool
     {
-        return (
+        return
             $time->asSeconds() >= $this->startTime->asSeconds()
-            && $time->asSeconds() <= $this->endTime->asSeconds()
-        );
+            && $time->asSeconds() <= $this->endTime->asSeconds();
     }
 
     public function containsFrame(int $frameNumber): bool
@@ -149,10 +148,9 @@ final class VideoRegion extends MediaTimestamp
 
     public function overlapsTime(VideoRegion $other): bool
     {
-        return (
+        return
             $this->startTime->asSeconds() < $other->endTime->asSeconds()
-            && $other->startTime->asSeconds() < $this->endTime->asSeconds()
-        );
+            && $other->startTime->asSeconds() < $this->endTime->asSeconds();
     }
 
     public function overlapsSpace(VideoRegion $other): bool
@@ -165,9 +163,9 @@ final class VideoRegion extends MediaTimestamp
         return $this->overlapsTime($other) && $this->overlapsSpace($other);
     }
 
-    public function getTimeOverlapDuration(VideoRegion $other): null|CommentTime
+    public function getTimeOverlapDuration(VideoRegion $other): ?CommentTime
     {
-        if (!$this->overlapsTime($other)) {
+        if (! $this->overlapsTime($other)) {
             return null;
         }
 

@@ -22,7 +22,7 @@ final class Hyperlink implements DocumentBlockConfigContract
 
     private array $tunes = ['commentTune'];
 
-    private null|string $shortcut = 'CMD+L';
+    private ?string $shortcut = 'CMD+L';
 
     public function __construct(
         private bool $inlineToolBar = false,
@@ -63,7 +63,7 @@ final class Hyperlink implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function shortcut(null|string $shortcut): self
+    public function shortcut(?string $shortcut): self
     {
         $this->shortcut = $shortcut;
 

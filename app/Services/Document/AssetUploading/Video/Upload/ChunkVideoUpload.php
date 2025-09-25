@@ -31,7 +31,7 @@ final class ChunkVideoUpload
         UploadedFile $chunk,
         int $chunkIndex,
         int $totalChunks,
-        null|string $fileName,
+        ?string $fileName,
         Document $document,
         string $videoSessionId,
     ): array {
@@ -103,7 +103,7 @@ final class ChunkVideoUpload
 
             // Get video session ID (required for video uploads)
             $videoSessionId = $request->input('session_id');
-            if (!$videoSessionId) {
+            if (! $videoSessionId) {
                 return VideoUploadResponse::error(
                     'Video session ID is required for chunk uploads.',
                 );
@@ -144,7 +144,7 @@ final class ChunkVideoUpload
     private function handleChunksComplete(
         UploadSessionService $sessionManager,
         string $sessionId,
-        null|string $fileName,
+        ?string $fileName,
         int $totalChunks,
         Document $document,
         int $chunkIndex,
@@ -188,7 +188,7 @@ final class ChunkVideoUpload
     private function assembleChunksAsync(
         UploadSessionService $sessionManager,
         string $sessionId,
-        null|string $fileName,
+        ?string $fileName,
         int $totalChunks,
         Document $document,
         string $videoSessionId,

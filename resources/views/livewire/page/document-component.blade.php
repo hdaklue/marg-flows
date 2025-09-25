@@ -75,7 +75,7 @@
             <div class="ml-3 flex items-center space-x-2" x-data="{
                 autoSaveEnabled: false,
                 autoSaveInterval: null,
-            
+
                 init() {
                     // Disable the document editor's automatic autosave initially
                     this.$nextTick(() => {
@@ -86,22 +86,22 @@
                         }
                     });
                 },
-            
+
                 toggleAutoSave() {
                     this.autoSaveEnabled = !this.autoSaveEnabled;
                     console.log('Auto-save toggled:', this.autoSaveEnabled);
-            
+
                     if (this.autoSaveEnabled) {
                         this.startAutoSave();
                     } else {
                         this.stopAutoSave();
                     }
                 },
-            
+
                 startAutoSave() {
                     // Always clear existing interval first
                     this.stopAutoSave();
-            
+
                     console.log('Starting auto-save interval');
                     this.autoSaveInterval = setInterval(() => {
                         console.log('Auto-save interval fired, checking conditions...');
@@ -113,16 +113,16 @@
                             console.log('Auto-save skipped - conditions not met');
                         }
                     }, 30000); // 30 seconds
-            
+
                     // Also enable the document editor's autosave
                     if (this.startAutosave) {
                         this.autosaveInterval = 30000; // 30 seconds
                         this.startAutosave();
                     }
-            
+
                     console.log('Auto-save interval ID:', this.autoSaveInterval);
                 },
-            
+
                 stopAutoSave() {
                     console.log('Stopping auto-save, current interval ID:', this.autoSaveInterval);
                     if (this.autoSaveInterval) {
@@ -132,7 +132,7 @@
                     } else {
                         console.log('No interval to clear');
                     }
-            
+
                     // Also disable the document editor's autosave
                     if (this.autosaveTimer) {
                         clearInterval(this.autosaveTimer);
@@ -181,12 +181,12 @@
                 show: $wire.entangle('hasNewVersions')
             }" wire:click="handleVerionsModalOpen" wire:poll.10s='checkNewVersions'
                 class="relative ml-3 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-                x-tooltip="'Version History'">
+                x-tooltip="'{{ __('document.editor.version_history') }}'">
                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span class="hidden sm:inline">History</span>
+                <span class="hidden sm:inline">{{ __('document.editor.version_history_short') }}</span>
 
                 <!-- New Version Indicator -->
 
@@ -198,8 +198,7 @@
 
             </button>
 
-            <x-user-avatar-stack :users="$this->participantsArray" :roleableKey="$this->document->getKey()" :roleableType="$this->document->getMorphClass()" :scopeToKey="$this->getDocumentableKey()"
-                :scopeToType="$this->getDocumentableType()" :canEdit="$this->userPermissions['canManageMembers']" size='2xs' />
+            <x-user-avatar-stack :users="$this->participantsArrayComputed" size='2xs' />
         </div>
 
     </div>

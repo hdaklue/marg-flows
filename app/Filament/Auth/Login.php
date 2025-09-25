@@ -27,7 +27,7 @@ final class Login extends BaseLogin
         return __('auth.login.heading');
     }
 
-    public function getSubheading(): null|string
+    public function getSubheading(): ?string
     {
         return __('auth.login.subheading');
     }

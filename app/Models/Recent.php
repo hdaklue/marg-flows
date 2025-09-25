@@ -57,7 +57,7 @@ final class Recent extends Model
         return $builder->whereHasMorph(
             'recentable',
             $recentable->getRecentType(),
-            fn(Builder $q) => $q->whereKey($recentable->getRecentKey()),
+            fn (Builder $q) => $q->whereKey($recentable->getRecentKey()),
         );
     }
 }

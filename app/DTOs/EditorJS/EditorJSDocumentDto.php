@@ -19,7 +19,7 @@ final class EditorJSDocumentDto extends ValidatedDTO
     /**
      * Create a new document with blocks array.
      */
-    public static function createWithBlocks(array $blocks, null|string $version = null): self
+    public static function createWithBlocks(array $blocks, ?string $version = null): self
     {
         return self::fromArray([
             'time' => time(),
@@ -192,8 +192,8 @@ final class EditorJSDocumentDto extends ValidatedDTO
     protected function defaults(): array
     {
         return [
-            'time' => fn() => time(),
-            'version' => fn() => config('editor.version', '2.28.2'),
+            'time' => fn () => time(),
+            'version' => fn () => config('editor.version', '2.28.2'),
             'blocks' => [],
         ];
     }

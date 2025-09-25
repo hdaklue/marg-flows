@@ -25,9 +25,9 @@ final class AudioSpecification implements DeliverableSpecification
         private readonly array $tags,
         private readonly array $requirements,
         private readonly array $constraints = [],
-        private readonly null|int $channels = null,
-        private readonly null|string $codec = null,
-        private readonly null|bool $stereo = null,
+        private readonly ?int $channels = null,
+        private readonly ?string $codec = null,
+        private readonly ?bool $stereo = null,
     ) {
         throw_if(
             $this->durationMin < 0 || $this->durationMax < 0,
@@ -114,17 +114,17 @@ final class AudioSpecification implements DeliverableSpecification
         return $this->constraints;
     }
 
-    public function getChannels(): null|int
+    public function getChannels(): ?int
     {
         return $this->channels;
     }
 
-    public function getCodec(): null|string
+    public function getCodec(): ?string
     {
         return $this->codec;
     }
 
-    public function isStereo(): null|bool
+    public function isStereo(): ?bool
     {
         return $this->stereo;
     }
@@ -281,10 +281,9 @@ final class AudioSpecification implements DeliverableSpecification
 
     public function hasRequirement(string $requirement): bool
     {
-        return (
+        return
             isset($this->requirements[$requirement])
-            || in_array($requirement, $this->requirements, true)
-        );
+            || in_array($requirement, $this->requirements, true);
     }
 
     public function getChannelConfiguration(): string
@@ -345,14 +344,13 @@ final class AudioSpecification implements DeliverableSpecification
 
     public function equals(self $other): bool
     {
-        return (
+        return
             $this->name === $other->name
             && $this->durationMin === $other->durationMin
             && $this->durationMax === $other->durationMax
             && $this->format === $other->format
             && $this->bitrate === $other->bitrate
-            && $this->sampleRate === $other->sampleRate
-        );
+            && $this->sampleRate === $other->sampleRate;
     }
 
     private function formatFileSize(float $bytes): string

@@ -28,7 +28,7 @@ final class CreateDocumentAction
                     ->required()
                     ->placeholder('Select a template'),
             ])
-            ->visible(fn() => filamentUser()->can('manage', $documentable))
+            ->visible(fn () => filamentUser()->can('manage', $documentable))
             ->action(function (array $data, Component $livewire) use (
                 $documentable,
                 $shouldRedirect,

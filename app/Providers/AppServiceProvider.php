@@ -46,15 +46,15 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TimeProgressService::class);
         // $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
-        $this->app->singleton('document.manager', fn(): DocumentService => new DocumentService());
-        $this->app->singleton('mention.service', fn(): MentionService => new MentionService());
+        $this->app->singleton('document.manager', fn (): DocumentService => new DocumentService);
+        $this->app->singleton('mention.service', fn (): MentionService => new MentionService);
         $this->app->singleton(
             DeliverableBuilder::class,
-            fn(): DeliverablesManager => new DeliverablesManager($this->app),
+            fn (): DeliverablesManager => new DeliverablesManager($this->app),
         );
         $this->app->singleton(
             UploadSessionManager::class,
-            fn($app) => new UploadSessionManager($app),
+            fn ($app) => new UploadSessionManager($app),
         );
 
         // Register independent directory managers

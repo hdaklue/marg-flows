@@ -17,6 +17,6 @@ final class DeliverablesManager extends Manager
 
     public function design(): DeliverableServiceContract
     {
-        return new DesignDeliverableService();
+        return new DesignDeliverableService;
     }
 }

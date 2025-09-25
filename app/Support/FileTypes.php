@@ -14,12 +14,12 @@ use Symfony\Component\Mime\MimeTypes;
  */
 final class FileTypes
 {
-    private static null|MimeTypes $mimeTypes = null;
+    private static ?MimeTypes $mimeTypes = null;
 
     /**
      * Get the MIME type for a given filename.
      */
-    public static function getMimeType(string $filename): null|string
+    public static function getMimeType(string $filename): ?string
     {
         return self::getMimeTypes()->guessMimeType($filename);
     }
@@ -27,7 +27,7 @@ final class FileTypes
     /**
      * Get the primary file extension for a given MIME type.
      */
-    public static function getExtension(string $mimeType): null|string
+    public static function getExtension(string $mimeType): ?string
     {
         $extensions = self::getMimeTypes()->getExtensions($mimeType);
 
@@ -374,6 +374,6 @@ final class FileTypes
 
     private static function getMimeTypes(): MimeTypes
     {
-        return self::$mimeTypes ??= new MimeTypes();
+        return self::$mimeTypes ??= new MimeTypes;
     }
 }

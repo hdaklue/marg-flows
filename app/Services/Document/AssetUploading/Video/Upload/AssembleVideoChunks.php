@@ -30,10 +30,10 @@ final class AssembleVideoChunks
     public function handle(
         UploadSessionService $sessionManager,
         string $sessionId,
-        null|string $fileName,
+        ?string $fileName,
         int $totalChunks,
         Document $document,
-        null|string $videoSessionId = null,
+        ?string $videoSessionId = null,
     ): string {
         try {
             Log::info('Starting video chunk assembly', [

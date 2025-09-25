@@ -118,17 +118,17 @@ final class GeneralFeedback extends Model
     // Type-specific methods
     public function hasCategory(): bool
     {
-        return !empty($this->feedback_category);
+        return ! empty($this->feedback_category);
     }
 
     public function hasMetadata(): bool
     {
-        return !empty($this->metadata);
+        return ! empty($this->metadata);
     }
 
     public function hasCustomData(): bool
     {
-        return !empty($this->custom_data);
+        return ! empty($this->custom_data);
     }
 
     public function getMetadataValue(string $key, mixed $default = null): mixed
@@ -173,7 +173,7 @@ final class GeneralFeedback extends Model
 
     public function getCategoryDisplay(): string
     {
-        if (!$this->hasCategory()) {
+        if (! $this->hasCategory()) {
             return 'Uncategorized';
         }
 
@@ -252,10 +252,10 @@ final class GeneralFeedback extends Model
         return 'general';
     }
 
-    public function convertToSpecializedModel(): null|Model
+    public function convertToSpecializedModel(): ?Model
     {
         // Attempt to convert to specialized model based on metadata
-        if (!$this->hasMetadata()) {
+        if (! $this->hasMetadata()) {
             return null;
         }
 
@@ -325,7 +325,7 @@ final class GeneralFeedback extends Model
         ];
     }
 
-    private function convertToVideoFeedback(): null|VideoFeedback
+    private function convertToVideoFeedback(): ?VideoFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -352,7 +352,7 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToAudioFeedback(): null|AudioFeedback
+    private function convertToAudioFeedback(): ?AudioFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -375,7 +375,7 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToDocumentFeedback(): null|DocumentFeedback
+    private function convertToDocumentFeedback(): ?DocumentFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
@@ -397,11 +397,11 @@ final class GeneralFeedback extends Model
         ]);
     }
 
-    private function convertToDesignFeedback(): null|DesignFeedback
+    private function convertToDesignFeedback(): ?DesignFeedback
     {
         $data = $this->getMetadataValue('data', []);
 
-        if (!isset($data['x_coordinate']) || !isset($data['y_coordinate'])) {
+        if (! isset($data['x_coordinate']) || ! isset($data['y_coordinate'])) {
             return null;
         }
 

@@ -79,7 +79,7 @@ trait HasTimeProgress
      * Get the due date for progress calculation
      * Override this method if your due date attribute has a different name.
      */
-    public function getProgressCompletedDate(): null|Carbon
+    public function getProgressCompletedDate(): ?Carbon
     {
         $completedDateAttribute = $this->getProgressCompletedDateAttribute();
 
@@ -109,7 +109,7 @@ trait HasTimeProgress
             // Basic validation: start and due dates must exist and be valid
             $hasValidBasicDates = $dueDate->gte($startDate);
 
-            if (!$hasValidBasicDates) {
+            if (! $hasValidBasicDates) {
                 return false;
             }
 

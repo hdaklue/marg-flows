@@ -107,7 +107,7 @@ final class DeliverableVersion extends Model
 
     public function transitionTo(DeliverableVersionStatus $newStatus): bool
     {
-        if (!$this->canTransitionTo($newStatus)) {
+        if (! $this->canTransitionTo($newStatus)) {
             return false;
         }
 
@@ -139,7 +139,7 @@ final class DeliverableVersion extends Model
     public function removeFile(string $fileId): void
     {
         $files = $this->files ?? [];
-        $files = array_filter($files, fn($file) => ($file['id'] ?? null) !== $fileId);
+        $files = array_filter($files, fn ($file) => ($file['id'] ?? null) !== $fileId);
         $this->update(['files' => array_values($files)]);
     }
 
@@ -162,7 +162,7 @@ final class DeliverableVersion extends Model
 
     public function hasFiles(): bool
     {
-        return !empty($this->files);
+        return ! empty($this->files);
     }
 
     public function getFileCount(): int
@@ -174,7 +174,7 @@ final class DeliverableVersion extends Model
     {
         $files = $this->files ?? [];
 
-        return array_filter($files, fn($file) => ($file['type'] ?? null) === $type);
+        return array_filter($files, fn ($file) => ($file['type'] ?? null) === $type);
     }
 
     // Status Helpers
@@ -209,7 +209,7 @@ final class DeliverableVersion extends Model
         return $this->version_number === $this->deliverable->versions()->max('version_number');
     }
 
-    public function getPreviousVersion(): null|self
+    public function getPreviousVersion(): ?self
     {
         return $this->deliverable
             ->versions()
@@ -218,7 +218,7 @@ final class DeliverableVersion extends Model
             ->first();
     }
 
-    public function getNextVersion(): null|self
+    public function getNextVersion(): ?self
     {
         return $this->deliverable
             ->versions()
@@ -249,7 +249,7 @@ final class DeliverableVersion extends Model
 
     public function hasNotes(): bool
     {
-        return !empty(trim($this->notes ?? ''));
+        return ! empty(trim($this->notes ?? ''));
     }
 
     // Comparison
@@ -257,7 +257,7 @@ final class DeliverableVersion extends Model
     {
         $previous = $this->getPreviousVersion();
 
-        if (!$previous) {
+        if (! $previous) {
             return [
                 'changes' => 'Initial version',
                 'files_added' => $this->getFileCount(),

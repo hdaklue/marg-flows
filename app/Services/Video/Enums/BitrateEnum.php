@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Enums;
 
+use InvalidArgumentException;
+
 enum BitrateEnum: int
 {
     case ULTRA_LOW_144P = 150;
@@ -19,7 +21,7 @@ enum BitrateEnum: int
     case MOBILE_LANDSCAPE = 3000;
 
     /**
-     * Calculate optimal bitrate based on pixels and target quality.
+     * Calculate the optimal bitrate based on pixels and target quality.
      */
     public static function calculateForPixels(int $pixels, string $qualityTier = 'medium'): int
     {
@@ -36,11 +38,12 @@ enum BitrateEnum: int
 
         $bpp = $bppValues[$qualityTier] ?? 0.002;
 
+
         // Calculate bitrate (assuming 30fps)
-        $bitrate = (int) round(($pixels * $bpp * 30) / 1000);
+        $bitrate = (int) floor(($pixels * $bpp * 30) / 1000);
 
         // Apply reasonable bounds
-        return max(100, min(20000, $bitrate));
+        return (int) max(100, min(20000, $bitrate));
     }
 
     /**
@@ -60,7 +63,7 @@ enum BitrateEnum: int
             '4k', '2160p' => self::ULTRA_HIGH_4K,
             'mobile_portrait' => self::MOBILE_PORTRAIT,
             'mobile_landscape' => self::MOBILE_LANDSCAPE,
-            default => self::HIGH_1080P,
+            default => throw new InvalidArgumentException("Invalid resolution: {$resolution}"),
         };
     }
 
@@ -71,7 +74,7 @@ enum BitrateEnum: int
 
     public function getMbps(): float
     {
-        return round($this->value / 1000, 1);
+        return floor(($this->value / 1000) * 10) / 10;
     }
 
     public function getQualityTier(): string

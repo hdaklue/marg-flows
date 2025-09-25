@@ -36,7 +36,7 @@ final class UploadSessionManager extends Manager
      */
     public function createHttpDriver(): UploadSessionService
     {
-        return new UploadSessionService(new HttpResponseProgressStrategy());
+        return new UploadSessionService(new HttpResponseProgressStrategy);
     }
 
     /**
@@ -44,7 +44,7 @@ final class UploadSessionManager extends Manager
      */
     public function createWebsocketDriver(): UploadSessionService
     {
-        return new UploadSessionService(new WebSocketProgressStrategy());
+        return new UploadSessionService(new WebSocketProgressStrategy);
     }
 
     /**
@@ -52,7 +52,7 @@ final class UploadSessionManager extends Manager
      */
     public function createLogDriver(): UploadSessionService
     {
-        return new UploadSessionService(new LogProgressStrategy());
+        return new UploadSessionService(new LogProgressStrategy);
     }
 
     /**
@@ -60,6 +60,6 @@ final class UploadSessionManager extends Manager
      */
     public function createRedisDriver(): UploadSessionService
     {
-        return new UploadSessionService(new SimpleProgressStrategy());
+        return new UploadSessionService(new SimpleProgressStrategy);
     }
 }

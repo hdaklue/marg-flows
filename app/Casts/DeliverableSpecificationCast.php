@@ -21,21 +21,21 @@ final class DeliverableSpecificationCast implements CastsAttributes
         string $key,
         mixed $value,
         array $attributes,
-    ): null|DeliverableSpecification {
+    ): ?DeliverableSpecification {
         if ($value === null) {
             return null;
         }
 
         $data = is_string($value) ? json_decode($value, true) : $value;
 
-        if (!is_array($data) || empty($data)) {
+        if (! is_array($data) || empty($data)) {
             return null;
         }
 
         // Get the format from the model to determine which specification class to use
         $format = $model->getAttribute('format');
 
-        if (!$format instanceof DeliverableFormat) {
+        if (! $format instanceof DeliverableFormat) {
             // Try to cast it if it's a string
             $format = is_string($format) ? DeliverableFormat::tryFrom($format) : null;
         }

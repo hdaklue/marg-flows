@@ -97,43 +97,6 @@ final class ListBlock extends Block
         ];
     }
 
-    /**
-     * Sanitize content to allow only specific HTML tags while preventing XSS
-     */
-    protected function sanitizeContent(string $content): string
-    {
-        // Define allowed tags that match the allows() method
-        $allowedTags = '<b><i><u><strong><em><span><a>';
-
-        // Strip all tags except allowed ones
-        $sanitized = strip_tags($content, $allowedTags);
-
-        // Additional sanitization for 'a' tags to prevent javascript: and data: URLs
-        $sanitized = preg_replace_callback(
-            '/<a\s+([^>]*?)href\s*=\s*["\']([^"\']*)["\']([^>]*?)>/i',
-            function ($matches) {
-                $href = $matches[2];
-                // Only allow http, https, mailto, and relative URLs
-                if (preg_match('/^(https?:\/\/|mailto:|\/|#)/i', $href)) {
-                    return (
-                        '<a '
-                        . $matches[1]
-                        . 'href="'
-                        . htmlspecialchars($href, ENT_QUOTES, 'UTF-8')
-                        . '"'
-                        . $matches[3]
-                        . '>'
-                    );
-                }
-                // Remove href if it's potentially dangerous
-                return '<span' . $matches[3] . '>';
-            },
-            $sanitized,
-        );
-
-        return $sanitized;
-    }
-
     public function rules(): array
     {
         return [
@@ -161,11 +124,48 @@ final class ListBlock extends Block
         return $this->renderNestedList($items, $style, [], $counterType, 0);
     }
 
+    /**
+     * Sanitize content to allow only specific HTML tags while preventing XSS.
+     */
+    protected function sanitizeContent(string $content): string
+    {
+        // Define allowed tags that match the allows() method
+        $allowedTags = '<b><i><u><strong><em><span><a>';
+
+        // Strip all tags except allowed ones
+        $sanitized = strip_tags($content, $allowedTags);
+
+        // Additional sanitization for 'a' tags to prevent javascript: and data: URLs
+        $sanitized = preg_replace_callback(
+            '/<a\s+([^>]*?)href\s*=\s*["\']([^"\']*)["\']([^>]*?)>/i',
+            function ($matches) {
+                $href = $matches[2];
+                // Only allow http, https, mailto, and relative URLs
+                if (preg_match('/^(https?:\/\/|mailto:|\/|#)/i', $href)) {
+                    return
+                        '<a '
+                        . $matches[1]
+                        . 'href="'
+                        . htmlspecialchars($href, ENT_QUOTES, 'UTF-8')
+                        . '"'
+                        . $matches[3]
+                        . '>';
+                }
+
+                // Remove href if it's potentially dangerous
+                return '<span' . $matches[3] . '>';
+            },
+            $sanitized,
+        );
+
+        return $sanitized;
+    }
+
     protected function renderNestedList(
         array $items,
         string $style = 'unordered',
         array $prefix = [],
-        null|string $counterType = null,
+        ?string $counterType = null,
         int $depth = 0,
     ): string {
         // Performance consideration: Keep depth limit at 5
@@ -201,7 +201,7 @@ final class ListBlock extends Block
                 $htmlParts[] = '<li>' . $content;
             }
 
-            if (!empty($nested)) {
+            if (! empty($nested)) {
                 $htmlParts[] = $this->renderNestedList(
                     $nested,
                     $style,

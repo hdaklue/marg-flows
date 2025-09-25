@@ -46,8 +46,8 @@ final class InvitationDTO extends ValidatedDTO
     protected function casts(): array
     {
         return [
-            'sender' => new ObjectCast(),
-            'role_data' => new CollectionCast(),
+            'sender' => new ObjectCast,
+            'role_data' => new CollectionCast,
         ];
     }
 }

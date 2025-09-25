@@ -21,7 +21,7 @@ final class ResolutionManager
     public static function from(
         string $sourcePath,
         string $disk = 'local',
-        null|NamingPattern $namingStrategy = null,
+        ?NamingPattern $namingStrategy = null,
     ): ResolutionManagerService {
         return ResolutionManagerService::from($sourcePath, $disk, $namingStrategy);
     }
@@ -32,7 +32,7 @@ final class ResolutionManager
     public static function fromDisk(
         string $sourcePath,
         string $disk = 'local',
-        null|NamingPattern $namingStrategy = null,
+        ?NamingPattern $namingStrategy = null,
     ): ResolutionManagerService {
         return ResolutionManagerService::fromDisk($sourcePath, $disk, $namingStrategy);
     }

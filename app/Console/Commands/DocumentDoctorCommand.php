@@ -60,7 +60,7 @@ final class DocumentDoctorCommand extends Command
 
         $configPath = config_path('document.php');
 
-        if (!File::exists($configPath)) {
+        if (! File::exists($configPath)) {
             $this->error("❌ Configuration file missing: {$configPath}");
             $this->issuesFound++;
 
@@ -91,7 +91,7 @@ final class DocumentDoctorCommand extends Command
 
         $templatesPath = app_path('Services/Document/Templates');
 
-        if (!File::exists($templatesPath)) {
+        if (! File::exists($templatesPath)) {
             $this->error("❌ Templates directory missing: {$templatesPath}");
             $this->issuesFound++;
 
@@ -104,7 +104,7 @@ final class DocumentDoctorCommand extends Command
         $directories = File::directories($templatesPath);
         $templateDirectories = array_filter(
             $directories,
-            fn($dir) => basename($dir) !== 'Translation',
+            fn ($dir) => basename($dir) !== 'Translation',
         );
 
         if (empty($templateDirectories)) {
@@ -146,7 +146,7 @@ final class DocumentDoctorCommand extends Command
         }
 
         // Check if class exists
-        if (!class_exists($templateClass)) {
+        if (! class_exists($templateClass)) {
             $this->error("❌ Template class not found: {$templateClass}");
             $templateIssues++;
 
@@ -156,7 +156,7 @@ final class DocumentDoctorCommand extends Command
         // Check if implements DocumentTemplateContract
         try {
             $reflection = new ReflectionClass($templateClass);
-            if (!$reflection->implementsInterface(DocumentTemplateContract::class)) {
+            if (! $reflection->implementsInterface(DocumentTemplateContract::class)) {
                 $this->error(
                     "❌ Template does not implement DocumentTemplateContract: {$templateClass}",
                 );
@@ -165,7 +165,7 @@ final class DocumentDoctorCommand extends Command
 
             // Check if template can be instantiated
             $instance = $templateClass::make();
-            if (!$instance) {
+            if (! $instance) {
                 $this->error("❌ Cannot instantiate template: {$templateClass}");
                 $templateIssues++;
             }
@@ -195,7 +195,7 @@ final class DocumentDoctorCommand extends Command
         ];
 
         foreach ($requiredMethods as $method) {
-            if (!$reflection->hasMethod($method)) {
+            if (! $reflection->hasMethod($method)) {
                 $this->error("❌ Missing method {$method} in {$templateClass}");
                 $templateIssues++;
             }
@@ -247,7 +247,7 @@ final class DocumentDoctorCommand extends Command
         int &$translationIssues,
     ): void {
         try {
-            if (!class_exists($templateClass)) {
+            if (! class_exists($templateClass)) {
                 return; // Already reported in template check
             }
 
@@ -274,7 +274,7 @@ final class DocumentDoctorCommand extends Command
         string $translationClass,
         int &$translationIssues,
     ): void {
-        if (!class_exists($translationClass)) {
+        if (! class_exists($translationClass)) {
             $this->error("❌ Translation class not found: {$translationClass}");
             $translationIssues++;
 
@@ -285,7 +285,7 @@ final class DocumentDoctorCommand extends Command
             $reflection = new ReflectionClass($translationClass);
 
             // Check if extends BaseTranslation
-            if (!$reflection->isSubclassOf(BaseTranslation::class)) {
+            if (! $reflection->isSubclassOf(BaseTranslation::class)) {
                 $this->error(
                     "❌ Translation class does not extend BaseTranslation: {$translationClass}",
                 );
@@ -293,11 +293,11 @@ final class DocumentDoctorCommand extends Command
             }
 
             // Check if can be instantiated
-            $instance = new $translationClass();
+            $instance = new $translationClass;
             $translations = $instance->getTranslations();
 
             // Check structure
-            if (!isset($translations['meta']) || !isset($translations['blocks'])) {
+            if (! isset($translations['meta']) || ! isset($translations['blocks'])) {
                 $this->error("❌ Invalid translation structure in {$translationClass}");
                 $translationIssues++;
             } else {

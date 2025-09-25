@@ -60,7 +60,7 @@ final class RecencyService
             ->get(); // returns actual models
     }
 
-    public static function forUser(User $user, null|int $limit = null): RecentableCollection
+    public static function forUser(User $user, ?int $limit = null): RecentableCollection
     {
         return Recent::query()
             ->forUser($user)

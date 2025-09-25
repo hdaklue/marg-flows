@@ -25,11 +25,10 @@ final class DeliverablePolicy
      */
     public function view(AssignableEntity $user, Deliverable $deliverable): bool
     {
-        return (
+        return
             $deliverable->isParticipant($user)
             || $deliverable->flow->isParticipant($user)
-            || $deliverable->getTenant()->isAdmin($user)
-        );
+            || $deliverable->getTenant()->isAdmin($user);
     }
 
     /**
@@ -37,10 +36,9 @@ final class DeliverablePolicy
      */
     public function create(User $user): bool
     {
-        return (
+        return
             $user->hasAssignmentOn(filamentTenant(), RoleEnum::ADMIN)
-            || $user->hasAssignmentOn(filamentTenant(), RoleEnum::MANAGER)
-        );
+            || $user->hasAssignmentOn(filamentTenant(), RoleEnum::MANAGER);
     }
 
     /**
@@ -49,12 +47,11 @@ final class DeliverablePolicy
     public function update(User $user, Deliverable $deliverable): bool
     {
         // Admin/Manager on deliverable or flow can always update
-        return (
+        return
             $user->hasAssignmentOn($deliverable, RoleEnum::ADMIN)
             || $user->hasAssignmentOn($deliverable, RoleEnum::MANAGER)
             || $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN)
-            || $user->hasAssignmentOn($deliverable->flow, RoleEnum::MANAGER)
-        );
+            || $user->hasAssignmentOn($deliverable->flow, RoleEnum::MANAGER);
     }
 
     /**
@@ -62,10 +59,9 @@ final class DeliverablePolicy
      */
     public function delete(User $user, Deliverable $deliverable): bool
     {
-        return (
+        return
             $user->hasAssignmentOn($deliverable, RoleEnum::ADMIN)
-            || $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN)
-        );
+            || $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN);
     }
 
     /**
@@ -73,10 +69,9 @@ final class DeliverablePolicy
      */
     public function restore(User $user, Deliverable $deliverable): bool
     {
-        return (
+        return
             $user->hasAssignmentOn($deliverable, RoleEnum::ADMIN)
-            || $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN)
-        );
+            || $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN);
     }
 
     /**
@@ -92,12 +87,11 @@ final class DeliverablePolicy
      */
     public function manageParticipants(User $user, Deliverable $deliverable): bool
     {
-        return (
+        return
             $user->hasAssignmentOn($deliverable, RoleEnum::ADMIN)
             || $user->hasAssignmentOn($deliverable, RoleEnum::MANAGER)
             || $user->hasAssignmentOn($deliverable->flow, RoleEnum::ADMIN)
-            || $user->hasAssignmentOn($deliverable->flow, RoleEnum::MANAGER)
-        );
+            || $user->hasAssignmentOn($deliverable->flow, RoleEnum::MANAGER);
     }
 
     /**
@@ -106,10 +100,9 @@ final class DeliverablePolicy
     public function submitVersion(User $user, Deliverable $deliverable): bool
     {
         // Assignees can submit versions
-        return (
+        return
             $deliverable->hasParticipantWithRole($user, AssigneeRole::ASSIGNEE)
-            || $this->manageParticipants($user, $deliverable)
-        );
+            || $this->manageParticipants($user, $deliverable);
     }
 
     /**
@@ -118,11 +111,10 @@ final class DeliverablePolicy
     public function review(User $user, Deliverable $deliverable): bool
     {
         // Reviewers, approvers, and managers can review
-        return (
+        return
             $deliverable->hasParticipantWithRole($user, AssigneeRole::REVIEWER)
             || $deliverable->hasParticipantWithRole($user, AssigneeRole::APPROVER)
-            || $this->manageParticipants($user, $deliverable)
-        );
+            || $this->manageParticipants($user, $deliverable);
     }
 
     /**
@@ -131,10 +123,9 @@ final class DeliverablePolicy
     public function approve(User $user, Deliverable $deliverable): bool
     {
         // Approvers and managers can approve
-        return (
+        return
             $deliverable->hasParticipantWithRole($user, AssigneeRole::APPROVER)
-            || $this->manageParticipants($user, $deliverable)
-        );
+            || $this->manageParticipants($user, $deliverable);
     }
 
     /**
@@ -143,10 +134,9 @@ final class DeliverablePolicy
     public function markComplete(User $user, Deliverable $deliverable): bool
     {
         // Assignees can mark as complete, or managers/admins
-        return (
+        return
             $deliverable->hasParticipantWithRole($user, AssigneeRole::ASSIGNEE)
-            || $this->manageParticipants($user, $deliverable)
-        );
+            || $this->manageParticipants($user, $deliverable);
     }
 
     /**
@@ -206,10 +196,9 @@ final class DeliverablePolicy
     public function attachFiles(User $user, Deliverable $deliverable): bool
     {
         // Assignees and managers can attach files
-        return (
+        return
             $deliverable->hasParticipantWithRole($user, AssigneeRole::ASSIGNEE)
-            || $this->manageParticipants($user, $deliverable)
-        );
+            || $this->manageParticipants($user, $deliverable);
     }
 
     /**

@@ -73,11 +73,11 @@ final class CalendarComponent extends Component
 
         // Load additional events using loadEvents method (can be overridden)
         $additionalEvents = $this->loadEvents();
-        if (!empty($additionalEvents)) {
+        if (! empty($additionalEvents)) {
             $events = $events->merge($additionalEvents);
         }
 
-        return $events->map(fn($event) => $this->ensureEventDTO($event))->toArray();
+        return $events->map(fn ($event) => $this->ensureEventDTO($event))->toArray();
     }
 
     #[Computed]
@@ -104,7 +104,7 @@ final class CalendarComponent extends Component
 
     public function changeView(string $view): void
     {
-        if (!in_array($view, $this->config->availableViews)) {
+        if (! in_array($view, $this->config->availableViews)) {
             return;
         }
 
@@ -158,7 +158,7 @@ final class CalendarComponent extends Component
 
     public function selectEvent(string $eventId): void
     {
-        if (!$this->config->enableEventClick) {
+        if (! $this->config->enableEventClick) {
             return;
         }
 
@@ -223,14 +223,14 @@ final class CalendarComponent extends Component
                 $date = $currentWeekStart->copy()->addDays($i);
 
                 if (
-                    !$this->config->showWeekends
+                    ! $this->config->showWeekends
                     && in_array($date->dayOfWeek, [0, 6])
                 ) {
                     continue;
                 }
 
                 $dayEvents = collect($this->currentEvents)
-                    ->filter(fn($event) => $this->ensureEventDTO($event)->occursOnDate($date))
+                    ->filter(fn ($event) => $this->ensureEventDTO($event)->occursOnDate($date))
                     ->values()
                     ->toArray();
 
@@ -245,7 +245,7 @@ final class CalendarComponent extends Component
                 ];
             }
 
-            if (!empty($week)) {
+            if (! empty($week)) {
                 $weeks[] = $week;
             }
 
@@ -270,7 +270,7 @@ final class CalendarComponent extends Component
 
         while ($current->lte($endOfWeek)) {
             if (
-                !$this->config->showWeekends
+                ! $this->config->showWeekends
                 && in_array($current->dayOfWeek, [0, 6])
             ) {
                 $current->addDay();
@@ -279,7 +279,7 @@ final class CalendarComponent extends Component
             }
 
             $dayEvents = collect($this->currentEvents)
-                ->filter(fn($event) => $this->ensureEventDTO($event)->occursOnDate($current))
+                ->filter(fn ($event) => $this->ensureEventDTO($event)->occursOnDate($current))
                 ->values()
                 ->toArray();
 
@@ -305,7 +305,7 @@ final class CalendarComponent extends Component
     {
         $currentDateCarbon = Carbon::parse($this->currentDate);
         $dayEvents = collect($this->currentEvents)
-            ->filter(fn($event) => $this->ensureEventDTO($event)->occursOnDate($currentDateCarbon))
+            ->filter(fn ($event) => $this->ensureEventDTO($event)->occursOnDate($currentDateCarbon))
             ->values()
             ->toArray();
 
@@ -323,7 +323,7 @@ final class CalendarComponent extends Component
     {
         $labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-        if (!$this->config->showWeekends) {
+        if (! $this->config->showWeekends) {
             return array_slice($labels, 1, 5); // Mon-Fri only
         }
 

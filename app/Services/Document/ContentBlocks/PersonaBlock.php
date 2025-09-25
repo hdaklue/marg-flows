@@ -190,15 +190,14 @@ final class PersonaBlock extends Block
         $ageRange = $this->get('age_range');
         $gender = $this->get('gender');
 
-        return (
-            !empty($name)
+        return
+            ! empty($name)
             && is_string($name)
             && trim($name) !== ''
-            && !empty($ageRange)
+            && ! empty($ageRange)
             && is_string($ageRange)
-            && !empty($gender)
-            && is_string($gender)
-        );
+            && ! empty($gender)
+            && is_string($gender);
     }
 
     /**
@@ -272,7 +271,7 @@ final class PersonaBlock extends Block
      */
     public function isEmpty(): bool
     {
-        return !$this->hasPersona();
+        return ! $this->hasPersona();
     }
 
     /**
@@ -280,7 +279,7 @@ final class PersonaBlock extends Block
      */
     public function getDisplayText(): string
     {
-        if (!$this->hasPersona()) {
+        if (! $this->hasPersona()) {
             return '';
         }
 
@@ -367,7 +366,7 @@ final class PersonaBlock extends Block
      */
     public function render(): string
     {
-        if (!$this->hasPersona()) {
+        if (! $this->hasPersona()) {
             return '';
         }
 
@@ -422,7 +421,7 @@ final class PersonaBlock extends Block
      */
     public function renderRtl(): string
     {
-        if (!$this->hasPersona()) {
+        if (! $this->hasPersona()) {
             return '';
         }
 

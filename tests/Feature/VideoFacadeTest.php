@@ -64,7 +64,7 @@ it('can chain operations using facade', function () {
     $result = Video::fromDisk($videoPath)
         ->trim(10, 60)
         ->resize(new Dimension(1280, 720))
-        ->convert(new Conversion720p());
+        ->convert(new Conversion720p);
 
     expect($result)->toBeInstanceOf(VideoEditor::class);
 
@@ -83,12 +83,12 @@ it('demonstrates facade usage patterns', function () {
     // Pattern 1: Local file processing
     $localEditor = Video::fromDisk('videos/uploads/local.mp4')
         ->trim(0, 30)
-        ->convert(new Conversion720p());
+        ->convert(new Conversion720p);
 
     // Pattern 2: URL processing
     $urlEditor = Video::fromUrl('https://example.com/remote.mp4')
         ->resize(new Dimension(854, 480))
-        ->convert(new Conversion720p());
+        ->convert(new Conversion720p);
 
     // Pattern 3: Public disk processing
     $publicEditor = Video::fromPublic('videos/public.mp4')
@@ -121,7 +121,7 @@ it('can use facade for batch processing', function () {
     $editors = [];
 
     foreach ($sources as $source) {
-        $editors[] = Video::fromDisk($source)->trim(0, 45)->convert(new Conversion720p());
+        $editors[] = Video::fromDisk($source)->trim(0, 45)->convert(new Conversion720p);
     }
 
     expect(count($editors))->toBe(3);
@@ -141,7 +141,7 @@ it('demonstrates advanced facade usage', function () {
         ->resize(new Dimension(1920, 1080)) // Full HD
         ->crop(100, 50, new Dimension(1720, 980)) // Crop with margins
         ->setFrameRate(30) // 30 FPS
-        ->convert(new Conversion720p()); // Final conversion
+        ->convert(new Conversion720p); // Final conversion
 
     $operations = $editor->getOperations();
 

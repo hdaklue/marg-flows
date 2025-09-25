@@ -17,10 +17,10 @@ final class Timezone
             //     ->sort()->toArray();
             return collect(countries(hydrate: true))
                 ->flatten()
-                ->mapWithKeys(fn($item) => [
+                ->mapWithKeys(fn ($item) => [
                     $item->getName() => $item->getTimezones(),
                 ])
-                ->map(fn($value, $key) => $value)
+                ->map(fn ($value, $key) => $value)
                 ->sortKeys()
                 ->toArray();
         });

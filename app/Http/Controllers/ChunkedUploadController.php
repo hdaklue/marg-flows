@@ -161,7 +161,7 @@ final class ChunkedUploadController extends Controller
         $chunkDir = config('chunked-upload.storage.chunk_directory', 'chunk-uploads');
         $chunkUploadsDir = storage_path("app/{$chunkDir}");
 
-        if (!is_dir($chunkUploadsDir)) {
+        if (! is_dir($chunkUploadsDir)) {
             return response()->json([
                 'success' => true,
                 'message' => 'No chunks to clean up',
@@ -219,7 +219,7 @@ final class ChunkedUploadController extends Controller
         $chunkDir = $this->getChunkDirectory($fileKey);
 
         // Create chunk directory if it doesn't exist
-        if (!is_dir($chunkDir)) {
+        if (! is_dir($chunkDir)) {
             mkdir($chunkDir, 0755, true);
         }
 
@@ -287,13 +287,13 @@ final class ChunkedUploadController extends Controller
     {
         $chunkDir = $this->getChunkDirectory($fileKey);
 
-        if (!is_dir($chunkDir)) {
+        if (! is_dir($chunkDir)) {
             return false;
         }
 
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDir}/chunk_{$i}";
-            if (!file_exists($chunkPath)) {
+            if (! file_exists($chunkPath)) {
                 return false;
             }
         }
@@ -325,7 +325,7 @@ final class ChunkedUploadController extends Controller
 
         // Ensure directory exists
         $finalDir = dirname($fullFinalPath);
-        if (!is_dir($finalDir)) {
+        if (! is_dir($finalDir)) {
             mkdir($finalDir, 0755, true);
         }
 
@@ -338,19 +338,19 @@ final class ChunkedUploadController extends Controller
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = "{$chunkDir}/chunk_{$i}";
 
-            if (!file_exists($chunkPath)) {
+            if (! file_exists($chunkPath)) {
                 fclose($finalHandle);
                 throw new Exception("Chunk {$i} not found");
             }
 
             $chunkHandle = fopen($chunkPath, 'rb');
-            if (!$chunkHandle) {
+            if (! $chunkHandle) {
                 fclose($finalHandle);
                 throw new Exception("Could not read chunk {$i}");
             }
 
             // Copy chunk to final file
-            while (!feof($chunkHandle)) {
+            while (! feof($chunkHandle)) {
                 $data = fread($chunkHandle, 8192);
                 fwrite($finalHandle, $data);
             }

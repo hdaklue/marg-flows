@@ -11,9 +11,9 @@ use Livewire\Component;
 
 final class ManageMembersModal extends Component
 {
-    public null|RoleableEntity $roleableEntity = null;
+    public ?RoleableEntity $roleableEntity = null;
 
-    public null|RoleableEntity $scopeToEntity = null;
+    public ?RoleableEntity $scopeToEntity = null;
 
     public $shouldShowModal = false;
 

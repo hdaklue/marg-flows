@@ -37,7 +37,7 @@ it('can apply conversion to video editor', function () {
     $videoPath = 'videos/test-video.mp4';
     $editor = new VideoEditor($videoPath);
 
-    $conversion = new Conversion720p();
+    $conversion = new Conversion720p;
     $result = $editor->convert($conversion);
 
     expect($result)->toBeInstanceOf(VideoEditor::class);
@@ -58,7 +58,7 @@ it('can chain multiple operations', function () {
 
     $dimension = new Dimension(854, 480);
 
-    $result = $editor->trim(5, 25)->resize($dimension)->convert(new Conversion720p());
+    $result = $editor->trim(5, 25)->resize($dimension)->convert(new Conversion720p);
 
     expect($result)->toBeInstanceOf(VideoEditor::class);
 });
@@ -80,7 +80,7 @@ it('can build pipeline and get operations count', function () {
     $videoPath = 'videos/test-video.mp4';
     $editor = new VideoEditor($videoPath);
 
-    $editor->resize(new Dimension(1920, 1080))->trim(0, 60)->convert(new Conversion720p());
+    $editor->resize(new Dimension(1920, 1080))->trim(0, 60)->convert(new Conversion720p);
 
     $operations = $editor->getOperations();
 

@@ -37,7 +37,7 @@ interface DocumentDirectoryManagerContract
      * @param  string|null  $identifier  The tenant identifier
      * @return array<string> Array of file paths within the tenant directory
      */
-    public function getAllFiles(null|string $identifier = null): array;
+    public function getAllFiles(?string $identifier = null): array;
 
     /**
      * Get secure URL for a file requiring authentication.

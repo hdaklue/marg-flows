@@ -19,7 +19,7 @@ final class VideoFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (!$testUser) {
+        if (! $testUser) {
             $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
@@ -153,9 +153,9 @@ final class VideoFeedbackSeeder extends Seeder
         return fake()->randomElement($comments);
     }
 
-    private function generateRegionData(): null|array
+    private function generateRegionData(): ?array
     {
-        if (!fake()->boolean(60)) { // 60% chance of having region data
+        if (! fake()->boolean(60)) { // 60% chance of having region data
             return null;
         }
 

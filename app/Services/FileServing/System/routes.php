@@ -41,7 +41,8 @@ Route::prefix('system/files')
             $expires = request()->integer('expires', 3600);
 
             // Create a simple entity that implements HasFiles for system files
-            $systemEntity = new class($type) implements HasFiles {
+            $systemEntity = new class($type) implements HasFiles
+            {
                 public function __construct(
                     private string $type,
                 ) {}
@@ -71,7 +72,8 @@ Route::prefix('system/files')
         Route::get('{type}/{filename}/exists', function (string $type, string $filename) {
             $resolver = app(SystemFileResolver::class);
 
-            $systemEntity = new class($type) implements HasFiles {
+            $systemEntity = new class($type) implements HasFiles
+            {
                 public function __construct(
                     private string $type,
                 ) {}
@@ -101,7 +103,8 @@ Route::prefix('system/files')
         Route::get('{type}/{filename}/info', function (string $type, string $filename) {
             $resolver = app(SystemFileResolver::class);
 
-            $systemEntity = new class($type) implements HasFiles {
+            $systemEntity = new class($type) implements HasFiles
+            {
                 public function __construct(
                     private string $type,
                 ) {}
@@ -134,7 +137,8 @@ Route::prefix('system/files')
         Route::delete('{type}/{filename}', function (string $type, string $filename) {
             $resolver = app(SystemFileResolver::class);
 
-            $systemEntity = new class($type) implements HasFiles {
+            $systemEntity = new class($type) implements HasFiles
+            {
                 public function __construct(
                     private string $type,
                 ) {}
@@ -167,7 +171,8 @@ Route::prefix('system/files')
 Route::get('system/serve/{type}/{filename}', function (string $type, string $filename) {
     $resolver = app(SystemFileResolver::class);
 
-    $systemEntity = new class($type) implements HasFiles {
+    $systemEntity = new class($type) implements HasFiles
+    {
         public function __construct(
             private string $type,
         ) {}
@@ -188,7 +193,7 @@ Route::get('system/serve/{type}/{filename}', function (string $type, string $fil
         }
     };
 
-    if (!$resolver->fileExists($systemEntity, $type, $filename)) {
+    if (! $resolver->fileExists($systemEntity, $type, $filename)) {
         abort(404, 'File not found');
     }
 

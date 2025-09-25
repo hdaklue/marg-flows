@@ -298,7 +298,7 @@ final class SortableDemo extends Component
     public function getAvailableColumnsFor(string $currentColumnId): array
     {
         return collect($this->columns)
-            ->reject(fn($column) => $column['id'] === $currentColumnId)
+            ->reject(fn ($column) => $column['id'] === $currentColumnId)
             ->values()
             ->toArray();
     }
@@ -310,7 +310,7 @@ final class SortableDemo extends Component
         return false;
     }
 
-    public function onSort(array $itemIds, null|string $from = null, null|string $to = null): mixed
+    public function onSort(array $itemIds, ?string $from = null, ?string $to = null): mixed
     {
         return true;
     }
@@ -467,15 +467,15 @@ final class SortableDemo extends Component
             $oldDone = count($this->done);
 
             $this->todos = collect($this->todos)
-                ->reject(fn($item) => $item['id'] === $itemId)
+                ->reject(fn ($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
             $this->inProgress = collect($this->inProgress)
-                ->reject(fn($item) => $item['id'] === $itemId)
+                ->reject(fn ($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
             $this->done = collect($this->done)
-                ->reject(fn($item) => $item['id'] === $itemId)
+                ->reject(fn ($item) => $item['id'] === $itemId)
                 ->values()
                 ->toArray();
 
@@ -527,7 +527,7 @@ final class SortableDemo extends Component
         ]);
 
         $movedItemId = $itemIds[0] ?? null;
-        if (!$movedItemId) {
+        if (! $movedItemId) {
             logger()->error('handleCrossGroupMove failed - no item ID');
             throw new InvalidArgumentException('No item ID provided for cross-group sort');
         }
@@ -624,13 +624,13 @@ final class SortableDemo extends Component
         };
     }
 
-    private function findAndRemoveItem(string $property, string $itemId): null|array
+    private function findAndRemoveItem(string $property, string $itemId): ?array
     {
         $items = collect($this->$property);
         $item = $items->firstWhere('id', $itemId);
 
         if ($item) {
-            $this->$property = $items->reject(fn($i) => $i['id'] === $itemId)->values()->toArray();
+            $this->$property = $items->reject(fn ($i) => $i['id'] === $itemId)->values()->toArray();
         }
 
         return $item;

@@ -19,7 +19,7 @@ final class DeleteDocumentImage
     /**
      * Handle document image deletion with generalized parameters.
      */
-    public function handle(string $path, null|string $disk = null): bool
+    public function handle(string $path, ?string $disk = null): bool
     {
         try {
             $storage = $disk ? Storage::disk($disk) : Storage::getFacadeRoot();

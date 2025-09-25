@@ -24,7 +24,7 @@
             {{-- Sidebar Header --}}
             <div
                 class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
-                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Document Versions</h2>
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ __('document.versions.title') }}</h2>
                 {{-- Mobile-only sidebar close button (closes sidebar, not modal) --}}
                 <button type="button" class="text-zinc-400 hover:text-zinc-600 md:hidden dark:hover:text-zinc-300"
                     wire:click="toggleSidebar">
@@ -57,7 +57,7 @@
                                     @if ($currentEditingVersion === $version->id)
                                         <span
                                             class="inline-flex items-center rounded-full bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-900/50 dark:text-sky-200">
-                                            Current
+                                            {{ __('document.versions.current') }}
                                         </span>
                                     @endif
                                 </div>
@@ -66,10 +66,10 @@
                                 @if ($currentEditingVersion !== $version->id)
                                     <button wire:click.stop="applyVersion('{{ $version->id }}')"
                                         class="inline-flex items-center justify-center w-6 h-6 text-xs font-medium bg-transparent border border-transparent rounded text-sky-600 hover:bg-sky-100 hover:text-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:text-sky-400 dark:hover:bg-sky-900/50 dark:hover:text-sky-300 dark:focus:ring-sky-400"
-                                        title="Apply Version">
+                                        title="{{ __('document.versions.apply_version') }}">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7" />
+                                                d="M12 4v16m0 0l-4-4m4 4l4-4" />
                                         </svg>
                                     </button>
                                 @endif
@@ -87,7 +87,7 @@
                                     @if ($version->creator->name !== filamentUser()->name)
                                         {{ $version->creator->name }}
                                     @else
-                                        You
+                                        {{ __('document.versions.you') }}
                                     @endif
                                 </div>
                             @endif
@@ -104,11 +104,11 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                     </svg>
-                                    Loading more versions...
+                                    {{ __('document.versions.loading_more') }}
                                 </div>
                             @else
                                 <div class="text-xs text-zinc-400 dark:text-zinc-500">
-                                    Scroll for more versions
+                                    {{ __('document.versions.scroll_for_more') }}
                                 </div>
                             @endif
                         </div>
@@ -125,7 +125,7 @@
                 <div class="flex items-center space-x-3">
                     {{-- Mobile Sidebar Toggle --}}
                     <button type="button" class="text-zinc-400 hover:text-zinc-600 md:hidden dark:hover:text-zinc-300"
-                        wire:click="toggleSidebar" title="Toggle Versions">
+                        wire:click="toggleSidebar" title="{{ __('document.versions.toggle_versions') }}">
                         @if ($sidebarCollapsed)
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -141,7 +141,7 @@
 
                     @if ($this->selectedVersion)
                         <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                        <span class="text-sm text-zinc-600 dark:text-zinc-400">Preview Mode - Read Only</span>
+                        <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ __('document.versions.preview_mode') }}</span>
                         <span class="hidden font-mono text-sm text-zinc-500 sm:inline dark:text-zinc-400">
                             {{ substr($this->selectedVersion->id, -6) }}
                         </span>
@@ -153,7 +153,7 @@
 
                 {{-- Main Close Button (always visible on all screen sizes) --}}
                 <button type="button" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                    wire:click="$dispatch('closeModal')" title="Close">
+                    wire:click="$dispatch('closeModal')" title="{{ __('document.versions.close') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -172,12 +172,12 @@
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                                {{ $this->selectedVersion ? 'No Content Available' : 'Select a Version' }}
+                                {{ $this->selectedVersion ? __('document.versions.no_content_available') : __('document.versions.select_version') }}
                             </h3>
                             <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
                                 {{ $this->selectedVersion
-                                    ? 'This version appears to be empty or corrupted.'
-                                    : 'Choose a version from the sidebar to preview its content.' }}
+                                    ? __('document.versions.version_empty')
+                                    : __('document.versions.choose_version_preview') }}
                             </p>
                         </div>
                     </div>

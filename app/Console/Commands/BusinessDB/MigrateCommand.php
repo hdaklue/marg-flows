@@ -56,8 +56,8 @@ final class MigrateCommand extends Command
             $this->warn('⚠️  This will DROP ALL TABLES in the business database!');
 
             if (
-                !$this->option('force')
-                && !$this->confirm('Do you really wish to run this command?')
+                ! $this->option('force')
+                && ! $this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
 
@@ -70,8 +70,8 @@ final class MigrateCommand extends Command
             $this->warn('⚠️  This will rollback ALL migrations!');
 
             if (
-                !$this->option('force')
-                && !$this->confirm('Do you really wish to run this command?')
+                ! $this->option('force')
+                && ! $this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
 
@@ -82,8 +82,8 @@ final class MigrateCommand extends Command
             $this->warn('⚠️  This will reset and re-run all migrations!');
 
             if (
-                !$this->option('force')
-                && !$this->confirm('Do you really wish to run this command?')
+                ! $this->option('force')
+                && ! $this->confirm('Do you really wish to run this command?')
             ) {
                 $this->info('Command cancelled.');
 
@@ -153,7 +153,7 @@ final class MigrateCommand extends Command
                 foreach ($value as $item) {
                     $parts[] = "{$key}={$item}";
                 }
-            } elseif (!is_bool($value)) {
+            } elseif (! is_bool($value)) {
                 $parts[] = "{$key}={$value}";
             }
         }
@@ -165,7 +165,7 @@ final class MigrateCommand extends Command
     {
         $businessDbPath = database_path('migrations/business-db');
 
-        if (!is_dir($businessDbPath)) {
+        if (! is_dir($businessDbPath)) {
             return [];
         }
 

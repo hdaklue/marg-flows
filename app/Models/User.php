@@ -11,8 +11,8 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
-use Hdaklue\MargRbac\Facades\RoleManager;
 use Hdaklue\MargRbac\Models\RbacUser;
+use Hdaklue\Porter\Contracts\RoleableEntity;
 use Hdaklue\Porter\Contracts\RoleContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
@@ -39,7 +39,6 @@ use Illuminate\Support\Collection as SupportCollection;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property string|null $active_tenant_id
- * @property AccountType $accout_type
  * @property-read mixed $avatar
  * @property-read Collection<int, Tenant> $createdTenants
  * @property-read int|null $created_tenants_count
@@ -58,14 +57,14 @@ use Illuminate\Support\Collection as SupportCollection;
  * @property-read int|null $role_assignments_count
  *
  * @method static Builder<static>|User appUser()
- * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static UserFactory factory($count = null, $state = [])
  * @method static Builder<static>|User newModelQuery()
  * @method static Builder<static>|User newQuery()
  * @method static Builder<static>|User query()
  * @method static Builder<static>|User scopeAppAdmin()
- * @method static Builder<static>|User scopeAssignedTo(\Hdaklue\MargRbac\Contracts\Role\RoleableEntity $entity)
+ * @method static Builder<static>|User scopeAssignedTo(RoleableEntity $entity)
  * @method static Builder<static>|User scopeMemberOf(\App\Models\Tenant $tenant)
- * @method static Builder<static>|User scopeNotAssignedTo(\Hdaklue\MargRbac\Contracts\Role\RoleableEntity $entity)
+ * @method static Builder<static>|User scopeNotAssignedTo(RoleableEntity $entity)
  * @method static Builder<static>|User scopeNotMemberOf(\App\Models\Tenant $tenant)
  * @method static Builder<static>|User whereAccountType($value)
  * @method static Builder<static>|User whereActiveTenantId($value)
@@ -115,11 +114,11 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return true;
     }
 
-    public function updateProfileAvatar(string $avatarFileName)
+    public function updateProfileAvatar(string $avatarFileName): void
     {
         $this->loadMissing('profile')->profile->update([
-                'avatar' => $avatarFileName,
-            ]);
+            'avatar' => $avatarFileName,
+        ]);
     }
 
     public function getTimeZone(): string
@@ -127,7 +126,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return $this->loadMissing('profile')->profile->getAttribute('timezone');
     }
 
-    public function getDefaultTenant(Panel $panel): null|Model
+    public function getDefaultTenant(Panel $panel): ?Model
     {
         return $this->activeTenant() ?? $this->getAssignedTenants()->first();
     }
@@ -165,7 +164,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     }
 
     /**
-     * Check if user can view a flow.
+     * Check if the user can view a flow.
      */
     public function canViewFlow(Flow $flow): bool
     {
@@ -173,19 +172,14 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     }
 
     /**
-     * Check if user has a specific role on a flow.
+     * Check if the user has a specific role in a flow.
      */
     public function hasRoleOnFlow(Flow $flow, RoleContract $role): bool
     {
         return $this->hasAssignmentOn($flow, $role);
     }
 
-    public function getAvatar(): null|string
-    {
-        return $this->load('profile')->profile?->avatar;
-    }
-
-    public function getAvatarFileName(): null|string
+    public function getAvatarFileName(): ?string
     {
         return $this->load('profile')->profile?->avatar;
     }
@@ -207,15 +201,6 @@ final class User extends RbacUser implements FilamentUser, HasTenants
     {
         return $this->hasMany(Tenant::class, 'creator_id');
     }
-
-    // /**
-    //  * Get all tenants this user is assigned to with any role.
-    //  * Override package method to use correct App\Models\Tenant class.
-    //  */
-    // public function getAssignedTenants()
-    // {
-    //     return RoleManager::getAssignedEntitiesByType($this, Relation::getMorphAlias(Tenant::class));
-    // }
 
     /**
      * Get the user's notifications using the main database connection.
@@ -243,7 +228,7 @@ final class User extends RbacUser implements FilamentUser, HasTenants
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'accout_type' => AccountType::class,
+            'account_type' => AccountType::class,
         ];
     }
 }

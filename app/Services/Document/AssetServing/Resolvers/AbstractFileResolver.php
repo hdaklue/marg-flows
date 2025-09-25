@@ -29,7 +29,7 @@ abstract class AbstractFileResolver
      */
     public function resolveSecureUrl($entity, string $type, string $filename): string
     {
-        if (!$this->validateAccess($entity)) {
+        if (! $this->validateAccess($entity)) {
             throw new HttpResponseException(response()->json([
                 'error' => 'Access denied',
             ], Response::HTTP_FORBIDDEN));
@@ -54,12 +54,12 @@ abstract class AbstractFileResolver
         $entity,
         string $type,
         string $filename,
-        null|int $expires = null,
-        null|User $user = null,
+        ?int $expires = null,
+        ?User $user = null,
     ): string {
         $user ??= auth()->user();
 
-        if (!$user || !$this->validateAccess($entity)) {
+        if (! $user || ! $this->validateAccess($entity)) {
             throw new HttpResponseException(response()->json([
                 'error' => 'Access denied',
             ], Response::HTTP_FORBIDDEN));
@@ -86,7 +86,7 @@ abstract class AbstractFileResolver
      * @param  string  $filename  The filename
      * @return int|null File size in bytes, null if file doesn't exist
      */
-    abstract public function getFileSize($entity, string $type, string $filename): null|int;
+    abstract public function getFileSize($entity, string $type, string $filename): ?int;
 
     /**
      * Delete file for the entity.
@@ -103,11 +103,11 @@ abstract class AbstractFileResolver
         $entity,
         string $type,
         string $filename,
-        null|User $user = null,
+        ?User $user = null,
     ): bool {
         $user ??= auth()->user();
 
-        if (!$user || !$this->validateAccess($entity)) {
+        if (! $user || ! $this->validateAccess($entity)) {
             throw new HttpResponseException(response()->json([
                 'error' => 'Access denied',
             ], Response::HTTP_FORBIDDEN));
@@ -154,7 +154,7 @@ abstract class AbstractFileResolver
         $entity,
         string $type,
         string $filename,
-        null|int $expires = null,
+        ?int $expires = null,
     ): string;
 
     /**

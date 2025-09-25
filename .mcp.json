@@ -4,14 +4,14 @@
             "command": "npx",
             "args": [
                 "@modelcontextprotocol/server-filesystem",
-                "/Users/home/Code/klueportal"
+                "/Users/home/Code/margflow"
             ],
             "env": {}
         },
         "laravel-boost": {
             "command": "php",
             "args": [
-                "./artisan",
+                "artisan",
                 "boost:mcp"
             ]
         },
@@ -21,7 +21,7 @@
                 "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
             ],
             "env": {
-                "SITE_PATH": "/Users/home/Code/klueportal"
+                "SITE_PATH": "/Users/home/Code/margflow"
             }
         }
     }

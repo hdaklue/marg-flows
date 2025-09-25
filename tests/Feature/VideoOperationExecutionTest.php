@@ -22,7 +22,7 @@ it('actually executes resize operations on real files', function () {
 
     // Ensure output directory exists
     $outputDir = dirname($fullOutputPath);
-    if (!is_dir($outputDir)) {
+    if (! is_dir($outputDir)) {
         mkdir($outputDir, 0755, true);
     }
 
@@ -40,7 +40,7 @@ it('actually executes resize operations on real files', function () {
         // Now use our video service to resize it
         $editor = Video::fromDisk($inputPath)
             ->resize(new Dimension(320, 240))
-            ->convert(new Conversion480p()); // Half size
+            ->convert(new Conversion480p); // Half size
 
         // Execute the operations by calling save
         try {
@@ -101,7 +101,7 @@ it('executes trim operations on real files', function () {
 
     // Ensure output directory exists
     $outputDir = dirname($fullOutputPath);
-    if (!is_dir($outputDir)) {
+    if (! is_dir($outputDir)) {
         mkdir($outputDir, 0755, true);
     }
 
@@ -117,7 +117,7 @@ it('executes trim operations on real files', function () {
         expect(Storage::disk('local')->exists($inputPath))->toBeTrue();
 
         // Use our video service to trim it (first 2 seconds)
-        $editor = Video::fromDisk($inputPath)->trim(0, 2)->convert(new Conversion480p()); // First 2 seconds only
+        $editor = Video::fromDisk($inputPath)->trim(0, 2)->convert(new Conversion480p); // First 2 seconds only
 
         try {
             $editor->save($fullOutputPath); // Use full path instead of relative

@@ -81,7 +81,7 @@ final class OriginalMigrateCommand extends Command
     {
         $migrationsPath = database_path('migrations');
 
-        if (!is_dir($migrationsPath)) {
+        if (! is_dir($migrationsPath)) {
             return [];
         }
 

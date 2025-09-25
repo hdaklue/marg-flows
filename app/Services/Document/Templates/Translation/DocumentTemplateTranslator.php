@@ -47,7 +47,7 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
      * @param  array<string>  $allowedTemplateClasses
      */
     public function __construct(
-        null|string $locale = null,
+        ?string $locale = null,
         string $fallbackLocale = 'en',
         array $allowedTemplateClasses = [],
     ) {
@@ -243,12 +243,12 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
     protected function findTranslatorForLocale(
         array $availableTranslations,
         string $locale,
-    ): null|object {
+    ): ?object {
         foreach ($availableTranslations as $translationClass) {
             $this->validateTranslationClass($translationClass);
 
             if ($translationClass::getLocaleCode() === $locale) {
-                return new $translationClass();
+                return new $translationClass;
             }
         }
 
@@ -276,7 +276,7 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
 
         $className = str_replace('/', '\\', $path);
 
-        if (!class_exists($className)) {
+        if (! class_exists($className)) {
             throw new InvalidArgumentException("Template class not found: {$className}");
         }
 
@@ -289,14 +289,14 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
     protected function validateTemplateClass(string $className): void
     {
         if (
-            !empty($this->allowedTemplateClasses)
-            && !in_array($className, $this->allowedTemplateClasses, true)
+            ! empty($this->allowedTemplateClasses)
+            && ! in_array($className, $this->allowedTemplateClasses, true)
         ) {
             throw new InvalidArgumentException("Template class not allowed: {$className}");
         }
 
         // Ensure class extends expected base class or implements expected interface
-        if (!method_exists($className, 'getAvailableTranslations')) {
+        if (! method_exists($className, 'getAvailableTranslations')) {
             throw new InvalidArgumentException("Invalid template class: {$className}");
         }
     }
@@ -306,7 +306,7 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
      */
     protected function validateTranslationClass(string $className): void
     {
-        if (!class_exists($className)) {
+        if (! class_exists($className)) {
             throw new InvalidArgumentException("Translation class not found: {$className}");
         }
 
@@ -317,9 +317,9 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
 
         // Legacy validation for backward compatibility
         if (
-            !method_exists($className, 'getLocaleCode')
-            || !method_exists($className, 'getBlockTranslations')
-            || !method_exists($className, 'getMetaTranslations')
+            ! method_exists($className, 'getLocaleCode')
+            || ! method_exists($className, 'getBlockTranslations')
+            || ! method_exists($className, 'getMetaTranslations')
         ) {
             throw new InvalidArgumentException("Invalid translation class: {$className}");
         }
@@ -330,7 +330,7 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
      */
     protected function validateLocale(string $locale): void
     {
-        if (!preg_match('/^[a-z]{2}(-[A-Z]{2})?$/', $locale)) {
+        if (! preg_match('/^[a-z]{2}(-[A-Z]{2})?$/', $locale)) {
             throw new InvalidArgumentException("Invalid locale format: {$locale}");
         }
     }
@@ -380,7 +380,7 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
     {
         $keysToRemove = array_filter(
             array_keys($this->translationCache),
-            fn($key) => (
+            fn ($key) => (
                 str_starts_with($key, "block_{$locale}_")
                 || str_starts_with($key, "meta_{$locale}_")
             ),
@@ -393,7 +393,7 @@ final class DocumentTemplateTranslator implements DocumentTemplateTranslatorInte
         // Also clear translator cache for this locale
         $translatorKeysToRemove = array_filter(
             array_keys($this->translatorCache),
-            fn($key) => str_starts_with($key, "{$locale}_"),
+            fn ($key) => str_starts_with($key, "{$locale}_"),
         );
 
         foreach ($translatorKeysToRemove as $key) {

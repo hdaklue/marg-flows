@@ -39,10 +39,10 @@ final class RecentInteractionsTabs extends NapTab
             Tab::make('documents')->icon(
                 'clipboard-document-list',
             )->livewire(RecentableList::class, [
-                'recents' => $this->getData()->whereTypeIs((new Document())->getRecentType()),
+                'recents' => $this->getData()->whereTypeIs((new Document)->getRecentType()),
             ]),
             Tab::make('flows')->icon('rectangle-stack')->livewire(RecentableList::class, [
-                'recents' => $this->getData()->whereTypeIs((new Flow())->getRecentType()),
+                'recents' => $this->getData()->whereTypeIs((new Flow)->getRecentType()),
             ]),
             // Tab::make('workflows')->content(new HtmlString('Workflows')),
             // Tab::make('analytics'),

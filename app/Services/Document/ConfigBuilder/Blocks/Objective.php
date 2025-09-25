@@ -34,7 +34,7 @@ final class Objective implements DocumentBlockConfigContract
 
     private array $tunes = ['commentTune'];
 
-    private null|string $shortcut = 'CMD+SHIFT+O';
+    private ?string $shortcut = 'CMD+SHIFT+O';
 
     public function __construct(
         private bool $inlineToolBar = false,
@@ -91,7 +91,7 @@ final class Objective implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function shortcut(null|string $shortcut): self
+    public function shortcut(?string $shortcut): self
     {
         $this->shortcut = $shortcut;
 
@@ -114,7 +114,7 @@ final class Objective implements DocumentBlockConfigContract
 
     public function addTune(string $tune): self
     {
-        if (!in_array($tune, $this->tunes)) {
+        if (! in_array($tune, $this->tunes)) {
             $this->tunes[] = $tune;
         }
 

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Document;
 
 use Hdaklue\Polish\BasePolisher;
 
-class DocumentVersionPolisher extends BasePolisher
+final class DocumentVersionPolisher extends BasePolisher
 {
     public static function shortKey(string $value): string
     {

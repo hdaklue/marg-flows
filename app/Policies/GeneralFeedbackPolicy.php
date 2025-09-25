@@ -184,7 +184,7 @@ final class GeneralFeedbackPolicy
         $feedbackable = $feedback->feedbackable;
 
         // If feedbackable doesn't exist, deny access
-        if (!$feedbackable) {
+        if (! $feedbackable) {
             return false;
         }
 
@@ -207,7 +207,7 @@ final class GeneralFeedbackPolicy
     {
         $feedbackable = $feedback->feedbackable;
 
-        if (!$feedbackable) {
+        if (! $feedbackable) {
             return false;
         }
 

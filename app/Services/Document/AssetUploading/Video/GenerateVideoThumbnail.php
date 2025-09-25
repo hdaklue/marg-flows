@@ -24,8 +24,8 @@ final class GenerateVideoThumbnail
         string $videoPath,
         float $duration,
         Document $document,
-        null|string $sessionId = null,
-    ): null|string {
+        ?string $sessionId = null,
+    ): ?string {
         try {
             $extractionTime = $duration < 10 ? $duration * 0.1 : 1.0;
             $videoFilename = pathinfo($videoPath, PATHINFO_FILENAME);

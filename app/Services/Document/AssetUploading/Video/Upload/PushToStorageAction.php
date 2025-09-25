@@ -31,8 +31,8 @@ final class PushToStorageAction
     public function handle(
         string $localFinalPath,
         Document $document,
-        null|string $videoSessionId = null,
-        null|array $videoMetadata = null,
+        ?string $videoSessionId = null,
+        ?array $videoMetadata = null,
     ): string {
         try {
             Log::info('Starting push to storage', [
@@ -130,13 +130,13 @@ final class PushToStorageAction
 
         // Read from local chunks disk and write to document disk using streaming
         $localStream = Storage::disk($chunksDisk)->readStream($localPath);
-        if (!$localStream) {
+        if (! $localStream) {
             throw new Exception("Failed to read assembled file from local storage: {$localPath}");
         }
 
         try {
             $success = Storage::disk($documentDisk)->writeStream($remotePath, $localStream);
-            if (!$success) {
+            if (! $success) {
                 throw new Exception(
                     "Failed to upload assembled file to document storage: {$remotePath}",
                 );

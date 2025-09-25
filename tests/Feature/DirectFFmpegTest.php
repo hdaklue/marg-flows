@@ -16,7 +16,7 @@ it('can directly process video with Laravel FFmpeg', function () {
 
     $fullOutputPath = Storage::disk('local')->path($outputPath);
     $outputDir = dirname($fullOutputPath);
-    if (!is_dir($outputDir)) {
+    if (! is_dir($outputDir)) {
         mkdir($outputDir, 0755, true);
     }
 

@@ -15,7 +15,7 @@ final class EditorJs extends Field
 
     protected string $view = 'forms.components.editor-js';
 
-    private null|string $cachedId = null;
+    private ?string $cachedId = null;
 
     public function editable(bool|Closure $editable = true): static
     {

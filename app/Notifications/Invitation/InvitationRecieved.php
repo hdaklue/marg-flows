@@ -39,7 +39,7 @@ final class InvitationRecieved extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage())
+        return (new MailMessage)
             ->greeting('Hello ' . Str::before($notifiable->name, ' ') . ',')
             ->line('You have been invited to join our succees management platform.')
             ->line(new HtmlString("Password: <b>{$this->password}</b>"))

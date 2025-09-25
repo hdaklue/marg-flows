@@ -29,7 +29,7 @@ final class AvatarService
      */
     public static function generateAvatarUrl(User $user): string
     {
-        if (!empty($user->getAvatarFileName())) {
+        if (! empty($user->getAvatarFileName())) {
             return SystemDirectoryManager::instance()
                 ->avatars()
                 ->getFileUrl($user->getAvatarFileName());
@@ -83,9 +83,9 @@ final class AvatarService
      * @param  User  $user  The user to get avatar path for
      * @return string|null Relative storage path or null if no avatar
      */
-    public static function getAvatarPath(User $user): null|string
+    public static function getAvatarPath(User $user): ?string
     {
-        if (!empty($user->getAvatarFileName())) {
+        if (! empty($user->getAvatarFileName())) {
             return SystemDirectoryManager::instance()
                 ->avatars()
                 ->getRelativePath($user->getAvatarFileName());

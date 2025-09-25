@@ -8,10 +8,11 @@ use App\Filament\Widgets\RecentInteractionsWidget;
 use App\Polishers\UserPolisher;
 use BackedEnum;
 use Illuminate\Contracts\Support\Htmlable;
+use Throwable;
 
 final class Dashboard extends \Filament\Pages\Dashboard
 {
-    protected static null|int $navigationSort = 1;
+    protected static ?int $navigationSort = 1;
 
     protected static bool $shouldRegisterNavigation = true;
 
@@ -34,8 +35,11 @@ final class Dashboard extends \Filament\Pages\Dashboard
         return 2;
     }
 
+    /**
+     * @throws Throwable
+     */
     public function getHeading(): Htmlable|string
     {
-        return 'Hi, ' . UserPolisher::displayname(filamentUser());
+        return 'Hi, ' . UserPolisher::polishUserName(filamentUser());
     }
 }

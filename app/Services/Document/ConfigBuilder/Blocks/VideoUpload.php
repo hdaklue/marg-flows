@@ -87,28 +87,28 @@ final class VideoUpload implements DocumentBlockConfigContract
         return $this;
     }
 
-    public function maxFileSize(null|int $size): self
+    public function maxFileSize(?int $size): self
     {
         $this->config['maxFileSize'] = $size;
 
         return $this;
     }
 
-    public function maxSingleFileSize(null|int $size): self
+    public function maxSingleFileSize(?int $size): self
     {
         $this->config['maxSingleFileSize'] = $size;
 
         return $this;
     }
 
-    public function chunkSize(null|int $size): self
+    public function chunkSize(?int $size): self
     {
         $this->config['chunkSize'] = $size;
 
         return $this;
     }
 
-    public function useChunkedUpload(null|bool $enabled): self
+    public function useChunkedUpload(?bool $enabled): self
     {
         $this->config['useChunkedUpload'] = $enabled;
 

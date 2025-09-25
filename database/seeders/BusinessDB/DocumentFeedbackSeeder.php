@@ -19,7 +19,7 @@ final class DocumentFeedbackSeeder extends Seeder
 
         // Get test user from main database
         $testUser = User::where('email', 'test@example.com')->first();
-        if (!$testUser) {
+        if (! $testUser) {
             $this->command->warn('Test user not found. Please run main DatabaseSeeder first.');
 
             return;
@@ -104,20 +104,19 @@ final class DocumentFeedbackSeeder extends Seeder
         return 'block_' . fake()->uuid();
     }
 
-    private function generateBlockVersion(): null|string
+    private function generateBlockVersion(): ?string
     {
-        if (!fake()->boolean(70)) { // 70% chance of having version info
+        if (! fake()->boolean(70)) { // 70% chance of having version info
             return null;
         }
 
-        return (
+        return
             'v'
             . fake()->numberBetween(1, 10)
             . '.'
             . fake()->numberBetween(0, 9)
             . '.'
-            . fake()->sha1()
-        );
+            . fake()->sha1();
     }
 
     private function generateDocumentComment(string $elementType, bool $hasTextSelection): string
@@ -192,9 +191,9 @@ final class DocumentFeedbackSeeder extends Seeder
         return fake()->randomElement($elementComments);
     }
 
-    private function generatePositionData(string $elementType): null|array
+    private function generatePositionData(string $elementType): ?array
     {
-        if (!fake()->boolean(60)) { // 60% chance of having position data
+        if (! fake()->boolean(60)) { // 60% chance of having position data
             return null;
         }
 

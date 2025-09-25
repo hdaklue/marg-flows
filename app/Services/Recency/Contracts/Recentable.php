@@ -20,5 +20,5 @@ interface Recentable
     /**
      * Optional: label or title for displaying in a dashboard widget.
      */
-    public function getRecentLabel(): null|string;
+    public function getRecentLabel(): ?string;
 }

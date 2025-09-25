@@ -217,10 +217,9 @@ final class DesignSpecification implements DeliverableSpecification
 
     public function equals(self $other): bool
     {
-        return (
+        return
             $this->width === $other->width
             && $this->height === $other->height
-            && abs($this->getAspectRatio() - $other->getAspectRatio()) < 1e-10
-        );
+            && abs($this->getAspectRatio() - $other->getAspectRatio()) < 1e-10;
     }
 }

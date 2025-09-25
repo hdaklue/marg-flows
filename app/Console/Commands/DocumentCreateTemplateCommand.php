@@ -148,7 +148,7 @@ final class DocumentCreateTemplateCommand extends Command
 
         $replacementKeys = array_merge(
             ['{{ namespace }}'],
-            array_map(fn($key) => "{{ {$key} }}", array_keys($replacements)),
+            array_map(fn ($key) => "{{ {$key} }}", array_keys($replacements)),
         );
 
         $replacementValues = array_merge([$namespace], array_values($replacements));
@@ -170,7 +170,7 @@ final class DocumentCreateTemplateCommand extends Command
 
         // Add use statement if not exists
         $useStatement = "use App\\Services\\Document\\Templates\\{$className}\\{$className};";
-        if (!str_contains($configContent, $useStatement)) {
+        if (! str_contains($configContent, $useStatement)) {
             $configContent = str_replace(
                 "use App\Services\Document\Templates\General\General;",
                 "use App\Services\Document\Templates\General\General;\n{$useStatement}",

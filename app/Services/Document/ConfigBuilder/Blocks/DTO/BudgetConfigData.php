@@ -17,7 +17,7 @@ final class BudgetConfigData extends SimpleDTO implements BlockConfigContract
 
     public array $config;
 
-    public null|string $shortcut;
+    public ?string $shortcut;
 
     protected function defaults(): array
     {

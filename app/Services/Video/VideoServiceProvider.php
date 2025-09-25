@@ -14,9 +14,9 @@ final class VideoServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind('video', fn($app) => new VideoManager($app));
+        $this->app->bind('video', fn ($app) => new VideoManager($app));
 
-        $this->app->bind(VideoNamingService::class, fn() => new VideoNamingService());
+        $this->app->bind(VideoNamingService::class, fn () => new VideoNamingService);
     }
 
     /**

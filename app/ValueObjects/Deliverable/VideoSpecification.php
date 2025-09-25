@@ -24,9 +24,9 @@ final class VideoSpecification
         private readonly array $recommendedPlatforms,
         private readonly array $requirements,
         private readonly array $constraints = [],
-        private readonly null|string $codec = null,
-        private readonly null|int $bitrate = null,
-        private readonly null|int $frameRate = null,
+        private readonly ?string $codec = null,
+        private readonly ?int $bitrate = null,
+        private readonly ?int $frameRate = null,
     ) {
         throw_if(
             $this->durationMin < 0 || $this->durationMax < 0,
@@ -113,17 +113,17 @@ final class VideoSpecification
         return $this->constraints;
     }
 
-    public function getCodec(): null|string
+    public function getCodec(): ?string
     {
         return $this->codec;
     }
 
-    public function getBitrate(): null|int
+    public function getBitrate(): ?int
     {
         return $this->bitrate;
     }
 
-    public function getFrameRate(): null|int
+    public function getFrameRate(): ?int
     {
         return $this->frameRate;
     }
@@ -319,13 +319,12 @@ final class VideoSpecification
 
     public function equals(self $other): bool
     {
-        return (
+        return
             $this->name === $other->name
             && $this->durationMin === $other->durationMin
             && $this->durationMax === $other->durationMax
             && $this->resolution === $other->resolution
-            && $this->format === $other->format
-        );
+            && $this->format === $other->format;
     }
 
     private function getEstimatedBitrate(): int

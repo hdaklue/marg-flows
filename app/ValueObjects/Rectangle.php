@@ -79,19 +79,18 @@ final class Rectangle implements Arrayable, Jsonable, JsonSerializable, Stringab
 
     public function contains(int $x, int $y): bool
     {
-        return (
+        return
             $x >= $this->x
             && $x
             <= ($this->x + $this->width)
             && $y >= $this->y
             && $y
-            <= ($this->y + $this->height)
-        );
+            <= ($this->y + $this->height);
     }
 
     public function overlaps(Rectangle $other): bool
     {
-        return !(
+        return ! (
             ($this->x + $this->width)
             < $other->x
             || ($other->x + $other->width)

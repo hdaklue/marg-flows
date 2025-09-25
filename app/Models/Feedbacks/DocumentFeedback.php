@@ -154,31 +154,30 @@ final class DocumentFeedback extends Model
     // Type-specific methods
     public function hasTextSelection(): bool
     {
-        return (
-            !empty($this->selection_data)
+        return
+            ! empty($this->selection_data)
             && isset($this->selection_data['selectedText'])
-            && !empty($this->selection_data['selectedText'])
-        );
+            && ! empty($this->selection_data['selectedText']);
     }
 
-    public function getSelectedText(): null|string
+    public function getSelectedText(): ?string
     {
         return $this->selection_data['selectedText'] ?? null;
     }
 
-    public function getSelectionStart(): null|int
+    public function getSelectionStart(): ?int
     {
         return $this->selection_data['start'] ?? null;
     }
 
-    public function getSelectionEnd(): null|int
+    public function getSelectionEnd(): ?int
     {
         return $this->selection_data['end'] ?? null;
     }
 
     public function getSelectionLength(): int
     {
-        if (!$this->hasTextSelection()) {
+        if (! $this->hasTextSelection()) {
             return 0;
         }
 
@@ -192,19 +191,19 @@ final class DocumentFeedback extends Model
         return $end - $start;
     }
 
-    public function getBlockIndex(): null|int
+    public function getBlockIndex(): ?int
     {
         return $this->position_data['blockIndex'] ?? null;
     }
 
-    public function getBlockPosition(): null|array
+    public function getBlockPosition(): ?array
     {
         return $this->position_data['position'] ?? null;
     }
 
     public function isBlockLevelFeedback(): bool
     {
-        return !$this->hasTextSelection();
+        return ! $this->hasTextSelection();
     }
 
     public function isTextLevelFeedback(): bool
@@ -276,7 +275,7 @@ final class DocumentFeedback extends Model
 
     public function hasBlockVersion(): bool
     {
-        return !empty($this->block_version);
+        return ! empty($this->block_version);
     }
 
     public function isBlockVersionCurrent(string $currentVersion): bool

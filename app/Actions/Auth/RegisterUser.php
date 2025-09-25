@@ -18,7 +18,6 @@ final class RegisterUser
     use AsAction;
 
     /**
-     *
      * @throws Exception
      */
     public function handle(string $email, string $username, string $password): ?User

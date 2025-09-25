@@ -18,10 +18,9 @@ use InvalidArgumentException;
  * Handles temporary chunk storage for file upload sessions with tenant isolation.
  * Uses LaraPath for secure directory structure and hashed tenant/session IDs.
  */
-final class ChunksStorageStrategy extends BaseStorageStrategy implements
-    ChunksStorageStrategyContract
+final class ChunksStorageStrategy extends BaseStorageStrategy implements ChunksStorageStrategyContract
 {
-    private null|string $sessionId = null;
+    private ?string $sessionId = null;
 
     /**
      * Constructor receives the tenant ID for secure path building.

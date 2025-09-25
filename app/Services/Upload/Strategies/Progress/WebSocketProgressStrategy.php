@@ -77,7 +77,7 @@ final class WebSocketProgressStrategy implements ProgressStrategyContract
         // broadcast(new UploadSessionFailed($sessionId, $message));
     }
 
-    public function getProgress(string $sessionId): null|ProgressData
+    public function getProgress(string $sessionId): ?ProgressData
     {
         // TODO: Implement progress retrieval from WebSocket storage
         // This would typically query the session storage to get current progress

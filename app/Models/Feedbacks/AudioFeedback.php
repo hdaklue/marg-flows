@@ -176,12 +176,12 @@ final class AudioFeedback extends Model implements HasMentionsContract
 
     public function hasWaveformData(): bool
     {
-        return !empty($this->waveform_data);
+        return ! empty($this->waveform_data);
     }
 
     public function hasFrequencyData(): bool
     {
-        return !empty($this->frequency_data);
+        return ! empty($this->frequency_data);
     }
 
     public function hasAmplitudeData(): bool
@@ -270,7 +270,7 @@ final class AudioFeedback extends Model implements HasMentionsContract
     protected function scopeByDuration(
         Builder $query,
         float $minDuration,
-        null|float $maxDuration = null,
+        ?float $maxDuration = null,
     ): Builder {
         $query->whereRaw('(end_time - start_time) >= ?', [$minDuration]);
 

@@ -54,7 +54,7 @@ final class StorageManager implements StorageManagerContract
      */
     public function createAvatarStrategy(): StorageStrategyContract
     {
-        return new AvatarStorageStrategy();
+        return new AvatarStorageStrategy;
     }
 
     /**
@@ -64,7 +64,7 @@ final class StorageManager implements StorageManagerContract
      */
     public function createTempStrategy(): StorageStrategyContract
     {
-        return new TempStorageStrategy();
+        return new TempStorageStrategy;
     }
 
     /**

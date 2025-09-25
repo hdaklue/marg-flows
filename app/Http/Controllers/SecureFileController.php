@@ -35,7 +35,7 @@ final class SecureFileController extends Controller
         string $path,
     ): StreamedResponse|Response {
         // Ensure user is authenticated
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             abort(401, 'Authentication required');
         }
 
@@ -55,7 +55,7 @@ final class SecureFileController extends Controller
         $disk = config('document.storage.disk', 'public');
 
         // Verify file exists
-        if (!Storage::disk($disk)->exists($fullPath)) {
+        if (! Storage::disk($disk)->exists($fullPath)) {
             abort(404, 'File not found');
         }
 
@@ -89,7 +89,7 @@ final class SecureFileController extends Controller
         ]);
 
         // Ensure user is authenticated
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             abort(401, 'Authentication required');
         }
 
@@ -112,7 +112,7 @@ final class SecureFileController extends Controller
         $fullPath = "{$userTenantId}/{$type}/{$path}";
         $disk = config('document.storage.disk', 'public');
 
-        if (!Storage::disk($disk)->exists($fullPath)) {
+        if (! Storage::disk($disk)->exists($fullPath)) {
             abort(404, 'File not found');
         }
 

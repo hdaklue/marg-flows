@@ -48,10 +48,10 @@ final class ResolutionExporter
 
             // Create the appropriate FFMpeg format object
             $format = match ($formatString) {
-                'mp4', 'mov' => new X264(),
-                'webm' => new WebM(),
-                'avi' => new WMV(),
-                default => new X264(),
+                'mp4', 'mov' => new X264,
+                'webm' => new WebM,
+                'avi' => new WMV,
+                default => new X264,
             };
 
             // Set bitrate if specified

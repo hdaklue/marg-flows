@@ -9,7 +9,7 @@ use App\Services\Upload\ChunkConfigManager;
 
 final class Base
 {
-    public function build(null|string $documentId = null): array
+    public function build(?string $documentId = null): array
     {
         $imagesConfig = EditorConfigBuilder::images();
         if ($documentId) {
@@ -38,7 +38,7 @@ final class Base
         ];
     }
 
-    private function buildVideoUploadConfig(null|string $documentId)
+    private function buildVideoUploadConfig(?string $documentId)
     {
         $videoUploadConfig = EditorConfigBuilder::videoUpload()->withChunkConfig(ChunkConfigManager::forVideos(
             'simple',

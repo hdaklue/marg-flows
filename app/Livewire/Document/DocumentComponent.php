@@ -170,7 +170,7 @@ final class DocumentComponent extends Component
     }
 
     #[Computed]
-    public function participantsArray(): ParticipantsCollection
+    public function participantsArrayComputed(): ParticipantsCollection
     {
         return $this->participants->asDtoCollection();
     }

@@ -35,7 +35,7 @@ final class UrlFetchController extends Controller
                 'User-Agent' => 'Mozilla/5.0 (compatible; KluePortal/1.0; +https://klueportal.com)',
             ])->get($url);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return response()->json([
                     'success' => 0,
                     'message' => 'Failed to fetch URL content',
@@ -67,7 +67,7 @@ final class UrlFetchController extends Controller
         ];
 
         // Create a DOM document to parse HTML
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         $previousSetting = libxml_use_internal_errors(true);
         $dom->loadHTML($html);
         libxml_clear_errors();

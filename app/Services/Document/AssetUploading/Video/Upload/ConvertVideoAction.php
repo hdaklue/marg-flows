@@ -33,7 +33,7 @@ final class ConvertVideoAction
     public function handle(
         string $localFinalPath,
         Document $document,
-        null|string $videoSessionId = null,
+        ?string $videoSessionId = null,
     ): array {
         try {
             Log::info('Starting video conversion', [
@@ -196,7 +196,7 @@ final class ConvertVideoAction
      */
     private function extractMetadataFromLocalFileWithFallback(
         string $localPath,
-        null|string $sessionId = null,
+        ?string $sessionId = null,
     ): array {
         try {
             return $this->extractMetadataFromLocalFile($localPath, $sessionId);
@@ -231,7 +231,7 @@ final class ConvertVideoAction
      */
     private function extractMetadataFromLocalFile(
         string $localPath,
-        null|string $sessionId = null,
+        ?string $sessionId = null,
     ): array {
         $chunksDisk = config('chunked-upload.storage.disk', 'local_chunks');
 

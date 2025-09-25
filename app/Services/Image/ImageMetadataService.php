@@ -111,7 +111,7 @@ final class ImageMetadataService
         try {
             $imagePath = $this->resolveImagePath($imageUrlOrPath);
 
-            if (!$imagePath || !File::exists($imagePath)) {
+            if (! $imagePath || ! File::exists($imagePath)) {
                 return $this->createErrorMetadata(
                     $imageUrlOrPath,
                     'Image file not found',
@@ -120,7 +120,7 @@ final class ImageMetadataService
                 );
             }
 
-            if (!$this->isValidImageFile($imagePath)) {
+            if (! $this->isValidImageFile($imagePath)) {
                 return $this->createErrorMetadata(
                     $imageUrlOrPath,
                     'Invalid image file format',
@@ -202,7 +202,7 @@ final class ImageMetadataService
     /**
      * Resolve an image URL or path to a local file path.
      */
-    private function resolveImagePath(string $imageUrlOrPath): null|string
+    private function resolveImagePath(string $imageUrlOrPath): ?string
     {
         // If it's already a local path and exists
         if (File::exists($imageUrlOrPath)) {

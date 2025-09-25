@@ -20,7 +20,7 @@ final class DTOException extends Exception
         private readonly Validator $validator,
         private readonly array $inputData,
         private readonly array $rules,
-        null|string $customMessage = null,
+        ?string $customMessage = null,
     ) {
         $errors = $this->validator->errors();
         $className = class_basename($this->dtoClass);
@@ -79,7 +79,7 @@ final class DTOException extends Exception
     /**
      * Get the first validation error message.
      */
-    public function getFirstError(): null|string
+    public function getFirstError(): ?string
     {
         return $this->validator->errors()->first();
     }
@@ -121,11 +121,11 @@ final class DTOException extends Exception
     private function buildDefaultMessage(
         string $className,
         string $failedFields,
-        null|string $firstError,
+        ?string $firstError,
     ): string {
         $message = "DTO validation failed for {$className}.";
 
-        if (!empty($failedFields)) {
+        if (! empty($failedFields)) {
             $message .= " Failed fields: [{$failedFields}].";
         }
 

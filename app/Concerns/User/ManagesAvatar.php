@@ -8,7 +8,7 @@ use App\Services\Avatar\AvatarService;
 
 trait ManagesAvatar
 {
-    public function getFilamentAvatarUrl(): null|string
+    public function getFilamentAvatarUrl(): ?string
     {
         return AvatarService::generateAvatarUrl($this);
     }
@@ -23,7 +23,7 @@ trait ManagesAvatar
         return AvatarService::getAvatarPath($this);
     }
 
-    public function getAvatarFileName(): null|string
+    public function getAvatarFileName(): ?string
     {
         return $this->avatar;
     }

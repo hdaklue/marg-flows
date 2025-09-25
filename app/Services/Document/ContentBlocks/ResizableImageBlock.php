@@ -83,17 +83,17 @@ final class ResizableImageBlock extends Block
     public function getFilenames(): array
     {
         $files = $this->get('files', []);
-        if (!is_array($files)) {
+        if (! is_array($files)) {
             return [];
         }
 
-        return array_map(fn($file) => $file['filename'] ?? '', $files);
+        return array_map(fn ($file) => $file['filename'] ?? '', $files);
     }
 
     /**
      * Get the gallery caption.
      */
-    public function getCaption(): null|string
+    public function getCaption(): ?string
     {
         return $this->get('caption');
     }
@@ -103,7 +103,7 @@ final class ResizableImageBlock extends Block
      */
     public function isEmpty(): bool
     {
-        return !$this->hasImages();
+        return ! $this->hasImages();
     }
 
     /**
@@ -113,7 +113,7 @@ final class ResizableImageBlock extends Block
      */
     public function render(): string
     {
-        if (!$this->hasImages()) {
+        if (! $this->hasImages()) {
             return '';
         }
 
