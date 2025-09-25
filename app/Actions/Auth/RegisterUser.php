@@ -9,7 +9,6 @@ use App\Models\Tenant;
 use App\Models\User;
 use Exception;
 use Filament\Auth\Events\Registered;
-use Hdaklue\MargRbac\Enums\Role\RoleEnum;
 use Hdaklue\Porter\RoleFactory;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -18,14 +17,18 @@ final class RegisterUser
 {
     use AsAction;
 
-    public function handle(string $email, string $username, string $password): null|User
+    /**
+     *
+     * @throws Exception
+     */
+    public function handle(string $email, string $username, string $password): ?User
     {
         $ip = app()->isProduction() ? request()->ip() : '41.43.60.242';
         $timezone = GetUserLocation::run($ip)->timezone;
 
         try {
             return DB::transaction(function () use ($username, $email, $password, $timezone) {
-                $user = new User();
+                $user = new User;
 
                 $user->username = $username;
                 $user->email = $email;
@@ -51,7 +54,7 @@ final class RegisterUser
         }
     }
 
-    private function createUserProfile(User $user, $timezone)
+    private function createUserProfile(User $user, $timezone): void
     {
         $user->profile()->create([
             'timezone' => $timezone,

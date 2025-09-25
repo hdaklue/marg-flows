@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace App\Livewire\Document;
 
 use App\Collections\ParticipantsCollection;
-use App\DTOs\Document\DocumentDto;
 use App\Facades\DocumentManager;
 use App\Models\Document;
 use App\Models\DocumentVersion;
 use App\Services\Document\Facades\EditorBuilder;
 use Exception;
 use Hdaklue\Porter\Facades\Porter;
+use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Log;
+use Throwable;
 
 /**
  * @property-read string  $updatedAtString
@@ -37,24 +38,26 @@ final class DocumentComponent extends Component
     /**
      * Current editing version for timeline integration.
      */
-    public null|string $currentEditingVersion = null;
+    public ?string $currentEditingVersion = null;
 
     /**
-     * Indicates if new versions are available since last check.
+     * Indicates if new versions are available since the last check.
      */
     public bool $hasNewVersions = false;
 
     // private string $current_content_hash;
 
-    private DocumentDto $documentDto;
-
-    public function mount(string $documentId, $canEdit = false)
+    /**
+     * @throws Exception
+     * @throws Throwable
+     */
+    public function mount(string $documentId): void
     {
-        $this->documentDto = DocumentManager::getDocumentDto($documentId);
+        $documentDto = DocumentManager::getDocumentDto($documentId);
 
         $this->documentId = $documentId;
-        // Initialize resolver using facade - blocks already contains full EditorJS format
-        $this->content = $this->documentDto->blocks;
+        // Initialize resolver using facade - blocks already contain a full EditorJS format
+        $this->content = $documentDto->blocks;
 
         $this->currentEditingVersion = DocumentManager::getDocument($this->documentId)
             ->loadMissing('latestVersion')
@@ -63,7 +66,7 @@ final class DocumentComponent extends Component
         // $this->current_content_hash = md5(serialize($this->content));
 
         $this->canEdit =
-            filamentUser()->can('manage', $this->document) && !$this->document->isArchived();
+            filamentUser()->can('manage', $this->document) && ! $this->document->isArchived();
     }
 
     #[Computed]
@@ -72,6 +75,9 @@ final class DocumentComponent extends Component
         return DocumentManager::getDocument($this->documentId);
     }
 
+    /**
+     * @throws Exception
+     */
     public function getToolsConfig()
     {
         return match ($this->userPlan) {
@@ -95,8 +101,10 @@ final class DocumentComponent extends Component
     /**
      * Get full tools config for rendering all existing blocks regardless of plan.
      * This ensures backward compatibility with blocks created on higher plans.
+     *
+     * @throws Exception
      */
-    public function getFullToolsConfig()
+    public function getFullToolsConfig(): array
     {
         // Start with base configuration to render all existing blocks
         $baseConfig = EditorBuilder::base()->build();
@@ -109,19 +117,28 @@ final class DocumentComponent extends Component
     }
 
     /**
-     * Get allowed tools for current plan - used to filter toolbox display.
+     * Get allowed tools for the current plan - used to filter toolbox display.
+     *
+     * @throws Exception
      */
-    public function getAllowedTools()
+    public function getAllowedTools(): array
     {
         return array_keys($this->getToolsConfig());
     }
 
+    /**
+     * @throws Throwable
+     */
     #[Computed]
     public function updatedAtString(): string
     {
         return toUserIsoString($this->document->updated_at, filamentUser());
     }
 
+    /**
+     * @throws Exception
+     * @throws Throwable
+     */
     #[Computed(true)]
     public function userPermissions(): array
     {
@@ -140,14 +157,15 @@ final class DocumentComponent extends Component
     }
 
     #[Computed]
-    public function currentEditingVersionComputed(): null|string
+    public function currentEditingVersionComputed(): ?string
     {
-        //If we have a current editing version, use it
+        // If we have a current editing version, use it
         if ($this->currentEditingVersion !== null) {
             return $this->currentEditingVersion;
         }
         // Otherwise, get the latest version from the document
         $this->document->loadMissing('latestVersion');
+
         return $this->document->latestVersion?->id;
     }
 
@@ -176,6 +194,9 @@ final class DocumentComponent extends Component
         }
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function saveDocument(string $content)
     {
         $this->authorize('update', $this->document);
@@ -298,7 +319,7 @@ final class DocumentComponent extends Component
         }
 
         $textBlocks = collect($content['blocks'])
-            ->filter(fn($block) => in_array($block['type'] ?? '', ['paragraph', 'header'], true))
+            ->filter(fn ($block) => in_array($block['type'] ?? '', ['paragraph', 'header'], true))
             ->pluck('data.text')
             ->filter()
             ->take(2);

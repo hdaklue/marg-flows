@@ -14,6 +14,7 @@ use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Computed;
+use Throwable;
 
 /**
  * @property-read bool $canEdit
@@ -22,7 +23,7 @@ final class ViewDocument extends ViewRecord
 {
     protected static string $resource = DocumentResource::class;
 
-    public null|array $data = [];
+    public ?array $data = [];
 
     public Width|string|null $maxContentWidth = 'full';
 
@@ -33,12 +34,16 @@ final class ViewDocument extends ViewRecord
         return '';
     }
 
+    /**
+     * @throws Throwable
+     */
     public function mount(int|string $record): void
     {
         $this->record = $this->resolveRecord($record);
         $this->form->fill([
             'title' => $this->record->getAttribute('name'),
         ]);
+
         RecordRecency::dispatch(filamentUser(), $this->record);
     }
 
@@ -74,7 +79,7 @@ final class ViewDocument extends ViewRecord
                 ->afterStateUpdated(function ($state, $livewire) {
                     $livewire->validate();
 
-                    if (!$this->canEdit() || blank($state)) {
+                    if (! $this->canEdit() || blank($state)) {
                         return;
                     }
 
@@ -91,6 +96,9 @@ final class ViewDocument extends ViewRecord
         ])->statePath('data');
     }
 
+    /**
+     * @throws Throwable
+     */
     #[Computed]
     public function canEdit(): bool
     {
