@@ -177,7 +177,9 @@
             </div>
 
             <!-- Version History Button -->
-            <button wire:click="handleVerionsModalOpen"
+            <button x-data="{
+                show: $wire.entangle('hasNewVersions')
+            }" wire:click="handleVerionsModalOpen" wire:poll.10s='checkNewVersions'
                 class="relative ml-3 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                 x-tooltip="'Version History'">
                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,13 +189,13 @@
                 <span class="hidden sm:inline">History</span>
 
                 <!-- New Version Indicator -->
-                @if ($hasNewVersions)
-                    <span class="absolute -right-1 -top-1 flex h-3 w-3">
-                        <span
-                            class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
-                        <span class="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span>
-                    </span>
-                @endif
+
+                <span class="absolute -right-1 -top-1 flex h-3 w-3" x-show="show" x-cloak>
+                    <span
+                        class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+                    <span class="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span>
+                </span>
+
             </button>
 
             <x-user-avatar-stack :users="$this->participantsArray" :roleableKey="$this->document->getKey()" :roleableType="$this->document->getMorphClass()" :scopeToKey="$this->getDocumentableKey()"

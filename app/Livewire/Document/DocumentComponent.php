@@ -56,9 +56,14 @@ final class DocumentComponent extends Component
         // Initialize resolver using facade - blocks already contains full EditorJS format
         $this->content = $this->documentDto->blocks;
 
+        $this->currentEditingVersion = DocumentManager::getDocument($this->documentId)
+            ->loadMissing('latestVersion')
+            ->latestVersion->getKey();
+
         // $this->current_content_hash = md5(serialize($this->content));
 
-        $this->canEdit = filamentUser()->can('manage', $this->document);
+        $this->canEdit =
+            filamentUser()->can('manage', $this->document) && !$this->document->isArchived();
     }
 
     #[Computed]
@@ -137,14 +142,12 @@ final class DocumentComponent extends Component
     #[Computed]
     public function currentEditingVersionComputed(): null|string
     {
-        // If we have a current editing version, use it
+        //If we have a current editing version, use it
         if ($this->currentEditingVersion !== null) {
             return $this->currentEditingVersion;
         }
-
         // Otherwise, get the latest version from the document
         $this->document->loadMissing('latestVersion');
-
         return $this->document->latestVersion?->id;
     }
 
@@ -218,28 +221,6 @@ final class DocumentComponent extends Component
         }
     }
 
-    // /**
-    //  * Get allowed block types for frontend editor configuration.
-    //  */
-    // #[Computed]
-    // public function allowedBlockTypes(): array
-    // {
-    //     return $this->documentResolver->getAllowedBlockTypes(
-    //         strtolower($this->userPlan),
-    //     );
-    // }
-
-    // /**
-    //  * Check if user can use specific block type.
-    //  */
-    // public function canUseBlockType(string $blockType): bool
-    // {
-    //     return $this->documentResolver->isBlockTypeAllowed(
-    //         $blockType,
-    //         strtolower($this->userPlan),
-    //     );
-    // }
-
     /**
      * Get JavaScript translations for the document editor.
      */
@@ -275,13 +256,15 @@ final class DocumentComponent extends Component
         ];
     }
 
-    /**
-     * Handle new version notification from modal polling.
-     */
-    #[On('new-versions-found')]
-    public function handleNewVersionsFound(): void
+    public function checkNewVersions(): void
     {
-        $this->hasNewVersions = true;
+        // Fetch the latest version ID directly
+        $latestVersion = DocumentVersion::where('document_id', $this->documentId)
+            ->orderByDesc('created_at')
+            ->first();
+        if ($latestVersion->getKey() !== $this->currentEditingVersionComputed) {
+            $this->hasNewVersions = true;
+        }
     }
 
     /**
