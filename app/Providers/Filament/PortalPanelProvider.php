@@ -48,7 +48,7 @@ final class PortalPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Emerald,
             ])
-            ->spa(hasPrefetching: true)
+            ->spa()
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
             ->breadcrumbs(false)

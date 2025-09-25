@@ -12,6 +12,8 @@ use App\Services\Document\Facades\EditorBuilder;
 use Exception;
 use Hdaklue\Porter\Facades\Porter;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -25,7 +27,7 @@ use Throwable;
  */
 final class DocumentComponent extends Component
 {
-    public $canEdit = false;
+    //    public $canEdit = false;
 
     public array $content;
 
@@ -34,6 +36,8 @@ final class DocumentComponent extends Component
 
     #[Locked]
     public string $documentId;
+
+//    public Document $document;
 
     /**
      * Current editing version for timeline integration.
@@ -53,20 +57,30 @@ final class DocumentComponent extends Component
      */
     public function mount(string $documentId): void
     {
-        $documentDto = DocumentManager::getDocumentDto($documentId);
 
         $this->documentId = $documentId;
         // Initialize resolver using facade - blocks already contain a full EditorJS format
-        $this->content = $documentDto->blocks;
-
         $this->currentEditingVersion = DocumentManager::getDocument($this->documentId)
             ->loadMissing('latestVersion')
             ->latestVersion->getKey();
+        //        $this->document = DocumentManager::getDocument($this->documentId);
+        $this->content = $this->document->blocks;
+
+        //        if (session()->has('Document::archive-update') && session('Document::archive-update') === $documentId) {
+        //            unset($this->document);
+        //        }
 
         // $this->current_content_hash = md5(serialize($this->content));
 
-        $this->canEdit =
-            filamentUser()->can('manage', $this->document) && ! $this->document->isArchived();
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Computed]
+    public function canEditComputed(): bool
+    {
+        return filamentUser()->can('manage', $this->document) && ! $this->document->isArchived();
     }
 
     #[Computed]
@@ -176,9 +190,9 @@ final class DocumentComponent extends Component
     }
 
     #[On('roleable-entity:members-updated.{documentId}')]
-    public function reloadPartipants(): void
+    public function reloadParticipants(): void
     {
-        unset($this->participants, $this->participantsArray);
+        unset($this->participants, $this->participantsArray, $this->canEditComputed, $this->userPermissions);
     }
 
     #[On('apply-version')]
@@ -192,12 +206,15 @@ final class DocumentComponent extends Component
             $this->content = $version->content;
             $this->dispatch('version-content-loaded', content: $version->content);
         }
+
+        // Clear computed properties that may be affected by version change
+        unset($this->canEditComputed, $this->userPermissions);
     }
 
     /**
-     * @throws AuthorizationException
+     * @throws AuthorizationException|Exception
      */
-    public function saveDocument(string $content)
+    public function saveDocument(string $content): void
     {
         $this->authorize('update', $this->document);
 
@@ -217,7 +234,7 @@ final class DocumentComponent extends Component
                 'created_at' => now(),
             ]);
 
-            // Update current editing version
+            // Update the current editing version
             $this->currentEditingVersion = $newVersion->id;
 
             // Use DocumentManager to update the document
@@ -231,7 +248,7 @@ final class DocumentComponent extends Component
             $this->dispatch('DocumentComponent::document-saved', newVersionId: $newVersion->id);
 
             // Update the DTO with new content
-            unset($this->updatedAtString, $this->document, $this->currentEditingVersionComputed);
+            unset($this->updatedAtString, $this->document, $this->currentEditingVersionComputed, $this->canEditComputed);
         } catch (Exception $e) {
             Log::error('Document save failed', [
                 'document_id' => $this->documentId,
@@ -297,7 +314,7 @@ final class DocumentComponent extends Component
         $this->hasNewVersions = false;
     }
 
-    public function handleVerionsModalOpen()
+    public function handleVerionsModalOpen(): void
     {
         $this->dispatch('openModal', 'document-versions-modal', [
             'documentId' => $this->documentId,
@@ -307,31 +324,8 @@ final class DocumentComponent extends Component
         // $this->dispatch('openModal', { component: 'document-versions-modal', arguments: { documentId: '{{ $documentId }}', currentEditingVersion: '{{ $this->currentEditingVersionComputed }}' } });
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         return view('livewire.page.document-component');
-    }
-
-    private function generatePreview(array $content): string
-    {
-        if (empty($content['blocks'])) {
-            return 'Empty document';
-        }
-
-        $textBlocks = collect($content['blocks'])
-            ->filter(fn ($block) => in_array($block['type'] ?? '', ['paragraph', 'header'], true))
-            ->pluck('data.text')
-            ->filter()
-            ->take(2);
-
-        if ($textBlocks->isEmpty()) {
-            return count($content['blocks']) . ' blocks';
-        }
-
-        $preview = $textBlocks->implode(' ');
-
-        return strlen($preview) > 100
-            ? substr(strip_tags($preview), 0, 100) . '...'
-            : strip_tags($preview);
     }
 }

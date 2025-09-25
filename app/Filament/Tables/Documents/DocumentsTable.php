@@ -89,9 +89,11 @@ final class DocumentsTable
                     )
                     ->action(function (array $record, Component $livewire) {
                         $document = DocumentManager::getDocument($record['id']);
-                        $livewire->resetTable();
+
                         try {
                             DocumentManager::restore($document);
+                            $livewire->resetTable();
+
                             Notification::make()
                                 ->body(__('common.messages.operation_completed'))
                                 ->success()

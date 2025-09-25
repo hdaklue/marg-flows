@@ -34,6 +34,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
+use Throwable;
 
 /**
  * @property-read Collection $stages
@@ -140,6 +141,9 @@ final class ViewFlow extends ViewRecord
     //     return true;
     // }
 
+    /**
+     * @throws Throwable
+     */
     public function content(Schema $schema): Schema
     {
         RecordRecency::dispatch(filamentUser(), $this->record);
@@ -149,35 +153,6 @@ final class ViewFlow extends ViewRecord
             Livewire::make(FlowTabs::class, ['flowId' => $this->record->getKey()]),
         ]);
     }
-
-    // #[On('sortable:sort')]
-    // public function updateSort($payload)
-    // {
-
-    //     $itemIds = $args[0] ?? [];
-    //     $eventData = $args[1] ?? null;
-
-    //     logger()->info('updateSort called', [
-    //         'itemIds' => $payload['items'],
-    //         'eventData' => $eventData,
-    //         // 'args_count' => count($args),
-    //     ]);
-
-    //     try {
-    //         $this->handleSort($itemIds, $eventData);
-    //     } catch (Exception $e) {
-    //         logger()->error('updateSort failed', [
-    //             'error' => $e->getMessage(),
-    //             'itemIds' => $itemIds,
-    //             'eventData' => $eventData,
-    //         ]);
-    //         $this->addError('sort', 'Failed to update sort order: ' . $e->getMessage());
-    //     }
-    // }
-    // public function hasResourceBreadcrumbs(): bool
-    // {
-    //     return true;
-    // }
 
     public function getSubheading(): string|Htmlable|null
     {
@@ -189,20 +164,4 @@ final class ViewFlow extends ViewRecord
         return ucfirst($this->record->title);
     }
 
-    protected function actioncrumbs(): array
-    {
-        return [
-            Step::make('Dashboard')->icon('heroicon-o-home')->url('/dashboard'),
-            Step::make('Users')
-                ->icon('heroicon-o-users')
-                ->current()
-                ->actions([
-                    CrumbAction::make('Export Users')->icon('heroicon-o-arrow-down-tray')->url('/'),
-                    CrumbAction::make('Import Users')->icon('heroicon-o-arrow-up-tray')->url('/'),
-                    CrumbAction::make('User Settings')->icon('heroicon-o-cog-6-tooth')->url(
-                        '/admin/users/settings',
-                    ),
-                ]),
-        ];
-    }
 }

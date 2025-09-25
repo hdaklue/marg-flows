@@ -44,6 +44,14 @@ final class ViewDocument extends ViewRecord
             'title' => $this->record->getAttribute('name'),
         ]);
 
+        // Check if this document was recently updated via archive/restore
+        if (session()->pull('Document::archive-update') === $this->record->getKey()) {
+            $this->record = $this->resolveRecord($record);
+            $this->form->fill([
+                'title' => $this->record->getAttribute('name'),
+            ]);
+        }
+
         RecordRecency::dispatch(filamentUser(), $this->record);
     }
 

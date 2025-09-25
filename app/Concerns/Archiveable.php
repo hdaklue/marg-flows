@@ -9,13 +9,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait Archiveable
 {
-    public function archive()
+    public function archive(): void
     {
         $this->archived_at = now();
         $this->save();
     }
 
-    public function unArchive()
+    public function unArchive(): void
     {
         $this->archived_at = null;
         $this->save();

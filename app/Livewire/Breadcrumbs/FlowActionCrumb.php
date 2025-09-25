@@ -11,6 +11,7 @@ use Hdaklue\Actioncrumb\Action;
 use Hdaklue\Actioncrumb\Components\WireCrumb;
 use Hdaklue\Actioncrumb\Step;
 use Hdaklue\Actioncrumb\Support\WireAction;
+use Illuminate\Contracts\View\Factory;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
@@ -19,7 +20,7 @@ final class FlowActionCrumb extends WireCrumb
     #[Locked]
     public string $flowId;
 
-    public function mount($record = null, $parent = null)
+    public function mount($record = null, $parent = null): void
     {
         // parent::mount($record, $parent);
         $this->flowId = $record->id;

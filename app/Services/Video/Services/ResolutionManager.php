@@ -20,6 +20,7 @@ use App\Services\Video\Video;
 use Closure;
 use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
+use Throwable;
 
 final class ResolutionManager
 {
@@ -119,7 +120,7 @@ final class ResolutionManager
     }
 
     /**
-     * Add 720p conversion to the batch.
+     * Add a 720p conversion to the batch.
      */
     public function to720p(): self
     {
@@ -235,9 +236,11 @@ final class ResolutionManager
     }
 
     /**
-     * Execute all conversions and save to specified directory.
+     * Execute all conversions and save to a specified directory.
      *
      * @return ResolutionData[]
+     *
+     * @throws Throwable
      */
     public function saveTo(string $directory = ''): array
     {
@@ -247,7 +250,7 @@ final class ResolutionManager
         );
 
         $this->results = [];
-        // If no directory specified, use same directory as source file
+        // If no directory specified, use the same directory as a source file
         $outputDirectory = $directory ?: $this->video->getDirectory();
 
         $exporter = ResolutionExporter::start($this->video->getPath(), $this->video->getDisk());
@@ -271,6 +274,8 @@ final class ResolutionManager
 
     /**
      * Execute all conversions and save to directory (alias for saveTo).
+     *
+     * @throws Throwable
      */
     public function convert(string $directory = ''): array
     {
@@ -321,14 +326,14 @@ final class ResolutionManager
     }
 
     /**
-     * Generate output path using naming strategy.
+     * Generate an output path using naming strategy.
      */
     private function generateOutputPath(string $directory, ConversionContract $conversion): string
     {
         $namingService = new VideoNamingService($this->namingStrategy);
         $filename = $namingService->generateName($this->video, $conversion);
 
-        // If directory is empty (current directory), return just filename
+        // If the directory is empty (current directory), return just the filename
         if (empty($directory)) {
             return $filename;
         }

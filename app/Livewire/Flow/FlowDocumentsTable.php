@@ -26,7 +26,7 @@ final class FlowDocumentsTable extends Component implements HasActions, HasSchem
     #[Locked]
     public Documentable $flow;
 
-    public function mount(Documentable $flow)
+    public function mount(Documentable $flow): void
     {
         $this->flow = $flow;
     }

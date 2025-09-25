@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Log;
+use Throwable;
+use WendellAdriel\ValidatedDTO\Exceptions\CastTargetException;
+use WendellAdriel\ValidatedDTO\Exceptions\MissingCastTypeException;
 
 final class DocumentService implements DocumentManagerInterface
 {
@@ -30,6 +33,8 @@ final class DocumentService implements DocumentManagerInterface
      * @param  Documentable  $documentable  The entity this page belongs to
      * @param  User  $creator  The user creating the page
      * @return Document The created page instance
+     *
+     * @throws Throwable
      */
     public function create(
         CreateDocumentDto $data,
@@ -104,8 +109,8 @@ final class DocumentService implements DocumentManagerInterface
         Document $document,
         array|string $newBlocks,
         // string $currentFingerPrint,
-    ) {
-        // If current content finger print === $document blocks normal update
+    ): void {
+        // If the current content fingerprint === $document blocks normal update
         // if not Should update diffs only
         $document->updateBlocks($newBlocks);
         $this->clearCache($document->documentable);
@@ -148,12 +153,13 @@ final class DocumentService implements DocumentManagerInterface
         )->sortByDesc('updated_at');
     }
 
-    public function restore(Document|string $document)
+    public function restore(Document|string $document): void
     {
         if (! $document instanceof Document) {
             $document = $this->getDocument($document);
         }
         $document->unArchive();
+        $this->clearDocumentsCache($document);
     }
 
     /**
@@ -194,13 +200,15 @@ final class DocumentService implements DocumentManagerInterface
         return $this->mapDocumentsToDtos($documents, $documentable);
     }
 
-    public function archive(Document|string $document)
+    public function archive(Document|string $document): void
     {
         if (! $document instanceof Document) {
             $document = $this->getDocument($document);
         }
 
         $document->archive();
+
+        $this->clearDocumentsCache($document);
     }
 
     public function getDocument(string $documentId): ?Document
@@ -222,6 +230,10 @@ final class DocumentService implements DocumentManagerInterface
         return $page;
     }
 
+    /**
+     * @throws CastTargetException
+     * @throws MissingCastTypeException
+     */
     public function getDocumentDto(string $documentId): ?DocumentDto
     {
         return DocumentDto::fromModel($this->getDocument($documentId));
@@ -306,7 +318,7 @@ final class DocumentService implements DocumentManagerInterface
      *
      * @param  Documentable  $documentable  The entity to clear cache for
      */
-    public function clearCache(Documentable $documentable): void
+    public function clearCache(Documentable|Model $documentable): void
     {
         $keys = [
             $this->generateDocumentsCacheKey($documentable),
@@ -354,16 +366,17 @@ final class DocumentService implements DocumentManagerInterface
      * @param  Document  $page  The page to generate key for
      * @return string The cache key
      */
-    public function generateDocumentCacheKey(Document $page): string
+    public function generateDocumentCacheKey(Document $document): string
     {
-        return "document:{$page->getKey()}:" . $this->generateContentHash($page);
+        return "document:{$document->getKey()}:" . $this->generateContentHash($document);
     }
 
-    public function generateContentHash(Document $page): string
+    public function generateContentHash(Document $document): string
     {
         $content = json_encode([
-            'name' => $page->name,
-            'blocks' => $page->blocks,
+            'name' => $document->name,
+            'blocks' => $document->blocks,
+            'archived_at' => $document->archived_at,
         ]);
 
         return md5($content);

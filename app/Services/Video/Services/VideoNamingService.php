@@ -8,6 +8,7 @@ use App\Services\Video\Contracts\ConversionContract;
 use App\Services\Video\Enums\NamingPattern;
 use App\Services\Video\Video;
 use Carbon\Carbon;
+use InvalidArgumentException;
 
 final class VideoNamingService
 {
@@ -39,12 +40,11 @@ final class VideoNamingService
                 ?->getWidth()}x{$conversion
                 ->getDimension()
                 ?->getHeight()}.{$conversion->getFormat()}",
-            NamingPattern::Conversion => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
+            NamingPattern::Conversion, NamingPattern::ResolutionLabel => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
             NamingPattern::Resolution => "{$basename}_{$this->getResolutionName(
                 $conversion,
             )}.{$conversion->getFormat()}",
-            NamingPattern::ResolutionLabel => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
-            default => "{$basename}_{$conversion->getName()}.{$conversion->getFormat()}",
+            default => throw new InvalidArgumentException('Invalid naming pattern'),
         };
     }
 
