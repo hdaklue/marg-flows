@@ -17,7 +17,7 @@ final class RemoveMemberAction
         return Action::make('remove')
             ->icon('heroicon-s-trash')
             ->iconButton()
-            ->label('Remove Member')
+            ->label(__('participants.actions.remove_member'))
             ->visible(filamentUser()->can('manage', $roleableEntity))
             ->color('danger')
             ->action(function (Component $livewire, $record) use ($roleableEntity) {
@@ -25,6 +25,7 @@ final class RemoveMemberAction
                 RemoveParticipant::run($roleableEntity, $user);
                 $livewire->resetTable();
             })
-            ->requiresConfirmation();
+            ->requiresConfirmation()
+            ->modalHeading(__('participants.confirmations.remove_member'));
     }
 }

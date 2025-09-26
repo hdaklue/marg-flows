@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Participants;
 
 use App\Collections\ParticipantsCollection;
+use App\Filament\Actions\Participants\InviteMemberAction;
 use App\Filament\Forms\Components\Resuable\RoleSelect;
 use App\Livewire\Participants\Actions\AddMemberAction;
 use App\Livewire\Participants\Actions\RemoveMemberAction;
@@ -32,6 +33,7 @@ use Hdaklue\Porter\Facades\Porter;
 use Hdaklue\Porter\Models\Roster;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
+use Throwable;
 
 final class ManageParticipantsTable extends Component implements HasActions, HasSchemas, HasTable
 {
@@ -46,6 +48,9 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
         $this->roleableEntity = $roleableEntity;
     }
 
+    /**
+     * @throws Throwable
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -54,12 +59,12 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                 Split::make([
                     ImageColumn::make('avatarUrl')->circular()->grow(false),
                     Stack::make([
-                        TextColumn::make('name')->weight(FontWeight::Bold)->label('name'),
+                        TextColumn::make('name')->weight(FontWeight::Bold)->label(__('participants.labels.name')),
                         TextColumn::make('username')
                             ->size(TextSize::ExtraSmall)
                             ->fontFamily(FontFamily::Mono)
                             ->formatStateUsing(fn ($state) => "@{$state}")
-                            ->label('username'),
+                            ->label(__('participants.labels.username')),
                     ])->grow(),
                     Split::make([
                         TextColumn::make('role')
@@ -79,13 +84,15 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                     filamentUser(),
                     $this->getAssignableUsers(),
                 )->outlined(),
+                InviteMemberAction::make(filamentTenant()),
+
             ])
             ->recordActions([
                 Action::make('change_role')
                     ->icon('heroicon-c-queue-list')
                     ->iconButton()
-                    ->visible(filamentUser()->can('manage', $this->roleableEntity))
-                    ->form([
+                    ->visible(fn () => $this->canManageRoleableEntity())
+                    ->schema([
                         RoleSelect::make('role', $this->roleableEntity, filamentUser()),
                     ])
                     ->color('gray')
@@ -93,7 +100,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                         $record['id'],
                         $data['role'],
                     ))
-                    ->label('Change Role'),
+                    ->label(__('participants.actions.change_role')),
                 RemoveMemberAction::make($this->roleableEntity),
             ])
             ->toolbarActions([
@@ -108,7 +115,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
         return view('livewire.participants.manage-participants-table');
     }
 
-    private function doChangeRole(string|int $targetId, string $role)
+    private function doChangeRole(string|int $targetId, string $role): void
     {
         try {
             $targetEntity = User::query()->where('id', $targetId)->firstOrFail();
@@ -122,7 +129,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                 $e->getMessage(),
             ]);
             Notification::make()
-                ->body(__('common.messages.operation_failed'))
+                ->body(__('participants.messages.operation_failed'))
                 ->danger()
                 ->send();
         }
@@ -140,6 +147,9 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
             ->toArray();
     }
 
+    /**
+     * @throws Throwable
+     */
     private function getAssignableUsers()
     {
         $this->roleableEntity->loadMissing('tenant');
@@ -153,4 +163,8 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
             ->pluck('assignable.name', 'assignable.id')
             ->toArray();
     }
+
+    /**
+     * @throws Throwable
+     */
 }

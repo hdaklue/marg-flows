@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b41328d80f1a097d4505821491c5a76c",
+    "content-hash": "f19a50979f310c838a35155fe8d0c5bb",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2530,16 +2530,16 @@
         },
         {
             "name": "hdaklue/marg-brac",
-            "version": "2.0.6",
+            "version": "2.0.7",
             "source": {
                 "type": "git",
                 "url": "git@github.com:hdaklue/marg-brac.git",
-                "reference": "d38192755e931f9ff2cd5b78196cf17a879d476d"
+                "reference": "be6397e96b46cef25ee8a0b650e83dcd7629a36b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/marg-brac/zipball/d38192755e931f9ff2cd5b78196cf17a879d476d",
-                "reference": "d38192755e931f9ff2cd5b78196cf17a879d476d",
+                "url": "https://api.github.com/repos/hdaklue/marg-brac/zipball/be6397e96b46cef25ee8a0b650e83dcd7629a36b",
+                "reference": "be6397e96b46cef25ee8a0b650e83dcd7629a36b",
                 "shasum": ""
             },
             "require": {
@@ -2608,10 +2608,10 @@
             ],
             "description": "Multi-tenant RBAC authentication package with shared database and Redis sessions",
             "support": {
-                "source": "https://github.com/hdaklue/marg-brac/tree/2.0.6",
+                "source": "https://github.com/hdaklue/marg-brac/tree/2.0.7",
                 "issues": "https://github.com/hdaklue/marg-brac/issues"
             },
-            "time": "2025-09-15T23:10:46+00:00"
+            "time": "2025-09-26T08:12:53+00:00"
         },
         {
             "name": "hdaklue/naptab",
@@ -2734,16 +2734,16 @@
         },
         {
             "name": "hdaklue/porter",
-            "version": "2.0.4",
+            "version": "2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/porter.git",
-                "reference": "b116d345e2e80f8aea4e36a4da98f4004da420a5"
+                "reference": "3a9cc2d098c6c975d7362b1577e3aa9c66076296"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/porter/zipball/b116d345e2e80f8aea4e36a4da98f4004da420a5",
-                "reference": "b116d345e2e80f8aea4e36a4da98f4004da420a5",
+                "url": "https://api.github.com/repos/hdaklue/porter/zipball/3a9cc2d098c6c975d7362b1577e3aa9c66076296",
+                "reference": "3a9cc2d098c6c975d7362b1577e3aa9c66076296",
                 "shasum": ""
             },
             "require": {
@@ -2795,9 +2795,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hdaklue/porter/issues",
-                "source": "https://github.com/hdaklue/porter/tree/2.0.4"
+                "source": "https://github.com/hdaklue/porter/tree/2.0.5"
             },
-            "time": "2025-09-15T23:24:57+00:00"
+            "time": "2025-09-26T08:07:45+00:00"
         },
         {
             "name": "jaybizzle/crawler-detect",

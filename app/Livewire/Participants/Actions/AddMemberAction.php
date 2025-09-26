@@ -26,6 +26,8 @@ final class AddMemberAction
             ->visible(fn () => filamentUser()->can('manage', $roleableEntity))
             ->form([
                 Select::make('member')
+                    ->label(__('participants.labels.member'))
+                    ->placeholder(__('participants.placeholders.select_member'))
                     ->native(false)
                     ->required()
                     ->searchable()
@@ -38,17 +40,17 @@ final class AddMemberAction
                     $user = User::where('id', $data['member'])->first();
                     AddParticipant::run($roleableEntity, $user, $role);
                     Notification::make()
-                        ->body(__('common.messages.operation_completed'))
+                        ->body(__('participants.messages.member_added'))
                         ->success()
                         ->send();
                 } catch (Exception $e) {
                     logger()->error($e->getMessage());
                     Notification::make()
-                        ->body(__('common.messages.operation_failed'))
+                        ->body(__('participants.messages.operation_failed'))
                         ->danger()
                         ->send();
                 }
             })
-            ->label('Add Memeber');
+            ->label(__('participants.actions.add_member'));
     }
 }
