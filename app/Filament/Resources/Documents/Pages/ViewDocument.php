@@ -66,6 +66,7 @@ final class ViewDocument extends ViewRecord
             PlaceholderInput::make('title')
                 ->editable($this->canEdit)
                 ->required()
+                ->editable(fn () => ! $this->record->isArchived())
                 ->live(debounce: '100ms')
                 ->minLength(10)
                 ->placeholder('Page Title')

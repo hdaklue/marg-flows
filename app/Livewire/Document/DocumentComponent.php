@@ -37,8 +37,6 @@ final class DocumentComponent extends Component
     #[Locked]
     public string $documentId;
 
-//    public Document $document;
-
     /**
      * Current editing version for timeline integration.
      */
@@ -314,18 +312,18 @@ final class DocumentComponent extends Component
         $this->hasNewVersions = false;
     }
 
-    public function handleVerionsModalOpen(): void
+    public function openDocumentVersionModal(): void
     {
-        $this->dispatch('openModal', 'document-versions-modal', [
+        $this->dispatch('openModal', 'document.document-versions-modal', [
             'documentId' => $this->documentId,
             'currentEditingVersion' => $this->currentEditingVersionComputed,
         ]);
-
-        // $this->dispatch('openModal', { component: 'document-versions-modal', arguments: { documentId: '{{ $documentId }}', currentEditingVersion: '{{ $this->currentEditingVersionComputed }}' } });
     }
+
+
 
     public function render(): Factory|View
     {
-        return view('livewire.page.document-component');
+        return view('livewire.document.document-component');
     }
 }

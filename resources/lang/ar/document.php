@@ -150,4 +150,10 @@ return [
             'Add a comment' => 'إضافة تعليق',
         ],
     ],
+    'archived' => [
+        'message' => 'هذا المستند مؤرشف',
+        'read_only' => 'للقراءة فقط',
+        'restore' => 'استعادة',
+        'restore_tooltip' => 'استعادة المستند من الأرشيف',
+    ],
 ];

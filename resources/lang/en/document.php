@@ -151,4 +151,10 @@ return [
             'Add a comment' => 'Add a comment',
         ],
     ],
+    'archived' => [
+        'message' => 'This document is archived',
+        'read_only' => 'Read only',
+        'restore' => 'Restore',
+        'restore_tooltip' => 'Restore document from archive',
+    ],
 ];

@@ -20,7 +20,8 @@
       "mcp__laravel-boost__browser-logs",
       "Bash(cp:*)",
       "Bash(rm:*)",
-      "Bash(vendor/bin/pint:*)"
+      "Bash(vendor/bin/pint:*)",
+      "mcp__filesystem__edit_file"
     ],
     "deny": []
   },
