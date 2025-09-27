@@ -7,6 +7,7 @@ namespace App\Providers\Filament;
 // Language switch plugin removed - using custom solution
 use App\Filament\Auth\Login;
 use App\Filament\Auth\Register;
+use App\Filament\Pages\Tenancy\ManageMembers;
 use App\Filament\Pages\UserSettings;
 use App\Filament\Widgets\RecentInteractionsWidget;
 use App\Http\Middleware\Filament\ConfigureDateTimePickers;
@@ -75,6 +76,13 @@ final class PortalPanelProvider extends PanelProvider
                     ->label(fn (): string => __('auth.profile.title'))
                     ->url(fn (): string => UserSettings::getUrl())
                     ->icon('heroicon-o-user-circle'),
+            ])
+            ->tenantProfile(ManageMembers::class)
+            ->tenantMenuItems([
+                //                Action::make('members')
+                //                    ->label('Members')
+                //                    ->url(fn (): string => ManageMembers::getUrl())
+                //                    ->icon('heroicon-o-users'),
             ])
             ->discoverResources(
                 in: app_path('Filament/Resources'),

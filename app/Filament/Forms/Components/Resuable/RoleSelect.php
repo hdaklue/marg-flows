@@ -7,6 +7,7 @@ namespace App\Filament\Forms\Components\Resuable;
 use Filament\Forms\Components\Select;
 use Hdaklue\Porter\Contracts\AssignableEntity;
 use Hdaklue\Porter\Contracts\RoleableEntity;
+use Hdaklue\Porter\Contracts\RoleContract;
 use Hdaklue\Porter\RoleFactory;
 
 final class RoleSelect
@@ -28,7 +29,7 @@ final class RoleSelect
         RoleableEntity $roleableEntity,
     ) {
         return RoleFactory::getRolesLowerThan($assignableEntity->getAssignmentOn($roleableEntity))
-            ->sortByDesc(fn ($item) => (int) $item->getLevel())
+            ->sortByDesc(fn (RoleContract $item) => (int) $item->getLevel())
             ->mapWithKeys(fn ($item) => [
                 $item::getPlainKey() => $item->getLabel(),
             ]);

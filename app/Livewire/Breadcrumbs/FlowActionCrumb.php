@@ -11,7 +11,6 @@ use Hdaklue\Actioncrumb\Action;
 use Hdaklue\Actioncrumb\Components\WireCrumb;
 use Hdaklue\Actioncrumb\Step;
 use Hdaklue\Actioncrumb\Support\WireAction;
-use Illuminate\Contracts\View\Factory;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 

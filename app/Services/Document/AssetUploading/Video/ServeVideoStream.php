@@ -32,17 +32,17 @@ final class ServeVideoStream
     use AsAction;
 
     // Video-specific constants for optimal performance
-    private const INITIAL_CHUNK_SIZE = 3 * 1024 * 1024; // 1MB for fast initial load
+    private const int|float INITIAL_CHUNK_SIZE = 3 * 1024 * 1024; // 3MB for a fast initial load
 
-    private const STREAMING_CHUNK_SIZE = 4 * 1024 * 1024; // 4MB for efficient streaming
+    private const int|float STREAMING_CHUNK_SIZE = 4 * 1024 * 1024; // 4MB for efficient streaming
 
-    private const MAX_CHUNK_SIZE = 16 * 1024 * 1024; // 16MB max chunk size
+    private const int|float MAX_CHUNK_SIZE = 16 * 1024 * 1024; // 16MB max chunk size
 
-    private const METADATA_CACHE_TTL = 3600; // 1 hour cache for metadata
+    private const int METADATA_CACHE_TTL = 3600; // 1-hour cache for metadata
 
-    private const CONTENT_CACHE_TTL = 5 * 60 * 60; // 5 hours cache for small videos
+    private const int|float CONTENT_CACHE_TTL = 5 * 60 * 60; // 5-hour cache for small videos
 
-    private const MAX_CACHEABLE_SIZE = 50 * 1024 * 1024; // 50MB max cacheable video
+    private const int|float MAX_CACHEABLE_SIZE = 50 * 1024 * 1024; // 50MB max cacheable video
 
     /**
      * Clear video metadata cache when file is updated.

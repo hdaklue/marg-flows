@@ -38,7 +38,6 @@ enum BitrateEnum: int
 
         $bpp = $bppValues[$qualityTier] ?? 0.002;
 
-
         // Calculate bitrate (assuming 30fps)
         $bitrate = (int) floor(($pixels * $bpp * 30) / 1000);
 

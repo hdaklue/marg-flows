@@ -320,8 +320,6 @@ final class DocumentComponent extends Component
         ]);
     }
 
-
-
     public function render(): Factory|View
     {
         return view('livewire.document.document-component');

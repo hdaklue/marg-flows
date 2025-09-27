@@ -12,7 +12,7 @@ if (! function_exists('filamentUser')) {
      *
      * @return User
      *
-     * @throws \Throwable
+     * @throws \Exception|\Throwable
      */
     function filamentUser(): Authenticatable
     {

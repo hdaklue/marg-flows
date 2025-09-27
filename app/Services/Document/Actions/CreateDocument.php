@@ -11,14 +11,17 @@ use App\Facades\DocumentManager;
 use App\Models\Document;
 use App\Models\User;
 use App\Services\Document\Contracts\DocumentTemplateContract;
-use Exception;
 use Hdaklue\Porter\Contracts\AssignableEntity;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Throwable;
 
 final class CreateDocument
 {
     use AsAction;
 
+    /**
+     * @throws Throwable
+     */
     public function handle(
         string $name,
         AssignableEntity|User $creator,
@@ -33,7 +36,7 @@ final class CreateDocument
             DocumentCreated::dispatch($createdDocument, $targetDocumentable, $creator);
 
             return $createdDocument;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             logger()->error('Error creating new document', [
                 'documentable' => $targetDocumentable,
                 'creator' => $creator,

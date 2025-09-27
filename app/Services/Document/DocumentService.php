@@ -9,8 +9,8 @@ use App\Contracts\Document\DocumentManagerInterface;
 use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
 use App\Models\Document;
-use App\Models\DocumentVersion;
 use App\Models\User;
+use App\Services\Document\Contracts\DocumentVersionContract;
 use DB;
 use Exception;
 use Hdaklue\Porter\Facades\Porter;
@@ -24,8 +24,12 @@ use Throwable;
 use WendellAdriel\ValidatedDTO\Exceptions\CastTargetException;
 use WendellAdriel\ValidatedDTO\Exceptions\MissingCastTypeException;
 
-final class DocumentService implements DocumentManagerInterface
+final readonly class DocumentService implements DocumentManagerInterface
 {
+    public function __construct(
+        private DocumentVersionContract $versionService,
+    ) {}
+
     /**
      * Create a new page associated with a documentable entity.
      *
@@ -43,38 +47,14 @@ final class DocumentService implements DocumentManagerInterface
     ): Document {
         return DB::transaction(function () use ($data, $documentable, $creator) {
             try {
-                $document = new Document([
-                    'name' => $data->name,
-                    'blocks' => $data->toEditorJSFormat(),
-                ]);
-
-                assert($documentable instanceof Model);
-                $document->documentable()->associate($documentable);
-                $document->creator()->associate($creator);
-                $document->save();
-                $document->assign($creator, RoleFactory::admin());
-
-                $document->refresh();
-                $version = new DocumentVersion([
-                    'content' => $document->blocks,
-                    'created_at' => now(),
-                ]);
-                $version->document()->associate($document);
-                $version->creator()->associate($creator);
-                $version->save();
-
+                $document = $this->createDocument($data, $documentable, $creator);
+                $this->assignCreatorRole($document, $creator);
+                $this->versionService->createInitialVersion($document, $creator);
                 $this->clearCache($documentable);
 
                 return $document;
             } catch (Exception $e) {
-                Log::error('Failed to create document', [
-                    'error' => $e->getMessage(),
-                    'data' => $data->toArray(),
-                    'documentable_type' => $documentable::class,
-                    'documentable_id' => $documentable->getKey(),
-                    'creator_id' => $creator->getKey(),
-                ]);
-
+                $this->logDocumentCreationError($e, $data, $documentable, $creator);
                 throw $e;
             }
         });
@@ -84,7 +64,7 @@ final class DocumentService implements DocumentManagerInterface
      * Update an existing page with new data.
      *
      * @param  Document  $document  The page to update
-     * @param  array{name?: string, blocks?: array<mixed>}  $data  The update data
+     * @param  array{name?: string, blocks?: array}  $data  The update data
      * @return Document The updated page instance
      */
     public function update(Document $document, array $data): Document
@@ -142,7 +122,7 @@ final class DocumentService implements DocumentManagerInterface
      */
     public function getDocumentsForUser(Documentable $documentable, User $user): Collection
     {
-        $documentablePages = $this->getDocumentsFordocumentable($documentable);
+        $documentablePages = $this->getDocumentsForDocumentable($documentable);
 
         $pageKeys = $documentablePages->pluck('id')->toArray();
 
@@ -393,7 +373,7 @@ final class DocumentService implements DocumentManagerInterface
      * Get all pages for a documentable entity with caching.
      * Cache key automatically invalidates when pages are added/removed.
      */
-    public function getDocumentsFordocumentable(Documentable $documentable): Collection
+    public function getDocumentsForDocumentable(Documentable $documentable): Collection
     {
         $pages = Document::whereHasMorph(
             'documentable',
@@ -412,6 +392,53 @@ final class DocumentService implements DocumentManagerInterface
         }
 
         return $pages;
+    }
+
+    /**
+     * Create the document instance and persist it.
+     */
+    private function createDocument(
+        CreateDocumentDto $data,
+        Documentable $documentable,
+        User $creator,
+    ): Document {
+        $document = new Document([
+            'name' => $data->name,
+            'blocks' => $data->toEditorJSFormat(),
+        ]);
+
+        assert($documentable instanceof Model);
+        $document->documentable()->associate($documentable);
+        $document->creator()->associate($creator);
+        $document->save();
+
+        return $document->refresh();
+    }
+
+    /**
+     * Assign admin role to the document creator.
+     */
+    private function assignCreatorRole(Document $document, User $creator): void
+    {
+        $document->assign($creator, RoleFactory::admin());
+    }
+
+    /**
+     * Log document creation errors with context.
+     */
+    private function logDocumentCreationError(
+        Exception $exception,
+        CreateDocumentDto $data,
+        Documentable $documentable,
+        User $creator,
+    ): void {
+        Log::error('Failed to create document', [
+            'error' => $exception->getMessage(),
+            'data' => $data->toArray(),
+            'documentable_type' => $documentable::class,
+            'documentable_id' => $documentable->getKey(),
+            'creator_id' => $creator->getKey(),
+        ]);
     }
 
     /**

@@ -12,7 +12,7 @@ final class CreateInvitation
 {
     use AsAction;
 
-    public function handle(User $sender, User $receiver, array $role_data)
+    public function handle(User $sender, User $receiver, array $role_data): void
     {
         $invitation = new MemberInvitation([
             'role_data' => $role_data,

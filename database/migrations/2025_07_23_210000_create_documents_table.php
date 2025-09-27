@@ -18,13 +18,13 @@ return new class extends Migration
             $table->string('name');
             $table->json('blocks');
 
-            // Cross-database reference to users table
+            // Cross-database reference to users' table
             $table->string('creator_id');
 
-            // Cross-database reference to tenants table for efficient querying
+            // Cross-database reference to the tenant table for efficient querying
             $table->string('tenant_id');
 
-            // Polymorphic relation (likely to flows in main db)
+            // Polymorphic relation (likely to flow in the main db)
             $table->string('documentable_type');
             $table->string('documentable_id');
 

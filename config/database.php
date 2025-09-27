@@ -65,7 +65,7 @@ return [
         ],
 
         'business_db' => [
-            'driver' => 'mysql',
+            'driver' => env('BUSINESS_DB_DRIVER', 'mysql'),
             'url' => env('BUSINESS_DB_URL'),
             'host' => env('BUSINESS_DB_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('BUSINESS_DB_PORT', env('DB_PORT', '3306')),
@@ -79,6 +79,7 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            'foreign_key_constraints' => env('BUSINESS_DB_FOREIGN_KEYS', true),
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 \PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
@@ -136,6 +137,7 @@ return [
 
         'rbac' => [
             'driver' => env('RBAC_DB_DRIVER', 'mysql'),
+            'url' => env('RBAC_DB_URL'),
             'host' => env('RBAC_DB_HOST', '127.0.0.1'),
             'port' => env('RBAC_DB_PORT', '3306'),
             'database' => env('RBAC_DB_DATABASE', 'marg-rbac'),
@@ -147,6 +149,7 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            'foreign_key_constraints' => env('RBAC_DB_FOREIGN_KEYS', true),
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 \PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],

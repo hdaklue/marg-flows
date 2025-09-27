@@ -15,16 +15,19 @@ use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Livewire\Component;
+use Throwable;
 
 final class DocumentsTable
 {
     public static function configure(Table $table, Documentable $documentable): Table
     {
         return $table
-            ->records(function ($search) use ($documentable) {
-                return self::getDocuments($documentable, $search);
+            ->records(function ($search, $filters) use ($documentable) {
+
+                return self::getDocuments($documentable, $search, $filters);
             })
             ->recordUrl(fn ($record) => DocumentResource::getUrl('view', [
                 'record' => $record['id'],
@@ -43,7 +46,9 @@ final class DocumentsTable
             ])
             ->searchable(true)
             ->filters([
-                //
+                Filter::make('show_archived')
+                    ->toggle()
+                    ->default(false),
             ])
             ->headerActions([
                 CreateDocumentAction::make($documentable)->outlined(),
@@ -114,7 +119,10 @@ final class DocumentsTable
             ]);
     }
 
-    private static function getDocuments($documentable, $search): array
+    /**
+     * @throws Throwable
+     */
+    private static function getDocuments($documentable, $search, array $filters): array
     {
         $canManage = filamentUser()->can('manage', $documentable);
 
@@ -127,6 +135,9 @@ final class DocumentsTable
                     fn ($item): bool => stripos($item->name, $term) !== false,
                 );
             })
+            ->when(! $filters['show_archived']['isActive'], fn ($collection) => $collection->filter(
+                fn ($item) => ! $item->isArchived(),
+            ))
             ->keyBy(fn ($item) => $item->getKey())
             ->toArray();
     }

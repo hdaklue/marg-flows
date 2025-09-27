@@ -87,6 +87,7 @@ final class Document extends Model implements BelongsToTenantContract, PorterRol
         'name',
         'blocks',
         'archived_at',
+        'current_version_id',
     ];
 
     // protected $with = [
@@ -108,6 +109,17 @@ final class Document extends Model implements BelongsToTenantContract, PorterRol
         return $this->hasMany(DocumentVersion::class, 'document_id');
     }
 
+    public function setCurrentVersion(DocumentVersion $version): void
+    {
+        $this->setAttribute('current_version_id', $version->getKey());
+        $this->save();
+    }
+
+    public function currentVersion(): DocumentVersion
+    {
+        return DocumentVersion::whereKey($this->getAttribute('current_version_id'))->first();
+    }
+
     public function latestVersion(): HasOne
     {
         return $this->hasOne(DocumentVersion::class, 'document_id')->latestOfMany();
@@ -123,7 +135,7 @@ final class Document extends Model implements BelongsToTenantContract, PorterRol
         return $this->getAttribute('name');
     }
 
-    public function updateBlocks(array|string $data)
+    public function updateBlocks(array|string $data): void
     {
         $this->setAttribute('blocks', $data);
         $this->save();

@@ -16,7 +16,9 @@ use App\Services\Document\ContentBlocks\ObjectiveBlock;
 use App\Services\Document\ContentBlocks\PersonaBlock;
 use App\Services\Document\ContentBlocks\ResizableImageBlock;
 use App\Services\Document\ContentBlocks\VideoUploadBlock;
+use App\Services\Document\Contracts\DocumentVersionContract;
 use App\Services\Document\DocumentService;
+use App\Services\Document\DocumentVersionService;
 use App\Services\Document\Facades\EditorBuilder;
 use App\Services\Document\Facades\EditorConfigBuilder;
 use App\Services\Document\Sessions\VideoUploadSessionManager;
@@ -42,6 +44,7 @@ final class DocumentServiceProvider extends ServiceProvider
     {
         // Core Document Services
         $this->app->bind(DocumentManagerInterface::class, DocumentService::class);
+        $this->app->bind(DocumentVersionContract::class, DocumentVersionService::class);
 
         // Editor Services
         $this->app->singleton(

@@ -14,7 +14,9 @@ use App\Services\Deliverable\DeliverablesManager;
 use App\Services\Directory\Managers\ChunksDirectoryManager;
 use App\Services\Directory\Managers\DocumentDirectoryManager;
 use App\Services\Directory\Managers\SystemDirectoryManager;
+use App\Services\Document\Contracts\DocumentVersionContract;
 use App\Services\Document\DocumentService;
+use App\Services\Document\DocumentVersionService;
 use App\Services\Flow\TimeProgressService;
 use App\Services\MentionService;
 use App\Services\Role\RoleAssignmentService;
@@ -32,6 +34,7 @@ use Hdaklue\Actioncrumb\Enums\ThemeStyle;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
@@ -46,7 +49,9 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TimeProgressService::class);
         // $this->app->singleton('role.manager', fn (): RoleAssignmentService => new RoleAssignmentService);
-        $this->app->singleton('document.manager', fn (): DocumentService => new DocumentService);
+        $this->app->singleton(DocumentVersionService::class);
+        $this->app->bind(DocumentVersionContract::class, DocumentVersionService::class);
+        $this->app->singleton('document.manager', fn (Application $app): DocumentService => new DocumentService($app->make(DocumentVersionContract::class)));
         $this->app->singleton('mention.service', fn (): MentionService => new MentionService);
         $this->app->singleton(
             DeliverableBuilder::class,
