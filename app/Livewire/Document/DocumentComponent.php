@@ -10,6 +10,7 @@ use App\Models\Document;
 use App\Models\DocumentVersion;
 use App\Services\Document\Facades\EditorBuilder;
 use Exception;
+use Filament\Notifications\Notification;
 use Hdaklue\Porter\Facades\Porter;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
@@ -203,36 +204,34 @@ final class DocumentComponent extends Component
                 throw new Exception('Invalid JSON content provided');
             }
 
-            // Save version to timeline
-            $newVersion = DocumentVersion::create([
-                'document_id' => $this->documentId,
-                'content' => $editorData,
-                'created_by' => auth()->id(),
-                'created_at' => now(),
-            ]);
-
-            // Update the current editing version
-            $this->currentEditingVersion = $newVersion->id;
-
             // Use DocumentManager to update the document
-            DocumentManager::updateBlocks(
+            $newVersion = DocumentManager::updateBlocks(
                 $this->document,
                 $editorData,
-                // $this->current_content_hash,
+                filamentUser(),
             );
+            $this->currentEditingVersion = $newVersion->id;
 
             // Notify version modal about the new version
             $this->dispatch('DocumentComponent::document-saved', newVersionId: $newVersion->id);
 
             // Update the DTO with new content
             unset($this->updatedAtString, $this->document, $this->currentEditingVersionComputed, $this->canEditComputed);
-        } catch (Exception $e) {
+            Notification::make()
+                ->body(__('common.messages.operation_completed'))
+                ->success()
+                ->send();
+
+        } catch (Throwable $e) {
             Log::error('Document save failed', [
                 'document_id' => $this->documentId,
                 'error' => $e->getMessage(),
             ]);
 
-            throw $e;
+            Notification::make()
+                ->body(__('common.messages.operation_failed'))
+                ->danger()
+                ->send();
         }
     }
 

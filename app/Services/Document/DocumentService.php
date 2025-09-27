@@ -9,6 +9,7 @@ use App\Contracts\Document\DocumentManagerInterface;
 use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
 use App\Models\Document;
+use App\Models\DocumentVersion;
 use App\Models\User;
 use App\Services\Document\Facades\DocumentVersionManager;
 use DB;
@@ -84,13 +85,18 @@ final readonly class DocumentService implements DocumentManagerInterface
     public function updateBlocks(
         Document $document,
         array|string $newBlocks,
+        User $creator,
+
         // string $currentFingerPrint,
-    ): void {
+    ): DocumentVersion {
         // If the current content fingerprint === $document blocks normal update
         // if not Should update diffs only
         $document->updateBlocks($newBlocks);
+        $newVersion = DocumentVersionManager::createNewVersion($document, $newBlocks, $creator);
         $this->clearCache($document->documentable);
         $this->clearDocumentsCache($document);
+
+        return $newVersion;
     }
 
     /**
