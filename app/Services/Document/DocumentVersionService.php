@@ -9,6 +9,10 @@ use App\Models\DocumentVersion;
 use App\Models\User;
 use App\Services\Document\Contracts\DocumentVersionContract;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
+use Throwable;
 
 final class DocumentVersionService implements DocumentVersionContract
 {
@@ -121,8 +125,40 @@ final class DocumentVersionService implements DocumentVersionContract
     /**
      * Check if a version is the current version.
      */
-    public function isCurrentVersion(DocumentVersion $version): bool
+    public function isCurrentVersionOfItsDocument(DocumentVersion $version): bool
     {
         return $version->document->current_version_id === $version->id;
+    }
+
+    /**
+     * Apply a version to its document by setting blocks and the current version.
+     *
+     * @throws Throwable
+     */
+    public function applyVersion(DocumentVersion $version): Document
+    {
+        $document = $version->document;
+
+        if ($document->id !== $version->document_id) {
+            throw new InvalidArgumentException('Version does not belong to the specified document');
+        }
+
+        try {
+            return DB::transaction(function () use ($document, $version) {
+                $document->blocks = $version->content;
+                $document->setCurrentVersion($version);
+
+                return $document;
+            });
+        } catch (Throwable $e) {
+            Log::error('Failed to apply document version', [
+                'version_id' => $version->id,
+                'document_id' => $document->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw $e;
+        }
     }
 }

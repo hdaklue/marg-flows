@@ -54,7 +54,7 @@
                                     </div>
 
                                     {{-- Current Version Badge --}}
-                                    @if ($currentEditingVersion === $version->id)
+                                    @if ($this->currentVersionId === $version->id)
                                         <span
                                             class="inline-flex items-center rounded-full bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-900/50 dark:text-sky-200">
                                             {{ __('document.versions.current') }}
@@ -63,7 +63,7 @@
                                 </div>
 
                                 {{-- Actions --}}
-                                @if ($currentEditingVersion !== $version->id)
+                                @if ($this->currentVersionId !== $version->id)
                                     <button wire:click.stop="applyVersion('{{ $version->id }}')"
                                         class="inline-flex items-center justify-center w-6 h-6 text-xs font-medium bg-transparent border border-transparent rounded text-sky-600 hover:bg-sky-100 hover:text-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:text-sky-400 dark:hover:bg-sky-900/50 dark:hover:text-sky-300 dark:focus:ring-sky-400"
                                         title="{{ __('document.versions.apply_version') }}">

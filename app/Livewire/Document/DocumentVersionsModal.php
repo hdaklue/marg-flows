@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Livewire\Document;
 
+use App\Filament\Resources\Documents\DocumentResource;
 use App\Models\Document;
 use App\Models\DocumentVersion;
+use App\Services\Document\Facades\DocumentVersionManager;
 use App\Services\Document\Facades\EditorBuilder;
 use Exception;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use LivewireUI\Modal\ModalComponent;
+use Throwable;
 
 final class DocumentVersionsModal extends ModalComponent
 {
@@ -64,9 +68,9 @@ final class DocumentVersionsModal extends ModalComponent
         // Load initial versions
         $this->loadMoreVersions();
 
-        // Set the initially selected version (preview if provided, otherwise current editing)
+        // Set the initially selected version (preview if provided, otherwise actual current version)
         $this->selectedVersionId =
-            $previewVersionId ?? $currentEditingVersion ?? $this->loadedVersions->first()?->id;
+            $previewVersionId ?? $this->currentVersionId ?? $this->loadedVersions->first()?->id;
     }
 
     public function selectVersion(string $versionId): void
@@ -114,6 +118,24 @@ final class DocumentVersionsModal extends ModalComponent
         return Document::findOrFail($this->documentId);
     }
 
+    #[Computed]
+    public function currentVersionId(): ?string
+    {
+        // Always get fresh data from database to avoid caching issues
+        return Document::where('id', $this->documentId)->value('current_version_id');
+    }
+
+    public function isCurrentVersion(DocumentVersion $version): bool
+    {
+        return $version->id === $this->currentVersionId;
+    }
+
+    #[Computed]
+    public function currentVersionBadgeClasses(): string
+    {
+        return 'bg-sky-100 text-sky-800 dark:bg-sky-900/20 dark:text-sky-300';
+    }
+
     public function getToolsConfig(): array
     {
         return match ($this->userPlan) {
@@ -145,6 +167,9 @@ final class DocumentVersionsModal extends ModalComponent
                     'preview_mode' => __('document.editor.preview_mode'),
                     'read_only' => __('document.editor.read_only'),
                 ],
+                'versions' => [
+                    'current' => __('document.versions.current'),
+                ],
             ],
             'editor_tools' => [
                 'paragraph' => __('document.tools.paragraph'),
@@ -170,9 +195,32 @@ final class DocumentVersionsModal extends ModalComponent
         $this->sidebarCollapsed = ! $this->sidebarCollapsed;
     }
 
+    /**
+     * @throws Throwable
+     */
     public function applyVersion(string $versionId): void
     {
-        $this->dispatch('apply-version', versionId: $versionId);
+        try {
+            $version = DocumentVersion::whereKey($versionId)->firstOrFail();
+            DocumentVersionManager::applyVersion($version);
+            $this->currentEditingVersion = $versionId;
+            $this->redirect(DocumentResource::getUrl('view', [
+                'record' => $this->documentId,
+                'tenant' => filamentTenant(),
+            ]), true);
+            Notification::make()
+                ->body(__('common.messages.operation_completed'))
+                ->success()
+                ->send();
+
+            $this->closeModal();
+        } catch (Throwable $e) {
+            logger()->error($e);
+            Notification::make()
+                ->body(__('common.messages.operation_failed'))
+                ->danger()
+                ->send();
+        }
     }
 
     #[On('DocumentComponent::document-saved')]

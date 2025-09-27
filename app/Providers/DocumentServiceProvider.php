@@ -99,6 +99,7 @@ final class DocumentServiceProvider extends ServiceProvider
     {
         return [
             DocumentManagerInterface::class,
+            DocumentVersionContract::class,
             EditorConfigBuilder::class,
             EditorBuilder::class,
             DocumentTemplateTranslatorInterface::class,

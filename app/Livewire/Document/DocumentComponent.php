@@ -172,13 +172,8 @@ final class DocumentComponent extends Component
     public function currentEditingVersionComputed(): ?string
     {
         // If we have a current editing version, use it
-        if ($this->currentEditingVersion !== null) {
-            return $this->currentEditingVersion;
-        }
-        // Otherwise, get the latest version from the document
-        $this->document->loadMissing('latestVersion');
 
-        return $this->document->latestVersion?->id;
+        return $this->document->current_version_id;
     }
 
     #[Computed]
@@ -191,22 +186,6 @@ final class DocumentComponent extends Component
     public function reloadParticipants(): void
     {
         unset($this->participants, $this->participantsArray, $this->canEditComputed, $this->userPermissions);
-    }
-
-    #[On('apply-version')]
-    public function handleVersionChange(string $versionId): void
-    {
-        $this->currentEditingVersion = $versionId;
-
-        // Load version content for editing
-        $version = DocumentVersion::find($versionId);
-        if ($version) {
-            $this->content = $version->content;
-            $this->dispatch('version-content-loaded', content: $version->content);
-        }
-
-        // Clear computed properties that may be affected by version change
-        unset($this->canEditComputed, $this->userPermissions);
     }
 
     /**
@@ -294,13 +273,14 @@ final class DocumentComponent extends Component
 
     public function checkNewVersions(): void
     {
+
         // Fetch the latest version ID directly
-        $latestVersion = DocumentVersion::where('document_id', $this->documentId)
-            ->orderByDesc('created_at')
-            ->first();
-        if ($latestVersion->getKey() !== $this->currentEditingVersionComputed) {
-            $this->hasNewVersions = true;
-        }
+        //        $latestVersion = DocumentVersion::where('document_id', $this->documentId)
+        //            ->orderByDesc('created_at')
+        //            ->first();
+        //        if ($latestVersion->getKey() !== $this->currentEditingVersionComputed) {
+        //            $this->hasNewVersions = true;
+        //        }
     }
 
     /**

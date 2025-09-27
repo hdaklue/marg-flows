@@ -10,7 +10,7 @@ use App\DTOs\Document\CreateDocumentDto;
 use App\DTOs\Document\DocumentDto;
 use App\Models\Document;
 use App\Models\User;
-use App\Services\Document\Contracts\DocumentVersionContract;
+use App\Services\Document\Facades\DocumentVersionManager;
 use DB;
 use Exception;
 use Hdaklue\Porter\Facades\Porter;
@@ -26,10 +26,6 @@ use WendellAdriel\ValidatedDTO\Exceptions\MissingCastTypeException;
 
 final readonly class DocumentService implements DocumentManagerInterface
 {
-    public function __construct(
-        private DocumentVersionContract $versionService,
-    ) {}
-
     /**
      * Create a new page associated with a documentable entity.
      *
@@ -49,7 +45,7 @@ final readonly class DocumentService implements DocumentManagerInterface
             try {
                 $document = $this->createDocument($data, $documentable, $creator);
                 $this->assignCreatorRole($document, $creator);
-                $this->versionService->createInitialVersion($document, $creator);
+                DocumentVersionManager::createInitialVersion($document, $creator);
                 $this->clearCache($documentable);
 
                 return $document;
