@@ -4,33 +4,23 @@ declare(strict_types=1);
 
 namespace App\Livewire\Breadcrumbs;
 
-use App\Filament\Resources\Flows\Actions\CreateFlowAction;
-use App\Filament\Resources\Flows\FlowResource;
+use App\Livewire\Steps\CurrentFlowStep;
+use App\Livewire\Steps\FlowStep;
 use App\Models\Flow;
-use Hdaklue\Actioncrumb\Action;
 use Hdaklue\Actioncrumb\Components\WireCrumb;
-use Hdaklue\Actioncrumb\Step;
-use Hdaklue\Actioncrumb\Support\WireAction;
-use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
+use Hdaklue\Actioncrumb\Components\WireStep;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 final class FlowActionCrumb extends WireCrumb
 {
-    use HasActionCrumbs;
-
     #[Locked]
     public string $flowId;
 
     public function mount($record = null, $parent = null): void
     {
-        // parent::mount($record, $parent);
+        parent::mount($record, $parent);
         $this->flowId = $record->id;
-    }
-
-    public function createFlowAction(): \Filament\Actions\Action
-    {
-        return CreateFlowAction::make($this);
     }
 
     #[Computed]
@@ -46,34 +36,11 @@ final class FlowActionCrumb extends WireCrumb
 
     protected function crumbSteps(): array
     {
-        return $this->actioncrumbs();
-    }
-
-    protected function actioncrumbs(): array
-    {
         return [
-            Step::make('flows')
-                ->label('Flows')
-                ->icon(FlowResource::getNavigationIcon())
-                ->actions([
-                    WireAction::make('create_flow')
-                        ->label('Create Flow')
-                        ->livewire($this)
-                        ->execute('createFlow'),
-                ])
-                ->url(fn () => FlowResource::getUrl('index', ['tenant' => filamentTenant()])),
-            Step::make('current')
-                ->label(fn () => str($this->flow->getAttribute('title'))->title())
-                ->actions([
-                    Action::make('share')
-                        ->label('Share with')
-                        ->visible(fn () => filamentUser()->can('manage', $this->flow))
-                        ->execute(fn () => $this->dispatch(
-                            'open-modal',
-                            id: 'manage-participants-modal',
-                        )),
-                ])
-                ->current(),
+            WireStep::make(FlowStep::class, ['record' => $this->flow])
+                ->stepId('flows'),
+            WireStep::make(CurrentFlowStep::class, ['record' => $this->flow])
+                ->stepId('current'),
         ];
     }
 }
