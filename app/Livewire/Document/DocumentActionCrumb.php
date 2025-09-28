@@ -15,6 +15,7 @@ use Filament\Notifications\Notification;
 use Hdaklue\Actioncrumb\Components\WireCrumb;
 use Hdaklue\Actioncrumb\Step;
 use Hdaklue\Actioncrumb\Support\WireAction;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use InvalidArgumentException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -24,6 +25,8 @@ use Livewire\Attributes\Locked;
  */
 final class DocumentActionCrumb extends WireCrumb
 {
+    use HasActionCrumbs;
+
     #[Locked]
     public string $documentId;
 
@@ -47,7 +50,7 @@ final class DocumentActionCrumb extends WireCrumb
     public function render()
     {
         return view('livewire.document.document-action-crumb', [
-            'renderedActioncrumbs' => $this->renderActioncrumbs(),
+            'renderedCrumbSteps' => $this->renderCrumbSteps(),
         ]);
     }
 
@@ -78,6 +81,11 @@ final class DocumentActionCrumb extends WireCrumb
     public function editFlowAction(): EditAction
     {
         return EditFlowInfoAction::make($this->flow);
+    }
+
+    protected function crumbSteps(): array
+    {
+        return $this->actioncrumbs();
     }
 
     protected function actioncrumbs(): array

@@ -11,11 +11,14 @@ use Hdaklue\Actioncrumb\Action;
 use Hdaklue\Actioncrumb\Components\WireCrumb;
 use Hdaklue\Actioncrumb\Step;
 use Hdaklue\Actioncrumb\Support\WireAction;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 final class FlowActionCrumb extends WireCrumb
 {
+    use HasActionCrumbs;
+
     #[Locked]
     public string $flowId;
 
@@ -41,6 +44,11 @@ final class FlowActionCrumb extends WireCrumb
         return view('livewire.breadcrumbs.flow-action-crumb');
     }
 
+    protected function crumbSteps(): array
+    {
+        return $this->actioncrumbs();
+    }
+
     protected function actioncrumbs(): array
     {
         return [
@@ -53,7 +61,7 @@ final class FlowActionCrumb extends WireCrumb
                         ->livewire($this)
                         ->execute('createFlow'),
                 ])
-                ->url(fn () => FlowResource::getUrl('index', ['teanant' => filamentTenant()])),
+                ->url(fn () => FlowResource::getUrl('index', ['tenant' => filamentTenant()])),
             Step::make('current')
                 ->label(fn () => str($this->flow->getAttribute('title'))->title())
                 ->actions([
