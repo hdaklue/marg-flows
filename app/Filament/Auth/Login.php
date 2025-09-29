@@ -14,7 +14,7 @@ final class Login extends BaseLogin
 
     public function hasLogo(): bool
     {
-        return false; // We'll handle logo in our custom layout
+        return true; // We'll handle logo in our custom layout
     }
 
     public function getTitle(): string

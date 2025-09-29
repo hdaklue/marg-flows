@@ -18,13 +18,24 @@ return new class extends Migration
                 $table->ulid('id')->primary();
 
                 $table->foreignUlid('sender_id')->references('id')->on('users');
-                $table->foreignUlid('receiver_id')->references('id')->on('users');
+                $table->string('receiver_email');
+                $table->foreignUlid('tenant_id')->references('id')->on('tenants');
 
-                $table->json('role_data');
+                $table->string('role_key');
+
+                $table->timestamp('accepted_at')->nullable();
+                $table->timestamp('rejected_at')->nullable();
+                $table->timestamp('expires_at');
 
                 $table->timestamps();
 
-                $table->index(['sender_id', 'receiver_id']);
+                $table->index('receiver_email');
+                $table->index('expires_at');
+                $table->index(['sender_id', 'receiver_email']);
+                $table->index(['tenant_id', 'receiver_email']);
+                $table->index(['tenant_id', 'receiver_email', 'sender_id']);
+
+                $table->unique(['receiver_email', 'tenant_id']);
 
             });
     }

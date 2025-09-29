@@ -9,7 +9,6 @@ use App\Providers\FileServingServiceProvider;
 use App\Providers\HorizonServiceProvider;
 use App\Providers\NapTabServiceProvider;
 use App\Services\Video\VideoServiceProvider;
-use Hdaklue\Actioncrumb\Providers\ActioncrumbServiceProvider;
 use Hdaklue\MargRbac\Providers\MargRbacServiceProvider;
 
 return [
@@ -21,5 +20,4 @@ return [
     NapTabServiceProvider::class,
     VideoServiceProvider::class,
     MargRbacServiceProvider::class,
-    ActioncrumbServiceProvider::class,
 ];

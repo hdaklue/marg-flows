@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\Database\LivesInOriginalDB;
+use Hdaklue\MargRbac\Concerns\Database\LivesInRbacDB;
+use Hdaklue\Porter\Casts\RoleCast;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,10 +39,19 @@ use Illuminate\Support\Carbon;
  */
 final class MemberInvitation extends Model
 {
-    use HasFactory, HasUlids, LivesInOriginalDB;
+    use HasFactory, HasUlids, LivesInRbacDB;
 
     protected $fillable = [
-        'role_data',
+        'role_key',
+        'receiver_email',
+        'expires_at',
+        'accepted_at',
+        'rejected_at',
+    ];
+
+    protected $with = [
+        'sender',
+        'tenant',
     ];
 
     public function sender(): BelongsTo
@@ -48,12 +59,28 @@ final class MemberInvitation extends Model
         return $this->belongsTo(User::class, 'sender_id');
     }
 
-    public function receiver(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'receiver_id');
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 
-    protected function scopeSentBy(Builder $query, User $user): Builder
+    public function expired(): bool
+    {
+        return $this->getAttribute('expires_at')->isPast();
+    }
+
+    public function accepted(): bool
+    {
+        return ! empty($this->getAttribute('accepted_at'));
+    }
+
+    public function rejected(): bool
+    {
+        return ! empty($this->getAttribute('rejected_at'));
+    }
+
+    #[Scope]
+    protected function sentBy(Builder $query, User $user): Builder
     {
         return $query->where('sender_id', '=', $user->id);
     }
@@ -61,7 +88,10 @@ final class MemberInvitation extends Model
     protected function casts(): array
     {
         return [
-            'role_data' => 'array',
+            'role_key' => RoleCast::class,
+            'accepted_at' => 'timestamp',
+            'rejected_at' => 'timestamp',
+            'expires_at' => 'timestamp',
         ];
     }
 }

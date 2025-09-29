@@ -11,7 +11,6 @@ use App\Livewire\Participants\Actions\AddMemberAction;
 use App\Livewire\Participants\Actions\RemoveMemberAction;
 use App\Models\Tenant;
 use App\Models\User;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -57,10 +56,11 @@ final class TenantMembersTable extends Component implements HasActions, HasSchem
             ->records(fn () => $this->getTenantMembers())
             ->columns([
                 Split::make([
-                    ImageColumn::make('avatarUrl')->circular()->grow(false),
+                    ImageColumn::make('assignable.avatarUrl')->circular()->grow(false),
                     Stack::make([
-                        TextColumn::make('name')->weight(FontWeight::Bold)->label(__('participants.labels.name')),
-                        TextColumn::make('username')
+                        TextColumn::make('assignable.name')
+                            ->weight(FontWeight::Bold)->label(__('participants.labels.name')),
+                        TextColumn::make('assignable.username')
                             ->size(TextSize::ExtraSmall)
                             ->fontFamily(FontFamily::Mono)
                             ->formatStateUsing(fn ($state) => "@{$state}")
@@ -70,7 +70,8 @@ final class TenantMembersTable extends Component implements HasActions, HasSchem
                         TextColumn::make('role')
                             ->alignEnd()
                             ->badge()
-                            ->state(fn ($record) => ucfirst($record['role']['name'])),
+                            ->color('gray')
+                            ->state(fn ($record) => $record->role_key->getLabel()),
                     ]),
                 ]),
             ])
@@ -83,13 +84,14 @@ final class TenantMembersTable extends Component implements HasActions, HasSchem
                 //                    filamentUser(),
                 //                    $this->getAssignableUsers(),
                 //                )->outlined(),
-                InviteMemberAction::make($this->tenant),
+                InviteMemberAction::make($this->tenant)
+                    ->color('primary'),
             ])
             ->recordActions([
                 Action::make('change_role')
                     ->icon('heroicon-c-queue-list')
                     ->iconButton()
-                    ->visible(fn () => $this->canManageTenant())
+                    ->visible(fn ($record) => $this->canManageTenant() && $record->assignable_id !== filamentUser()->getKey())
                     ->schema([
                         RoleSelect::make('role', $this->tenant, filamentUser()),
                     ])
@@ -99,7 +101,8 @@ final class TenantMembersTable extends Component implements HasActions, HasSchem
                         $data['role'],
                     ))
                     ->label(__('participants.actions.change_role')),
-                RemoveMemberAction::make($this->tenant),
+                RemoveMemberAction::make($this->tenant)
+                    ->visible(fn ($record) => $this->canManageTenant() && $record->assignable_id !== filamentUser()->getKey()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -119,7 +122,7 @@ final class TenantMembersTable extends Component implements HasActions, HasSchem
             $targetEntity = User::query()->where('id', $targetId)->firstOrFail();
             Porter::changeRoleOn($targetEntity, $this->tenant, $role);
             $this->resetTable();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             logger()->error('Error changing tenant member role', [
                 'actor' => filamentUser(),
                 'tenant' => $this->tenant->id,
@@ -136,14 +139,15 @@ final class TenantMembersTable extends Component implements HasActions, HasSchem
 
     private function getTenantMembers()
     {
-        return (new ParticipantsCollection(
-            Porter::getParticipantsWithRoles($this->tenant)
-                ->reject(fn ($item) => $item->assignable_id === filamentUser()->getKey())
-                ->keyBy('assignable_id'),
-        ))
-            ->asDtoCollection()
-            ->map(fn ($item) => $item->toArray())
-            ->toArray();
+        return Porter::getParticipantsWithRoles($this->tenant)
+//            ->reject(fn ($item) => $item->assignable_id === filamentUser()->getKey())
+            ->keyBy('assignable_id');
+        //        return (new ParticipantsCollection(
+        //
+        //        ))
+        //            ->asDtoCollection()
+        //            ->map(fn ($item) => $item->toArray())
+        //            ->toArray();
     }
 
     /**

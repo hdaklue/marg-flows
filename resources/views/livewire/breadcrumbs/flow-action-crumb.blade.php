@@ -1,6 +1,6 @@
 <div>
     <div x-data>
-        {!! $this->renderCrumbSteps() !!}
+        {!! $this->renderActioncrumbs() !!}
     </div>
 
     <livewire:participants.manage-participants-modal :roleableEntity="$this->flow" />

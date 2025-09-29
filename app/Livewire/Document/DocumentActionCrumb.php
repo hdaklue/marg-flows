@@ -4,11 +4,19 @@ declare(strict_types=1);
 
 namespace App\Livewire\Document;
 
-use App\Livewire\Steps\DocumentStep;
+use App\Filament\Actions\Document\CreateDocumentAction;
+use App\Filament\Actions\Flow\EditFlowInfoAction;
+use App\Filament\Resources\Flows\FlowResource;
 use App\Models\Document;
 use App\Models\Flow;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Hdaklue\Actioncrumb\Components\WireCrumb;
-use Hdaklue\Actioncrumb\Components\WireStep;
+use Hdaklue\Actioncrumb\Step;
+use Hdaklue\Actioncrumb\Support\WireAction;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
+use InvalidArgumentException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
@@ -17,10 +25,12 @@ use Livewire\Attributes\Locked;
  */
 final class DocumentActionCrumb extends WireCrumb
 {
+    use HasActionCrumbs;
+
     #[Locked]
     public string $documentId;
 
-    public function mount($record = null, $parent = null)
+    public function mount($record = null, $parent = null): void
     {
         parent::mount($record, $parent);
         $this->documentId = $record->id;
@@ -40,30 +50,87 @@ final class DocumentActionCrumb extends WireCrumb
 
     public function render()
     {
-        return view('livewire.document.document-action-crumb', [
-            'renderedCrumbSteps' => $this->renderCrumbSteps(),
-        ]);
+        return view('livewire.document.document-action-crumb');
     }
 
-    protected function crumbSteps(): array
+    public function deleteDocumentAction(): Action
+    {
+        return Action::make('deleteDocument')
+            ->label('Delete Document')
+            ->icon('heroicon-o-trash')
+            ->requiresConfirmation()
+            ->action(function () {
+                Notification::make()
+                    ->title('Delete Document')
+                    ->body('Delete document functionality')
+                    ->warning()
+                    ->send();
+            });
+    }
+
+    public function createDocumentAction(): Action
+    {
+        if (! $this->document) {
+            throw new InvalidArgumentException('Document is required for createDocumentAction');
+        }
+
+        return CreateDocumentAction::make($this->document->documentable, shouldRedirect: true);
+    }
+
+    public function editFlowAction(): EditAction
+    {
+        return EditFlowInfoAction::make($this->flow);
+    }
+
+    protected function actioncrumbs(): array
     {
         if (! $this->document) {
             return [];
         }
 
+        $flowDocsUrl = FlowResource::getUrl('view', [
+            'tenant' => filamentTenant(),
+            'record' => $this->flow,
+            'activeTab' => 'documents',
+        ]);
+        $flowUrl = FlowResource::getUrl('view', [
+            'tenant' => filamentTenant(),
+            'record' => $this->flow,
+        ]);
+
         return [
-            WireStep::make(DocumentStep::class, [
-                'record' => $this->document,
-                'stepType' => 'flow',
-            ])->stepId('flow'),
-            WireStep::make(DocumentStep::class, [
-                'record' => $this->document,
-                'stepType' => 'document',
-            ])->stepId('document'),
-            WireStep::make(DocumentStep::class, [
-                'record' => $this->document,
-                'stepType' => 'current',
-            ])->stepId('current'),
+            Step::make('flow')
+                ->label(fn () => str($this->flow->title)->title())
+                ->icon(FlowResource::getNavigationIcon())
+                ->url($flowUrl)
+                ->actions([
+                    WireAction::make('Edit Flow')
+                        ->livewire($this)
+                        ->icon('heroicon-o-plus')
+                        ->execute('editFlow'),
+                ]),
+            Step::make('document')
+                ->label('Documents')
+                ->icon('heroicon-o-folder')
+                ->url($flowDocsUrl)
+                ->actions([
+                    WireAction::make('Create Document')
+                        ->livewire($this)
+                        ->icon('heroicon-o-plus')
+                        ->execute('createDocument'),
+                ]),
+            Step::make('current_document')
+                ->label($this->document->name)
+                ->current()
+                ->actions([
+                    \Hdaklue\Actioncrumb\Action::make('share')
+                        ->label('Share with ..')
+                        ->visible(fn () => filamentUser()->can('manage', $this->document))
+                        ->execute(fn () => $this->dispatch(
+                            'open-modal',
+                            id: 'manage-participants-modal',
+                        )),
+                ]),
         ];
     }
 }

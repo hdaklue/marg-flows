@@ -24,7 +24,7 @@ final class AddMemberAction
     ): Action {
         return Action::make('add_member')
             ->visible(fn () => filamentUser()->can('manage', $roleableEntity))
-            ->form([
+            ->schema([
                 Select::make('member')
                     ->label(__('participants.labels.member'))
                     ->placeholder(__('participants.placeholders.select_member'))

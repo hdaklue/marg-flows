@@ -4,37 +4,28 @@ declare(strict_types=1);
 
 namespace App\DTOs\Invitation;
 
+use App\Models\Tenant;
 use App\Models\User;
-use App\Services\Timezone;
-use Illuminate\Support\Collection;
-use Illuminate\Validation\Rule;
-use WendellAdriel\ValidatedDTO\Casting\CollectionCast;
-use WendellAdriel\ValidatedDTO\Casting\ObjectCast;
+use WendellAdriel\ValidatedDTO\Casting\ModelCast;
 use WendellAdriel\ValidatedDTO\ValidatedDTO;
 
 final class InvitationDTO extends ValidatedDTO
 {
-    public object $sender;
+    public User $sender;
+
+    public Tenant $tenant;
 
     public string $email;
 
-    public string $name;
-
-    public array|Collection $role_data;
-
-    public string $timezone;
+    public string $role_key;
 
     protected function rules(): array
     {
         return [
             'sender' => ['required'],
-            'name' => ['required'],
-            'email' => ['email', 'required', Rule::notIn(User::pluck('email'))],
-            'role_data' => ['required'],
-            'timezone' => [
-                'required',
-                Rule::in(Timezone::getTimezonesAsFlatList()),
-            ],
+            'email' => ['email', 'required'],
+            'role_key' => ['required'],
+            'tenant' => ['required'],
         ];
     }
 
@@ -46,8 +37,8 @@ final class InvitationDTO extends ValidatedDTO
     protected function casts(): array
     {
         return [
-            'sender' => new ObjectCast,
-            'role_data' => new CollectionCast,
+            'sender' => new ModelCast(User::class),
+            'tenant' => new ModelCast(Tenant::class),
         ];
     }
 }
