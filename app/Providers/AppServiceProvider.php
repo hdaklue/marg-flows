@@ -27,7 +27,7 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Enums\Size;
 use Filament\Support\Facades\FilamentAsset;
-use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
+use Hdaklue\Actioncrumb\Configuration\ActioncrumbConfig;
 use Hdaklue\Actioncrumb\Enums\SeparatorType;
 use Hdaklue\Actioncrumb\Enums\TailwindColor;
 use Hdaklue\Actioncrumb\Enums\ThemeStyle;
@@ -153,12 +153,12 @@ final class AppServiceProvider extends ServiceProvider
         ]);
     }
 
-    protected function configureVite()
+    protected function configureVite(): void
     {
         Vite::useAggressivePrefetching();
     }
 
-    protected function configureModel()
+    protected function configureModel(): void
     {
         Relation::enforceMorphMap([
             'user' => User::class,
@@ -169,7 +169,7 @@ final class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict();
     }
 
-    protected function configureGate()
+    protected function configureGate(): void
     {
         if (app()->isProduction()) {
             Gate::defaultDenialResponse(Response::denyAsNotFound());

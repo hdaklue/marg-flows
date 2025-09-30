@@ -50,6 +50,7 @@ final class PortalPanelProvider extends PanelProvider
                 'primary' => Color::Emerald,
             ])
             ->spa()
+            ->topbar(false)
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
             ->breadcrumbs(false)
@@ -60,9 +61,9 @@ final class PortalPanelProvider extends PanelProvider
                 // Custom language switching will be added via render hooks
             ])
             ->maxContentWidth(Width::ScreenTwoExtraLarge)
-            ->renderHook(PanelsRenderHook::TOPBAR_END, fn (): string => Blade::render(
-                '<x-language-switch />',
-            ))
+//            ->renderHook(PanelsRenderHook::SIDEBAR_LOGO_AFTER, fn (): string => Blade::render(
+//                '<x-language-switch />',
+//            ))
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,
                 fn (): string => Blade::render('<x-language-switch />'),

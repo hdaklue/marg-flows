@@ -27,6 +27,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Throwable;
 
 final class UserSettings extends Page implements HasTable
 {
@@ -49,6 +50,9 @@ final class UserSettings extends Page implements HasTable
         return UserTenant::configure($table);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function content(Schema $schema): Schema
     {
         return $schema->components([

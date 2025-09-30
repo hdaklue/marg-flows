@@ -13,7 +13,7 @@
         "asmit/resized-column": "^1.1",
         "bumpcore/editor.php": "^1.2",
         "filament/filament": "^4.0",
-        "hdaklue/actioncrumb": "1.0.12",
+        "hdaklue/actioncrumb": "^2.0",
         "hdaklue/larapath": "2.0.0",
         "hdaklue/laravel-dto-morph-cast": "^1.1",
         "hdaklue/marg-brac": "^2.0",
