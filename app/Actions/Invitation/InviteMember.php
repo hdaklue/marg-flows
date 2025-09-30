@@ -6,6 +6,7 @@ namespace App\Actions\Invitation;
 
 use App\Actions\User\GenerateUserAvatar;
 use App\DTOs\Invitation\InvitationDTO;
+use App\Models\MemberInvitation;
 use App\Models\Tenant;
 use App\Models\TenantUser;
 use App\Models\User;
@@ -22,6 +23,7 @@ use Illuminate\Support\Collection;
 use function Illuminate\Support\defer;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -48,14 +50,19 @@ final class InviteMember
         // send an email with the invitation link
 
         $role = RoleFactory::tryMake($dto->role_key);
-        CreateInvitation::run(request()->user(), $dto->tenant, $dto->email, $role);
-        //        $this->notifyMember();
+        $invitation = CreateInvitation::run(request()->user(), $dto->tenant, $dto->email, $role);
+        $this->notifyMember($dto->tenant, $invitation);
 
     }
 
-    private function notifyMember(): void
+    private function notifyMember(Tenant $tenant, MemberInvitation $invitation): void
     {
-        $this->member->notify(new InvitationRecieved($this->password));
+        $receiver = new User;
+        $receiver->email = $invitation->getAttribute('receiver_email');
+        //        $receiver->notify(new InvitationRecieved($tenant, $invitation->getKey()));
+        Notification::route('mail', [$invitation->getAttribute('receiver_email') => $invitation->getAttribute('receiver_email')])
+            ->notify(new InvitationRecieved($tenant, $invitation->getKey()));
+
     }
 
     //    private function persistMember(InvitationDTO $dto)

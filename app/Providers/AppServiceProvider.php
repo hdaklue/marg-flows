@@ -87,12 +87,18 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->configureModel();
 
+        //        ActioncrumbConfig::make()
+        //            ->themeStyle(ThemeStyle::Square) // Simple, Rounded, Square
+        //            ->separatorType(SeparatorType::Line) // Chevron, Line
+        //            ->primaryColor(TailwindColor::Emerald) // Any Tailwind color
+        //            ->secondaryColor(TailwindColor::Zinc) // Secondary accents
+        //            ->compactMenuOnMobile()
+        //            ->bind();
         ActioncrumbConfig::make()
-            ->themeStyle(ThemeStyle::Simple) // Simple, Rounded, Square
-            ->separatorType(SeparatorType::Line) // Chevron, Line
-            ->primaryColor(TailwindColor::Emerald) // Any Tailwind color
-            ->secondaryColor(TailwindColor::Zinc) // Secondary accents
-            ->compactMenuOnMobile()
+            ->themeStyle(ThemeStyle::Simple)
+            ->separatorType(SeparatorType::Chevron)
+            ->primaryColor(TailwindColor::Emerald)
+            ->secondaryColor(TailwindColor::Zinc)
             ->bind();
 
         Event::subscribe(TenantEventSubscriber::class);

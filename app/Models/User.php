@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
 
@@ -82,6 +83,8 @@ use Illuminate\Support\Collection as SupportCollection;
  */
 final class User extends RbacUser implements FilamentUser, HasTenants
 {
+    use Notifiable;
+
     protected static $factory = UserFactory::class;
 
     /**

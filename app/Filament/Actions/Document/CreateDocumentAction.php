@@ -21,7 +21,7 @@ final class CreateDocumentAction
     {
         return Action::make('add_document')
             ->label('Add Document')
-            ->form([
+            ->schema([
                 TextInput::make('name')->required()->maxLength(100),
                 Select::make('template')
                     ->options(DocumentTemplate::templatesAsSelectArray())

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Filament\Pages\AcceptInvitation;
 use App\Http\Controllers\SecureFileController;
 use App\Http\Controllers\UrlFetchController;
 use App\Livewire\CalendarTest;
@@ -35,10 +36,10 @@ Route::get('/videoPreview', PreviewVideo::class)->name('video.preview');
 Route::get('/audioPreview', PreviewAudio::class)->name('audio.preview');
 Route::get('/videoRecord', VideoRecorder::class)->name('video.record');
 
-// Route::get(
-//    'invitation/accept',
-//    \App\Filament\Pages\AcceptInvitation::class,
-// )->middleware([Authenticate::class])->name('invitation.accept');
+Route::get(
+    'invitation/accept',
+    AcceptInvitation::class,
+)->middleware([Authenticate::class])->name('invitation.accept');
 
 // URL fetch route for EditorJS LinkTool
 Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])->middleware(['auth'])->name(

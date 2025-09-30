@@ -2340,16 +2340,16 @@
         },
         {
             "name": "hdaklue/actioncrumb",
-            "version": "2.0.17",
+            "version": "2.0.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/actioncrumb.git",
-                "reference": "bdd7769a47490c87f9fe4fdb6329626d47ec7864"
+                "reference": "d3b77d842ae59f97871b3ea244d6510e05ce590a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/actioncrumb/zipball/bdd7769a47490c87f9fe4fdb6329626d47ec7864",
-                "reference": "bdd7769a47490c87f9fe4fdb6329626d47ec7864",
+                "url": "https://api.github.com/repos/hdaklue/actioncrumb/zipball/d3b77d842ae59f97871b3ea244d6510e05ce590a",
+                "reference": "d3b77d842ae59f97871b3ea244d6510e05ce590a",
                 "shasum": ""
             },
             "require": {
@@ -2398,9 +2398,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hdaklue/actioncrumb/issues",
-                "source": "https://github.com/hdaklue/actioncrumb/tree/2.0.17"
+                "source": "https://github.com/hdaklue/actioncrumb/tree/2.0.25"
             },
-            "time": "2025-09-30T08:25:12+00:00"
+            "time": "2025-09-30T18:29:35+00:00"
         },
         {
             "name": "hdaklue/larapath",
