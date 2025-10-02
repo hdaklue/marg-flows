@@ -30,13 +30,13 @@ final readonly class InviteMemberAction
             ->color('gray')
             ->action(function (array $data) {
                 try {
-                    $dto = InvitationDTO::fromArray([
-                        'email' => $data['email'],
-                        'role_key' => $data['role'],
-                        'sender' => filamentUser(),
-                        'tenant' => filamentTenant(),
-                    ]);
-                    InviteMember::run($dto);
+                    //                    $dto = InvitationDTO::fromArray([
+                    //                        'email' => $data['email'],
+                    //                        'role_key' => $data['role'],
+                    //                        'sender' => filamentUser(),
+                    //                        'tenant' => filamentTenant(),
+                    //                    ]);
+                    InviteMember::run(filamentUser(), filamentTenant(), $data['role'], $data['email']);
 
                     Notification::make()
                         ->body(__('common.messages.operation_completed'))

@@ -26,9 +26,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
-
-use function request;
-
 use Throwable;
 
 final class InviteMember
@@ -44,14 +41,14 @@ final class InviteMember
     /**
      * @throws Throwable
      */
-    public function handle(InvitationDTO $dto): void
+    public function handle(User $sender, Tenant $tenant, string $role, string $receiver_email): void
     {
         // create the invitation
         // send an email with the invitation link
 
-        $role = RoleFactory::tryMake($dto->role_key);
-        $invitation = CreateInvitation::run(request()->user(), $dto->tenant, $dto->email, $role);
-        $this->notifyMember($dto->tenant, $invitation);
+        $role = RoleFactory::tryMake($role);
+        $invitation = CreateInvitation::run($sender, $tenant, $receiver_email, $role);
+        $this->notifyMember($tenant, $invitation);
 
     }
 
