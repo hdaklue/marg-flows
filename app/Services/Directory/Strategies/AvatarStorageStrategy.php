@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Directory\Strategies;
 
 use Exception;
-use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
 use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -15,8 +14,9 @@ final class AvatarStorageStrategy extends BaseStorageStrategy
 {
     public function store(UploadedFile $file): string
     {
+
         $secureFilename = PathBuilder::base('')
-            ->addFile($file->getClientOriginalName(), SanitizationStrategy::SLUG)
+            ->addFile($file->getClientOriginalName())
             ->getFilename();
 
         $path = $file->storeAs($this->getDirectory(), $secureFilename, [

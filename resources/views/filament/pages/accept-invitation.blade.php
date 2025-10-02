@@ -1,3 +1,5 @@
 <x-filament-panels::page.simple>
-    {{-- Page content --}}
+    <div class="flex w-full justify-center items-center">
+        {{ $this->content }}
+    </div>
 </x-filament-panels::page.simple>

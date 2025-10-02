@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Notifications\Invitation;
 
-use App\Filament\Pages\AcceptInvitation;
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -43,9 +42,9 @@ final class InvitationRecieved extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->greeting('Hello ')
-            ->line('You have been invited to join our succees management platform.')
+            ->line('You have been invited to join Margineer')
 //            ->line(new HtmlString("Password: <b>{$this->password}</b>"))
-            ->action('Login Here', AcceptInvitation::getUrl(['t' => $this->invitationCode]))
+            ->action('Accept', route('invitation.view', ['id' => $this->invitationCode]))
             ->line('Thank you for being a part of our success!');
     }
 

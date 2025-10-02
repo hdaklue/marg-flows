@@ -85,7 +85,10 @@ final class TenantMembersTable extends Component implements HasActions, HasSchem
                 //                    $this->getAssignableUsers(),
                 //                )->outlined(),
                 InviteMemberAction::make($this->tenant)
-                    ->color('primary'),
+                    ->color('primary')
+                    ->after(function () {
+                        $this->dispatch('InviteMemberAction::InvitationsSent');
+                    }),
             ])
             ->recordActions([
                 Action::make('change_role')

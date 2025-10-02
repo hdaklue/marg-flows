@@ -7,20 +7,14 @@ namespace App\Filament\Resources\Flows\Pages;
 use App\Concerns\Filament\Pages\DisableBreadcrumb;
 use App\Filament\Actions\Document\CreateDocumentAction;
 use App\Filament\Actions\Flow\EditFlowInfoAction;
-use App\Filament\Resources\Documents\DocumentResource;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Livewire\Flow\FlowTabs;
-use App\Services\Document\Actions\CreateDocument;
-use App\Services\Document\Facades\DocumentTemplate;
 use App\Services\Recency\Actions\RecordRecency;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Text;
@@ -61,41 +55,6 @@ final class ViewFlow extends ViewRecord
                 Action::make('add_stream')
                     ->label(__('flow.actions.stream'))
                     ->size(Size::ExtraSmall),
-                // Action::make('add_document')
-                //     ->label('Add Document')
-                //     ->form([
-                //         TextInput::make('name')->required()->maxLength(100),
-                //         Select::make(
-                //             'template',
-                //         )->options(DocumentTemplate::templatesAsSelectArray()),
-                //     ])
-                //     ->action(function (array $data) {
-                //         try {
-                //             $driver = (string) $data['template'];
-
-                //             $template = DocumentTemplate::$driver();
-                //             $createdDocument = CreateDocument::run(
-                //                 $data['name'],
-                //                 filamentUser(),
-                //                 $this->record,
-                //                 $template,
-                //             );
-                //             $this->redirect(DocumentResource::getUrl('view', [
-                //                 'record' => $createdDocument->getKey(),
-                //             ]), true);
-
-                //             // Notification::make()
-                //             //     ->body(__('common.messages.operation_completed'))
-                //             //     ->success()
-                //             //     ->send();
-                //         } catch (Exception $e) {
-                //             logger()->error($e->getMessage());
-                //             Notification::make()
-                //                 ->body(__('common.messages.operation_failed'))
-                //                 ->danger()
-                //                 ->send();
-                //         }
-                //     }),
                 CreateDocumentAction::make($this->record),
                 Action::make('add_check')
                     ->label(__('flow.actions.checkpoint'))

@@ -14,6 +14,8 @@ use App\Livewire\SortableDemo;
 use App\Livewire\TestChunkedUpload;
 use App\Livewire\ToastCalendarTest;
 use Filament\Http\Middleware\Authenticate;
+use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
+use Hdaklue\PathBuilder\Facades\LaraPath;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
@@ -29,6 +31,12 @@ use Illuminate\Support\Facades\Session;
 
 Route::get('/imagePreview', action: PreviewImage::class)->name('home');
 
+// Route::get('/test/path', function () {
+//    return LaraPath::base('base dore')
+//        ->addHashedDir('asdasdad')
+//        ->addFile('test adad.txt', SanitizationStrategy::SNAKE)
+//        ->toString();
+// });
 // Route::get('/', SortableDemo::class);
 
 Route::get('/annotation', fn () => view('annotation'));
@@ -37,9 +45,9 @@ Route::get('/audioPreview', PreviewAudio::class)->name('audio.preview');
 Route::get('/videoRecord', VideoRecorder::class)->name('video.record');
 
 Route::get(
-    'invitation/accept',
+    'i/a/{id}',
     AcceptInvitation::class,
-)->middleware([Authenticate::class])->name('invitation.accept');
+)->middleware([Authenticate::class])->name('invitation.view');
 
 // URL fetch route for EditorJS LinkTool
 Route::get('editor/fetch-url', [UrlFetchController::class, 'fetchUrl'])->middleware(['auth'])->name(

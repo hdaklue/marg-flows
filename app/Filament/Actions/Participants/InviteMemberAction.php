@@ -37,6 +37,7 @@ final readonly class InviteMemberAction
                         'tenant' => filamentTenant(),
                     ]);
                     InviteMember::run($dto);
+
                     Notification::make()
                         ->body(__('common.messages.operation_completed'))
                         ->success()

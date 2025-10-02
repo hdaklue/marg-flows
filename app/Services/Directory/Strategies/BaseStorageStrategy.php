@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Directory\Strategies;
 
 use App\Services\Directory\Contracts\StorageStrategyContract;
-use Hdaklue\PathBuilder\Enums\SanitizationStrategy;
 use Hdaklue\PathBuilder\PathBuilder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -184,7 +183,7 @@ abstract class BaseStorageStrategy implements StorageStrategyContract
     protected function buildSecurePath(string $fileName): string
     {
         return PathBuilder::base($this->getDirectory())
-            ->addFile($fileName, SanitizationStrategy::SLUG)
+            ->addFile($fileName)
             ->validate()
             ->toString();
     }

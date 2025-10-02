@@ -81,6 +81,10 @@ return [
             'transport' => 'array',
         ],
 
+        'mailtrap-sdk' => [
+            'transport' => 'mailtrap-sdk',
+        ],
+
         'failover' => [
             'transport' => 'failover',
             'mailers' => [

@@ -1,23 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
-use App\Providers\AppServiceProvider;
-use App\Providers\DocumentServiceProvider;
-use App\Providers\Filament\PortalPanelProvider;
-use App\Providers\FileServingServiceProvider;
-use App\Providers\HorizonServiceProvider;
-use App\Providers\NapTabServiceProvider;
-use App\Services\Video\VideoServiceProvider;
-use Hdaklue\MargRbac\Providers\MargRbacServiceProvider;
-
 return [
-    AppServiceProvider::class,
-    DocumentServiceProvider::class,
-    PortalPanelProvider::class,
-    FileServingServiceProvider::class,
-    HorizonServiceProvider::class,
-    NapTabServiceProvider::class,
-    VideoServiceProvider::class,
-    MargRbacServiceProvider::class,
+    App\Providers\AppServiceProvider::class,
+    App\Providers\DocumentServiceProvider::class,
+    App\Providers\Filament\PortalPanelProvider::class,
+    App\Providers\FileServingServiceProvider::class,
+    App\Providers\HorizonServiceProvider::class,
+    App\Providers\NapTabServiceProvider::class,
+    App\Services\Video\VideoServiceProvider::class,
+    Hdaklue\MargRbac\Providers\MargRbacServiceProvider::class,
 ];

@@ -7,7 +7,7 @@ namespace App\Providers\Filament;
 // Language switch plugin removed - using custom solution
 use App\Filament\Auth\Login;
 use App\Filament\Auth\Register;
-use App\Filament\Pages\Tenancy\ManageMembers;
+use App\Filament\Pages\Tenancy\TeamSetting;
 use App\Filament\Pages\UserSettings;
 use App\Filament\Widgets\RecentInteractionsWidget;
 use App\Http\Middleware\Filament\ConfigureDateTimePickers;
@@ -40,7 +40,7 @@ final class PortalPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('portal')
-            ->path('/app')
+            ->path('')
             ->login(Login::class)
             ->passwordReset()
             ->registration(Register::class)
@@ -78,11 +78,12 @@ final class PortalPanelProvider extends PanelProvider
                     ->url(fn (): string => UserSettings::getUrl())
                     ->icon('heroicon-o-user-circle'),
             ])
-            ->tenantProfile(ManageMembers::class)
+            ->tenantProfile(TeamSetting::class)
             ->tenantMenuItems([
+                'profile' => fn (Action $action) => $action->visible(filamentUser()->can('manage', filamentTenant()))->label('Setting'),
                 //                Action::make('members')
                 //                    ->label('Members')
-                //                    ->url(fn (): string => ManageMembers::getUrl())
+                //                    ->url(fn (): string => TeamSetting::getUrl())
                 //                    ->icon('heroicon-o-users'),
             ])
             ->discoverResources(

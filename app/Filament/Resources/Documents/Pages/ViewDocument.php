@@ -25,7 +25,7 @@ final class ViewDocument extends ViewRecord
 
     public ?array $data = [];
 
-    public Width|string|null $maxContentWidth = 'full';
+    //    public Width|string|null $maxContentWidth = '7xl';
 
     protected string $view = 'filament.resources.document-resource.pages.view';
 

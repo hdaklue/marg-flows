@@ -41,6 +41,7 @@ final class GenerateUserAvatar
         }
 
         $file = UploadedFile::fake()->createWithContent($fileName, $content);
+
         $avatarFileName = SystemDirectoryManager::instance()->avatars()->store($file);
         $user->updateProfileAvatar($avatarFileName);
     }

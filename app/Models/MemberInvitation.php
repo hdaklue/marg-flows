@@ -80,6 +80,12 @@ final class MemberInvitation extends Model
     }
 
     #[Scope]
+    protected function forTenant(Builder $query, Tenant $tenant): Builder
+    {
+        return $query->where('tenant_id', '=', $tenant->id);
+    }
+
+    #[Scope]
     protected function sentBy(Builder $query, User $user): Builder
     {
         return $query->where('sender_id', '=', $user->id);
