@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Tenancy;
 
+use App\Actions\Invitation\RevokeInvitaion;
 use App\Models\MemberInvitation;
+use App\Polishers\InvitationPolisher;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Enums\ActionStatus;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Tables\Columns\TextColumn;
@@ -18,6 +23,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Throwable;
 
 final class PendingInvitationTable extends Component implements HasActions, HasSchemas, HasTable
 {
@@ -25,15 +31,29 @@ final class PendingInvitationTable extends Component implements HasActions, HasS
     use InteractsWithSchemas;
     use InteractsWithTable;
 
+    /**
+     * @throws Throwable
+     */
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => MemberInvitation::forTenant(filamentTenant()))
+            ->query(fn (): Builder => MemberInvitation::forTenant(filamentTenant())->orderBy('created_at', 'desc'))
             ->columns([
                 TextColumn::make('receiver_email')->label('Email'),
                 TextColumn::make('role_key')
                     ->formatStateUsing(fn ($state) => $state->getLabel())
-                    ->label('Created At'),
+                    ->badge()
+                    ->color('gray')
+                    ->label('Role'),
+                TextColumn::make('created_at')
+                    ->label('Sent at')
+                    ->timezone(filamentUser()->getTimezone())
+                    ->date(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color('gray')
+                    ->state(fn ($record) => InvitationPolisher::status($record)),
+
             ])
             ->filters([
                 //
@@ -42,7 +62,21 @@ final class PendingInvitationTable extends Component implements HasActions, HasS
                 //
             ])
             ->recordActions([
-                //
+                Action::make('delete')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->icon('heroicon-o-trash')
+                    ->visible(fn ($record) => InvitationPolisher::status($record) === 'sent')
+                    ->iconButton()
+                    ->label('Delete')
+                    ->action(fn (MemberInvitation $record) => RevokeInvitaion::run($record->getKey()))
+                    ->after(function ($action) {
+                        match ($action->getStatus()) {
+                            ActionStatus::Success => Notification::make()->success()->body(__('common.messages.operation_completed'))->send(),
+                            ActionStatus::Failure => Notification::make()->danger()->body(__('common.messages.operation_failed'))->send(),
+                        };
+
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
