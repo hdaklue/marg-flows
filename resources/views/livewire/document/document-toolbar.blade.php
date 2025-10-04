@@ -169,6 +169,7 @@
         </div>
 
         <!-- Version History Button -->
+        @if($this->canEditComputed)
         <button x-data="{
             show: $wire.entangle('hasNewVersions')
         }" wire:click="openDocumentVersionModal" wire:poll.10s='checkNewVersions'
@@ -187,6 +188,7 @@
                 <span class="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span>
             </span>
         </button>
+        @endif
 
         <x-user-avatar-stack :users="$this->participantsArrayComputed" size='2xs' />
     </div>

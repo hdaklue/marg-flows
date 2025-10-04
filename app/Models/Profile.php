@@ -29,6 +29,7 @@ final class Profile extends Model
         'user_id',
         'avatar',
         'timezone',
+        'locale',
     ];
 
     public function user(): BelongsTo

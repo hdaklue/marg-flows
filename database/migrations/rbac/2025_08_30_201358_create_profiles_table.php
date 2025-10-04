@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('user_id'); // References user ID from RBAC database
             $table->string('avatar')->nullable();
             $table->string('timezone')->nullable();
+            $table->char('locale', 3)->nullable();
             $table->timestamps();
 
             $table->index('user_id');

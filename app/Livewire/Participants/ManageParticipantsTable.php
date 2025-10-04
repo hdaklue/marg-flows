@@ -83,7 +83,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                     $this->roleableEntity,
                     filamentUser(),
                     $this->getAssignableUsers(),
-                )->outlined(),
+                ),
                 InviteMemberAction::make(filamentTenant()),
 
             ])

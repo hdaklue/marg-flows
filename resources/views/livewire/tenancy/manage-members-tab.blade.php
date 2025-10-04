@@ -12,7 +12,7 @@
     <div>
         <x-filament::section>
             <x-slot name="heading">
-               Pending Invitation
+                Invitations
             </x-slot>
 
            <livewire:tenancy.pending-invitation-table/>
