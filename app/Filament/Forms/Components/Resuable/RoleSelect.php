@@ -17,10 +17,13 @@ final class RoleSelect
         RoleableEntity $roleableEntity,
         AssignableEntity $assignableEntity,
         bool $required = true,
+        ?RoleContract $currentRole = null,
     ): Select {
         return Select::make($id)
             ->required($required)
             ->label('Select Roles')
+            ->disableOptionWhen(fn (string $value) => $value === $currentRole?->getPlainKey())
+
             ->options(self::resolveRoles($assignableEntity, $roleableEntity));
     }
 
@@ -28,7 +31,7 @@ final class RoleSelect
         AssignableEntity $assignableEntity,
         RoleableEntity $roleableEntity,
     ) {
-        return RoleFactory::getRolesLowerThan($assignableEntity->getAssignmentOn($roleableEntity))
+        return RoleFactory::getRolesLowerThanOrEqual($assignableEntity->getAssignmentOn($roleableEntity))
             ->sortByDesc(fn (RoleContract $item) => (int) $item->getLevel())
             ->mapWithKeys(fn ($item) => [
                 $item::getPlainKey() => $item->getLabel(),

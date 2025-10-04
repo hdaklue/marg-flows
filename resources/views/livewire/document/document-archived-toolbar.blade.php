@@ -1,5 +1,5 @@
 <!-- Archived Document Toolbar -->
-<div x-cloak x-bind:style="isSticky ? `top: ${topbarHeight}px;` : ''"
+<div x-cloak x-bind:style="isSticky ? `top: 0px;` : ''"
     :class="{
         'fixed left-0 right-0 z-20 bg-amber-50/90 dark:bg-amber-900/20 backdrop-blur-sm py-2 border-y border-amber-200 dark:border-amber-800': isSticky,
         'mb-4': !isSticky,

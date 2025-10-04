@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Livewire\Breadcrumbs;
 
+use App\Filament\Actions\Flow\EditFlowInfoAction;
 use App\Filament\Resources\Flows\Actions\CreateFlowAction;
 use App\Filament\Resources\Flows\FlowResource;
 use App\Models\Flow;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\EditAction;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Hdaklue\Actioncrumb\Components\WireCrumb;
@@ -51,6 +53,11 @@ final class FlowActionCrumb extends WireCrumb implements HasActions, HasSchemas
         return view('livewire.breadcrumbs.flow-action-crumb');
     }
 
+    public function editFlowAction(): EditAction
+    {
+        return EditFlowInfoAction::make($this->flow);
+    }
+
     /**
      * @throws Throwable
      */
@@ -65,11 +72,18 @@ final class FlowActionCrumb extends WireCrumb implements HasActions, HasSchemas
                 ->url($flowUrl)
                 ->actions([WireAction::make('create_flow')
                     ->label('Create Flow')
+                    ->visible(fn () => filamentUser()->can('create', [Flow::class, filamentTenant()]))
                     ->livewire($this)
                     ->execute('createFlow'), ]),
 
             Step::make('current')
                 ->label(fn () => str($this->flow->getAttribute('title'))->title())
+                ->actions([
+                    WireAction::make('Edit Info')
+                        ->livewire($this)
+                        ->icon('heroicon-o-plus')
+                        ->execute('editFlow'),
+                ])
                 ->current(),
         ];
     }

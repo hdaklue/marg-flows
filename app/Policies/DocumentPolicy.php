@@ -69,6 +69,6 @@ final class DocumentPolicy
 
     public function manage(User $user, Document $document): bool
     {
-        return $user->isAtLeastOn(RoleFactory::manager(), $document);
+        return $user->isAtLeastOn(RoleFactory::manager(), $document) && ! $document->isArchived();
     }
 }

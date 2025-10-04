@@ -8,7 +8,6 @@ use App\Livewire\Participants\ManageParticipantsTable;
 use App\Models\Flow;
 use Hdaklue\NapTab\Livewire\NapTab;
 use Hdaklue\NapTab\UI\Tab;
-use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Locked;
 
 final class FlowTabs extends NapTab
@@ -21,9 +20,10 @@ final class FlowTabs extends NapTab
         $flow = Flow::where('id', $this->flowId)->first();
 
         return [
-            Tab::make('streams')->icon('arrows-right-left')->label(__('flow.tabs.streams')),
+            Tab::make('streams')
+                ->icon('arrows-right-left')
+                ->label(__('flow.tabs.streams')),
             Tab::make('documents')
-
                 ->icon('clipboard-document-list')
                 ->label(__('flow.tabs.documents'))
                 ->livewire(FlowDocumentsTable::class, [
@@ -37,10 +37,5 @@ final class FlowTabs extends NapTab
                     'roleableEntity' => $flow,
                 ]),
         ];
-    }
-
-    public function streams()
-    {
-        return new HtmlString('hello');
     }
 }

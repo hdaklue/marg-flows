@@ -93,7 +93,13 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                     ->iconButton()
                     ->visible(fn () => $this->canManageRoleableEntity())
                     ->schema([
-                        RoleSelect::make('role', $this->roleableEntity, filamentUser()),
+                        RoleSelect::make(
+                            'role',
+                            $this->roleableEntity,
+                            filamentUser(),
+                            true,
+
+                        ),
                     ])
                     ->color('gray')
                     ->action(fn ($record, array $data) => $this->doChangeRole(

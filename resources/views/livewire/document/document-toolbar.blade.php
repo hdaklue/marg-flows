@@ -2,7 +2,7 @@
 <!-- Save Status Indicator -->
 <div x-cloak x-bind:style="isSticky ? `top: 0px;` : ''"
     :class="{
-        'fixed left-0 right-0 z-20 bg-white/80 dark:bg-zinc-900  py-2 border-y border-zinc-200 dark:border-zinc-700': isSticky,
+        'fixed left-0 right-0 z-20 bg-white dark:bg-zinc-900  py-2 border-y border-zinc-200 dark:border-zinc-700': isSticky,
         'mb-3': !isSticky,
         'flex items-center justify-center space-x-2 text-xs transition-all duration-150 ease-out': true
     }">
