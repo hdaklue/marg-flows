@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8fac9a4f04d0711eeb46eefd1a2133f4",
+    "content-hash": "0ad9f998129e780e4879d84555a88ef5",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2340,16 +2340,16 @@
         },
         {
             "name": "hdaklue/actioncrumb",
-            "version": "2.0.31",
+            "version": "2.0.32",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/actioncrumb.git",
-                "reference": "2239e09f1965d8022882c8d681cbb1dd4455a9bb"
+                "reference": "4caea8396649cc9e3807fa2d5121957720285185"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/actioncrumb/zipball/2239e09f1965d8022882c8d681cbb1dd4455a9bb",
-                "reference": "2239e09f1965d8022882c8d681cbb1dd4455a9bb",
+                "url": "https://api.github.com/repos/hdaklue/actioncrumb/zipball/4caea8396649cc9e3807fa2d5121957720285185",
+                "reference": "4caea8396649cc9e3807fa2d5121957720285185",
                 "shasum": ""
             },
             "require": {
@@ -2398,9 +2398,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hdaklue/actioncrumb/issues",
-                "source": "https://github.com/hdaklue/actioncrumb/tree/2.0.31"
+                "source": "https://github.com/hdaklue/actioncrumb/tree/2.0.32"
             },
-            "time": "2025-10-02T08:45:51+00:00"
+            "time": "2025-10-03T11:58:54+00:00"
         },
         {
             "name": "hdaklue/larapath",
@@ -2734,16 +2734,16 @@
         },
         {
             "name": "hdaklue/porter",
-            "version": "2.0.6",
+            "version": "2.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hdaklue/porter.git",
-                "reference": "4af4c22452f14b07dc379c2e48cf09dac8d904dd"
+                "reference": "9f168fda47df99d8ab61abac79b2e305b3e7155d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hdaklue/porter/zipball/4af4c22452f14b07dc379c2e48cf09dac8d904dd",
-                "reference": "4af4c22452f14b07dc379c2e48cf09dac8d904dd",
+                "url": "https://api.github.com/repos/hdaklue/porter/zipball/9f168fda47df99d8ab61abac79b2e305b3e7155d",
+                "reference": "9f168fda47df99d8ab61abac79b2e305b3e7155d",
                 "shasum": ""
             },
             "require": {
@@ -2795,9 +2795,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hdaklue/porter/issues",
-                "source": "https://github.com/hdaklue/porter/tree/2.0.6"
+                "source": "https://github.com/hdaklue/porter/tree/2.0.10"
             },
-            "time": "2025-09-26T13:52:01+00:00"
+            "time": "2025-10-03T10:43:10+00:00"
         },
         {
             "name": "jaybizzle/crawler-detect",

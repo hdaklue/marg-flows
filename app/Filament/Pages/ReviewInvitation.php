@@ -4,23 +4,27 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Actions\Invitation\AcceptInvitation;
+use App\Actions\Invitation\RejectInvitation;
 use App\Models\MemberInvitation;
 use Filament\Actions\Action;
+use Filament\Actions\Enums\ActionStatus;
+use Filament\Notifications\Notification;
 use Filament\Pages\SimplePage;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Throwable;
 
-final class AcceptInvitation extends SimplePage
+final class ReviewInvitation extends SimplePage
 {
     protected static bool $shouldRegisterNavigation = false;
 
     public string $tenant_name;
 
-    protected string $token;
+    public ?MemberInvitation $invitation = null;
 
-    protected MemberInvitation $invitation;
+    protected string $token;
 
     protected string $view = 'filament.pages.accept-invitation';
 
@@ -42,12 +46,24 @@ final class AcceptInvitation extends SimplePage
                 Action::make('accept')
                     ->label('Accept ')
                     ->color('success')
-                    ->action(fn () => dd('accepting')),
+                    ->action(fn () => AcceptInvitation::run($this->invitation, filamentUser()))
+                    ->after(function ($action) {
+                        match ($action->getStatus()) {
+                            ActionStatus::Success => redirect()->route('filament.portal.pages.dashboard', ['tenant' => filamentUser()->getActiveTenantId()]),
+                            ActionStatus::Failure => Notification::make()->danger()->body(__('common.messages.operation_failed'))->send(),
+                        };
+                    }),
                 Action::make('reject')
                     ->label('Reject')
                     ->color('gray')
                     ->outlined()
-                    ->action(fn () => dd('accepting')),
+                    ->action(fn () => RejectInvitation::run($this->invitation, filamentUser()))
+                    ->after(function ($action) {
+                        match ($action->getStatus()) {
+                            ActionStatus::Success => redirect()->route('filament.portal.pages.dashboard', ['tenant' => filamentUser()->getActiveTenantId()]),
+                            ActionStatus::Failure => Notification::make()->danger()->body(__('common.messages.operation_failed'))->send(),
+                        };
+                    }),
             ]),
         ]);
     }
@@ -61,11 +77,8 @@ final class AcceptInvitation extends SimplePage
         $this->invitation = MemberInvitation::whereKey($this->token)
             ->with('tenant')->firstOrFail();
         $this->tenant_name = $this->invitation?->tenant->name;
-        // load the invitation
-        // make sure that invitation is not expired, and user email is the receiver email
-        //        abort_if(! $this->canAcceptInvitation(), 404);
-        //
-        //        return true;
+        abort_if(! $this->canAcceptInvitation(), 404);
+
     }
 
     /**
@@ -75,7 +88,7 @@ final class AcceptInvitation extends SimplePage
     {
 
         return filamentUser()->getAttribute('email') === $this->invitation->getAttribute('receiver_email')
-            && ! $this->invitation->expired();
+            && ! $this->invitation->expired() && ! $this->invitation->accepted();
 
     }
 }

@@ -167,4 +167,8 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
     /**
      * @throws Throwable
      */
+    private function canManageRoleableEntity(): bool
+    {
+        return filamentUser()->can('manage', $this->roleableEntity);
+    }
 }

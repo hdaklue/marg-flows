@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Filament\Pages\AcceptInvitation;
+use App\Filament\Pages\ReviewInvitation;
 use App\Http\Controllers\SecureFileController;
 use App\Http\Controllers\UrlFetchController;
 use App\Livewire\CalendarTest;
@@ -43,10 +43,10 @@ Route::get('/annotation', fn () => view('annotation'));
 Route::get('/videoPreview', PreviewVideo::class)->name('video.preview');
 Route::get('/audioPreview', PreviewAudio::class)->name('audio.preview');
 Route::get('/videoRecord', VideoRecorder::class)->name('video.record');
-
+// Tenant member invitation
 Route::get(
     'i/a/{id}',
-    AcceptInvitation::class,
+    ReviewInvitation::class,
 )->middleware([Authenticate::class])->name('invitation.view');
 
 // URL fetch route for EditorJS LinkTool

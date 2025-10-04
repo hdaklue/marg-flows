@@ -79,6 +79,13 @@ final class MemberInvitation extends Model
         return ! empty($this->getAttribute('rejected_at'));
     }
 
+    public function accept(): void
+    {
+        $this->update([
+            'accepted_at' => now(),
+        ]);
+    }
+
     #[Scope]
     protected function forTenant(Builder $query, Tenant $tenant): Builder
     {
@@ -95,9 +102,9 @@ final class MemberInvitation extends Model
     {
         return [
             'role_key' => RoleCast::class,
-            'accepted_at' => 'timestamp',
-            'rejected_at' => 'timestamp',
-            'expires_at' => 'timestamp',
+            'accepted_at' => 'datetime',
+            'rejected_at' => 'datetime',
+            'expires_at' => 'datetime',
         ];
     }
 }

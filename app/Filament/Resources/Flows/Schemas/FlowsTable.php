@@ -33,7 +33,7 @@ final class FlowsTable
 
                 return Flow::query()
                     ->unless($isAdmin, function ($query) {
-                        $query->forParticipant(filamentUser());
+                        $query->forParticipant(filamentUser(), filamentTenant());
                     })
                     ->orderBy('stage')
                     ->orderByDesc('updated_at')

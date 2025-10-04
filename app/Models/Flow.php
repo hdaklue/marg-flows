@@ -17,11 +17,11 @@ use App\Contracts\Stage\HasStages;
 use App\Contracts\Tenant\BelongsToTenantContract;
 use App\Enums\FlowStage;
 use App\Facades\MentionService;
+use App\Services\Flow\FlowService;
 use App\Services\Recency\Concerns\RecentableModel;
 use App\Services\Recency\Contracts\Recentable;
 use Hdaklue\MargRbac\Concerns\Tenant\BelongsToTenant;
 use Hdaklue\Porter\Concerns\ReceivesRoleAssignments;
-use Hdaklue\Porter\Contracts\RoleableEntity;
 use Hdaklue\Porter\Multitenancy\Contracts\PorterRoleableContract;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,7 +48,6 @@ use Illuminate\Support\Collection;
  * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $assignedRoles
  * @property-read int|null $assigned_roles_count
  * @property-read User $creator
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Document> $documents
@@ -66,7 +65,6 @@ use Illuminate\Support\Collection;
  * @method static Builder<static>|Flow assignable()
  * @method static Builder<static>|Flow byStage(\App\Enums\FlowStage|string $stage)
  * @method static \Database\Factories\FlowFactory factory($count = null, $state = [])
- * @method static Builder<static>|Flow forParticipant(\App\Contracts\Role\AssignableEntity $member)
  * @method static Builder<static>|Flow newModelQuery()
  * @method static Builder<static>|Flow newQuery()
  * @method static Builder<static>|Flow onlyTrashed()
@@ -91,7 +89,7 @@ use Illuminate\Support\Collection;
  *
  * @mixin \Eloquent
  */
-final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, PorterRoleableContract, Recentable, RoleableEntity, ScopedToTenant, SentInNotification, Sidenoteable
+final class Flow extends Model implements BelongsToTenantContract, Documentable, HasStages, PorterRoleableContract, Recentable, ScopedToTenant, SentInNotification, Sidenoteable
 {
     use BelongsToTenant, HasFactory, HasSideNotes, HasStagesTrait, HasUlids, LivesInOriginalDB, ManagesDocuments, ReceivesRoleAssignments, RecentableModel, SentInNotificationTrait, SoftDeletes;
 
@@ -264,7 +262,15 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     }
 
     #[Scope]
-    protected function assignable(Builder $builder)
+    protected function forParticipant(Builder $builder, User $user, Tenant $tenant): Builder
+    {
+        $ids = (new FlowService)->getForParticipant($user, $tenant)->pluck('id')->toArray();
+
+        return $builder->whereIn('id', $ids);
+    }
+
+    #[Scope]
+    protected function assignable(Builder $builder): Builder
     {
         return $builder->where('stage', '!=', FlowStage::COMPLETED->value);
     }

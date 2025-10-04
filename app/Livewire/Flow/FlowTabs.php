@@ -23,7 +23,7 @@ final class FlowTabs extends NapTab
         return [
             Tab::make('streams')->icon('arrows-right-left')->label(__('flow.tabs.streams')),
             Tab::make('documents')
-                ->visible(fn () => filamentUser()->can('manage', $flow))
+
                 ->icon('clipboard-document-list')
                 ->label(__('flow.tabs.documents'))
                 ->livewire(FlowDocumentsTable::class, [
@@ -32,6 +32,7 @@ final class FlowTabs extends NapTab
             Tab::make('members')
                 ->icon('user-group')
                 ->label(__('flow.tabs.members'))
+                ->visible(fn () => filamentUser()->can('manage', $flow))
                 ->livewire(ManageParticipantsTable::class, [
                     'roleableEntity' => $flow,
                 ]),

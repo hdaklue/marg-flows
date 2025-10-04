@@ -45,9 +45,7 @@ final class FlowPolicy
      */
     public function update(User $user, Flow $flow): bool
     {
-        return
-            $user->hasAssignmentOn($flow, RoleFactory::admin())
-            || $user->hasAssignmentOn($flow, RoleFactory::manager());
+        return $user->isAtLeastOn(RoleFactory::manager(), $flow);
 
         // return $user->hasAssignmentOn('writer', $flow) || $user->hasAssignmentOn(RoleEnum::SUPER_ADMIN, filament()->getTenant());
     }

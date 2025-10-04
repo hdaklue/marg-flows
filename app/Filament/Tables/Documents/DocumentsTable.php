@@ -48,6 +48,7 @@ final class DocumentsTable
             ->filters([
                 Filter::make('show_archived')
                     ->toggle()
+                    ->visible(fn() => filamentUser()->can('manage', $documentable))
                     ->default(false),
             ])
             ->headerActions([
@@ -122,7 +123,7 @@ final class DocumentsTable
     /**
      * @throws Throwable
      */
-    private static function getDocuments($documentable, $search, array $filters): array
+    private static function getDocuments($documentable, $search, ?array $filters): array
     {
         $canManage = filamentUser()->can('manage', $documentable);
 
@@ -135,7 +136,7 @@ final class DocumentsTable
                     fn ($item): bool => stripos($item->name, $term) !== false,
                 );
             })
-            ->when(! $filters['show_archived']['isActive'], fn ($collection) => $collection->filter(
+            ->when(!($filters['show_archived']['isActive'] ?? false), fn($collection) => $collection->filter(
                 fn ($item) => ! $item->isArchived(),
             ))
             ->keyBy(fn ($item) => $item->getKey())

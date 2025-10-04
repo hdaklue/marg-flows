@@ -384,7 +384,6 @@ final readonly class DocumentService implements DocumentManagerInterface
                 $query->where('id', $documentable->getKey());
             },
         )->get();
-
         if (config('document.should_cache')) {
             $cacheKey =
                 "documents:documentable:{$documentable->getMorphClass()}:{$documentable->getKey()}:"
