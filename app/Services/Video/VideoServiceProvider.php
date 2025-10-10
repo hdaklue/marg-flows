@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Video;
 
+use App\Services\Video\Services\ResolutionManager;
 use App\Services\Video\Services\VideoNamingService;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,6 +18,8 @@ final class VideoServiceProvider extends ServiceProvider
         $this->app->bind('video', fn ($app) => new VideoManager($app));
 
         $this->app->bind(VideoNamingService::class, fn () => new VideoNamingService);
+
+        $this->app->singleton(ResolutionManager::class, fn () => new ResolutionManager);
     }
 
     /**

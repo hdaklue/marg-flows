@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Video\Facades;
 
-use App\Services\Video\Enums\NamingPattern;
 use App\Services\Video\Services\ResolutionManager as ResolutionManagerService;
+use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static ResolutionManagerService from(string $sourcePath, string $disk = 'local', ?\App\Services\Video\Enums\NamingPattern $namingStrategy = null)
@@ -13,35 +13,13 @@ use App\Services\Video\Services\ResolutionManager as ResolutionManagerService;
  *
  * @see ResolutionManagerService
  */
-final class ResolutionManager
+final class ResolutionManager extends Facade
 {
     /**
-     * Create a new ResolutionManager instance from path.
+     * Get the registered name of the component.
      */
-    public static function from(
-        string $sourcePath,
-        string $disk = 'local',
-        ?NamingPattern $namingStrategy = null,
-    ): ResolutionManagerService {
-        return ResolutionManagerService::from($sourcePath, $disk, $namingStrategy);
-    }
-
-    /**
-     * Create a new ResolutionManager instance from disk.
-     */
-    public static function fromDisk(
-        string $sourcePath,
-        string $disk = 'local',
-        ?NamingPattern $namingStrategy = null,
-    ): ResolutionManagerService {
-        return ResolutionManagerService::fromDisk($sourcePath, $disk, $namingStrategy);
-    }
-
-    /**
-     * Forward static calls to the ResolutionManager service.
-     */
-    public static function __callStatic(string $method, array $arguments): mixed
+    protected static function getFacadeAccessor(): string
     {
-        return ResolutionManagerService::$method(...$arguments);
+        return ResolutionManagerService::class;
     }
 }
