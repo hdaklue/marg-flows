@@ -65,24 +65,18 @@ return [
         ],
 
         'business_db' => [
-            'driver' => env('BUSINESS_DB_DRIVER', 'mysql'),
+            'driver' => env('BUSINESS_DB_DRIVER', 'pgsql'),
             'url' => env('BUSINESS_DB_URL'),
             'host' => env('BUSINESS_DB_HOST', env('DB_HOST', '127.0.0.1')),
-            'port' => env('BUSINESS_DB_PORT', env('DB_PORT', '3306')),
-            'database' => env('BUSINESS_DB_DATABASE', 'klue_portal_business'),
-            'username' => env('BUSINESS_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'port' => env('BUSINESS_DB_PORT', env('DB_PORT', '5432')),
+            'database' => env('BUSINESS_DB_DATABASE', 'business_db'),
+            'username' => env('BUSINESS_DB_USERNAME', env('DB_USERNAME', 'postgres')),
             'password' => env('BUSINESS_DB_PASSWORD', env('DB_PASSWORD', '')),
-            'unix_socket' => env('BUSINESS_DB_SOCKET', env('DB_SOCKET', '')),
-            'charset' => env('BUSINESS_DB_CHARSET', 'utf8mb4'),
-            'collation' => env('BUSINESS_DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'charset' => env('BUSINESS_DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-            'foreign_key_constraints' => env('BUSINESS_DB_FOREIGN_KEYS', true),
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                \PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'search_path' => env('BUSINESS_DB_SCHEMA', 'public'),
+            'sslmode' => env('BUSINESS_DB_SSLMODE', 'prefer'),
         ],
 
         'mariadb' => [
