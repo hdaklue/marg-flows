@@ -30,9 +30,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use LaravelIdea\Helper\Hdaklue\Porter\Models\_IH_Roster_QB;
 
 /**
  * @property string $id
@@ -128,7 +131,7 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     /**
      * Get all participants (users with role assignments) on this flow.
      */
-    public function participants()
+    public function participants(): MorphToMany|MorphMany|_IH_Roster_QB
     {
         return $this->roleAssignments()->where('assignable_type', 'user');
     }
@@ -259,6 +262,11 @@ final class Flow extends Model implements BelongsToTenantContract, Documentable,
     public function getRecentLabel(): ?string
     {
         return $this->title;
+    }
+
+    public function getTable()
+    {
+        return 'flows';
     }
 
     #[Scope]

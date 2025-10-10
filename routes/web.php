@@ -29,6 +29,14 @@ use Illuminate\Support\Facades\Session;
  |
  */
 
+Route::get('test/debug-session', function () {
+    return [
+        'session_id' => session()->getId(),
+        'csrf_token' => csrf_token(),
+        'all_session' => session()->all(),
+    ];
+});
+
 Route::get('/imagePreview', action: PreviewImage::class)->name('home');
 
 // Route::get('/test/path', function () {

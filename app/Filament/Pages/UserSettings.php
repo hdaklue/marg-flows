@@ -83,7 +83,7 @@ final class UserSettings extends Page implements HasTable
                             'avatar' => AvatarService::getAvatarPath(filamentUser()) ?: null,
                             'timezone' => filamentUser()->getTimeZone(),
                         ])
-                        ->form([
+                        ->schema([
                             TextInput::make('name')->label(__('auth.profile.fields.name')),
                             FileUpload::make('avatar')
                                 ->imageEditorViewportWidth(100)

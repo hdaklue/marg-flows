@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Hdaklue\MargRbac\Rules\Username\UsernameAvailable;
 use Hdaklue\MargRbac\Rules\Username\UsernameFormat;
+use Hdaklue\MargRbac\Rules\Username\UsernameNotReserved;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -105,8 +106,8 @@ final class Register extends BaseRegister
                 $livewire,
                 Field $component,
             ) => $livewire->validateOnly($component->getStatePath()))
-            ->rules([new UsernameAvailable, new UsernameFormat])
-            ->maxLength(255)
+            ->rules([new UsernameAvailable, new UsernameFormat, new UsernameNotReserved])
+            ->maxLength(fn () => config('margrbac.username.max_length'))
             ->autofocus();
     }
 

@@ -76,11 +76,11 @@ return [
             'teams' => 'Teams',
         ],
         'actions' => [
-            'edit' => 'Edit',
+            'edit' => 'Update info',
         ],
         'fields' => [
             'name' => 'Name',
-            'avatar' => 'Avatar',
+            'avatar' => 'Personal avatar',
             'timezone' => 'Timezone',
         ],
     ],

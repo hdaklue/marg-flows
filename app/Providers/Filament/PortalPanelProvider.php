@@ -48,6 +48,8 @@ final class PortalPanelProvider extends PanelProvider
             ->tenant(Tenant::class)
             ->colors([
                 'primary' => Color::Emerald,
+                'secondary' => Color::Sky,
+                'gray' => Color::Zinc,
             ])
             ->spa()
             ->topbar(false)

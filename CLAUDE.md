@@ -11,6 +11,7 @@
 KluePortal is a sophisticated Laravel application implementing enterprise-level flow and task management with advanced role-based access control (RBAC) and multi-tenant architecture.
 
 ## Current Architecture
+- **Database**: PostgreSQL (primary database system)
 - **Multi-tenant RBAC** with 1-hour caching (226ms response, 5MB memory)
 - **Dual-database approach**: Main DB (core) + Business DB (supplementary)
 - **DTOs**: TaskDto, AssigneeDto under `app/DTOs/`

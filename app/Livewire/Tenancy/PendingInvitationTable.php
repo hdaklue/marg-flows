@@ -51,7 +51,8 @@ final class PendingInvitationTable extends Component implements HasActions, HasS
                     ->date(),
                 TextColumn::make('status')
                     ->badge()
-                    ->color('gray')
+                    ->color('secondary')
+
                     ->state(fn ($record) => InvitationPolisher::status($record)),
 
             ])

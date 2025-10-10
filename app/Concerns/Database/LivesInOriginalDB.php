@@ -17,27 +17,46 @@ trait LivesInOriginalDB
     /**
      * Get the table associated with the model.
      */
+    //    public function getTable(): string
+    //    {
+    //        if (! isset($this->table)) {
+    //            return str_replace(
+    //                '\\',
+    //                '',
+    //                config('database.connections.' . config('database.default') . '.database')
+    //                . '.'
+    //                . parent::getTable(),
+    //            );
+    //        }
+    //
+    //        $defaultDatabase = config('database.connections.'
+    //        . config('database.default')
+    //        . '.database');
+    //
+    //        // If table already has database prefix, return as is
+    //        if (str_contains($this->table, '.')) {
+    //            return $this->table;
+    //        }
+    //
+    //        //        return $defaultDatabase . '.' . $this->table;
+    //        return $this->table;
+    //    }
     public function getTable(): string
     {
-        if (! isset($this->table)) {
-            return str_replace(
-                '\\',
-                '',
-                config('database.connections.' . config('database.default') . '.database')
-                . '.'
-                . parent::getTable(),
-            );
+        $defaultConnection = config('database.default');
+        $connectionConfig = config("database.connections.{$defaultConnection}");
+        $driver = $connectionConfig['driver'] ?? null;
+
+        if ($driver === 'pgsql') {
+            $schema = str_replace('-', '_', $connectionConfig['database']); // PostgreSQL-safe name
+
+            return parent::getTable();
         }
 
-        $defaultDatabase = config('database.connections.'
-        . config('database.default')
-        . '.database');
-
-        // If table already has database prefix, return as is
-        if (str_contains($this->table, '.')) {
-            return $this->table;
+        if ($driver === 'mysql') {
+            return $connectionConfig['database'] . '.' . parent::getTable();
         }
 
-        return $defaultDatabase . '.' . $this->table;
+        return parent::getTable();
     }
 }

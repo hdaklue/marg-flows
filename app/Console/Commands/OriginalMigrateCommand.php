@@ -15,7 +15,7 @@ final class OriginalMigrateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'original:migrate 
+    protected $signature = 'original:migrate
                             {--force : Force the operation to run when in production}
                             {--pretend : Dump the SQL queries that would be run}
                             {--seed : Seed the database after migration}';
@@ -46,7 +46,7 @@ final class OriginalMigrateCommand extends Command
 
             // Run migrations on mysql connection, excluding RBAC migrations
             $exitCode = Artisan::call('migrate', array_filter([
-                '--database' => 'mysql',
+                '--database' => 'pgsql',
                 '--path' => $mainMigrations,
                 '--force' => $this->option('force'),
                 '--pretend' => $this->option('pretend'),

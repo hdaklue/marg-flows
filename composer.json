@@ -139,11 +139,11 @@
             "type": "package",
             "package": {
                 "name": "hdaklue/marg-brac",
-                "version": "2.0.7",
+                "version": "2.0.8",
                 "source": {
                     "url": "https://github.com/hdaklue/marg-brac.git",
                     "type": "git",
-                    "reference": "2.0.7"
+                    "reference": "2.0.8"
                 },
                 "autoload": {
                     "psr-4": {

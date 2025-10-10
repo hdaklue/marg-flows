@@ -70,6 +70,7 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                         TextColumn::make('role')
                             ->alignEnd()
                             ->badge()
+                            ->color('secondary')
                             // ->formatStateUsing(fn($state) => dd($state)),
                             ->state(fn ($record) => ucfirst($record['role']['name'])),
                     ]),
@@ -84,7 +85,8 @@ final class ManageParticipantsTable extends Component implements HasActions, Has
                     filamentUser(),
                     $this->getAssignableUsers(),
                 ),
-                InviteMemberAction::make(filamentTenant()),
+                InviteMemberAction::make(filamentTenant())
+                    ->color('gray'),
 
             ])
             ->recordActions([
